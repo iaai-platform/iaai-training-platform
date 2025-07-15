@@ -1,0 +1,910 @@
+[
+  {
+    "firstName": "Noura",
+    "lastName": "Lebbar",
+    "email": "noura.lebbar@iaai.com",
+    "phoneNumber": "+39 123 456 789",
+    "profileImage": null,
+    "title": "Prof.",
+    "designation": "Cosmetic Surgeon",
+    "experience": "15 years",
+    "expertise": [
+      "Lasers",
+      "Dermal Fillers",
+      "Anti-Aging Treatments",
+      "Trademarked Procedures",
+      "Skin Rejuvenation"
+    ],
+    "specializations": [
+      "Aesthetic Medicine",
+      "Cosmetic Surgery",
+      "Non-Surgical Rejuvenation"
+    ],
+    "certifications": [
+      {
+        "name": "MD - University of Milan (Honors)",
+        "issuingOrganization": "University of Milan",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Specialization in Cosmetic Surgery",
+        "issuingOrganization": "University of Milan",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Prof. Noura Lebbar is a Cosmetic Surgeon based in Milan, Italy. An honors graduate from the University of Milan, she brings fifteen years of experience with lasers, fillers, anti-aging treatments, and trademarked procedures. As a global trainer and lecturer, she shares her expertise worldwide. She also serves as a Professor at the University of Genova, Italy.",
+    "qualifications": [
+      "MD - University of Milan (Honors)",
+      "Specialization in Cosmetic Surgery",
+      "Professor - University of Genova"
+    ],
+    "achievements": [
+      "Global trainer and lecturer in aesthetic medicine",
+      "Developer of trademarked aesthetic procedures",
+      "15 years of specialized experience"
+    ],
+    "publications": [],
+    "teachingStyle": "Comprehensive theoretical knowledge combined with hands-on practical demonstrations",
+    "languages": ["Italian", "English", "French"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": "Milan",
+      "state": null,
+      "country": "Italy",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Amane",
+    "lastName": "Al-Bazzaz",
+    "email": "amane.albazzaz@iaai.com",
+    "phoneNumber": "+1 403 123 4567",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Founder & Owner of Luma Clinic",
+    "experience": "10+ years",
+    "expertise": [
+      "Aesthetic Injectables",
+      "Facial Ultrasound",
+      "Evidence-Based Aesthetic Medicine",
+      "Precision Techniques"
+    ],
+    "specializations": [
+      "Aesthetic Medicine",
+      "Facial Ultrasound",
+      "Injectable Treatments"
+    ],
+    "certifications": [
+      {
+        "name": "MD - McMaster University",
+        "issuingOrganization": "McMaster University",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "MSc in Health Research Methodology",
+        "issuingOrganization": "McMaster University",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Amane Al-Bazzaz is the Founder & Owner of Luma Clinic in Calgary, Canada. She specializes in aesthetic medicine with years of experience in injectables and facial ultrasound. Holding an MD and MSc in Health Research Methodology from McMaster University, she has an extensive teaching background in medical schools and hospitals. As the North American partner for Aesthetic Intelligence (London, UK), she teaches doctors and nurses about aesthetic injectables and facial ultrasound.",
+    "qualifications": [
+      "MD - McMaster University",
+      "MSc in Health Research Methodology - McMaster University"
+    ],
+    "achievements": [
+      "North American partner for Aesthetic Intelligence (London, UK)",
+      "Published researcher in high-impact journals",
+      "Contributor to Plastic and Reconstructive Surgery journal"
+    ],
+    "publications": [
+      {
+        "title": "Evidence-Based Approaches in Aesthetic Medicine",
+        "type": "Research Paper",
+        "publishedIn": "Plastic and Reconstructive Surgery",
+        "year": 2023,
+        "link": null
+      }
+    ],
+    "teachingStyle": "Evidence-based approach with emphasis on safety and accuracy using ultrasound guidance",
+    "languages": ["English", "Arabic"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": "Calgary",
+      "state": null,
+      "country": "Canada",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Saif",
+    "lastName": "Al-anssari",
+    "email": "saif.alanssari@iaai.com",
+    "phoneNumber": "+964 770 123 4567",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Maxillo-Facial Practitioner",
+    "experience": "15 years",
+    "expertise": [
+      "Maxillo-Facial Procedures",
+      "Aesthetic Medicine",
+      "Thread Lifting",
+      "BTX Injectables",
+      "Advanced Facial Techniques"
+    ],
+    "specializations": [
+      "Maxillo-Facial Surgery",
+      "Aesthetic Medicine",
+      "Thread Techniques",
+      "Injectable Treatments"
+    ],
+    "certifications": [
+      {
+        "name": "Merz Aesthetic TTT Certification",
+        "issuingOrganization": "Merz Aesthetics",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Aptos Thread Certification",
+        "issuingOrganization": "Aptos",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Saif Al-anssari is an experienced Maxillo-Facial Practitioner with 15 years of expertise in aesthetic and facial procedures. Certified in Merz Aesthetic TTT, Aptos techniques, cadaver training, and over 30 courses across various companies. He leads training programs for Merz Aesthetic, Aptos threads, IAAI, and BTX injectables. As an innovator in aesthetic medicine, he is the creator of SUGAR, SALT & CHiLiS techniques.",
+    "qualifications": [
+      "MD in Maxillo-Facial Surgery",
+      "30+ specialized aesthetic courses",
+      "Cadaver training certification"
+    ],
+    "achievements": [
+      "Creator of SUGAR, SALT & CHiLiS techniques",
+      "Renowned trainer for Merz Aesthetic and Aptos",
+      "International influence in aesthetic education"
+    ],
+    "publications": [],
+    "teachingStyle": "Innovative techniques with emphasis on anatomical precision and safety",
+    "languages": ["Arabic", "English"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "country": "Iraq",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Gökçe",
+    "lastName": "Haspolat",
+    "email": "gokce.haspolat@iaai.com",
+    "phoneNumber": "+90 532 123 4567",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Medical Aesthetician",
+    "experience": "18 years",
+    "expertise": [
+      "Botox",
+      "Dermal Fillers",
+      "Mesotherapy",
+      "Thread Lifting",
+      "Energy-Based Devices",
+      "HIFU",
+      "Laser Treatments"
+    ],
+    "specializations": [
+      "Aesthetic Medicine",
+      "Energy-Based Treatments",
+      "Thread Lifting",
+      "Laser Therapy"
+    ],
+    "certifications": [
+      {
+        "name": "Master's in Aesthetic Medicine and Therapeutics",
+        "issuingOrganization": "Camerino University, Italy",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Mesotherapy Certificate",
+        "issuingOrganization": "Turkish Ministry of Health",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Gökçe Haspolat is an experienced Medical Aesthetician with 18 years of expertise in aesthetic medicine, specializing in advanced techniques. She holds a Master's in Aesthetic Medicine and Therapeutics from Camerino University, Italy, and a Mesotherapy Certificate from the Turkish Ministry of Health. As an Official Thread Trainer for Oreon Lifescience.co, she shares expertise in aesthetic procedures.",
+    "qualifications": [
+      "MD",
+      "Master's in Aesthetic Medicine and Therapeutics - Camerino University, Italy",
+      "Mesotherapy Certificate - Turkish Ministry of Health"
+    ],
+    "achievements": [
+      "Official Thread Trainer for Oreon Lifescience.co",
+      "18 years of specialized experience",
+      "Expert in multiple energy-based devices"
+    ],
+    "publications": [],
+    "teachingStyle": "Comprehensive approach covering both injectable and energy-based treatments",
+    "languages": ["Turkish", "English", "Italian"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "country": "Turkey",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Jamila",
+    "lastName": "Atannaz",
+    "email": "jamila.atannaz@iaai.com",
+    "phoneNumber": "+212 661 123 456",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Founder & CEO of Atannaz Plastic Surgery",
+    "experience": "20+ years",
+    "expertise": [
+      "Plastic Surgery",
+      "Laser-Assisted Lipolysis",
+      "Autologous Fat Transfer",
+      "Rhinoplasty",
+      "Non-Surgical Facial Rejuvenation",
+      "Cosmetic Gynecology"
+    ],
+    "specializations": [
+      "Plastic & Reconstructive Surgery",
+      "Aesthetic Medicine",
+      "Cosmetic Gynecology"
+    ],
+    "certifications": [
+      {
+        "name": "MD - University of Hassan II",
+        "issuingOrganization": "University of Hassan II",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Residency in Plastic & Reconstructive Surgery",
+        "issuingOrganization": "University of Hassan II",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Jamila Atannaz is an Expert Plastic Surgeon and Founder & CEO of Atannaz Plastic Surgery in Casablanca, Morocco, with extensive experience in aesthetic and reconstructive procedures. She holds a medical degree from University of Hassan II and has completed residency in Plastic & Reconstructive Surgery. As a Faculty member of the American Aesthetic Association, she leads postgraduate courses in aesthetic medicine and cosmetic gynecology.",
+    "qualifications": [
+      "MD - University of Hassan II",
+      "Residency in Plastic & Reconstructive Surgery"
+    ],
+    "achievements": [
+      "Faculty member of the American Aesthetic Association",
+      "International speaker and researcher",
+      "Founder of successful plastic surgery practice"
+    ],
+    "publications": [],
+    "teachingStyle": "Advanced surgical techniques combined with non-surgical approaches",
+    "languages": ["Arabic", "French", "English"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": "Casablanca",
+      "state": null,
+      "country": "Morocco",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Farzana",
+    "lastName": "Khan",
+    "email": "farzana.khan@iaai.com",
+    "phoneNumber": "+44 7123 456789",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Medical Doctor & Aesthetic Specialist",
+    "experience": "20+ years",
+    "expertise": [
+      "Dermatology",
+      "Gynecology",
+      "Aesthetic Medicine",
+      "PRP Therapy",
+      "Polynucleotides",
+      "Hyaluronic Acid Injectables",
+      "Skin Boosters",
+      "Energy-Based Devices"
+    ],
+    "specializations": [
+      "Women's Health",
+      "Regenerative Medicine",
+      "Aesthetic Medicine",
+      "Intimate Rejuvenation"
+    ],
+    "certifications": [
+      {
+        "name": "Diploma in Sexual and Reproductive Health",
+        "issuingOrganization": "Faculty of Sexual & Reproductive Healthcare",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "MRCGP",
+        "issuingOrganization": "The Royal College of General Practitioners",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Farzana Khan is an experienced Medical Doctor & Aesthetic Specialist with over 20 years of experience, specializing in dermatology, gynecology, and aesthetic medicine. She earned her MD from Copenhagen University and later qualified as a GP from The Royal College of General Practitioners in London. Holding a Diploma in Sexual and Reproductive Health, she is a member of The British Menopause Society.",
+    "qualifications": [
+      "MD - Copenhagen University",
+      "MRCGP - The Royal College of General Practitioners, London",
+      "Diploma in Sexual and Reproductive Health"
+    ],
+    "achievements": [
+      "Member of The British Menopause Society",
+      "Featured in media and press",
+      "Public speaker and advocate for women's health"
+    ],
+    "publications": [],
+    "teachingStyle": "Holistic approach combining women's health with aesthetic medicine",
+    "languages": ["English", "Danish"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": "London",
+      "state": null,
+      "country": "United Kingdom",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Özgür",
+    "lastName": "Aglamis",
+    "email": "ozgur.aglamis@iaai.com",
+    "phoneNumber": "+90 533 123 4567",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Leading Expert in Cosmetic Gynecology",
+    "experience": "15+ years",
+    "expertise": [
+      "Cosmetic Gynecology",
+      "Genital Aesthetics",
+      "Vaginoplasty",
+      "Labiaplasty",
+      "Genital Fat Transfer",
+      "PRP Therapy",
+      "Stem Cell Treatments"
+    ],
+    "specializations": [
+      "Cosmetic Gynecology",
+      "Genital Rejuvenation",
+      "Aesthetic Gynecology"
+    ],
+    "certifications": [
+      {
+        "name": "MD - Gazi University Faculty of Medicine",
+        "issuingOrganization": "Gazi University",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Residency in Gynecology & Obstetrics",
+        "issuingOrganization": "Gazi University",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Özgür Aglamis is a Leading Expert in Cosmetic Gynecology, specializing in genital aesthetics and rejuvenation, offering advanced techniques for patient care. He completed medical studies at Gazi University Faculty of Medicine and residency in Gynecology & Obstetrics. As a recognized trainer and educator, he provides professional training for aesthetic gynecology, guiding international practitioners in advanced methods.",
+    "qualifications": [
+      "MD - Gazi University Faculty of Medicine",
+      "Residency in Gynecology & Obstetrics"
+    ],
+    "achievements": [
+      "Global speaker and researcher",
+      "Recognized trainer in aesthetic gynecology",
+      "Innovator in aesthetic procedures"
+    ],
+    "publications": [],
+    "teachingStyle": "Specialized focus on cosmetic gynecology with emphasis on patient care and advanced techniques",
+    "languages": ["Turkish", "English"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "country": "Turkey",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Giovanni",
+    "lastName": "Angiolini",
+    "email": "giovanni.angiolini@iaai.com",
+    "phoneNumber": "+39 333 123 4567",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Expert in Aesthetic & Orthopedic Medicine",
+    "experience": "15+ years",
+    "expertise": [
+      "Aesthetic Medicine",
+      "Orthopedic Surgery",
+      "Full Face Techniques",
+      "Facial Harmonization",
+      "Anti-Aging Medicine"
+    ],
+    "specializations": [
+      "Aesthetic Medicine",
+      "Orthopedic Surgery",
+      "Facial Harmonization"
+    ],
+    "certifications": [
+      {
+        "name": "MD - University of Sassari",
+        "issuingOrganization": "University of Sassari",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Specialization in Orthopedic Surgery (Top Honors)",
+        "issuingOrganization": "University of Sassari",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Master's in Aesthetic & Anti-Aging Medicine",
+        "issuingOrganization": "Tor Vergata University, Rome",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Giovanni Angiolini is an Expert in Aesthetic & Orthopedic Medicine, specializing in aesthetic treatments and orthopedic surgery, combining medical expertise with a focus on wellness. He earned his medical degree from the University of Sassari, later specializing in Orthopedic Surgery with top honors. He completed a Master's in Aesthetic & Anti-Aging Medicine at Tor Vergata University, Rome, followed by international training in Mexico.",
+    "qualifications": [
+      "MD - University of Sassari",
+      "Specialization in Orthopedic Surgery (Top Honors)",
+      "Master's in Aesthetic & Anti-Aging Medicine - Tor Vergata University, Rome"
+    ],
+    "achievements": [
+      "Public figure and author",
+      "Book on health and fitness",
+      "International training in Mexico"
+    ],
+    "publications": [],
+    "teachingStyle": "Integrative approach combining orthopedic knowledge with aesthetic medicine",
+    "languages": ["Italian", "English", "Spanish"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "country": "Italy",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Nataliya",
+    "lastName": "Sanytska",
+    "email": "nataliya.sanytska@iaai.com",
+    "phoneNumber": "+380 67 123 4567",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Expert in Dermatology & Aesthetic Medicine",
+    "experience": "10+ years",
+    "expertise": [
+      "Dermatology",
+      "Aesthetic Medicine",
+      "Skin Rejuvenation",
+      "Facial Restoration",
+      "Thread Lifting",
+      "PRP Therapy",
+      "Laser Treatments"
+    ],
+    "specializations": [
+      "Aesthetic Dermatology",
+      "Skin Rejuvenation",
+      "Non-Surgical Treatments"
+    ],
+    "certifications": [
+      {
+        "name": "MD",
+        "issuingOrganization": "Medical University",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Specialized training in Aesthetic Dermatology",
+        "issuingOrganization": "Medical University",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Nataliya Sanytska is an Expert in Dermatology & Aesthetic Medicine with over a decade of experience providing advanced treatments across Europe and the Gulf. She earned her medical degree with further specialized training in aesthetic dermatology. As a recognized trainer and speaker, she conducts workshops and courses globally, sharing expertise in innovative aesthetic techniques.",
+    "qualifications": [
+      "MD",
+      "Specialized training in Aesthetic Dermatology"
+    ],
+    "achievements": [
+      "International trainer and speaker",
+      "Over 10 years of practice across Europe and Gulf",
+      "Expert in cutting-edge aesthetic techniques"
+    ],
+    "publications": [],
+    "teachingStyle": "Patient-centered approach focusing on natural, refined results",
+    "languages": ["Ukrainian", "English", "Russian", "Arabic"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "country": "Ukraine",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  },
+  {
+    "firstName": "Massimo",
+    "lastName": "Vitale",
+    "email": "massimo.vitale@iaai.com",
+    "phoneNumber": "+39 051 123 4567",
+    "profileImage": null,
+    "title": "Dr.",
+    "designation": "Renowned Aesthetic & Laser Therapy Physician",
+    "experience": "20+ years",
+    "expertise": [
+      "Aesthetic Medicine",
+      "Laser Therapy",
+      "Full-Face Liquid Lifting",
+      "Lip Enhancement",
+      "Scar Management",
+      "Non-Surgical Skin Treatments",
+      "Aesthetic Injectables"
+    ],
+    "specializations": [
+      "Aesthetic Medicine",
+      "Laser Therapy",
+      "Facial Rejuvenation",
+      "Scar Treatment"
+    ],
+    "certifications": [
+      {
+        "name": "MD - Universidad del Zulia",
+        "issuingOrganization": "Universidad del Zulia",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "MD - University of Turin",
+        "issuingOrganization": "University of Turin",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Certification in Aesthetic Medicine",
+        "issuingOrganization": "Medical Institution",
+        "issueDate": null,
+        "expiryDate": null
+      },
+      {
+        "name": "Certification in Laser Therapy",
+        "issuingOrganization": "Medical Institution",
+        "issueDate": null,
+        "expiryDate": null
+      }
+    ],
+    "bio": "Dr. Massimo Vitale is a Renowned Aesthetic & Laser Therapy Physician who leads a thriving private practice in Bologna, Italy, specializing in advanced aesthetic treatments. He holds medical degrees from Universidad del Zulia and the University of Turin, with additional certifications in aesthetic medicine and laser therapy. As a recognized international trainer and speaker, he frequently presents at global conferences.",
+    "qualifications": [
+      "MD - Universidad del Zulia",
+      "MD - University of Turin",
+      "Certification in Aesthetic Medicine",
+      "Certification in Laser Therapy"
+    ],
+    "achievements": [
+      "AMWC Aesthetic Award 2024",
+      "International trainer and speaker",
+      "Groundbreaking work in skin enhancement and scar treatment"
+    ],
+    "publications": [],
+    "teachingStyle": "Advanced techniques in aesthetic injectables and laser treatments with focus on innovation",
+    "languages": ["Italian", "Spanish", "English"],
+    "availableDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "preferredCourseTypes": ["InPersonAestheticTraining", "OnlineLiveTraining"],
+    "assignedCourses": [],
+    "ratings": {
+      "overall": 0,
+      "totalRatings": 0,
+      "courseRatings": []
+    },
+    "address": {
+      "street": null,
+      "city": "Bologna",
+      "state": null,
+      "country": "Italy",
+      "zipCode": null
+    },
+    "socialMedia": {
+      "linkedin": null,
+      "twitter": null,
+      "website": null
+    },
+    "notificationSettings": {
+      "email": true,
+      "courseAssignments": true,
+      "courseUpdates": true,
+      "courseReminders": true,
+      "studentMessages": true,
+      "systemNotifications": true
+    },
+    "emailNotifications": [],
+    "status": "Active",
+    "contractType": "Contract",
+    "hourlyRate": null,
+    "notes": null,
+    "documents": [],
+    "createdBy": null,
+    "lastModifiedBy": null,
+    "isDeleted": false
+  }
+]

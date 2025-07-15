@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Support Tickets - IAAI</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .tickets-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .tickets-header {
+            text-align: center;
+            background: #ffc107;
+            color: #333;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .tickets-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .ticket-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+            transition: background 0.3s ease;
+        }
+        .ticket-item:hover {
+            background: #f8f9fa;
+        }
+        .ticket-item:last-child {
+            border-bottom: none;
+        }
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .ticket-id {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .ticket-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .status-open {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-resolved {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-in-progress {
+            background: #cce7ff;
+            color: #0066cc;
+        }
+        .ticket-subject {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .ticket-meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .view-btn {
+            background: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .view-btn:hover {
+            background: #0056b3;
+            text-decoration: none;
+            color: white;
+        }
+        .create-ticket-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        .create-ticket-btn:hover {
+            background: #218838;
+            text-decoration: none;
+            color: white;
+        }
+        .no-tickets {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/header') %>
+  
+<!-- Breadcrumb Navigation -->
+<nav class="breadcrumb">
+    <a href="/">Home</a> > 
+    <a href="/dashboard">Dashboard</a> > 
+    <a href="/support/help">Support</a> > 
+    <span>Community</span>
+</nav>
+    
+    <div class="tickets-container">
+        <div class="tickets-header">
+            <h1><i class="fas fa-ticket-alt"></i> My Support Tickets</h1>
+            <p>Track your support requests and responses</p>
+        </div>
+
+        <a href="/support/contact" class="create-ticket-btn">
+            <i class="fas fa-plus"></i> Create New Ticket
+        </a>
+
+        <div class="tickets-list">
+            <% if (tickets && tickets.length > 0) { %>
+                <% tickets.forEach(ticket => { %>
+                <div class="ticket-item">
+                    <div class="ticket-header">
+                        <span class="ticket-id">#<%= ticket.id %></span>
+                        <span class="ticket-status status-<%= ticket.status.toLowerCase().replace(' ', '-') %>">
+                            <%= ticket.status %>
+                        </span>
+                    </div>
+                    <div class="ticket-subject"><%= ticket.subject %></div>
+                    <div class="ticket-meta">
+                        <i class="fas fa-calendar"></i> Created: <%= ticket.created.toLocaleDateString() %>
+                        <br>
+                        <i class="fas fa-tag"></i> Category: <%= ticket.category %>
+                        <% if (ticket.assignedAgent) { %>
+                        <br>
+                        <i class="fas fa-user"></i> Agent: <%= ticket.assignedAgent %>
+                        <% } %>
+                    </div>
+                    <a href="/support/tickets/<%= ticket.id %>" class="view-btn">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </div>
+                <% }); %>
+            <% } else { %>
+                <div class="no-tickets">
+                    <i class="fas fa-inbox" style="font-size: 3rem; color: #ddd; margin-bottom: 20px;"></i>
+                    <h3>No tickets found</h3>
+                    <p>You haven't created any support tickets yet.</p>
+                    <a href="/support/contact" class="create-ticket-btn">
+                        <i class="fas fa-plus"></i> Create Your First Ticket
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - User Management | IAAI</title>
+    <link rel="stylesheet" href="/css/userapproval.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<%- include('partials/header') %>
+
+<body>
+    <!-- Page Header -->
+    <header>
+        <h1>Admin Dashboard - User Management</h1>
+        <a href="/dashboard" class="cta-btn">Admin Home</a>
+    </header>
+
+    <section class="admin-container">
+        <!-- Statistics Cards -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <div class="number" id="totalUsers"><%= users ? users.length : 0 %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Approval</h3>
+                <div class="number" id="pendingUsers"><%= users ? users.filter(u => !u.isConfirmed).length : 0 %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Confirmed Users</h3>
+                <div class="number" id="confirmedUsers"><%= users ? users.filter(u => u.isConfirmed).length : 0 %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Today's Registrations</h3>
+                <div class="number" id="todayUsers">
+                    <%= users ? users.filter(u => {
+                        const today = new Date();
+                        const userDate = new Date(u.createdAt);
+                        return userDate.toDateString() === today.toDateString();
+                    }).length : 0 %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div class="alert success" id="successAlert"></div>
+        <div class="alert error" id="errorAlert"></div>
+
+        <!-- Filters -->
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="statusFilter">Status:</label>
+                <select id="statusFilter" onchange="filterUsers()">
+                    <option value="all">All Users</option>
+                    <option value="pending">Pending Approval</option>
+                    <option value="confirmed">Confirmed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="roleFilter">Role:</label>
+                <select id="roleFilter" onchange="filterUsers()">
+                    <option value="all">All Roles</option>
+                    <option value="user">Users</option>
+                    <option value="admin">Admins</option>
+                    <option value="instructor">Instructors</option>
+                </select>
+            </div>
+            <div class="filter-group search-box">
+                <input type="text" id="searchInput" placeholder="Search users..." onkeyup="filterUsers()">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+
+        <h2>User Approval Management</h2>
+        
+        <!-- Loading Spinner -->
+        <div class="loading" id="loadingSpinner">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <!-- Users Table -->
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Country</th>
+                    <th>Role</th>
+                    <th>Registration Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (users && users.length > 0) { %>
+                    <% users.forEach((user, index) => { %>
+                        <tr data-user-id="<%= user._id %>" 
+                            data-status="<%= user.isConfirmed ? 'confirmed' : 'pending' %>"
+                            data-role="<%= user.role || 'user' %>">
+                            <td><%= index + 1 %></td>
+                            <td><%= user.firstName || '' %> <%= user.lastName || '' %></td>
+                            <td><%= user.email || '' %></td>
+                            <td><%= user.phoneNumber || 'N/A' %></td>
+                            <td><%= user.country || 'N/A' %></td>
+                            <td><span class="status"><%= user.role || 'user' %></span></td>
+                            <td><%= user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A' %></td>
+                            <td>
+                                <% if (user.isConfirmed) { %>
+                                    <span class="status confirmed">Confirmed</span>
+                                <% } else { %>
+                                    <span class="status pending">Pending</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <% if (!user.isConfirmed) { %>
+                                        <button class="approve-btn" onclick="showApprovalModal('<%= user._id %>', '<%= user.email %>', '<%= user.firstName || '' %>', '<%= user.lastName || '' %>')">
+                                            <i class="fas fa-check-circle"></i> Approve
+                                        </button>
+                                        <button class="reject-btn" onclick="showRejectionModal('<%= user._id %>', '<%= user.email %>')">
+                                            <i class="fas fa-times-circle"></i> Reject
+                                        </button>
+                                    <% } else { %>
+                                        <button class="disable-btn" disabled>Already Confirmed</button>
+                                    <% } %>
+                                    <button class="view-btn" onclick="viewUserDetails('<%= user._id %>')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 30px;">
+                            <p style="color: #666; font-size: 16px;">No users found in the system.</p>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Approval Modal -->
+    <div id="approvalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Approve User & Send Welcome Email</h3>
+                <span class="close" onclick="closeModal('approvalModal')">&times;</span>
+            </div>
+            <p><strong>Approving User:</strong> <span id="approvalUserName"></span></p>
+            <p><strong>Email:</strong> <span id="approvalEmail"></span></p>
+            
+            <div class="form-group">
+                <label for="emailSubject">Email Subject:</label>
+                <input type="text" id="emailSubject" value="Welcome to IAAI Training - Account Approved! 🎉">
+            </div>
+            
+            <div class="form-group">
+                <label for="emailContent">Email Content:</label>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                    <small style="color: #666;">This email will be sent to the user. You can edit the content below:</small>
+                </div>
+                <textarea id="emailContent" rows="15"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="sendEmailCheckbox" checked> 
+                    Send welcome email to user
+                </label>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="reject-btn" onclick="closeModal('approvalModal')">Cancel</button>
+                <button class="view-btn" onclick="previewEmail()">
+                    <i class="fas fa-eye"></i> Preview Email
+                </button>
+                <button class="approve-btn" onclick="approveUser()">
+                    <i class="fas fa-check"></i> Approve & Send Email
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div id="rejectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reject User</h3>
+                <span class="close" onclick="closeModal('rejectionModal')">&times;</span>
+            </div>
+            <p>Are you sure you want to reject this user?</p>
+            <p><strong>Email:</strong> <span id="rejectionEmail"></span></p>
+            <div class="form-group">
+                <label for="rejectionReason">Reason for Rejection:</label>
+                <textarea id="rejectionReason" placeholder="Please provide a reason..." required></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="approve-btn" onclick="closeModal('rejectionModal')">Cancel</button>
+                <button class="reject-btn" onclick="rejectUser()">
+                    <i class="fas fa-times"></i> Confirm Rejection
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Preview Modal -->
+    <div id="emailPreviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Email Preview</h3>
+                <span class="close" onclick="closeModal('emailPreviewModal')">&times;</span>
+            </div>
+            <div style="border: 1px solid #ddd; border-radius: 5px; padding: 20px; background: white; max-height: 500px; overflow-y: auto;">
+                <div id="emailPreviewContent"></div>
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="approve-btn" onclick="closeModal('emailPreviewModal')">Close Preview</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Debug logging
+        console.log('Admin User Approval page loaded');
+        
+        // Global variables for current user
+        let currentUserId = null;
+        let currentUserEmail = null;
+        let currentUserFirstName = null;
+        let currentUserLastName = null;
+    
+        // Email template
+        function getEmailTemplate(firstName, lastName) {
+            return `Dear ${firstName} ${lastName},
+    
+    Great news! Your account has been successfully approved by our admin team. You now have full access to the IAAI Training platform.
+    
+    You can now log in to your account and start exploring our courses:
+    ${window.location.origin}/login
+    
+    What You Can Do Now:
+    - Browse and enroll in aesthetic training courses
+    - Access self-paced online training materials
+    - Register for live online sessions
+    - Sign up for in-person training programs
+    - Track your learning progress
+    - Earn certificates upon course completion
+    
+    Getting Started:
+    1. Login: Use your registered email and password
+    2. Complete Your Profile: Add professional information and preferences
+    3. Explore Courses: Browse our catalog and add courses to your wishlist
+    4. Enroll: Register for courses that interest you
+    
+    Need Help?
+    Our support team is here to assist you. Feel free to reach out at support@iaai-training.com
+    
+    Thank you for joining IAAI Training Institute!
+    
+    Best regards,
+    IAAI Training Team`;
+        }
+    
+        // Show approval modal with pre-filled email content
+        function showApprovalModal(userId, email, firstName, lastName) {
+            currentUserId = userId;
+            currentUserEmail = email;
+            currentUserFirstName = firstName;
+            currentUserLastName = lastName;
+            
+            document.getElementById('approvalUserName').textContent = `${firstName} ${lastName}`;
+            document.getElementById('approvalEmail').textContent = email;
+            
+            // Pre-fill email content
+            document.getElementById('emailContent').value = getEmailTemplate(firstName, lastName);
+            
+            document.getElementById('approvalModal').style.display = 'block';
+        }
+    
+        // Show rejection modal
+        function showRejectionModal(userId, email) {
+            currentUserId = userId;
+            currentUserEmail = email;
+            document.getElementById('rejectionEmail').textContent = email;
+            document.getElementById('rejectionModal').style.display = 'block';
+        }
+    
+        // Preview email
+        function previewEmail() {
+            const subject = document.getElementById('emailSubject').value;
+            const content = document.getElementById('emailContent').value;
+            
+            const previewHtml = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: #1a365d; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                        <h1 style="margin: 0;">IAAI Training Institute</h1>
+                    </div>
+                    <div style="border: 1px solid #e2e8f0; border-top: none; padding: 30px; border-radius: 0 0 10px 10px;">
+                        <h2 style="color: #1a365d; margin-top: 0;">${subject}</h2>
+                        <div style="white-space: pre-wrap; line-height: 1.6;">${content.replace(/\n/g, '<br>')}</div>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+                        <p>© ${new Date().getFullYear()} IAAI Training Institute. All rights reserved.</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('emailPreviewContent').innerHTML = previewHtml;
+            document.getElementById('emailPreviewModal').style.display = 'block';
+        }
+    
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId === 'approvalModal') {
+                currentUserId = null;
+                currentUserEmail = null;
+                currentUserFirstName = null;
+                currentUserLastName = null;
+            }
+        }
+    
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    
+        // Show alert
+        function showAlert(message, type) {
+            const alert = document.getElementById(type + 'Alert');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    
+        // Show loading
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+    
+        // Hide loading
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+    
+        // Approve User - USING SAME APPROACH AS admin-users-manage.ejs
+        async function approveUser() {
+            if (!currentUserId) return;
+            
+            const emailSubject = document.getElementById('emailSubject').value;
+            const emailContent = document.getElementById('emailContent').value;
+            const sendEmail = document.getElementById('sendEmailCheckbox').checked;
+            
+            showLoading();
+            closeModal('approvalModal');
+            
+            try {
+                // USING THE CORRECT ENDPOINT
+                const response = await fetch('/admin-user-approval/approve-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        userId: currentUserId,
+                        sendEmail: sendEmail,
+                        emailSubject: emailSubject,
+                        emailContent: emailContent
+                    })
+                });
+                
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    // Update UI without page reload
+                    updateUserRow(currentUserId, 'confirmed');
+                    updateStatistics();
+                } else {
+                    showAlert(result.message || 'Error approving user', 'error');
+                }
+            } catch (err) {
+                hideLoading();
+                console.error('Error:', err);
+                showAlert('Error updating user status. Please try again.', 'error');
+            }
+        }
+    
+        // Reject User - USING SAME APPROACH AS admin-users-manage.ejs
+        async function rejectUser() {
+            if (!currentUserId) return;
+            
+            const reason = document.getElementById('rejectionReason').value;
+            if (!reason.trim()) {
+                showAlert('Please provide a reason for rejection', 'error');
+                return;
+            }
+            
+            showLoading();
+            closeModal('rejectionModal');
+            
+            try {
+                // USING THE CORRECT ENDPOINT
+                const response = await fetch('/admin-user-approval/reject-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        userId: currentUserId,
+                        reason: reason 
+                    })
+                });
+                
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    // Remove user row
+                    const row = document.querySelector(`tr[data-user-id="${currentUserId}"]`);
+                    if (row) row.remove();
+                    updateStatistics();
+                } else {
+                    showAlert(result.message || 'Error rejecting user', 'error');
+                }
+            } catch (err) {
+                hideLoading();
+                console.error('Error:', err);
+                showAlert('Error updating user status. Please try again.', 'error');
+            }
+        }
+    
+        // Update user row after approval
+        function updateUserRow(userId, status) {
+            const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+            if (!row) return;
+            
+            // Update status
+            row.setAttribute('data-status', status);
+            const statusCell = row.querySelector('td:nth-child(8)');
+            statusCell.innerHTML = '<span class="status confirmed">Confirmed</span>';
+            
+            // Update actions
+            const actionsCell = row.querySelector('td:last-child .action-buttons');
+            actionsCell.innerHTML = `
+                <button class="disable-btn" disabled>Already Confirmed</button>
+                <button class="view-btn" onclick="viewUserDetails('${userId}')">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            `;
+        }
+    
+        // Update statistics
+        function updateStatistics() {
+            const rows = document.querySelectorAll('#usersTable tbody tr');
+            let total = 0, pending = 0, confirmed = 0;
+            
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    total++;
+                    if (row.getAttribute('data-status') === 'pending') {
+                        pending++;
+                    } else {
+                        confirmed++;
+                    }
+                }
+            });
+            
+            document.getElementById('totalUsers').textContent = total;
+            document.getElementById('pendingUsers').textContent = pending;
+            document.getElementById('confirmedUsers').textContent = confirmed;
+        }
+    
+        // Filter users
+        function filterUsers() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const roleFilter = document.getElementById('roleFilter').value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            
+            const rows = document.querySelectorAll('#usersTable tbody tr');
+            
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                const role = row.getAttribute('data-role');
+                const text = row.textContent.toLowerCase();
+                
+                let show = true;
+                
+                if (statusFilter !== 'all' && status !== statusFilter) {
+                    show = false;
+                }
+                
+                if (roleFilter !== 'all' && role !== roleFilter) {
+                    show = false;
+                }
+                
+                if (searchInput && !text.includes(searchInput)) {
+                    show = false;
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+            
+            updateStatistics();
+        }
+    
+        // View user details
+        function viewUserDetails(userId) {
+            window.location.href = `/admin-users/${userId}`;
+        }
+    
+        // Auto-refresh pending users count every 30 seconds
+        setInterval(() => {
+            // You can implement a lightweight API call here to update pending count
+            // without refreshing the entire page
+        }, 30000);
+    </script>
+
+<%- include('partials/footer') %>
+
+</body>
+</html>

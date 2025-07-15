@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - International Aesthetic Academic Institution (IAAI)</title>
+    <link rel="stylesheet" href="/css/checkoutstyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  </head>
+  
+  <body>
+    <%- include('partials/header') %>
+
+    <!-- ✅ Enhanced Checkout Section -->
+    <section id="checkout">
+      <div class="checkout-container">
+        <h1><i class="fas fa-shopping-cart"></i> Your Cart</h1>
+        
+        <!-- Progress Indicator -->
+        <div class="checkout-progress">
+          <div class="progress-step active">
+            <span class="step-number">1</span>
+            <span class="step-label">Shopping Cart</span>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step">
+            <span class="step-number">2</span>
+            <span class="step-label">Payment</span>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step">
+            <span class="step-number">3</span>
+            <span class="step-label">Confirmation</span>
+          </div>
+        </div>
+       
+        <% if (coursesInCart && coursesInCart.length > 0) { %>
+          <!-- Course Table -->
+          <div class="table-container">
+            <table class="checkout-table">
+              <thead>
+                <tr>
+                  <th>Course Code</th>
+                  <th>Course Title</th>
+                  <th>Type</th>
+                  <th>Start Date</th>
+                  <th>Price</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% coursesInCart.forEach((course, index) => { %>
+                  <tr data-course-id="<%= course.courseId %>" data-course-type="<%= course.courseType %>">
+                    <td><strong><%= course.courseCode %></strong></td>
+                    <td>
+                      <div class="course-title-cell">
+                        <%= course.title %>
+                        <% if (course.courseType === 'Self-Paced') { %>
+                          <span class="course-badge self-paced">Self-Paced</span>
+                        <% } else if (course.courseType === 'Online Live') { %>
+                          <span class="course-badge online-live">Live Online</span>
+                        <% } else { %>
+                          <span class="course-badge in-person">In-Person</span>
+                        <% } %>
+                      </div>
+                    </td>
+                    <td><%= course.courseType %></td>
+                    <td>
+                      <% if (course.startDate) { %>
+                        <%= new Date(course.startDate).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric', 
+                          year: 'numeric' 
+                        }) %>
+                      <% } else { %>
+                        <span class="text-muted">Anytime</span>
+                      <% } %>
+                    </td>
+                    <td class="price-cell">
+                      <strong>$<%= course.price.toFixed(2) %></strong> USD
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn-icon btn-wishlist" 
+                                onclick="moveToWishlist('<%= course.courseId %>', '<%= course.courseType %>')"
+                                title="Move to Wishlist">
+                          <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="btn-icon btn-remove" 
+                                onclick="removeFromCart('<%= course.courseId %>', '<%= course.courseType %>')"
+                                title="Remove from Cart">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Price Summary -->
+          <div class="price-summary">
+            <div class="price-row">
+              <span>Subtotal (<%= coursesInCart.length %> items):</span>
+              <span class="price-value">$<span id="originalPrice"><%= totalPrice.toFixed(2) %></span> USD</span>
+            </div>
+            
+            <div class="price-row promo-applied" id="discountRow" style="display: none;">
+              <span>Discount (<span id="discountPercent">0</span>%):</span>
+              <span class="price-value discount">-$<span id="discountAmount">0.00</span> USD</span>
+            </div>
+            
+            <div class="price-row" id="taxRow" style="display: none;">
+              <span>Tax:</span>
+              <span class="price-value">$<span id="taxAmount">0.00</span> USD</span>
+            </div>
+            
+            <div class="price-row total">
+              <span>Total:</span>
+              <span class="price-value total-price">$<span id="discountedPrice"><%= totalPrice.toFixed(2) %></span> USD</span>
+            </div>
+            
+            <!-- Savings Message -->
+            <div id="savingsMessage" class="savings-message" style="display: none;">
+              <i class="fas fa-piggy-bank"></i>
+              You're saving $<span id="savingsAmount">0.00</span>!
+            </div>
+          </div>
+         
+          <!-- ✅ Promo Code Section -->
+          <div class="promo-section">
+            <h3><i class="fas fa-tag"></i> Have a Promo Code?</h3>
+            <div class="promo-input-group">
+              <input type="text" id="promoCode" placeholder="Enter Promo Code" class="promo-input">
+              <button type="button" id="applyPromoBtn" class="btn-apply-promo">
+                <i class="fas fa-tag"></i> Apply
+              </button>
+            </div>
+            <div id="promoMessage" class="promo-message"></div>
+            
+            <!-- Active Promo Display -->
+            <div id="activePromo" class="active-promo" style="display: none;">
+              <i class="fas fa-check-circle"></i>
+              Active: <span id="activePromoCode"></span>
+              <button class="remove-promo" onclick="removePromoCode()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ✅ Additional Options -->
+          <div class="additional-options">
+            <h3><i class="fas fa-cog"></i> Additional Options</h3>
+            
+            <!-- Gift Option -->
+            <label class="checkbox-container">
+              <input type="checkbox" id="giftOption" onchange="toggleGiftOptions()">
+              <span class="checkmark"></span>
+              <span>This is a gift</span>
+            </label>
+            
+            <div id="giftDetails" class="gift-details" style="display: none;">
+              <input type="email" id="giftRecipientEmail" placeholder="Recipient's Email" class="form-input">
+              <textarea id="giftMessage" placeholder="Gift message (optional)" class="form-textarea"></textarea>
+            </div>
+            
+            <!-- Add Notes -->
+            <label class="checkbox-container">
+              <input type="checkbox" id="addNotes" onchange="toggleNotes()">
+              <span class="checkmark"></span>
+              <span>Add order notes</span>
+            </label>
+            
+            <div id="orderNotes" style="display: none;">
+              <textarea id="notesText" placeholder="Add any special instructions or notes" class="form-textarea"></textarea>
+            </div>
+          </div>
+
+          <!-- ✅ Terms and Conditions -->
+          <div class="terms-container">
+            <label class="checkbox-container">
+              <input type="checkbox" id="agreeTerms" required onchange="validateCheckout()">
+              <span class="checkmark"></span>
+              <span class="terms-text">
+                I agree to the 
+                <a href="/policies#terms" target="_blank">Terms and Conditions</a>,
+                <a href="/policies#privacy" target="_blank">Privacy Policy</a>, and
+                <a href="/policies#refund" target="_blank">Refund Policy</a>
+              </span>
+            </label>
+          </div>
+
+          <!-- ✅ Action Buttons -->
+          <div class="checkout-actions">
+            <button type="button" class="btn-secondary" onclick="window.location.href='/training-programs'">
+              <i class="fas fa-arrow-left"></i> Continue Shopping
+            </button>
+            <button type="button" class="btn-primary" id="proceedBtn" onclick="handleCheckout()" disabled>
+              <i class="fas fa-credit-card"></i> Proceed to Payment
+            </button>
+          </div>
+          
+          <!-- Security Badge -->
+          <div class="security-badge">
+            <i class="fas fa-lock"></i>
+            <span>Secure Checkout - SSL Encrypted</span>
+          </div>
+
+        <% } else { %>
+          <!-- Empty Cart -->
+          <div class="empty-cart">
+            <i class="fas fa-shopping-cart empty-cart-icon"></i>
+            <h3>Your cart is empty!</h3>
+            <p>Looks like you haven't added any courses yet.</p>
+            
+            <!-- Quick Links -->
+            <div class="quick-links">
+              <a href="/training-programs" class="btn-primary">
+                <i class="fas fa-graduation-cap"></i> Browse All Courses
+              </a>
+              <a href="/wishlist" class="btn-secondary">
+                <i class="fas fa-heart"></i> View Wishlist
+              </a>
+            </div>
+            
+            <!-- Recommendations -->
+            <div class="recommendations">
+              <h4>Popular Courses</h4>
+              <p>Check out our most popular training programs</p>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+      <div class="spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Processing...</p>
+      </div>
+    </div>
+
+    <script>
+      let currentDiscountedPrice = <%= totalPrice.toFixed(2) %>;
+      let originalPrice = <%= totalPrice.toFixed(2) %>;
+      let promoApplied = false;
+      let promoDiscount = 0;
+
+      // ✅ Initialize on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        validateCheckout();
+      });
+
+      // ✅ Validate checkout button state
+      function validateCheckout() {
+        const agreeTerms = document.getElementById('agreeTerms').checked;
+        const proceedBtn = document.getElementById('proceedBtn');
+        proceedBtn.disabled = !agreeTerms;
+      }
+
+      // ✅ Remove from Cart
+      async function removeFromCart(courseId, courseType) {
+        if (!confirm('Are you sure you want to remove this course from your cart?')) {
+          return;
+        }
+
+        showLoading(true);
+
+        try {
+          const response = await fetch('/remove-from-cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courseId, courseType })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            // Animate row removal
+            const row = document.querySelector(`tr[data-course-id="${courseId}"]`);
+            row.style.animation = 'fadeOut 0.5s';
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+          } else {
+            showMessage(result.message || 'Error removing course from cart', 'error');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showMessage('Error removing course from cart', 'error');
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // ✅ Move to Wishlist
+      async function moveToWishlist(courseId, courseType) {
+        showLoading(true);
+
+        try {
+          // First add to wishlist
+          const wishlistResponse = await fetch('/add-to-wishlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courseId, courseType })
+          });
+
+          const wishlistResult = await wishlistResponse.json();
+
+          if (wishlistResult.success) {
+            // Then remove from cart
+            const removeResponse = await fetch('/remove-from-cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ courseId, courseType })
+            });
+
+            const removeResult = await removeResponse.json();
+
+            if (removeResult.success) {
+              showMessage('Course moved to wishlist!', 'success');
+              setTimeout(() => window.location.reload(), 1000);
+            }
+          } else {
+            showMessage(wishlistResult.message || 'Error moving to wishlist', 'error');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showMessage('Error moving course to wishlist', 'error');
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // ✅ Apply Promo Code
+      document.getElementById('applyPromoBtn').addEventListener('click', async () => {
+        const promoCode = document.getElementById('promoCode').value.trim();
+        const button = document.getElementById('applyPromoBtn');
+        
+        if (!promoCode) {
+          showMessage('Please enter a promo code.', 'error');
+          return;
+        }
+
+        // Disable button during processing
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying...';
+
+        try {
+          const response = await fetch('/apply-promo-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ promoCode })
+          });
+
+          const result = await response.json();
+          
+          if (result.success) {
+            currentDiscountedPrice = parseFloat(result.newTotalPrice);
+            const discountAmount = originalPrice - currentDiscountedPrice;
+            promoDiscount = ((discountAmount / originalPrice) * 100).toFixed(0);
+            
+            // Update UI
+            document.getElementById('discountedPrice').innerText = result.newTotalPrice;
+            document.getElementById('discountAmount').innerText = discountAmount.toFixed(2);
+            document.getElementById('discountPercent').innerText = promoDiscount;
+            document.getElementById('discountRow').style.display = 'flex';
+            document.getElementById('savingsAmount').innerText = discountAmount.toFixed(2);
+            document.getElementById('savingsMessage').style.display = 'block';
+            
+            // Show active promo
+            document.getElementById('activePromoCode').innerText = promoCode.toUpperCase();
+            document.getElementById('activePromo').style.display = 'flex';
+            
+            // Disable promo input
+            document.getElementById('promoCode').disabled = true;
+            button.style.display = 'none';
+            
+            promoApplied = true;
+            
+            if (result.completeRegistration) {
+              // ✅ 100% discount - Change button to "Complete Registration"
+              const proceedBtn = document.getElementById('proceedBtn');
+              proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
+              proceedBtn.classList.add('btn-success');
+              showMessage('🎉 Promo code applied! Your courses are now FREE!', 'success');
+            } else {
+              // ✅ Partial discount
+              showMessage('✅ Promo code applied successfully!', 'success');
+            }
+          } else {
+            showMessage(result.message, 'error');
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-tag"></i> Apply';
+          }
+        } catch (error) {
+          console.error('Error applying promo code:', error);
+          showMessage('Error applying promo code. Please try again.', 'error');
+          button.disabled = false;
+          button.innerHTML = '<i class="fas fa-tag"></i> Apply';
+        }
+      });
+
+      // ✅ Remove Promo Code
+      function removePromoCode() {
+        if (confirm('Remove promo code?')) {
+          // Reset prices
+          currentDiscountedPrice = originalPrice;
+          document.getElementById('discountedPrice').innerText = originalPrice.toFixed(2);
+          document.getElementById('discountRow').style.display = 'none';
+          document.getElementById('savingsMessage').style.display = 'none';
+          document.getElementById('activePromo').style.display = 'none';
+          
+          // Re-enable promo input
+          document.getElementById('promoCode').disabled = false;
+          document.getElementById('promoCode').value = '';
+          document.getElementById('applyPromoBtn').style.display = 'inline-flex';
+          
+          // Reset button
+          const proceedBtn = document.getElementById('proceedBtn');
+          proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
+          proceedBtn.classList.remove('btn-success');
+          
+          promoApplied = false;
+          showMessage('Promo code removed', 'info');
+        }
+      }
+
+      // ✅ Toggle Gift Options
+      function toggleGiftOptions() {
+        const giftDetails = document.getElementById('giftDetails');
+        giftDetails.style.display = document.getElementById('giftOption').checked ? 'block' : 'none';
+      }
+
+      // ✅ Toggle Notes
+      function toggleNotes() {
+        const orderNotes = document.getElementById('orderNotes');
+        orderNotes.style.display = document.getElementById('addNotes').checked ? 'block' : 'none';
+      }
+
+      // ✅ Show message
+      function showMessage(message, type) {
+        const messageDiv = document.getElementById('promoMessage');
+        messageDiv.className = `promo-message ${type}`;
+        messageDiv.innerHTML = `
+          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+          ${message}
+        `;
+        messageDiv.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          messageDiv.style.display = 'none';
+        }, 5000);
+      }
+
+      // ✅ Show/Hide Loading
+      function showLoading(show) {
+        document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+      }
+
+      // ✅ Handle Checkout
+      async function handleCheckout() {
+        const agreeTerms = document.getElementById('agreeTerms').checked;
+        const proceedBtn = document.getElementById('proceedBtn');
+        
+        if (!agreeTerms) {
+          alert('⚠️ Please agree to the Terms and Conditions to proceed.');
+          return;
+        }
+
+        // Collect additional data
+        const checkoutData = {
+          isGift: document.getElementById('giftOption').checked,
+          giftRecipientEmail: document.getElementById('giftRecipientEmail')?.value,
+          giftMessage: document.getElementById('giftMessage')?.value,
+          orderNotes: document.getElementById('notesText')?.value
+        };
+
+        // Store in session for later use
+        sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+
+        // Disable button during processing
+        proceedBtn.disabled = true;
+        proceedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        showLoading(true);
+
+        try {
+          if (currentDiscountedPrice <= 0) {
+            // ✅ FREE registration
+            console.log('🎯 Processing free registration...');
+            
+            const response = await fetch('/complete-registration', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(checkoutData)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+              window.location.href = `/success?ref=${result.referenceNumber}`;
+            } else {
+              alert('❌ Error completing registration: ' + (result.message || 'Please try again.'));
+              proceedBtn.disabled = false;
+              proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
+            }
+          } else {
+            // ✅ Payment required
+            console.log('💳 Redirecting to payment...');
+            window.location.href = '/payment';
+          }
+        } catch (error) {
+          console.error('Error during checkout:', error);
+          alert('❌ Error processing checkout. Please try again.');
+          proceedBtn.disabled = false;
+          proceedBtn.innerHTML = currentDiscountedPrice <= 0 ? 
+            '<i class="fas fa-check-circle"></i> Complete Registration (FREE)' : 
+            '<i class="fas fa-credit-card"></i> Proceed to Payment';
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // ✅ Prevent accidental navigation
+      window.addEventListener('beforeunload', function (e) {
+        if (document.querySelectorAll('.checkout-table tbody tr').length > 0) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
+
+      // ✅ Debug information
+      console.log('💰 Initial total price:', <%= totalPrice.toFixed(2) %>);
+      console.log('🛒 Courses in cart:', <%= coursesInCart ? coursesInCart.length : 0 %>);
+    </script>
+  </body>
+</html>

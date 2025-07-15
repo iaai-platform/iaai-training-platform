@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assessment - <%= course.basic.title %></title>
+  <link rel="stylesheet" href="/css/librarystyle.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+
+    .assessment-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .assessment-header {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .assessment-header h1 {
+      color: #002147;
+      margin: 0 0 15px 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .assessment-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #666;
+    }
+
+    .meta-item i {
+      color: #b8860b;
+      width: 20px;
+    }
+
+    .assessment-info {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .info-card {
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #b8860b;
+      background: #f8f9ff;
+    }
+
+    .info-card h3 {
+      margin: 0 0 10px 0;
+      color: #002147;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .info-card p {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .attendance-status {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .status-card.success {
+      background: #d4f4dd;
+      border: 2px solid #28a745;
+    }
+
+    .status-card.warning {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+    }
+
+    .status-card.danger {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+    }
+
+    .status-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+    }
+
+    .status-card.success .status-icon {
+      background: #28a745;
+    }
+
+    .status-card.warning .status-icon {
+      background: #ffc107;
+    }
+
+    .status-card.danger .status-icon {
+      background: #dc3545;
+    }
+
+    .assessment-history {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      background: #f8f9fa;
+    }
+
+    .history-item.passed {
+      background: #d4f4dd;
+      border-left: 4px solid #28a745;
+    }
+
+    .history-item.failed {
+      background: #f8d7da;
+      border-left: 4px solid #dc3545;
+    }
+
+    .assessment-form {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .question-container {
+      margin-bottom: 30px;
+      padding: 25px;
+      border-radius: 12px;
+      background: #f8f9ff;
+      border: 2px solid #e9ecef;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .question-number {
+      background: #002147;
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+
+    .question-text {
+      flex: 1;
+      color: #002147;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .question-points {
+      background: #b8860b;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 15px;
+    }
+
+    .answers-container {
+      margin-left: 50px;
+    }
+
+    .answer-option {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      background: white;
+      border: 2px solid #e9ecef;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .answer-option:hover {
+      border-color: #b8860b;
+      background: #fffef7;
+    }
+
+    .answer-option.selected {
+      border-color: #002147;
+      background: #f0f7ff;
+    }
+
+    .answer-option input[type="radio"] {
+      margin-right: 12px;
+      transform: scale(1.2);
+    }
+
+    .answer-text {
+      flex: 1;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .assessment-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      margin-top: 30px;
+    }
+
+    .progress-info {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .cta-btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 33, 71, 0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #002147;
+      border: 2px solid #002147;
+    }
+
+    .btn-secondary:hover {
+      background: #002147;
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+      color: #000;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+    }
+
+    .btn-info {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+    }
+
+    .alert {
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 4px solid;
+    }
+
+    .alert-success {
+      background: #d4f4dd;
+      border-left-color: #28a745;
+      color: #155724;
+    }
+
+    .alert-warning {
+      background: #fff3cd;
+      border-left-color: #ffc107;
+      color: #856404;
+    }
+
+    .alert-danger {
+      background: #f8d7da;
+      border-left-color: #dc3545;
+      color: #721c24;
+    }
+
+    /* ✅ NEW: Results Display Styles */
+    .results-container {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .results-hero {
+      padding: 40px 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+    }
+
+    .results-hero.passed {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .results-hero.failed {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+    }
+
+    .results-hero.retake {
+      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+      color: #000;
+    }
+
+    .results-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .results-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .results-score {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .results-subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      opacity: 0.9;
+    }
+
+    .results-details {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .detail-item {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #002147;
+      margin-bottom: 5px;
+    }
+
+    .detail-label {
+      color: #666;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .next-steps {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      padding: 25px;
+      margin-top: 30px;
+      color: #333;
+    }
+
+    .next-steps h4 {
+      color: #002147;
+      margin: 0 0 15px 0;
+      font-size: 1.3rem;
+    }
+
+    .next-steps ul {
+      text-align: left;
+      margin: 15px 0;
+      padding-left: 20px;
+    }
+
+    .next-steps li {
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    /* Animation effects */
+    .fade-in {
+      animation: fadeIn 0.8s ease-in;
+    }
+
+    .slide-up {
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .loading-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #002147;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .assessment-container {
+        padding: 0 15px;
+      }
+
+      .results-title {
+        font-size: 2rem;
+      }
+
+      .results-score {
+        font-size: 2.5rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cta-btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+
+  
+  <div class="assessment-container">
+    <!-- Assessment Header -->
+    <div class="assessment-header">
+      <h1><i class="fas fa-clipboard-check"></i> Live Online Course Assessment</h1>
+      <p><strong><%= course.basic.title %></strong></p>
+      <p><%= course.basic.description %></p>
+      
+      <div class="assessment-meta">
+        <div class="meta-item">
+          <i class="fas fa-calendar"></i>
+          <span>Course Date: <%= new Date(course.schedule.startDate).toLocaleDateString() %></span>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-clock"></i>
+          <span>Duration: <%= course.schedule.duration || 'TBD' %></span>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-code"></i>
+          <span>Course Code: <%= course.basic.courseCode %></span>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-user-tie"></i>
+          <span>Platform: <%= course.platform.name || 'Online' %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assessment Information -->
+    <div class="assessment-info">
+      <h2><i class="fas fa-info-circle"></i> Assessment Information</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>Assessment Type</h3>
+          <p><%= assessment.type.charAt(0).toUpperCase() + assessment.type.slice(1) %> Assessment</p>
+        </div>
+        <div class="info-card">
+          <h3>Passing Score</h3>
+          <p><%= assessment.passingScore || 70 %>% or higher</p>
+        </div>
+        <div class="info-card">
+          <h3>Total Questions</h3>
+          <p><%= assessment.questions ? assessment.questions.length : 0 %> questions</p>
+        </div>
+        <div class="info-card">
+          <h3>Time Limit</h3>
+          <p><%= assessment.timeLimit ? assessment.timeLimit + ' minutes' : 'No time limit' %></p>
+        </div>
+        <div class="info-card">
+          <h3>Attempts Allowed</h3>
+          <p><%= maxAttempts %> total attempts</p>
+        </div>
+        <div class="info-card">
+          <h3>Attempts Used</h3>
+          <p><%= currentAttempts %> of <%= maxAttempts %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Status -->
+    <div class="attendance-status">
+      <h2><i class="fas fa-user-check"></i> Attendance Status</h2>
+      <div class="status-card success">
+        <div class="status-icon">
+          <i class="fas fa-check"></i>
+        </div>
+        <div>
+          <h3>Attendance Verified</h3>
+          <p>Your attendance meets the minimum requirement (<%= attendancePercentage %>% attendance)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ NEW: Assessment Results Display (Hidden by default) -->
+    <div id="resultsContainer" class="results-container" style="display: none;">
+      <div id="resultsHero" class="results-hero">
+        <i id="resultsIcon" class="results-icon"></i>
+        <h2 id="resultsTitle" class="results-title"></h2>
+        <div id="resultsScore" class="results-score"></div>
+        <p id="resultsSubtitle" class="results-subtitle"></p>
+        
+        <div class="results-details">
+          <div class="details-grid">
+            <div class="detail-item">
+              <div id="scoreValue" class="detail-value">-</div>
+              <div class="detail-label">Your Score</div>
+            </div>
+            <div class="detail-item">
+              <div id="passingValue" class="detail-value">-</div>
+              <div class="detail-label">Required Score</div>
+            </div>
+            <div class="detail-item">
+              <div id="attemptsValue" class="detail-value">-</div>
+              <div class="detail-label">Attempts Used</div>
+            </div>
+            <div class="detail-item">
+              <div id="questionsValue" class="detail-value">-</div>
+              <div class="detail-label">Total Questions</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="nextSteps" class="next-steps">
+          <h4><i class="fas fa-route"></i> Next Steps</h4>
+          <div id="nextStepsContent"></div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="viewResultsBtn" class="cta-btn btn-info">
+            <i class="fas fa-chart-bar"></i> View Detailed Results
+          </button>
+          <button id="retakeBtn" class="cta-btn btn-warning" style="display: none;">
+            <i class="fas fa-redo"></i> Retake Assessment
+          </button>
+          <a href="/library/live" id="libraryBtn" class="cta-btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Return to Library
+          </a>
+          <button id="proceedBtn" class="cta-btn btn-success" style="display: none;">
+            <i class="fas fa-arrow-right"></i> Complete Course
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ UPDATED: Assessment Results Display -->
+    <% if (hasPassedAssessment) { %>
+    <div class="results-container fade-in">
+      <div class="results-hero passed">
+        <i class="fas fa-trophy results-icon"></i>
+        <h2 class="results-title">🎉 Congratulations!</h2>
+        <div class="results-score"><%= assessmentHistory.length > 0 ? assessmentHistory[assessmentHistory.length - 1].score : 'N/A' %>%</div>
+        <p class="results-subtitle">You have successfully passed the assessment!</p>
+        
+        <div class="results-details">
+          <div class="details-grid">
+            <div class="detail-item">
+              <div class="detail-value"><%= assessmentHistory.length > 0 ? assessmentHistory[assessmentHistory.length - 1].score : 'N/A' %>%</div>
+              <div class="detail-label">Your Score</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-value"><%= assessment.passingScore || 70 %>%</div>
+              <div class="detail-label">Required Score</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-value"><%= currentAttempts %></div>
+              <div class="detail-label">Attempts Used</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-value"><%= assessment.questions ? assessment.questions.length : 0 %></div>
+              <div class="detail-label">Total Questions</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="next-steps">
+          <h4><i class="fas fa-graduation-cap"></i> Next Steps</h4>
+          <ul>
+            <li>✅ Assessment completed successfully</li>
+            <li>🎓 Return to your library to complete the course</li>
+            <li>📜 Confirm your attendance to receive your certificate</li>
+            <li>💡 Share your achievement with others</li>
+          </ul>
+        </div>
+
+        <div class="action-buttons">
+          <button onclick="showDetailedResults()" class="cta-btn btn-info">
+            <i class="fas fa-chart-bar"></i> View Detailed Results
+          </button>
+          <a href="/library/live" class="cta-btn btn-success">
+            <i class="fas fa-arrow-right"></i> Complete Course
+          </a>
+          <button onclick="window.print()" class="cta-btn btn-secondary">
+            <i class="fas fa-print"></i> Print Results
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <% } else if (!canTakeAssessment) { %>
+    <!-- ✅ UPDATED: No more attempts -->
+    <div class="results-container fade-in">
+      <div class="results-hero failed">
+        <i class="fas fa-times-circle results-icon"></i>
+        <h2 class="results-title">Assessment Limit Reached</h2>
+        <p class="results-subtitle">You have used all <%= maxAttempts %> available attempts for this assessment.</p>
+        
+        <% if (assessmentHistory.length > 0) { %>
+          <div class="results-details">
+            <div class="details-grid">
+              <div class="detail-item">
+                <div class="detail-value"><%= Math.max(...assessmentHistory.map(a => a.score)) %>%</div>
+                <div class="detail-label">Best Score</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-value"><%= assessment.passingScore || 70 %>%</div>
+                <div class="detail-label">Required Score</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-value"><%= maxAttempts %></div>
+                <div class="detail-label">Max Attempts</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-value"><%= assessment.questions ? assessment.questions.length : 0 %></div>
+                <div class="detail-label">Total Questions</div>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <div class="next-steps">
+          <h4><i class="fas fa-info-circle"></i> What's Next?</h4>
+          <ul>
+            <li>📞 Contact support for additional attempts if needed</li>
+            <li>📚 Review course materials for better preparation</li>
+            <li>🔄 Consider retaking the live course if available</li>
+            <li>💬 Speak with your instructor for guidance</li>
+          </ul>
+        </div>
+
+        <div class="action-buttons">
+          <button onclick="showDetailedResults()" class="cta-btn btn-info">
+            <i class="fas fa-chart-bar"></i> View Results History
+          </button>
+          <a href="/library/live" class="cta-btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Return to Library
+          </a>
+          <a href="/contact" class="cta-btn btn-warning">
+            <i class="fas fa-headset"></i> Contact Support
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <% } else { %>
+    
+    <!-- ✅ UPDATED: Assessment History (if exists) -->
+    <% if (assessmentHistory && assessmentHistory.length > 0) { %>
+    <div class="assessment-history">
+      <h2><i class="fas fa-history"></i> Previous Attempts</h2>
+      <% assessmentHistory.forEach((attempt, index) => { %>
+        <div class="history-item <%= attempt.passed ? 'passed' : 'failed' %>">
+          <div>
+            <strong>Attempt #<%= attempt.attemptNumber %></strong>
+            <br>
+            <small><%= new Date(attempt.date).toLocaleString() %></small>
+          </div>
+          <div style="text-align: right;">
+            <strong><%= attempt.score %>%</strong>
+            <br>
+            <small style="font-weight: 600; color: <%= attempt.passed ? '#28a745' : '#dc3545' %>;">
+              <%= attempt.passed ? '✅ PASSED' : '❌ FAILED' %>
+            </small>
+          </div>
+        </div>
+      <% }) %>
+      
+      <% if (currentAttempts > 0) { %>
+        <div style="background: #e8f4f8; border: 2px solid #17a2b8; border-radius: 8px; padding: 15px; margin-top: 15px;">
+          <i class="fas fa-info-circle" style="color: #17a2b8;"></i>
+          <strong style="color: #17a2b8;">Attempts Remaining: <%= maxAttempts - currentAttempts %></strong>
+        </div>
+      <% } %>
+    </div>
+    <% } %>
+
+    <!-- Assessment Form -->
+    <div id="assessmentForm" class="assessment-form">
+      <h2><i class="fas fa-edit"></i> Assessment Questions</h2>
+      
+      <% if (currentAttempts > 0) { %>
+        <div class="alert alert-warning">
+          <i class="fas fa-redo"></i>
+          <strong>Retake Attempt:</strong> This is attempt #<%= currentAttempts + 1 %> of <%= maxAttempts %>.
+        </div>
+      <% } %>
+      
+      <form id="questionForm">
+        <% if (assessment.questions && assessment.questions.length > 0) { %>
+          <% assessment.questions.forEach((question, index) => { %>
+            <div class="question-container">
+              <div class="question-header">
+                <div class="question-number"><%= index + 1 %></div>
+                <div class="question-text"><%= question.question %></div>
+                <div class="question-points"><%= question.points || 1 %> pts</div>
+              </div>
+              
+              <div class="answers-container">
+                <% question.answers.forEach((answer, answerIndex) => { %>
+                  <label class="answer-option" for="q<%= index %>_a<%= answerIndex %>">
+                    <input 
+                      type="radio" 
+                      id="q<%= index %>_a<%= answerIndex %>" 
+                      name="question_<%= index %>" 
+                      value="<%= answerIndex %>"
+                      required
+                    >
+                    <span class="answer-text"><%= answer %></span>
+                  </label>
+                <% }) %>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            No questions have been configured for this assessment. Please contact your instructor.
+          </div>
+        <% } %>
+
+        <% if (assessment.questions && assessment.questions.length > 0) { %>
+        <div class="assessment-controls">
+          <div class="progress-info">
+            <i class="fas fa-tasks"></i>
+            <span id="answeredCount">0</span> of <%= assessment.questions.length %> questions answered
+          </div>
+          <div>
+            <button type="submit" class="cta-btn btn-primary" id="submitBtn" disabled>
+              <i class="fas fa-paper-plane"></i> Submit Assessment
+            </button>
+          </div>
+        </div>
+        <% } %>
+      </form>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- ✅ NEW: Detailed Results Modal -->
+  <div id="resultsModal" class="loading-overlay">
+    <div class="loading-content" style="max-width: 600px; width: 90%;">
+      <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Assessment Results</h3>
+      <div id="resultsContent">
+        <!-- Results will be populated here -->
+      </div>
+      <div style="margin-top: 20px;">
+        <button onclick="closeResultsModal()" class="cta-btn btn-secondary">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Processing your assessment...</p>
+      <small>Please wait while we calculate your results.</small>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('questionForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const resultsContainer = document.getElementById('resultsContainer');
+      const assessmentForm = document.getElementById('assessmentForm');
+      
+      const totalQuestions = <%= assessment.questions ? assessment.questions.length : 0 %>;
+      
+      // ✅ NEW: Check if assessment is completed on page load
+      const hasPassedAssessment = <%= hasPassedAssessment || false %>;
+      const assessmentCompleted = <%= assessmentCompleted || false %>;
+      const assessmentScore = <%= assessmentScore || 0 %>;
+      const passingScore = <%= passingScore || 70 %>;
+      
+      // If assessment is completed, show results immediately
+      if (hasPassedAssessment || (assessmentCompleted && assessmentScore >= passingScore)) {
+        if (assessmentForm && resultsContainer) {
+          // Hide form and show results
+          assessmentForm.style.display = 'none';
+          
+          // Populate and show results
+          showResults({
+            passed: true,
+            score: assessmentScore,
+            passingScore: passingScore,
+            currentAttempts: <%= currentAttempts %>,
+            totalAttempts: <%= maxAttempts %>,
+            canRetake: false
+          });
+        }
+        return; // Exit early if already completed
+      }
+      
+      if (!form) return; // No form to handle
+
+      // Handle answer selection
+      const answerOptions = document.querySelectorAll('.answer-option');
+      answerOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const radio = this.querySelector('input[type="radio"]');
+          radio.checked = true;
+          
+          // Remove selected class from siblings
+          const questionContainer = this.closest('.answers-container');
+          questionContainer.querySelectorAll('.answer-option').forEach(opt => {
+            opt.classList.remove('selected');
+          });
+          
+          // Add selected class to current option
+          this.classList.add('selected');
+          
+          updateProgress();
+        });
+      });
+
+      // Update progress counter
+      function updateProgress() {
+        const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+        const answeredCountElement = document.getElementById('answeredCount');
+        if (answeredCountElement) {
+          answeredCountElement.textContent = answeredQuestions;
+        }
+        
+        // Enable submit button if all questions answered
+        if (submitBtn) {
+          submitBtn.disabled = answeredQuestions < totalQuestions;
+          
+          // Update button text based on progress
+          if (answeredQuestions === totalQuestions) {
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Assessment';
+            submitBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+          } else {
+            submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Submit Assessment (${answeredQuestions}/${totalQuestions})`;
+          }
+        }
+      }
+
+      // ✅ Show results with modern UI
+      function showResults(result) {
+        // Hide the assessment form
+        if (assessmentForm) {
+          assessmentForm.style.display = 'none';
+        }
+        
+        // Show and populate results container
+        if (resultsContainer) {
+          resultsContainer.style.display = 'block';
+          resultsContainer.classList.add('fade-in');
+        }
+        
+        const resultsHero = document.getElementById('resultsHero');
+        const resultsIcon = document.getElementById('resultsIcon');
+        const resultsTitle = document.getElementById('resultsTitle');
+        const resultsScore = document.getElementById('resultsScore');
+        const resultsSubtitle = document.getElementById('resultsSubtitle');
+        const nextStepsContent = document.getElementById('nextStepsContent');
+        
+        // Update detail values
+        if (document.getElementById('scoreValue')) {
+          document.getElementById('scoreValue').textContent = result.score + '%';
+        }
+        if (document.getElementById('passingValue')) {
+          document.getElementById('passingValue').textContent = result.passingScore + '%';
+        }
+        if (document.getElementById('attemptsValue')) {
+          document.getElementById('attemptsValue').textContent = `${result.currentAttempts || 0}/${result.totalAttempts || 0}`;
+        }
+        if (document.getElementById('questionsValue')) {
+          document.getElementById('questionsValue').textContent = totalQuestions;
+        }
+        
+        if (result.passed) {
+          // Passed styling
+          if (resultsHero) resultsHero.className = 'results-hero passed';
+          if (resultsIcon) resultsIcon.className = 'fas fa-trophy results-icon';
+          if (resultsTitle) resultsTitle.textContent = '🎉 Congratulations!';
+          if (resultsScore) resultsScore.textContent = result.score + '%';
+          if (resultsSubtitle) resultsSubtitle.textContent = 'You have successfully passed the assessment!';
+          
+          if (nextStepsContent) {
+            nextStepsContent.innerHTML = `
+              <ul>
+                <li>✅ Assessment completed successfully</li>
+                <li>🎓 Return to your library to complete the course</li>
+                <li>📜 Confirm your attendance to receive your certificate</li>
+                <li>💡 Share your achievement with others</li>
+              </ul>
+            `;
+          }
+          
+          // Show proceed button
+          const proceedBtn = document.getElementById('proceedBtn');
+          const retakeBtn = document.getElementById('retakeBtn');
+          if (proceedBtn) proceedBtn.style.display = 'inline-flex';
+          if (retakeBtn) retakeBtn.style.display = 'none';
+          
+        } else {
+          // Failed styling
+          const canRetake = result.canRetake && result.attemptsRemaining > 0;
+          
+          if (resultsHero) {
+            resultsHero.className = canRetake ? 'results-hero retake' : 'results-hero failed';
+          }
+          if (resultsIcon) {
+            resultsIcon.className = canRetake ? 'fas fa-redo results-icon' : 'fas fa-times-circle results-icon';
+          }
+          if (resultsTitle) {
+            resultsTitle.textContent = canRetake ? 'Almost There!' : 'Assessment Not Passed';
+          }
+          if (resultsScore) resultsScore.textContent = result.score + '%';
+          if (resultsSubtitle) {
+            resultsSubtitle.textContent = canRetake 
+              ? `You scored ${result.score}%. You need ${result.passingScore}% to pass.`
+              : 'You have used all available attempts.';
+          }
+          
+          if (nextStepsContent) {
+            if (canRetake) {
+              nextStepsContent.innerHTML = `
+                <ul>
+                  <li>📊 Review your results below</li>
+                  <li>📚 Study the course materials again</li>
+                  <li>🔄 You have ${result.attemptsRemaining} attempt(s) remaining</li>
+                  <li>💪 Take the assessment again when ready</li>
+                </ul>
+              `;
+              
+              // Show retake button
+              const retakeBtn = document.getElementById('retakeBtn');
+              const proceedBtn = document.getElementById('proceedBtn');
+              if (retakeBtn) retakeBtn.style.display = 'inline-flex';
+              if (proceedBtn) proceedBtn.style.display = 'none';
+              
+            } else {
+              nextStepsContent.innerHTML = `
+                <ul>
+                  <li>📞 Contact support for additional attempts</li>
+                  <li>📚 Review course materials for better preparation</li>
+                  <li>🔄 Consider retaking the live course if available</li>
+                  <li>💬 Speak with your instructor for guidance</li>
+                </ul>
+              `;
+              
+              const retakeBtn = document.getElementById('retakeBtn');
+              const proceedBtn = document.getElementById('proceedBtn');
+              if (retakeBtn) retakeBtn.style.display = 'none';
+              if (proceedBtn) proceedBtn.style.display = 'none';
+            }
+          }
+        }
+        
+        // Scroll to results
+        if (resultsContainer) {
+          resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+
+      // Handle form submission
+      if (form) {
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          
+          const confirmation = confirm(
+            'Are you sure you want to submit your assessment?\n\n' +
+            '⚠️ You cannot change your answers after submission.\n' +
+            `📊 Attempts remaining: <%= maxAttempts - currentAttempts - 1 %>`
+          );
+          
+          if (!confirmation) return;
+          
+          // Show loading
+          if (loadingOverlay) loadingOverlay.style.display = 'flex';
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+          }
+          
+          // Collect answers
+          const answers = {};
+          for (let i = 0; i < totalQuestions; i++) {
+            const selectedAnswer = document.querySelector(`input[name="question_${i}"]:checked`);
+            if (selectedAnswer) {
+              answers[i] = parseInt(selectedAnswer.value);
+            }
+          }
+          
+          console.log('Submitting answers:', answers);
+          
+          try {
+            const response = await fetch(`/library/online-live/assessment/<%= course._id %>`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ answers: answers })
+            });
+            
+            const result = await response.json();
+            console.log('Assessment result:', result);
+            
+            if (result.success) {
+              // Hide loading and show results
+              if (loadingOverlay) loadingOverlay.style.display = 'none';
+              
+              // Add current attempt info to result
+              result.currentAttempts = <%= currentAttempts %> + 1;
+              result.totalAttempts = <%= maxAttempts %>;
+              
+              // Show modern results UI
+              setTimeout(() => {
+                showResults(result);
+              }, 500);
+              
+
+              if (result.passed) {
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'success',
+        title: '🎉 Assessment Completed!',
+        html: `
+          <div style="text-align: center;">
+            <i class="fas fa-trophy" style="font-size: 3rem; color: #ffd700; margin-bottom: 15px;"></i>
+            <h3 style="color: #28a745;">Congratulations!</h3>
+            <p>You scored <strong>${result.score}%</strong> and passed the assessment!</p>
+            <div style="background: #d4f4dd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <div style="color: #155724; font-weight: 600;">
+                <i class="fas fa-check-circle" style="color: #28a745;"></i> Assessment Completed<br>
+                <i class="fas fa-user-check" style="color: #28a745;"></i> Attendance Confirmed<br>
+                <i class="fas fa-certificate" style="color: #28a745;"></i> Ready for Certificate
+              </div>
+            </div>
+            <p style="color: #666;">You will be redirected to your library to complete the course.</p>
+          </div>
+        `,
+        confirmButtonColor: '#28a745',
+        confirmButtonText: '<i class="fas fa-arrow-right"></i> Go to Library',
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      }).then(() => {
+        // Redirect to library page
+        window.location.href = '/library/live';
+      });
+    }, 2000);
+  }
+
+            } else {
+              throw new Error(result.message || 'Unknown error occurred');
+            }
+          } catch (error) {
+            console.error('Assessment submission error:', error);
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
+            alert(
+              '❌ Error submitting assessment\n\n' +
+              'Please check your connection and try again.\n' +
+              'If the problem persists, contact support.'
+            );
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Assessment';
+            }
+          }
+        });
+      }
+
+      // ✅ Event handlers for new buttons
+      
+      // Retake button
+      const retakeBtn = document.getElementById('retakeBtn');
+      if (retakeBtn) {
+        retakeBtn.addEventListener('click', function() {
+          if (confirm('Are you sure you want to retake the assessment?\n\nThis will start a new attempt.')) {
+            location.reload();
+          }
+        });
+      }
+      
+      // Proceed button
+      const proceedBtn = document.getElementById('proceedBtn');
+      if (proceedBtn) {
+        proceedBtn.addEventListener('click', function() {
+          window.location.href = '/library/live';
+        });
+      }
+
+      // Initialize progress
+      updateProgress();
+
+      // ✅ Auto-save progress (optional)
+      let autoSaveTimeout;
+      function autoSaveProgress() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+          const answers = {};
+          for (let i = 0; i < totalQuestions; i++) {
+            const selectedAnswer = document.querySelector(`input[name="question_${i}"]:checked`);
+            if (selectedAnswer) {
+              answers[i] = parseInt(selectedAnswer.value);
+            }
+          }
+          localStorage.setItem('assessment_progress_<%= course._id %>', JSON.stringify(answers));
+        }, 1000);
+      }
+
+      // Restore progress from localStorage
+      try {
+        const savedProgress = localStorage.getItem('assessment_progress_<%= course._id %>');
+        if (savedProgress) {
+          const answers = JSON.parse(savedProgress);
+          Object.keys(answers).forEach(questionIndex => {
+            const radio = document.querySelector(`input[name="question_${questionIndex}"][value="${answers[questionIndex]}"]`);
+            if (radio) {
+              radio.checked = true;
+              radio.closest('.answer-option').classList.add('selected');
+            }
+          });
+          updateProgress();
+        }
+      } catch (e) {
+        console.log('Could not restore previous progress');
+      }
+
+      // Add auto-save to radio buttons
+      answerOptions.forEach(option => {
+        option.addEventListener('click', autoSaveProgress);
+      });
+
+      // Clear saved progress on successful submission
+      if (form) {
+        form.addEventListener('submit', () => {
+          localStorage.removeItem('assessment_progress_<%= course._id %>');
+        });
+      }
+    });
+
+    // ✅ Global functions for results modal
+    function showDetailedResults() {
+      const modal = document.getElementById('resultsModal');
+      const content = document.getElementById('resultsContent');
+      
+      // You can populate this with detailed results from assessmentHistory
+      content.innerHTML = `
+        <div style="text-align: left;">
+          <h4>Assessment History</h4>
+          <% if (assessmentHistory && assessmentHistory.length > 0) { %>
+            <% assessmentHistory.forEach((attempt, index) => { %>
+              <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px;">
+                <strong>Attempt #<%= attempt.attemptNumber %></strong><br>
+                <small>Date: <%= new Date(attempt.date).toLocaleString() %></small><br>
+                <span style="color: <%= attempt.passed ? '#28a745' : '#dc3545' %>;">
+                  Score: <%= attempt.score %>% - <%= attempt.passed ? 'PASSED' : 'FAILED' %>
+                </span>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p>No detailed results available.</p>
+          <% } %>
+        </div>
+      `;
+      
+      modal.style.display = 'flex';
+    }
+
+    function closeResultsModal() {
+      document.getElementById('resultsModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('resultsModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeResultsModal();
+      }
+    });
+  </script>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

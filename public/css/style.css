@@ -1,0 +1,679 @@
+/* General Body Styling */
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hero Section */
+#hero {
+  background-size: cover;
+  background-position: center;
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+}
+
+#hero .hero-content h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #002147; /* Dark Blue color for the welcome text */
+}
+
+#hero .hero-content p {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #002147; /* Dark Blue color for the description text */
+}
+
+.cta-btn {
+  background-color: #ffcc00;
+  padding: 12px 30px;
+  font-size: 18px;
+  text-transform: uppercase;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  color: black;
+}
+
+.cta-btn:hover {
+  background-color: #e5b300;
+}
+
+/* Styling for Section Box */
+.section-box {
+  display: flex;              /* Use flexbox to align items side by side */
+  justify-content: space-between; /* Add space between left and right sections */
+  gap: 20px;                  /* Optional: Add space between the image and the text */
+  max-width: 1100px;          /* Set a maximum width for the section */
+  margin: 0 auto;             /* Center the section horizontally */
+  padding: 40px;              /* Padding inside the section */
+  background-color: white;
+  border: 2px solid #dcdcdc;
+  border-radius: 10px;
+}
+
+/* Left Half for the Image */
+.news-left {
+  flex: 1;                    /* Make this take half the width */
+  display: flex;              /* Use flexbox to center the image inside */
+  justify-content: center;    /* Horizontally center the image */
+  align-items: center;        /* Vertically center the image */
+  padding: 20px;              /* Add padding to the left section */
+}
+
+.news-left img {
+  width: 30%;                /* Ensure image takes the full width of the container */
+  height: auto;               /* Keep the aspect ratio of the image */
+  max-width: 100%;            /* Prevent image from exceeding the container width */
+  object-fit: cover;          /* Make sure the image fills the space without stretching */
+}
+
+/* Right Half for the Description (Text) */
+.news-right {
+  flex: 1;                    /* Take the other half of the section */
+  display: flex;              /* Use flexbox for vertical alignment */
+  flex-direction: column;     /* Stack the content vertically */
+  justify-content: center;    /* Center content vertically */
+  padding: 20px;              /* Add padding to the right section */
+}
+
+.news-right h3 {
+  font-size: 24px;            /* Set font size for the title */
+  margin-bottom: 15px;        /* Add space below the title */
+  color: #002147;             /* Dark blue color for the title */
+}
+
+.news-right p {
+  font-size: 16px;            /* Set font size for the paragraph */
+  margin-bottom: 20px;        /* Add space below the paragraph */
+}
+
+.cta-btn {
+  background-color: #ffcc00;  /* Yellow background for the button */
+  padding: 12px 30px;         /* Add padding to the button */
+  font-size: 18px;            /* Set font size for the button text */
+  text-transform: uppercase;  /* Make text uppercase */
+  border-radius: 25px;        /* Round the corners of the button */
+  border: none;               /* Remove the border */
+  cursor: pointer;            /* Change the cursor to pointer */
+  text-decoration: none;      /* Remove underline from the link */
+  color: black;               /* Set text color for the button */
+}
+
+.cta-btn:hover {
+  background-color: #e5b300;  /* Darker yellow on hover */
+}
+
+/* Responsive Design: Stack them on smaller screens */
+@media (max-width: 768px) {
+  .section-box {
+    flex-direction: column;    /* Stack the image and text on top of each other */
+  }
+
+  .news-left, .news-right {
+    flex: none;                /* Let both parts take full width on small screens */
+    width: 100%;               /* Ensure both parts take full width */
+  }
+}
+
+/* Footer Section */
+footer {
+  background-color: #002147;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+footer ul {
+  list-style: none;
+  padding: 0;
+}
+
+footer ul li {
+  display: inline-block;
+  margin-right: 15px;
+}
+
+footer ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+footer .social-icons {
+  margin-top: 20px;
+}
+
+footer .social-icons a {
+  color: white;
+  margin: 0 10px;
+  font-size: 20px;
+}
+
+/* Modal Styling for Image Lightbox (Optional) */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+  max-width: 100%;
+  height: auto;
+}
+
+.close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  font-size: 40px;
+  color: white;
+}
+
+#caption {
+  color: #ccc;
+  font-size: 18px;
+  text-align: center;
+}
+
+/* Responsive Design: Stack on smaller screens */
+@media (max-width: 768px) {
+  .section-box {
+    flex-direction: column;
+  }
+
+  .news-left, .news-right {
+    flex: none; /* Let both parts take full width on small screens */
+    width: 100%;
+  }
+}
+
+/* General Body Styling for Training Programs Page */
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+
+
+/* Breadcrumb Navigation */
+nav.breadcrumb {
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #f0f0f0;
+}
+
+nav.breadcrumb a {
+  text-decoration: none;
+  color: #002147;
+}
+
+nav.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Hero Section */
+#hero {
+  background-size: cover;
+  background-position: center;
+  height: 25vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: rgb(58, 5, 191);
+  background-image: url('/images/hero-background2.jpg');
+}
+
+#hero .hero-content h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+#hero .hero-content p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.cta-btn {
+  background-color: #ffcc00;
+  padding: 12px 30px;
+  font-size: 18px;
+  text-transform: uppercase;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  color: black;
+}
+
+.cta-btn:hover {
+  background-color: #e5b300;
+}
+
+/* Card Container: 9 Boxes (3 per row) */
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px;
+  justify-items: center;
+}
+
+.card {
+  position: relative;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+/* Card Image */
+.card-image {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 2px solid #ddd;
+}
+
+.card-content {
+  padding: 20px;
+}
+
+.card-content h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.card-content p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+/* Call to Action Button */
+.cta-btn {
+  background-color: #ffcc00;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: black;
+  border-radius: 25px;
+  font-weight: bold;
+  display: inline-block;
+  transition: background-color 0.3s;
+}
+
+.cta-btn:hover {
+  background-color: #e5b300;
+}
+
+@media (max-width: 768px) {
+  /* Responsive Grid for Mobile Devices */
+  .card-container {
+    grid-template-columns: repeat(1, 1fr); /* One card per row on small screens */
+  }
+
+
+  #hero {
+    height: 50vh;
+  }
+
+  .cta-btn {
+    font-size: 16px;
+  }
+}
+/* Arrow button positioning */
+.arrow-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: #ffcc00;
+  text-decoration: none;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.5); /* Optional background for better visibility */
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.arrow-btn:hover {
+  background-color: rgba(0, 0, 0, 0.8); /* Darken the background when hovered */
+}
+
+/* Card Content */
+.card-content {
+  padding: 10px;
+  background-color: white;
+  font-size: 14px;
+}
+
+.card-content h3 a {
+  color: #002147;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.card-content p {
+  font-size: 14px;
+  color: #555;
+}
+
+
+//specifc style for in person 
+/* Styling for the Table of Upcoming Courses */
+.table-container {
+  margin: 40px 0;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table th,
+table td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+table th {
+  background-color: #002147;
+  color: white;
+  font-weight: bold;
+}
+
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table tr:hover {
+  background-color: #f1f1f1;
+}
+
+table a {
+  color: #ffcc00;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+table a:hover {
+  text-decoration: underline;
+} 
+
+/* Table Styling */
+table {
+  width: 100%;
+  table-layout: fixed;  /* Ensure fixed column width */
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+th, td {
+  padding: 12px 20px;    /* Adjust padding for better spacing */
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Column specific widths */
+th, td:nth-child(1), td:nth-child(2) {
+  width: 5%;   /* No. column with width for two digits */
+}
+
+th, td:nth-child(3), td:nth-child(4) {
+  width: 15%;   /* Date and price columns */
+}
+
+th, td:nth-child(5) {
+  width: 15%;    /* Location column */
+}
+
+th, td:nth-child(6) {
+  width: 30%;    /* Description column */
+}
+
+th, td:nth-child(7) {
+  width: 15%;    /* Action column (View Details button) */
+}
+
+/* Styling for Action buttons in the table */
+.cta-btn {
+  background-color: #ffcc00;
+  padding: 6px 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  color: black;
+  display: inline-block;
+}
+
+.cta-btn:hover {
+  background-color: #e5b300;
+}
+
+/* Responsive Design for Tables */
+@media (max-width: 768px) {
+  table {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 10px 15px;
+  }
+
+  th:nth-child(1), td:nth-child(1),
+  th:nth-child(2), td:nth-child(2),
+  th:nth-child(3), td:nth-child(3),
+  th:nth-child(4), td:nth-child(4),
+  th:nth-child(5), td:nth-child(5),
+  th:nth-child(6), td:nth-child(6),
+  th:nth-child(7), td:nth-child(7) {
+    width: auto;  /* Allow columns to adapt on smaller screens */
+  }
+
+  th, td {
+    text-align: center;
+  }
+}
+
+
+
+
+/* Success message style */
+.success-message {
+  background-color: #dff0d8;
+  color: green;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Error message style */
+.error-message {
+  background-color: #f2dede;
+  color: red;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* General Body Styling */
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+/* for contact us page..................
+/* General styling */
+/* General Contact Form Styles */
+#contact-us {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+h1, h2 {
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.contact-info ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.contact-info li {
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+button.cta-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.cta-btn:hover {
+  background-color: #0056b3;
+}
+
+
+/* Basic styling for the sidebar */
+.sidebar {
+  width: 300px;
+  float: left;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-right: 2px solid #ddd;
+}
+
+.sidebar h3 {
+  font-size: 24px;
+  color: #002147;
+  margin-bottom: 10px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  margin-bottom: 10px;
+}
+
+.sidebar li a {
+  text-decoration: none;
+  color: #002147;
+  font-weight: bold;
+}
+
+.sidebar li a:hover {
+  color: #ffcc00;
+}
+
+.sidebar .not-started {
+  color: #d9534f;
+}
+
+.sidebar .in-progress {
+  color: #f0ad4e;
+}
+
+.sidebar .completed {
+  color: #5bc0de;
+}
+
+/* Video player section */
+.video-player {
+  padding: 20px;
+  float: left;
+  width: 70%;
+}
+
+/* Button styling */
+button {
+  background-color: #ffcc00;
+  padding: 10px 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #e5b300;
+}
+
+.video-controls {
+  margin-top: 20px;
+  text-align: center;
+}

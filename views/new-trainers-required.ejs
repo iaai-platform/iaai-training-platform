@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>new-trainers-required</title>
+    <link rel="stylesheet" href="/css/formpages.css"> <!-- Correct -->
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+  </head>
+  
+  <%- include('partials/header') %>
+  
+
+
+    <!-- ✅ Hero Section -->
+    <section class="hero">
+        <h1>Become a Trainer with IAAI</h1>
+        <p>Join our academy and train the next generation of aesthetic professionals.</p>
+    </section>
+
+    <!-- ✅ Requirements Section -->
+    <section class="requirements">
+        <h2>Trainer Requirements</h2>
+        <ul>
+            <li>Minimum 3 years of experience in the aesthetic field.</li>
+            <li>Certification in aesthetic medicine.</li>
+            <li>Strong teaching and presentation skills.</li>
+            <li>Ability to conduct online and in-person training.</li>
+        </ul>
+    </section>
+
+    <!-- ✅ Application Form -->
+    <section class="trainer-application">
+        <h2>Apply Now</h2>
+        <form id="trainerApplicationForm">
+            <label for="fullName">Full Name:</label>
+            <input type="text" id="fullName" name="fullName" required>
+
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="text" id="phoneNumber" name="phoneNumber" required>
+
+            <label for="experience">Experience (Years):</label>
+            <input type="text" id="experience" name="experience" required>
+
+            <label for="expertise">Expertise:</label>
+            <textarea id="expertise" name="expertise" required></textarea>
+
+            <label for="cvUrl">CV Upload (Link):</label>
+            <input type="text" id="cvUrl" name="cvUrl" required>
+
+            <button type="submit" class="cta-btn">Submit Application</button>
+        </form>
+    </section>
+
+
+    <%- include('partials/footer') %>
+    <script>
+        document.getElementById('trainerApplicationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/apply-trainer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        });
+    </script>
+
+</body>
+</html>

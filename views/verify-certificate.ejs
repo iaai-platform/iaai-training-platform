@@ -1,0 +1,396 @@
+views/verify-certificate.ejs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificate Verification - IAAI Training</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .verification-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .verification-header {
+      background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .verification-header .logo {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    .verification-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .verification-header p {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .verification-content {
+      padding: 40px;
+      text-align: center;
+    }
+
+    .result-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    .success-result .result-icon {
+      color: #38a169;
+    }
+
+    .error-result .result-icon {
+      color: #e53e3e;
+    }
+
+    .result-title {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .success-result .result-title {
+      color: #38a169;
+    }
+
+    .error-result .result-title {
+      color: #e53e3e;
+    }
+
+    .result-message {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      color: #4a5568;
+    }
+
+    .certificate-details {
+      background: #f7fafc;
+      border-radius: 15px;
+      padding: 30px;
+      margin: 30px 0;
+      border-left: 5px solid #3182ce;
+      text-align: left;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 500;
+      color: #4a5568;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      color: #2d3748;
+      text-align: right;
+    }
+
+    .verification-badge {
+      background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 50px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 20px 0;
+    }
+
+    .error-details {
+      background: #fed7d7;
+      color: #c53030;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 5px solid #e53e3e;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(49, 130, 206, 0.3);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e0;
+    }
+
+    .verification-footer {
+      background: #f7fafc;
+      padding: 30px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .verification-footer h3 {
+      color: #2d3748;
+      margin-bottom: 15px;
+    }
+
+    .verification-footer p {
+      color: #718096;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .verification-container {
+        margin: 10px;
+      }
+
+      .verification-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .detail-value {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="verification-container">
+    <!-- Header -->
+    <div class="verification-header">
+      <div class="logo">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <h1>Certificate Verification</h1>
+      <p>Verify the authenticity of professional certificates</p>
+    </div>
+
+    <!-- Content -->
+    <div class="verification-content">
+      <% 
+        // ✅ SAFE: Define default values if variables are not passed
+        const isSuccess = typeof success !== 'undefined' ? success : false;
+        const errorMessage = typeof error !== 'undefined' ? error : 'An error occurred during verification.';
+        const cert = typeof certificate !== 'undefined' ? certificate : null;
+      %>
+      
+      <% if (isSuccess && cert) { %>
+        <!-- Success Result -->
+        <div class="success-result">
+          <div class="result-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h2 class="result-title">Certificate Verified</h2>
+          <p class="result-message">This certificate is authentic and valid.</p>
+          
+          <div class="verification-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span>Digitally Verified</span>
+          </div>
+        </div>
+
+        <!-- Certificate Details -->
+        <div class="certificate-details">
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-certificate"></i>
+              Certificate ID
+            </div>
+            <div class="detail-value"><%= cert.certificateId %></div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-user"></i>
+              Recipient Name
+            </div>
+            <div class="detail-value"><%= cert.recipientName %></div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-book"></i>
+              Course Title
+            </div>
+            <div class="detail-value"><%= cert.courseTitle %></div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-code"></i>
+              Course Code
+            </div>
+            <div class="detail-value"><%= cert.courseCode %></div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-university"></i>
+              Institution
+            </div>
+            <div class="detail-value"><%= cert.institutionName %></div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-calendar-check"></i>
+              Completion Date
+            </div>
+            <div class="detail-value">
+              <%= new Date(cert.completionDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) %>
+            </div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="detail-label">
+              <i class="fas fa-key"></i>
+              Verification Code
+            </div>
+            <div class="detail-value"><%= cert.verificationCode %></div>
+          </div>
+        </div>
+      <% } else { %>
+        <!-- Error Result -->
+        <div class="error-result">
+          <div class="result-icon">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <h2 class="result-title">Certificate Not Found</h2>
+          <p class="result-message">The certificate you're trying to verify could not be found or is invalid.</p>
+        </div>
+
+        <div class="error-details">
+          <h4>
+            <i class="fas fa-exclamation-triangle"></i>
+            Error Details
+          </h4>
+          <p><%= errorMessage %></p>
+        </div>
+
+        <div style="margin: 30px 0;">
+          <p style="color: #718096; margin-bottom: 20px;">
+            Please check the verification code and try again.
+          </p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Footer -->
+    <div class="verification-footer">
+      <h3>About Certificate Verification</h3>
+      <p>
+        IAAI Training Institute uses digital verification technology to ensure 
+        the authenticity and integrity of all issued certificates.
+      </p>
+      
+      <div>
+        <a href="/" class="btn btn-primary">
+          <i class="fas fa-home"></i>
+          Back to Home
+        </a>
+        <a href="/about" class="btn btn-secondary">
+          <i class="fas fa-info-circle"></i>
+          Learn More
+        </a>
+      </div>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+        <p style="font-size: 0.9rem; color: #718096;">
+          <i class="fas fa-shield-alt"></i>
+          This verification system is powered by IAAI Training Institute's secure certificate infrastructure.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add fade-in animation
+      const container = document.querySelector('.verification-container');
+      container.style.opacity = '0';
+      container.style.transform = 'translateY(30px)';
+      container.style.transition = 'all 0.8s ease';
+      
+      setTimeout(() => {
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
+      }, 100);
+    });
+  </script>
+</body>
+</html>

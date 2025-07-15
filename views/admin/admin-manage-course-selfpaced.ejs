@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - IAAI Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Modern Admin Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --light: #f3f4f6;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .admin-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-header p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+
+        /* Container */
+        .admin-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            color: var(--gray);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            background: var(--light);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .tab-btn i {
+            font-size: 1.25rem;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .stat-change {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Action Bar */
+        .action-bar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.3s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--gray);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Search and Filter */
+        .search-filter {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* Course Table */
+        .courses-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .courses-table th {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .courses-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+
+        .courses-table tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Course Info Cell */
+        .course-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .course-title {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.875rem;
+        }
+
+        .course-code {
+            color: var(--gray);
+            font-size: 0.75rem;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-published {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-archived {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        /* Price Badge */
+        .price-badge {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .price-free {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        /* Video Count */
+        .video-count {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .video-count i {
+            color: var(--primary);
+        }
+
+        /* Actions */
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .btn-edit:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-view {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .btn-view:hover {
+            background: #4f46e5;
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.875rem;
+        }
+
+        .form-group label span {
+            color: var(--danger);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
+        }
+
+        /* Switch Toggle */
+        .switch-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Video Management Styles */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .video-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            position: relative;
+        }
+
+        .video-sequence {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .video-content {
+            padding: 1.5rem;
+        }
+
+        .video-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .video-description {
+            color: var(--gray);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .video-info {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .video-info span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .quiz-badge {
+            background: var(--success);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .no-quiz-badge {
+            background: #e5e7eb;
+            color: var(--gray);
+        }
+
+        .video-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Question Block Styles */
+        .question-block {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .question-block:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-type {
+            background: #f3f4f6;
+        }
+
+        .question-points {
+            background: #fef3c7;
+            border-color: #fbbf24;
+        }
+
+        .option-input {
+            font-family: 'Courier New', monospace;
+        }
+
+        .question-explanation {
+            background: #f0fdf4;
+            border-color: #86efac;
+        }
+
+        .current-file {
+            background: #dbeafe;
+            padding: 0.75rem;
+            border-radius: 6px;
+            color: #1e40af;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Assessment Section */
+        #assessmentSection {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .tab-navigation {
+                flex-direction: column;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .search-filter {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .courses-table {
+                font-size: 0.75rem;
+            }
+
+            .courses-table th,
+            .courses-table td {
+                padding: 0.5rem;
+            }
+
+            .table-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideUp 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast-error {
+            border-left: 4px solid var(--danger);
+        }
+    
+    /* Certification Body Selection Styles */
+.cert-body-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: #dbeafe;
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #1e40af;
+    font-weight: 500;
+}
+
+.cert-body-tag .remove-cert {
+    cursor: pointer;
+    color: #dc2626;
+    font-weight: bold;
+    padding: 0 0.25rem;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+.cert-body-tag .remove-cert:hover {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+/* Multiple select styling */
+#certificationBodies {
+    min-height: 42px;
+    max-height: 150px;
+    overflow-y: auto;
+    resize: vertical;
+}
+
+#certificationBodies option {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+#certificationBodies option:checked {
+    background: #dbeafe;
+    color: #1e40af;
+    font-weight: 500;
+}
+
+/* Loading state for certification bodies */
+.cert-body-loading {
+    color: #6b7280;
+    font-style: italic;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+/* Empty state for certification bodies */
+.cert-body-empty {
+    color: #9ca3af;
+    font-style: italic;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+/* Enhanced styling for multiple certification body selection */
+#issuingAuthorityId {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 2px solid #e2e8f0;
+}
+
+#issuingAuthorityId:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+#additionalCertificationBodies {
+    min-height: 100px;
+    max-height: 150px;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #fefefe 0%, #f9fafb 100%);
+    border: 2px solid #e5e7eb;
+}
+
+#additionalCertificationBodies option {
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+#additionalCertificationBodies option:checked {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    font-weight: 600;
+}
+
+#additionalCertificationBodies option:hover:not(:checked) {
+    background: #f3f4f6;
+}
+
+/* Tags for selected additional certification bodies */
+.cert-body-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #1e40af;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.cert-body-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cert-body-tag .remove-cert {
+    cursor: pointer;
+    color: #dc2626;
+    font-weight: bold;
+    padding: 0.25rem;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.cert-body-tag .remove-cert:hover {
+    background: #fecaca;
+    color: #991b1b;
+    transform: scale(1.1);
+}
+
+/* Section styling */
+.cert-section {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1rem;
+}
+
+.cert-section h5 {
+    margin-bottom: 1rem;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Certificate preview styling */
+#certificatePreview {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: #78716c;
+    line-height: 1.4;
+}
+
+#certificatePreview div {
+    margin-bottom: 0.25rem;
+}
+
+#previewPrimary, #previewAdditionalList {
+    font-weight: 600;
+    color: #92400e;
+}
+
+/* Animation for showing/hiding sections */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+</head>
+
+<body>
+    <!-- Include Admin Header -->
+    <%- include('partials/header') %>
+
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <div class="admin-header-content">
+            <h1>
+                <i class="fas fa-play-circle"></i>
+                <%= title %>
+            </h1>
+            <p>Manage courses, videos, and student assessments</p>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-number" id="totalCourses">0</div>
+                <div class="stat-label">Total Courses</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 12%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" id="totalStudents">0</div>
+                <div class="stat-label">Enrolled Students</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 8%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="stat-number" id="totalVideos">0</div>
+                <div class="stat-label">Total Videos</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 15%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <div class="stat-number" id="totalCertificates">0</div>
+                <div class="stat-label">Certificates Issued</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 5%
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('courses')">
+                <i class="fas fa-book-open"></i>
+                Course Management
+            </button>
+            <button class="tab-btn" onclick="switchTab('videos')">
+                <i class="fas fa-video"></i>
+                Video Management
+            </button>
+        </div>
+
+        <!-- Courses Tab Content -->
+        <div id="coursesTab" class="tab-content active">
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="showCreateCourseModal()">
+                        <i class="fas fa-plus"></i> Create New Course
+                    </button>
+                    <button class="btn btn-success" onclick="exportCourses()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-outline" onclick="importCourses()">
+                        <i class="fas fa-upload"></i> Import
+                    </button>
+                </div>
+                
+                <div class="search-filter">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="courseSearch" placeholder="Search courses...">
+                    </div>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                    <select class="filter-select" id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="aesthetic">Aesthetic</option>
+                        <option value="medical">Medical</option>
+                        <option value="business">Business</option>
+                        <option value="technical">Technical</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Courses Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">
+                        <i class="fas fa-list"></i> All Courses
+                    </div>
+                    <button class="btn btn-sm btn-outline" onclick="refreshCourses()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                
+                <div id="coursesTableContainer">
+                    <table class="courses-table">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Category</th>
+                                <th>Instructor</th>
+                                <th>Price</th>
+                                <th>Videos</th>
+                                <th>Students</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                            <!-- Courses will be loaded here -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="empty-state" id="noCoursesState" style="display: none;">
+                        <i class="fas fa-book-open"></i>
+                        <h3>No Courses Yet</h3>
+                        <p>Create your first self-paced course to get started</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos Tab Content -->
+        <div id="videosTab" class="tab-content">
+            <!-- Video Management Action Bar -->
+            <div class="action-bar">
+                <div class="action-buttons">
+                    <select class="filter-select" id="courseSelect" onchange="loadCourseVideos()">
+                        <option value="">Select a Course</option>
+                        <!-- Courses will be loaded here -->
+                    </select>
+                    <button class="btn btn-primary" onclick="showAddVideoModal()" id="addVideoBtn" disabled>
+                        <i class="fas fa-plus"></i> Add Video
+                    </button>
+                    <button class="btn btn-outline" onclick="reorderVideos()" id="reorderBtn" disabled>
+                        <i class="fas fa-sort"></i> Reorder
+                    </button>
+                </div>
+                
+                <div class="search-filter">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="videoSearch" placeholder="Search videos...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Videos Grid -->
+            <div id="videosContainer">
+                <div class="empty-state">
+                    <i class="fas fa-video-slash"></i>
+                    <h3>Select a Course</h3>
+                    <p>Choose a course from the dropdown to manage its videos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Modal -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="courseModalTitle">Create New Course</h2>
+                <button class="close" onclick="closeCourseModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="courseForm" enctype="multipart/form-data">
+                    <input type="hidden" id="courseId" name="courseId">
+                    
+                    <!-- BASIC INFORMATION SECTION -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem; color: #1f2937;">📚 Basic Information</h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Course Code <span style="color: #6b7280; font-size: 0.75rem;">(Optional - Auto-generated if empty)</span></label>
+                                <input type="text" class="form-control" id="courseCode" name="courseCode" 
+                                       placeholder="e.g., SELF-AES-101 (leave empty for auto-generation)">
+                                <div class="form-hint">Leave empty to auto-generate based on category</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Category <span>*</span></label>
+                                <select class="form-control" id="category" name="category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="aesthetic">Aesthetic</option>
+                                    <option value="medical">Medical</option>
+                                    <option value="business">Business</option>
+                                    <option value="technical">Technical</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Course Title <span>*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   placeholder="Enter course title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Description <span>*</span></label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      placeholder="Describe what students will learn..." required rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>About This Course</label>
+                            <textarea class="form-control" id="aboutThisCourse" name="aboutThisCourse" 
+                                      placeholder="Additional detailed course information..." rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Course Status</label>
+                            <select class="form-control" id="status" name="status">
+                                <option value="draft">Draft</option>
+                                <option value="published">Published</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                        </div>
+                    </div>
+            
+                    <!-- CONTENT & LEARNING SECTION -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f0f9ff; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem; color: #1f2937;">🎯 Learning Content</h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Experience Level</label>
+                                <select class="form-control" id="experienceLevel" name="experienceLevel">
+                                    <option value="all-levels">All Levels</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Estimated Duration (minutes)</label>
+                                <input type="number" class="form-control" id="estimatedMinutes" name="estimatedMinutes" 
+                                       placeholder="60" min="1" value="60">
+                                <div class="form-hint">Total course duration estimate</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Prerequisites</label>
+                            <input type="text" class="form-control" id="prerequisites" name="prerequisites" 
+                                   placeholder="Any prerequisites for this course...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Learning Objectives</label>
+                            <textarea class="form-control" id="objectives" name="objectives" 
+                                      placeholder="Enter learning objectives, one per line..." rows="4"></textarea>
+                            <div class="form-hint">Enter each objective on a new line</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Target Audience</label>
+                            <input type="text" class="form-control" id="targetAudience" name="targetAudience" 
+                                   placeholder="e.g., Aesthetic Practitioners, Dermatologists, Nurses">
+                            <div class="form-hint">Separate multiple audiences with commas</div>
+                        </div>
+                    </div>
+            
+                    <!-- INSTRUCTOR & ACCESS SECTION -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f0fdf4; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem; color: #1f2937;">👨‍🏫 Instructor & Access</h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Instructor <span>*</span></label>
+                                <select class="form-control" id="instructorId" name="instructorId" required>
+                                    <option value="">Select Instructor</option>
+                                    <!-- Instructors will be loaded here -->
+                                </select>
+                                <div class="form-hint">
+                                    If no instructors appear, <a href="/instructors" target="_blank">add instructors first</a>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Price ($)</label>
+                                <input type="number" class="form-control" id="price" name="price" 
+                                       placeholder="0" min="0" step="0.01" value="0">
+                                <div class="form-hint">Set to 0 for free courses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Access Duration (days)</label>
+                            <input type="number" class="form-control" id="accessDays" name="accessDays" 
+                                   placeholder="365" min="0" value="365">
+                            <div class="form-hint">0 = lifetime access</div>
+                        </div>
+                    </div>
+            
+                    <!-- CERTIFICATION SECTION - UPDATED -->
+<!-- CERTIFICATION SECTION - SIMPLE VERSION -->
+<div style="margin-bottom: 2rem; padding: 1.5rem; background: #f0f9ff; border-radius: 8px;">
+    <h4 style="margin-bottom: 1rem; color: #1f2937;">🏆 Certification Settings</h4>
+    
+    <div class="form-group">
+        <label class="switch-group">
+            <span>Enable Certificate</span>
+            <label class="switch">
+                <input type="checkbox" id="certificateEnabled" name="certificateEnabled" checked>
+                <span class="slider"></span>
+            </label>
+        </label>
+    </div>
+    
+    <div id="certificationOptions" style="margin-top: 1rem;">
+        <!-- PRIMARY CERTIFICATION BODY -->
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
+            <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                📋 Primary Certification Authority
+            </h5>
+            
+            <div class="form-group">
+                <label>Primary Certification Body <span style="color: #6b7280; font-size: 0.75rem;">(Optional)</span></label>
+                <select class="form-control" id="issuingAuthorityId" name="issuingAuthorityId">
+                    <option value="">Use Default (IAAI Training Institute)</option>
+                    <!-- Options will be loaded dynamically -->
+                </select>
+                <div class="form-hint">Select the main certification body that will issue certificates</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Authority Name</label>
+                <input type="text" class="form-control" id="issuingAuthority" name="issuingAuthority" 
+                       placeholder="IAAI Training Institute" value="IAAI Training Institute" readonly>
+                <div class="form-hint">This will be updated automatically when you select a certification body above</div>
+            </div>
+        </div>
+
+        <!-- ADDITIONAL CERTIFICATION BODIES -->
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
+            <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                🤝 Additional Certification Bodies
+            </h5>
+            
+            <div class="form-group">
+                <label>Co-issuing/Partner Bodies <span style="color: #6b7280; font-size: 0.75rem;">(Optional - Hold Ctrl/Cmd to select multiple)</span></label>
+                <select class="form-control" id="additionalCertificationBodies" name="additionalCertificationBodies" 
+                        multiple style="min-height: 100px;">
+                    <!-- Options will be loaded dynamically -->
+                </select>
+                <div class="form-hint">
+                    Select additional certification bodies that will co-issue or endorse certificates.
+                    Hold Ctrl (Windows) or Cmd (Mac) to select multiple.
+                </div>
+            </div>
+
+            <!-- Display Selected Additional Bodies -->
+            <div id="additionalCertBodiesDisplay" style="display: none; margin-top: 1rem;">
+                <label style="font-size: 0.875rem; margin-bottom: 0.5rem; display: block; font-weight: 500;">
+                    Selected Additional Bodies:
+                </label>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+                    <!-- Selected items will be displayed here as tags -->
+                </div>
+            </div>
+        </div>
+
+        <!-- CERTIFICATION REQUIREMENTS -->
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
+            <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                ✅ Certification Requirements
+            </h5>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Minimum Score (%)</label>
+                    <input type="number" class="form-control" id="minimumScore" name="minimumScore" 
+                           placeholder="70" min="0" max="100" value="70">
+                </div>
+                
+                <div class="form-group">
+                    <label class="switch-group">
+                        <span>Require All Videos Completion</span>
+                        <label class="switch">
+                            <input type="checkbox" id="requireAllVideos" name="requireAllVideos" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- CERTIFICATE PREVIEW -->
+        <div style="margin-top: 1rem; padding: 1rem; background: #fefce8; border-radius: 6px; border: 1px solid #fde047;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <i class="fas fa-certificate" style="color: #ca8a04;"></i>
+                <span style="font-weight: 600; color: #92400e; font-size: 0.875rem;">Certificate Preview</span>
+            </div>
+            <div id="certificatePreview" style="font-size: 0.75rem; color: #78716c;">
+                <div>Primary Authority: <span id="previewPrimary">IAAI Training Institute</span></div>
+                <div id="previewAdditional" style="display: none;">
+                    Additional Bodies: <span id="previewAdditionalList"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                    <!-- MEDIA SECTION -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #fef7ff; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem; color: #1f2937;">🎨 Media & Thumbnails</h4>
+                        
+                        <!-- Course Thumbnail Upload -->
+                        <div class="form-group">
+                            <label>Course Thumbnail</label>
+                            
+                            <!-- File Input -->
+                            <input type="file" class="form-control" id="thumbnailFile" name="thumbnailFile" 
+                                   accept="image/*" onchange="handleThumbnailUpload(this)">
+                            <div class="form-hint">Upload a course thumbnail image (JPG, PNG, WebP, max 5MB)</div>
+                            
+                            <!-- Image Preview Container -->
+                            <div id="thumbnailPreviewContainer" style="display: none; margin-top: 1rem; padding: 1rem; border: 2px dashed #e5e7eb; border-radius: 8px; background: #f9fafb;">
+                                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                                    <!-- Preview Image -->
+                                    <div style="flex-shrink: 0;">
+                                        <img id="thumbnailPreview" style="max-width: 200px; max-height: 150px; border-radius: 8px; object-fit: cover; border: 2px solid #e5e7eb;">
+                                    </div>
+                                    
+                                    <!-- Image Info and Actions -->
+                                    <div style="flex: 1;">
+                                        <div id="thumbnailInfo" style="margin-bottom: 1rem;">
+                                            <div style="font-weight: 600; color: #374151;" id="thumbnailFileName">image.jpg</div>
+                                            <div style="font-size: 0.875rem; color: #6b7280;" id="thumbnailFileSize">Size: 2.3 MB</div>
+                                            <div style="font-size: 0.875rem; color: #6b7280;" id="thumbnailDimensions">Dimensions: 800x600</div>
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <button type="button" class="btn btn-sm btn-success" id="saveThumbnailBtn" onclick="saveThumbnail()" style="display: none;">
+                                                <i class="fas fa-save"></i> Save Image
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="removeThumbnail()">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('thumbnailFile').click()">
+                                                <i class="fas fa-upload"></i> Change Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Upload Progress -->
+                                <div id="uploadProgress" style="display: none; margin-top: 1rem;">
+                                    <div style="background: #e5e7eb; border-radius: 10px; overflow: hidden;">
+                                        <div id="progressBar" style="height: 8px; background: #10b981; width: 0%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;" id="uploadStatus">Uploading...</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Current Saved Thumbnail -->
+                            <div id="currentThumbnail" style="display: none; margin-top: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 8px; border: 1px solid #bfdbfe;">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <img id="currentThumbnailPreview" style="max-width: 100px; max-height: 75px; border-radius: 6px; object-fit: cover;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; color: #1e40af;">Current Thumbnail</div>
+                                        <div style="font-size: 0.875rem; color: #3b82f6;" id="currentThumbnailName">current-image.jpg</div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteCurrentThumbnail()">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview Video URL -->
+                        <div class="form-group">
+                            <label>Preview Video URL</label>
+                            <input type="url" class="form-control" id="previewVideoUrl" name="previewVideoUrl" 
+                                   placeholder="https://videos.example.com/preview.mp4">
+                            <div class="form-hint">Optional preview video URL for marketing</div>
+                        </div>
+                    </div>
+            
+                    <!-- SUPPORT SECTION -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #fffbeb; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem; color: #1f2937;">🆘 Support Information</h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Support Email</label>
+                                <input type="email" class="form-control" id="supportEmail" name="supportEmail" 
+                                       placeholder="support@iaa-i.com" value="support@iaa-i.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Response Time</label>
+                                <select class="form-control" id="responseTime" name="responseTime">
+                                    <option value="24 hours">24 hours</option>
+                                    <option value="48 hours" selected>48 hours</option>
+                                    <option value="72 hours">72 hours</option>
+                                    <option value="1 week">1 week</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- CERTIFICATION SECTION -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f0f9ff; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem; color: #1f2937;">🏆 Certification Settings</h4>
+                        
+                        <div class="form-group">
+                            <label class="switch-group">
+                                <span>Enable Certificate</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="certificateEnabled" name="certificateEnabled" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </label>
+                        </div>
+                        
+                        <div id="certificationOptions" style="margin-top: 1rem;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Minimum Score (%)</label>
+                                    <input type="number" class="form-control" id="minimumScore" name="minimumScore" 
+                                           placeholder="70" min="0" max="100" value="70">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Issuing Authority</label>
+                                    <input type="text" class="form-control" id="issuingAuthority" name="issuingAuthority" 
+                                           placeholder="IAAI Training Institute" value="IAAI Training Institute">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="switch-group">
+                                    <span>Require All Videos Completion</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="requireAllVideos" name="requireAllVideos" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- METADATA SECTION -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f9fafb; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem; color: #1f2937;">🏷️ Metadata & Tags</h4>
+                        
+                        <div class="form-group">
+                            <label>Tags</label>
+                            <input type="text" class="form-control" id="tags" name="tags" 
+                                   placeholder="e.g., jawline, contouring, cannula, dermal fillers">
+                            <div class="form-hint">Separate tags with commas (used for search and filtering)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Internal Notes</label>
+                            <textarea class="form-control" id="internalNotes" name="internalNotes" 
+                                      placeholder="Internal admin notes (not visible to students)..." rows="3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- SUBMIT BUTTONS -->
+                    <div style="text-align: right; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e5e7eb;">
+                        <button type="button" class="btn btn-secondary" onclick="closeCourseModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="saveCourseBtn">
+                            <span id="saveCourseText">Create Course</span>
+                            <span id="saveCourseLoader" class="loading" style="display: none;"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="videoModalTitle">Add Video</h2>
+                <button class="close" onclick="closeVideoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="videoForm" enctype="multipart/form-data">
+                    <input type="hidden" id="videoId" name="videoId">
+                    <input type="hidden" id="videoCourseId" name="courseId">
+                    
+                    <div class="form-group">
+                        <label>Video Title <span>*</span></label>
+                        <input type="text" class="form-control" id="videoTitle" name="title" 
+                               placeholder="Enter video title" required>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Sequence Order <span>*</span></label>
+                            <input type="number" class="form-control" id="videoSequence" name="sequence" 
+                                   placeholder="1" min="1" required>
+                            <div class="form-hint">Order in which this video appears in the course</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Duration (minutes)</label>
+                            <input type="number" class="form-control" id="videoDuration" name="duration" 
+                                   placeholder="10" min="1">
+                            <div class="form-hint">Approximate video length</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Video Description <span>*</span></label>
+                        <textarea class="form-control" id="videoDescription" name="description" 
+                                  placeholder="Describe what students will learn in this video..." 
+                                  rows="4" required></textarea>
+                        <div class="form-hint">This will be shown to students before they watch the video</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Video File <span>*</span></label>
+                        <input type="file" class="form-control" id="videoFile" name="videoFile" 
+                               accept="video/*" required>
+                        <div class="form-hint">Max file size: 500MB. Supported formats: MP4, MOV, AVI, WEBM</div>
+                        <div id="currentVideoFile" class="current-file" style="display: none; margin-top: 0.5rem;">
+                            <i class="fas fa-video"></i> Current file: <span id="currentVideoFileName"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Video Transcript / Script</label>
+                        <textarea class="form-control" id="videoTranscript" name="transcript" 
+                                  placeholder="Enter the full transcript or script of the video for accessibility and searchability..." 
+                                  rows="6"></textarea>
+                        <div class="form-hint">Helps with accessibility and allows students to follow along</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="switch-group">
+                            <span>Make this a Preview Video (Free)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="isPreview" name="isPreview">
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <div class="form-hint">Preview videos can be watched without purchasing the course</div>
+                    </div>
+                    
+                    <!-- Assessment/Exam Section -->
+                    <div style="margin-top: 2rem; padding: 2rem; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0; font-size: 1.25rem; color: #1f2937;">
+                                <i class="fas fa-clipboard-list"></i> Video Assessment / Exam
+                            </h3>
+                            <label class="switch-group" style="margin: 0;">
+                                <span style="margin-right: 0.5rem;">Enable Assessment</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="enableAssessment" onchange="toggleAssessment()">
+                                    <span class="slider"></span>
+                                </label>
+                            </label>
+                        </div>
+                        
+                        <div id="assessmentSection" style="display: none;">
+                            <div class="form-grid" style="margin-bottom: 1rem;">
+                                <div class="form-group">
+                                    <label>Passing Score (%)</label>
+                                    <input type="number" class="form-control" id="passingScore" name="passingScore" 
+                                           placeholder="70" min="0" max="100" value="70">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Time Limit (minutes)</label>
+                                    <input type="number" class="form-control" id="timeLimit" name="timeLimit" 
+                                           placeholder="0" min="0">
+                                    <div class="form-hint">0 = No time limit</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Assessment Instructions</label>
+                                <textarea class="form-control" id="assessmentInstructions" name="assessmentInstructions" 
+                                          placeholder="Instructions for students before starting the assessment..." 
+                                          rows="3"></textarea>
+                            </div>
+                            
+                            <div style="margin-top: 1.5rem;">
+                                <h4 style="margin-bottom: 1rem; font-size: 1rem;">Exam Questions</h4>
+                                <div id="examQuestions"></div>
+                                <button type="button" class="btn btn-success btn-sm" onclick="addExamQuestion()">
+                                    <i class="fas fa-plus"></i> Add Question
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e5e7eb;">
+                        <button type="button" class="btn btn-secondary" onclick="closeVideoModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="saveVideoBtn">
+                            <span id="saveVideoText">Add Video</span>
+                            <span id="saveVideoLoader" class="loading" style="display: none;"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the external JavaScript file -->
+    <script src="/js/admin-selfpaced-courses.js"></script>
+    <script>
+        // Add this JavaScript to update the certificate preview in real-time
+        function updateCertificatePreview() {
+            const primarySelect = document.getElementById("issuingAuthorityId");
+            const additionalSelect = document.getElementById("additionalCertificationBodies");
+            const previewPrimary = document.getElementById("previewPrimary");
+            const previewAdditional = document.getElementById("previewAdditional");
+            const previewAdditionalList = document.getElementById("previewAdditionalList");
+        
+            // Update primary authority preview
+            if (primarySelect && previewPrimary) {
+                const selectedPrimary = primarySelect.options[primarySelect.selectedIndex];
+                previewPrimary.textContent = selectedPrimary.text;
+            }
+        
+            // Update additional bodies preview
+            if (additionalSelect && previewAdditional && previewAdditionalList) {
+                const selectedAdditional = Array.from(additionalSelect.selectedOptions);
+                
+                if (selectedAdditional.length > 0) {
+                    previewAdditional.style.display = "block";
+                    previewAdditionalList.textContent = selectedAdditional.map(opt => opt.text).join(", ");
+                } else {
+                    previewAdditional.style.display = "none";
+                }
+            }
+        }
+        
+        // Add event listeners when the form is loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            const primarySelect = document.getElementById("issuingAuthorityId");
+            const additionalSelect = document.getElementById("additionalCertificationBodies");
+            
+            if (primarySelect) {
+                primarySelect.addEventListener("change", updateCertificatePreview);
+            }
+            
+            if (additionalSelect) {
+                additionalSelect.addEventListener("change", function() {
+                    updateAdditionalCertificationBodies();
+                    updateCertificatePreview();
+                });
+            }
+        });
+        </script>
+        
+</body>
+</html>

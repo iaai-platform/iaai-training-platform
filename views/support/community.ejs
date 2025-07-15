@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Forum - IAAI</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .community-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .community-header {
+            text-align: center;
+            background: #6f42c1;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .categories-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .category-item {
+            border-left: 4px solid #007bff;
+            background: #f8f9ff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        .category-item:nth-child(2) { border-left-color: #28a745; background: #f8fff8; }
+        .category-item:nth-child(3) { border-left-color: #ffc107; background: #fffdf5; }
+        .category-item:nth-child(4) { border-left-color: #dc3545; background: #fff5f5; }
+        .category-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .category-desc {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        .category-stats {
+            color: #999;
+            font-size: 0.8rem;
+        }
+        .recent-topics {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .topic-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .topic-item:last-child {
+            border-bottom: none;
+        }
+        .topic-title {
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .topic-title:hover {
+            text-decoration: underline;
+        }
+        .topic-meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .topic-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: #999;
+        }
+        .new-topic-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        .new-topic-btn:hover {
+            background: #218838;
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="community-container">
+        <div class="community-header">
+            <h1><i class="fas fa-users"></i> Community Forum</h1>
+            <p>Connect with students, instructors, and professionals</p>
+        </div>
+
+        <% if (user) { %>
+        <a href="#" class="new-topic-btn" onclick="createTopic()">
+            <i class="fas fa-plus"></i> Start New Discussion
+        </a>
+        <% } else { %>
+        <p style="text-align: center; margin-bottom: 20px;">
+            <a href="/login">Login</a> to participate in discussions
+        </p>
+        <% } %>
+
+        <div class="categories-section">
+            <h2>Discussion Categories</h2>
+            
+            <div class="category-item">
+                <div class="category-name">
+                    <i class="fas fa-syringe"></i> Injectables
+                </div>
+                <div class="category-desc">Botox, fillers, and injection techniques</div>
+                <div class="category-stats">45 topics • 234 posts</div>
+            </div>
+
+            <div class="category-item">
+                <div class="category-name">
+                    <i class="fas fa-briefcase"></i> Business & Practice
+                </div>
+                <div class="category-desc">Practice management and business growth</div>
+                <div class="category-stats">32 topics • 156 posts</div>
+            </div>
+
+            <div class="category-item">
+                <div class="category-name">
+                    <i class="fas fa-laptop"></i> Technology & Equipment
+                </div>
+                <div class="category-desc">Latest equipment and technology discussions</div>
+                <div class="category-stats">18 topics • 89 posts</div>
+            </div>
+
+            <div class="category-item">
+                <div class="category-name">
+                    <i class="fas fa-graduation-cap"></i> Student Support
+                </div>
+                <div class="category-desc">Help and support for current students</div>
+                <div class="category-stats">67 topics • 312 posts</div>
+            </div>
+        </div>
+
+        <div class="recent-topics">
+            <h2>Recent Discussions</h2>
+            
+            <div class="topic-item">
+                <a href="#" class="topic-title">Best practices for Botox injections</a>
+                <div class="topic-meta">by Dr. Smith • 2 hours ago</div>
+                <div class="topic-stats">
+                    <span><i class="fas fa-comments"></i> 12 replies</span>
+                    <span><i class="fas fa-eye"></i> 156 views</span>
+                </div>
+            </div>
+
+            <div class="topic-item">
+                <a href="#" class="topic-title">Setting up your first aesthetic practice</a>
+                <div class="topic-meta">by PracticeOwner22 • 5 hours ago</div>
+                <div class="topic-stats">
+                    <span><i class="fas fa-comments"></i> 8 replies</span>
+                    <span><i class="fas fa-eye"></i> 89 views</span>
+                </div>
+            </div>
+
+            <div class="topic-item">
+                <a href="#" class="topic-title">New laser technology discussion</a>
+                <div class="topic-meta">by TechExpert • 1 day ago</div>
+                <div class="topic-stats">
+                    <span><i class="fas fa-comments"></i> 15 replies</span>
+                    <span><i class="fas fa-eye"></i> 234 views</span>
+                </div>
+            </div>
+
+            <div class="topic-item">
+                <a href="#" class="topic-title">Course completion certificate question</a>
+                <div class="topic-meta">by StudentUser • 2 days ago</div>
+                <div class="topic-stats">
+                    <span><i class="fas fa-comments"></i> 3 replies</span>
+                    <span><i class="fas fa-eye"></i> 45 views</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+        function createTopic() {
+            const title = prompt('Enter discussion title:');
+            if (title) {
+                const category = prompt('Enter category (Injectables, Business, Technology, Student Support):');
+                if (category) {
+                    alert('Feature coming soon! Your topic "' + title + '" will be created in the ' + category + ' category.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

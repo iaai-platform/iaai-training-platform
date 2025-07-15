@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Certificates - IAAI Training Institute</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f7fafc;
+      line-height: 1.6;
+    }
+
+    /* Breadcrumb Navigation */
+    .breadcrumb {
+      background: white;
+      padding: 15px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.9rem;
+    }
+
+    .breadcrumb a {
+      color: #3182ce;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .breadcrumb a:hover {
+      color: #2c5282;
+      text-decoration: underline;
+    }
+
+    .breadcrumb span {
+      color: #718096;
+      margin: 0 8px;
+    }
+
+    /* Hero Header */
+    .hero-header {
+      background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+      color: white;
+      padding: 80px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      transform: rotate(45deg);
+    }
+
+    .hero-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hero-header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .hero-header p {
+      font-size: 1.3rem;
+      opacity: 0.95;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Quick Actions Bar */
+    .quick-actions {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(49, 130, 206, 0.3);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e0;
+    }
+
+    .search-box {
+      padding: 10px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      width: 300px;
+      transition: border-color 0.3s;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #3182ce;
+    }
+
+    /* Achievement Summary */
+    .achievement-summary {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 40px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .summary-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .summary-header h2 {
+      color: #2d3748;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .achievement-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #3182ce;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      color: #4a5568;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .achievement-level {
+      background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .icon-bronze { color: #cd7f32; }
+    .icon-silver { color: #c0c0c0; }
+    .icon-gold { color: #ffd700; }
+
+    /* Filters Section */
+    .filters-section {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      padding: 8px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 25px;
+      background: white;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .filter-tab.active {
+      background: #3182ce;
+      color: white;
+      border-color: #3182ce;
+    }
+
+    .filter-tab:hover {
+      border-color: #3182ce;
+    }
+
+    /* Certificates Section */
+    .certificates-section {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 10px;
+    }
+
+    .view-btn {
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .view-btn.active {
+      background: #3182ce;
+      color: white;
+      border-color: #3182ce;
+    }
+
+    .view-btn:first-child {
+      border-radius: 8px 0 0 8px;
+    }
+
+    .view-btn:last-child {
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* Certificates Grid View */
+    .certificates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 30px;
+    }
+
+    .certificate-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .certificate-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+      border-color: #3182ce;
+    }
+
+    .certificate-ribbon {
+      position: absolute;
+      top: 20px;
+      right: -30px;
+      background: #f39c12;
+      color: white;
+      padding: 5px 40px;
+      transform: rotate(45deg);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .certificate-header {
+      background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    .certificate-header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 20px solid #2c5282;
+    }
+
+    .certificate-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      display: inline-block;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .certificate-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .certificate-code {
+      opacity: 0.9;
+      font-size: 0.9rem;
+    }
+
+    .certificate-body {
+      padding: 30px;
+      padding-top: 40px;
+    }
+
+    .certificate-info {
+      margin-bottom: 25px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #64748b;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-value {
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .certificate-score {
+      background: #f0fdf4;
+      color: #15803d;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .certificate-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .certificate-actions .btn {
+      flex: 1;
+      justify-content: center;
+      padding: 12px 16px;
+    }
+
+    /* List View */
+    .certificates-list {
+      display: none;
+    }
+
+    .certificate-list-item {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      transition: all 0.3s;
+    }
+
+    .certificate-list-item:hover {
+      border-color: #3182ce;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .list-icon {
+      font-size: 2.5rem;
+      color: #f39c12;
+    }
+
+    .list-content {
+      flex: 1;
+    }
+
+    .list-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 5px;
+    }
+
+    .list-details {
+      display: flex;
+      gap: 20px;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .list-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #718096;
+    }
+
+    .empty-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: #4a5568;
+    }
+
+    .empty-state p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Certificate Verification Modal */
+    .verification-info {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .verification-info h4 {
+      color: #0369a1;
+      margin-bottom: 10px;
+    }
+
+    .verification-link {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-header h1 {
+        font-size: 2rem;
+      }
+
+      .hero-header p {
+        font-size: 1.1rem;
+      }
+
+      .quick-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .certificates-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .certificate-list-item {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .list-actions {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      .achievement-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .certificate-ribbon {
+        font-size: 0.65rem;
+        padding: 3px 30px;
+      }
+    }
+
+    /* Loading State */
+    .loading-spinner {
+      text-align: center;
+      padding: 50px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3182ce;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Include Header -->
+  <%- include('partials/header') %>
+
+  <!-- Breadcrumb Navigation -->
+  <nav class="breadcrumb">
+    <a href="/">Home</a>
+    <span>></span>
+    <a href="/dashboard">Dashboard</a>
+    <span>></span>
+    <span style="color: #2d3748;">My Certificates</span>
+  </nav>
+
+  <!-- Hero Header -->
+  <div class="hero-header">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="fas fa-trophy"></i>
+      </div>
+      <h1>My Professional Certificates</h1>
+      <p>Your achievements and certifications from IAAI Training Institute</p>
+    </div>
+  </div>
+
+  <div class="container">
+    
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions">
+      <div class="action-buttons">
+        <a href="/dashboard" class="btn btn-secondary">
+          <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <a href="/library" class="btn btn-primary">
+          <i class="fas fa-graduation-cap"></i> Browse More Courses
+        </a>
+      </div>
+      <input type="text" class="search-box" id="searchCertificates" placeholder="Search certificates...">
+    </div>
+
+    <!-- Achievement Summary -->
+    <div class="achievement-summary">
+      <div class="summary-header">
+        <h2>Your Learning Journey</h2>
+      </div>
+      <div class="achievement-stats">
+        <div class="stat-card">
+          <div class="stat-icon icon-gold">
+            <i class="fas fa-certificate"></i>
+          </div>
+          <span class="stat-number"><%= achievementSummary.totalCertificates || 0 %></span>
+          <span class="stat-label">Total Certificates</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-bronze">
+            <i class="fas fa-clock"></i>
+          </div>
+          <span class="stat-number"><%= achievementSummary.totalLearningHours || 0 %></span>
+          <span class="stat-label">Learning Hours</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-silver">
+            <i class="fas fa-award"></i>
+          </div>
+          <div class="achievement-level"><%= achievementSummary.achievementLevel || 'Beginner' %></div>
+          <span class="stat-label">Achievement Level</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color: #3182ce;">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <span class="stat-number"><%= achievementSummary.activeCertificates || 0 %></span>
+          <span class="stat-label">Active Certificates</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filters-section">
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterCertificates('all')">All Certificates</button>
+        <button class="filter-tab" onclick="filterCertificates('recent')">Recent</button>
+        <button class="filter-tab" onclick="filterCertificates('selfpaced')">Self-Paced</button>
+        <button class="filter-tab" onclick="filterCertificates('live')">Live Training</button>
+        <button class="filter-tab" onclick="filterCertificates('inperson')">In-Person</button>
+      </div>
+    </div>
+
+    <!-- Certificates Section -->
+    <div class="certificates-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-certificate"></i>
+          Your Certificates
+        </h2>
+        <div class="view-toggle">
+          <button class="view-btn active" onclick="toggleView('grid')">
+            <i class="fas fa-th"></i>
+          </button>
+          <button class="view-btn" onclick="toggleView('list')">
+            <i class="fas fa-list"></i>
+          </button>
+        </div>
+      </div>
+
+      <% if (certificates && certificates.length > 0) { %>
+        <!-- Grid View -->
+        <div class="certificates-grid" id="gridView">
+          <% certificates.forEach(certificate => { %>
+            <div class="certificate-card" data-course-type="<%= certificate.courseType %>">
+              <% if (certificate.certificateStatus?.downloadCount > 5) { %>
+                <div class="certificate-ribbon">Popular</div>
+              <% } %>
+              
+              <div class="certificate-header">
+                <div class="certificate-icon">
+                  <i class="fas fa-award"></i>
+                </div>
+                <div class="certificate-title"><%= certificate.certificateDetails?.title || 'Certificate' %></div>
+                <div class="certificate-code">
+                  <%= certificate.certificateDetails?.courseCode || 'N/A' %>
+                </div>
+              </div>
+
+              <div class="certificate-body">
+                <div class="certificate-info">
+                  <div class="info-row">
+                    <span class="info-label">
+                      <i class="fas fa-calendar-check"></i>
+                      Completed
+                    </span>
+                    <span class="info-value">
+                      <%= certificate.certificateDetails?.completionDate ? 
+                          new Date(certificate.certificateDetails.completionDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          }) : 
+                          'N/A' %>
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">
+                      <i class="fas fa-user-graduate"></i>
+                      Instructor
+                    </span>
+                    <span class="info-value">
+                      <%= certificate.certificateDetails?.instructorName || 'IAAI Institute' %>
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">
+                      <i class="fas fa-chart-line"></i>
+                      Performance
+                    </span>
+                    <span class="info-value">
+                      <span class="certificate-score">
+                        <%= certificate.certificateDetails?.courseStats?.averageScore || 0 %>% Score
+                      </span>
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">
+                      <i class="fas fa-download"></i>
+                      Downloads
+                    </span>
+                    <span class="info-value">
+                      <%= certificate.certificateStatus?.downloadCount || 0 %> times
+                    </span>
+                  </div>
+                </div>
+
+                <div class="certificate-actions">
+                  <a href="/certificates/view/<%= certificate.certificateId %>" class="btn btn-primary">
+                    <i class="fas fa-eye"></i>
+                    View
+                  </a>
+                  <button class="btn btn-secondary" onclick="downloadCertificate('<%= certificate.certificateId %>')">
+                    <i class="fas fa-download"></i>
+                    Download
+                  </button>
+                  <button class="btn btn-secondary" onclick="shareCertificate('<%= certificate.certificateId %>')">
+                    <i class="fas fa-share"></i>
+                    Share
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- List View -->
+        <div class="certificates-list" id="listView">
+          <% certificates.forEach(certificate => { %>
+            <div class="certificate-list-item" data-course-type="<%= certificate.courseType %>">
+              <div class="list-icon">
+                <i class="fas fa-certificate"></i>
+              </div>
+              <div class="list-content">
+                <div class="list-title"><%= certificate.certificateDetails?.title || 'Certificate' %></div>
+                <div class="list-details">
+                  <span><i class="fas fa-code"></i> <%= certificate.certificateDetails?.courseCode %></span>
+                  <span><i class="fas fa-calendar"></i> <%= new Date(certificate.certificateDetails?.completionDate).toLocaleDateString() %></span>
+                  <span><i class="fas fa-percentage"></i> <%= certificate.certificateDetails?.courseStats?.averageScore || 0 %>% Score</span>
+                </div>
+              </div>
+              <div class="list-actions">
+                <a href="/certificates/view/<%= certificate.certificateId %>" class="btn btn-primary">
+                  <i class="fas fa-eye"></i> View Certificate
+                </a>
+                <button class="btn btn-secondary" onclick="downloadCertificate('<%= certificate.certificateId %>')">
+                  <i class="fas fa-download"></i>
+                </button>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-certificate"></i>
+          </div>
+          <h3>No Certificates Yet</h3>
+          <p>Complete your first course to earn your professional certificate and showcase your achievements!</p>
+          <a href="/library" class="btn btn-primary">
+            <i class="fas fa-book"></i>
+            Browse Available Courses
+          </a>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Certificate Verification Info -->
+    <div class="verification-info">
+      <h4><i class="fas fa-shield-alt"></i> Certificate Verification</h4>
+      <p>All certificates issued by IAAI Training Institute can be verified online. Share your verification link with employers or colleagues to prove your achievements.</p>
+    </div>
+  </div>
+
+  <!-- Include Footer -->
+  <%- include('partials/footer') %>
+
+  <script>
+    // Toggle between grid and list view
+    function toggleView(view) {
+      const gridView = document.getElementById('gridView');
+      const listView = document.getElementById('listView');
+      const viewBtns = document.querySelectorAll('.view-btn');
+      
+      viewBtns.forEach(btn => btn.classList.remove('active'));
+      
+      if (view === 'grid') {
+        gridView.style.display = 'grid';
+        listView.style.display = 'none';
+        viewBtns[0].classList.add('active');
+      } else {
+        gridView.style.display = 'none';
+        listView.style.display = 'block';
+        viewBtns[1].classList.add('active');
+      }
+    }
+
+    // Filter certificates
+    function filterCertificates(type) {
+      const tabs = document.querySelectorAll('.filter-tab');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      const cards = document.querySelectorAll('.certificate-card, .certificate-list-item');
+      
+      cards.forEach(card => {
+        if (type === 'all') {
+          card.style.display = '';
+        } else if (type === 'recent') {
+          // Show only certificates from last 30 days
+          card.style.display = '';
+        } else {
+          const courseType = card.getAttribute('data-course-type');
+          if (type === 'selfpaced' && courseType === 'SelfPacedOnlineTraining') {
+            card.style.display = '';
+          } else if (type === 'live' && courseType === 'OnlineLiveTraining') {
+            card.style.display = '';
+          } else if (type === 'inperson' && courseType === 'InPersonAestheticTraining') {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // Search certificates
+    document.getElementById('searchCertificates').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const cards = document.querySelectorAll('.certificate-card, .certificate-list-item');
+      
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+
+    // Download certificate
+    function downloadCertificate(certificateId) {
+      Swal.fire({
+        title: 'Downloading Certificate',
+        text: 'Preparing your certificate for download...',
+        icon: 'info',
+        showCancelButton: false,
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      fetch(`/certificates/download/${certificateId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: 'Certificate ready for download',
+              timer: 2000
+            });
+          } else {
+            Swal.fire({
+              icon: 'info',
+              title: 'Coming Soon',
+              text: 'PDF download functionality will be available soon!',
+              confirmButtonColor: '#3182ce'
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Download error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Download Failed',
+            text: 'Unable to download certificate at this time'
+          });
+        });
+    }
+
+    // Share certificate
+    function shareCertificate(certificateId) {
+      fetch(`/certificates/api/my-certificates`)
+        .then(response => response.json())
+        .then(data => {
+          const certificate = data.certificates.find(c => c.certificateId === certificateId);
+          if (certificate) {
+            const shareUrl = certificate.shareableUrl || `${window.location.origin}/certificates/verify-page/${certificateId}`;
+            
+            Swal.fire({
+              title: 'Share Your Achievement!',
+              html: `
+                <div style="text-align: center; margin: 20px 0;">
+                  <p style="margin-bottom: 20px;">Share your professional certificate:</p>
+                  <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <input type="text" value="${shareUrl}" readonly style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 5px; font-size: 0.9rem;" id="shareUrl">
+                  </div>
+                  <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                    <button onclick="copyShareLink()" style="background: #3182ce; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                      <i class="fas fa-copy"></i> Copy Link
+                    </button>
+                    <button onclick="shareOnLinkedIn('${shareUrl}')" style="background: #0077b5; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                      <i class="fab fa-linkedin"></i> LinkedIn
+                    </button>
+                    <button onclick="shareOnTwitter('${shareUrl}')" style="background: #1da1f2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                      <i class="fab fa-twitter"></i> Twitter
+                    </button>
+                  </div>
+                </div>
+              `,
+              showConfirmButton: false,
+              showCloseButton: true,
+              width: '600px'
+            });
+          }
+        });
+    }
+
+    function copyShareLink() {
+      const shareUrl = document.getElementById('shareUrl');
+      shareUrl.select();
+      document.execCommand('copy');
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Copied!',
+        text: 'Link copied to clipboard',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+
+    function shareOnLinkedIn(url) {
+      const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      window.open(linkedinUrl, '_blank', 'width=600,height=500');
+    }
+
+    function shareOnTwitter(url) {
+      const text = encodeURIComponent('I just earned a professional certificate from IAAI Training Institute! 🎓');
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`;
+      window.open(twitterUrl, '_blank', 'width=600,height=500');
+    }
+
+    // Initialize page animations
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animate cards on load
+      const cards = document.querySelectorAll('.certificate-card');
+      cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+          card.style.transition = 'all 0.5s ease';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+
+      // Animate stats
+      const statNumbers = document.querySelectorAll('.stat-number');
+      statNumbers.forEach(stat => {
+        const finalValue = parseInt(stat.textContent);
+        let currentValue = 0;
+        const increment = finalValue / 20;
+        
+        const timer = setInterval(() => {
+          currentValue += increment;
+          if (currentValue >= finalValue) {
+            currentValue = finalValue;
+            clearInterval(timer);
+          }
+          stat.textContent = Math.round(currentValue);
+        }, 50);
+      });
+    });
+  </script>
+</body>
+</html>

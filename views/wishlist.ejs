@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - IAAI</title>
+    <link rel="stylesheet" href="/css/wishlist.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    
+    <!-- Enhanced notification styles -->
+    <style>
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+        max-width: 300px;
+      }
+      
+      .notification.success { background-color: #28a745; }
+      .notification.error { background-color: #dc3545; }
+      .notification.warning { background-color: #ffc107; color: #333; }
+      
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+      
+      .btn-loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+      
+      .btn-loading::after {
+        content: " ⏳";
+      }
+      
+      .empty-wishlist {
+        text-align: center;
+        padding: 50px;
+        font-size: 18px;
+        color: #666;
+      }
+      
+      .empty-wishlist i {
+        font-size: 48px;
+        color: #ddd;
+        margin-bottom: 20px;
+        display: block;
+      }
+
+      .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .status-wishlist { background-color: #6c757d; color: white; }
+      .status-cart { background-color: #28a745; color: white; }
+      .status-paid { background-color: #17a2b8; color: white; }
+      .status-registered { background-color: #007bff; color: white; }
+      
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      
+      .cta-btn, .delete-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+      
+      .cta-btn {
+        background-color: #007bff;
+        color: white;
+      }
+      
+      .cta-btn:hover {
+        background-color: #0056b3;
+      }
+      
+      .delete-btn {
+        background-color: #dc3545;
+        color: white;
+      }
+      
+      .delete-btn:hover {
+        background-color: #c82333;
+      }
+    </style>
+  </head>
+  
+  <body>
+    <%- include('partials/header') %>
+    
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb">
+      <a href="/">Home</a> > <a href="/dashboard">Dashboard</a> > <span>My Wishlist</span>
+    </nav>
+
+    <!-- Page Title -->
+    <section id="wishlist-header">
+      <h1>My Wishlist</h1>
+      <p>Manage your saved courses and move them to your cart when ready.</p>
+    </section>
+
+    <!-- Wishlist Table -->
+    <div class="wishlist-container">
+      <% if (wishlist && wishlist.length > 0) { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Course Code</th>
+              <th>Title</th>
+              <th>Price</th>
+              <th>Course Type</th>
+              <th>Added On</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% wishlist.forEach(course => { %>
+              <tr>
+                <td><%= course.courseCode %></td>
+                <td><%= course.title %></td>
+                <td>$<%= course.price.toFixed(2) %></td>
+                <td>
+                  <% if (course.courseType === 'InPersonAestheticTraining') { %>
+                    In-Person Training
+                  <% } else if (course.courseType === 'OnlineLiveTraining') { %>
+                    Online Live Training
+                  <% } else if (course.courseType === 'SelfPacedOnlineTraining') { %>
+                    Self-Paced Training
+                  <% } else { %>
+                    <%= course.courseType %>
+                  <% } %>
+                </td>
+                <td><%= new Date(course.addedAt).toLocaleDateString() %></td>
+                <td>
+                  <span class="status-badge status-<%= course.status %>">
+                    <%= course.status.charAt(0).toUpperCase() + course.status.slice(1) %>
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="cta-btn move-to-cart-btn" 
+                            data-course-id="<%= course.courseId %>" 
+                            data-course-type="<%= course.courseType %>" 
+                            data-course-code="<%= course.courseCode %>"
+                            data-price="<%= course.price %>"
+                            data-course-title="<%= course.title %>"> 
+                      <i class="fas fa-shopping-cart"></i> Move to Cart
+                    </button>
+                    
+                    <button class="delete-btn remove-from-wishlist-btn" 
+                            data-course-id="<%= course.courseId %>"
+                            data-course-type="<%= course.courseType %>"
+                            data-course-title="<%= course.title %>">
+                      <i class="fas fa-trash"></i> Remove
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <div class="empty-wishlist">
+          <i class="fas fa-heart"></i>
+          <h3>Your wishlist is empty</h3>
+          <p>Browse our courses and add your favorites to your wishlist!</p>
+          <a href="/in-person-aesthetic-training" class="cta-btn">Browse In-Person Courses</a>
+          <a href="/online-live-training" class="cta-btn">Browse Live Courses</a>
+          <a href="/self-paced-online-training" class="cta-btn">Browse Self-Paced Courses</a>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- JavaScript for Wishlist Actions -->
+    <script>
+      // Show notification function
+      function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'slideOut 0.3s ease-out';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 5000);
+      }
+
+      // Set button loading state
+      function setButtonLoading(button, loading) {
+        if (loading) {
+          button.classList.add('btn-loading');
+          button.disabled = true;
+        } else {
+          button.classList.remove('btn-loading');
+          button.disabled = false;
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('🔧 Setting up wishlist event listeners...');
+        
+        // ✅ Move to Cart
+        const moveToCartButtons = document.querySelectorAll('.move-to-cart-btn');
+        console.log('🛒 Found', moveToCartButtons.length, 'move-to-cart buttons');
+        
+        moveToCartButtons.forEach((button, index) => {
+          button.addEventListener('click', async (e) => {
+            console.log('🛒 Move to cart button clicked!');
+            
+            const button = e.currentTarget;
+            const courseId = button.getAttribute('data-course-id');
+            const courseType = button.getAttribute('data-course-type');
+            const courseTitle = button.getAttribute('data-course-title');
+
+            console.log('🛒 Moving to cart from wishlist:', { 
+              courseId, 
+              courseType
+            });
+
+            if (!courseId || !courseType) {
+              console.error('❌ Missing required data:', { courseId, courseType });
+              showNotification('❌ Missing course data', 'error');
+              return;
+            }
+
+            setButtonLoading(button, true);
+
+            try {
+              // First, move from wishlist to cart
+              const moveResponse = await fetch('/move-to-cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId, courseType })
+              });
+
+              console.log('📥 Response status:', moveResponse.status);
+              
+              const result = await moveResponse.json();
+              console.log('📥 Response data:', result);
+              
+              if (result.success) {
+                showNotification(`✅ "${courseTitle}" moved to cart!`, 'success');
+                setTimeout(() => location.reload(), 1500);
+              } else {
+                showNotification(result.message, 'warning');
+              }
+            } catch (err) {
+              console.error('❌ Network error:', err);
+              showNotification('❌ Error moving course to cart', 'error');
+            } finally {
+              setButtonLoading(button, false);
+            }
+          });
+        });
+
+        // ✅ Remove from Wishlist
+        const removeButtons = document.querySelectorAll('.remove-from-wishlist-btn');
+        console.log('🗑️ Found', removeButtons.length, 'remove buttons');
+        
+        removeButtons.forEach(button => {
+          button.addEventListener('click', async (e) => {
+            const button = e.currentTarget;
+            const courseId = button.getAttribute('data-course-id');
+            const courseType = button.getAttribute('data-course-type');
+            const courseTitle = button.getAttribute('data-course-title');
+
+            if (!confirm(`Are you sure you want to remove "${courseTitle}" from your wishlist?`)) {
+              return;
+            }
+
+            console.log('🗑️ Removing from wishlist:', { courseId, courseType });
+
+            setButtonLoading(button, true);
+
+            try {
+              const response = await fetch('/remove-from-wishlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId, courseType })
+              });
+
+              const result = await response.json();
+              
+              if (result.success) {
+                showNotification(`🗑️ "${courseTitle}" removed from wishlist`, 'success');
+                setTimeout(() => location.reload(), 1500);
+              } else {
+                showNotification(result.message, 'warning');
+              }
+            } catch (err) {
+              console.error('❌ Error:', err);
+              showNotification('❌ Error removing course', 'error');
+            } finally {
+              setButtonLoading(button, false);
+            }
+          });
+        });
+      });
+
+      // Debug logging
+      console.log('📊 Wishlist page loaded');
+      console.log('📋 Wishlist items count:', <%= wishlist.length %>);
+      <% if (wishlist.length > 0) { %>
+        console.log('📋 Course types in wishlist:', [
+          <% wishlist.forEach((course, index) => { %>
+            '<%= course.courseType %>'<% if (index < wishlist.length - 1) { %>,<% } %>
+          <% }) %>
+        ]);
+      <% } %>
+    </script>
+
+    <%- include('partials/footer') %>
+  </body>
+</html>

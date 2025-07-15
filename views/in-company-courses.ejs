@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>in-company-courses</title>
+    <link rel="stylesheet" href="/css/formpages.css"> <!-- Link to the main CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+  </head>
+  
+  <%- include('partials/header') %>
+
+
+    <!-- ✅ Breadcrumb Navigation -->
+    <nav class="breadcrumb">
+        <a href="/">Home</a> > <a href="/in-company-courses">In-Company Training</a>
+    </nav>
+
+    <!-- ✅ In-Company Training Section -->
+    <section class="training-info">
+        <h1>In-Company Aesthetic Training</h1>
+        <p>
+            Enhance your team’s expertise with customized **In-Company Aesthetic Training**.
+            Delivered **on-site or online**, our programs are designed to meet **your team's unique needs**.
+        </p>
+        <ul>
+            <li>💡 **Tailored Training Programs** for your team.</li>
+            <li>🌎 **Flexible Online or On-Site Delivery**.</li>
+            <li>📜 **Certification upon Completion**.</li>
+        </ul>
+    </section>
+
+    <!-- ✅ Application Form -->
+    <section class="application-form">
+        <h2>Apply for In-Company Training</h2>
+        <form id="inCompanyForm">
+            <input type="hidden" name="courseType" value="In-Company">
+            
+            <label for="fullName">Full Name:</label>
+            <input type="text" name="fullName" required>
+
+            <label for="email">Email:</label>
+            <input type="email" name="email" required>
+
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="text" name="phoneNumber" required>
+
+            <label for="companyName">Company Name:</label>
+            <input type="text" name="companyName">
+
+            <label for="message">Describe your team’s training needs:</label>
+            <textarea name="message" required></textarea>
+
+            <button type="submit">Submit Application</button>
+        </form>
+    </section>
+
+    <!-- ✅ JavaScript for Form Submission -->
+    <script>
+        document.getElementById('inCompanyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/apply-in-company', { // ✅ Fix route name
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            alert(result.message);
+            if (result.success) {
+                e.target.reset();
+            }
+        });
+    </script>
+
+<%- include('partials/footer') %>
+
+</body>
+</html>

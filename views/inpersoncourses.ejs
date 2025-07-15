@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= course.basic?.title || 'Course' %> - Luxury Medical Training</title>
+  <link rel="stylesheet" href="/css/course-details.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+  <!-- Enhanced Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="/"><i class="fas fa-home"></i> Home</a> 
+    <i class="fas fa-chevron-right" style="margin: 0 10px; color: #999; font-size: 12px;"></i>
+    <a href="/training-programs">Training Programs</a> 
+    <i class="fas fa-chevron-right" style="margin: 0 10px; color: #999; font-size: 12px;"></i>
+    <a href="/in-person-aesthetic-training">In-Person Aesthetic Training</a>
+    <i class="fas fa-chevron-right" style="margin: 0 10px; color: #999; font-size: 12px;"></i>
+    <span><%= course.basic?.title || 'Course Details' %></span>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-header">
+        <div class="hero-info">
+          <div class="course-code-badge">
+            <i class="fas fa-tag"></i> <%= course.basic?.courseCode || 'N/A' %>
+          </div>
+          <h1 class="hero-title"><%= course.basic?.title || 'Aesthetic Training Course' %></h1>
+          <p class="hero-description"><%= course.basic?.description || 'Elevate your practice with our comprehensive hands-on training program.' %></p>
+          
+          <div class="hero-meta">
+            <div class="meta-item">
+              <i class="fas fa-user-md"></i>
+              <span><%= course.instructorNames || 'Expert Instructors' %></span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-calendar"></i>
+              <span><%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'TBD' %></span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span><%= course.venue?.name || 'Premium Training Facility' %></span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="hero-actions">
+          <div class="price-display">
+            <span class="price-label">Investment</span>
+            <div class="price-amount">
+              <span class="price-currency">$</span><%= course.enrollment?.price || 0 %>
+            </div>
+            <% if (course.enrollment?.earlyBirdPrice && course.enrollment?.earlyBirdDeadline && new Date() < new Date(course.enrollment.earlyBirdDeadline)) { %>
+              <span class="early-bird-tag">
+                <i class="fas fa-tag"></i> Early Bird: $<%= course.enrollment.earlyBirdPrice %>
+              </span>
+            <% } %>
+          </div>
+          
+          <div class="action-buttons">
+            <% if (user) { %>
+              <button class="btn-primary add-to-cart-btn" 
+                      data-course-id="<%= course._id %>" 
+                      data-course-type="InPersonAestheticTraining"
+                      data-price="<%= course.enrollment?.price || 0 %>"
+                      data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                      data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
+                      <%= (course.enrollment?.seatsAvailable <= 0 || course.basic?.status !== 'open') ? 'disabled' : '' %>>
+                <i class="fas fa-shopping-cart"></i> 
+                <%= (course.enrollment?.seatsAvailable <= 0) ? 'Course Full' : 'Add to Cart' %>
+              </button>
+              
+              <button class="btn-secondary add-to-wishlist-btn" 
+                      data-course-id="<%= course._id %>" 
+                      data-course-type="InPersonAestheticTraining"
+                      data-price="<%= course.enrollment?.price || 0 %>"
+                      data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                      data-course-title="<%= course.basic?.title || 'Untitled Course' %>">
+                <i class="fas fa-heart"></i> Save to Wishlist
+              </button>
+            <% } else { %>
+              <button class="btn-primary" onclick="showLoginRequired()">
+                <i class="fas fa-shopping-cart"></i> Add to Cart
+              </button>
+              <button class="btn-secondary" onclick="showLoginRequired()">
+                <i class="fas fa-heart"></i> Save to Wishlist
+              </button>
+            <% } %>
+          </div>
+          
+          <div class="availability-info">
+            <div class="seats-available">
+              <strong><%= course.enrollment?.seatsAvailable || 0 %></strong> of <strong><%= course.enrollment?.maxEnrollment || 20 %></strong> seats available
+            </div>
+            <div class="seats-bar">
+              <div class="seats-fill" style="width: <%= ((course.enrollment?.maxEnrollment - course.enrollment?.seatsAvailable) / course.enrollment?.maxEnrollment * 100) || 0 %>%"></div>
+            </div>
+            <div class="seats-text">
+              <% if (course.enrollment?.seatsAvailable <= 5 && course.enrollment?.seatsAvailable > 0) { %>
+                <i class="fas fa-exclamation-circle"></i> Limited availability - Register soon!
+              <% } else if (course.enrollment?.seatsAvailable <= 0) { %>
+                <i class="fas fa-times-circle"></i> This course is fully booked
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Quick Info Bar -->
+    <div class="quick-info-bar">
+      <div class="info-item">
+        <div class="info-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="info-label">Duration</div>
+        <div class="info-value"><%= course.schedule?.duration || 'TBD' %></div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-icon">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <div class="info-label">Certification</div>
+        <div class="info-value"><%= course.certification?.certificateProvided ? 'Yes' : 'No' %></div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-icon">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div class="info-label">Level</div>
+        <div class="info-value"><%= course.basic?.difficultyLevel || 'All Levels' %></div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-icon">
+          <i class="fas fa-language"></i>
+        </div>
+        <div class="info-label">Language</div>
+        <div class="info-value"><%= course.basic?.language || 'English' %></div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="info-label">Class Size</div>
+        <div class="info-value">Max <%= course.enrollment?.maxEnrollment || 20 %></div>
+      </div>
+    </div>
+
+    <% if (course.media?.uploadedPicture) { %>
+    <!-- Course Image -->
+    <div class="content-section">
+      <div class="image-gallery">
+        <div class="main-image">
+          <img src="<%= course.media.uploadedPicture %>" alt="<%= course.basic?.title %>" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="image-placeholder" style="display: none;">
+            <i class="fas fa-image"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Course Overview -->
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <h2 class="section-title">Course Overview</h2>
+      </div>
+      
+      <div class="overview-content">
+        <p><%= course.overview?.aboutThisCourse || course.basic?.description || 'This comprehensive training program is designed to provide healthcare professionals with the knowledge and practical skills needed to excel in aesthetic medicine.' %></p>
+        
+        <% if (course.overview?.targetAudience) { %>
+        <p><strong>Who Should Attend:</strong> <%= course.overview.targetAudience %></p>
+        <% } %>
+        
+        <% if (course.overview?.prerequisites) { %>
+        <p><strong>Prerequisites:</strong> <%= course.overview.prerequisites %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Learning Objectives -->
+    <% if (course.overview?.objectives && course.overview.objectives.length > 0) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-bullseye"></i>
+        </div>
+        <h2 class="section-title">Learning Objectives</h2>
+      </div>
+      
+      <div class="objectives-grid">
+        <% course.overview.objectives.forEach((objective, index) => { %>
+        <div class="objective-item">
+          <div class="objective-number"><%= index + 1 %></div>
+          <div class="objective-text"><%= objective %></div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Course Curriculum -->
+    <% if (course.modules && course.modules.length > 0) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-book-open"></i>
+        </div>
+        <h2 class="section-title">Course Curriculum</h2>
+      </div>
+      
+      <div class="curriculum-timeline">
+        <% course.modules.forEach((module, index) => { %>
+        <div class="module-item">
+          <div class="module-header">
+            <h3 class="module-title">Module <%= index + 1 %>: <%= module.title %></h3>
+            <% if (module.duration) { %>
+            <span class="module-duration">
+              <i class="far fa-clock"></i> <%= module.duration %>
+            </span>
+            <% } %>
+          </div>
+          
+          <% if (module.description) { %>
+          <p class="module-description"><%= module.description %></p>
+          <% } %>
+          
+          <% if (module.topics && module.topics.length > 0) { %>
+          <div class="module-topics">
+            <% module.topics.forEach(topic => { %>
+            <span class="topic-tag"><%= topic %></span>
+            <% }) %>
+          </div>
+          <% } %>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Schedule Details -->
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <h2 class="section-title">Schedule & Location</h2>
+      </div>
+      
+      <div class="schedule-grid">
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="schedule-label">Start Date</div>
+          <div class="schedule-value">
+            <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %>
+          </div>
+          <div class="schedule-detail">
+            <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { weekday: 'long' }) : '' %>
+          </div>
+        </div>
+        
+        <% if (course.schedule?.endDate) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-calendar-times"></i>
+          </div>
+          <div class="schedule-label">End Date</div>
+          <div class="schedule-value">
+            <%= new Date(course.schedule.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+          </div>
+          <div class="schedule-detail">
+            <%= new Date(course.schedule.endDate).toLocaleDateString('en-US', { weekday: 'long' }) %>
+          </div>
+        </div>
+        <% } %>
+        
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-hourglass-half"></i>
+          </div>
+          <div class="schedule-label">Duration</div>
+          <div class="schedule-value"><%= course.schedule?.duration || 'TBD' %></div>
+          <div class="schedule-detail">
+            <%= course.schedule?.scheduleType || 'Full-time' %>
+          </div>
+        </div>
+        
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-map-marked-alt"></i>
+          </div>
+          <div class="schedule-label">Location</div>
+          <div class="schedule-value"><%= course.venue?.name || 'TBD' %></div>
+          <div class="schedule-detail">
+            <%= course.venue?.city ? `${course.venue.city}, ${course.venue.state}` : course.basic?.location || '' %>
+          </div>
+        </div>
+      </div>
+      
+      <% if (course.venue?.address || course.venue?.facilities) { %>
+      <div class="terms-box" style="margin-top: 30px;">
+        <h4 class="terms-title">
+          <i class="fas fa-building"></i> Venue Details
+        </h4>
+        <% if (course.venue?.address) { %>
+        <p style="margin-bottom: 10px;"><strong>Address:</strong> <%= course.venue.address %></p>
+        <% } %>
+        <% if (course.venue?.facilities && course.venue.facilities.length > 0) { %>
+        <p style="margin-bottom: 10px;"><strong>Facilities:</strong></p>
+        <ul class="terms-list">
+          <% course.venue.facilities.forEach(facility => { %>
+          <li><%= facility %></li>
+          <% }) %>
+        </ul>
+        <% } %>
+      </div>
+      <% } %>
+    </div>
+
+
+
+<!-- Instructor Information -->
+<% if (course.instructorDetails && (course.instructorDetails.primary || course.instructorDetails.additional)) { %>
+  <div class="content-section">
+    <div class="section-header">
+      <div class="section-icon">
+        <i class="fas fa-user-md"></i>
+      </div>
+      <h2 class="section-title">Meet Your Instructors</h2>
+    </div>
+    
+    <!-- Primary Instructor -->
+    <% if (course.instructorDetails.primary) { %>
+    <div class="instructor-profile" style="margin-bottom: 30px;">
+      <div class="instructor-image">
+        <% if (course.instructorDetails.primary.profileImage) { %>
+        <img src="<%= course.instructorDetails.primary.profileImage %>" alt="<%= course.instructorDetails.primary.fullName %>">
+        <% } else { %>
+        <div class="image-placeholder">
+          <i class="fas fa-user"></i>
+        </div>
+        <% } %>
+      </div>
+      
+      <div class="instructor-info">
+        <h3 class="instructor-name"><%= course.instructorDetails.primary.fullName || `${course.instructorDetails.primary.firstName} ${course.instructorDetails.primary.lastName}` %></h3>
+        <p class="instructor-title"><%= course.instructorDetails.primary.title || '' %> <%= course.instructorDetails.primary.designation || 'Lead Instructor' %></p>
+        <p class="instructor-bio"><%= course.instructorDetails.primary.bio || 'Experienced practitioner with extensive expertise in aesthetic medicine.' %></p>
+        
+        <% if (course.instructorDetails.primary.qualifications && course.instructorDetails.primary.qualifications.length > 0) { %>
+        <div class="instructor-credentials">
+          <% course.instructorDetails.primary.qualifications.forEach(qualification => { %>
+          <span class="credential-badge">
+            <i class="fas fa-award"></i> <%= qualification %>
+          </span>
+          <% }) %>
+        </div>
+        <% } %>
+        
+        <% if (course.instructorDetails.primary.specializations && course.instructorDetails.primary.specializations.length > 0) { %>
+        <div class="instructor-credentials" style="margin-top: 10px;">
+          <% course.instructorDetails.primary.specializations.forEach(specialization => { %>
+          <span class="credential-badge" style="background: #f0f7ff; color: #002147;">
+            <i class="fas fa-star"></i> <%= specialization %>
+          </span>
+          <% }) %>
+        </div>
+        <% } %>
+        
+        <% if (course.instructorDetails.primary.experience) { %>
+        <p style="margin-top: 15px; color: #666;">
+          <i class="fas fa-briefcase"></i> <%= course.instructorDetails.primary.experience %> of experience
+        </p>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+    
+    <!-- Additional Instructors -->
+    <% if (course.instructorDetails.additional && course.instructorDetails.additional.length > 0) { %>
+    <h3 style="margin: 30px 0 20px; color: #002147;">Co-Instructors</h3>
+    <div class="requirements-grid">
+      <% course.instructorDetails.additional.forEach(instructor => { %>
+      <div class="requirement-card">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <% if (instructor.profileImage) { %>
+            <img src="<%= instructor.profileImage %>" alt="<%= instructor.fullName %>" style="width: 100%; height: 100%; object-fit: cover;">
+            <% } else { %>
+            <i class="fas fa-user" style="color: #999; font-size: 24px;"></i>
+            <% } %>
+          </div>
+          <div>
+            <h4 style="margin: 0; color: #002147;"><%= instructor.fullName || `${instructor.firstName} ${instructor.lastName}` %></h4>
+            <p style="margin: 0; color: #666; font-size: 14px;"><%= instructor.title || '' %> <%= instructor.designation || instructor.role || 'Co-Instructor' %></p>
+          </div>
+        </div>
+        <% if (instructor.bio) { %>
+        <p style="color: #555; font-size: 14px; line-height: 1.6;"><%= instructor.bio %></p>
+        <% } %>
+        <% if (instructor.specializations && instructor.specializations.length > 0) { %>
+        <div style="margin-top: 10px;">
+          <% instructor.specializations.forEach(spec => { %>
+          <span style="display: inline-block; padding: 3px 10px; background: #f0f7ff; border-radius: 15px; font-size: 12px; color: #002147; margin-right: 5px; margin-bottom: 5px;">
+            <%= spec %>
+          </span>
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+    
+
+
+
+<!-- Certification Body Information -->
+<% if (course.certificationBodyDetails) { %>
+  <div class="content-section">
+    <div class="section-header">
+      <div class="section-icon">
+        <i class="fas fa-building"></i>
+      </div>
+      <h2 class="section-title">Certification Authority</h2>
+    </div>
+    
+    <div class="instructor-profile">
+      <% if (course.certificationBodyDetails.logo) { %>
+      <div class="instructor-image">
+        <img src="<%= course.certificationBodyDetails.logo %>" alt="<%= course.certificationBodyDetails.companyName %>" style="object-fit: contain; padding: 10px;">
+      </div>
+      <% } %>
+      
+      <div class="instructor-info">
+        <h3 class="instructor-name"><%= course.certificationBodyDetails.companyName %></h3>
+        <% if (course.certificationBodyDetails.shortName) { %>
+        <p class="instructor-title">(<%= course.certificationBodyDetails.shortName %>)</p>
+        <% } %>
+        
+        <% if (course.certificationBodyDetails.description) { %>
+        <p class="instructor-bio"><%= course.certificationBodyDetails.description %></p>
+        <% } %>
+        
+        <% if (course.certificationBodyDetails.establishedYear) { %>
+        <p style="color: #666; margin-top: 10px;">
+          <i class="fas fa-calendar-alt"></i> Established: <%= course.certificationBodyDetails.establishedYear %>
+        </p>
+        <% } %>
+        
+        <% if (course.certificationBodyDetails.accreditation && course.certificationBodyDetails.accreditation.length > 0) { %>
+        <div class="instructor-credentials" style="margin-top: 15px;">
+          <h4 style="font-size: 14px; color: #002147; margin-bottom: 10px;">Accreditations:</h4>
+          <% course.certificationBodyDetails.accreditation.forEach(accred => { %>
+          <span class="credential-badge">
+            <i class="fas fa-certificate"></i> <%= accred %>
+          </span>
+          <% }) %>
+        </div>
+        <% } %>
+        
+        <% if (course.certificationBodyDetails.recognizedBy && course.certificationBodyDetails.recognizedBy.length > 0) { %>
+        <div class="instructor-credentials" style="margin-top: 10px;">
+          <h4 style="font-size: 14px; color: #002147; margin-bottom: 10px;">Recognized By:</h4>
+          <% course.certificationBodyDetails.recognizedBy.forEach(org => { %>
+          <span class="credential-badge" style="background: #f0f7ff; color: #002147;">
+            <i class="fas fa-check-circle"></i> <%= org %>
+          </span>
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    
+    <% if (course.certificationBodyDetails.specializations && course.certificationBodyDetails.specializations.length > 0) { %>
+    <div class="terms-box" style="margin-top: 30px;">
+      <h4 class="terms-title">
+        <i class="fas fa-graduation-cap"></i> Certification Specializations
+      </h4>
+      <ul class="terms-list">
+        <% course.certificationBodyDetails.specializations.forEach(spec => { %>
+        <li><%= spec %></li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+    
+    <% if (course.certificationBodyDetails.website || course.certificationBodyDetails.email) { %>
+    <div class="schedule-grid" style="margin-top: 30px;">
+      <% if (course.certificationBodyDetails.website) { %>
+      <div class="schedule-card">
+        <div class="schedule-icon">
+          <i class="fas fa-globe"></i>
+        </div>
+        <div class="schedule-label">Website</div>
+        <div class="schedule-value">
+          <a href="<%= course.certificationBodyDetails.website %>" target="_blank" style="color: #002147; text-decoration: none;">
+            Visit Website
+          </a>
+        </div>
+      </div>
+      <% } %>
+      
+      <% if (course.certificationBodyDetails.email) { %>
+      <div class="schedule-card">
+        <div class="schedule-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <div class="schedule-label">Contact</div>
+        <div class="schedule-value">
+          <a href="mailto:<%= course.certificationBodyDetails.email %>" style="color: #002147; text-decoration: none;">
+            <%= course.certificationBodyDetails.email %>
+          </a>
+        </div>
+      </div>
+      <% } %>
+      
+      <% if (course.certificationBodyDetails.phone) { %>
+      <div class="schedule-card">
+        <div class="schedule-icon">
+          <i class="fas fa-phone"></i>
+        </div>
+        <div class="schedule-label">Phone</div>
+        <div class="schedule-value">
+          <a href="tel:<%= course.certificationBodyDetails.phone %>" style="color: #002147; text-decoration: none;">
+            <%= course.certificationBodyDetails.phone %>
+          </a>
+        </div>
+      </div>
+      <% } %>
+      
+      <% if (course.certificationBodyDetails.address) { %>
+      <div class="schedule-card">
+        <div class="schedule-icon">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <div class="schedule-label">Location</div>
+        <div class="schedule-value">
+          <%= course.certificationBodyDetails.address.city %>, <%= course.certificationBodyDetails.address.country %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+
+
+
+
+    <!-- Course Content Details -->
+    <% if (course.content) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-book"></i>
+        </div>
+        <h2 class="section-title">Course Content</h2>
+      </div>
+      
+      <div class="requirements-grid">
+        <% if (course.content.totalDuration) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-clock"></i> Total Duration</h4>
+          <p><%= course.content.totalDuration %> hours of comprehensive training</p>
+        </div>
+        <% } %>
+        
+        <% if (course.content.totalModules) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-layer-group"></i> Course Structure</h4>
+          <p><%= course.content.totalModules %> modules covering all essential topics</p>
+        </div>
+        <% } %>
+        
+        <% if (course.content.teachingMethods && course.content.teachingMethods.length > 0) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-chalkboard-teacher"></i> Teaching Methods</h4>
+          <ul class="requirement-list">
+            <% course.content.teachingMethods.forEach(method => { %>
+            <li><%= method %></li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+        
+        <% if (course.content.learningActivities && course.content.learningActivities.length > 0) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-tasks"></i> Learning Activities</h4>
+          <ul class="requirement-list">
+            <% course.content.learningActivities.forEach(activity => { %>
+            <li><%= activity %></li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+      </div>
+      
+      <% if (course.content.supplementaryResources && course.content.supplementaryResources.length > 0) { %>
+      <div class="terms-box" style="margin-top: 30px;">
+        <h4 class="terms-title">
+          <i class="fas fa-folder-open"></i> Supplementary Resources
+        </h4>
+        <ul class="terms-list">
+          <% course.content.supplementaryResources.forEach(resource => { %>
+          <li><%= resource %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+
+    <!-- Practical Training Details -->
+    <% if (course.practical) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-hand-holding-medical"></i>
+        </div>
+        <h2 class="section-title">Hands-On Practical Training</h2>
+      </div>
+      
+      <% if (course.practical.handsOnComponents && course.practical.handsOnComponents.length > 0) { %>
+      <div class="objectives-grid" style="margin-bottom: 30px;">
+        <% course.practical.handsOnComponents.forEach((component, index) => { %>
+        <div class="objective-item">
+          <div class="objective-number"><i class="fas fa-syringe"></i></div>
+          <div class="objective-text"><%= component %></div>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+      
+      <div class="schedule-grid">
+        <% if (course.practical.clinicalHours) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-user-clock"></i>
+          </div>
+          <div class="schedule-label">Clinical Hours</div>
+          <div class="schedule-value"><%= course.practical.clinicalHours %> Hours</div>
+          <div class="schedule-detail">Supervised Practice</div>
+        </div>
+        <% } %>
+        
+        <% if (course.practical.patientInteractions) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="schedule-label">Patient Interactions</div>
+          <div class="schedule-value"><%= course.practical.patientInteractions %></div>
+          <div class="schedule-detail">Real Cases</div>
+        </div>
+        <% } %>
+        
+        <% if (course.practical.proceduresCount) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-procedures"></i>
+          </div>
+          <div class="schedule-label">Procedures</div>
+          <div class="schedule-value"><%= course.practical.proceduresCount %>+</div>
+          <div class="schedule-detail">Hands-on Practice</div>
+        </div>
+        <% } %>
+        
+        <% if (course.practical.simulationTraining) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-vr-cardboard"></i>
+          </div>
+          <div class="schedule-label">Simulation</div>
+          <div class="schedule-value">Available</div>
+          <div class="schedule-detail">Advanced Training</div>
+        </div>
+        <% } %>
+      </div>
+      
+      <% if (course.practical.practiceProtocols && course.practical.practiceProtocols.length > 0) { %>
+      <div class="terms-box" style="margin-top: 30px;">
+        <h4 class="terms-title">
+          <i class="fas fa-clipboard-check"></i> Practice Protocols
+        </h4>
+        <ul class="terms-list">
+          <% course.practical.practiceProtocols.forEach(protocol => { %>
+          <li><%= protocol %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+      
+      <% if (course.practical.safetyGuidelines && course.practical.safetyGuidelines.length > 0) { %>
+      <div class="terms-box" style="margin-top: 20px; border-color: #dc3545;">
+        <h4 class="terms-title" style="color: #dc3545;">
+          <i class="fas fa-exclamation-triangle"></i> Safety Guidelines
+        </h4>
+        <ul class="terms-list">
+          <% course.practical.safetyGuidelines.forEach(guideline => { %>
+          <li><%= guideline %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+
+    <!-- Course Inclusions -->
+    <% if (course.inclusions) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-gift"></i>
+        </div>
+        <h2 class="section-title">What's Included</h2>
+      </div>
+      
+      <div class="certification-features">
+        <% if (course.inclusions.courseMaterials && course.inclusions.courseMaterials.length > 0) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <h4 class="cert-title">Course Materials</h4>
+          <p class="cert-description">
+            <%= course.inclusions.courseMaterials.join(', ') %>
+          </p>
+        </div>
+        <% } %>
+        
+        <% if (course.inclusions.mealsIncluded) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-utensils"></i>
+          </div>
+          <h4 class="cert-title">Meals & Refreshments</h4>
+          <p class="cert-description">
+            <%= course.inclusions.mealDetails || 'Lunch and refreshments provided' %>
+          </p>
+        </div>
+        <% } %>
+        
+        <% if (course.inclusions.accommodationIncluded) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-bed"></i>
+          </div>
+          <h4 class="cert-title">Accommodation</h4>
+          <p class="cert-description">
+            <%= course.inclusions.accommodationDetails || 'Accommodation assistance available' %>
+          </p>
+        </div>
+        <% } %>
+        
+        <% if (course.inclusions.transportationIncluded) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-shuttle-van"></i>
+          </div>
+          <h4 class="cert-title">Transportation</h4>
+          <p class="cert-description">
+            <%= course.inclusions.transportationDetails || 'Local transportation provided' %>
+          </p>
+        </div>
+        <% } %>
+      </div>
+      
+      <% if (course.inclusions.kitContents && course.inclusions.kitContents.length > 0) { %>
+      <div class="terms-box" style="margin-top: 30px;">
+        <h4 class="terms-title">
+          <i class="fas fa-toolbox"></i> Training Kit Contents
+        </h4>
+        <ul class="terms-list">
+          <% course.inclusions.kitContents.forEach(item => { %>
+          <li><%= item %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+      
+      <% if (course.inclusions.certificateDetails) { %>
+      <div class="terms-box" style="margin-top: 20px;">
+        <h4 class="terms-title">
+          <i class="fas fa-certificate"></i> Certificate Information
+        </h4>
+        <p><%= course.inclusions.certificateDetails %></p>
+      </div>
+      <% } %>
+      
+      <% if (course.inclusions.postCourseSupport && course.inclusions.postCourseSupport.length > 0) { %>
+      <div class="terms-box" style="margin-top: 20px;">
+        <h4 class="terms-title">
+          <i class="fas fa-headset"></i> Post-Course Support
+        </h4>
+        <ul class="terms-list">
+          <% course.inclusions.postCourseSupport.forEach(support => { %>
+          <li><%= support %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+
+    <!-- Attendance Policy -->
+    <% if (course.attendance) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-user-check"></i>
+        </div>
+        <h2 class="section-title">Attendance & Completion Requirements</h2>
+      </div>
+      
+      <div class="requirements-grid">
+        <div class="requirement-card">
+          <h4><i class="fas fa-percentage"></i> Minimum Attendance</h4>
+          <p><%= course.attendance.minimumAttendance %>% attendance required for certification</p>
+        </div>
+        
+        <% if (course.attendance.attendanceTracking) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-clipboard-check"></i> Attendance Tracking</h4>
+          <p><%= course.attendance.attendanceTracking %></p>
+        </div>
+        <% } %>
+        
+        <% if (course.attendance.makeUpPolicy) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-redo"></i> Make-Up Policy</h4>
+          <p><%= course.attendance.makeUpPolicy %></p>
+        </div>
+        <% } %>
+        
+        <% if (course.attendance.tardyPolicy) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-clock"></i> Punctuality Policy</h4>
+          <p><%= course.attendance.tardyPolicy %></p>
+        </div>
+        <% } %>
+      </div>
+      
+      <% if (course.attendance.attendanceImpact) { %>
+      <div class="terms-box" style="margin-top: 20px;">
+        <h4 class="terms-title">
+          <i class="fas fa-exclamation-circle"></i> Impact of Poor Attendance
+        </h4>
+        <p><%= course.attendance.attendanceImpact %></p>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+
+    <!-- Contact Information -->
+    <% if (course.contact) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-address-book"></i>
+        </div>
+        <h2 class="section-title">Contact Information</h2>
+      </div>
+      
+      <div class="schedule-grid">
+        <% if (course.contact.courseCoordinator) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-user-tie"></i>
+          </div>
+          <div class="schedule-label">Course Coordinator</div>
+          <div class="schedule-value"><%= course.contact.courseCoordinator.name %></div>
+          <% if (course.contact.courseCoordinator.email) { %>
+          <div class="schedule-detail">
+            <a href="mailto:<%= course.contact.courseCoordinator.email %>" style="color: #b8860b;">
+              <%= course.contact.courseCoordinator.email %>
+            </a>
+          </div>
+          <% } %>
+        </div>
+        <% } %>
+        
+        <% if (course.contact.supportEmail) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <div class="schedule-label">Support Email</div>
+          <div class="schedule-value">
+            <a href="mailto:<%= course.contact.supportEmail %>" style="color: #002147; text-decoration: none;">
+              <%= course.contact.supportEmail %>
+            </a>
+          </div>
+        </div>
+        <% } %>
+        
+        <% if (course.contact.supportPhone) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-phone"></i>
+          </div>
+          <div class="schedule-label">Support Phone</div>
+          <div class="schedule-value">
+            <a href="tel:<%= course.contact.supportPhone %>" style="color: #002147; text-decoration: none;">
+              <%= course.contact.supportPhone %>
+            </a>
+          </div>
+        </div>
+        <% } %>
+        
+        <% if (course.contact.officeHours) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-business-time"></i>
+          </div>
+          <div class="schedule-label">Office Hours</div>
+          <div class="schedule-value"><%= course.contact.officeHours %></div>
+        </div>
+        <% } %>
+      </div>
+      
+      <% if (course.contact.emergencyContact) { %>
+      <div class="terms-box" style="margin-top: 20px; border-color: #dc3545;">
+        <h4 class="terms-title" style="color: #dc3545;">
+          <i class="fas fa-phone-alt"></i> Emergency Contact
+        </h4>
+        <p>
+          <strong><%= course.contact.emergencyContact.name %></strong><br>
+          Phone: <a href="tel:<%= course.contact.emergencyContact.phone %>" style="color: #dc3545;">
+            <%= course.contact.emergencyContact.phone %>
+          </a>
+          <% if (course.contact.emergencyContact.available) { %>
+          <br><small>Available: <%= course.contact.emergencyContact.available %></small>
+          <% } %>
+        </p>
+      </div>
+      <% } %>
+      
+      <% if (course.contact.socialMedia) { %>
+      <div style="text-align: center; margin-top: 30px;">
+        <h4 style="color: #002147; margin-bottom: 15px;">Connect With Us</h4>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+          <% if (course.contact.socialMedia.facebook) { %>
+          <a href="<%= course.contact.socialMedia.facebook %>" target="_blank" class="credential-badge" style="background: #1877f2; color: white; border: none;">
+            <i class="fab fa-facebook-f"></i> Facebook
+          </a>
+          <% } %>
+          <% if (course.contact.socialMedia.twitter) { %>
+          <a href="<%= course.contact.socialMedia.twitter %>" target="_blank" class="credential-badge" style="background: #1da1f2; color: white; border: none;">
+            <i class="fab fa-twitter"></i> Twitter
+          </a>
+          <% } %>
+          <% if (course.contact.socialMedia.linkedin) { %>
+          <a href="<%= course.contact.socialMedia.linkedin %>" target="_blank" class="credential-badge" style="background: #0077b5; color: white; border: none;">
+            <i class="fab fa-linkedin-in"></i> LinkedIn
+          </a>
+          <% } %>
+          <% if (course.contact.socialMedia.instagram) { %>
+          <a href="<%= course.contact.socialMedia.instagram %>" target="_blank" class="credential-badge" style="background: #e4405f; color: white; border: none;">
+            <i class="fab fa-instagram"></i> Instagram
+          </a>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-clipboard-list"></i>
+        </div>
+        <h2 class="section-title">Requirements & Materials</h2>
+      </div>
+      
+      <div class="requirements-grid">
+        <% if (course.requirements?.prerequisites) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-check-circle"></i> Prerequisites</h4>
+          <p><%= course.requirements.prerequisites %></p>
+        </div>
+        <% } %>
+        
+        <% if (course.requirements?.technicalRequirements || course.requirements?.systemRequirements) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-laptop"></i> Technical Requirements</h4>
+          <ul class="requirement-list">
+            <% if (course.requirements.technicalRequirements) { %>
+            <li><%= course.requirements.technicalRequirements %></li>
+            <% } %>
+            <% if (course.requirements.systemRequirements) { %>
+            <li><%= course.requirements.systemRequirements %></li>
+            <% } %>
+          </ul>
+        </div>
+        <% } %>
+        
+        <% if (course.requirements?.requiredMaterials && course.requirements.requiredMaterials.length > 0) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-tools"></i> Required Materials</h4>
+          <ul class="requirement-list">
+            <% course.requirements.requiredMaterials.forEach(material => { %>
+            <li><%= material %></li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+        
+        <% if (course.requirements?.providedMaterials && course.requirements.providedMaterials.length > 0) { %>
+        <div class="requirement-card">
+          <h4><i class="fas fa-gift"></i> Provided Materials</h4>
+          <ul class="requirement-list">
+            <% course.requirements.providedMaterials.forEach(material => { %>
+            <li><%= material %></li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Certification Information -->
+    <% if (course.certification?.certificateProvided) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <h2 class="section-title">Certification</h2>
+      </div>
+      
+      <div class="certification-features">
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-award"></i>
+          </div>
+          <h4 class="cert-title">Certificate Type</h4>
+          <p class="cert-description">
+            <%= course.certification.certificateType || 'Certificate of Completion' %>
+          </p>
+        </div>
+        
+        <% if (course.certification.ceuCredits) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <h4 class="cert-title">CEU Credits</h4>
+          <p class="cert-description">
+            <%= course.certification.ceuCredits %> Continuing Education Units
+          </p>
+        </div>
+        <% } %>
+        
+        <% if (course.certification.validityPeriod) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <h4 class="cert-title">Validity Period</h4>
+          <p class="cert-description">
+            <%= course.certification.validityPeriod %> months
+          </p>
+        </div>
+        <% } else { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-infinity"></i>
+          </div>
+          <h4 class="cert-title">Validity</h4>
+          <p class="cert-description">Lifetime Certification</p>
+        </div>
+        <% } %>
+        
+        <% if (course.certification.verificationMethod) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h4 class="cert-title">Verification</h4>
+          <p class="cert-description">
+            <%= course.certification.verificationMethod %>
+          </p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Enrollment Terms -->
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-file-contract"></i>
+        </div>
+        <h2 class="section-title">Enrollment Information</h2>
+      </div>
+      
+      <div class="terms-box">
+        <h4 class="terms-title">
+          <i class="fas fa-info-circle"></i> Important Information
+        </h4>
+        <ul class="terms-list">
+          <% if (course.enrollment?.registrationDeadline) { %>
+          <li>Registration deadline: <%= new Date(course.enrollment.registrationDeadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></li>
+          <% } %>
+          <% if (course.enrollment?.cancellationPolicy) { %>
+          <li><%= course.enrollment.cancellationPolicy %></li>
+          <% } %>
+          <% if (course.enrollment?.refundPolicy) { %>
+          <li>Refund Policy: <%= course.enrollment.refundPolicy %></li>
+          <% } %>
+          <% if (course.enrollment?.paymentOptions && course.enrollment.paymentOptions.length > 0) { %>
+          <li>Payment options: <%= course.enrollment.paymentOptions.join(', ') %></li>
+          <% } %>
+          <% if (course.enrollment?.minEnrollment) { %>
+          <li>Minimum enrollment: <%= course.enrollment.minEnrollment %> students required</li>
+          <% } %>
+        </ul>
+      </div>
+      
+      <% if (course.enrollment?.enrollmentInstructions) { %>
+      <div class="terms-box" style="margin-top: 20px;">
+        <h4 class="terms-title">
+          <i class="fas fa-clipboard-check"></i> How to Enroll
+        </h4>
+        <p><%= course.enrollment.enrollmentInstructions %></p>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-question-circle"></i>
+        </div>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+      </div>
+      
+      <div class="faq-accordion">
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h4>What is the dress code for the training?</h4>
+            <i class="fas fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Professional medical attire or business casual is recommended. Closed-toe shoes are required for all practical sessions. We recommend bringing a lab coat for hands-on training.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h4>Are meals provided during the training?</h4>
+            <i class="fas fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Light refreshments and lunch are provided on all training days. Please inform us of any dietary restrictions during registration.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h4>Can I get a refund if I need to cancel?</h4>
+            <i class="fas fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            <p><%= course.enrollment?.refundPolicy || 'Full refunds are available up to 14 days before the course start date. Cancellations made within 14 days are subject to a 50% cancellation fee.' %></p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h4>Will I receive support after the training?</h4>
+            <i class="fas fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Yes! All participants receive 3 months of post-training support, including access to our online community, monthly Q&A sessions, and email support from instructors.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <h2 class="section-title">Need More Information?</h2>
+      </div>
+      
+      <div style="text-align: center; padding: 20px;">
+        <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
+          Have questions about this course? Our training advisors are here to help you make the right decision for your professional development.
+        </p>
+        <a href="/contact" class="btn-primary" style="display: inline-block; text-decoration: none;">
+          <i class="fas fa-phone"></i> Contact Training Advisor
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Action Bar -->
+  <div class="mobile-action-bar">
+    <div class="mobile-action-content">
+      <div class="mobile-price">
+        $<%= course.enrollment?.price || 0 %>
+      </div>
+      <div class="mobile-buttons">
+        <% if (user) { %>
+          <button class="btn-primary add-to-cart-btn" 
+                  data-course-id="<%= course._id %>" 
+                  data-course-type="InPersonAestheticTraining"
+                  data-price="<%= course.enrollment?.price || 0 %>"
+                  data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                  data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
+                  <%= (course.enrollment?.seatsAvailable <= 0 || course.basic?.status !== 'open') ? 'disabled' : '' %>
+                  style="padding: 12px 20px; font-size: 14px;">
+            <i class="fas fa-shopping-cart"></i> Add to Cart
+          </button>
+        <% } else { %>
+          <button class="btn-primary" onclick="showLoginRequired()" style="padding: 12px 20px; font-size: 14px;">
+            <i class="fas fa-shopping-cart"></i> Add to Cart
+          </button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Container -->
+  <div id="notificationContainer"></div>
+
+  <script>
+    // Show notification function
+    function showNotification(title, message, type = 'success') {
+      const container = document.getElementById('notificationContainer');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        warning: 'fa-exclamation-triangle'
+      };
+      
+      notification.innerHTML = `
+        <div class="notification-icon">
+          <i class="fas ${iconMap[type]}"></i>
+        </div>
+        <div class="notification-content">
+          <h4>${title}</h4>
+          <p>${message}</p>
+        </div>
+      `;
+      
+      container.appendChild(notification);
+      
+      // Show notification
+      setTimeout(() => notification.classList.add('show'), 10);
+      
+      // Auto remove
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 500);
+      }, 5000);
+    }
+
+    // Show login required message
+    function showLoginRequired() {
+      showNotification('Authentication Required', 'Please log in to continue', 'warning');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    }
+
+    // Set button loading state
+    function setButtonLoading(button, loading) {
+      if (loading) {
+        button.classList.add('btn-loading');
+        button.disabled = true;
+        const icon = button.querySelector('i');
+        if (icon) {
+          const originalClass = icon.className;
+          icon.setAttribute('data-original-class', originalClass);
+          icon.className = 'fas fa-spinner fa-spin';
+        }
+      } else {
+        button.classList.remove('btn-loading');
+        button.disabled = false;
+        const icon = button.querySelector('i');
+        if (icon) {
+          const originalClass = icon.getAttribute('data-original-class');
+          if (originalClass) {
+            icon.className = originalClass;
+          }
+        }
+      }
+    }
+
+    // Add to Cart functionality
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        const button = e.currentTarget;
+        
+        if (button.disabled) return;
+        
+        const courseData = {
+          courseId: button.getAttribute('data-course-id'),
+          courseType: button.getAttribute('data-course-type'),
+          price: button.getAttribute('data-price'),
+          courseCode: button.getAttribute('data-course-code')
+        };
+        const courseTitle = button.getAttribute('data-course-title');
+
+        setButtonLoading(button, true);
+
+        try {
+          const response = await fetch('/add-to-cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(courseData)
+          });
+
+          const result = await response.json();
+          
+          if (result.success) {
+            showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+            // Update button state
+            button.style.background = '#2e7d3e';
+            setTimeout(() => button.style.background = '', 2000);
+          } else {
+            showNotification('Unable to Add', result.message, 'warning');
+          }
+        } catch (err) {
+          console.error('Cart error:', err);
+          showNotification('Error', 'Failed to add course to cart', 'error');
+        } finally {
+          setButtonLoading(button, false);
+        }
+      });
+    });
+
+    // Add to Wishlist functionality
+    document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        const button = e.currentTarget;
+        const courseData = {
+          courseId: button.getAttribute('data-course-id'),
+          courseType: button.getAttribute('data-course-type'),
+          price: button.getAttribute('data-price'),
+          courseCode: button.getAttribute('data-course-code')
+        };
+        const courseTitle = button.getAttribute('data-course-title');
+
+        setButtonLoading(button, true);
+
+        try {
+          const response = await fetch('/add-to-wishlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(courseData)
+          });
+
+          const result = await response.json();
+          
+          if (result.success) {
+            showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
+            // Update button appearance
+            button.innerHTML = '<i class="fas fa-heart" style="color: #e74c3c;"></i> Saved to Wishlist';
+            button.style.borderColor = '#e74c3c';
+            button.style.color = '#e74c3c';
+          } else {
+            showNotification('Unable to Add', result.message, 'warning');
+          }
+        } catch (err) {
+          console.error('Wishlist error:', err);
+          showNotification('Error', 'Failed to add course to wishlist', 'error');
+        } finally {
+          if (!button.innerHTML.includes('Saved')) {
+            setButtonLoading(button, false);
+          }
+        }
+      });
+    });
+
+    // FAQ Toggle
+    function toggleFaq(element) {
+      const faqItem = element.parentElement;
+      const wasActive = faqItem.classList.contains('active');
+      
+      // Close all FAQ items
+      document.querySelectorAll('.faq-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Open clicked item if it wasn't active
+      if (!wasActive) {
+        faqItem.classList.add('active');
+      }
+    }
+
+
+
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Initialize
+    console.log('📚 Course details page loaded');
+    console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
+    console.log('💺 Seats available:', <%= course.enrollment?.seatsAvailable || 0 %>);
+  </script>
+
+
+<!-- TEMPORARY DEBUG - Remove after testing -->
+<div style="background: #f0f0f0; padding: 20px; margin: 20px; border: 2px solid red;">
+  <h3>Debug Information:</h3>
+  <p><strong>Course ID:</strong> <%= course._id %></p>
+  <p><strong>Course Title:</strong> <%= course.basic?.title %></p>
+  
+  <h4>Instructor Data Check:</h4>
+  <p><strong>Primary Instructor ID in Course:</strong> <%= course.instructors?.primary?.instructorId || 'NONE' %></p>
+  <p><strong>Primary Instructor Name in Course:</strong> <%= course.instructors?.primary?.name || 'NONE' %></p>
+  <p><strong>Has instructorDetails object:</strong> <%= !!course.instructorDetails %></p>
+  <p><strong>Has primary in instructorDetails:</strong> <%= !!course.instructorDetails?.primary %></p>
+  <% if (course.instructorDetails?.primary) { %>
+    <p><strong>Primary Instructor Full Name:</strong> <%= course.instructorDetails.primary.firstName %> <%= course.instructorDetails.primary.lastName %></p>
+  <% } %>
+  
+  <h4>Certification Body Check:</h4>
+  <p><strong>Certification Body ID in Course:</strong> <%= course.certification?.issuingAuthorityId || 'NONE' %></p>
+  <p><strong>Certification Body Name in Course:</strong> <%= course.certification?.issuingAuthority || 'NONE' %></p>
+  <p><strong>Has certificationBodyDetails:</strong> <%= !!course.certificationBodyDetails %></p>
+  <% if (course.certificationBodyDetails) { %>
+    <p><strong>Certification Body Company Name:</strong> <%= course.certificationBodyDetails.companyName %></p>
+  <% } %>
+</div>
+  <%- include('partials/footer') %>
+</body>
+</html>

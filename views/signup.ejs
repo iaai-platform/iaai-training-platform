@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Page</title>
+    <link rel="stylesheet" href="/css/signupstyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <%- include('partials/header') %>
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/"><i class="fas fa-home"></i> Home</a> 
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <span class="current">Signup</span>
+        </div>
+    </nav>
+
+    <div class="signup-wrapper">
+        <div class="signup-container">
+            <!-- Header Section -->
+            <div class="signup-header">
+                <div class="header-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1>Create Your Account</h1>
+                <p class="subtitle">Join our community and start your learning journey</p>
+            </div>
+
+            <!-- Message Container -->
+            <div class="message-container">
+                <% if (success_message) { %>
+                    <div class="message success-message" id="successMessage">
+                        <div class="message-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="message-content">
+                            <h4>Application Submitted Successfully!</h4>
+                            <p><%= success_message %></p>
+                        </div>
+                        <button class="message-close" onclick="closeMessage('successMessage')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                <% } %>
+                
+                <% if (error_message) { %>
+                    <div class="message error-message" id="errorMessage">
+                        <div class="message-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="message-content">
+                            <h4>Oops! Something went wrong</h4>
+                            <p><%= error_message %></p>
+                        </div>
+                        <button class="message-close" onclick="closeMessage('errorMessage')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                <% } %>
+            </div>
+            
+            <!-- Signup Form -->
+            <form id="signup-form" action="/signup" method="POST" class="modern-form">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Personal Information
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">
+                                First Name <span class="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input 
+                                    type="text" 
+                                    name="firstName" 
+                                    id="firstName"
+                                    placeholder="Enter your first name"
+                                    value="<%= formData ? formData.firstName || '' : '' %>"
+                                    required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lastName">
+                                Last Name <span class="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input 
+                                    type="text" 
+                                    name="lastName" 
+                                    id="lastName"
+                                    placeholder="Enter your last name"
+                                    value="<%= formData ? formData.lastName || '' : '' %>"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">
+                            Email Address <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input 
+                                type="email" 
+                                name="email" 
+                                id="email"
+                                placeholder="your.email@example.com"
+                                value="<%= formData ? formData.email || '' : '' %>"
+                                required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">
+                            Password <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input 
+                                type="password" 
+                                name="password" 
+                                id="password"
+                                placeholder="Create a strong password"
+                                required>
+                            <button type="button" class="toggle-password" onclick="togglePassword()">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength"></div>
+                    </div>
+                </div>
+
+                <!-- Additional Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Additional Information
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-phone input-icon"></i>
+                                <input 
+                                    type="tel" 
+                                    name="phoneNumber"
+                                    id="phoneNumber"
+                                    placeholder="+1 (555) 123-4567"
+                                    value="<%= formData ? formData.phoneNumber || '' : '' %>">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profession">Profession</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-briefcase input-icon"></i>
+                                <input 
+                                    type="text" 
+                                    name="profession"
+                                    id="profession"
+                                    placeholder="Your profession"
+                                    value="<%= formData ? formData.profession || '' : '' %>">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-globe input-icon"></i>
+                                <input 
+                                    type="text" 
+                                    name="country"
+                                    id="country"
+                                    placeholder="Your country"
+                                    value="<%= formData ? formData.country || '' : '' %>">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="role">
+                                Role <span class="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user-tag input-icon"></i>
+                                <select name="role" id="role" required>
+                                    <option value="">Select your role</option>
+                                    <option value="user" <%= formData && formData.role === 'user' ? 'selected' : '' %>>
+                                        <i class="fas fa-user"></i> Student
+                                    </option>
+                                    <option value="instructor" <%= formData && formData.role === 'instructor' ? 'selected' : '' %>>
+                                        <i class="fas fa-chalkboard-teacher"></i> Instructor
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructor Specific Fields -->
+                <div id="instructorFields" class="form-section instructor-section" style="display: <%= formData && formData.role === 'instructor' ? 'block' : 'none' %>;">
+                    <h3 class="section-title">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        Instructor Information
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="experience">Teaching Experience</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-clock input-icon"></i>
+                            <input 
+                                type="text" 
+                                name="experience" 
+                                id="experience"
+                                placeholder="Years of experience"
+                                value="<%= formData ? formData.experience || '' : '' %>">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expertise">Area of Expertise</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-graduation-cap input-icon"></i>
+                            <input 
+                                type="text" 
+                                name="expertise" 
+                                id="expertise"
+                                placeholder="Your areas of expertise"
+                                value="<%= formData ? formData.expertise || '' : '' %>">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cv">CV/Resume Link (optional)</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-file-alt input-icon"></i>
+                            <input 
+                                type="text" 
+                                name="cv" 
+                                id="cv"
+                                placeholder="Link to your CV"
+                                value="<%= formData ? formData.cv || '' : '' %>">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Application
+                    </button>
+                    <p class="login-link">
+                        Already have an account? 
+                        <a href="/login" class="cta-link">
+                            <i class="fas fa-sign-in-alt"></i> Login here
+                        </a>
+                    </p>
+                </div>
+            </form>
+
+            <!-- Information Box -->
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Your application will be reviewed by our team. Once approved, you'll receive an email confirmation and can start accessing our platform.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'fas fa-eye';
+            }
+        }
+
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const strengthBar = document.getElementById('passwordStrength');
+            let strength = 0;
+            let strengthText = '';
+            let strengthClass = '';
+
+            if (password.length >= 8) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^A-Za-z0-9]/)) strength++;
+
+            switch(strength) {
+                case 0:
+                case 1:
+                    strengthText = 'Weak';
+                    strengthClass = 'weak';
+                    break;
+                case 2:
+                    strengthText = 'Fair';
+                    strengthClass = 'fair';
+                    break;
+                case 3:
+                    strengthText = 'Good';
+                    strengthClass = 'good';
+                    break;
+                case 4:
+                    strengthText = 'Strong';
+                    strengthClass = 'strong';
+                    break;
+            }
+
+            if (password.length > 0) {
+                strengthBar.innerHTML = `<div class="strength-indicator ${strengthClass}">${strengthText}</div>`;
+                strengthBar.style.display = 'block';
+            } else {
+                strengthBar.style.display = 'none';
+            }
+        });
+
+        // Show/Hide Instructor Fields
+        document.getElementById('role').addEventListener('change', function () {
+            const role = this.value;
+            const instructorFields = document.getElementById('instructorFields');
+            
+            if (role === 'instructor') {
+                instructorFields.style.display = 'block';
+                instructorFields.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                instructorFields.style.display = 'none';
+            }
+        });
+
+        // Close message function
+        function closeMessage(messageId) {
+            const message = document.getElementById(messageId);
+            if (message) {
+                message.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => message.remove(), 300);
+            }
+        }
+
+        // Auto-hide messages after 10 seconds
+        setTimeout(function() {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msg => {
+                msg.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 10000);
+
+        // Form validation
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('error');
+                } else {
+                    field.classList.remove('error');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+
+        // Remove error class on input
+        document.querySelectorAll('input, select').forEach(field => {
+            field.addEventListener('input', function() {
+                this.classList.remove('error');
+            });
+        });
+    </script>
+</body>
+</html>

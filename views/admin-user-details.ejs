@@ -1,0 +1,1074 @@
+//admin-user-details.ejs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details - IAAI Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* User Details Page Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Admin Header */
+        .admin-header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(220,53,69,0.2);
+        }
+
+        .admin-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .breadcrumb {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        /* Container */
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* User Profile Card */
+        .user-profile-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #f0f2f5;
+            margin-bottom: 25px;
+        }
+
+        .user-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+
+        .user-info-main h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        .user-email {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .user-badges {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-role {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .badge-role.admin {
+            background: #dc3545;
+        }
+
+        .badge-role.instructor {
+            background: #6f42c1;
+        }
+
+        .badge-status {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-status.pending {
+            background: #ffc107;
+            color: #333;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* Professional Profile Section */
+        .professional-section {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .professional-section h4 {
+            color: #17a2b8;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #007bff;
+        }
+
+        /* Course List */
+        .course-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .course-item {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .course-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .course-details h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .course-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .course-status-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .course-type-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .type-in-person {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .type-online-live {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .type-self-paced {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cart {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Progress Section for Self-Paced Courses */
+        .progress-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 8px;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #4caf50;
+            transition: width 0.3s ease;
+        }
+
+        /* Action Buttons */
+        .action-bar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Timeline */
+        .activity-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .activity-timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #007bff;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .setting-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .setting-card h5 {
+            margin: 0 0 15px 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .course-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .course-status-info {
+                align-items: flex-start;
+                width: 100%;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<%- include('partials/header') %>
+
+<body>
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <div class="admin-header-content">
+            <div>
+                <h1><i class="fas fa-user"></i> User Details</h1>
+                <p>View and manage user information</p>
+            </div>
+            <div class="breadcrumb">
+                <a href="/">Home</a> > 
+                <a href="/dashboard">Dashboard</a> > 
+                <a href="/admin-users">Users</a> > 
+                <span>User Details</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <a href="/admin-users" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+            <% if (!userDetails.isConfirmed) { %>
+                <button class="btn btn-success" onclick="approveUser('<%= userDetails._id %>')">
+                    <i class="fas fa-check"></i> Approve User
+                </button>
+            <% } %>
+            <button class="btn btn-warning" onclick="resetPassword('<%= userDetails._id %>')">
+                <i class="fas fa-key"></i> Reset Password
+            </button>
+            <button class="btn btn-primary" onclick="changeRole('<%= userDetails._id %>', '<%= userDetails.role %>')">
+                <i class="fas fa-user-tag"></i> Change Role
+            </button>
+            <button class="btn btn-danger" onclick="deleteUser('<%= userDetails._id %>', '<%= userDetails.firstName %> <%= userDetails.lastName %>')">
+                <i class="fas fa-trash"></i> Delete User
+            </button>
+        </div>
+
+        <!-- User Profile Card -->
+        <div class="user-profile-card">
+            <div class="profile-header">
+                <div class="user-avatar-large">
+                    <%= userDetails.firstName.charAt(0) %><%= userDetails.lastName.charAt(0) %>
+                </div>
+                <div class="user-info-main">
+                    <h2><%= userDetails.firstName %> <%= userDetails.lastName %></h2>
+                    <p class="user-email"><%= userDetails.email %></p>
+                    <div class="user-badges">
+                        <span class="badge badge-role <%= userDetails.role %>"><%= userDetails.role %></span>
+                        <span class="badge badge-status <%= userDetails.isConfirmed ? '' : 'pending' %>">
+                            <%= userDetails.isConfirmed ? 'Confirmed' : 'Pending Confirmation' %>
+                        </span>
+                        <% if (userDetails.twoFactorAuth && userDetails.twoFactorAuth.enabled) { %>
+                            <span class="badge badge-success">2FA Enabled</span>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value"><%= userDetails.phoneNumber || 'Not provided' %></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Country</div>
+                    <div class="info-value"><%= userDetails.country || 'Not specified' %></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Profession</div>
+                    <div class="info-value"><%= userDetails.profession || 'Not specified' %></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Member Since</div>
+                    <div class="info-value"><%= new Date(userDetails.createdAt).toLocaleDateString() %></div>
+                </div>
+            </div>
+
+            <!-- Professional Profile (if exists) -->
+            <% if (userDetails.professionalProfile && (userDetails.professionalProfile.clinicName || userDetails.professionalProfile.bio)) { %>
+                <div class="professional-section">
+                    <h4><i class="fas fa-briefcase-medical"></i> Professional Profile</h4>
+                    <div class="info-grid">
+                        <% if (userDetails.professionalProfile.clinicName) { %>
+                            <div class="info-item">
+                                <div class="info-label">Clinic Name</div>
+                                <div class="info-value"><%= userDetails.professionalProfile.clinicName %></div>
+                            </div>
+                        <% } %>
+                        <% if (userDetails.professionalProfile.licenseNumber) { %>
+                            <div class="info-item">
+                                <div class="info-label">License Number</div>
+                                <div class="info-value"><%= userDetails.professionalProfile.licenseNumber %></div>
+                            </div>
+                        <% } %>
+                        <% if (userDetails.professionalProfile.yearsExperience) { %>
+                            <div class="info-item">
+                                <div class="info-label">Years of Experience</div>
+                                <div class="info-value"><%= userDetails.professionalProfile.yearsExperience %></div>
+                            </div>
+                        <% } %>
+                    </div>
+                    <% if (userDetails.professionalProfile.bio) { %>
+                        <div style="margin-top: 15px;">
+                            <div class="info-label">Bio</div>
+                            <div class="info-value"><%= userDetails.professionalProfile.bio %></div>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Enrolled Courses -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-graduation-cap"></i> Enrolled Courses
+                </h3>
+                <span class="badge badge-primary"><%= userDetails.myCourses ? userDetails.myCourses.length : 0 %> Courses</span>
+            </div>
+
+            <% if (userDetails.myCourses && userDetails.myCourses.length > 0) { %>
+                <div class="course-list">
+                    <% userDetails.myCourses.forEach(course => { %>
+                        <div class="course-item">
+                            <div class="course-details">
+                                <h4><%= course.courseTitle || course.title %></h4>
+                                <div class="course-meta">
+                                    <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
+                                    <span><i class="fas fa-dollar-sign"></i> $<%= course.price %></span>
+                                    <span><i class="fas fa-calendar"></i> <%= new Date(course.dateOfRegistration).toLocaleDateString() %></span>
+                                    <% if (course.courseType === 'In-Person' && course.courseId) { %>
+                                        <span><i class="fas fa-map-marker-alt"></i> <%= course.courseId.location || 'TBD' %></span>
+                                    <% } %>
+                                </div>
+
+                                <!-- Progress for Self-Paced Courses -->
+                                <% if (course.courseType === 'Self-Paced' && course.userCourseStatus) { %>
+                                    <div class="progress-section">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span>Course Progress</span>
+                                            <span><%= course.userCourseStatus.userCourseTotalstatus || 'In Progress' %></span>
+                                        </div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar-fill" style="width: <%= 
+                                                course.videos && course.videos.length > 0 && course.userCourseStatus.completedVideos 
+                                                ? (course.userCourseStatus.completedVideos.length / course.videos.length * 100) 
+                                                : 0 
+                                            %>%"></div>
+                                        </div>
+                                        <% if (course.videos && course.videos.length > 0) { %>
+                                            <small><%= course.userCourseStatus.completedVideos ? course.userCourseStatus.completedVideos.length : 0 %> of <%= course.videos.length %> videos completed</small>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div class="course-status-info">
+                                <span class="course-type-badge type-<%= course.courseType.toLowerCase().replace(' ', '-') %>">
+                                    <%= course.courseType %>
+                                </span>
+                                <span class="status-pill <%= course.status === 'Paid and Registered' ? 'status-paid' : 'status-cart' %>">
+                                    <%= course.status %>
+                                </span>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <p>No courses enrolled yet</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Wishlist -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-heart"></i> Wishlist
+                </h3>
+                <span class="badge badge-primary"><%= userDetails.myWishlist ? userDetails.myWishlist.length : 0 %> Items</span>
+            </div>
+
+            <% if (userDetails.myWishlist && userDetails.myWishlist.length > 0) { %>
+                <div class="course-list">
+                    <% userDetails.myWishlist.forEach(course => { %>
+                        <div class="course-item">
+                            <div class="course-details">
+                                <h4><%= course.courseTitle || course.title %></h4>
+                                <div class="course-meta">
+                                    <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
+                                    <span><i class="fas fa-dollar-sign"></i> $<%= course.price %></span>
+                                </div>
+                            </div>
+                            <span class="course-type-badge type-<%= course.courseType.toLowerCase().replace(' ', '-') %>">
+                                <%= course.courseType %>
+                            </span>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-heart"></i>
+                    <p>No items in wishlist</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- User Settings -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-cog"></i> User Settings & Preferences
+                </h3>
+            </div>
+
+            <div class="settings-grid">
+                <!-- Notification Settings -->
+                <div class="setting-card">
+                    <h5><i class="fas fa-bell"></i> Notifications</h5>
+                    <% if (userDetails.notificationSettings) { %>
+                        <div class="setting-item">
+                            <span>Email Notifications</span>
+                            <span><%= userDetails.notificationSettings.email ? '✓' : '✗' %></span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Course Updates</span>
+                            <span><%= userDetails.notificationSettings.courseUpdates ? '✓' : '✗' %></span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Promotions</span>
+                            <span><%= userDetails.notificationSettings.promotions ? '✓' : '✗' %></span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Digest Frequency</span>
+                            <span><%= userDetails.notificationSettings.digest || 'weekly' %></span>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Privacy Settings -->
+                <div class="setting-card">
+                    <h5><i class="fas fa-lock"></i> Privacy</h5>
+                    <% if (userDetails.privacySettings) { %>
+                        <div class="setting-item">
+                            <span>Profile Visibility</span>
+                            <span><%= userDetails.privacySettings.profileVisibility || 'private' %></span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Show Progress</span>
+                            <span><%= userDetails.privacySettings.showProgress ? '✓' : '✗' %></span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Allow Messages</span>
+                            <span><%= userDetails.privacySettings.allowMessages ? '✓' : '✗' %></span>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Learning Preferences -->
+                <div class="setting-card">
+                    <h5><i class="fas fa-book-reader"></i> Learning</h5>
+                    <% if (userDetails.learningPreferences) { %>
+                        <div class="setting-item">
+                            <span>Pace</span>
+                            <span><%= userDetails.learningPreferences.pace || 'normal' %></span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Video Quality</span>
+                            <span><%= userDetails.learningPreferences.videoQuality || 'auto' %></span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Subtitles</span>
+                            <span><%= userDetails.learningPreferences.subtitles ? '✓' : '✗' %></span>
+                        </div>
+                        <div class="setting-item">
+                            <span>Language</span>
+                            <span><%= userDetails.learningPreferences.language || 'en' %></span>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Activity -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-history"></i> Recent Activity
+                </h3>
+            </div>
+
+            <div class="activity-timeline">
+                <% if (userDetails.accountStatus && userDetails.accountStatus.lastLoginAt) { %>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">
+                                <%= new Date(userDetails.accountStatus.lastLoginAt).toLocaleString() %>
+                            </div>
+                            <div>Last login</div>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <% if (userDetails.loginActivity && userDetails.loginActivity.length > 0) { %>
+                    <% userDetails.loginActivity.slice(0, 5).forEach(activity => { %>
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <div class="timeline-date">
+                                    <%= new Date(activity.loginTime).toLocaleString() %>
+                                </div>
+                                <div>
+                                    Login from <%= activity.location || 'Unknown location' %>
+                                    <% if (activity.ip) { %>
+                                        <small class="text-muted">(IP: <%= activity.ip %>)</small>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } %>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">
+                            <%= new Date(userDetails.createdAt).toLocaleString() %>
+                        </div>
+                        <div>Account created</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Approve user
+        async function approveUser(userId) {
+    const result = await Swal.fire({
+        title: 'Approve User',
+        text: 'Are you sure you want to approve this user?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, approve!'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch('/admin/approve-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    userId: userId,
+                    sendEmail: true  // Always send email
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'User Approved!',
+                    text: data.message,
+                    timer: 2000
+                });
+                location.reload();
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'Failed to approve user', 'error');
+        }
+    }
+}
+        // Change user role
+        async function changeRole(userId, currentRole) {
+            const { value: newRole } = await Swal.fire({
+                title: 'Change User Role',
+                input: 'select',
+                inputOptions: {
+                    'user': 'User',
+                    'instructor': 'Instructor',
+                    'admin': 'Admin'
+                },
+                inputPlaceholder: 'Select a role',
+                inputValue: currentRole,
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to select a role!'
+                    }
+                }
+            });
+
+            if (newRole && newRole !== currentRole) {
+                try {
+                    const response = await fetch(`/admin-users/${userId}/update-role`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ role: newRole })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Role Updated!',
+                            text: `User role changed to ${newRole}`,
+                            timer: 2000
+                        });
+                        location.reload();
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Failed to update role', 'error');
+                }
+            }
+        }
+
+        // Reset password
+        async function resetPassword(userId) {
+            const result = await Swal.fire({
+                title: 'Reset Password',
+                text: 'This will send a password reset email to the user. Continue?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, reset!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin-users/${userId}/reset-password`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Password Reset!',
+                            text: data.message,
+                            timer: 3000
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Failed to reset password', 'error');
+                }
+            }
+        }
+
+        // Delete user (Move to Recycle Bin)
+        async function deleteUser(userId, userName) {
+    const { value: formValues } = await Swal.fire({
+        title: 'Delete User',
+        html: `
+            <p>Are you sure you want to delete <strong>${userName}</strong>?</p>
+            <p class="text-muted">The user will be moved to recycle bin and can be recovered within 30 days.</p>
+            <div style="margin-top: 20px;">
+                <label for="deletion-reason" style="display: block; text-align: left; margin-bottom: 5px;">Reason for deletion (optional):</label>
+                <textarea id="deletion-reason" class="swal2-input" style="width: 100%; height: 80px;" placeholder="Enter reason..."></textarea>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        preConfirm: () => {
+            return {
+                reason: document.getElementById('deletion-reason').value
+            }
+        }
+    });
+    
+    if (formValues) {
+        try {
+            const response = await fetch('/admin/reject-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    userId,
+                    reason: formValues.reason || 'Deleted by admin'
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'User Moved to Recycle Bin!',
+                    text: data.message,
+                    timer: 2000
+                });
+                window.location.href = '/admin-users';
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'Failed to delete user', 'error');
+        }
+    }
+}
+    
+    </script>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

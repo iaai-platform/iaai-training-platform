@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback & Suggestions - IAAI</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .feedback-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .feedback-header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+        }
+
+        .feedback-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .feedback-header p {
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .feedback-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feedback-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .feedback-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .feedback-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            padding: 15px;
+            border-radius: 50%;
+            color: white;
+        }
+
+        .feedback-icon.course { background: linear-gradient(135deg, #28a745, #20c997); }
+        .feedback-icon.feature { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+        .feedback-icon.bug { background: linear-gradient(135deg, #dc3545, #e83e8c); }
+        .feedback-icon.survey { background: linear-gradient(135deg, #6f42c1, #7952b3); }
+        .feedback-icon.beta { background: linear-gradient(135deg, #17a2b8, #6610f2); }
+
+        .feedback-card h3 {
+            margin: 0;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .feedback-card p {
+            color: #6c757d;
+            margin: 10px 0 20px 0;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .form-control.textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .rating-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .rating-star {
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .rating-star:hover,
+        .rating-star.active {
+            color: #ffc107;
+        }
+
+        .priority-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .priority-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .priority-option:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .priority-option.selected {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+        }
+
+        .priority-option.low { border-color: #28a745; }
+        .priority-option.medium { border-color: #ffc107; }
+        .priority-option.high { border-color: #dc3545; }
+
+        .priority-option.selected.low { background: #28a745; }
+        .priority-option.selected.medium { background: #ffc107; }
+        .priority-option.selected.high { background: #dc3545; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+        }
+
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .recent-feedback {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .recent-feedback h3 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-item {
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            background: #f8f9ff;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .feedback-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .feedback-item-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .feedback-item-type {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .feedback-item-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .beta-signup {
+            background: linear-gradient(135deg, #6f42c1, #7952b3);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .beta-signup h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .beta-signup p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .beta-btn {
+            background: white;
+            color: #6f42c1;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .beta-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .feedback-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .priority-group {
+                flex-direction: column;
+            }
+            
+            .feedback-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <div class="feedback-container">
+        <!-- Header -->
+        <div class="feedback-header">
+            <h1><i class="fas fa-star"></i> Feedback & Suggestions</h1>
+            <p>Help us improve IAAI by sharing your thoughts and experiences</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alertContainer"></div>
+
+        <!-- Feedback Cards Grid -->
+        <div class="feedback-grid">
+            
+            <!-- Course Feedback -->
+            <div class="feedback-card">
+                <div class="feedback-card-header">
+                    <div class="feedback-icon course">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h3>Course Feedback</h3>
+                        <p>Rate and review your completed courses</p>
+                    </div>
+                </div>
+                
+                <form id="courseFeedbackForm">
+                    <div class="form-group">
+                        <label for="courseSelect">Select Course</label>
+                        <select id="courseSelect" name="courseId" class="form-control" required>
+                            <option value="">Choose a course...</option>
+                            <option value="botox-101">Botox Fundamentals 101</option>
+                            <option value="filler-advanced">Advanced Dermal Fillers</option>
+                            <option value="practice-management">Practice Management</option>
+                            <option value="safety-protocols">Safety & Protocols</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Overall Rating</label>
+                        <div class="rating-group" data-rating="0">
+                            <span class="rating-star" data-value="1">★</span>
+                            <span class="rating-star" data-value="2">★</span>
+                            <span class="rating-star" data-value="3">★</span>
+                            <span class="rating-star" data-value="4">★</span>
+                            <span class="rating-star" data-value="5">★</span>
+                        </div>
+                        <input type="hidden" name="rating" id="courseRating" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="courseReview">Your Review</label>
+                        <textarea id="courseReview" name="review" class="form-control textarea" 
+                                placeholder="Share your experience with this course..." required></textarea>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="recommend" name="recommend" value="true">
+                        <label for="recommend">I would recommend this course to others</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Submit Course Feedback
+                    </button>
+                </form>
+            </div>
+
+            <!-- Feature Request -->
+            <div class="feedback-card">
+                <div class="feedback-card-header">
+                    <div class="feedback-icon feature">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <h3>Feature Request</h3>
+                        <p>Suggest new features or improvements</p>
+                    </div>
+                </div>
+                
+                <form id="featureRequestForm">
+                    <div class="form-group">
+                        <label for="featureTitle">Feature Title</label>
+                        <input type="text" id="featureTitle" name="featureTitle" class="form-control" 
+                               placeholder="Brief title for your suggestion..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="featureDescription">Detailed Description</label>
+                        <textarea id="featureDescription" name="description" class="form-control textarea" 
+                                placeholder="Describe your feature idea in detail..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Priority Level</label>
+                        <div class="priority-group">
+                            <div class="priority-option low" data-priority="low">
+                                <i class="fas fa-arrow-down"></i>
+                                <div>Low</div>
+                                <small>Nice to have</small>
+                            </div>
+                            <div class="priority-option medium" data-priority="medium">
+                                <i class="fas fa-minus"></i>
+                                <div>Medium</div>
+                                <small>Would be helpful</small>
+                            </div>
+                            <div class="priority-option high" data-priority="high">
+                                <i class="fas fa-arrow-up"></i>
+                                <div>High</div>
+                                <small>Really needed</small>
+                            </div>
+                        </div>
+                        <input type="hidden" name="priority" id="featurePriority" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-magic"></i> Submit Feature Request
+                    </button>
+                </form>
+            </div>
+
+            <!-- Bug Report -->
+            <div class="feedback-card">
+                <div class="feedback-card-header">
+                    <div class="feedback-icon bug">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <div>
+                        <h3>Report a Bug</h3>
+                        <p>Help us fix issues you encounter</p>
+                    </div>
+                </div>
+                
+                <form id="bugReportForm">
+                    <div class="form-group">
+                        <label for="bugTitle">Bug Title</label>
+                        <input type="text" id="bugTitle" name="bugTitle" class="form-control" 
+                               placeholder="Brief description of the issue..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bugSteps">Steps to Reproduce</label>
+                        <textarea id="bugSteps" name="steps" class="form-control textarea" 
+                                placeholder="1. Go to... &#10;2. Click on... &#10;3. Expected vs actual result..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bugDescription">Additional Details</label>
+                        <textarea id="bugDescription" name="description" class="form-control textarea" 
+                                placeholder="Browser, device, error messages, screenshots description..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Severity Level</label>
+                        <div class="priority-group">
+                            <div class="priority-option low" data-severity="low">
+                                <i class="fas fa-info-circle"></i>
+                                <div>Minor</div>
+                                <small>Cosmetic issue</small>
+                            </div>
+                            <div class="priority-option medium" data-severity="medium">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div>Major</div>
+                                <small>Affects functionality</small>
+                            </div>
+                            <div class="priority-option high" data-severity="high">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <div>Critical</div>
+                                <small>Blocks usage</small>
+                            </div>
+                        </div>
+                        <input type="hidden" name="severity" id="bugSeverity" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-tools"></i> Submit Bug Report
+                    </button>
+                </form>
+            </div>
+
+            <!-- Satisfaction Survey -->
+            <div class="feedback-card">
+                <div class="feedback-card-header">
+                    <div class="feedback-icon survey">
+                        <i class="fas fa-poll"></i>
+                    </div>
+                    <div>
+                        <h3>Satisfaction Survey</h3>
+                        <p>Tell us about your overall experience</p>
+                    </div>
+                </div>
+                
+                <form id="satisfactionSurveyForm">
+                    <div class="form-group">
+                        <label>How satisfied are you with IAAI?</label>
+                        <div class="rating-group" data-rating="0">
+                            <span class="rating-star" data-value="1">★</span>
+                            <span class="rating-star" data-value="2">★</span>
+                            <span class="rating-star" data-value="3">★</span>
+                            <span class="rating-star" data-value="4">★</span>
+                            <span class="rating-star" data-value="5">★</span>
+                        </div>
+                        <input type="hidden" name="satisfaction" id="satisfactionRating" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="improvements">What could we improve?</label>
+                        <textarea id="improvements" name="improvements" class="form-control textarea" 
+                                placeholder="Share your thoughts on how we can serve you better..."></textarea>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="wouldRecommend" name="wouldRecommend" value="true">
+                        <label for="wouldRecommend">I would recommend IAAI to colleagues</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-thumbs-up"></i> Submit Survey
+                    </button>
+                </form>
+            </div>
+
+            <!-- General Suggestion -->
+            <div class="feedback-card">
+                <div class="feedback-card-header">
+                    <div class="feedback-icon feature">
+                        <i class="fas fa-comment-alt"></i>
+                    </div>
+                    <div>
+                        <h3>General Suggestion</h3>
+                        <p>Share any other thoughts or ideas</p>
+                    </div>
+                </div>
+                
+                <form id="generalSuggestionForm">
+                    <div class="form-group">
+                        <label for="suggestionCategory">Category</label>
+                        <select id="suggestionCategory" name="category" class="form-control" required>
+                            <option value="">Select category...</option>
+                            <option value="content">Course Content</option>
+                            <option value="platform">Platform/Website</option>
+                            <option value="support">Customer Support</option>
+                            <option value="billing">Billing/Payments</option>
+                            <option value="mobile">Mobile Experience</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="suggestionText">Your Suggestion</label>
+                        <textarea id="suggestionText" name="suggestion" class="form-control textarea" 
+                                placeholder="Share your thoughts, ideas, or feedback..." required></textarea>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="followUp" name="followUp" value="true">
+                        <label for="followUp">I'm open to follow-up questions about this suggestion</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-share"></i> Submit Suggestion
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- Beta Testing Program -->
+        <div class="beta-signup">
+            <h3><i class="fas fa-flask"></i> Join Our Beta Testing Program</h3>
+            <p>Be the first to try new features and help shape the future of IAAI</p>
+            <button class="beta-btn" onclick="joinBetaProgram()">
+                <i class="fas fa-rocket"></i> Join Beta Program
+            </button>
+        </div>
+
+        <!-- Recent Feedback -->
+        <div class="recent-feedback">
+            <h3><i class="fas fa-history"></i> Your Recent Feedback</h3>
+            <div id="recentFeedbackList">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+        // Rating System
+        document.querySelectorAll('.rating-group').forEach(group => {
+            const stars = group.querySelectorAll('.rating-star');
+            const hiddenInput = group.parentElement.querySelector('input[type="hidden"]');
+            
+            stars.forEach((star, index) => {
+                star.addEventListener('click', () => {
+                    const rating = index + 1;
+                    group.dataset.rating = rating;
+                    hiddenInput.value = rating;
+                    
+                    stars.forEach((s, i) => {
+                        s.classList.toggle('active', i < rating);
+                    });
+                });
+                
+                star.addEventListener('mouseenter', () => {
+                    stars.forEach((s, i) => {
+                        s.style.color = i <= index ? '#ffc107' : '#ddd';
+                    });
+                });
+            });
+            
+            group.addEventListener('mouseleave', () => {
+                const currentRating = parseInt(group.dataset.rating);
+                stars.forEach((s, i) => {
+                    s.style.color = i < currentRating ? '#ffc107' : '#ddd';
+                });
+            });
+        });
+
+        // Priority/Severity Selection
+        document.querySelectorAll('.priority-group').forEach(group => {
+            const options = group.querySelectorAll('.priority-option');
+            const hiddenInput = group.parentElement.querySelector('input[type="hidden"]');
+            
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    options.forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                    hiddenInput.value = option.dataset.priority || option.dataset.severity;
+                });
+            });
+        });
+
+        // Form Submissions
+        function submitForm(formId, endpoint) {
+            const form = document.getElementById(formId);
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+            
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showAlert('success', result.message);
+                    form.reset();
+                    resetFormStates();
+                    loadRecentFeedback();
+                } else {
+                    showAlert('error', result.message || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to submit. Please try again.');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        // Form event listeners
+        document.getElementById('courseFeedbackForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitForm('courseFeedbackForm', '/support/feedback/course');
+        });
+
+        document.getElementById('featureRequestForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitForm('featureRequestForm', '/support/feedback/feature');
+        });
+
+        document.getElementById('bugReportForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitForm('bugReportForm', '/support/feedback/bug');
+        });
+
+        document.getElementById('satisfactionSurveyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitForm('satisfactionSurveyForm', '/support/feedback/satisfaction');
+        });
+
+        document.getElementById('generalSuggestionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitForm('generalSuggestionForm', '/support/feedback/suggestion');
+        });
+
+        // Utility functions
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+            
+            // Scroll to top to show alert
+            alertContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetFormStates() {
+            // Reset ratings
+            document.querySelectorAll('.rating-group').forEach(group => {
+                group.dataset.rating = '0';
+                group.querySelectorAll('.rating-star').forEach(star => {
+                    star.classList.remove('active');
+                    star.style.color = '#ddd';
+                });
+            });
+            
+            // Reset priority selections
+            document.querySelectorAll('.priority-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Reset hidden inputs
+            document.querySelectorAll('input[type="hidden"]').forEach(input => {
+                input.value = '';
+            });
+        }
+
+        function joinBetaProgram() {
+            fetch('/support/feedback/beta-signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(result => {
+                showAlert('success', 'Welcome to our Beta Testing Program! We\'ll contact you when new features are available.');
+            })
+            .catch(error => {
+                showAlert('error', 'Failed to join beta program. Please try again.');
+            });
+        }
+
+        function loadRecentFeedback() {
+            fetch('/support/feedback/recent')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('recentFeedbackList');
+                if (data.length === 0) {
+                    container.innerHTML = '<p style="color: #6c757d; text-align: center;">No recent feedback submitted</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.map(item => `
+                    <div class="feedback-item">
+                        <div class="feedback-item-header">
+                            <span class="feedback-item-type">${item.type}</span>
+                            <span class="feedback-item-date">${new Date(item.date).toLocaleDateString()}</span>
+                        </div>
+                        <div><strong>${item.title}</strong></div>
+                        <div style="color: #6c757d; margin-top: 5px;">${item.preview}</div>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error loading recent feedback:', error);
+            });
+        }
+
+        // Load recent feedback on page load
+        document.addEventListener('DOMContentLoaded', loadRecentFeedback);
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>International Aesthetic Academic Institution (IAAI)</title>
+  <link rel="stylesheet" href="/css/home.css"> <!-- Link to the main CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+</head>
+
+<%- include('partials/header') %>
+
+
+  <!-- Hero Section -->
+
+<section id="hero" style="background-image: url('/images/image9.jpeg');">
+  <div class="hero-overlay">
+    <div class="hero-content">
+      <h1>Welcome to the International Aesthetic Academic Institution</h1>
+      <p>Your journey to aesthetic excellence begins here.</p>
+      <a href="/about" class="cta-btn">About Us</a>
+    </div>
+  </div>
+</section>
+
+  <!-- Services Section -->
+  <section id="services" class="services-section">
+    <div class="services-content">
+        <h2>Our Services</h2>
+        <p>Welcome to our exclusive training platform, where professional development meets cutting-edge aesthetic education. Access a wide range of courses designed for doctors, from in-person workshops to online live sessions, all tailored to elevate your expertise and career.</p>
+        <a href="/training-programs" class="cta-btn">Our Training Programs</a>
+    </div>
+    <div class="services-image">
+        <img src="/images/image5.jpeg" alt="Aesthetic Training">
+    </div>
+</section>
+
+<!-- ✅ News Section -->
+<section id="news" class="section-box">
+  <h2><%= homepageContent.latestNewsTitle || 'Latest News' %></h2>
+  <div class="section-content">
+      <!-- ✅ Left Side: News Text -->
+      <div class="news-left">
+          <h3><%= homepageContent.latestNewsDes || 'No News Available' %></h3>
+          <a href="/NewsDetails" class="cta-btn">Read More</a>
+      </div>
+      <!-- ✅ Right Side: News Image -->
+      <div class="news-right">
+          <img src="/images/image8.jpeg" alt="Latest News Image">
+      </div>
+  </div>
+</section> 
+
+<!-- ✅ Latest Section -->
+<section id="latest" class="section-box">
+  <h2>The Latest from IAAI</h2>
+  <div class="section-content">
+      <!-- Left Side: Text Descriptions -->
+      <div class="latest-left">
+          <div class="latest-item">
+              <h3><%= homepageContent.latest1Title || 'Latest 1' %></h3>
+              <p><%= homepageContent.latest1Detail || 'Description for latest 1 is not available.' %></p>
+              <a href="/NewsDetails" class="cta-btn">Read More</a>
+          </div>
+          <div class="latest-item">
+              <h3><%= homepageContent.latest2Title || 'Latest 2' %></h3>
+              <p><%= homepageContent.latest2Detail || 'Description for latest 2 is not available.' %></p>
+              <a href="/NewsDetails" class="cta-btn">Read More</a>
+          </div>
+          <div class="latest-item">
+              <h3><%= homepageContent.latest3Title || 'Latest 3' %></h3>
+              <p><%= homepageContent.latest3Detail || 'Description for latest 3 is not available.' %></p>
+              <a href="/NewsDetails" class="cta-btn">Read More</a>
+          </div>
+      </div>
+      <!-- Right Side: Images -->
+      <div class="latest-right">
+          <div class="latest-img">
+              <img src="/images/image10.jpeg" alt="Latest 1">
+          </div>
+          <div class="latest-img">
+              <img src="/images/image11.jpeg" alt="Latest 2">
+          </div>
+          <div class="latest-img">
+              <img src="/images/image12.jpeg" alt="Latest 3">
+          </div>
+      </div>
+  </div>
+</section>
+
+
+<%- include('partials/footer') %>
+
+
+  <script>
+    // ✅ Function to Show Menu
+function showMenu() {
+  document.getElementById("programMenu").style.display = "block";
+}
+
+// ✅ Function to Hide Menu
+function hideMenu() {
+  document.getElementById("programMenu").style.display = "none";
+}
+  </script>
+
+
+</body>
+
+</html>

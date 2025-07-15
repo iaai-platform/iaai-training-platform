@@ -1,0 +1,332 @@
+{
+    "basic": {
+      "courseCode": "JAW-WEBINAR-2025",
+      "title": "Perfect Jawline: Sculpt, Define & Impress",
+      "description": "Master the art of facial contouring with this comprehensive webinar on jawline aesthetics. Learn advanced injection techniques, product selection, and combination protocols to achieve perfect jawline definition for your patients.",
+      "aboutThisCourse": "A 75-minute live webinar covering everything from anatomy to advanced contouring techniques, including hands-on case reviews and expert Q&A.",
+      "category": "aesthetic",
+      "status": "open",
+      "courseType": "online-live"
+    },
+    "schedule": {
+      "startDate": "2025-03-22T14:00:00Z",
+      "endDate": "2025-03-22T15:15:00Z",
+      "duration": "75 minutes",
+      "registrationDeadline": "2025-03-20T23:59:59Z",
+      "primaryTimezone": "UTC",
+      "displayTimezones": ["EST", "PST", "GMT", "CET"],
+      "pattern": "single",
+      "sessionTime": {
+        "startTime": "14:00",
+        "endTime": "15:15",
+        "breakDuration": 0
+      },
+      "sessions": [{
+        "dayNumber": 1,
+        "date": "2025-03-22T14:00:00Z",
+        "startTime": "14:00",
+        "endTime": "15:15",
+        "title": "Perfect Jawline Contouring Masterclass",
+        "type": "workshop"
+      }]
+    },
+    "enrollment": {
+      "price": 199,
+      "earlyBirdPrice": 149,
+      "currency": "USD",
+      "seatsAvailable": 200,
+      "minEnrollment": 25,
+      "currentEnrollment": 0,
+      "waitlistEnabled": true
+    },
+    "instructors": {
+      "primary": {
+        "instructorId": "507f1f77bcf86cd799439011",
+        "name": "Dr. Massimo Vitale",
+        "role": "Lead Instructor"
+      },
+      "additional": []
+    },
+    "platform": {
+      "name": "Zoom",
+      "accessUrl": "https://zoom.us/meeting/jawline-masterclass-2025",
+      "features": {
+        "breakoutRooms": false,
+        "polling": true,
+        "whiteboard": true,
+        "recording": true,
+        "chat": true,
+        "screenSharing": true
+      }
+    },
+    "content": {
+      "objectives": [
+        "Understand male vs. female jawline aesthetic differences",
+        "Master key anatomical structures and danger zones",
+        "Perfect needle vs. cannula injection techniques",
+        "Select appropriate products based on density and G-prime",
+        "Manage asymmetry and achieve instant results",
+        "Implement combination protocols with PRP, toxins, and threads"
+      ],
+      "modules": [
+        {
+          "title": "Introduction & Speaker Welcome",
+          "description": "Meet your expert trainer and overview of session goals",
+          "duration": "5 minutes",
+          "order": 1
+        },
+        {
+          "title": "Jawline Aesthetics: What Patients Want in 2025",
+          "description": "Male vs. female definitions, common complaints and trends",
+          "duration": "5 minutes",
+          "order": 2
+        },
+        {
+          "title": "Anatomy & Danger Zones",
+          "description": "Key anatomical structures, safe injection zones",
+          "duration": "10 minutes",
+          "order": 3
+        },
+        {
+          "title": "Injection Techniques for Perfect Contouring",
+          "description": "Needle vs. cannula use, product selection, injection depth & vector placement",
+          "duration": "15 minutes",
+          "order": 4
+        },
+        {
+          "title": "Video Case Review",
+          "description": "Step-by-step treatment approach with before/after photos",
+          "duration": "20 minutes",
+          "order": 5
+        },
+        {
+          "title": "Combination Protocols",
+          "description": "Enhancing results with PRP, toxins, threads and long-term maintenance",
+          "duration": "10 minutes",
+          "order": 6
+        },
+        {
+          "title": "Q&A Session - Ask the Expert",
+          "description": "Open mic for questions, bonus tips on pricing & patient retention",
+          "duration": "10 minutes",
+          "order": 7
+        }
+      ],
+      "targetAudience": [
+        "Aesthetic Medicine Practitioners",
+        "Dermatologists",
+        "Plastic Surgeons",
+        "Nurse Injectors",
+        "Medical Spa Professionals"
+      ],
+      "experienceLevel": "intermediate",
+      "prerequisites": "Basic knowledge of facial anatomy and injection techniques required",
+      "detailedSyllabus": "Comprehensive coverage of jawline contouring from anatomy to advanced combination treatments"
+    },
+    "technical": {
+      "systemRequirements": {
+        "os": ["Windows 10+", "macOS 10.14+", "iOS 12+", "Android 8+"],
+        "browsers": ["Chrome 80+", "Firefox 78+", "Safari 12+", "Edge 80+"],
+        "minimumRAM": "4GB",
+        "processor": "Dual-core 2GHz"
+      },
+      "internetSpeed": {
+        "minimum": "5 Mbps",
+        "recommended": "25 Mbps"
+      },
+      "requiredSoftware": ["Zoom Client"],
+      "equipment": {
+        "camera": "recommended",
+        "microphone": "required",
+        "headset": "recommended"
+      },
+      "techCheckRequired": false
+    },
+    "interaction": {
+      "participationRequired": true,
+      "cameraRequired": false,
+      "features": {
+        "polls": true,
+        "quizzes": true,
+        "breakoutRooms": false,
+        "qa": true,
+        "chat": true,
+        "reactions": true
+      },
+      "engagementTools": ["Zoom Polls"],
+      "networkingOptions": {
+        "virtualCoffeeBreaks": false,
+        "discussionForum": true
+      }
+    },
+    "recording": {
+      "enabled": true,
+      "type": "cloud",
+      "availability": {
+        "forStudents": true,
+        "duration": 30,
+        "downloadable": false,
+        "passwordProtected": true
+      },
+      "autoTranscription": true
+    },
+    "media": {
+      "documents": [
+        "jawline-contouring-guide.pdf",
+        "anatomy-reference-sheet.pdf",
+        "product-selection-chart.pdf"
+      ],
+      "links": [
+        {
+          "title": "Facial Anatomy Interactive Guide",
+          "url": "https://resources.iaai.com/facial-anatomy",
+          "type": "tool"
+        }
+      ]
+    },
+    "materials": {
+      "handouts": [
+        {
+          "title": "Jawline Contouring Quick Reference Guide",
+          "releaseTime": "immediate"
+        },
+        {
+          "title": "Product Selection Chart",
+          "releaseTime": "immediate"
+        },
+        {
+          "title": "Patient Consent Templates",
+          "releaseTime": "after-session"
+        }
+      ],
+      "lms": {
+        "enabled": false
+      }
+    },
+    "assessment": {
+      "required": true,
+      "type": "quiz",
+      "passingScore": 70,
+      "retakesAllowed": 2,
+      "platform": "Zoom Polls",
+      "timeLimit": 15
+    },
+    "certification": {
+      "enabled": true,
+      "types": ["completion"],
+      "issuingAuthority": "IAAI Training Institute",
+      "requirements": {
+        "minimumAttendance": 90,
+        "minimumScore": 70,
+        "practicalRequired": false,
+        "projectRequired": false
+      },
+      "validity": {
+        "isLifetime": false,
+        "years": 2
+      },
+      "features": {
+        "digitalBadge": true,
+        "blockchain": false,
+        "qrVerification": true,
+        "autoGenerate": true
+      },
+      "template": "professional_v1"
+    },
+    "attendance": {
+      "trackingEnabled": true,
+      "method": "automatic",
+      "minimumRequired": 90,
+      "lateJoinWindow": 10,
+      "rules": {
+        "minimumSessionTime": 85,
+        "breakAttendanceRequired": false
+      }
+    },
+    "support": {
+      "contact": {
+        "email": "info@iaa-i.com",
+        "whatsapp": "+90 536 745 86 66"
+      },
+      "hours": {
+        "available": true,
+        "schedule": "9 AM - 6 PM (Monday-Friday)",
+        "timezone": "CET"
+      },
+      "channels": {
+        "email": true,
+        "liveChat": false,
+        "ticketing": false
+      }
+    },
+    "postCourse": {
+      "accessDuration": {
+        "recordings": 30,
+        "materials": 90,
+        "forum": 180
+      },
+      "alumni": {
+        "refresherAccess": true,
+        "updatesIncluded": true,
+        "communityAccess": true,
+        "futureDiscount": 20
+      },
+      "continuedLearning": {
+        "monthlyWebinars": true,
+        "newsletter": true,
+        "advancedCourses": ["ADV-FACE-CONT-2025", "COMB-PROTO-2025"]
+      }
+    },
+    "experience": {
+      "onboarding": {
+        "orientationRequired": false
+      },
+      "accessibility": {
+        "closedCaptions": true,
+        "transcripts": true,
+        "signLanguage": false,
+        "audioDescription": false
+      },
+      "gamification": {
+        "enabled": false,
+        "points": false,
+        "badges": false,
+        "leaderboard": false
+      }
+    },
+    "analytics": {
+      "engagement": {
+        "averageAttendance": 0,
+        "completionRate": 0,
+        "satisfactionScore": 0,
+        "dropoffRate": 0
+      },
+      "participation": {
+        "totalQuestions": 0,
+        "totalPolls": 0,
+        "totalChats": 0
+      }
+    },
+    "notificationSettings": {
+      "courseUpdates": true,
+      "emailNotifications": true,
+      "reminderSchedule": [3, 1],
+      "marketingEmails": true,
+      "weeklyDigest": false
+    },
+    "metadata": {
+      "version": 1,
+      "tags": [
+        "jawline contouring",
+        "facial aesthetics",
+        "cannula technique",
+        "needle technique",
+        "facial anatomy",
+        "danger zones",
+        "combination treatments",
+        "PRP",
+        "threads"
+      ],
+      "isTemplate": false
+    }
+  }

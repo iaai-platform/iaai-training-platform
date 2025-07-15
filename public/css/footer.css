@@ -1,0 +1,75 @@
+/* ============================================================
+   ✅ FOOTER STYLING (Matches Header Aesthetics)
+============================================================ */
+
+footer {
+    background-color: #E2E2E2; /* Matches header background */
+    border-top: 3px solid #b8860b; /* Gold accent */
+    padding: 20px 0;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif; /* Consistent UI font */
+}
+
+/* ✅ Footer Links */
+footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+footer ul li {
+    display: inline;
+}
+
+footer ul li a {
+    text-decoration: none;
+    color: #0C2340; /* Dark blue text for readability */
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.3s ease-in-out;
+}
+
+footer ul li a:hover {
+    color: #b8860b; /* Gold hover effect */
+}
+
+/* ✅ Social Media Icons */
+.social-icons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.social-icons a {
+    color: #0C2340; /* Consistent with header text */
+    font-size: 24px; /* Icon size */
+    transition: color 0.3s ease-in-out;
+}
+
+.social-icons a:hover {
+    color: #b8860b; /* Gold hover effect */
+}
+
+/* ✅ Copyright Text */
+footer p {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #333;
+    font-weight: 400;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    footer ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .social-icons {
+        margin-top: 10px;
+    }
+}

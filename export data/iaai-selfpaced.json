@@ -1,0 +1,186 @@
+{
+    "basic": {
+      "courseCode": "JAW-CONT-2025",
+      "title": "Advanced Jawline Contouring Techniques with Cannula",
+      "description": "Master the art of jawline contouring using advanced cannula techniques. Learn from Dr. Massimo Vitale's systematic approach to lower third facial rejuvenation, including jawline definition, chin projection, and full face harmonization with minimal product usage.",
+      "aboutThisCourse": "This comprehensive video course demonstrates a less invasive approach to jawline contouring using cannulas, achieving remarkable results with only three syringes for full face treatment.",
+      "category": "aesthetic",
+      "status": "published",
+      "courseType": "self-paced"
+    },
+    "access": {
+      "price": 149,
+      "currency": "USD",
+      "accessDays": 365,
+      "totalEnrollments": 0
+    },
+    "content": {
+      "objectives": [
+        "Master cannula insertion techniques for jawline contouring",
+        "Understand proper entry points and injection planes",
+        "Learn linear retrograde injection technique",
+        "Develop skills for chin projection enhancement",
+        "Achieve full face rejuvenation with minimal product",
+        "Minimize patient discomfort and complications"
+      ],
+      "targetAudience": [
+        "Aesthetic Medicine Practitioners",
+        "Dermatologists",
+        "Plastic Surgeons",
+        "Advanced Injectors",
+        "Medical Professionals in Aesthetics"
+      ],
+      "experienceLevel": "intermediate",
+      "prerequisites": "Basic knowledge of facial anatomy and injection techniques. Prior experience with dermal fillers recommended.",
+      "estimatedMinutes": 45,
+      "totalVideos": 1,
+      "totalQuestions": 10
+    },
+    "videos": [{
+      "title": "Complete Jawline Contouring Masterclass",
+      "description": "Dr. Massimo Vitale demonstrates his signature technique for jawline contouring using a 22G x 70mm cannula, covering facial mapping, entry points, injection techniques, and achieving natural results with minimal product.",
+      "videoUrl": "https://videos.iaai.com/jawline-contouring-vitale-2025.mp4",
+      "duration": 45,
+      "sequence": 1,
+      "transcript": "I am drawing the face for the contouring treatment of the lower third I first draw the edges of the jawline up the chin, then extend to the mandibular angle, and finally mark the projection points of the chin. For the jawline treatment, I will use a long cannula to minimize trauma for the patient and reduce the risk of wheezing and hematomas by utilizing a single entry point. Specifically, I will use a 22 gage by 70 millimeters cannula. The entry point is located approximately at the midpoint of the mandibro line. I recommend to insert only the tip without tunneling, simply pinching with the tip while making small rotational movements will be sufficient to create an adequate opening for the easy insertion of the cannula, which, as we know, has a long tip before inserting the cannula, it is important to have a proper grip. I recommend holding it between the index finger and the thumb from the needle grip and the lower connector to ensure better control and precision once the cannula is inserted, to facilitate its sliding, is advisable to stretch the skin with the non injecting hand to ease the insertion process, making slight movements to bring the skin closer to the cannula can help it glide smoothly while maintaining the correct injection plane. The injection plane, it is subcutaneous tissue. Once the cannula is fully inserted, the injection will be performing a linear retrograde technique, keeping the cannula bevel up from the same entry point, several mini vectors can be created to better define the jawline. The same maneuver is performed on the opposite side. This procedure is not painful as as well positioned canal glides smoothly through the tissue without causing discomfort. Occasionally, some resistance may be encountered due to fibrosis or tissue adhesions, which may cause slight discomfort for the patient, but it is entirely tolerable. In this case, a one ml syringe of hyaluronic acid with a medium g prime was used with a point five ml distributed per side. As you can see, I am carefully angling the tip of my blunt cannula keep it in the same plane, to adjust the vector and enhance the jawline definition. Finally, I will use a 27 gauche by 13 millimeters needle provided with the syringe to perform a deep bolus injection above the periosteum, ensuring I feel the contact. The syringe will be oriented perpendicularly with the objective of the increasing the volume and the projection of the chin, depending on the desired effect. A single access point or bolus can be performed, or, as in this case, multiple access points slightly lower to further elongate the chin. So I just finished my treatment with only three syringes. This is a less invasive approach. I treat on my patient, the cheekbone area, the jawline, for more definition, a little projection of the of the chin, and obviously the improvement and reshaping on her lips. So this patient came to me telling me that she was feeling a little bit tired. Her face was tired. So I would I tried to give her a more fresh look with a non invasive approach, with only three syringe amount, this is a very, very small amount for full face, but the result is very nice.",
+      "dateUploaded": "2025-01-01T10:00:00Z",
+      "exam": [
+        {
+          "questionText": "What size cannula does Dr. Vitale recommend for jawline contouring?",
+          "options": [
+            "25G x 50mm",
+            "22G x 70mm",
+            "18G x 70mm",
+            "22G x 50mm"
+          ],
+          "correctAnswer": "22G x 70mm"
+        },
+        {
+          "questionText": "Where is the recommended entry point for the cannula?",
+          "options": [
+            "At the chin",
+            "At the mandibular angle",
+            "At the midpoint of the mandibular line",
+            "Below the ear"
+          ],
+          "correctAnswer": "At the midpoint of the mandibular line"
+        },
+        {
+          "questionText": "What is the correct injection plane for jawline contouring?",
+          "options": [
+            "Intradermal",
+            "Subcutaneous tissue",
+            "Intramuscular",
+            "Supraperiosteal"
+          ],
+          "correctAnswer": "Subcutaneous tissue"
+        },
+        {
+          "questionText": "What injection technique is used once the cannula is fully inserted?",
+          "options": [
+            "Bolus injection",
+            "Fanning technique",
+            "Linear retrograde technique",
+            "Cross-hatching"
+          ],
+          "correctAnswer": "Linear retrograde technique"
+        },
+        {
+          "questionText": "How should the cannula be held for optimal control?",
+          "options": [
+            "Like a pencil",
+            "Between index finger and thumb from the needle grip and lower connector",
+            "With all fingers wrapped around",
+            "Between middle and ring finger"
+          ],
+          "correctAnswer": "Between index finger and thumb from the needle grip and lower connector"
+        },
+        {
+          "questionText": "What type of hyaluronic acid was used in this demonstration?",
+          "options": [
+            "Low G-prime",
+            "Medium G-prime",
+            "High G-prime",
+            "Ultra-high G-prime"
+          ],
+          "correctAnswer": "Medium G-prime"
+        },
+        {
+          "questionText": "How much product was distributed per side for the jawline?",
+          "options": [
+            "1.0 ml",
+            "0.5 ml",
+            "0.75 ml",
+            "1.5 ml"
+          ],
+          "correctAnswer": "0.5 ml"
+        },
+        {
+          "questionText": "What needle size is used for chin projection?",
+          "options": [
+            "30G x 13mm",
+            "27G x 13mm",
+            "25G x 25mm",
+            "27G x 6mm"
+          ],
+          "correctAnswer": "27G x 13mm"
+        },
+        {
+          "questionText": "Where should the chin projection injection be placed?",
+          "options": [
+            "In the subcutaneous layer",
+            "In the muscle",
+            "Above the periosteum with bone contact",
+            "In the dermis"
+          ],
+          "correctAnswer": "Above the periosteum with bone contact"
+        },
+        {
+          "questionText": "How many syringes were used for the complete full-face treatment?",
+          "options": [
+            "5 syringes",
+            "4 syringes",
+            "3 syringes",
+            "2 syringes"
+          ],
+          "correctAnswer": "3 syringes"
+        }
+      ],
+      "isPreview": false
+    }],
+    "instructor": {
+      "instructorId": "507f1f77bcf86cd799439011",
+      "name": "Dr. Massimo Vitale",
+      "title": "Renowned Aesthetic & Laser Therapy Physician"
+    },
+    "certification": {
+      "enabled": true,
+      "requireAllVideos": true,
+      "minimumScore": 80,
+      "certificateTitle": "Certificate of Completion - Advanced Jawline Contouring",
+      "issuingAuthority": "IAAI Training Institute"
+    },
+    "media": {
+      "thumbnailUrl": "https://images.iaai.com/courses/jawline-contouring-thumb.jpg",
+      "previewVideoUrl": "https://videos.iaai.com/jawline-contouring-preview.mp4"
+    },
+    "support": {
+      "email": "support@iaa-i.com",
+      "responseTime": "48 hours"
+    },
+    "metadata": {
+      "publishedDate": "2025-01-01T00:00:00Z",
+      "tags": [
+        "jawline contouring",
+        "cannula technique",
+        "chin projection",
+        "facial contouring",
+        "hyaluronic acid",
+        "minimally invasive",
+        "dr massimo vitale",
+        "full face rejuvenation",
+        "advanced injection techniques"
+      ],
+      "internalNotes": "Award-winning technique demonstrated by Dr. Vitale - AMWC Aesthetic Award 2024 winner"
+    }
+  }

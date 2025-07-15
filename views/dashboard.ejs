@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>International Aesthetic Academic Institution (IAAI)</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+
+<body class="dashboard-body">
+  <%- include('partials/header') %>
+  
+  <!-- Breadcrumb Navigation -->
+  <nav class="breadcrumb">
+    <a href="/">Home</a> > <a href="/training-programs">Our Training Programs</a> > Dashboard
+  </nav>
+
+  <!-- Dashboard Main Container -->
+  <div class="dashboard-container">
+
+    <!-- Welcome Section -->
+    <div class="welcome-box">
+      <h1>Welcome, <%= user ? user.firstName : 'Guest' %>!</h1>
+      <p>Manage your courses, profile, and settings from here.</p>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+
+      <!-- My Courses -->
+      <div class="dashboard-card">
+        <div class="card-icon">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+        <h2>My Courses</h2>
+        <p>View and manage the courses you're enrolled in.</p>
+        <a href="/my-courses" class="card-btn">Go to My Courses</a>
+      </div>
+
+      <!-- My Certificates -->
+      <div class="dashboard-card">
+        <div class="card-icon certificate">
+          <i class="fas fa-award"></i>
+        </div>
+        <h2>My Certificates</h2>
+        <p>View and download your earned certificates.</p>
+        <a href="/certificates" class="card-btn">View Certificates</a>
+      </div>
+
+      <!-- Orders -->
+      <div class="dashboard-card">
+        <div class="card-icon">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <h2>Your Orders</h2>
+        <p>Check your purchased courses and payment details.</p>
+        <a href="/orders" class="card-btn">View Orders</a>
+      </div>
+
+      <!-- Wishlist -->
+      <div class="dashboard-card">
+        <div class="card-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <h2>Wishlist</h2>
+        <p>Save and review courses you're interested in.</p>
+        <a href="/wishlist" class="card-btn">View Wishlist</a>
+      </div>
+
+      <!-- Profile -->
+      <div class="dashboard-card">
+        <div class="card-icon">
+          <i class="fas fa-user-edit"></i>
+        </div>
+        <h2>Profile</h2>
+        <p>Update your profile information and preferences.</p>
+        <a href="/profile" class="card-btn">Edit Profile</a>
+      </div>
+
+    </div>
+
+    <!-- Account Settings Section -->
+    <div class="section-divider">
+      <h2><i class="fas fa-cog"></i> Account Settings</h2>
+      <p>Manage your account preferences, security, and privacy settings</p>
+    </div>
+
+    <div class="dashboard-grid settings-grid">
+
+      <!-- Security Settings -->
+      <div class="dashboard-card settings-card">
+        <div class="card-icon security">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h3>Security</h3>
+        <p>Password, two-factor authentication, and login activity.</p>
+        <a href="/account/security" class="card-btn">Manage Security</a>
+      </div>
+
+      <!-- Notification Settings -->
+      <div class="dashboard-card settings-card">
+        <div class="card-icon notifications">
+          <i class="fas fa-bell"></i>
+        </div>
+        <h3>Notifications</h3>
+        <p>Email alerts, course reminders, and communication preferences.</p>
+        <a href="/account/notifications" class="card-btn">Set Preferences</a>
+      </div>
+
+      <!-- Privacy Settings -->
+      <div class="dashboard-card settings-card">
+        <div class="card-icon privacy">
+          <i class="fas fa-user-secret"></i>
+        </div>
+        <h3>Privacy</h3>
+        <p>Data visibility, profile privacy, and account deletion.</p>
+        <a href="/account/privacy" class="card-btn">Privacy Settings</a>
+      </div>
+
+      <!-- Billing & Payments -->
+      <div class="dashboard-card settings-card">
+        <div class="card-icon billing">
+          <i class="fas fa-credit-card"></i>
+        </div>
+        <h3>Billing</h3>
+        <p>Payment methods, billing history, and subscription management.</p>
+        <a href="/account/billing" class="card-btn">Manage Billing</a>
+      </div>
+
+      <!-- Learning Preferences -->
+      <div class="dashboard-card settings-card">
+        <div class="card-icon learning">
+          <i class="fas fa-sliders-h"></i>
+        </div>
+        <h3>Learning Preferences</h3>
+        <p>Course display, video quality, and accessibility options.</p>
+        <a href="/account/preferences" class="card-btn">Set Preferences</a>
+      </div>
+
+      <!-- Professional Profile -->
+      <div class="dashboard-card settings-card">
+        <div class="card-icon professional">
+          <i class="fas fa-briefcase"></i>
+        </div>
+        <h3>Professional Profile</h3>
+        <p>Practice information, certifications, and professional network.</p>
+        <a href="/account/professional" class="card-btn">Update Profile</a>
+      </div>
+
+    </div>
+
+    <!-- Customer Support Section -->
+    <div class="section-divider">
+      <h2><i class="fas fa-headset"></i> Customer Support</h2>
+      <p>Get help, contact support, and access learning resources</p>
+    </div>
+
+    <div class="dashboard-grid support-grid">
+
+      <!-- Help Center -->
+      <div class="dashboard-card support-card">
+        <div class="card-icon help">
+          <i class="fas fa-question-circle"></i>
+        </div>
+        <h3>Help Center</h3>
+        <p>FAQs, tutorials, and getting started guides.</p>
+        <a href="/support/help" class="card-btn">Browse Help</a>
+      </div>
+
+      <!-- Contact Support -->
+      <div class="dashboard-card support-card">
+        <div class="card-icon contact">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <h3>Contact Support</h3>
+        <p>Submit tickets, chat with support, or schedule a call.</p>
+        <a href="/support/contact" class="card-btn">Contact Us</a>
+      </div>
+
+      <!-- Support Tickets -->
+      <div class="dashboard-card support-card">
+        <div class="card-icon tickets">
+          <i class="fas fa-ticket-alt"></i>
+        </div>
+        <h3>My Support Tickets</h3>
+        <p>Track your support requests and view responses.</p>
+        <a href="/support/tickets" class="card-btn">View Tickets</a>
+      </div>
+
+      <!-- Community -->
+      <div class="dashboard-card support-card">
+        <div class="card-icon community">
+          <i class="fas fa-users"></i>
+        </div>
+        <h3>Community</h3>
+        <p>Connect with students, instructors, and industry professionals.</p>
+        <a href="/support/community" class="card-btn">Join Community</a>
+      </div>
+
+      <!-- Feedback -->
+      <div class="dashboard-card support-card">
+        <div class="card-icon feedback">
+          <i class="fas fa-star"></i>
+        </div>
+        <h3>Feedback</h3>
+        <p>Rate courses, suggest features, and share your experience.</p>
+        <a href="/support/feedback" class="card-btn">Give Feedback</a>
+      </div>
+
+      <!-- Live Chat -->
+      <div class="dashboard-card support-card">
+        <div class="card-icon chat">
+          <i class="fas fa-comments"></i>
+        </div>
+        <h3>Live Chat</h3>
+        <p>Get instant help from our support team during business hours.</p>
+        <a href="#" onclick="openLiveChat()" class="card-btn">Start Chat</a>
+      </div>
+
+    </div>
+
+    <!-- Admin Actions (Only Visible to Admins) -->
+    <% if (user && user.role === 'admin') { %>
+
+      <div class="section-divider admin-section">
+        <h2><i class="fas fa-crown"></i> Admin Dashboard</h2>
+        <p>Administrative tools and management features</p>
+      </div>
+
+      <div class="dashboard-grid admin-grid">
+          <!-- inperson -->
+        <!-- In-Person Courses -->
+<div class="dashboard-card admin-card">
+  <div class="card-icon admin">
+    <i class="fas fa-chalkboard-teacher"></i>
+  </div>
+  <h3>Manage In-Person Courses</h3>
+  <p>Edit and update all training courses.</p>
+  <a href="/admin-courses/inperson" class="card-btn">Edit Courses</a>
+</div>
+
+<!-- Online Live Courses -->
+<div class="dashboard-card admin-card">
+  <div class="card-icon admin">
+    <i class="fas fa-video"></i>
+  </div>
+  <h3>Manage Online Live Courses</h3>
+  <p>Edit and update all training courses.</p>
+  <a href="/admin-courses/onlinelive" class="card-btn">Edit Courses</a>
+</div>
+
+<!-- Self-Paced Courses -->
+<div class="dashboard-card admin-card">
+  <div class="card-icon admin">
+    <i class="fas fa-play-circle"></i>
+  </div>
+  <h3>Manage Self Paced Courses</h3>
+  <p>Edit and update all training courses.</p>
+  <a href="/admin-courses/selfpaced/manage" class="card-btn">Upload Videos</a>
+</div>
+
+              <!-- Manage home page -->
+        <div class="dashboard-card admin-card">
+          <div class="card-icon admin">
+            <i class="fas fa-home"></i>
+          </div>
+          <h3>Manage Homepage</h3>
+          <p>Update and customize the homepage content.</p>
+          <a href="/admin-homepage" class="card-btn">Manage Homepage</a>
+        </div>
+
+        <div class="dashboard-card admin-card">
+          <div class="card-icon admin">
+            <i class="fas fa-tags"></i>
+          </div>
+          <h3>Manage Promo Codes</h3>
+          <p>Define and update promo codes for discounts.</p>
+          <a href="/admin-promo-codes" class="card-btn">Go to Promo Codes</a>
+        </div>
+
+        <div class="dashboard-card admin-card">
+          <div class="card-icon admin">
+            <i class="fas fa-users-cog"></i>
+          </div>
+          <h3>Manage Users</h3>
+          <p>View all registered user information.</p>
+          <a href="/admin-users" class="card-btn">Go to User Info</a>
+        </div>
+
+        <!-- manage instructors -->
+        <div class="dashboard-card admin-card">
+          <div class="card-icon admin">
+            <i class="fas fa-users-cog"></i>
+          </div>
+          <h3>Manage Instructors</h3>
+          <p>View all Instructors information.</p>
+          <a href="/instructors/manage" class="card-btn">Go to Instructor Info</a>
+        </div>
+
+        <!-- Payment Analytics Card -->
+        <div class="dashboard-card admin-card">
+          <div class="card-icon admin" style="color: #28a745;">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Payment Analytics</h3>
+          <p>View detailed revenue reports and payment analytics.</p>
+          <a href="/admin/payment-analytics" class="card-btn">View Analytics</a>
+        </div>
+
+<!-- Manage Certification Bodies Card (ADD THIS) -->
+<div class="dashboard-card admin-card">
+  <div class="card-icon admin">
+    <i class="fas fa-certificate"></i>
+  </div>
+  <h3>Manage Certification Bodies</h3>
+  <p>Add and manage aesthetic industry certification organizations.</p>
+  <a href="/admin-certification-bodies" class="card-btn">Manage Bodies</a>
+</div>
+
+
+        <div class="dashboard-card admin-card">
+          <div class="card-icon admin">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <h3>Application Forms</h3>
+          <p>View all application forms.</p>
+          <a href="/admin-view-forms" class="card-btn">Go to Forms</a>
+        </div>
+
+        <div class="dashboard-card admin-card">
+          <div class="card-icon admin">
+            <i class="fas fa-user-check"></i>
+          </div>
+          <h3>User Applications</h3>
+          <p>Confirm or deactivate user accounts.</p>
+          <a href="/admin-user-approval" class="card-btn">User Approval</a>
+        </div>
+
+        <!-- Recycle Bin Card -->
+        <div class="dashboard-card admin-card recycle-bin-card">
+          <div class="card-icon recycle-bin">
+            <i class="fas fa-trash-restore"></i>
+          </div>
+          <h3>Recycle Bin</h3>
+          <p>Recover deleted users or permanently remove them.</p>
+          <a href="/admin-users/recycle-bin" class="card-btn">View Recycle Bin</a>
+        </div>
+
+      </div>
+
+    <% } %>
+
+    <!-- Instructor Actions (Only Visible to Instructors) -->
+    <% if (user && user.role === 'instructor') { %>
+
+      <div class="section-divider instructor-section">
+        <h2><i class="fas fa-chalkboard-teacher"></i> Instructor Dashboard</h2>
+        <p>Teaching tools and course management</p>
+      </div>
+
+      <div class="dashboard-grid instructor-grid">
+
+        <div class="dashboard-card instructor-card">
+          <div class="card-icon instructor">
+            <i class="fas fa-file-signature"></i>
+          </div>
+          <h3>My Applications</h3>
+          <p>View your instructor applications and status.</p>
+          <a href="/instructor-applications" class="card-btn">View Applications</a>
+        </div>
+
+        <div class="dashboard-card instructor-card">
+          <div class="card-icon instructor">
+            <i class="fas fa-chalkboard"></i>
+          </div>
+          <h3>My Teaching Courses</h3>
+          <p>See courses you've been assigned to teach.</p>
+          <a href="/instructor-courses" class="card-btn">My Courses</a>
+        </div>
+
+      </div>
+
+    <% } %>
+
+  </div>
+
+  <%- include('partials/footer') %>
+  
+  <script>
+    function openLiveChat() {
+      // Placeholder for live chat functionality
+      alert('Live Chat feature coming soon! Please use the Contact Support form for now.');
+    }
+  </script>
+
+  <!-- Enhanced styling for the new sections -->
+  <style>
+    .section-divider {
+      margin: 50px 0 30px 0;
+      padding: 20px 0;
+      border-bottom: 2px solid #f1f3f4;
+      text-align: center;
+    }
+
+    .section-divider h2 {
+      color: #333;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .section-divider p {
+      color: #6c757d;
+      margin: 0;
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .card-icon.security { color: #dc3545; }
+    .card-icon.notifications { color: #ffc107; }
+    .card-icon.privacy { color: #6f42c1; }
+    .card-icon.billing { color: #28a745; }
+    .card-icon.learning { color: #17a2b8; }
+    .card-icon.professional { color: #fd7e14; }
+    .card-icon.help { color: #007bff; }
+    .card-icon.contact { color: #28a745; }
+    .card-icon.tickets { color: #ffc107; }
+    .card-icon.community { color: #6f42c1; }
+    .card-icon.feedback { color: #fd7e14; }
+    .card-icon.chat { color: #17a2b8; }
+    .card-icon.admin { color: #dc3545; }
+    .card-icon.instructor { color: #28a745; }
+    .card-icon.recycle-bin { color: #ffc107; }
+    .card-icon.certificate { color: #f39c12; }
+
+    .settings-card {
+      border-left: 4px solid #007bff;
+      background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    }
+
+    .support-card {
+      border-left: 4px solid #28a745;
+      background: linear-gradient(135deg, #f8fff8 0%, #ffffff 100%);
+    }
+    
+    .admin-card {
+      border-left: 4px solid #dc3545;
+      background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+    }
+    
+    .instructor-card {
+      border-left: 4px solid #28a745;
+      background: linear-gradient(135deg, #f5fff5 0%, #ffffff 100%);
+    }
+
+    /* Special styling for recycle bin card */
+    .recycle-bin-card {
+      border-left: 4px solid #ffc107;
+      background: linear-gradient(135deg, #fffdf5 0%, #ffffff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .recycle-bin-card::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 193, 7, 0.1);
+      border-radius: 50%;
+    }
+
+    .admin-section h2 { color: #dc3545; }
+    .instructor-section h2 { color: #28a745; }
+
+    .card-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+    }
+
+    .card-btn:hover {
+      background: #0056b3;
+      text-decoration: none;
+      color: white;
+    }
+
+    .dashboard-card h3 {
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    /* Animation for the recycle bin icon on hover */
+    .recycle-bin-card:hover .card-icon {
+      animation: rotate 0.5s ease-in-out;
+    }
+
+    /* Certificate card special styling */
+    .dashboard-card:has(.card-icon.certificate) {
+      border-left: 4px solid #f39c12;
+      background: linear-gradient(135deg, #fffaf0 0%, #ffffff 100%);
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+      100% { transform: rotate(0deg); }
+    }
+  </style>
+</body>
+
+</html>

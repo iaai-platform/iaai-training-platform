@@ -1,0 +1,384 @@
+[
+    {
+      "basic": {
+        "courseCode": "FULLFACE2025",
+        "title": "Full Face Harmonization with Dr. Giovanni Angiolini",
+        "description": "Master the art of full face harmonization with renowned aesthetic physician Dr. Giovanni Angiolini. This comprehensive 2-day course combines theoretical knowledge with extensive hands-on practice, covering advanced injection techniques for temple fillers, eye treatments, cheek enhancement, fluid lifting, rhinofiller, lip contouring, jawline definition, biostimulation, and full-face Botox applications.",
+        "category": "aesthetic",
+        "status": "open"
+      },
+      "schedule": {
+        "startDate": "2025-07-29T09:00:00.000Z",
+        "endDate": "2025-07-30T17:00:00.000Z",
+        "duration": "2 days",
+        "timeSlots": {
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "lunchBreak": "12:30-13:30"
+        },
+        "registrationDeadline": "2025-07-22T23:59:59.000Z"
+      },
+      "enrollment": {
+        "price": 3500,
+        "earlyBirdPrice": 3000,
+        "currency": "USD",
+        "seatsAvailable": 15,
+        "minEnrollment": 5,
+        "currentEnrollment": 0
+      },
+      "instructors": {
+        "primary": {
+          "instructorId": "507f1f77bcf86cd799439011",
+          "name": "Dr. Giovanni Angiolini",
+          "role": "Lead Instructor"
+        },
+        "additional": []
+      },
+      "venue": {
+        "name": "IAAI Training Center",
+        "address": "Istanbul Medical District",
+        "city": "Istanbul",
+        "country": "Turkey",
+        "type": "training-center",
+        "facilities": ["OR", "Lab", "Lecture Hall", "Simulation Room"],
+        "parkingAvailable": true
+      },
+      "content": {
+        "objectives": [
+          "Master dangerous zones and vascular system anatomy",
+          "Learn to choose the right products for each indication",
+          "Perfect Dr. Giovanni's signature injection techniques",
+          "Develop comprehensive facial assessment skills",
+          "Create natural, harmonious facial enhancement"
+        ],
+        "modules": [
+          {
+            "title": "Dangerous Zones and Vascular System",
+            "description": "In-depth study of facial anatomy and high-risk injection areas",
+            "duration": "2 hours",
+            "order": 1
+          },
+          {
+            "title": "Product Selection Mastery",
+            "description": "Choosing the right products for optimal results",
+            "duration": "1.5 hours",
+            "order": 2
+          },
+          {
+            "title": "Dr. Giovanni's Injection Techniques",
+            "description": "Signature techniques for natural results",
+            "duration": "2 hours",
+            "order": 3
+          },
+          {
+            "title": "Live Demonstrations",
+            "description": "Watch the master at work with real patients",
+            "duration": "2 hours",
+            "order": 4
+          }
+        ],
+        "targetAudience": ["Medical Doctors", "Dentists", "Aesthetic Practitioners", "Plastic Surgeons"],
+        "experienceLevel": "intermediate",
+        "prerequisites": "Medical degree and basic injection experience required",
+        "technicalRequirements": "Basic knowledge of facial anatomy and injection techniques"
+      },
+      "practical": {
+        "hasHandsOn": true,
+        "procedures": [
+          "Temple Fillers",
+          "Eye Treatment",
+          "Cheek Bone Enhancement",
+          "Fluid Lifting",
+          "Rhinofiller",
+          "Lip Filler",
+          "Jawline Fillers",
+          "Biostimulation",
+          "Full-Face Botox",
+          "Chin Augmentation"
+        ],
+        "equipment": ["Injection kits", "Various HA fillers", "Cannulas", "Needles", "Botox"],
+        "trainingType": ["live-patient"],
+        "studentRatio": "1:1",
+        "safetyRequirements": {
+          "ppeRequired": true,
+          "healthClearance": false,
+          "insuranceRequired": true
+        }
+      },
+      "assessment": {
+        "required": false,
+        "type": "none",
+        "passingScore": 70,
+        "retakesAllowed": 0
+      },
+      "certification": {
+        "enabled": true,
+        "type": "completion",
+        "issuingAuthority": "IAAI Training Institute",
+        "requirements": {
+          "minimumAttendance": 90,
+          "minimumScore": 0,
+          "practicalRequired": true
+        },
+        "validity": {
+          "isLifetime": true
+        },
+        "features": {
+          "digitalBadge": true,
+          "qrVerification": true,
+          "autoGenerate": true
+        }
+      },
+      "inclusions": {
+        "meals": {
+          "breakfast": false,
+          "lunch": true,
+          "coffee": true,
+          "dietaryOptions": true
+        },
+        "accommodation": {
+          "included": false,
+          "assistanceProvided": true,
+          "partnerHotels": ["Istanbul Medical Hotel", "Park Inn by Radisson"]
+        },
+        "materials": {
+          "courseMaterials": true,
+          "certificatePrinting": true,
+          "practiceSupplies": true,
+          "takeHome": true
+        },
+        "services": {
+          "airportTransfer": false,
+          "localTransport": false,
+          "translation": false
+        }
+      },
+      "media": {
+        "mainImage": {
+          "url": "https://iaai.com/images/giovanni-course-2025.jpg",
+          "alt": "Full Face Harmonization Course with Dr. Giovanni"
+        },
+        "documents": [],
+        "images": [],
+        "videos": [],
+        "promotional": {
+          "brochureUrl": "https://iaai.com/brochures/fullface-giovanni-2025.pdf"
+        },
+        "links": []
+      },
+      "attendance": {
+        "trackingEnabled": true,
+        "minimumRequired": 90,
+        "checkInMethod": "manual",
+        "records": []
+      },
+      "contact": {
+        "email": "info@iaa-i.com",
+        "phone": "+90 536 745 86 66",
+        "whatsapp": "+90 536 745 86 66",
+        "registrationUrl": "https://iaai.com/register/fullface-2025",
+        "supportHours": "9 AM - 6 PM (Monday-Friday)"
+      },
+      "notificationSettings": {
+        "courseUpdates": true,
+        "emailNotifications": true,
+        "marketingEmails": true,
+        "weeklyDigest": false
+      },
+      "metadata": {
+        "createdBy": "507f1f77bcf86cd799439020",
+        "version": 1,
+        "tags": ["advanced", "full-face", "harmonization", "giovanni", "2025"],
+        "notes": "Premium course with Dr. Giovanni Angiolini",
+        "isTemplate": false
+      }
+    },
+    {
+      "basic": {
+        "courseCode": "FOUNDATION2025",
+        "title": "Mastering Facial Injection - Foundation Level",
+        "description": "Comprehensive 3-day foundation course covering essential aesthetic injection techniques. Master skin rejuvenation with mesotherapy, microneedling, and PRP; perfect upper face Botox applications; and learn fundamental filler techniques for lips, nasolabial folds, and cheeks. Ideal for beginners and those seeking to strengthen their foundational skills.",
+        "category": "aesthetic",
+        "status": "open"
+      },
+      "schedule": {
+        "startDate": "2025-02-23T09:00:00.000Z",
+        "endDate": "2025-02-25T17:00:00.000Z",
+        "duration": "3 days",
+        "timeSlots": {
+          "startTime": "09:00",
+          "endTime": "17:30",
+          "lunchBreak": "14:00-15:00"
+        },
+        "registrationDeadline": "2025-02-16T23:59:59.000Z"
+      },
+      "enrollment": {
+        "price": 2500,
+        "earlyBirdPrice": 2000,
+        "currency": "USD",
+        "seatsAvailable": 20,
+        "minEnrollment": 8,
+        "currentEnrollment": 0
+      },
+      "instructors": {
+        "primary": {
+          "instructorId": "507f1f77bcf86cd799439012",
+          "name": "IAAI Expert Faculty",
+          "role": "Lead Instructor"
+        },
+        "additional": []
+      },
+      "venue": {
+        "name": "IAAI Training Center",
+        "address": "Istanbul Medical District",
+        "city": "Istanbul",
+        "country": "Turkey",
+        "type": "training-center",
+        "facilities": ["Lab", "Lecture Hall", "Practice Rooms"],
+        "parkingAvailable": true
+      },
+      "content": {
+        "objectives": [
+          "Master skin rejuvenation techniques including mesotherapy and PRP",
+          "Perfect upper face Botox injection skills",
+          "Learn fundamental filler techniques for common areas",
+          "Understand facial anatomy and danger zones",
+          "Develop safe injection practices and complication management"
+        ],
+        "modules": [
+          {
+            "title": "Part 1: Skin Rejuvenation",
+            "description": "Anatomy, aging classification, biorevitalization, mesotherapy, and PRP",
+            "duration": "Day 1 morning",
+            "order": 1
+          },
+          {
+            "title": "Part 2: Botox Upper Face",
+            "description": "Upper face anatomy, injection techniques, and complications",
+            "duration": "Day 1 afternoon",
+            "order": 2
+          },
+          {
+            "title": "Part 3: Filler Fundamentals",
+            "description": "Filler types, techniques for lips, NLF, and cheeks",
+            "duration": "Days 2-3",
+            "order": 3
+          }
+        ],
+        "targetAudience": ["Medical Doctors", "Nurses", "Dentists", "Healthcare Professionals"],
+        "experienceLevel": "beginner",
+        "prerequisites": "Medical or nursing degree required",
+        "technicalRequirements": "No prior injection experience necessary"
+      },
+      "practical": {
+        "hasHandsOn": true,
+        "procedures": [
+          "Mesotherapy face injection",
+          "Microneedling with Dermapen",
+          "Botox - Glabella",
+          "Botox - Frontalis",
+          "Botox - Crow's feet",
+          "Botox - Bunny lines",
+          "Botox - Nose tip",
+          "Filler - Nasolabial folds",
+          "Filler - Cheeks",
+          "Filler - Lips"
+        ],
+        "equipment": ["Mesotherapy products", "Dermapen", "Botox", "HA fillers", "Injection kits"],
+        "trainingType": ["model"],
+        "studentRatio": "1:1",
+        "safetyRequirements": {
+          "ppeRequired": true,
+          "healthClearance": false,
+          "insuranceRequired": false
+        }
+      },
+      "assessment": {
+        "required": true,
+        "type": "both",
+        "passingScore": 70,
+        "retakesAllowed": 1
+      },
+      "certification": {
+        "enabled": true,
+        "type": "achievement",
+        "issuingAuthority": "IAAI Training Institute",
+        "requirements": {
+          "minimumAttendance": 90,
+          "minimumScore": 70,
+          "practicalRequired": true
+        },
+        "validity": {
+          "isLifetime": true
+        },
+        "features": {
+          "digitalBadge": true,
+          "qrVerification": true,
+          "autoGenerate": true
+        }
+      },
+      "inclusions": {
+        "meals": {
+          "breakfast": false,
+          "lunch": true,
+          "coffee": true,
+          "dietaryOptions": true
+        },
+        "accommodation": {
+          "included": false,
+          "assistanceProvided": true,
+          "partnerHotels": ["Istanbul Medical Hotel", "Best Western"]
+        },
+        "materials": {
+          "courseMaterials": true,
+          "certificatePrinting": true,
+          "practiceSupplies": true,
+          "takeHome": true
+        },
+        "services": {
+          "airportTransfer": false,
+          "localTransport": false,
+          "translation": false
+        }
+      },
+      "media": {
+        "mainImage": {
+          "url": "https://iaai.com/images/foundation-course-2025.jpg",
+          "alt": "Mastering Facial Injection Foundation Course"
+        },
+        "documents": ["Foundation-Fillers-Presentation.pdf"],
+        "images": [],
+        "videos": [],
+        "promotional": {
+          "brochureUrl": "https://iaai.com/brochures/foundation-2025.pdf"
+        },
+        "links": []
+      },
+      "attendance": {
+        "trackingEnabled": true,
+        "minimumRequired": 90,
+        "checkInMethod": "manual",
+        "records": []
+      },
+      "contact": {
+        "email": "info@iaa-i.com",
+        "phone": "+90 532 667 53 55",
+        "whatsapp": "+90 536 745 86 66",
+        "registrationUrl": "https://iaai.com/register/foundation-2025",
+        "supportHours": "9 AM - 6 PM (Monday-Friday)"
+      },
+      "notificationSettings": {
+        "courseUpdates": true,
+        "emailNotifications": true,
+        "marketingEmails": true,
+        "weeklyDigest": false
+      },
+      "metadata": {
+        "createdBy": "507f1f77bcf86cd799439020",
+        "version": 1,
+        "tags": ["foundation", "beginner", "botox", "filler", "mesotherapy", "2025"],
+        "notes": "Foundation level course with comprehensive hands-on training",
+        "isTemplate": false
+      }
+    }
+  ]

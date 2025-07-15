@@ -1,0 +1,54 @@
+/* ✅ Admin Dashboard Promo Code Section */
+.admin-dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.dashboard-card h3 {
+    margin-bottom: 10px;
+    font-size: 22px;
+    color: #002147;
+}
+
+.dashboard-card .cta-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #ffcc00;
+    border-radius: 5px;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+}
+
+/* ✅ Promo Code Management Page */
+.promo-code-form {
+    margin: 20px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.promo-code-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.promo-code-table th, .promo-code-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.promo-code-table th {
+    background: #f4f4f4;
+}

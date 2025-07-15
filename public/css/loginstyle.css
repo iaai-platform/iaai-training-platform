@@ -1,0 +1,405 @@
+/* ============================================================
+   ✅ General Styling for the Login Page
+============================================================ */
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================
+     ✅ 4. Profile Dropdown (Aligned & Properly Styled)
+============================================================ */
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+    font-family: 'Montserrat', sans-serif; /* ✅ Consistent Font */
+}
+
+/* ✅ Profile Icon Styling */
+/* ✅ Profile Icon Button */
+.profile-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333; /* ✅ Matches Navbar */
+    font-size: 22px; /* ✅ Bigger icon */
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s ease-in-out;
+}
+/* ✅ Add Human Head Icon */
+.profile-icon i {
+    font-size: 32px; /* ✅ Icon Size */
+    color: #b80b0b; /* ✅ Gold icon */
+}
+
+/* ✅ Dropdown Menu */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0; /* ✅ Align dropdown with the right edge */
+    top: 100%; /* ✅ Position directly below the profile icon */
+    background-color: white;
+    min-width: 200px; /* ✅ Wider for better visibility */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+/* ✅ Dropdown Links */
+.dropdown-content a {
+    font-family: 'Montserrat', sans-serif; /* ✅ Apply Montserrat */
+    color: #333;
+    padding: 12px 15px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+/* ✅ Hover Effect */
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* ✅ Show dropdown on hover */
+.profile-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* ✅ Ensure Dropdown is Fully Visible */
+@media (max-width: 768px) {
+    .dropdown-content {
+        right: auto; /* ✅ Prevent overflow on small screens */
+        left: 0;
+    }
+}
+
+/* ============================================================
+     ✅ 5. Mobile Responsive Styles
+============================================================ */
+@media screen and (max-width: 768px) {
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .navbar {
+      flex-direction: column;
+      width: 100%;
+    }
+  
+    .navbar a {
+      width: 100%;
+      text-align: left;
+    }
+  
+    .search-bar {
+      width: 100%;
+      margin-top: 10px;
+    }
+  
+    .search-bar input {
+      width: 100%;
+    }
+  
+    .program-menu {
+      top: 120px;
+      padding: 5px 0;
+    }
+}
+
+/* ============================================================
+ ✅ UPDATED: Hero Section for Better Fitting
+============================================================ */
+#hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px); /* Subtract header/footer height */
+  padding: 40px 20px; /* Add padding for spacing */
+  background: url('/images/login-bg.jpg') no-repeat center center/cover;
+  overflow-y: auto; /* Allow scrolling if content is too tall */
+}
+
+/* ============================================================
+ ✅ UPDATED: Login Form Container with Better Spacing
+============================================================ */
+.hero-content {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 30px; /* Reduced from 40px */
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 100%;
+  max-width: 400px; /* Increased from 350px for reCAPTCHA */
+  margin: auto;
+  max-height: calc(100vh - 160px); /* Ensure it fits in viewport */
+  overflow-y: auto; /* Add scrollbar if needed */
+}
+
+/* ✅ Login Heading */
+.hero-content h1 {
+  font-size: 24px; /* Slightly reduced */
+  color: #002147;
+  margin-bottom: 15px; /* Reduced spacing */
+}
+
+/* ============================================================
+ ✅ Security Notice Styling
+============================================================ */
+.security-notice {
+  background-color: #f0f7ff;
+  border-left: 4px solid #4285f4;
+  padding: 10px; /* Reduced padding */
+  margin: 10px 0; /* Reduced margin */
+  border-radius: 4px;
+  font-size: 13px;
+  color: #0066cc;
+  text-align: left;
+}
+
+.security-notice i {
+  margin-right: 8px;
+  color: #4285f4;
+}
+
+/* ============================================================
+ ✅ Messages Styling
+============================================================ */
+.error-message,
+.success-message {
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0; /* Reduced margin */
+  text-align: center;
+  animation: slideIn 0.3s ease-out;
+  font-size: 14px;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* ============================================================
+ ✅ UPDATED: Form Spacing
+============================================================ */
+.hero-content form div {
+  margin-bottom: 15px; /* Reduced from 20px */
+  text-align: left;
+}
+
+.hero-content label {
+  font-size: 14px; /* Reduced from 16px */
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 6px; /* Reduced from 8px */
+}
+
+/* ✅ Styling Input Fields */
+.hero-content input[type="email"],
+.hero-content input[type="password"] {
+  width: 100%;
+  padding: 10px; /* Reduced from 12px */
+  font-size: 14px; /* Reduced from 16px */
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+/* ✅ Input Hover & Focus Effect */
+.hero-content input:focus {
+  border-color: #b8860b;
+}
+
+/* ============================================================
+ ✅ Remember Me Checkbox
+============================================================ */
+.hero-content label input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+/* ============================================================
+ ✅ UPDATED: reCAPTCHA Container
+============================================================ */
+.recaptcha-container {
+  margin: 15px 0; /* Reduced margin */
+  display: flex;
+  justify-content: center;
+  transform: scale(0.9); /* Slightly scale down reCAPTCHA */
+  transform-origin: center;
+}
+
+.recaptcha-error {
+  color: #dc3545;
+  font-size: 13px;
+  margin-top: 5px;
+  display: none;
+  text-align: center;
+}
+
+/* ============================================================
+ ✅ Login Button
+============================================================ */
+.hero-content button {
+  background-color: #b8860b;
+  color: white;
+  font-size: 16px; /* Reduced from 18px */
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 10px; /* Reduced from 12px */
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.hero-content button:hover {
+  background-color: #ffd700;
+  color: black;
+}
+
+.hero-content button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+ ✅ Links for Forgot Password & Signup
+============================================================ */
+.hero-content p {
+  margin-top: 12px; /* Reduced from 15px */
+  font-size: 13px; /* Reduced from 14px */
+}
+
+.hero-content a {
+  text-decoration: none;
+  color: #002147;
+  font-weight: bold;
+}
+
+.hero-content a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+ ✅ Loading State
+============================================================ */
+#loginLoader {
+  display: none;
+}
+
+/* ============================================================
+ ✅ Responsive Design
+============================================================ */
+@media (max-width: 768px) {
+  #hero {
+    min-height: calc(100vh - 100px);
+    padding: 20px 15px;
+  }
+  
+  .hero-content {
+    padding: 25px;
+    max-height: none; /* Remove height restriction on mobile */
+  }
+  
+  .hero-content h1 {
+    font-size: 22px;
+  }
+  
+  .recaptcha-container {
+    transform: scale(0.85);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content {
+    width: 95%;
+    padding: 20px;
+  }
+  
+  .hero-content h1 {
+    font-size: 20px;
+  }
+  
+  .hero-content input[type="email"],
+  .hero-content input[type="password"] {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .hero-content button {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .recaptcha-container {
+    transform: scale(0.77);
+    margin: 10px -20px; /* Negative margin to center scaled element */
+  }
+  
+  .security-notice {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+
+/* ============================================================
+ ✅ For Very Small Screens
+============================================================ */
+@media (max-height: 700px) {
+  #hero {
+    min-height: auto;
+    padding: 20px;
+  }
+  
+  .hero-content {
+    margin: 20px auto;
+  }
+  
+  .hero-content h1 {
+    margin-bottom: 10px;
+  }
+  
+  .hero-content form div {
+    margin-bottom: 12px;
+  }
+}
+
+/* ============================================================
+ ✅ Custom Scrollbar for Login Container
+============================================================ */
+.hero-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hero-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.hero-content::-webkit-scrollbar-thumb {
+  background: #b8860b;
+  border-radius: 10px;
+}
+
+.hero-content::-webkit-scrollbar-thumb:hover {
+  background: #9a7209;
+}

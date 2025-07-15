@@ -1,0 +1,211 @@
+/* ============================================================
+   ✅ HEADER STYLING
+============================================================ */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #E2E2E2 ; /* Clean white background */
+  border-bottom: 3px solid #b8860b; /* Gold accent */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  padding: 15px 20px;
+  position: relative;
+  font-family: 'Montserrat', sans-serif; /* ✅ Modern & clean font */
+}
+
+/* ✅ Logo Styling */
+.logo img {
+  height: 60px;
+  width: auto;
+}
+
+/* ✅ Navbar */
+.navbar {
+  display: flex;
+  padding-left: 20px;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  align-items: center;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* ✅ Navbar Links */
+.navbar a {
+  color: #0C2340; /* Dark text for readability */
+  text-decoration: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: 500; /* Medium weight */
+  text-transform: uppercase; /* Premium feel */
+  transition: color 0.3s ease-in-out;
+}
+
+.navbar a:hover {
+  color: #b8860b; /* Gold hover effect */
+}
+
+/* ✅ "All Programs" Dropdown */
+.program-menu-trigger {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 500;
+  gap: 5px;
+  transition: all 0.3s ease;
+}
+
+.program-menu-trigger i {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.program-menu-trigger:hover {
+  background-color: white;
+  color: black;
+  border-radius: 60px;
+  transform: scale(1.7);
+}
+
+/* ✅ Dropdown Styling */
+.program-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #E2E2E2 ;
+  padding: 10px 0;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 1000;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.program-menu-trigger:hover + .program-menu,
+.program-menu:hover {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.program-menu a {
+  color: #002147;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+  display: inline-block;
+  transition: background 0.3s ease;
+}
+
+.program-menu a:hover {
+  background: #f4f4f4;
+  border-radius: 5px;
+}
+
+/* ✅ Search Bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.search-bar input {
+  padding: 8px;
+  font-size: 14px;
+  border: 2px solid #b8860b;
+  border-radius: 5px;
+  width: 200px;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.search-bar input:focus {
+  border-color: #ffd700;
+  outline: none;
+}
+
+/* ✅ Profile Dropdown */
+.profile-dropdown {
+  position: relative;
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.profile-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  font-size: 22px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.3s ease-in-out;
+}
+
+.profile-icon i {
+  font-size: 32px;
+  color: #b80b0b;
+}
+
+/* ✅ Dropdown Content */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: white;
+  min-width: 200px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.dropdown-content a {
+  font-family: 'Montserrat', sans-serif;
+  color: #333;
+  padding: 12px 15px;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.profile-dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* ✅ Mobile Responsive */
+@media (max-width: 768px) {
+  header {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .navbar {
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+  }
+
+  .search-bar input {
+      width: 100%;
+  }
+
+  .dropdown-content {
+      right: auto;
+      left: 0;
+  }
+}

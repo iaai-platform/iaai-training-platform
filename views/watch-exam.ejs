@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= course.title || 'Course' %> - <%= currentVideo ? currentVideo.title : 'Video Player' %></title>
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="/css/watch.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Enhanced Styles for New Features -->
+  <style>
+    /* No Video Container */
+    .no-video-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .no-video-content {
+      max-width: 500px;
+      padding: 40px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .no-video-content i {
+      font-size: 4rem;
+      color: #dc3545;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+
+    /* Enhanced Video Action Buttons */
+    .video-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .video-btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-watch-again { 
+      background: linear-gradient(135deg, #17a2b8, #138496); 
+      color: white; 
+      border: 1px solid #17a2b8;
+    }
+    .btn-continue { 
+      background: linear-gradient(135deg, #ffc107, #e0a800); 
+      color: #212529; 
+      border: 1px solid #ffc107;
+    }
+    .btn-start { 
+      background: linear-gradient(135deg, #28a745, #20c997); 
+      color: white; 
+      border: 1px solid #28a745;
+    }
+    .btn-exam { 
+      background: linear-gradient(135deg, #007bff, #0056b3); 
+      color: white; 
+      border: 1px solid #007bff;
+    }
+    .btn-exam-completed { 
+      background: linear-gradient(135deg, #6c757d, #545b62); 
+      color: white; 
+      border: 1px solid #6c757d;
+    }
+
+    .video-btn:hover { 
+      transform: translateY(-2px); 
+      text-decoration: none; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .video-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Watch Status Indicators */
+    .watch-status {
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-right: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .watch-status.completed { 
+      background: #d4edda; 
+      color: #155724; 
+      border: 1px solid #c3e6cb;
+    }
+    .watch-status.in-progress { 
+      background: #fff3cd; 
+      color: #856404; 
+      border: 1px solid #ffeaa7;
+    }
+
+    /* Video Placeholder */
+    .no-video-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 12px;
+      color: #6c757d;
+      border: 2px dashed #dee2e6;
+    }
+
+    .no-video-placeholder i { 
+      font-size: 3rem; 
+      margin-bottom: 15px; 
+      opacity: 0.7;
+    }
+
+    /* Sidebar Enhancements */
+    .no-videos-message {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6c757d;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .no-videos-message i { 
+      font-size: 2rem; 
+      margin-bottom: 10px; 
+      opacity: 0.7;
+    }
+
+    .sidebar-footer {
+      padding: 15px;
+      border-top: 1px solid #e9ecef;
+      margin-top: auto;
+      background: #f8f9fa;
+    }
+
+    .completion-badge {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .completion-badge i {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    /* Enhanced Exam Styles */
+    .exam-completed-notice, .exam-pending-notice {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .exam-completed-notice {
+      border-left: 5px solid #28a745;
+      background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    }
+
+    .exam-pending-notice {
+      border-left: 5px solid #17a2b8;
+      background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    }
+
+    .exam-actions-header {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .exam-actions-header .btn {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    /* Exam Review Styles */
+    .exam-review {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 12px;
+      padding: 25px;
+      margin-top: 20px;
+      border: 1px solid #dee2e6;
+    }
+
+    .review-header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    .review-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 25px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #007bff;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .review-question {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 5px solid #dee2e6;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .review-question.correct {
+      border-left-color: #28a745;
+      background: linear-gradient(135deg, #ffffff, #f8fff9);
+    }
+
+    .review-question.incorrect {
+      border-left-color: #dc3545;
+      background: linear-gradient(135deg, #ffffff, #fff8f8);
+    }
+
+    .review-question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .question-number {
+      background: #007bff;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .question-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600;
+    }
+
+    .question-status.correct {
+      color: #28a745;
+    }
+
+    .question-status.incorrect {
+      color: #dc3545;
+    }
+
+    .question-text-review {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #495057;
+    }
+
+    .user-answer, .correct-answer {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .user-answer {
+      background: #e3f2fd;
+      border-left: 3px solid #2196f3;
+    }
+
+    .correct-answer {
+      background: #e8f5e8;
+      border-left: 3px solid #4caf50;
+    }
+
+    /* Failed Review Styles */
+    .failed-review-header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #dc3545;
+    }
+
+    .failed-review-header i {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .failed-question-review {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 5px solid #dc3545;
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.1);
+    }
+
+    .wrong-answer {
+      color: #dc3545;
+      background: #f8d7da;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border-left: 3px solid #dc3545;
+    }
+
+    .correct-answer {
+      color: #28a745;
+      background: #d4edda;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border-left: 3px solid #28a745;
+    }
+
+    .explanation {
+      background: #e2e3e5;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+      font-style: italic;
+      border-left: 3px solid #6c757d;
+    }
+
+    /* Action Buttons */
+    .review-actions {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #dee2e6;
+    }
+
+    .review-actions .btn {
+      margin: 0 8px;
+    }
+
+    /* Enhanced Results */
+    .exam-result-header {
+      text-align: center;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+    }
+
+    .exam-result-header.passed {
+      background: linear-gradient(135deg, #d4edda, #c3e6cb);
+      border: 2px solid #28a745;
+    }
+
+    .exam-result-header.failed {
+      background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+      border: 2px solid #dc3545;
+    }
+
+    .result-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+    }
+
+    .exam-result-header.passed .result-icon {
+      color: #28a745;
+    }
+
+    .exam-result-header.failed .result-icon {
+      color: #dc3545;
+    }
+
+    .pass-message {
+      color: #155724;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .fail-message {
+      color: #721c24;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .result-actions {
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .result-actions .btn {
+      margin: 0 8px 8px 8px;
+    }
+
+    /* Utility Classes */
+    .text-danger { color: #dc3545 !important; }
+    .text-success { color: #28a745 !important; }
+    .text-info { color: #17a2b8 !important; }
+    .text-warning { color: #ffc107 !important; }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .video-actions {
+        flex-direction: column;
+      }
+      
+      .video-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .review-stats {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .review-actions .btn {
+        margin: 5px;
+        width: 100%;
+      }
+    }
+
+    /* Loading States */
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .btn-loading::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Enhanced Tab Content */
+    .exam-info-content {
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .exam-completed-info, .exam-pending-info {
+      text-align: center;
+      padding: 25px;
+      border-radius: 10px;
+    }
+
+    .exam-completed-info {
+      background: linear-gradient(135deg, #d4edda, #c3e6cb);
+      border: 2px solid #28a745;
+    }
+
+    .exam-pending-info {
+      background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+      border: 2px solid #ffc107;
+    }
+
+    .exam-completed-info i, .exam-pending-info i { 
+      font-size: 2.5rem; 
+      margin-bottom: 15px; 
+    }
+
+    .exam-completed-info i { color: #28a745; }
+    .exam-pending-info i { color: #ffc107; }
+  </style>
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+  <% if (!currentVideo) { %>
+    <!-- No Video Available -->
+    <div class="no-video-container">
+      <div class="no-video-content">
+        <i class="fas fa-video-slash"></i>
+        <h2>No Videos Available</h2>
+        <p>This course doesn't have any videos yet. Please check back later or contact support.</p>
+        <a href="/library/self-paced" class="btn btn-primary">
+          <i class="fas fa-arrow-left"></i> Back to Library
+        </a>
+      </div>
+    </div>
+  <% } else { %>
+
+  <!-- Enhanced Progress Bar -->
+  <div class="course-progress-bar">
+    <div class="progress-container">
+      <div class="progress-info">
+        <h4><%= course.title %></h4>
+        <span class="progress-text">
+          <%= courseStats.completedVideos %>/<%= courseStats.totalVideos %> videos completed
+          (<%= courseStats.progressPercentage %>%)
+        </span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: <%= courseStats.progressPercentage %>%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="watch-container">
+    <!-- Enhanced Sidebar -->
+    <aside class="course-sidebar">
+      <div class="sidebar-header">
+        <h3><i class="fas fa-list"></i> Course Content</h3>
+        <div class="course-stats">
+          <span class="stat-item">
+            <i class="fas fa-play-circle"></i>
+            <%= courseStats.completedVideos %>/<%= courseStats.totalVideos %>
+          </span>
+          <span class="stat-item">
+            <i class="fas fa-clipboard-check"></i>
+            <%= courseStats.completedExams %>/<%= courseStats.totalExams %>
+          </span>
+        </div>
+      </div>
+
+      <div class="video-list">
+        <% if (videos && videos.length > 0) { %>
+          <% videos.forEach((video, index) => { %>
+            <div class="video-item <%= currentVideo._id.toString() === video._id.toString() ? 'active' : '' %> <%= video.userProgress && video.userProgress.isCompleted ? 'completed' : '' %>">
+              <div class="video-number">
+                <% if (video.userProgress && video.userProgress.isCompleted) { %>
+                  <i class="fas fa-check-circle completed"></i>
+                <% } else if (video.userProgress && video.userProgress.progressPercentage > 0) { %>
+                  <i class="fas fa-play-circle in-progress"></i>
+                <% } else { %>
+                  <%= video.sequence || (index + 1) %>
+                <% } %>
+              </div>
+              
+              <div class="video-content">
+                <div class="video-title">
+                  <h4><%= video.title %></h4>
+                </div>
+                
+                <div class="video-meta">
+                  <span class="duration">
+                    <i class="fas fa-clock"></i> 
+                    <%= video.duration ? Math.round(video.duration / 60) + ' min' : '~15 min' %>
+                  </span>
+                  
+                  <% if (video.userProgress && video.userProgress.hasExam) { %>
+                    <span class="exam-indicator <%= video.userProgress.examCompleted ? 'completed' : '' %>">
+                      <i class="fas fa-clipboard-question"></i>
+                      <%= video.userProgress.examCompleted ? 'Exam Passed (' + video.userProgress.examScore + '%)' : 'Has Exam' %>
+                    </span>
+                  <% } %>
+                </div>
+
+                <!-- Enhanced Progress Display -->
+                <% if (video.userProgress && video.userProgress.progressPercentage > 0 && video.userProgress.progressPercentage < 100) { %>
+                  <div class="video-progress">
+                    <div class="progress-bar-small">
+                      <div class="progress-fill-small" style="width: <%= video.userProgress.progressPercentage %>%"></div>
+                    </div>
+                    <span class="progress-text-small"><%= video.userProgress.progressPercentage %>% watched</span>
+                  </div>
+                <% } %>
+
+                <!-- Enhanced Action Buttons -->
+                <div class="video-actions">
+                  <% if (video.userProgress && video.userProgress.isCompleted) { %>
+                    <!-- Watch Again Option -->
+                    <button type="button" class="video-btn btn-watch-again" 
+                            onclick="navigateToVideo('<%= course._id %>', '<%= video._id %>')">
+                      <i class="fas fa-redo"></i> Watch Again
+                    </button>
+                  <% } else if (video.userProgress && video.userProgress.progressPercentage > 0) { %>
+                    <!-- Continue Watching -->
+                    <button type="button" class="video-btn btn-continue" 
+                            onclick="navigateToVideo('<%= course._id %>', '<%= video._id %>')">
+                      <i class="fas fa-play"></i> Continue (<%= video.userProgress.progressPercentage %>%)
+                    </button>
+                  <% } else { %>
+                    <!-- Start Watching -->
+                    <button type="button" class="video-btn btn-start" 
+                            onclick="navigateToVideo('<%= course._id %>', '<%= video._id %>')">
+                      <i class="fas fa-play"></i> Start Video
+                    </button>
+                  <% } %>
+                  
+                  <!-- Exam Actions -->
+                  <% if (video.userProgress && video.userProgress.hasExam) { %>
+                    <% if (!video.userProgress.examCompleted) { %>
+                      <button type="button" class="video-btn btn-exam" 
+                              onclick="navigateToExam('<%= course._id %>', '<%= video._id %>')">
+                        <i class="fas fa-clipboard-question"></i> Take Exam
+                      </button>
+                    <% } else { %>
+                      <button type="button" class="video-btn btn-exam-completed" 
+                              onclick="navigateToExam('<%= course._id %>', '<%= video._id %>')">
+                        <i class="fas fa-check-circle"></i> Review (<%= video.userProgress.examScore %>%)
+                      </button>
+                    <% } %>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="no-videos-message">
+            <i class="fas fa-video-slash"></i>
+            <p>No videos available in this course yet.</p>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Course Completion Status -->
+      <% if (courseCompleted) { %>
+        <div class="completion-badge">
+          <i class="fas fa-trophy"></i>
+          <span>Course Completed!</span>
+          <a href="/certificate/<%= course._id %>" class="btn btn-sm btn-light" style="margin-top: 10px;">
+            <i class="fas fa-certificate"></i> Get Certificate
+          </a>
+        </div>
+      <% } %>
+
+      <!-- Back to Library -->
+      <div class="sidebar-footer">
+        <a href="/library/self-paced" class="btn btn-secondary btn-block">
+          <i class="fas fa-arrow-left"></i> Back to Library
+        </a>
+      </div>
+    </aside>
+
+    <!-- Enhanced Main Content -->
+    <main class="main-content">
+      <!-- Video Player Section -->
+      <div id="videoSection" class="content-section <%= examMode ? 'hidden' : '' %>">
+        <div class="video-container">
+          <% if (currentVideo.videoUrl) { %>
+            <video 
+              id="videoPlayer" 
+              controls 
+              preload="metadata" 
+              data-video-id="<%= currentVideo._id %>"
+              data-course-id="<%= course._id %>"
+              onloadedmetadata="initializeVideo()"
+              ontimeupdate="updateProgress()"
+              onended="onVideoEnded()"
+              poster="<%= currentVideo.thumbnailUrl || '' %>">
+              <source src="<%= currentVideo.videoUrl %>" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          <% } else { %>
+            <div class="no-video-placeholder">
+              <i class="fas fa-video-slash"></i>
+              <h3>Video Not Available</h3>
+              <p>This video is currently not available. Please contact support.</p>
+            </div>
+          <% } %>
+          
+          <div class="video-overlay" id="videoOverlay">
+            <div class="play-button" onclick="playVideo()">
+              <i class="fas fa-play"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-info">
+          <div class="video-header">
+            <h1 id="videoTitle"><%= currentVideo.title %></h1>
+            <div class="video-actions">
+              <!-- Watch Status -->
+              <% if (currentVideo.userProgress && currentVideo.userProgress.isCompleted) { %>
+                <span class="watch-status completed">
+                  <i class="fas fa-check-circle"></i> Completed
+                </span>
+              <% } else if (currentVideo.userProgress && currentVideo.userProgress.progressPercentage > 0) { %>
+                <span class="watch-status in-progress">
+                  <i class="fas fa-play-circle"></i> <%= currentVideo.userProgress.progressPercentage %>% Watched
+                </span>
+              <% } %>
+              
+              <button class="action-btn" onclick="toggleFullscreen()" title="Fullscreen">
+                <i class="fas fa-expand"></i>
+              </button>
+              <button class="action-btn" onclick="restartVideo()" title="Restart Video">
+                <i class="fas fa-redo"></i>
+              </button>
+              <button class="action-btn" onclick="downloadVideo()" title="Download">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Enhanced Tabs -->
+          <div class="content-tabs">
+            <button class="tab-btn active" onclick="showTab('description', this)">
+              <i class="fas fa-info-circle"></i> Description
+            </button>
+            <button class="tab-btn" onclick="showTab('notes', this)">
+              <i class="fas fa-sticky-note"></i> My Notes
+            </button>
+            <% if (currentVideo.transcript) { %>
+              <button class="tab-btn" onclick="showTab('transcript', this)">
+                <i class="fas fa-file-text"></i> Transcript
+              </button>
+            <% } %>
+            <% if (currentVideo.userProgress && currentVideo.userProgress.hasExam) { %>
+              <button class="tab-btn" onclick="showTab('exam-info', this)">
+                <i class="fas fa-clipboard-question"></i> Quiz Info
+              </button>
+            <% } %>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content-container">
+            <div id="description" class="tab-content active">
+              <div class="content-card">
+                <h3>About this video</h3>
+                <p id="videoDescription"><%= currentVideo.description || 'No description available for this video.' %></p>
+                
+                <!-- Learning Objectives -->
+                <% if (currentVideo.learningObjectives && currentVideo.learningObjectives.length > 0) { %>
+                  <h4>Learning Objectives</h4>
+                  <ul>
+                    <% currentVideo.learningObjectives.forEach(objective => { %>
+                      <li><%= objective %></li>
+                    <% }) %>
+                  </ul>
+                <% } %>
+              </div>
+            </div>
+
+            <div id="notes" class="tab-content">
+              <div class="content-card">
+                <h3>My Notes</h3>
+                <div class="notes-container">
+                  <textarea 
+                    id="userNotes" 
+                    placeholder="Take notes while watching the video..."
+                    rows="8"><%= currentVideoNotes || '' %></textarea>
+                  <div class="notes-actions">
+                    <button class="btn btn-primary" onclick="saveNotes()">
+                      <i class="fas fa-save"></i> Save Notes
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearNotes()">
+                      <i class="fas fa-eraser"></i> Clear
+                    </button>
+                    <span id="saveStatus" class="save-status"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <% if (currentVideo.transcript) { %>
+              <div id="transcript" class="tab-content">
+                <div class="content-card">
+                  <h3>Video Transcript</h3>
+                  <div class="transcript-content">
+                    <p id="videoTranscript"><%= currentVideo.transcript %></p>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+
+            <% if (currentVideo.userProgress && currentVideo.userProgress.hasExam) { %>
+              <div id="exam-info" class="tab-content">
+                <div class="content-card">
+                  <h3>Quiz Information</h3>
+                  <div class="exam-info-content">
+                    <% if (currentVideo.userProgress.examCompleted) { %>
+                      <div class="exam-completed-info">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Quiz Completed!</h4>
+                        <p>Your Score: <strong><%= currentVideo.userProgress.examScore %>%</strong></p>
+                        <div style="margin-top: 15px;">
+                          <button class="btn btn-info" onclick="navigateToExam('<%= course._id %>', '<%= currentVideo._id %>')">
+                            <i class="fas fa-eye"></i> Review Quiz
+                          </button>
+                          <button class="btn btn-warning" onclick="retakeExamFromTab()">
+                            <i class="fas fa-redo"></i> Retake Quiz
+                          </button>
+                        </div>
+                      </div>
+                    <% } else { %>
+                      <div class="exam-pending-info">
+                        <i class="fas fa-clipboard-question"></i>
+                        <h4>Quiz Available</h4>
+                        <p>Complete the video to unlock the quiz, or take it now to test your knowledge.</p>
+                        <button class="btn btn-primary" onclick="navigateToExam('<%= course._id %>', '<%= currentVideo._id %>')">
+                          <i class="fas fa-clipboard-question"></i> Take Quiz
+                        </button>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Exam Section -->
+      <div id="examSection" class="content-section <%= !examMode ? 'hidden' : '' %>">
+        <div class="exam-container">
+          <div class="exam-header">
+            <h2><i class="fas fa-clipboard-question"></i> Video Quiz</h2>
+            <p>Test your understanding of the video content</p>
+            
+            <!-- Enhanced Exam Status Display -->
+            <% if (currentVideo.userProgress && currentVideo.userProgress.examCompleted) { %>
+              <div class="exam-completed-notice">
+                <div>
+                  <i class="fas fa-check-circle text-success" style="font-size: 1.5rem;"></i>
+                </div>
+                <div style="flex: 1;">
+                  <strong>Quiz Completed!</strong> 
+                  You scored <%= currentVideo.userProgress.examScore %>% on this quiz.
+                  <div class="exam-actions-header">
+                    <button class="btn btn-sm btn-info" onclick="showExamReview()">
+                      <i class="fas fa-eye"></i> Review Previous Answers
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="retakeExamFresh()">
+                      <i class="fas fa-redo"></i> Retake Quiz
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="exam-pending-notice">
+                <div>
+                  <i class="fas fa-info-circle text-info" style="font-size: 1.5rem;"></i>
+                </div>
+                <div>
+                  This quiz will test your understanding of the video content. You need 60% to pass.
+                </div>
+              </div>
+            <% } %>
+          </div>
+
+          <% if (exam && exam.length > 0) { %>
+            <!-- Quiz Form -->
+            <form id="examForm" class="exam-form">
+              <% exam.forEach((question, qIndex) => { %>
+                <div class="question-card">
+                  <div class="question-header">
+                    <span class="question-number">Question <%= qIndex + 1 %></span>
+                    <span class="question-points">1 point</span>
+                  </div>
+                  
+                  <h3 class="question-text"><%= question.questionText %></h3>
+                  
+                  <div class="options-container">
+                    <% question.options.forEach((option, oIndex) => { %>
+                      <label class="option-label">
+                        <input 
+                          type="radio" 
+                          name="answer_<%= question._id %>" 
+                          value="<%= option %>"
+                          <% if (existingExamResponse && existingExamResponse.answers) { %>
+                            <%= existingExamResponse.answers['answer_' + question._id] === option ? 'checked' : '' %>
+                          <% } %>
+                        >
+                        <span class="option-text"><%= option %></span>
+                        <span class="checkmark"></span>
+                      </label>
+                    <% }) %>
+                  </div>
+                </div>
+              <% }) %>
+
+              <div class="exam-actions">
+                <button type="button" class="btn btn-secondary" onclick="showVideoSection()">
+                  <i class="fas fa-arrow-left"></i> Back to Video
+                </button>
+                
+                <!-- Dynamic Submit Button -->
+                <% if (currentVideo.userProgress && currentVideo.userProgress.examCompleted) { %>
+                  <button type="button" class="btn btn-warning" onclick="submitExamRetake()">
+                    <i class="fas fa-redo"></i> Submit Retake
+                  </button>
+                <% } else { %>
+                  <button type="button" class="btn btn-primary" onclick="submitExam()">
+                    <i class="fas fa-paper-plane"></i> Submit Quiz
+                  </button>
+                <% } %>
+              </div>
+            </form>
+
+            <!-- Enhanced Exam Results -->
+            <div id="examResults" class="exam-results hidden">
+              <!-- Results will be populated by JavaScript -->
+            </div>
+
+            <!-- Exam Review Section -->
+            <div id="examReview" class="exam-review hidden">
+              <div class="review-header">
+                <h3><i class="fas fa-eye"></i> Review Your Previous Answers</h3>
+                <p>Here are your answers from your previous attempt:</p>
+              </div>
+              <div id="reviewContent">
+                <!-- Review content will be populated by JavaScript -->
+              </div>
+              <div class="review-actions">
+                <button class="btn btn-secondary" onclick="hideExamReview()">
+                  <i class="fas fa-eye-slash"></i> Hide Review
+                </button>
+                <button class="btn btn-warning" onclick="retakeExamFresh()">
+                  <i class="fas fa-redo"></i> Take Fresh Quiz
+                </button>
+              </div>
+            </div>
+
+          <% } else { %>
+            <div class="no-exam">
+              <i class="fas fa-info-circle"></i>
+              <h3>No quiz available</h3>
+              <p>This video doesn't have an associated quiz.</p>
+              <button class="btn btn-primary" onclick="showVideoSection()">
+                <i class="fas fa-arrow-left"></i> Back to Video
+              </button>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Course Completion Section -->
+      <div id="completionSection" class="content-section <%= !courseCompleted ? 'hidden' : '' %>">
+        <div class="completion-container">
+          <div class="completion-animation">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <h1>Congratulations!</h1>
+          <p>You have successfully completed <strong><%= course.title %></strong></p>
+          <div class="completion-stats">
+            <div class="stat">
+              <span class="number"><%= courseStats.totalVideos %></span>
+              <span class="label">Videos Watched</span>
+            </div>
+            <div class="stat">
+              <span class="number"><%= courseStats.totalExams %></span>
+              <span class="label">Quizzes Passed</span>
+            </div>
+          </div>
+          <div class="completion-actions">
+            <a href="/certificate/<%= course._id %>" class="btn btn-primary">
+              <i class="fas fa-certificate"></i> Download Certificate
+            </a>
+            <a href="/library/self-paced" class="btn btn-secondary">
+              <i class="fas fa-book"></i> Back to Library
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Navigation -->
+      <div class="navigation-controls">
+        <% if (prevVideo) { %>
+          <a href="/watch-exam/<%= course._id %>/<%= prevVideo._id %>" class="nav-btn nav-prev">
+            <i class="fas fa-chevron-left"></i>
+            <div class="nav-text">
+              <span class="nav-label">Previous</span>
+              <span class="nav-title"><%= prevVideo.title %></span>
+            </div>
+          </a>
+        <% } %>
+
+        <% if (nextVideo) { %>
+          <a href="/watch-exam/<%= course._id %>/<%= nextVideo._id %>" class="nav-btn nav-next">
+            <div class="nav-text">
+              <span class="nav-label">Next</span>
+              <span class="nav-title"><%= nextVideo.title %></span>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <% } %>
+
+  <%- include('partials/footer') %>
+
+  <!-- Complete Enhanced JavaScript -->
+  <script>
+    // Global variables
+    let currentVideoId = '<%= currentVideo ? currentVideo._id : "" %>';
+    let currentCourseId = '<%= course._id %>';
+    let videoPlayer = null;
+    let progressUpdateInterval = null;
+
+    // Global quiz state
+    let quizState = {
+      hasSubmitted: false,
+      showingAnswers: false,
+      currentResults: null,
+      originalAnswers: {}
+    };
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      videoPlayer = document.getElementById('videoPlayer');
+      if (videoPlayer) {
+        initializePlayer();
+      }
+      
+      <% if (examMode) { %>
+        showExamSection();
+      <% } else if (courseCompleted) { %>
+        showCompletionSection();
+      <% } else { %>
+        showVideoSection();
+      <% } %>
+
+      // Initialize quiz event listeners
+      initializeQuizListeners();
+    });
+
+    // ===========================================
+    // NAVIGATION FUNCTIONS (Enhanced)
+    // ===========================================
+
+    // Navigate to video
+    function navigateToVideo(courseId, videoId) {
+      console.log('📍 Navigating to video:', courseId, videoId);
+      
+      try {
+        // Save current progress
+        if (videoPlayer && currentVideoId !== videoId) {
+          saveVideoProgress();
+          videoPlayer.pause();
+        }
+        
+        // Navigate to video
+        window.location.href = `/watch-exam/${courseId}/${videoId}`;
+        
+      } catch (error) {
+        console.error('❌ Error navigating to video:', error);
+        window.location.href = `/watch-exam/${courseId}/${videoId}`;
+      }
+    }
+
+    // Navigate to exam
+    function navigateToExam(courseId, videoId) {
+      console.log('📝 Navigating to exam:', courseId, videoId);
+      window.location.href = `/watch-exam/${courseId}/${videoId}?exam=true`;
+    }
+
+    // Retake exam from tab
+    function retakeExamFromTab() {
+      console.log('🔄 Starting retake from tab...');
+      window.location.href = `/watch-exam/${currentCourseId}/${currentVideoId}?exam=true`;
+    }
+
+    // ===========================================
+    // VIDEO PLAYER FUNCTIONS (Enhanced)
+    // ===========================================
+
+    // Initialize video player
+    function initializePlayer() {
+      if (!videoPlayer) return;
+      
+      // Load saved progress
+      const savedTime = <%= currentVideo && currentVideo.userProgress ? currentVideo.userProgress.currentTime : 0 %>;
+      if (savedTime > 0) {
+        videoPlayer.currentTime = savedTime;
+      }
+
+      // Set up event listeners
+      videoPlayer.addEventListener('timeupdate', updateProgress);
+      videoPlayer.addEventListener('ended', onVideoEnded);
+      videoPlayer.addEventListener('play', onVideoPlay);
+      videoPlayer.addEventListener('pause', onVideoPause);
+      videoPlayer.addEventListener('loadedmetadata', function() {
+        console.log('✅ Video loaded successfully');
+      });
+      videoPlayer.addEventListener('error', function(e) {
+        console.error('❌ Video error:', e);
+        showVideoError();
+      });
+    }
+
+    // Enhanced video control functions
+    function playVideo() {
+      if (videoPlayer) {
+        videoPlayer.play().catch(error => {
+          console.error('Error playing video:', error);
+          showVideoError();
+        });
+        const overlay = document.getElementById('videoOverlay');
+        if (overlay) overlay.style.display = 'none';
+      }
+    }
+
+    function restartVideo() {
+      if (videoPlayer) {
+        videoPlayer.currentTime = 0;
+        videoPlayer.play();
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 2000,
+          icon: 'info',
+          title: 'Video restarted'
+        });
+      }
+    }
+
+    function showVideoError() {
+      Swal.fire({
+        icon: 'error',
+        title: 'Video Error',
+        text: 'There was an error loading or playing the video. Please try refreshing the page.',
+        confirmButtonColor: '#dc3545'
+      });
+    }
+
+    function onVideoPlay() {
+      const overlay = document.getElementById('videoOverlay');
+      if (overlay) overlay.style.display = 'none';
+      startProgressTracking();
+    }
+
+    function onVideoPause() {
+      saveVideoProgress();
+    }
+
+    function onVideoEnded() {
+      markVideoCompleted();
+    }
+
+    function updateProgress() {
+      if (!videoPlayer) return;
+      
+      const currentTime = videoPlayer.currentTime;
+      const duration = videoPlayer.duration;
+      
+      if (duration > 0) {
+        const progressPercent = (currentTime / duration) * 100;
+      }
+    }
+
+    function startProgressTracking() {
+      if (progressUpdateInterval) {
+        clearInterval(progressUpdateInterval);
+      }
+      
+      progressUpdateInterval = setInterval(() => {
+        saveVideoProgress();
+      }, 10000);
+    }
+
+    function saveVideoProgress() {
+      if (!videoPlayer) return;
+      
+      const currentTime = videoPlayer.currentTime;
+      const duration = videoPlayer.duration;
+      
+      fetch('/update-video-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId: currentCourseId,
+          videoId: currentVideoId,
+          currentTime: currentTime,
+          duration: duration
+        })
+      }).catch(error => {
+        console.error('Error saving progress:', error);
+      });
+    }
+
+    // Mark video as completed
+    async function markVideoCompleted() {
+      try {
+        const response = await fetch('/mark-video-completed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId: currentCourseId,
+            videoId: currentVideoId,
+            currentTime: videoPlayer ? videoPlayer.currentTime : 0
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          updateVideoCompletionUI();
+          
+          // Show completion message
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            icon: 'success',
+            title: 'Video completed!'
+          });
+          
+          if (data.courseCompleted) {
+            setTimeout(() => {
+              showCompletionSection();
+            }, 2000);
+          }
+        }
+      } catch (error) {
+        console.error('Error marking video completed:', error);
+      }
+    }
+
+    // ===========================================
+    // SECTION SWITCHING
+    // ===========================================
+
+    function showVideoSection() {
+      const videoSection = document.getElementById('videoSection');
+      const examSection = document.getElementById('examSection');
+      const completionSection = document.getElementById('completionSection');
+      
+      if (videoSection) videoSection.classList.remove('hidden');
+      if (examSection) examSection.classList.add('hidden');
+      if (completionSection) completionSection.classList.add('hidden');
+    }
+
+    function showExamSection() {
+      const videoSection = document.getElementById('videoSection');
+      const examSection = document.getElementById('examSection');
+      const completionSection = document.getElementById('completionSection');
+      
+      if (videoSection) videoSection.classList.add('hidden');
+      if (examSection) examSection.classList.remove('hidden');
+      if (completionSection) completionSection.classList.add('hidden');
+      
+      if (videoPlayer) {
+        videoPlayer.pause();
+      }
+    }
+
+    function showCompletionSection() {
+      const videoSection = document.getElementById('videoSection');
+      const examSection = document.getElementById('examSection');
+      const completionSection = document.getElementById('completionSection');
+      
+      if (videoSection) videoSection.classList.add('hidden');
+      if (examSection) examSection.classList.add('hidden');
+      if (completionSection) completionSection.classList.remove('hidden');
+    }
+
+    // ===========================================
+    // TAB FUNCTIONS
+    // ===========================================
+
+    function showTab(tabName, button) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      const targetTab = document.getElementById(tabName);
+      if (targetTab) targetTab.classList.add('active');
+      if (button) button.classList.add('active');
+    }
+
+    // ===========================================
+    // NOTES FUNCTIONS (Enhanced)
+    // ===========================================
+
+    async function saveNotes() {
+      const notesTextarea = document.getElementById('userNotes');
+      const statusElement = document.getElementById('saveStatus');
+      
+      if (!notesTextarea || !statusElement) return;
+      
+      const notes = notesTextarea.value;
+      
+      try {
+        statusElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        statusElement.className = 'save-status';
+        
+        const response = await fetch('/save-notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId: currentCourseId,
+            videoId: currentVideoId,
+            notes: notes
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          statusElement.innerHTML = '<i class="fas fa-check"></i> Saved!';
+          statusElement.className = 'save-status success';
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        statusElement.innerHTML = '<i class="fas fa-times"></i> Error saving';
+        statusElement.className = 'save-status error';
+      }
+      
+      setTimeout(() => {
+        statusElement.innerHTML = '';
+        statusElement.className = 'save-status';
+      }, 3000);
+    }
+
+    function clearNotes() {
+      const notesTextarea = document.getElementById('userNotes');
+      if (notesTextarea) {
+        Swal.fire({
+          title: 'Clear Notes?',
+          text: 'Are you sure you want to clear all your notes for this video?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#dc3545',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Yes, clear them!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            notesTextarea.value = '';
+            saveNotes(); // Auto-save the empty state
+          }
+        });
+      }
+    }
+
+    // ===========================================
+    // ENHANCED EXAM FUNCTIONS
+    // ===========================================
+
+    // Initialize quiz listeners
+    function initializeQuizListeners() {
+      const examForm = document.getElementById('examForm');
+      if (examForm) {
+        document.querySelectorAll('#examForm input[type="radio"]').forEach(input => {
+          input.addEventListener('change', function() {
+            const questionCard = this.closest('.question-card');
+            if (questionCard) {
+              questionCard.classList.add('answered');
+            }
+            updateQuizProgress();
+          });
+        });
+      }
+    }
+
+    // Show exam review (previous answers)
+    async function showExamReview() {
+      console.log('👁️ Showing exam review...');
+      
+      try {
+        const response = await fetch(`/exam-results/${currentCourseId}/${currentVideoId}`);
+        const data = await response.json();
+        
+        if (data.success && data.examProgress) {
+          displayExamReview(data.examProgress);
+        } else {
+          throw new Error('No exam history found');
+        }
+      } catch (error) {
+        console.error('Error loading exam review:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Review Not Available',
+          text: 'Unable to load your previous answers.',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    }
+
+    // Display exam review content
+    function displayExamReview(examProgress) {
+      const reviewSection = document.getElementById('examReview');
+      const examForm = document.getElementById('examForm');
+      const examResults = document.getElementById('examResults');
+      
+      if (!reviewSection) return;
+      
+      // Hide other sections
+      if (examForm) examForm.style.display = 'none';
+      if (examResults) examResults.classList.add('hidden');
+      
+      // Show review section
+      reviewSection.classList.remove('hidden');
+      
+      // Get the last attempt
+      const lastAttempt = examProgress.attempts[examProgress.attempts.length - 1];
+      
+      let reviewHTML = `
+        <div class="review-stats">
+          <div class="stat-item">
+            <span class="stat-number">${lastAttempt.score}%</span>
+            <span class="stat-label">Your Score</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">${examProgress.attempts.length}</span>
+            <span class="stat-label">Attempts</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">${examProgress.bestScore}%</span>
+            <span class="stat-label">Best Score</span>
+          </div>
+        </div>
+        
+        <div class="review-questions">
+          <h4>Your Previous Answers:</h4>
+      `;
+      
+      // Display each question and user's answer
+      if (lastAttempt.answers) {
+        lastAttempt.answers.forEach((answer, index) => {
+          const status = answer.isCorrect ? 'correct' : 'incorrect';
+          reviewHTML += `
+            <div class="review-question ${status}">
+              <div class="review-question-header">
+                <span class="question-number">Question ${index + 1}</span>
+                <span class="question-status ${status}">
+                  <i class="fas fa-${answer.isCorrect ? 'check-circle' : 'times-circle'}"></i>
+                  ${answer.isCorrect ? 'Correct' : 'Incorrect'}
+                </span>
+              </div>
+              <p class="question-text-review"><strong>Question:</strong> ${answer.questionText || 'Question text not available'}</p>
+              <div class="user-answer">
+                <strong>Your Answer:</strong> ${answer.userAnswer || 'No answer'}
+              </div>
+              ${!answer.isCorrect ? `
+                <div class="correct-answer">
+                  <strong>Correct Answer:</strong> ${answer.correctAnswer || 'Not available'}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+      }
+      
+      reviewHTML += `</div>`;
+      
+      const reviewContent = document.getElementById('reviewContent');
+      if (reviewContent) {
+        reviewContent.innerHTML = reviewHTML;
+      }
+    }
+
+    // Hide exam review
+    function hideExamReview() {
+      const reviewSection = document.getElementById('examReview');
+      const examForm = document.getElementById('examForm');
+      
+      if (reviewSection) reviewSection.classList.add('hidden');
+      if (examForm) examForm.style.display = 'block';
+    }
+
+    // Retake exam fresh
+    function retakeExamFresh() {
+      console.log('🔄 Starting fresh retake...');
+      
+      Swal.fire({
+        title: 'Retake Quiz?',
+        text: 'This will clear all your current answers and let you start fresh.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Start Fresh!',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Clear all selections
+          document.querySelectorAll('#examForm input[type="radio"]').forEach(input => {
+            input.checked = false;
+          });
+          
+          // Hide review and results
+          const reviewSection = document.getElementById('examReview');
+          const resultsSection = document.getElementById('examResults');
+          const examForm = document.getElementById('examForm');
+          
+          if (reviewSection) reviewSection.classList.add('hidden');
+          if (resultsSection) resultsSection.classList.add('hidden');
+          if (examForm) {
+            examForm.style.display = 'block';
+            // Update submit button
+            const submitBtn = examForm.querySelector('.btn-primary, .btn-warning');
+            if (submitBtn) {
+              submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Quiz';
+              submitBtn.className = 'btn btn-primary';
+              submitBtn.onclick = submitExam;
+            }
+          }
+          
+          // Reset quiz state
+          quizState.hasSubmitted = false;
+          quizState.showingAnswers = false;
+          quizState.originalAnswers = {};
+          
+          // Remove answered classes
+          document.querySelectorAll('.question-card.answered').forEach(card => {
+            card.classList.remove('answered');
+          });
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Quiz Reset!',
+            text: 'You can now start the quiz fresh.',
+            timer: 2000,
+            timerProgressBar: true
+          });
+        }
+      });
+    }
+
+    // Submit exam retake
+    async function submitExamRetake() {
+      const result = await Swal.fire({
+        title: 'Submit Retake?',
+        text: 'Are you sure you want to submit your retake attempt?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Submit!',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (result.isConfirmed) {
+        await submitExam();
+      }
+    }
+
+    // Enhanced submit exam
+    async function submitExam() {
+      console.log('🚀 Starting exam submission...');
+      
+      const examForm = document.getElementById('examForm');
+      if (!examForm) {
+        console.error('❌ Exam form not found');
+        return;
+      }
+      
+      const formData = new FormData(examForm);
+      const answers = {};
+      
+      // Collect answers
+      for (let [key, value] of formData.entries()) {
+        answers[key] = value;
+      }
+      
+      // Check if all questions are answered
+      const totalQuestions = document.querySelectorAll('.question-card').length;
+      const answeredQuestions = Object.keys(answers).length;
+      
+      if (answeredQuestions < totalQuestions) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Incomplete Quiz',
+          text: `Please answer all ${totalQuestions} questions before submitting.`,
+          confirmButtonColor: '#6f42c1'
+        });
+        return;
+      }
+
+      // Store original answers
+      quizState.originalAnswers = { ...answers };
+
+      try {
+        // Show loading state
+        const submitButton = document.querySelector('.exam-actions .btn-primary, .exam-actions .btn-warning');
+        if (submitButton) {
+          const originalText = submitButton.innerHTML;
+          submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+          submitButton.disabled = true;
+        }
+        
+        const response = await fetch('/submit-exam', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId: currentCourseId,
+            videoId: currentVideoId,
+            answers: answers
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Restore button
+        if (submitButton) {
+          submitButton.innerHTML = submitButton.innerHTML.includes('Retake') ? 
+            '<i class="fas fa-redo"></i> Submit Retake' : 
+            '<i class="fas fa-paper-plane"></i> Submit Quiz';
+          submitButton.disabled = false;
+        }
+        
+        if (data.success) {
+          quizState.hasSubmitted = true;
+          quizState.currentResults = data;
+          
+          showExamResults(data);
+          
+          if (data.passed) {
+            updateExamCompletionUI();
+          }
+        } else {
+          throw new Error(data.message || 'Unknown error');
+        }
+      } catch (error) {
+        console.error('❌ Error submitting exam:', error);
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Submission Error',
+          text: error.message || 'Failed to submit quiz. Please try again.',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    }
+
+    // Enhanced exam results display
+    function showExamResults(results) {
+      const resultsContainer = document.getElementById('examResults');
+      if (!resultsContainer) return;
+      
+      const passed = results.passed;
+      const percentage = Math.round((results.correctCount / results.totalQuestions) * 100);
+      
+      let resultsHTML = `
+        <div class="exam-result-header ${passed ? 'passed' : 'failed'}">
+          <div class="result-icon">
+            <i class="fas fa-${passed ? 'check-circle' : 'times-circle'}"></i>
+          </div>
+          <h3>${passed ? 'Congratulations!' : 'Quiz Results'}</h3>
+          <p>You scored ${results.correctCount} out of ${results.totalQuestions} (${percentage}%)</p>
+          ${passed ? '<p class="pass-message">You have passed this quiz!</p>' : '<p class="fail-message">You need 60% to pass.</p>'}
+        </div>
+        
+        <div class="result-stats">
+          <div class="stat-item">
+            <span class="stat-number">${results.correctCount}</span>
+            <span class="stat-label">Correct</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">${results.incorrectCount}</span>
+            <span class="stat-label">Incorrect</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">${percentage}%</span>
+            <span class="stat-label">Score</span>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn btn-primary" onclick="showVideoSection()">
+            <i class="fas fa-arrow-left"></i> Back to Video
+          </button>
+          
+          <button class="btn btn-warning" onclick="retakeExamFresh()">
+            <i class="fas fa-redo"></i> Retake Quiz
+          </button>
+          
+          ${!passed && results.reviewAnswers ? `
+            <button class="btn btn-info" onclick="showFailedAnswerReview()">
+              <i class="fas fa-eye"></i> Review Answers
+            </button>
+          ` : ''}
+        </div>
+      `;
+
+      resultsContainer.innerHTML = resultsHTML;
+      resultsContainer.classList.remove('hidden');
+      
+      const examForm = document.getElementById('examForm');
+      if (examForm) examForm.style.display = 'none';
+
+      // Check if course is completed
+      if (results.courseCompleted) {
+        setTimeout(() => {
+          showCompletionSection();
+        }, 3000);
+      }
+    }
+
+    // Show failed answer review
+    function showFailedAnswerReview() {
+      if (!quizState.currentResults || !quizState.currentResults.reviewAnswers) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Review Not Available',
+          text: 'Unable to load answer review.',
+          confirmButtonColor: '#dc3545'
+        });
+        return;
+      }
+
+      let reviewHTML = `
+        <div class="failed-review-header">
+          <i class="fas fa-times-circle text-danger"></i>
+          <h4>Incorrect Answers Review</h4>
+          <p>Here are the questions you got wrong and the correct answers:</p>
+        </div>
+      `;
+
+      quizState.currentResults.reviewAnswers.forEach((review, index) => {
+        reviewHTML += `
+          <div class="failed-question-review">
+            <h5><strong>Question:</strong> ${review.question}</h5>
+            <div class="wrong-answer">
+              <strong>Your Answer:</strong> <span class="text-danger">${review.userAnswer}</span>
+            </div>
+            <div class="correct-answer">
+              <strong>Correct Answer:</strong> <span class="text-success">${review.correctAnswer}</span>
+            </div>
+            ${review.explanation ? `
+              <div class="explanation">
+                <strong>Explanation:</strong> ${review.explanation}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      reviewHTML += `
+        <div class="review-actions">
+          <button class="btn btn-secondary" onclick="hideFailedReview()">
+            <i class="fas fa-eye-slash"></i> Hide Review
+          </button>
+          <button class="btn btn-warning" onclick="retakeExamFresh()">
+            <i class="fas fa-redo"></i> Try Again
+          </button>
+        </div>
+      `;
+
+      const resultsContainer = document.getElementById('examResults');
+      if (resultsContainer) {
+        resultsContainer.innerHTML = reviewHTML;
+      }
+    }
+
+    function hideFailedReview() {
+      // Go back to normal results
+      if (quizState.currentResults) {
+        showExamResults(quizState.currentResults);
+      }
+    }
+
+    // ===========================================
+    // UTILITY FUNCTIONS
+    // ===========================================
+
+    function updateQuizProgress() {
+      const totalQuestions = document.querySelectorAll('.question-card').length;
+      const answeredQuestions = document.querySelectorAll('.question-card.answered').length;
+      console.log(`Quiz Progress: ${answeredQuestions}/${totalQuestions} questions answered`);
+    }
+
+    function updateVideoCompletionUI() {
+      const videoItems = document.querySelectorAll('.video-item');
+      videoItems.forEach(item => {
+        if (item.querySelector(`[onclick*="${currentVideoId}"]`)) {
+          const numberElement = item.querySelector('.video-number');
+          if (numberElement) {
+            numberElement.innerHTML = '<i class="fas fa-check-circle completed"></i>';
+          }
+          item.classList.add('completed');
+        }
+      });
+    }
+
+    function updateExamCompletionUI() {
+      const videoItems = document.querySelectorAll('.video-item');
+      videoItems.forEach(item => {
+        if (item.querySelector(`[onclick*="${currentVideoId}"]`)) {
+          const examIndicator = item.querySelector('.exam-indicator');
+          if (examIndicator) {
+            examIndicator.classList.add('completed');
+            examIndicator.innerHTML = '<i class="fas fa-clipboard-question"></i> Exam Passed';
+          }
+        }
+      });
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement && videoPlayer) {
+        videoPlayer.requestFullscreen().catch(err => {
+          console.error('Error attempting to enable fullscreen:', err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    function downloadVideo() {
+      Swal.fire({
+        icon: 'info',
+        title: 'Download Feature',
+        text: 'Video download feature will be available soon!',
+        confirmButtonColor: '#6f42c1'
+      });
+    }
+
+    // ===========================================
+    // TESTING FUNCTIONS (Remove in production)
+    // ===========================================
+
+    function testWatchAgain() {
+      console.log('🧪 Test function called - JavaScript is working!');
+      Swal.fire({
+        icon: 'success',
+        title: 'JavaScript Test',
+        text: 'JavaScript is working correctly! Watch Again functionality should work.',
+        timer: 2000,
+        timerProgressBar: true
+      });
+    }
+
+    // ===========================================
+    // EVENT LISTENERS & CLEANUP
+    // ===========================================
+
+    // Handle button loading states
+    function setButtonLoading(button, loading = true) {
+      if (!button) return;
+      
+      if (loading) {
+        button.disabled = true;
+        button.classList.add('btn-loading');
+        button.dataset.originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+      } else {
+        button.disabled = false;
+        button.classList.remove('btn-loading');
+        if (button.dataset.originalText) {
+          button.innerHTML = button.dataset.originalText;
+        }
+      }
+    }
+
+    // Enhanced error handling
+    window.addEventListener('error', function(event) {
+      console.error('Global error caught:', event.error);
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+      if (progressUpdateInterval) {
+        clearInterval(progressUpdateInterval);
+      }
+      if (videoPlayer && !videoPlayer.paused) {
+        saveVideoProgress();
+      }
+    });
+
+    // Handle visibility change (when user switches tabs)
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        // Page is hidden, pause video if playing
+        if (videoPlayer && !videoPlayer.paused) {
+          saveVideoProgress();
+        }
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(event) {
+      // Only handle shortcuts when not typing in inputs
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      switch(event.key) {
+        case ' ': // Spacebar to play/pause
+          event.preventDefault();
+          if (videoPlayer) {
+            if (videoPlayer.paused) {
+              videoPlayer.play();
+            } else {
+              videoPlayer.pause();
+            }
+          }
+          break;
+        
+        case 'ArrowLeft': // Left arrow to rewind 10s
+          event.preventDefault();
+          if (videoPlayer) {
+            videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
+          }
+          break;
+        
+        case 'ArrowRight': // Right arrow to forward 10s
+          event.preventDefault();
+          if (videoPlayer) {
+            videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
+          }
+          break;
+        
+        case 'f': // F for fullscreen
+          event.preventDefault();
+          toggleFullscreen();
+          break;
+        
+        case 'r': // R for restart
+          event.preventDefault();
+          restartVideo();
+          break;
+      }
+    });
+
+    // Handle mobile touch events
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', function(event) {
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    });
+
+    document.addEventListener('touchend', function(event) {
+      if (!touchStartX || !touchStartY) return;
+
+      const touchEndX = event.changedTouches[0].clientX;
+      const touchEndY = event.changedTouches[0].clientY;
+
+      const diffX = touchStartX - touchEndX;
+      const diffY = touchStartY - touchEndY;
+
+      // Only handle horizontal swipes on video container
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        const videoContainer = document.querySelector('.video-container');
+        if (videoContainer && videoContainer.contains(event.target)) {
+          if (diffX > 0) {
+            // Swipe left - next video
+            const nextBtn = document.querySelector('.nav-next');
+            if (nextBtn) nextBtn.click();
+          } else {
+            // Swipe right - previous video
+            const prevBtn = document.querySelector('.nav-prev');
+            if (prevBtn) prevBtn.click();
+          }
+        }
+      }
+
+      touchStartX = 0;
+      touchStartY = 0;
+    });
+
+    // Auto-save notes periodically
+    let notesSaveTimeout;
+    const notesTextarea = document.getElementById('userNotes');
+    if (notesTextarea) {
+      notesTextarea.addEventListener('input', function() {
+        clearTimeout(notesSaveTimeout);
+        notesSaveTimeout = setTimeout(() => {
+          saveNotes();
+        }, 2000); // Auto-save after 2 seconds of inactivity
+      });
+    }
+
+    // Show keyboard shortcuts help
+    function showKeyboardShortcuts() {
+      Swal.fire({
+        title: 'Keyboard Shortcuts',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>Spacebar:</strong> Play/Pause video</p>
+            <p><strong>← →:</strong> Rewind/Forward 10 seconds</p>
+            <p><strong>F:</strong> Toggle fullscreen</p>
+            <p><strong>R:</strong> Restart video</p>
+            <p><strong>Swipe left/right:</strong> Next/Previous video (mobile)</p>
+          </div>
+        `,
+        icon: 'info',
+        confirmButtonColor: '#6f42c1'
+      });
+    }
+
+    // Add help button for shortcuts (optional)
+    document.addEventListener('keydown', function(event) {
+      if (event.key === '?' || event.key === 'h') {
+        event.preventDefault();
+        showKeyboardShortcuts();
+      }
+    });
+
+    console.log('✅ Enhanced Watch-Exam page loaded successfully');
+    console.log('🎯 Current video:', currentVideoId);
+    console.log('📚 Current course:', currentCourseId);
+    console.log('⌨️ Press "?" for keyboard shortcuts');
+  </script>
+</body>
+</html>

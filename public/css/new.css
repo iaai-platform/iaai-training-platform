@@ -1,0 +1,823 @@
+
+/* ============================================================
+   ✅ 1. General Page Styling
+============================================================ */
+body {
+    
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  } 
+  
+
+
+/* ✅ Modern Font for Navigation Menu */
+.body {
+    font-family: 'Montserrat', sans-serif;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500; /* Medium weight */
+
+    text-transform: uppercase; /* Optional: Makes it look premium */
+    letter-spacing: 1px; /* Adds a high-end feel */
+}
+
+
+
+
+
+
+
+  
+  /* ============================================================
+     ✅ 2. Header Styling
+  ============================================================ */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background-color: #ffffff; /* Clean white background */
+    border-bottom: 3px solid #b8860b; /* Gold accent for luxury feel *
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+   
+
+
+
+    padding: 15px 20px;
+    position: relative;
+  }
+  
+  /* ✅ 2.1 Logo Styling */
+  .logo img {
+    height: 60px;
+    width: auto;
+  }
+  
+  /* ✅ 2.2 Navbar Styling */
+  .navbar {
+    display: flex;
+    padding-left: 20px; /* Adjust spacing from the left */
+    gap: 5px; /* Adds spacing between menu items */
+    list-style: none;
+   
+    padding: 0;
+    margin: 10px;
+    height: 100%; /* Ensures full height inside header */
+    align-items: center;
+  }
+  
+  .navbar a {
+    color: #ffd700;
+   
+    text-decoration: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    margin: 0 10px; /* Space outside each item */
+    transition: background 0.3s ease;
+  }
+  
+  /* ✅ 2.3 "All Programs" with Arrow Icon */
+  .program-menu-trigger {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between text and icon */
+  }
+  
+  .program-menu-trigger i {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+  }
+  
+  /* ✅ Rotate arrow when menu is visible */
+  .program-menu-trigger:hover i {
+    transform: rotate(180deg);
+  }
+  
+  /* ✅ 2.4 Menu Bar for "All Programs" */
+  .program-menu {
+    display: none;
+    position: absolute;
+    top: 100px; /* Adjust position below navbar */
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 10px 0;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 1000;
+  }
+  
+  /* ✅ Show menu on hover */
+  .program-menu-trigger:hover + .program-menu,
+  .program-menu:hover {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  /* ✅ 2.5 Menu Items (Horizontal Layout) */
+  .program-menu a {
+    color: #002147;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    display: inline-block;
+    transition: background 0.3s ease;
+  }
+  
+  .program-menu a:hover {
+    background: #f4f4f4;
+    border-radius: 5px;
+  }
+  
+  /* ============================================================
+     ✅ 3. Search Bar Styling
+  ============================================================ */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+/* ✅ Search Input Field with Border */
+.search-bar input {
+    padding: 8px;
+    font-size: 14px;
+    border: 2px solid #b8860b; /* ✅ Gold Border (Matches Hero Section) */
+    border-radius: 5px; /* ✅ Slightly Rounded Edges */
+    width: 200px;
+    transition: border-color 0.3s ease-in-out; /* ✅ Smooth Effect */
+}
+
+/* ✅ Change Border on Focus */
+.search-bar input:focus {
+    border-color: #ffd700; /* ✅ Lighter Gold on Focus */
+    outline: none; /* ✅ Remove default blue outline */
+}
+/* ============================================================
+     ✅ 4. Profile Dropdown (Aligned & Properly Styled)
+============================================================ */
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+    font-family: 'Montserrat', sans-serif; /* ✅ Consistent Font */
+}
+
+/* ✅ Profile Icon Styling */
+/* ✅ Profile Icon Button */
+.profile-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333; /* ✅ Matches Navbar */
+    font-size: 22px; /* ✅ Bigger icon */
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s ease-in-out;
+}
+/* ✅ Add Human Head Icon */
+.profile-icon i {
+    font-size: 32px; /* ✅ Icon Size */
+
+ 
+    color: #b80b0b; /* ✅ Gold icon */
+}
+
+/* ✅ Dropdown Menu */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0; /* ✅ Align dropdown with the right edge */
+    top: 100%; /* ✅ Position directly below the profile icon */
+    background-color: white;
+    min-width: 200px; /* ✅ Wider for better visibility */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+/* ✅ Dropdown Links */
+.dropdown-content a {
+    font-family: 'Montserrat', sans-serif; /* ✅ Apply Montserrat */
+    color: #333;
+    padding: 12px 15px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+/* ✅ Hover Effect */
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* ✅ Show dropdown on hover */
+.profile-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* ✅ Ensure Dropdown is Fully Visible */
+@media (max-width: 768px) {
+    .dropdown-content {
+        right: auto; /* ✅ Prevent overflow on small screens */
+        left: 0;
+    }
+}
+
+  /* ============================================================
+     ✅ 5. Mobile Responsive Styles
+  ============================================================ */
+  @media screen and (max-width: 768px) {
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .navbar {
+      flex-direction: column;
+      width: 100%;
+    }
+  
+    .navbar a {
+      width: 100%;
+      text-align: left;
+    }
+  
+    .search-bar {
+      width: 100%;
+      margin-top: 10px;
+    }
+  
+    .search-bar input {
+      width: 100%;
+    }
+  
+    .program-menu {
+      top: 120px;
+      padding: 5px 0;
+    }
+  }
+
+/* ======================================================
+   ✅ GENERAL STYLING
+====================================================== */
+
+
+
+/* ✅ Hero Section */
+#hero {
+    background-size: cover;
+    background-position: center;
+    height: 60vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+
+
+
+
+
+
+
+
+
+}
+
+#hero .hero-content h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: #f1f3f5;
+}
+
+#hero .hero-content p {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #edf0f3;
+}
+
+/* ✅ Call-to-Action Button */
+.cta-btn {
+    background-color: #ffcc00;
+    padding: 12px 30px;
+    font-size: 18px;
+    text-transform: uppercase;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+
+.cta-btn:hover {
+    background-color: #e5b300;
+}
+
+
+/* ======================================================
+   ✅ SECTION BOX STYLING
+====================================================== */
+
+.section-box {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: white;
+    border: 2px solid #dcdcdc;
+    border-radius: 10px;
+}
+
+/* ✅ Left Section (Image) */
+.news-left {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.news-left img {
+    width: 30%;
+    height: auto;
+    max-width: 100%;
+    object-fit: cover;
+}
+
+/* ✅ Right Section (Text) */
+.news-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+}
+
+.news-right h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #002147;
+}
+
+.news-right p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+
+/* ======================================================
+   ✅ FOOTER STYLING
+====================================================== */
+
+footer {
+    background-color: #002147;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+footer ul {
+    list-style: none;
+    padding: 0;
+}
+
+footer ul li {
+    display: inline-block;
+    margin-right: 15px;
+}
+
+footer ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+footer .social-icons {
+    margin-top: 20px;
+}
+
+footer .social-icons a {
+    color: white;
+    margin: 0 10px;
+    font-size: 20px;
+}
+
+/* ======================================================
+   ✅ RESPONSIVE DESIGN
+====================================================== */
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dropdown-content {
+        min-width: 200px;
+    }
+
+    .profile-dropdown {
+        text-align: center;
+    }
+
+    .profile-dropdown .dropdown-content {
+        right: auto;
+        left: 0;
+    }
+
+    .section-box {
+        flex-direction: column;
+    }
+
+    .news-left, .news-right {
+        flex: none;
+        width: 100%;
+    }
+}
+
+
+
+/* ======================================================
+   ✅ 
+====================================================== */
+/* Hero Section Styling */
+#hero {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    height: 60vh; /* Adjust height as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  
+  /* Optional: dark overlay for better text contrast */
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Adjust opacity as needed */
+    z-index: 1;
+  }
+  
+  /* Content on top of the overlay */
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 20px;
+  }
+  
+  .hero-content h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+  }
+  
+  .hero-content p {
+    font-size: 1.5em;
+    margin-bottom: 30px;
+  }
+  
+  .cta-btn {
+    background-color: #ffcc00;
+    padding: 12px 30px;
+    text-transform: uppercase;
+    border-radius: 25px;
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cta-btn:hover {
+    background-color: #e5b300;
+  }
+
+  #hero {
+    background-image: url('/images/image9.jpeg');
+    background-size: 100%; /* Adjust zoom level (e.g., 150% zooms in) */
+    background-position: top center; /* Focus on the upper part */
+    background-repeat: no-repeat;
+    height: 80vh;
+  }
+
+
+
+  
+/* ======================================================
+   ✅ 
+====================================================== */
+
+/* ✅ Apply Elegant Font to the Header */
+header {
+    font-family: 'Playfair Display', serif; 
+    font-weight: 700; /* Bold for professional look */
+}
+
+/* ✅ Modern Font for Navigation Menu */
+.navbar {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500; /* Medium weight */
+    text-transform: uppercase; /* Optional: Makes it look premium */
+    letter-spacing: 1px; /* Adds a high-end feel */
+}
+
+/* ✅ Optional: Styling for Menu Links */
+.navbar a {
+    color: #333; /* Dark color for a premium feel */
+    font-size: 16px;
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar a:hover {
+    color: #b8860b; /* Aesthetic gold effect on hover */
+}
+
+
+
+/* ============================================================
+   ✅ Services Section Styling
+============================================================ */
+.services-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1100px;
+    margin: 50px auto;
+    padding: 40px;
+    background-color: white;
+    border: 2px solid #dcdcdc;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    gap: 20px;
+}
+
+/* ✅ Left Section (Text Content) */
+.services-content {
+    flex: 1;
+    padding: 20px;
+    text-align: left;
+}
+
+.services-content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #002147;
+    margin-bottom: 15px;
+}
+
+.services-content p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    color: #444;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+/* ✅ Right Section (Image) */
+.services-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.services-image img {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    .services-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .services-content, .services-image {
+        flex: none;
+        width: 100%;
+    }
+
+    .services-image img {
+        max-width: 100%;
+    }
+}
+
+
+/* ======================================================
+   ✅ NEWS SECTION STYLING (Matching Services Section)
+====================================================== *//* ======================================================
+   ✅ NEWS SECTION STYLING (Using Playfair Display & Montserrat)
+====================================================== */
+#news {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: white;
+    border: 2px solid #dcdcdc;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif; /* ✅ Applied Montserrat for content */
+}
+
+/* ✅ News Section Header */
+#news h2 {
+    font-family: 'Playfair Display', serif; /* ✅ Elegant Playfair for Header */
+    font-size: 30px;
+    font-weight: bold;
+    color: #002147;
+    margin-bottom: 20px;
+}
+
+/* ✅ News Section Content */
+#news .section-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ✅ Left Side (News Text) */
+.news-left {
+    flex: 1;
+    text-align: left;
+    padding: 20px;
+    font-family: 'Montserrat', sans-serif; /* ✅ Montserrat for content */
+}
+
+.news-left h3 {
+    font-size: 24px;
+    color: #002147;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif; /* ✅ Apply Playfair to h3 */
+}
+
+.news-left p {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+/* ✅ Right Side (News Image) */
+.news-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.news-right img {
+    width: 100%;
+    max-width: 450px;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    #news .section-content {
+        flex-direction: column-reverse; /* ✅ Image appears first on smaller screens */
+    }
+
+    .news-right img {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* ======================================================
+   ✅ LATEST SECTION STYLING
+====================================================== */
+/* ======================================================
+   ✅ LATEST SECTION STYLING
+====================================================== */
+#latest {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: white;
+    border: 2px solid #dcdcdc;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* ✅ Section Header */
+#latest h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: #002147;
+    margin-bottom: 20px;
+}
+
+/* ✅ Content Layout */
+#latest .section-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+/* ✅ Left Side (Text Content) */
+.latest-left {
+    flex: 1;
+    text-align: left;
+    padding: 20px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.latest-left .latest-item {
+    margin-bottom: 20px; /* Space between each latest item */
+}
+
+.latest-left h3 {
+    font-size: 22px;
+    color: #002147;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
+}
+
+.latest-left p {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 15px;
+}
+
+/* ✅ Right Side (Images) */
+.latest-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+/* ✅ Ensure images align with the corresponding text */
+.latest-right .latest-img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.latest-right img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    #latest .section-content {
+        flex-direction: column-reverse;
+    }
+
+    .latest-right img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .latest-left, .latest-right {
+        width: 100%;
+        text-align: center;
+    }
+}

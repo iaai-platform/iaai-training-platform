@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Support - IAAI</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .contact-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .contact-header {
+            text-align: center;
+            background: #28a745;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .contact-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .submit-btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .contact-methods {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .method-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .method-item:last-child {
+            border-bottom: none;
+        }
+        .method-icon {
+            font-size: 1.5rem;
+            color: #007bff;
+            width: 30px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="contact-container">
+        <div class="contact-header">
+            <h1><i class="fas fa-envelope"></i> Contact Support</h1>
+            <p>We're here to help you with any questions</p>
+        </div>
+
+        <div class="contact-methods">
+            <h3>How to reach us:</h3>
+            <div class="method-item">
+                <i class="fas fa-comments method-icon"></i>
+                <div>
+                    <strong>Live Chat</strong><br>
+                    <small>Available 24/7 - Instant response</small>
+                </div>
+            </div>
+            <div class="method-item">
+                <i class="fas fa-envelope method-icon"></i>
+                <div>
+                    <strong>Email Support</strong><br>
+                    <small>Response within 24 hours</small>
+                </div>
+            </div>
+            <div class="method-item">
+                <i class="fas fa-phone method-icon"></i>
+                <div>
+                    <strong>Phone Support</strong><br>
+                    <small>Mon-Fri 9AM-6PM EST: 1-800-IAAI-HELP</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-form">
+            <h3>Send us a message</h3>
+            <div id="alertContainer"></div>
+            
+            <form id="contactForm">
+                <div class="form-group">
+                    <label for="name">Your Name *</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" class="form-control">
+                        <option value="general">General Question</option>
+                        <option value="technical">Technical Support</option>
+                        <option value="billing">Billing & Payments</option>
+                        <option value="course">Course Access</option>
+                        <option value="account">Account Issues</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject *</label>
+                    <input type="text" id="subject" name="subject" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message *</label>
+                    <textarea id="message" name="message" class="form-control" rows="5" required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Show loading
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            btn.disabled = true;
+            
+            fetch('/support/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showAlert('success', result.message);
+                    this.reset();
+                } else {
+                    showAlert('error', result.message || 'Error sending message');
+                }
+            })
+            .catch(error => {
+                showAlert('error', 'Failed to send message. Please try again.');
+            })
+            .finally(() => {
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+                btn.disabled = false;
+            });
+        });
+
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.innerHTML = message;
+            alert.style.display = 'block';
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

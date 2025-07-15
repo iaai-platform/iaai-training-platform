@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>International Aesthetic Academic Institution (IAAI)</title>
+  <link rel="stylesheet" href="/css/style.css"> <!-- Link to the main CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+</head>
+
+
+
+
+<body>
+  <%- include('partials/header') %>
+
+  <!-- Breadcrumb Navigation -->
+  <nav class="breadcrumb">
+    <a href="/">Home</a> > <a href="/training-programs">Our Training Programs</a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <div class="hero-content">
+        <h1>Our Training Programs</h1>
+        <p>Explore a variety of training programs offered to enhance your aesthetic skills.</p>
+    </div>
+</section>
+
+  <!-- Cards Section (9 Boxes) -->
+  <section id="cards-section" class="section-box">
+    <div class="card-container">
+
+      <!-- Card 1: In-Person Aesthetic Training -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image2.jpg');">
+          <a href="/in-person-aesthetic-training" class="cta-btn arrow-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>In-Person Aesthetic Training</h3>
+          <p>Comprehensive aesthetic training covering injectables, contouring, PRP, microneedling, chemical peels, and laser treatments.</p>
+        </div>
+      </div>
+
+      <!-- Card 2: Online Live Training -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image3.jpg');">
+          <a href="/online-live-training" class="cta-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>Online Live Training</h3>
+          <p>Interactive online live courses teaching aesthetic techniques, including injectables, skin treatments, and facial contouring.</p>
+        </div>
+      </div>
+
+      <!-- Card 3: Self-Paced Online Training -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image4.jpg');">
+          <a href="/self-paced-online-training" class="cta-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>Self-Paced Online Training</h3>
+          <p>Learn aesthetic techniques at your own pace with pre-recorded expert-led training sessions.</p>
+        </div>
+      </div>
+
+      <!-- Card 4: On-Demand Courses -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image5.jpg');">
+          <a href="/on-demand-courses" class="cta-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>On-Demand Courses</h3>
+          <p>Access expert-led aesthetic training anytime with flexible, on-demand courses tailored to your schedule.</p>
+        </div>
+      </div>
+
+      <!-- Card 5: New Trainers Required -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image6.jpg');">
+          <a href="/new-trainers-required" class="cta-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>New Trainers Required</h3>
+          <p>Work with us to deliver our courses.</p>
+        </div>
+      </div>
+
+      <!-- Card 6: In-Company Courses -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image7.jpg');">
+          <a href="/in-company-courses" class="cta-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>In-Company Courses</h3>
+          <p>Customized in-company aesthetic training delivered on-site or online, tailored to your team’s needs.</p>
+        </div>
+      </div>
+
+      <!-- Card 7: Mentorship Program -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image8.jpg');">
+          <a href="/mentorship-program" class="cta-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>Mentorship Program</h3>
+          <p>Connect with experienced professionals for one-on-one mentorship to enhance your skills.</p>
+        </div>
+      </div>
+
+      <!-- Card 8: Advanced Aesthetic Techniques -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image9.jpg');">
+          <a href="/advanced-aesthetic-techniques" class="cta-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>Advanced Aesthetic Techniques</h3>
+          <p>Learn advanced techniques for injectables, skin treatments, and more from top professionals.</p>
+        </div>
+      </div>
+
+      <!-- Card 9: Corporate Aesthetic Training -->
+      <div class="card">
+        <div class="card-image" style="background-image: url('/images/image10.jpg');">
+          <a href="/corporate-aesthetic-training" class="cta-btn">→</a>
+        </div>
+        <div class="card-content">
+          <h3>Corporate Aesthetic Training</h3>
+          <p>Offer tailored training to your employees to advance their aesthetic skills within your company.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+
+
+  <script>
+    // Function to confirm if the user really wants to delete the course
+  function confirmDelete(courseName, courseId) {
+    const confirmation = confirm(`Are you sure you want to delete the course: ${courseName}? This action cannot be undone.`);
+    if (confirmation) {
+      // Proceed with course deletion
+      deleteCourse(courseId); // Call the function to delete the course
+    } else {
+      alert("Course deletion canceled.");
+    }
+  }
+
+  // Function to actually delete the course (example for using AJAX)
+ 
+  // Function to confirm if the user really wants to delete the course
+  function confirmDelete(courseName) {
+    const confirmation = confirm(`Are you sure you want to delete the course: ${courseName}? This action cannot be undone.`);
+    if (confirmation) {
+      alert(`The course "${courseName}" has been deleted.`); // Placeholder action
+      // Implement the actual delete logic here, for example, using an AJAX request
+    }
+  }
+
+  </script>
+  
+</body>
+</html>

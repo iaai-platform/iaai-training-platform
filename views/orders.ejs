@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders page</title>
+    <link rel="stylesheet" href="/css/orders.css"> <!-- Use the enhanced CSS I provided -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+  </head>
+  
+  <body>
+    <%- include('partials/header') %>
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb">
+      <a href="/">Home</a> > <a href="/dashboard">Dashboard</a> > <span>Your Orders</span>
+    </nav>
+
+    <div class="container">
+      <h1 class="cart-title">
+        <i class="fas fa-shopping-cart"></i> Your Orders
+      </h1>
+
+      <!-- ✅ Form to select courses to remove -->
+      <form id="removeForm" action="/remove-from-cart" method="POST">
+        <% if (orders && orders.length > 0) { %> 
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Select</th>
+                <th>Course Title</th>
+                <th>Course Code</th>
+                <th>Price</th>
+                <th>Course Type</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% orders.forEach(order => { %>
+                <tr>
+                  <td>
+                    <!-- ✅ Checkbox to select courses for removal -->
+                    <input type="checkbox" name="courseIds[]" value="<%= order.courseId %>">
+                  </td>
+                  <td class="course-title">
+                    <%= order.title || 'Untitled Course' %>
+                    <% if (order.startDate) { %>
+                      <br><small class="course-meta">Starts: <%= new Date(order.startDate).toLocaleDateString() %></small>
+                    <% } %>
+                    <% if (order.location) { %>
+                      <br><small class="course-meta">Location: <%= order.location %></small>
+                    <% } %>
+                  </td>
+                  <td><%= order.courseCode || 'N/A' %></td>
+                  <td class="price-cell">$<%= order.price ? order.price.toFixed(2) : '0.00' %></td>
+                  <td>
+                    <span class="course-type-badge <%= order.displayType.toLowerCase().replace(/\s+/g, '-') %>">
+                      <%= order.displayType || 'Unknown' %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-badge status-cart">
+                      <%= order.status %>
+                    </span>
+                  </td>
+                  <td>
+                    <!-- ✅ View Details Button -->
+                    <% let detailsUrl;
+                       if (order.courseType === 'SelfPacedOnlineTraining') {
+                         detailsUrl = '/self-paced-online-training/courses/' + order.courseId;
+                       } else if (order.courseType === 'InPersonAestheticTraining') {
+                         detailsUrl = '/in-person-aesthetic-training/courses/' + order.courseId;
+                       } else if (order.courseType === 'OnlineLiveTraining') {
+                         detailsUrl = '/online-live-training/courses/' + order.courseId;
+                       }
+                    %>
+                    <a href="<%= detailsUrl %>" class="view-details-btn">
+                      <i class="fas fa-eye"></i> View Details
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+
+          <!-- ✅ Cart Summary with Total Price -->
+          <div class="cart-summary">
+            <h3 class="total-price">
+              <span>Total Price:</span> 
+              <span class="price-amount">$<%= totalAmount %></span>
+            </h3>
+          </div>
+
+          <!-- ✅ Buttons: Remove Selected & Proceed to Checkout -->
+          <div class="button-group">
+            <button type="submit" class="remove-btn">
+              <i class="fas fa-trash"></i> Remove Selected Courses
+            </button>
+            <a href="/checkout" class="checkout-btn">
+              <i class="fas fa-credit-card"></i> Proceed to Checkout
+            </a>
+          </div>
+
+        <% } else { %>
+          <div class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Your cart is empty!</h3>
+            <p>Browse our courses and add them to your cart to get started.</p>
+            <div class="browse-buttons">
+              <a href="/in-person-aesthetic-training" class="cta-btn">Browse In-Person Courses</a>
+              <a href="/online-live-training" class="cta-btn">Browse Live Courses</a>
+              <a href="/self-paced-online-training" class="cta-btn">Browse Self-Paced Courses</a>
+            </div>
+          </div>
+        <% } %>
+      </form>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <!-- ✅ JavaScript for Remove Courses -->
+    <script>
+      // Notification function
+      function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+          ${message}
+        `;
+        
+        // Add styles
+        notification.style.cssText = `
+          position: fixed;
+          top: 30px;
+          right: 30px;
+          padding: 16px 24px;
+          border-radius: 8px;
+          color: white;
+          font-weight: 500;
+          z-index: 1000;
+          animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          max-width: 350px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+          font-family: 'Montserrat', sans-serif;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: ${type === 'success' ? 'linear-gradient(135deg, #28a745 0%, #218838 100%)' : type === 'error' ? 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)' : 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)'};
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'slideOut 0.3s ease-out';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 5000);
+      }
+
+      document.getElementById('removeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();  // Prevent default form submission
+
+        const courseIds = Array.from(document.querySelectorAll('input[name="courseIds[]"]:checked'))
+                              .map(input => input.value);
+
+        if (courseIds.length === 0) {
+          showNotification('Please select at least one course to remove.', 'warning');
+          return;
+        }
+
+        try {
+          const response = await fetch('/remove-from-cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courseIds })
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            showNotification(result.message, 'success');
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            showNotification('Error removing courses.', 'error');
+          }
+        } catch (err) {
+          console.error('Error:', err);
+          showNotification('Error removing courses.', 'error');
+        }
+      });
+      
+      // Add CSS animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(400px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(400px); opacity: 0; }
+        }
+        
+        .status-badge.status-cart { 
+          background-color: #28a745; 
+          color: white; 
+        }
+      `;
+      document.head.appendChild(style);
+    </script>
+
+  </body>
+</html>

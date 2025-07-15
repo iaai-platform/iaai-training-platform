@@ -1,0 +1,233 @@
+<!-- views/admin/partials/header.ejs -->
+<nav class="admin-nav">
+    <div class="admin-nav-container">
+        <div class="admin-nav-brand">
+            <a href="/dashboard" class="brand-link">
+                <i class="fas fa-graduation-cap"></i>
+                <span>IAAI Admin</span>
+            </a>
+        </div>
+        
+        <div class="admin-nav-menu">
+            <a href="/dashboard" class="nav-link <%= typeof title !== 'undefined' && title.includes('Dashboard') ? 'active' : '' %>">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            
+            <div class="nav-dropdown">
+                <a href="#" class="nav-link dropdown-toggle">
+                    <i class="fas fa-book"></i> Courses <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/admin-courses/inperson" class="dropdown-item">
+                        <i class="fas fa-chalkboard-teacher"></i> In-Person Training
+                    </a>
+                    <a href="/admin-courses/onlinelive" class="dropdown-item">
+                        <i class="fas fa-video"></i> Online Live Training
+                    </a>
+                    <a href="/admin/selfpaced/manage" class="dropdown-item <%= typeof title !== 'undefined' && title.includes('Self-Paced') ? 'active' : '' %>">
+                        <i class="fas fa-play-circle"></i> Self-Paced Courses
+                    </a>
+                </div>
+            </div>
+            
+            <a href="/instructors" class="nav-link">
+                <i class="fas fa-user-tie"></i> Instructors
+            </a>
+            
+            <a href="/admin-users" class="nav-link">
+                <i class="fas fa-users"></i> Users
+            </a>
+        </div>
+        
+        <div class="admin-nav-user">
+            <div class="user-info">
+                <span class="user-name"><%= user.firstName || user.email %></span>
+                <span class="user-role"><%= user.role %></span>
+            </div>
+            <a href="/logout" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<style>
+.admin-nav {
+    background: #1f2937;
+    color: white;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.admin-nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+}
+
+.admin-nav-brand {
+    display: flex;
+    align-items: center;
+}
+
+.brand-link {
+    color: white;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand-link:hover {
+    color: #e0e7ff;
+}
+
+.admin-nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    margin-left: 3rem;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-link.active {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+}
+
+.nav-dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #374151;
+    min-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.dropdown-item.active {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+}
+
+.dropdown-item:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.dropdown-item:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.admin-nav-user {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-info {
+    text-align: right;
+}
+
+.user-name {
+    display: block;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.user-role {
+    display: block;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: capitalize;
+}
+
+.logout-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.logout-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-nav-menu {
+        display: none;
+    }
+    
+    .user-info {
+        display: none;
+    }
+}
+</style>

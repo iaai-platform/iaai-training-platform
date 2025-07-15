@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>on-demand-courses</title>
+    <link rel="stylesheet" href="/css/formpages.css"> <!-- Link to the main CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+  </head>
+  <%- include('partials/header') %>
+  
+  
+
+    <!-- ✅ Course Details Section -->
+    <section class="course-description">
+        <h2>Why Choose On-Demand Training?</h2>
+        <p>Access expert-led courses at your own pace, with 24/7 availability, practical demonstrations, and certification.</p>
+        <h3>Popular Topics:</h3>
+        <ul>
+            <li>Botulinum Toxin & Dermal Fillers</li>
+            <li>Advanced Facial Contouring</li>
+            <li>Non-Surgical Rhinoplasty</li>
+            <li>PRP Therapy & Skin Rejuvenation</li>
+        </ul>
+    </section>
+
+    <!-- ✅ Enrollment Form -->
+    <section class="enrollment-form">
+        <h2>Apply for On-Demand Courses</h2>
+        <form id="onDemandForm">
+            <label for="fullName">Full Name:</label>
+            <input type="text" id="fullName" name="fullName" required>
+
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+
+            <label for="courseInterest">Course of Interest:</label>
+            <select id="courseInterest" name="courseInterest">
+                <option value="botox">Botox & Dermal Fillers</option>
+                <option value="facial-contouring">Facial Contouring</option>
+                <option value="skin-rejuvenation">Skin Rejuvenation</option>
+                <option value="prp">PRP Therapy</option>
+            </select>
+
+            <button type="submit">Submit Application</button>
+        </form>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        document.getElementById("onDemandForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            
+            const formData = {
+                fullName: document.getElementById("fullName").value,
+                email: document.getElementById("email").value,
+                phoneNumber: document.getElementById("phoneNumber").value,
+                courseInterest: document.getElementById("courseInterest").value,
+            };
+
+            try {
+                const response = await fetch("/apply-on-demand", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert("✅ Application Submitted Successfully!");
+                } else {
+                    alert("❌ " + result.message);
+                }
+            } catch (error) {
+                console.error("❌ Error submitting application:", error);
+                alert("Error submitting application. Please try again.");
+            }
+        });
+    </script>
+
+</body>
+</html>

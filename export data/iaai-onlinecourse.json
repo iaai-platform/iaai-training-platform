@@ -1,0 +1,651 @@
+{
+    "basic": {
+      "courseCode": "SKIN-REJ-2025",
+      "title": "Advanced Skin Rejuvenation Techniques",
+      "description": "Comprehensive online training on skin rejuvenation strategies, covering skin aging exposome, antiaging approaches, and practical treatment protocols. Learn about various modalities including retinoids, peptides, hyaluronic acid, lasers, and more.",
+      "aboutThisCourse": "This course provides in-depth knowledge of skin anatomy, aging mechanisms, and evidence-based rejuvenation techniques. Participants will learn to identify skin phototypes, select appropriate treatments, and manage pre/post-care protocols.",
+      "category": "aesthetic",
+      "status": "open",
+      "courseType": "online-live"
+    },
+    "schedule": {
+      "startDate": "2025-03-15T09:00:00Z",
+      "endDate": "2025-03-15T17:00:00Z",
+      "duration": "8 hours",
+      "registrationDeadline": "2025-03-08T23:59:59Z",
+      "primaryTimezone": "UTC",
+      "displayTimezones": ["EST", "PST", "GMT", "CET"],
+      "pattern": "single",
+      "sessionTime": {
+        "startTime": "09:00",
+        "endTime": "17:00",
+        "breakDuration": 15
+      },
+      "sessions": [{
+        "dayNumber": 1,
+        "date": "2025-03-15T09:00:00Z",
+        "startTime": "09:00",
+        "endTime": "17:00",
+        "title": "Comprehensive Skin Rejuvenation Training",
+        "type": "workshop"
+      }]
+    },
+    "enrollment": {
+      "price": 450,
+      "earlyBirdPrice": 380,
+      "currency": "USD",
+      "seatsAvailable": 100,
+      "minEnrollment": 20,
+      "currentEnrollment": 0,
+      "waitlistEnabled": true
+    },
+    "instructors": {
+      "primary": {
+        "name": "Dr. Expert Dermatologist",
+        "role": "Lead Instructor"
+      },
+      "additional": []
+    },
+    "platform": {
+      "name": "Zoom",
+      "accessUrl": "https://zoom.us/meeting/skin-rejuvenation-2025",
+      "features": {
+        "breakoutRooms": true,
+        "polling": true,
+        "whiteboard": true,
+        "recording": true,
+        "chat": true,
+        "screenSharing": true
+      }
+    },
+    "content": {
+      "objectives": [
+        "Understand the three layers of skin and aging exposome factors",
+        "Master antiaging strategies including accelerating skin turnover and ECM improvement",
+        "Identify skin phototypes using Fitzpatrick classification",
+        "Apply evidence-based treatments: retinoids, ascorbic acid, peptides, and more",
+        "Implement proper pre and post-treatment protocols",
+        "Learn camouflage techniques for post-treatment care"
+      ],
+      "modules": [
+        {
+          "title": "Skin Anatomy and Layers",
+          "description": "Understanding epidermis, dermis, and hypodermis structure",
+          "duration": "1 hour",
+          "order": 1
+        },
+        {
+          "title": "Skin Aging Exposome",
+          "description": "External and internal factors affecting skin aging",
+          "duration": "1.5 hours",
+          "order": 2
+        },
+        {
+          "title": "Antiaging Strategies",
+          "description": "Accelerating skin turnover, preventing fibroblast aging, ECM reactivation",
+          "duration": "1.5 hours",
+          "order": 3
+        },
+        {
+          "title": "Aesthetic Medicine Visit & Fitzpatrick Classification",
+          "description": "Patient assessment and skin phototype identification",
+          "duration": "1 hour",
+          "order": 4
+        },
+        {
+          "title": "Treatment Modalities & Mechanisms",
+          "description": "Retinoids, acids, peptides, HA, carboxytherapy, lasers, RF, HIFU",
+          "duration": "2 hours",
+          "order": 5
+        },
+        {
+          "title": "Pre and Post Treatment Protocols",
+          "description": "Patient preparation, recovery management, and camouflage techniques",
+          "duration": "1 hour",
+          "order": 6
+        }
+      ],
+      "targetAudience": [
+        "Dermatologists",
+        "Aesthetic Medicine Practitioners",
+        "Plastic Surgeons",
+        "Nurses in Aesthetic Medicine",
+        "Medical Spa Professionals"
+      ],
+      "experienceLevel": "intermediate",
+      "prerequisites": "Basic knowledge of skin anatomy and physiology. Medical or nursing degree preferred.",
+      "detailedSyllabus": "Comprehensive coverage of skin rejuvenation from basic science to practical application"
+    },
+    "technical": {
+      "systemRequirements": {
+        "os": ["Windows 10+", "macOS 10.14+", "iOS 12+", "Android 8+"],
+        "browsers": ["Chrome 80+", "Firefox 78+", "Safari 12+", "Edge 80+"],
+        "minimumRAM": "4GB",
+        "processor": "Dual-core 2GHz"
+      },
+      "internetSpeed": {
+        "minimum": "5 Mbps",
+        "recommended": "25 Mbps"
+      },
+      "requiredSoftware": ["Zoom Client"],
+      "equipment": {
+        "camera": "recommended",
+        "microphone": "required",
+        "headset": "recommended"
+      },
+      "techCheckRequired": true,
+      "techCheckDate": "2025-03-13T16:00:00Z"
+    },
+    "interaction": {
+      "participationRequired": true,
+      "cameraRequired": false,
+      "features": {
+        "polls": true,
+        "quizzes": true,
+        "breakoutRooms": true,
+        "qa": true,
+        "chat": true,
+        "reactions": true
+      },
+      "engagementTools": ["Mentimeter", "Kahoot"],
+      "networkingOptions": {
+        "virtualCoffeeBreaks": true,
+        "discussionForum": true
+      }
+    },
+    "recording": {
+      "enabled": true,
+      "type": "cloud",
+      "availability": {
+        "forStudents": true,
+        "duration": 90,
+        "downloadable": false,
+        "passwordProtected": true
+      },
+      "autoTranscription": true
+    },
+    "media": {
+      "documents": [
+        "skin-rejuvenation-presentation.pdf",
+        "treatment-protocols-guide.pdf",
+        "fitzpatrick-scale-reference.pdf"
+      ],
+      "links": [
+        {
+          "title": "Skin Aging Exposome Research",
+          "url": "https://example.com/skin-aging-research",
+          "type": "article"
+        },
+        {
+          "title": "Treatment Demonstration Videos",
+          "url": "https://example.com/treatment-demos",
+          "type": "video"
+        }
+      ]
+    },
+    "materials": {
+      "handouts": [
+        {
+          "title": "Pre and Post Treatment Guidelines",
+          "releaseTime": "immediate"
+        },
+        {
+          "title": "Camouflage Techniques Guide",
+          "releaseTime": "after-session"
+        },
+        {
+          "title": "Treatment Comparison Chart",
+          "releaseTime": "immediate"
+        }
+      ],
+      "lms": {
+        "enabled": false
+      }
+    },
+    "assessment": {
+      "required": true,
+      "type": "quiz",
+      "passingScore": 75,
+      "retakesAllowed": 2,
+      "platform": "Zoom Polls",
+      "timeLimit": 30
+    },
+    "certification": {
+      "enabled": true,
+      "types": ["completion", "achievement"],
+      "issuingAuthority": "IAAI Training Institute",
+      "requirements": {
+        "minimumAttendance": 90,
+        "minimumScore": 75,
+        "practicalRequired": false,
+        "projectRequired": false
+      },
+      "validity": {
+        "isLifetime": false,
+        "years": 2
+      },
+      "features": {
+        "digitalBadge": true,
+        "blockchain": false,
+        "qrVerification": true,
+        "autoGenerate": true
+      },
+      "template": "professional_v1"
+    },
+    "attendance": {
+      "trackingEnabled": true,
+      "method": "automatic",
+      "minimumRequired": 90,
+      "lateJoinWindow": 15,
+      "rules": {
+        "minimumSessionTime": 85,
+        "breakAttendanceRequired": false
+      }
+    },
+    "support": {
+      "contact": {
+        "email": "info@iaa-i.com",
+        "whatsapp": "+90 536 745 86 66"
+      },
+      "hours": {
+        "available": true,
+        "schedule": "9 AM - 6 PM (Monday-Friday)",
+        "timezone": "CET"
+      },
+      "channels": {
+        "email": true,
+        "liveChat": false,
+        "ticketing": false
+      }
+    },
+    "postCourse": {
+      "accessDuration": {
+        "recordings": 90,
+        "materials": 180,
+        "forum": 365
+      },
+      "alumni": {
+        "refresherAccess": true,
+        "updatesIncluded": true,
+        "communityAccess": true,
+        "futureDiscount": 15
+      },
+      "continuedLearning": {
+        "monthlyWebinars": true,
+        "newsletter": true,
+        "advancedCourses": ["ADV-LASER-2025", "INJ-TECH-2025"]
+      }
+    },
+    "experience": {
+      "onboarding": {
+        "orientationRequired": false
+      },
+      "accessibility": {
+        "closedCaptions": true,
+        "transcripts": true,
+        "signLanguage": false,
+        "audioDescription": false
+      },
+      "gamification": {
+        "enabled": true,
+        "points": true,
+        "badges": true,
+        "leaderboard": false
+      }
+    },
+    "notificationSettings": {
+      "courseUpdates": true,
+      "emailNotifications": true,
+      "reminderSchedule": [7, 3, 1],
+      "marketingEmails": true,
+      "weeklyDigest": false
+    },
+    "metadata": {
+      "version": 1,
+      "tags": [
+        "skin rejuvenation",
+        "antiaging",
+        "aesthetic medicine",
+        "dermatology",
+        "laser therapy",
+        "chemical peels",
+        "hyaluronic acid",
+        "retinoids"
+      ],
+      "isTemplate": false
+    }
+  }
+
+
+  {
+    "basic": {
+      "courseCode": "JAW-WEBINAR-2025",
+      "title": "Perfect Jawline: Sculpt, Define & Impress",
+      "description": "Master the art of facial contouring with this comprehensive webinar on jawline aesthetics. Learn advanced injection techniques, product selection, and combination protocols to achieve perfect jawline definition for your patients.",
+      "aboutThisCourse": "A 75-minute live webinar covering everything from anatomy to advanced contouring techniques, including hands-on case reviews and expert Q&A.",
+      "category": "aesthetic",
+      "status": "open",
+      "courseType": "online-live"
+    },
+    "schedule": {
+      "startDate": "2025-03-22T14:00:00Z",
+      "endDate": "2025-03-22T15:15:00Z",
+      "duration": "75 minutes",
+      "registrationDeadline": "2025-03-20T23:59:59Z",
+      "primaryTimezone": "UTC",
+      "displayTimezones": ["EST", "PST", "GMT", "CET"],
+      "pattern": "single",
+      "sessionTime": {
+        "startTime": "14:00",
+        "endTime": "15:15",
+        "breakDuration": 0
+      },
+      "sessions": [{
+        "dayNumber": 1,
+        "date": "2025-03-22T14:00:00Z",
+        "startTime": "14:00",
+        "endTime": "15:15",
+        "title": "Perfect Jawline Contouring Masterclass",
+        "type": "workshop"
+      }]
+    },
+    "enrollment": {
+      "price": 199,
+      "earlyBirdPrice": 149,
+      "currency": "USD",
+      "seatsAvailable": 200,
+      "minEnrollment": 25,
+      "currentEnrollment": 0,
+      "waitlistEnabled": true
+    },
+    "instructors": {
+      "primary": {
+        "instructorId": "507f1f77bcf86cd799439011",
+        "name": "Dr. Massimo Vitale",
+        "role": "Lead Instructor"
+      },
+      "additional": []
+    },
+    "platform": {
+      "name": "Zoom",
+      "accessUrl": "https://zoom.us/meeting/jawline-masterclass-2025",
+      "features": {
+        "breakoutRooms": false,
+        "polling": true,
+        "whiteboard": true,
+        "recording": true,
+        "chat": true,
+        "screenSharing": true
+      }
+    },
+    "content": {
+      "objectives": [
+        "Understand male vs. female jawline aesthetic differences",
+        "Master key anatomical structures and danger zones",
+        "Perfect needle vs. cannula injection techniques",
+        "Select appropriate products based on density and G-prime",
+        "Manage asymmetry and achieve instant results",
+        "Implement combination protocols with PRP, toxins, and threads"
+      ],
+      "modules": [
+        {
+          "title": "Introduction & Speaker Welcome",
+          "description": "Meet your expert trainer and overview of session goals",
+          "duration": "5 minutes",
+          "order": 1
+        },
+        {
+          "title": "Jawline Aesthetics: What Patients Want in 2025",
+          "description": "Male vs. female definitions, common complaints and trends",
+          "duration": "5 minutes",
+          "order": 2
+        },
+        {
+          "title": "Anatomy & Danger Zones",
+          "description": "Key anatomical structures, safe injection zones",
+          "duration": "10 minutes",
+          "order": 3
+        },
+        {
+          "title": "Injection Techniques for Perfect Contouring",
+          "description": "Needle vs. cannula use, product selection, injection depth & vector placement",
+          "duration": "15 minutes",
+          "order": 4
+        },
+        {
+          "title": "Video Case Review",
+          "description": "Step-by-step treatment approach with before/after photos",
+          "duration": "20 minutes",
+          "order": 5
+        },
+        {
+          "title": "Combination Protocols",
+          "description": "Enhancing results with PRP, toxins, threads and long-term maintenance",
+          "duration": "10 minutes",
+          "order": 6
+        },
+        {
+          "title": "Q&A Session - Ask the Expert",
+          "description": "Open mic for questions, bonus tips on pricing & patient retention",
+          "duration": "10 minutes",
+          "order": 7
+        }
+      ],
+      "targetAudience": [
+        "Aesthetic Medicine Practitioners",
+        "Dermatologists",
+        "Plastic Surgeons",
+        "Nurse Injectors",
+        "Medical Spa Professionals"
+      ],
+      "experienceLevel": "intermediate",
+      "prerequisites": "Basic knowledge of facial anatomy and injection techniques required",
+      "detailedSyllabus": "Comprehensive coverage of jawline contouring from anatomy to advanced combination treatments"
+    },
+    "technical": {
+      "systemRequirements": {
+        "os": ["Windows 10+", "macOS 10.14+", "iOS 12+", "Android 8+"],
+        "browsers": ["Chrome 80+", "Firefox 78+", "Safari 12+", "Edge 80+"],
+        "minimumRAM": "4GB",
+        "processor": "Dual-core 2GHz"
+      },
+      "internetSpeed": {
+        "minimum": "5 Mbps",
+        "recommended": "25 Mbps"
+      },
+      "requiredSoftware": ["Zoom Client"],
+      "equipment": {
+        "camera": "recommended",
+        "microphone": "required",
+        "headset": "recommended"
+      },
+      "techCheckRequired": false
+    },
+    "interaction": {
+      "participationRequired": true,
+      "cameraRequired": false,
+      "features": {
+        "polls": true,
+        "quizzes": true,
+        "breakoutRooms": false,
+        "qa": true,
+        "chat": true,
+        "reactions": true
+      },
+      "engagementTools": ["Zoom Polls"],
+      "networkingOptions": {
+        "virtualCoffeeBreaks": false,
+        "discussionForum": true
+      }
+    },
+    "recording": {
+      "enabled": true,
+      "type": "cloud",
+      "availability": {
+        "forStudents": true,
+        "duration": 30,
+        "downloadable": false,
+        "passwordProtected": true
+      },
+      "autoTranscription": true
+    },
+    "media": {
+      "documents": [
+        "jawline-contouring-guide.pdf",
+        "anatomy-reference-sheet.pdf",
+        "product-selection-chart.pdf"
+      ],
+      "links": [
+        {
+          "title": "Facial Anatomy Interactive Guide",
+          "url": "https://resources.iaai.com/facial-anatomy",
+          "type": "tool"
+        }
+      ]
+    },
+    "materials": {
+      "handouts": [
+        {
+          "title": "Jawline Contouring Quick Reference Guide",
+          "releaseTime": "immediate"
+        },
+        {
+          "title": "Product Selection Chart",
+          "releaseTime": "immediate"
+        },
+        {
+          "title": "Patient Consent Templates",
+          "releaseTime": "after-session"
+        }
+      ],
+      "lms": {
+        "enabled": false
+      }
+    },
+    "assessment": {
+      "required": true,
+      "type": "quiz",
+      "passingScore": 70,
+      "retakesAllowed": 2,
+      "platform": "Zoom Polls",
+      "timeLimit": 15
+    },
+    "certification": {
+      "enabled": true,
+      "types": ["completion"],
+      "issuingAuthority": "IAAI Training Institute",
+      "requirements": {
+        "minimumAttendance": 90,
+        "minimumScore": 70,
+        "practicalRequired": false,
+        "projectRequired": false
+      },
+      "validity": {
+        "isLifetime": false,
+        "years": 2
+      },
+      "features": {
+        "digitalBadge": true,
+        "blockchain": false,
+        "qrVerification": true,
+        "autoGenerate": true
+      },
+      "template": "professional_v1"
+    },
+    "attendance": {
+      "trackingEnabled": true,
+      "method": "automatic",
+      "minimumRequired": 90,
+      "lateJoinWindow": 10,
+      "rules": {
+        "minimumSessionTime": 85,
+        "breakAttendanceRequired": false
+      }
+    },
+    "support": {
+      "contact": {
+        "email": "info@iaa-i.com",
+        "whatsapp": "+90 536 745 86 66"
+      },
+      "hours": {
+        "available": true,
+        "schedule": "9 AM - 6 PM (Monday-Friday)",
+        "timezone": "CET"
+      },
+      "channels": {
+        "email": true,
+        "liveChat": false,
+        "ticketing": false
+      }
+    },
+    "postCourse": {
+      "accessDuration": {
+        "recordings": 30,
+        "materials": 90,
+        "forum": 180
+      },
+      "alumni": {
+        "refresherAccess": true,
+        "updatesIncluded": true,
+        "communityAccess": true,
+        "futureDiscount": 20
+      },
+      "continuedLearning": {
+        "monthlyWebinars": true,
+        "newsletter": true,
+        "advancedCourses": ["ADV-FACE-CONT-2025", "COMB-PROTO-2025"]
+      }
+    },
+    "experience": {
+      "onboarding": {
+        "orientationRequired": false
+      },
+      "accessibility": {
+        "closedCaptions": true,
+        "transcripts": true,
+        "signLanguage": false,
+        "audioDescription": false
+      },
+      "gamification": {
+        "enabled": false,
+        "points": false,
+        "badges": false,
+        "leaderboard": false
+      }
+    },
+    "analytics": {
+      "engagement": {
+        "averageAttendance": 0,
+        "completionRate": 0,
+        "satisfactionScore": 0,
+        "dropoffRate": 0
+      },
+      "participation": {
+        "totalQuestions": 0,
+        "totalPolls": 0,
+        "totalChats": 0
+      }
+    },
+    "notificationSettings": {
+      "courseUpdates": true,
+      "emailNotifications": true,
+      "reminderSchedule": [3, 1],
+      "marketingEmails": true,
+      "weeklyDigest": false
+    },
+    "metadata": {
+      "version": 1,
+      "tags": [
+        "jawline contouring",
+        "facial aesthetics",
+        "cannula technique",
+        "needle technique",
+        "facial anatomy",
+        "danger zones",
+        "combination treatments",
+        "PRP",
+        "threads"
+      ],
+      "isTemplate": false
+    }
+  }

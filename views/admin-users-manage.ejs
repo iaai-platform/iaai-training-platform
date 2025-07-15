@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - IAAI Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Admin User Management Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Admin Header */
+        .admin-header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(220,53,69,0.2);
+        }
+
+        .admin-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .admin-header .breadcrumb {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+        }
+
+        .admin-header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+
+        .admin-header .breadcrumb a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        /* Container */
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Revenue Summary Card */
+        .revenue-summary {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+        }
+
+        .revenue-summary h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .revenue-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .revenue-stat {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .revenue-stat .value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .revenue-stat .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Analytics Button */
+        .analytics-btn {
+            background: #17a2b8;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .analytics-btn:hover {
+            background: #138496;
+            text-decoration: none;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Search and Filter Bar */
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .filter-select {
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* Table Container */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Users Table */
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .users-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f8f9fa;
+            vertical-align: top;
+        }
+
+        .users-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        /* User Info */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Payment Info */
+        .payment-info {
+            text-align: center;
+        }
+
+        .payment-amount {
+            font-weight: 600;
+            color: #28a745;
+            font-size: 1.1rem;
+        }
+
+        .payment-count {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        /* Course Pills */
+        .course-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .course-pill {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .course-pill.in-person {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .course-pill.online-live {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .course-pill.self-paced {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Wishlist */
+        .wishlist-count {
+            background: #ffc107;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .users-table {
+                font-size: 12px;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 10px 8px;
+            }
+
+            .course-pills {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+
+<%- include('partials/header') %>
+
+<body>
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <div class="admin-header-content">
+            <div>
+                <h1><i class="fas fa-users"></i> User Management</h1>
+                <p>Manage registered users and their course enrollments</p>
+            </div>
+            <div class="breadcrumb">
+                <a href="/">Home</a> > 
+                <a href="/dashboard">Dashboard</a> > 
+                <span>User Management</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <!-- Revenue Summary -->
+        <% if (overallStats) { %>
+        <div class="revenue-summary">
+            <h2><i class="fas fa-chart-line"></i> Financial Overview</h2>
+            <div class="revenue-stats">
+                <div class="revenue-stat">
+                    <div class="value">$<%= overallStats.totalRevenue.toFixed(2) %></div>
+                    <div class="label">Total Revenue</div>
+                </div>
+                <div class="revenue-stat">
+                    <div class="value"><%= overallStats.totalTransactions %></div>
+                    <div class="label">Total Transactions</div>
+                </div>
+                <div class="revenue-stat">
+                    <div class="value">$<%= overallStats.averageTransactionValue %></div>
+                    <div class="label">Average Transaction</div>
+                </div>
+                <div class="revenue-stat">
+                    <div class="value"><%= overallStats.totalPaidCourses %></div>
+                    <div class="label">Paid Enrollments</div>
+                </div>
+                <div class="revenue-stat">
+                    <div class="value"><%= overallStats.totalFreeCourses %></div>
+                    <div class="label">Free Enrollments</div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Analytics Button -->
+        <a href="/admin/payment-analytics" class="analytics-btn">
+            <i class="fas fa-chart-bar"></i> View Detailed Analytics
+        </a>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number"><%= users.length %></div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= users.filter(u => u.isConfirmed).length %></div>
+                <div class="stat-label">Confirmed Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= users.reduce((sum, u) => sum + (u.myCourses ? u.myCourses.length : 0), 0) %></div>
+                <div class="stat-label">Total Enrollments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= users.filter(u => u.totalSpent > 0).length %></div>
+                <div class="stat-label">Paying Users</div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="filter-bar">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by name, email, or phone...">
+            <select class="filter-select" id="roleFilter">
+                <option value="">All Roles</option>
+                <option value="user">Users</option>
+                <option value="admin">Admins</option>
+                <option value="instructor">Instructors</option>
+            </select>
+            <select class="filter-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="pending">Pending</option>
+            </select>
+            <select class="filter-select" id="paymentFilter">
+                <option value="">All Users</option>
+                <option value="paying">Paying Users</option>
+                <option value="free">Free Users Only</option>
+            </select>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="fas fa-table"></i> Registered Users
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="exportUsers()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+
+            <% if (users.length > 0) { %>
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Contact</th>
+                            <th>Location</th>
+                            <th>Courses</th>
+                            <th>Total Spent</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <% users.forEach(user => { %>
+                            <tr data-user-id="<%= user._id %>" 
+                                data-role="<%= user.role %>" 
+                                data-status="<%= user.isConfirmed ? 'confirmed' : 'pending' %>"
+                                data-payment="<%= user.totalSpent > 0 ? 'paying' : 'free' %>">
+                                
+                                <!-- User Info -->
+                                <td>
+                                    <div class="user-info">
+                                        <div class="user-avatar">
+                                            <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+                                        </div>
+                                        <div>
+                                            <strong><%= user.firstName %> <%= user.lastName %></strong>
+                                            <br>
+                                            <small class="text-muted"><%= user.role %></small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Contact -->
+                                <td>
+                                    <%= user.email %><br>
+                                    <small><%= user.phoneNumber || 'No phone' %></small>
+                                </td>
+
+                                <!-- Location -->
+                                <td><%= user.country || 'Not specified' %></td>
+
+                                <!-- Courses -->
+                                <td>
+                                    <% if (user.myCourses && user.myCourses.length > 0) { %>
+                                        <div class="course-pills">
+                                            <% user.myCourses.slice(0, 3).forEach(course => { %>
+                                                <span class="course-pill <%= course.courseType.toLowerCase().replace(' ', '-') %>" 
+                                                      title="<%= course.courseTitle || course.title %> - <%= course.status %>">
+                                                    <%= course.courseCode %>
+                                                </span>
+                                            <% }) %>
+                                            <% if (user.myCourses.length > 3) { %>
+                                                <span class="course-pill" style="background: #e0e0e0; color: #666;">
+                                                    +<%= user.myCourses.length - 3 %>
+                                                </span>
+                                            <% } %>
+                                        </div>
+                                        <small class="text-muted">
+                                            <%= user.coursesPurchased || 0 %> purchased, 
+                                            <%= user.myWishlist ? user.myWishlist.length : 0 %> wishlist
+                                        </small>
+                                    <% } else { %>
+                                        <span class="text-muted">No courses</span>
+                                    <% } %>
+                                </td>
+
+                                <!-- Payment Info -->
+                                <td class="payment-info">
+                                    <div class="payment-amount">$<%= user.totalSpent.toFixed(2) %></div>
+                                    <div class="payment-count">
+                                        <%= user.paymentTransactions ? user.paymentTransactions.length : 0 %> transactions
+                                    </div>
+                                </td>
+
+                                <!-- Status -->
+                                <td>
+                                    <span class="status-badge status-<%= user.isConfirmed ? 'confirmed' : 'pending' %>">
+                                        <%= user.isConfirmed ? 'Confirmed' : 'Pending' %>
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn btn-info btn-sm" onclick="viewUserDetails('<%= user._id %>')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <% if (!user.isConfirmed) { %>
+                                            <button class="btn btn-success btn-sm" onclick="approveUser('<%= user._id %>')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        <% } %>
+                                        <% if (user.totalSpent > 0) { %>
+                                            <button class="btn btn-warning btn-sm" onclick="viewUserTransactions('<%= user._id %>')">
+                                                <i class="fas fa-receipt"></i>
+                                            </button>
+                                        <% } %>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteUser('<%= user._id %>', '<%= user.firstName %> <%= user.lastName %>')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h3>No users found</h3>
+                    <p>There are no registered users yet.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        // Search and Filter functionality
+        document.getElementById('searchBox').addEventListener('input', filterUsers);
+        document.getElementById('roleFilter').addEventListener('change', filterUsers);
+        document.getElementById('statusFilter').addEventListener('change', filterUsers);
+        document.getElementById('paymentFilter').addEventListener('change', filterUsers);
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const paymentFilter = document.getElementById('paymentFilter').value;
+            
+            const rows = document.querySelectorAll('#usersTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const role = row.dataset.role;
+                const status = row.dataset.status;
+                const payment = row.dataset.payment;
+                
+                const matchesSearch = text.includes(searchTerm);
+                const matchesRole = !roleFilter || role === roleFilter;
+                const matchesStatus = !statusFilter || status === statusFilter;
+                const matchesPayment = !paymentFilter || payment === paymentFilter;
+                
+                row.style.display = matchesSearch && matchesRole && matchesStatus && matchesPayment ? '' : 'none';
+            });
+        }
+
+        // View user details
+        function viewUserDetails(userId) {
+            window.location.href = `/admin-users/${userId}`;
+        }
+
+        // View user transactions
+        function viewUserTransactions(userId) {
+            window.location.href = `/admin-users/${userId}#transactions`;
+        }
+
+        // Approve user
+        async function approveUser(userId) {
+            const result = await Swal.fire({
+                title: 'Approve User',
+                text: 'Are you sure you want to approve this user?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, approve!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/admin/approve-user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            userId: userId,
+                            sendEmail: true
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'User Approved!',
+                            text: data.message,
+                            timer: 2000
+                        });
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Failed to approve user', 'error');
+                }
+            }
+        }
+        
+        // Delete user
+        async function deleteUser(userId, userName) {
+            const result = await Swal.fire({
+                title: 'Delete User',
+                html: `Are you sure you want to delete <strong>${userName}</strong>?<br>This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/admin/reject-user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            userId: userId,
+                            reason: 'User deleted by admin'
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'User Deleted!',
+                            text: data.message,
+                            timer: 2000
+                        });
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Failed to delete user', 'error');
+                }
+            }
+        }
+        
+        // Export users
+        function exportUsers() {
+            window.location.href = '/admin/users/export?format=csv';
+        }
+    </script>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

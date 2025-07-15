@@ -1,0 +1,605 @@
+/* ============================================================
+   ✅ GENERAL STYLING FOR COURSE PAGES
+=========================================================== */
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+  }
+
+  
+
+  /* ============================================================
+   ✅ ADMIN CONTAINER
+  =========================================================== */
+  .admin-container {
+    width: 95%; /* Increased from 90% to use more page width */
+    max-width: 1600px; /* Increased max-width */
+    margin: 30px auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-container h2 {
+    color: #002147;
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-family: 'Playfair Display', serif;
+  }
+  
+  /* ============================================================
+   ✅ STATISTICS CARDS
+  =========================================================== */
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    border-top: 3px solid #b8860b;
+  }
+  
+  .stat-card h3 {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  
+  .stat-card .number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #002147;
+    margin: 0.5rem 0;
+  }
+  
+  /* ============================================================
+   ✅ FILTERS CONTAINER
+  =========================================================== */
+  .filters-container {
+    background: #f9f9f9;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .filter-group label {
+    font-weight: 500;
+    color: #002147;
+  }
+  
+  .filter-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: white;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .search-box {
+    position: relative;
+    max-width: 300px;
+    flex: 1;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 0.5rem 2.5rem 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .search-box i {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+  }
+  
+  /* ============================================================
+   ✅ TABLE STYLING FOR COURSES (OPTIMIZED FOR FULL WIDTH)
+  =========================================================== */
+  table {
+    width: 100%; /* Full width within container */
+    margin: 30px 0;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    table-layout: fixed; /* Fixed layout for better column control */
+  }
+  
+  /* ✅ Table Header */
+  thead th {
+    padding: 15px 8px; /* Reduced horizontal padding for space */
+    font-size: 18px;
+    text-align: left;
+    background-color: #002147;
+    color: white;
+    border-bottom: 3px solid #b8860b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Column width distribution for optimal space usage */
+  th:nth-child(1) { width: 4%; }   /* No. */
+  th:nth-child(2) { width: 14%; }  /* Full Name */
+  th:nth-child(3) { width: 20%; }  /* Email */
+  th:nth-child(4) { width: 10%; }  /* Phone */
+  th:nth-child(5) { width: 10%; }  /* Country */
+  th:nth-child(6) { width: 8%; }   /* Role */
+  th:nth-child(7) { width: 11%; }  /* Registration Date */
+  th:nth-child(8) { width: 8%; }   /* Status */
+  th:nth-child(9) { width: 15%; }  /* Actions */
+  
+  /* ✅ Table Rows */
+  tbody tr {
+    border-bottom: 1px solid #ddd;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Light gray background for alternating rows */
+  }
+  
+  tbody tr:hover {
+    background-color: #fffcf0; /* Light gold hover effect */
+  }
+  
+  /* ✅ Table Data */
+  td {
+    padding: 15px 8px; /* Matching header padding */
+    font-size: 16px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Allow email and name to wrap if needed */
+  td:nth-child(2), td:nth-child(3) {
+    white-space: normal;
+    word-break: break-word;
+  }
+  
+  /* ✅ Status Badges */
+  .status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  
+  .status.confirmed {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .status.pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+  }
+  
+  /* ✅ Action Buttons - Compact but readable */
+  .action-buttons {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  
+  .approve-btn, .reject-btn, .view-btn {
+    padding: 0.5rem 0.9rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+  }
+  
+  /* Icon sizes in buttons */
+  .approve-btn i, .reject-btn i, .view-btn i {
+    font-size: 13px;
+  }
+  
+  .approve-btn {
+    background: #28a745;
+    color: white;
+  }
+  
+  .approve-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+  }
+  
+  .reject-btn {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .reject-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+  }
+  
+  .view-btn {
+    background: #002147;
+    color: white;
+  }
+  
+  .view-btn:hover {
+    background: #003366;
+    transform: translateY(-1px);
+  }
+  
+  .disable-btn {
+    padding: 0.5rem 0.9rem;
+    background: #e2e8f0;
+    color: #a0aec0;
+    border: none;
+    border-radius: 5px;
+    cursor: not-allowed;
+    font-size: 13px;
+  }
+  
+  /* ✅ View Details Button (matching original) */
+  .cta-btn {
+    background-color: #b8860b;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    outline: none;
+    transition: background 0.3s ease;
+  }
+  
+  .cta-btn:hover {
+    background-color: #8a6d0b;
+  }
+  
+  /* ============================================================
+   ✅ LOADING SPINNER
+  =========================================================== */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    margin: 20px 0;
+  }
+  
+  .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #002147;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* ============================================================
+   ✅ ALERT MESSAGES
+  =========================================================== */
+  .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    display: none;
+    font-weight: 500;
+  }
+  
+  .alert.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .alert.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  /* ============================================================
+   ✅ MODAL STYLING - ADJUSTED FOR VISIBILITY
+  =========================================================== */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow-y: auto; /* Allow scrolling if modal is too tall */
+  }
+  
+  .modal-content {
+    background-color: white;
+    margin: 5% auto; /* Reduced from 10% for better visibility */
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-height: 85vh; /* Limit height to viewport */
+    overflow-y: auto; /* Allow scrolling within modal */
+    position: relative;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    position: sticky;
+    top: -2rem;
+    background: white;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .modal-header h3 {
+    margin: 0;
+    color: #002147;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+  }
+  
+  .close {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.3s;
+  }
+  
+  .close:hover {
+    color: #000;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #002147;
+  }
+  
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical;
+    min-height: 100px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  /* Email content textarea specific styling */
+  #emailContent {
+    min-height: 300px;
+    max-height: 400px;
+  }
+  
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    position: sticky;
+    bottom: -2rem;
+    background: white;
+  }
+  
+  /* ============================================================
+   ✅ RESPONSIVE DESIGN - Enhanced for Table
+  =========================================================== */
+  @media (max-width: 1400px) {
+    /* Adjust column widths for medium-large screens */
+    th:nth-child(1) { width: 5%; }   /* No. */
+    th:nth-child(2) { width: 15%; }  /* Full Name */
+    th:nth-child(3) { width: 22%; }  /* Email */
+    th:nth-child(4) { width: 12%; }  /* Phone */
+    th:nth-child(5) { width: 10%; }  /* Country */
+    th:nth-child(6) { width: 8%; }   /* Role */
+    th:nth-child(7) { width: 12%; }  /* Registration Date */
+    th:nth-child(8) { width: 8%; }   /* Status */
+    th:nth-child(9) { width: 8%; }   /* Actions - reduced */
+    
+    /* Smaller action buttons */
+    .approve-btn, .reject-btn, .view-btn {
+      padding: 0.4rem 0.7rem;
+      font-size: 12px;
+    }
+    
+    .approve-btn i, .reject-btn i, .view-btn i {
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 1200px) {
+    /* Hide less important columns on medium screens */
+    th:nth-child(6), td:nth-child(6), /* Role */
+    th:nth-child(7), td:nth-child(7) { /* Registration Date */
+      display: none;
+    }
+    
+    /* Redistribute column widths */
+    th:nth-child(1) { width: 5%; }   /* No. */
+    th:nth-child(2) { width: 20%; }  /* Full Name */
+    th:nth-child(3) { width: 25%; }  /* Email */
+    th:nth-child(4) { width: 15%; }  /* Phone */
+    th:nth-child(5) { width: 12%; }  /* Country */
+    th:nth-child(8) { width: 10%; }  /* Status */
+    th:nth-child(9) { width: 13%; }  /* Actions */
+  }
+  
+  @media (max-width: 768px) {
+    .admin-container {
+      width: 100%;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 0;
+    }
+    
+    /* Stack stats cards in 2 columns */
+    .stats-container {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+    
+    /* Further hide columns on mobile */
+    th:nth-child(4), td:nth-child(4), /* Phone */
+    th:nth-child(5), td:nth-child(5) { /* Country */
+      display: none;
+    }
+    
+    /* Mobile column widths */
+    th:nth-child(1) { width: 10%; }  /* No. */
+    th:nth-child(2) { width: 30%; }  /* Full Name */
+    th:nth-child(3) { width: 30%; }  /* Email */
+    th:nth-child(8) { width: 15%; }  /* Status */
+    th:nth-child(9) { width: 15%; }  /* Actions */
+    
+    /* Smaller text and padding */
+    th, td {
+      padding: 10px 5px;
+      font-size: 14px;
+    }
+    
+    thead th {
+      font-size: 16px;
+    }
+    
+    /* Stack action buttons vertically */
+    .action-buttons {
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    
+    .approve-btn, .reject-btn, .view-btn {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      font-size: 11px;
+    }
+    
+    /* Stack filters vertically */
+    .filters-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .filter-group {
+      width: 100%;
+    }
+    
+    .filter-group select {
+      width: 100%;
+    }
+    
+    /* Modal adjustments for mobile */
+    .modal-content {
+      margin: 2% auto;
+      padding: 1.5rem;
+      width: 95%;
+      max-height: 95vh;
+    }
+    
+    #emailContent {
+      min-height: 200px;
+      max-height: 300px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    /* Single column stats on very small screens */
+    .stats-container {
+      grid-template-columns: 1fr;
+    }
+    
+    /* Show only essential columns */
+    table {
+      font-size: 12px;
+    }
+    
+    th, td {
+      padding: 8px 3px;
+      font-size: 12px;
+    }
+    
+    thead th {
+      font-size: 14px;
+    }
+    
+    /* Allow name to wrap */
+    td:nth-child(2) {
+      white-space: normal;
+    }
+    
+    /* Modal adjustments */
+    .modal-content {
+      margin: 1% auto;
+      padding: 1rem;
+    }
+    
+    .modal-actions {
+      flex-wrap: wrap;
+    }
+    
+    .modal-actions button {
+      flex: 1;
+      min-width: 100px;
+    }
+  }

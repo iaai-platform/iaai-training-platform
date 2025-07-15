@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>International Aesthetic Academic Institution (IAAI) News</title>
+        <link rel="stylesheet" href="/css/newsdetails.css"> <!-- Link to the main CSS -->
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+      </head>
+      
+      <%- include('partials/header') %>
+<body>
+
+ 
+
+    <!-- ✅ Breadcrumb Navigation -->
+    <nav class="breadcrumb">
+        <a href="/">Home</a> > <a href="/news">News</a> > Latest News
+    </nav>
+
+    <!-- ✅ Latest News Section -->
+    <section class="news-details-container">
+        <div class="news-header">
+            <h1><%= latestNews.latestNewsDes %></h1>
+        </div>
+
+        <div class="news-content">
+            <div class="news-image">
+                <img src="<%= latestNews.latestNewsImage %>" alt="Latest News">
+            </div>
+            <div class="news-text">
+                <p><%= latestNews.latestNewsDetails %></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ✅ Latest 1 Section -->
+    <section class="latest-news">
+        <h2><%= latestNews.latest1Title %></h2>
+        <div class="latest-content">
+            <div class="latest-img">
+                <img src="<%= latestNews.latest1Image %>" alt="Latest 1">
+            </div>
+            <p><%= latestNews.latest1Detail %></p>
+        </div>
+    </section>
+
+    <!-- ✅ Latest 2 Section -->
+    <section class="latest-news">
+        <h2><%= latestNews.latest2Title %></h2>
+        <div class="latest-content">
+            <div class="latest-img">
+                <img src="<%= latestNews.latest2Image %>" alt="Latest 2">
+            </div>
+            <p><%= latestNews.latest2Detail %></p>
+        </div>
+    </section>
+
+    <!-- ✅ Latest 3 Section -->
+    <section class="latest-news">
+        <h2><%= latestNews.latest3Title %></h2>
+        <div class="latest-content">
+            <div class="latest-img">
+                <img src="<%= latestNews.latest3Image %>" alt="Latest 3">
+            </div>
+            <p><%= latestNews.latest3Detail %></p>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+</body>
+</html>

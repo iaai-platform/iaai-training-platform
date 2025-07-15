@@ -1,0 +1,181 @@
+/* ✅ General Styles */
+body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+
+
+
+/* ✅ Main Section */
+section {
+    width: 90%;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Form Styling */
+form {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+   
+}
+
+label {
+    font-weight: 500;
+    color: #333;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+
+form h2 {
+    font-size: 22px;
+    color: #002147;
+    font-family: 'Playfair Display', serif;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+
+/* ✅ Upload Button */
+input[type="file"] {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* ✅ Save Button */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: #b8860b; /* Gold */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+button:hover {
+    background-color: #e5b300; /* Lighter Gold */
+}
+
+
+/* ✅ Exam Section */
+#exam-section {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+#exam-questions .question {
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* ✅ Real-Time Video Table */
+#videoTable {
+    width: 90%;
+    margin: 40px auto;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#videoTable th, #videoTable td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+#videoTable th {
+    background: #2a3f54;
+    color: white;
+}
+
+#videoTable tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+/* ✅ Action Buttons */
+.edit-btn {
+    background: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    section {
+        width: 95%;
+        padding: 15px;
+    }
+
+    #videoTable th, #videoTable td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+}

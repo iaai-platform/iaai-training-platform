@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In-Person Aesthetic Training - Luxury Medical Training</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    /* Table Container */
+    .table-container {
+      max-width: 1400px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+      overflow-x: auto;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    
+    /* Breadcrumb Styling */
+    .breadcrumb {
+      margin: 0;
+      padding: 20px 5%;
+      background: linear-gradient(to right, rgba(0, 33, 71, 0.05), rgba(184, 134, 11, 0.05));
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .breadcrumb a {
+      color: #002147;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .breadcrumb a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: #b8860b;
+      transition: width 0.3s ease;
+    }
+    
+    .breadcrumb a:hover::after {
+      width: 100%;
+    }
+    
+    .breadcrumb span {
+      color: #b8860b;
+      font-weight: 600;
+    }
+    
+    /* Hero Section */
+    #hero {
+      background: linear-gradient(135deg, #002147 0%, #001633 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 80px 0;
+    }
+    
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(184, 134, 11, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    
+    #hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(184, 134, 11, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .hero-content h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 20px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .hero-content p {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.8;
+      max-width: 800px;
+      margin: 0 auto;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+    
+    /* Search and Filter Bar */
+    .filter-bar {
+      background: white;
+      padding: 25px;
+      margin: -40px auto 40px;
+      max-width: 1200px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 10;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 12px 45px 12px 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 50px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: #b8860b;
+    }
+    
+    .search-box i {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+    }
+    
+    .filter-dropdown {
+      min-width: 180px;
+    }
+    
+    .filter-dropdown select {
+      width: 100%;
+      padding: 12px 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 50px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .filter-dropdown select:focus {
+      outline: none;
+      border-color: #b8860b;
+    }
+    
+    /* View Toggle Buttons */
+    .view-toggle {
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .view-btn {
+      padding: 12px 30px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 50px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #666;
+    }
+    
+    .view-btn:hover {
+      border-color: #b8860b;
+      color: #b8860b;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .view-btn.active {
+      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+      color: white;
+      border-color: #b8860b;
+    }
+    
+    /* Calendar View Styles */
+    .calendar-container {
+      max-width: 1400px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+      display: none;
+    }
+    
+    .calendar-header {
+      background: white;
+      border-radius: 12px 12px 0 0;
+      padding: 25px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .calendar-nav button {
+      background: #f0f0f0;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .calendar-nav button:hover {
+      background: #b8860b;
+      color: white;
+      transform: scale(1.1);
+    }
+    
+    .calendar-nav h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: #002147;
+      margin: 0;
+      min-width: 200px;
+      text-align: center;
+    }
+    
+    .calendar-view-options {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .calendar-view-btn {
+      padding: 8px 20px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+    
+    .calendar-view-btn.active {
+      background: #002147;
+      color: white;
+      border-color: #002147;
+    }
+    
+    /* Calendar Grid */
+    .calendar-grid {
+      background: white;
+      border-radius: 0 0 12px 12px;
+      padding: 20px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .weekday {
+      text-align: center;
+      font-weight: 600;
+      color: #666;
+      padding: 15px 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+    
+    .calendar-day {
+      min-height: 120px;
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 10px;
+      position: relative;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .calendar-day:hover {
+      background: #fff;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .calendar-day.other-month {
+      background: #fafafa;
+      opacity: 0.5;
+    }
+    
+    .calendar-day.today {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4ff 100%);
+      border-color: #002147;
+    }
+    
+    .calendar-day.has-course {
+      background: linear-gradient(135deg, #fef9f0 0%, #fdf5e8 100%);
+      border-color: #b8860b;
+    }
+    
+    .day-number {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    
+    .day-courses {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    
+    .course-badge {
+      background: #b8860b;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 15px;
+      font-size: 11px;
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .course-badge:hover {
+      background: #9a7209;
+      transform: scale(1.05);
+    }
+    
+    .course-badge.full {
+      background: #dc3545;
+    }
+    
+    .course-badge.limited {
+      background: #ffc107;
+      color: #333;
+    }
+    
+    /* Month View - Responsive Grid */
+    .month-view-grid {
+      display: none;
+    }
+    
+    /* Year View */
+    .year-view-grid {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      padding: 30px;
+    }
+    
+    .year-month {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    }
+    
+    .year-month h4 {
+      font-family: 'Playfair Display', serif;
+      color: #002147;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 18px;
+    }
+    
+    .year-month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+    
+    .year-weekday {
+      text-align: center;
+      font-size: 10px;
+      color: #999;
+      font-weight: 600;
+      padding: 5px 0;
+    }
+    
+    .year-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      border-radius: 4px;
+      background: #f9f9f9;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .year-day:hover {
+      background: #e0e0e0;
+    }
+    
+    .year-day.has-course {
+      background: #b8860b;
+      color: white;
+      font-weight: 600;
+    }
+    
+    .year-day.today {
+      border: 2px solid #002147;
+    }
+    
+    /* Course Details Modal */
+    .course-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    
+    .course-modal.show {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      animation: modalSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 12px 12px 0 0;
+      position: relative;
+    }
+    
+    .modal-close {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+    
+    .modal-body {
+      padding: 30px;
+    }
+    
+    .modal-course-info {
+      display: grid;
+      gap: 20px;
+    }
+    
+    .modal-info-row {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .modal-info-row:last-child {
+      border-bottom: none;
+    }
+    
+    .modal-label {
+      font-weight: 600;
+      color: #666;
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    .modal-btn {
+      flex: 1;
+      padding: 12px 25px;
+      border-radius: 50px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-btn-primary {
+      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+      color: white;
+    }
+    
+    .modal-btn-secondary {
+      background: white;
+      color: #002147;
+      border: 2px solid #002147;
+    }
+    
+    .modal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Modern Table Styling */
+    .courses-table {
+      width: 100%;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .courses-table thead {
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+    }
+    
+    .courses-table th {
+      padding: 20px 15px;
+      text-align: left;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+    }
+    
+    .courses-table th::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(to right, transparent, #b8860b, transparent);
+    }
+    
+    .courses-table tbody tr {
+      transition: all 0.3s ease;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .courses-table tbody tr:hover {
+      background-color: #fefdfb;
+      transform: scale(1.01);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .courses-table td {
+      padding: 20px 15px;
+      font-size: 14px;
+    }
+    
+    /* Course Title Cell */
+    .course-title {
+      font-weight: 600;
+      color: #002147;
+    }
+    
+    /* Date Badge */
+    .date-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #f0f7ff;
+      color: #002147;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    /* Price Badge */
+    .price-badge {
+      font-weight: 700;
+      color: #b8860b;
+      font-size: 16px;
+    }
+    
+    /* Status Badges */
+    .status-badge {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+    }
+    
+    .status-open {
+      background: #d4f4dd;
+      color: #2e7d3e;
+    }
+    
+    .status-limited {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-closed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    /* Seats Count Badge */
+    .seats-count {
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    
+    .seats-good {
+      color: #2e7d3e;
+      background: #d4f4dd;
+    }
+    
+    .seats-warning {
+      color: #856404;
+      background: #fff3cd;
+    }
+    
+    .seats-danger {
+      color: #721c24;
+      background: #f8d7da;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-icon::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn-icon:hover::before {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .btn-details {
+      background: #002147;
+      color: white;
+    }
+    
+    .btn-details:hover {
+      background: #003366;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 33, 71, 0.3);
+    }
+    
+    .btn-wishlist {
+      background: #fff;
+      color: #e74c3c;
+      border: 2px solid #e74c3c;
+    }
+    
+    .btn-wishlist:hover {
+      background: #e74c3c;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+    
+    .btn-cart {
+      background: #b8860b;
+      color: white;
+    }
+    
+    .btn-cart:hover {
+      background: #9a7209;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
+    }
+    
+    /* Tooltips */
+    .tooltip {
+      position: relative;
+    }
+    
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      margin-bottom: 5px;
+    }
+    
+    .tooltip:hover::after {
+      opacity: 1;
+    }
+    
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: -400px;
+      max-width: 400px;
+      padding: 20px 25px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+    }
+    
+    .notification.show {
+      right: 20px;
+    }
+    
+    .notification-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .notification.success .notification-icon {
+      background: #d4f4dd;
+      color: #2e7d3e;
+    }
+    
+    .notification.error .notification-icon {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .notification.warning .notification-icon {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .notification-content h4 {
+      margin: 0 0 5px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .notification-content p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    /* Loading States */
+    .btn-loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    .btn-loading i {
+      animation: spin 1s linear infinite;
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero-content h1 {
+        font-size: 32px;
+      }
+      
+      .filter-bar {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .search-box, .filter-dropdown {
+        width: 100%;
+      }
+      
+      .table-container {
+        padding: 0 10px;
+      }
+      
+      .courses-table {
+        font-size: 12px;
+      }
+      
+      .courses-table th,
+      .courses-table td {
+        padding: 12px 8px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+      }
+      
+      .notification.show {
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+  <!-- Enhanced Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="/"><i class="fas fa-home"></i> Home</a> 
+    <i class="fas fa-chevron-right" style="margin: 0 10px; color: #999; font-size: 12px;"></i>
+    <a href="/training-programs">Training Programs</a> 
+    <i class="fas fa-chevron-right" style="margin: 0 10px; color: #999; font-size: 12px;"></i>
+    <span>In-Person Aesthetic Training</span>
+  </nav>
+
+  <!-- Enhanced Hero Section -->
+  <section id="hero">
+    <div class="hero-content">
+      <h1>Exclusive In-Person Aesthetic Training</h1>
+      <p>Elevate your practice with our premium hands-on training programs. Learn from world-renowned experts in state-of-the-art facilities, mastering the latest techniques in aesthetic medicine.</p>
+    </div>
+  </section>
+
+  <!-- Search and Filter Bar -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <input type="text" id="courseSearch" placeholder="Search courses by name, location, or instructor...">
+      <i class="fas fa-search"></i>
+    </div>
+    <div class="filter-dropdown">
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option value="Open to Register">Open</option>
+        <option value="Limited Seats">Limited Seats</option>
+        <option value="Closed">Closed</option>
+      </select>
+    </div>
+    <div class="filter-dropdown">
+      <select id="dateFilter">
+        <option value="">All Dates</option>
+        <option value="upcoming">Upcoming</option>
+        <option value="this-month">This Month</option>
+        <option value="next-month">Next Month</option>
+      </select>
+    </div>
+    <div class="filter-dropdown">
+      <select id="sortBy">
+        <option value="">Sort By</option>
+        <option value="date-asc">Date (Earliest First)</option>
+        <option value="date-desc">Date (Latest First)</option>
+        <option value="price-asc">Price (Low to High)</option>
+        <option value="price-desc">Price (High to Low)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- View Toggle Buttons -->
+  <div class="view-toggle">
+    <button class="view-btn active" id="tableViewBtn">
+      <i class="fas fa-list"></i> List View
+    </button>
+    <button class="view-btn" id="calendarViewBtn">
+      <i class="fas fa-calendar-alt"></i> Calendar View
+    </button>
+  </div>
+
+  <!-- Enhanced Courses Table -->
+  <div class="table-container" id="tableView">
+    <table class="courses-table" id="coursesTable">
+      <thead>
+        <tr>
+          <th style="width: 5%">#</th>
+          <th style="width: 10%">Code</th>
+          <th style="width: 20%">Course Title</th>
+          <th style="width: 12%">Start Date</th>
+          <th style="width: 12%">End Date</th>
+          <th style="width: 10%">Duration</th>
+          <th style="width: 8%">Price</th>
+          <th style="width: 10%">Venue</th>
+          <th style="width: 8%">Seats</th>
+          <th style="width: 8%">Status</th>
+          <th style="width: 15%">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% courses.forEach((course, index) => { %>
+          <tr data-course-id="<%= course._id %>" 
+              data-status="<%= course.basic?.status || 'draft' %>"
+              data-date="<%= course.schedule?.startDate %>"
+              data-price="<%= course.enrollment?.price || 0 %>">
+            <td><%= index + 1 %></td>
+            <td><strong><%= course.basic?.courseCode || 'N/A' %></strong></td>
+            <td class="course-title">
+              <%= course.basic?.title || 'Untitled Course' %>
+              <% if (course.instructorNames) { %>
+                <br><small style="color: #666;">Instructor: <%= course.instructorNames %></small>
+              <% } %>
+            </td>
+            <td>
+              <span class="date-badge">
+                <i class="far fa-calendar"></i> 
+                <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %>
+              </span>
+            </td>
+            <td>
+              <% if (course.schedule?.endDate) { %>
+                <span class="date-badge">
+                  <%= new Date(course.schedule.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                </span>
+              <% } else { %>
+                <span style="color: #999;">-</span>
+              <% } %>
+            </td>
+            <td><%= course.schedule?.duration || 'TBD' %></td>
+            <td class="price-badge">
+              $<%= course.enrollment?.price || 0 %>
+              <% if (course.enrollment?.earlyBirdPrice) { %>
+                <br><small style="color: #28a745;">Early: $<%= course.enrollment.earlyBirdPrice %></small>
+              <% } %>
+            </td>
+            <td>
+              <i class="fas fa-map-marker-alt" style="color: #b8860b;"></i> 
+              <%= course.venue?.name || 'TBD' %>
+            </td>
+            <td>
+              <span class="seats-count <%= course.enrollment?.seatsAvailable > 5 ? 'seats-good' : course.enrollment?.seatsAvailable > 0 ? 'seats-warning' : 'seats-danger' %>">
+                <%= course.enrollment?.seatsAvailable || 0 %>
+              </span>
+            </td>
+            <td>
+              <% 
+                const status = course.basic?.status || 'draft';
+                let statusClass = 'status-closed';
+                let statusText = status.charAt(0).toUpperCase() + status.slice(1);
+                
+                if (status === 'open' && course.enrollment?.seatsAvailable > 5) {
+                  statusClass = 'status-open';
+                  statusText = 'Open';
+                } else if (status === 'open' && course.enrollment?.seatsAvailable <= 5 && course.enrollment?.seatsAvailable > 0) {
+                  statusClass = 'status-limited';
+                  statusText = 'Limited';
+                } else if (status === 'full' || course.enrollment?.seatsAvailable <= 0) {
+                  statusClass = 'status-closed';
+                  statusText = 'Full';
+                }
+              %>
+              <span class="status-badge <%= statusClass %>"><%= statusText %></span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon btn-details tooltip" data-tooltip="View Details" 
+                        onclick="window.location.href='/in-person/courses/<%= course._id %>'">
+                  <i class="fas fa-info-circle"></i>
+                </button>
+                
+                <% if (user) { %>
+                  <button class="btn-icon btn-wishlist tooltip add-to-wishlist-btn" 
+                          data-tooltip="Add to Wishlist"
+                          data-course-id="<%= course._id %>" 
+                          data-course-type="InPersonAestheticTraining"
+                          data-price="<%= course.enrollment?.price || 0 %>"
+                          data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                          data-course-title="<%= course.basic?.title || 'Untitled Course' %>">
+                    <i class="fas fa-heart"></i>
+                  </button>
+                  
+                  <button class="btn-icon btn-cart tooltip add-to-cart-btn" 
+                          data-tooltip="Add to Cart"
+                          data-course-id="<%= course._id %>" 
+                          data-course-type="InPersonAestheticTraining"
+                          data-price="<%= course.enrollment?.price || 0 %>"
+                          data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                          data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
+                          <%= (course.enrollment?.seatsAvailable <= 0 || status !== 'open') ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' %>>
+                    <i class="fas fa-shopping-cart"></i>
+                  </button>
+                <% } else { %>
+                  <button class="btn-icon btn-wishlist tooltip" 
+                          data-tooltip="Login to add to wishlist"
+                          onclick="showLoginRequired()">
+                    <i class="fas fa-heart"></i>
+                  </button>
+                  
+                  <button class="btn-icon btn-cart tooltip" 
+                          data-tooltip="Login to add to cart"
+                          onclick="showLoginRequired()">
+                    <i class="fas fa-shopping-cart"></i>
+                  </button>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Calendar View -->
+  <div class="calendar-container" id="calendarView">
+    <div class="calendar-header">
+      <div class="calendar-nav">
+        <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+        <h3 id="currentMonth">December 2024</h3>
+        <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div class="calendar-view-options">
+        <button class="calendar-view-btn active" id="monthViewBtn">Month</button>
+        <button class="calendar-view-btn" id="yearViewBtn">Year</button>
+      </div>
+    </div>
+    
+    <!-- Month View -->
+    <div class="calendar-grid month-view-grid" id="monthView">
+      <div class="calendar-weekdays">
+        <div class="weekday">Sun</div>
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+      </div>
+      <div class="calendar-days" id="calendarDays">
+        <!-- Calendar days will be generated by JavaScript -->
+      </div>
+    </div>
+    
+    <!-- Year View -->
+    <div class="year-view-grid" id="yearView">
+      <!-- Year view months will be generated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Course Details Modal -->
+  <div class="course-modal" id="courseModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalCourseTitle">Course Title</h3>
+        <button class="modal-close" onclick="closeModal()">
+          <i class="fas fa-times" style="color: white;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-course-info" id="modalCourseInfo">
+          <!-- Course details will be populated by JavaScript -->
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" id="modalViewDetails">
+            <i class="fas fa-eye"></i> View Full Details
+          </button>
+          <% if (user) { %>
+            <button class="modal-btn modal-btn-secondary" id="modalAddToCart">
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+          <% } else { %>
+            <button class="modal-btn modal-btn-secondary" onclick="showLoginRequired()">
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Container -->
+  <div id="notificationContainer"></div>
+
+  <script>
+    // Enhanced notification system
+    function showNotification(title, message, type = 'success') {
+      const container = document.getElementById('notificationContainer');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        warning: 'fa-exclamation-triangle'
+      };
+      
+      notification.innerHTML = `
+        <div class="notification-icon">
+          <i class="fas ${iconMap[type]}"></i>
+        </div>
+        <div class="notification-content">
+          <h4>${title}</h4>
+          <p>${message}</p>
+        </div>
+      `;
+      
+      container.appendChild(notification);
+      
+      // Show notification
+      setTimeout(() => notification.classList.add('show'), 10);
+      
+      // Auto remove
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 500);
+      }, 5000);
+    }
+
+    // Login required handler
+    function showLoginRequired() {
+      showNotification('Authentication Required', 'Please log in to continue', 'warning');
+      setTimeout(() => window.location.href = '/login', 2000);
+    }
+
+    // Enhanced button loading state
+    function setButtonLoading(button, loading) {
+      if (loading) {
+        button.classList.add('btn-loading');
+        const icon = button.querySelector('i');
+        if (icon) {
+          icon.className = 'fas fa-spinner';
+        }
+      } else {
+        button.classList.remove('btn-loading');
+        const icon = button.querySelector('i');
+        if (icon) {
+          icon.className = button.classList.contains('btn-wishlist') ? 'fas fa-heart' : 'fas fa-shopping-cart';
+        }
+      }
+    }
+
+    // This same code works on all three course pages
+// (in-person-aesthetic-training.ejs, online-live-training.ejs, self-paced-online-training.ejs)
+
+// Add to Cart
+document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+  button.addEventListener('click', async function(e) {
+    e.preventDefault();
+    
+    const courseId = this.getAttribute('data-course-id');
+    const courseType = this.getAttribute('data-course-type');
+    const courseTitle = this.getAttribute('data-course-title');
+    
+    try {
+      const response = await fetch('/add-to-cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId, courseType })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+      } else {
+        showNotification('Error', result.message, 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showNotification('Error', 'Failed to add to cart', 'error');
+    }
+  });
+});
+
+// Add to Wishlist
+document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
+  button.addEventListener('click', async function(e) {
+    e.preventDefault();
+    
+    const courseId = this.getAttribute('data-course-id');
+    const courseType = this.getAttribute('data-course-type');
+    const courseTitle = this.getAttribute('data-course-title');
+    
+    try {
+      const response = await fetch('/add-to-wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId, courseType })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
+        
+        // Optional: Update button appearance
+        this.style.color = '#e74c3c';
+        this.querySelector('i').classList.add('fas');
+        this.querySelector('i').classList.remove('far');
+      } else {
+        showNotification('Error', result.message, 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showNotification('Error', 'Failed to add to wishlist', 'error');
+    }
+  });
+});
+
+
+
+
+    // Search functionality
+    const searchInput = document.getElementById('courseSearch');
+    searchInput.addEventListener('input', filterCourses);
+
+    // Filter functionality
+    document.getElementById('statusFilter').addEventListener('change', filterCourses);
+    document.getElementById('dateFilter').addEventListener('change', filterCourses);
+    document.getElementById('sortBy').addEventListener('change', sortCourses);
+
+    function filterCourses() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const dateFilter = document.getElementById('dateFilter').value;
+      const rows = document.querySelectorAll('#coursesTable tbody tr');
+      
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const status = row.getAttribute('data-status');
+        const courseDate = new Date(row.getAttribute('data-date'));
+        const today = new Date();
+        
+        let showRow = true;
+        
+        // Search filter
+        if (searchTerm && !text.includes(searchTerm)) {
+          showRow = false;
+        }
+        
+        // Status filter - updated to match the model structure
+        if (statusFilter) {
+          if (statusFilter === 'Open to Register' && status !== 'open') {
+            showRow = false;
+          } else if (statusFilter === 'Limited Seats') {
+            // Check if row has limited seats badge
+            const statusBadge = row.querySelector('.status-badge');
+            if (!statusBadge || !statusBadge.textContent.includes('Limited')) {
+              showRow = false;
+            }
+          } else if (statusFilter === 'Closed' && (status !== 'full' && status !== 'closed' && status !== 'cancelled')) {
+            showRow = false;
+          }
+        }
+        
+        // Date filter
+        if (dateFilter && !isNaN(courseDate)) {
+          const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+          const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+          const nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+          const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+          
+          switch(dateFilter) {
+            case 'upcoming':
+              if (courseDate < today) showRow = false;
+              break;
+            case 'this-month':
+              if (courseDate < monthStart || courseDate > monthEnd) showRow = false;
+              break;
+            case 'next-month':
+              if (courseDate < nextMonthStart || courseDate > nextMonthEnd) showRow = false;
+              break;
+          }
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+      });
+    }
+
+    function sortCourses() {
+      const sortBy = document.getElementById('sortBy').value;
+      const tbody = document.querySelector('#coursesTable tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      
+      rows.sort((a, b) => {
+        switch(sortBy) {
+          case 'date-asc':
+            return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+          case 'date-desc':
+            return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+          case 'price-asc':
+            return parseFloat(a.getAttribute('data-price')) - parseFloat(b.getAttribute('data-price'));
+          case 'price-desc':
+            return parseFloat(b.getAttribute('data-price')) - parseFloat(a.getAttribute('data-price'));
+          default:
+            return 0;
+        }
+      });
+      
+      // Re-append sorted rows
+      rows.forEach(row => tbody.appendChild(row));
+      
+      // Update row numbers
+      rows.forEach((row, index) => {
+        row.querySelector('td:first-child').textContent = index + 1;
+      });
+    }
+
+    // Initialize page
+    console.log('📊 Page loaded with <%= courses.length %> courses');
+    console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
+
+    // Calendar functionality
+    const courses = <%- JSON.stringify(courses) %>;
+    let currentDate = new Date();
+    let currentView = 'month';
+    
+    // View toggle functionality
+    document.getElementById('tableViewBtn').addEventListener('click', function() {
+      document.getElementById('tableView').style.display = 'block';
+      document.getElementById('calendarView').style.display = 'none';
+      document.getElementById('tableViewBtn').classList.add('active');
+      document.getElementById('calendarViewBtn').classList.remove('active');
+    });
+    
+    document.getElementById('calendarViewBtn').addEventListener('click', function() {
+      document.getElementById('tableView').style.display = 'none';
+      document.getElementById('calendarView').style.display = 'block';
+      document.getElementById('calendarViewBtn').classList.add('active');
+      document.getElementById('tableViewBtn').classList.remove('active');
+      if (currentView === 'month') {
+        renderMonthView();
+      } else {
+        renderYearView();
+      }
+    });
+    
+    // Calendar view toggle
+    document.getElementById('monthViewBtn').addEventListener('click', function() {
+      currentView = 'month';
+      document.getElementById('monthViewBtn').classList.add('active');
+      document.getElementById('yearViewBtn').classList.remove('active');
+      document.getElementById('monthView').style.display = 'block';
+      document.getElementById('yearView').style.display = 'none';
+      renderMonthView();
+    });
+    
+    document.getElementById('yearViewBtn').addEventListener('click', function() {
+      currentView = 'year';
+      document.getElementById('yearViewBtn').classList.add('active');
+      document.getElementById('monthViewBtn').classList.remove('active');
+      document.getElementById('monthView').style.display = 'none';
+      document.getElementById('yearView').style.display = 'grid';
+      renderYearView();
+    });
+    
+    // Navigation buttons
+    document.getElementById('prevBtn').addEventListener('click', function() {
+      if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderMonthView();
+      } else {
+        currentDate.setFullYear(currentDate.getFullYear() - 1);
+        renderYearView();
+      }
+    });
+    
+    document.getElementById('nextBtn').addEventListener('click', function() {
+      if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderMonthView();
+      } else {
+        currentDate.setFullYear(currentDate.getFullYear() + 1);
+        renderYearView();
+      }
+    });
+    
+    // Render month view
+    function renderMonthView() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+      const prevLastDate = new Date(year, month, 0).getDate();
+      
+      // Update header
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                         'July', 'August', 'September', 'October', 'November', 'December'];
+      document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+      
+      // Clear calendar
+      const calendarDays = document.getElementById('calendarDays');
+      calendarDays.innerHTML = '';
+      
+      // Previous month days
+      for (let i = firstDay; i > 0; i--) {
+        const dayDiv = createDayElement(prevLastDate - i + 1, true, new Date(year, month - 1, prevLastDate - i + 1));
+        calendarDays.appendChild(dayDiv);
+      }
+      
+      // Current month days
+      for (let day = 1; day <= lastDate; day++) {
+        const dayDiv = createDayElement(day, false, new Date(year, month, day));
+        calendarDays.appendChild(dayDiv);
+      }
+      
+      // Next month days
+      const remainingDays = 42 - (firstDay + lastDate);
+      for (let day = 1; day <= remainingDays; day++) {
+        const dayDiv = createDayElement(day, true, new Date(year, month + 1, day));
+        calendarDays.appendChild(dayDiv);
+      }
+    }
+    
+    // Create day element
+    function createDayElement(day, isOtherMonth, date) {
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'calendar-day';
+      if (isOtherMonth) dayDiv.classList.add('other-month');
+      
+      // Check if today
+      const today = new Date();
+      if (date.toDateString() === today.toDateString()) {
+        dayDiv.classList.add('today');
+      }
+      
+      // Day number
+      const dayNumber = document.createElement('div');
+      dayNumber.className = 'day-number';
+      dayNumber.textContent = day;
+      dayDiv.appendChild(dayNumber);
+      
+      // Check for courses on this date
+      const dayCoursesDiv = document.createElement('div');
+      dayCoursesDiv.className = 'day-courses';
+      
+      const dayCourses = courses.filter(course => {
+        const courseDate = new Date(course.schedule?.startDate);
+        return courseDate.toDateString() === date.toDateString();
+      });
+      
+      if (dayCourses.length > 0) {
+        dayDiv.classList.add('has-course');
+        dayCourses.forEach(course => {
+          const courseBadge = document.createElement('div');
+          courseBadge.className = 'course-badge';
+          
+          if (course.enrollment?.seatsAvailable <= 0) {
+            courseBadge.classList.add('full');
+          } else if (course.enrollment?.seatsAvailable <= 5) {
+            courseBadge.classList.add('limited');
+          }
+          
+          courseBadge.textContent = course.basic?.courseCode || 'N/A';
+          courseBadge.onclick = () => showCourseModal(course);
+          dayCoursesDiv.appendChild(courseBadge);
+        });
+      }
+      
+      dayDiv.appendChild(dayCoursesDiv);
+      return dayDiv;
+    }
+    
+    // Render year view
+    function renderYearView() {
+      const year = currentDate.getFullYear();
+      document.getElementById('currentMonth').textContent = year;
+      
+      const yearViewGrid = document.getElementById('yearView');
+      yearViewGrid.innerHTML = '';
+      
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                         'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      for (let month = 0; month < 12; month++) {
+        const monthDiv = document.createElement('div');
+        monthDiv.className = 'year-month';
+        
+        const monthTitle = document.createElement('h4');
+        monthTitle.textContent = monthNames[month];
+        monthDiv.appendChild(monthTitle);
+        
+        const monthGrid = document.createElement('div');
+        monthGrid.className = 'year-month-grid';
+        
+        // Add weekday headers
+        const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        weekdays.forEach(day => {
+          const weekdayDiv = document.createElement('div');
+          weekdayDiv.className = 'year-weekday';
+          weekdayDiv.textContent = day;
+          monthGrid.appendChild(weekdayDiv);
+        });
+        
+        // Add days
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+        
+        // Empty cells for alignment
+        for (let i = 0; i < firstDay; i++) {
+          monthGrid.appendChild(document.createElement('div'));
+        }
+        
+        // Days of the month
+        for (let day = 1; day <= lastDate; day++) {
+          const dayDiv = document.createElement('div');
+          dayDiv.className = 'year-day';
+          dayDiv.textContent = day;
+          
+          const date = new Date(year, month, day);
+          const today = new Date();
+          if (date.toDateString() === today.toDateString()) {
+            dayDiv.classList.add('today');
+          }
+          
+          // Check for courses
+          const hasCourse = courses.some(course => {
+            const courseDate = new Date(course.schedule?.startDate);
+            return courseDate.toDateString() === date.toDateString();
+          });
+          
+          if (hasCourse) {
+            dayDiv.classList.add('has-course');
+            dayDiv.onclick = () => {
+              currentDate = new Date(year, month, day);
+              currentView = 'month';
+              document.getElementById('monthViewBtn').click();
+            };
+          }
+          
+          monthGrid.appendChild(dayDiv);
+        }
+        
+        monthDiv.appendChild(monthGrid);
+        yearViewGrid.appendChild(monthDiv);
+      }
+    }
+    
+    // Show course modal
+    function showCourseModal(course) {
+      const modal = document.getElementById('courseModal');
+      document.getElementById('modalCourseTitle').textContent = course.title;
+      
+      const courseInfo = document.getElementById('modalCourseInfo');
+      courseInfo.innerHTML = `
+        <div class="modal-info-row">
+          <div class="modal-label">Course Code</div>
+          <div>${course.courseCode}</div>
+        </div>
+        <div class="modal-info-row">
+          <div class="modal-label">Date</div>
+          <div>${new Date(course.startDate).toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}</div>
+        </div>
+        <div class="modal-info-row">
+          <div class="modal-label">Duration</div>
+          <div>${course.duration || 'TBD'}</div>
+        </div>
+        <div class="modal-info-row">
+          <div class="modal-label">Location</div>
+          <div>${course.location}</div>
+        </div>
+        <div class="modal-info-row">
+          <div class="modal-label">Instructor</div>
+          <div>${course.instructor}</div>
+        </div>
+        <div class="modal-info-row">
+          <div class="modal-label">Price</div>
+          <div style="font-weight: 700; color: #b8860b;">${course.price} USD</div>
+        </div>
+        <div class="modal-info-row">
+          <div class="modal-label">Seats Available</div>
+          <div>${course.seatsAvailable} / ${course.maxEnrollment || 20}</div>
+        </div>
+      `;
+      
+      // Update modal buttons
+      document.getElementById('modalViewDetails').onclick = () => {
+        window.location.href = `/in-person/courses/${course._id}`;
+      };
+      
+      <% if (user) { %>
+      const modalAddToCart = document.getElementById('modalAddToCart');
+      if (modalAddToCart) {
+        modalAddToCart.onclick = async () => {
+          const courseData = {
+            courseId: course._id,
+            courseType: 'InPersonAestheticTraining',
+            price: course.price,
+            courseCode: course.courseCode
+          };
+          
+          try {
+            const response = await fetch('/add-to-cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(courseData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              showNotification('Added to Cart', `"${course.title}" has been added to your cart`, 'success');
+              closeModal();
+            } else {
+              showNotification('Unable to Add', result.message, 'warning');
+            }
+          } catch (err) {
+            console.error('Cart error:', err);
+            showNotification('Error', 'Failed to add course to cart', 'error');
+          }
+        };
+      }
+      <% } %>
+      
+      modal.classList.add('show');
+    }
+    
+    // Close modal
+    function closeModal() {
+      document.getElementById('courseModal').classList.remove('show');
+    }
+    
+    // Click outside modal to close
+    document.getElementById('courseModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+    
+    // Initialize month view
+    document.getElementById('monthView').style.display = 'block';
+    renderMonthView();
+  </script>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

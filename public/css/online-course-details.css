@@ -1,0 +1,455 @@
+/* ============================================================
+   ✅ ONLINE COURSE DETAILS PAGE STYLING
+   Based on provided CSS example
+=========================================================== */
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* ============================================================
+   ✅ Breadcrumb Navigation (Consistent Across Pages)
+  =========================================================== */
+  .breadcrumb {
+    margin: 20px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  .breadcrumb a {
+    text-decoration: none;
+    color: #002147;
+    font-weight: bold;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  .breadcrumb span {
+    color: #666;
+    font-weight: normal;
+  }
+  
+  /* ============================================================
+   ✅ HERO SECTION
+  =========================================================== */
+  #hero {
+    background: url('/images/image15.jpeg') no-repeat center center/cover;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    padding: 40px 20px;
+    position: relative;
+  }
+  
+  /* ✅ Dark overlay for better text readability */
+  #hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+  }
+  
+  /* ✅ Text stays above the overlay */
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    font-family: 'Playfair Display', serif;
+  }
+  
+  .hero-content h1 {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .hero-content p {
+    font-size: 18px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  /* ============================================================
+   ✅ COURSE DETAILS WRAPPER
+  =========================================================== */
+  .course-details-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* ============================================================
+   ✅ TABLE STYLING FOR COURSE DETAILS
+  =========================================================== */
+  .course-details-table {
+    width: 100%;
+    margin: 30px auto;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* ✅ Table Header */
+  .course-details-table thead th {
+    padding: 15px;
+    font-size: 18px;
+    text-align: left;
+    background-color: #002147;
+    color: white;
+    border-bottom: 3px solid #b8860b;
+  }
+  
+  /* ✅ Table Rows */
+  .course-details-table tbody tr {
+    border-bottom: 1px solid #ddd;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  .course-details-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .course-details-table tbody tr:hover {
+    background-color: #fffcf0;
+  }
+  
+  /* ✅ Table Data */
+  .course-details-table td {
+    padding: 15px;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  /* ✅ Label Cells */
+  .label-cell {
+    width: 30%;
+    font-weight: bold;
+    color: #002147;
+    background-color: #f5f5f5;
+  }
+  
+  /* ✅ Module Styling */
+  .module-header-row {
+    background-color: #f0f0f0;
+    font-weight: bold;
+  }
+  
+  .module-number-cell {
+    text-align: center;
+    font-weight: bold;
+    color: #b8860b;
+    font-size: 18px;
+  }
+  
+  .module-description {
+    color: #666;
+    font-style: italic;
+    display: block;
+    margin-top: 5px;
+  }
+  
+  /* ✅ Overview Content */
+  .overview-content {
+    padding: 25px !important;
+  }
+  
+  .overview-content h3 {
+    color: #002147;
+    margin-bottom: 15px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .overview-content h3 i {
+    color: #b8860b;
+  }
+  
+  .overview-content p {
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .objectives-list {
+    margin: 0;
+    padding-left: 25px;
+  }
+  
+  .objectives-list li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+    color: #333;
+  }
+  
+  /* ✅ Technical Requirements */
+  .tech-requirements {
+    margin-top: 15px;
+    padding-left: 25px;
+  }
+  
+  .tech-requirements li {
+    margin-bottom: 8px;
+    color: #666;
+  }
+  
+  /* ✅ Status Badge */
+  .status-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .status-badge.status-open {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .status-badge.status-closed {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  /* ✅ Price Styling */
+  .price-cell {
+    font-size: 18px;
+  }
+  
+  .price-amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: #002147;
+  }
+  
+  .early-bird {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  /* ✅ Seats Count */
+  .seats-count {
+    font-weight: bold;
+    font-size: 16px;
+    color: #666;
+  }
+  
+  /* ✅ Course Link */
+  .course-link {
+    color: #b8860b;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+  
+  .course-link:hover {
+    color: #8a6d0b;
+    text-decoration: underline;
+  }
+  
+  .course-link i {
+    margin-right: 5px;
+  }
+  
+  /* ✅ Course Status Message */
+  .course-status-message {
+    background-color: #f0f0f0;
+    border-left: 4px solid #b8860b;
+    padding: 15px;
+    margin: 20px 0;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .course-status-message i {
+    color: #b8860b;
+    margin-right: 10px;
+  }
+  
+  /* ============================================================
+   ✅ CTA BUTTONS
+  =========================================================== */
+  .cta-btn {
+    background-color: #b8860b;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .cta-btn:hover:not(:disabled) {
+    background-color: #8a6d0b;
+  }
+  
+  .cta-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .cta-btn i {
+    margin-right: 5px;
+  }
+  
+  /* ============================================================
+   ✅ BUTTON GROUP
+  =========================================================== */
+  .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+  }
+  
+  .checkout-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    border-radius: 0;
+    text-decoration: none;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .checkout-btn:hover:not(:disabled) {
+    background-color: #1d7a34;
+  }
+  
+  .wishlist-btn {
+    background-color: #b8860b;
+    color: white;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    border-radius: 0;
+    text-decoration: none;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .wishlist-btn:hover:not(:disabled) {
+    background-color: #8a6d0b;
+  }
+  
+  .wishlist-btn.wishlisted {
+    background-color: #d9534f;
+  }
+  
+  .wishlist-btn.wishlisted:hover {
+    background-color: #b52b27;
+  }
+  
+  /* ============================================================
+   ✅ LOADING STATE
+  =========================================================== */
+  .btn-loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+  .btn-loading::after {
+    content: " ⏳";
+  }
+  
+  /* ============================================================
+   ✅ RESPONSIVE DESIGN (For Mobile View)
+  =========================================================== */
+  @media (max-width: 768px) {
+    .course-details-table {
+      width: 100%;
+      font-size: 14px;
+    }
+  
+    .course-details-table th, 
+    .course-details-table td {
+      padding: 10px;
+    }
+  
+    .label-cell {
+      width: 40%;
+    }
+  
+    .hero-content h1 {
+      font-size: 28px;
+    }
+  
+    .hero-content p {
+      font-size: 16px;
+    }
+  
+    .button-group {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .checkout-btn, 
+    .wishlist-btn {
+      width: 80%;
+      max-width: 300px;
+    }
+  
+    .course-status-message {
+      margin: 15px 0;
+      font-size: 14px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .breadcrumb {
+      font-size: 14px;
+      margin: 10px;
+    }
+  
+    .course-details-wrapper {
+      padding: 10px;
+    }
+  
+    .course-details-table {
+      margin: 20px 0;
+    }
+  
+    .price-amount {
+      font-size: 20px;
+    }
+  
+    .module-number-cell {
+      font-size: 16px;
+    }
+  
+    .overview-content h3 {
+      font-size: 18px;
+    }
+  
+    .tech-requirements {
+      padding-left: 20px;
+    }
+  }

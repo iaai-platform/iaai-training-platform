@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Learning Dashboard - IAAI</title>
+  <link rel="stylesheet" href="/css/my-courses.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>My Learning Dashboard</h1>
+        <p class="header-subtitle">Welcome back, <%= user.firstName %>! Continue your learning journey.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <i class="fas fa-book"></i>
+      </div>
+      <div class="stat-number"><%= stats.totalCourses %></div>
+      <div class="stat-label">Total Courses</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon progress">
+        <i class="fas fa-spinner"></i>
+      </div>
+      <div class="stat-number"><%= stats.inProgressCourses %></div>
+      <div class="stat-label">In Progress</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon completed">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-number"><%= stats.completedCourses %></div>
+      <div class="stat-label">Completed</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon upcoming">
+        <i class="fas fa-calendar-alt"></i>
+      </div>
+      <div class="stat-number"><%= stats.upcomingCourses %></div>
+      <div class="stat-label">Upcoming</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon certificates">
+        <i class="fas fa-certificate"></i>
+      </div>
+      <div class="stat-number"><%= stats.certificatesEarned %></div>
+      <div class="stat-label">Certificates</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-container">
+    <select class="filter-select" id="courseTypeFilter">
+      <option value="all">All Course Types</option>
+      <option value="In-Person">In-Person Training</option>
+      <option value="Online-Live">Live Online Training</option>
+      <option value="Self-Paced">Self-Paced Training</option>
+    </select>
+
+    <div class="search-box">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-input" id="courseSearch" placeholder="Search courses...">
+    </div>
+  </div>
+
+  <!-- Course Tabs -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button class="tab active" data-tab="all">
+        All Courses <span class="tab-badge"><%= registeredCourses.length %></span>
+      </button>
+      <button class="tab" data-tab="upcoming">
+        Upcoming <span class="tab-badge"><%= upcomingCourses.length %></span>
+      </button>
+      <button class="tab" data-tab="in-progress">
+        In Progress <span class="tab-badge"><%= inProgressCourses.length %></span>
+      </button>
+      <button class="tab" data-tab="completed">
+        Completed <span class="tab-badge"><%= completedCourses.length %></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Course Content -->
+  <div class="courses-container">
+    <!-- All Courses Tab -->
+    <div class="tab-content active" id="all">
+      <% if (registeredCourses && registeredCourses.length > 0) { %>
+        <div class="courses-grid">
+          <% registeredCourses.forEach(course => { %>
+            <%- include('partials/course-card', { course }) %>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <%- include('partials/empty-state', { 
+          icon: 'fa-book-open',
+          title: 'No Courses Yet',
+          message: 'Start your learning journey by enrolling in a course!'
+        }) %>
+      <% } %>
+    </div>
+
+    <!-- Upcoming Courses Tab -->
+    <div class="tab-content" id="upcoming">
+      <% if (upcomingCourses && upcomingCourses.length > 0) { %>
+        <div class="courses-grid">
+          <% upcomingCourses.forEach(course => { %>
+            <%- include('partials/course-card', { course }) %>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <%- include('partials/empty-state', { 
+          icon: 'fa-calendar-alt',
+          title: 'No Upcoming Courses',
+          message: 'All your courses have already started or are self-paced.'
+        }) %>
+      <% } %>
+    </div>
+
+    <!-- In Progress Tab -->
+    <div class="tab-content" id="in-progress">
+      <% if (inProgressCourses && inProgressCourses.length > 0) { %>
+        <div class="courses-grid">
+          <% inProgressCourses.forEach(course => { %>
+            <%- include('partials/course-card', { course }) %>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <%- include('partials/empty-state', { 
+          icon: 'fa-spinner',
+          title: 'No Courses In Progress',
+          message: 'Start learning to see your progress here!'
+        }) %>
+      <% } %>
+    </div>
+
+    <!-- Completed Tab -->
+    <div class="tab-content" id="completed">
+      <% if (completedCourses && completedCourses.length > 0) { %>
+        <div class="courses-grid">
+          <% completedCourses.forEach(course => { %>
+            <%- include('partials/course-card', { course }) %>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <%- include('partials/empty-state', { 
+          icon: 'fa-trophy',
+          title: 'No Completed Courses Yet',
+          message: 'Complete your first course to see it here!'
+        }) %>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    // Tab Switching
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab;
+        
+        // Update active tab
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Update active content
+        tabContents.forEach(content => {
+          content.classList.remove('active');
+          if (content.id === targetTab) {
+            content.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Search Functionality
+    const searchInput = document.getElementById('courseSearch');
+    const courseTypeFilter = document.getElementById('courseTypeFilter');
+
+    function filterCourses() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const selectedType = courseTypeFilter.value;
+      const activeTab = document.querySelector('.tab-content.active');
+      const courseCards = activeTab.querySelectorAll('.course-card');
+
+      courseCards.forEach(card => {
+        const title = card.querySelector('.course-title').textContent.toLowerCase();
+        const code = card.querySelector('.course-code').textContent.toLowerCase();
+        const type = card.dataset.courseType;
+        
+        const matchesSearch = title.includes(searchTerm) || code.includes(searchTerm);
+        const matchesType = selectedType === 'all' || type === selectedType;
+        
+        card.style.display = matchesSearch && matchesType ? 'flex' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', filterCourses);
+    courseTypeFilter.addEventListener('change', filterCourses);
+
+    // Progress Animation
+    document.addEventListener('DOMContentLoaded', () => {
+      const progressBars = document.querySelectorAll('.progress-fill');
+      progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+          bar.style.width = width;
+        }, 100);
+      });
+    });
+  </script>
+
+</body>
+</html>

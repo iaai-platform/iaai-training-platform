@@ -1,0 +1,147 @@
+/* ======================================================
+   ✅ GENERAL STYLING FOR ABOUT US PAGE
+====================================================== */
+body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+
+/* ============================================================
+   ✅ Breadcrumb Navigation (Consistent Across All Pages)
+============================================================ */
+.breadcrumb {
+    margin: 20px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+  }
+  
+  .breadcrumb a {
+    text-decoration: none;
+    color: #002147;
+    font-weight: bold;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+
+
+
+/* ======================================================
+   ✅ HERO SECTION
+====================================================== */
+#hero {
+    text-align: center;
+    padding: 50px 20px;
+    background: url('/images/about-bg.jpg') no-repeat center center/cover;
+    color: white;
+}
+
+.hero-content h1 {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
+}
+
+.hero-content p {
+    font-size: 18px;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+/* ======================================================
+   ✅ SECTION BOXES (MISSION, VISION, CHOOSE US, ETC.)
+===================================================== */
+.section-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-box:nth-child(even) {
+    flex-direction: row-reverse; /* Alternate layout */
+}
+
+.section-box img {
+    width: 45%;
+    border-radius: 10px;
+}
+
+.news-right {
+    width: 50%;
+    padding: 20px;
+    text-align: left;
+}
+
+.news-right h3 {
+    font-size: 22px;
+    color: #002147;
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
+}
+
+.news-right p {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* ✅ List Styling */
+.news-right ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.news-right ul li {
+    font-size: 16px;
+    color: #555;
+    padding: 5px 0;
+    position: relative;
+    padding-left: 25px;
+}
+
+.news-right ul li::before {
+    content: "✔";
+    color: #ffcc00;
+    font-size: 18px;
+    position: absolute;
+    left: 0;
+    top: 4px;
+}
+
+/* ======================================================
+   ✅ RESPONSIVE DESIGN
+===================================================== */
+@media screen and (max-width: 768px) {
+    .section-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .section-box:nth-child(even) {
+        flex-direction: column;
+    }
+
+    .section-box img {
+        width: 80%;
+        margin-bottom: 15px;
+    }
+
+    .news-right {
+        width: 100%;
+    }
+}

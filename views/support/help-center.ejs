@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center - IAAI</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .help-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .help-header {
+            text-align: center;
+            background: #007bff;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .faq-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .faq-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .faq-question {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .faq-answer {
+            color: #666;
+            display: none;
+        }
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="help-container">
+        <div class="help-header">
+            <h1><i class="fas fa-question-circle"></i> Help Center</h1>
+            <p>Find answers to common questions</p>
+        </div>
+
+        <input type="text" class="search-box" placeholder="Search for help..." onkeyup="searchFAQ(this.value)">
+
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleAnswer(this)">
+                    <i class="fas fa-plus"></i> How do I access my courses?
+                </div>
+                <div class="faq-answer">
+                    Go to your dashboard and click "My Courses". All your enrolled courses will be listed there.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleAnswer(this)">
+                    <i class="fas fa-plus"></i> How do I reset my password?
+                </div>
+                <div class="faq-answer">
+                    Click "Forgot Password" on the login page and enter your email address. We'll send you a reset link.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleAnswer(this)">
+                    <i class="fas fa-plus"></i> Where can I download my certificate?
+                </div>
+                <div class="faq-answer">
+                    After completing a course, go to "My Courses" and click the "Download Certificate" button.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleAnswer(this)">
+                    <i class="fas fa-plus"></i> How do I contact support?
+                </div>
+                <div class="faq-answer">
+                    You can contact support through live chat, email, or by creating a support ticket in your dashboard.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleAnswer(this)">
+                    <i class="fas fa-plus"></i> What are the system requirements?
+                </div>
+                <div class="faq-answer">
+                    You need a modern browser (Chrome, Firefox, Safari, Edge), stable internet connection, and JavaScript enabled.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-section">
+            <h2>Quick Links</h2>
+            <p><a href="/support/contact">Contact Support</a></p>
+            <p><a href="/support/tickets">My Support Tickets</a></p>
+            <p><a href="/support/community">Community Forum</a></p>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+        function toggleAnswer(element) {
+            const answer = element.nextElementSibling;
+            const icon = element.querySelector('i');
+            
+            if (answer.style.display === 'block') {
+                answer.style.display = 'none';
+                icon.className = 'fas fa-plus';
+            } else {
+                answer.style.display = 'block';
+                icon.className = 'fas fa-minus';
+            }
+        }
+
+        function searchFAQ(query) {
+            const items = document.querySelectorAll('.faq-item');
+            query = query.toLowerCase();
+            
+            items.forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                
+                if (question.includes(query) || answer.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = query === '' ? 'block' : 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

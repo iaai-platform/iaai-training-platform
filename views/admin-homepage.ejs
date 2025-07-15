@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>International Aesthetic Academic Institution (IAAI)</title>
+  <link rel="stylesheet" href="/css/admin.css "> <!-- Link to the main CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+</head>
+
+<%- include('partials/header') %>
+
+
+
+<body>
+
+    <!-- ✅ Page Header -->
+    <header>
+      <h1>Admin Dashboard - User Management - Home page</h1>
+      <a href="/dashboard" class="cta-btn">Admin Home</a>
+  </header>
+
+
+
+
+  <!-- ✅ Form to Update Homepage Content -->
+  <section>
+    <h2>Update Homepage Content</h2>
+    <form id="homepageForm" enctype="multipart/form-data">
+      <input type="hidden" id="contentId" name="id"> <!-- ✅ Hidden Field to Store ID -->
+  
+      <label>Latest News Title:</label>
+      <input type="text" id="latestNewsTitle" name="latestNewsTitle" required>
+  
+      <label>Latest News Description:</label>
+      <textarea id="latestNewsDes" name="latestNewsDes" required></textarea>
+  
+      <label>Latest News Details:</label>
+      <textarea id="latestNewsDetails" name="latestNewsDetails" required></textarea>
+  
+      <label>Upload News Image:</label>
+      <input type="file" id="latestNewsImage" name="latestNewsImage">
+  
+      <label>Latest 1 Title:</label>
+      <input type="text" id="latest1Title" name="latest1Title">
+  
+      <label>Latest 1 Detail:</label>
+      <textarea id="latest1Detail" name="latest1Detail"></textarea>
+  
+      <label>Upload Latest 1 Image:</label>
+      <input type="file" id="latest1Image" name="latest1Image">
+  
+      <label>Latest 2 Title:</label>
+      <input type="text" id="latest2Title" name="latest2Title">
+  
+      <label>Latest 2 Detail:</label>
+      <textarea id="latest2Detail" name="latest2Detail"></textarea>
+  
+      <label>Upload Latest 2 Image:</label>
+      <input type="file" id="latest2Image" name="latest2Image">
+  
+      <label>Latest 3 Title:</label>
+      <input type="text" id="latest3Title" name="latest3Title">
+  
+      <label>Latest 3 Detail:</label>
+      <textarea id="latest3Detail" name="latest3Detail"></textarea>
+  
+      <label>Upload Latest 3 Image:</label>
+      <input type="file" id="latest3Image" name="latest3Image">
+  
+      <button type="submit">Save</button>
+  </form>
+  </section>
+
+  <!-- ✅ Real-Time Table -->
+  <section>
+    <h2>Homepage Records</h2>
+    <table id="homepageTable">
+      <thead>
+        <tr>
+          <th>Latest News</th>
+          <th>Latest 1</th>
+          <th>Latest 2</th>
+          <th>Latest 3</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% homepageRecords.forEach(record => { %>
+          <tr>
+            <td><%= record.latestNewsTitle %></td>
+            <td><%= record.latest1Title || '-' %></td>
+            <td><%= record.latest2Title || '-' %></td>
+            <td><%= record.latest3Title || '-' %></td>
+            <td>
+              <button onclick="editContent('<%= record._id %>')">✏️ Edit</button>
+              <button onclick="deleteContent('<%= record._id %>')">🗑️ Delete</button>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ✅ JavaScript to Handle Admin Actions -->
+  <script>
+    document.getElementById("homepageForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      
+      const formData = new FormData();
+      formData.append('id', document.getElementById("contentId").value);
+      formData.append('latestNewsTitle', document.getElementById("latestNewsTitle").value);
+      formData.append('latestNewsDes', document.getElementById("latestNewsDes").value);
+      formData.append('latestNewsDetails', document.getElementById("latestNewsDetails").value);
+      
+      if (document.getElementById("latestNewsImage").files[0]) {
+        formData.append('latestNewsImage', document.getElementById("latestNewsImage").files[0]);
+      }
+
+      if (document.getElementById("latest1Title").value) {
+        formData.append('latest1Title', document.getElementById("latest1Title").value);
+        formData.append('latest1Detail', document.getElementById("latest1Detail").value);
+        if (document.getElementById("latest1Image").files[0]) {
+          formData.append('latest1Image', document.getElementById("latest1Image").files[0]);
+        }
+      }
+
+      if (document.getElementById("latest2Title").value) {
+        formData.append('latest2Title', document.getElementById("latest2Title").value);
+        formData.append('latest2Detail', document.getElementById("latest2Detail").value);
+        if (document.getElementById("latest2Image").files[0]) {
+          formData.append('latest2Image', document.getElementById("latest2Image").files[0]);
+        }
+      }
+
+      if (document.getElementById("latest3Title").value) {
+        formData.append('latest3Title', document.getElementById("latest3Title").value);
+        formData.append('latest3Detail', document.getElementById("latest3Detail").value);
+        if (document.getElementById("latest3Image").files[0]) {
+          formData.append('latest3Image', document.getElementById("latest3Image").files[0]);
+        }
+      }
+
+      const response = await fetch("/update-homepage", {
+        method: "POST",
+        body: formData
+      });
+
+      if (response.ok) {
+        alert("✅ Homepage updated successfully!");
+        window.location.reload();
+      } else {
+        alert("❌ Error updating homepage.");
+      }
+    });
+
+    async function deleteContent(id) {
+      if (confirm("Are you sure you want to delete?")) {
+        await fetch(`/delete-homepage/${id}`, { method: "DELETE" });
+        window.location.reload();
+      }
+    }
+
+    // ✅ Function to Edit Homepage Content
+// ✅ Function to Fetch Homepage Content & Auto-Fill Form
+async function editContent(id) {
+        try {
+            const response = await fetch(`/get-homepage-content/${id}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                // ✅ Populate the form fields
+                document.getElementById("contentId").value = data._id || "";
+                document.getElementById("latestNewsTitle").value = data.latestNewsTitle || "";
+                document.getElementById("latestNewsDes").value = data.latestNewsDes || "";
+                document.getElementById("latestNewsDetails").value = data.latestNewsDetails || "";
+
+                document.getElementById("latest1Title").value = data.latest1Title || "";
+                document.getElementById("latest1Detail").value = data.latest1Detail || "";
+
+                document.getElementById("latest2Title").value = data.latest2Title || "";
+                document.getElementById("latest2Detail").value = data.latest2Detail || "";
+
+                document.getElementById("latest3Title").value = data.latest3Title || "";
+                document.getElementById("latest3Detail").value = data.latest3Detail || "";
+
+                alert("✅ Edit the fields and click 'Save' to update.");
+            } else {
+                alert("❌ Error fetching content for editing.");
+            }
+        } catch (error) {
+            console.error("❌ Error:", error);
+        }
+    }
+  </script>
+</body>
+</html>

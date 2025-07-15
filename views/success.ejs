@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Successful - IAAI</title>
+  <link rel="stylesheet" href="/css/checkoutstyle.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .success-container {
+      max-width: 600px;
+      margin: 50px auto;
+      text-align: center;
+      padding: 40px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .success-icon {
+      font-size: 4rem;
+      color: #28a745;
+      margin-bottom: 20px;
+    }
+    .reference-number {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+      font-family: monospace;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .action-buttons {
+      margin-top: 30px;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 0 10px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .cta-btn:hover {
+      background: #0056b3;
+    }
+    .cta-btn.secondary {
+      background: #6c757d;
+    }
+    .cta-btn.secondary:hover {
+      background: #545b62;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="success-container">
+    <div class="success-icon">
+      ✅
+    </div>
+    
+    <h1>Registration Successful!</h1>
+    
+    <p>Congratulations! Your course registration has been completed successfully.</p>
+    
+    <% if (referenceNumber) { %>
+      <div class="reference-number">
+        Reference Number: <%= referenceNumber %>
+      </div>
+      <p><em>Please save this reference number for your records.</em></p>
+    <% } %>
+    
+    <div class="action-buttons">
+      <a href="/my-courses" class="cta-btn">View My Courses</a>
+      <a href="/dashboard" class="cta-btn secondary">Go to Dashboard</a>
+      <a href="/training-programs" class="cta-btn secondary">Browse More Courses</a>
+    </div>
+    
+    <div style="margin-top: 30px; color: #6c757d;">
+      <p>📧 A confirmation email will be sent to your registered email address.</p>
+      <p>📚 You can access your courses from the "My Courses" section.</p>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

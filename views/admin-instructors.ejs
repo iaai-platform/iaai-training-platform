@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Management - IAAI Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #7c3aed;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-color: #1f2937;
+            --light-bg: #f9fafb;
+            --white: #ffffff;
+            --border-color: #e5e7eb;
+            --text-muted: #6b7280;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light-bg);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37,99,235,0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Instructor Grid */
+        .instructor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .instructor-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .instructor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .instructor-header {
+            padding: 25px;
+            background: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .instructor-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .instructor-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .instructor-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .instructor-details h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .instructor-email {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .instructor-body {
+            padding: 25px;
+        }
+
+        .instructor-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: var(--light-bg);
+            border-radius: 8px;
+        }
+
+        .instructor-expertise {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .expertise-tag {
+            padding: 4px 12px;
+            background: #e0e7ff;
+            color: var(--primary-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .instructor-actions {
+            display: flex;
+            gap: 10px;
+            padding: 20px 25px;
+            background: var(--light-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .close {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        /* Form Styles */
+        .form-section {
+            background: var(--light-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .form-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Profile Upload Styles */
+        .profile-upload-area {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .profile-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 4px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+            background: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .profile-preview:hover {
+            border-color: var(--primary-color);
+        }
+
+        .profile-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-preview-placeholder {
+            font-size: 60px;
+            color: var(--text-muted);
+        }
+
+        .profile-upload-btn {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .profile-upload-btn input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .profile-upload-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            gap: 8px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .profile-upload-label:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37,99,235,0.3);
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-on-leave {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/header') %>
+    
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1><i class="fas fa-chalkboard-teacher"></i> Instructor Management</h1>
+                    <p>Manage instructors and their assignments</p>
+                </div>
+                <div class="header-actions">
+                    <a href="/dashboard" class="btn btn-primary" style="background: white; color: var(--primary-color);">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="showCreateModal()">
+                    <i class="fas fa-plus-circle"></i> Add New Instructor
+                </button>
+            </div>
+            
+            <div class="filter-section">
+                <input type="text" class="form-control" id="searchBox" placeholder="Search instructors..." style="width: 300px;">
+            </div>
+        </div>
+
+        <!-- Instructors Grid -->
+        <div class="instructor-grid" id="instructorGrid">
+            <!-- Instructors will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-user-tie"></i>
+            <h3>No instructors found</h3>
+            <p>Start by adding your first instructor</p>
+        </div>
+    </div>
+
+    <!-- Instructor Modal -->
+    <div id="instructorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Instructor</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="instructorForm" enctype="multipart/form-data">
+                    <!-- Basic Information with Profile Photo -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-user"></i> Basic Information</h3>
+                        
+                        <!-- Profile Photo Upload Section -->
+                        <div class="profile-upload-area">
+                            <div class="profile-preview" id="profilePreview">
+                                <i class="fas fa-user profile-preview-placeholder"></i>
+                            </div>
+                            <div class="profile-upload-btn">
+                                <label for="profileImage" class="profile-upload-label">
+                                    <i class="fas fa-camera"></i> Upload Photo
+                                </label>
+                                <input type="file" id="profileImage" name="profileImage" accept="image/*" onchange="previewProfileImage(event)">
+                            </div>
+                            <small class="form-text">Maximum file size: 5MB (JPG, PNG, WEBP)</small>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" name="firstName" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" name="lastName" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" name="phoneNumber" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Title</label>
+                                <select name="title" class="form-control">
+                                    <option value="">Select Title</option>
+                                    <option value="Dr.">Dr.</option>
+                                    <option value="Prof.">Prof.</option>
+                                    <option value="Mr.">Mr.</option>
+                                    <option value="Ms.">Ms.</option>
+                                    <option value="Mrs.">Mrs.</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Designation</label>
+                                <input type="text" name="designation" class="form-control" placeholder="e.g., Senior Aesthetic Trainer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-briefcase"></i> Professional Information</h3>
+                        <div class="form-group">
+                            <label>Experience *</label>
+                            <input type="text" name="experience" class="form-control" required placeholder="e.g., 10+ years in aesthetic medicine">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Areas of Expertise</label>
+                            <input type="text" name="expertise" class="form-control" placeholder="Separate with commas (e.g., Botox, Dermal Fillers, PDO Threads)">
+                            <small class="form-text">Enter expertise areas separated by commas</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Biography</label>
+                            <textarea name="bio" class="form-control" rows="4" placeholder="Brief professional biography..."></textarea>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>LinkedIn Profile</label>
+                                <input type="url" name="linkedin" class="form-control" placeholder="https://linkedin.com/in/...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Personal Website</label>
+                                <input type="url" name="website" class="form-control" placeholder="https://...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teaching Preferences -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-chalkboard"></i> Teaching Preferences</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Preferred Course Types</label>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <label style="font-weight: normal;">
+                                        <input type="checkbox" name="preferredCourseTypes" value="InPersonAestheticTraining">
+                                        In-Person Training
+                                    </label>
+                                    <label style="font-weight: normal;">
+                                        <input type="checkbox" name="preferredCourseTypes" value="OnlineLiveTraining">
+                                        Online Live Training
+                                    </label>
+                                    <label style="font-weight: normal;">
+                                        <input type="checkbox" name="preferredCourseTypes" value="SelfPacedOnlineTraining">
+                                        Self-Paced Online Training
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select name="status" class="form-control">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="On Leave">On Leave</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Administrative -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-cog"></i> Administrative</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Contract Type</label>
+                                <select name="contractType" class="form-control">
+                                    <option value="Contract">Contract</option>
+                                    <option value="Full-time">Full-time</option>
+                                    <option value="Part-time">Part-time</option>
+                                    <option value="Guest">Guest</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Hourly Rate</label>
+                                <input type="number" name="hourlyRate" class="form-control" min="0" step="0.01">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Administrative notes..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()" style="background: var(--text-muted); color: white; margin-right: 10px;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save"></i> <span id="submitBtnText">Save Instructor</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let instructors = [];
+        let editingInstructorId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInstructors();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchBox').addEventListener('input', filterInstructors);
+            document.getElementById('instructorForm').addEventListener('submit', handleFormSubmit);
+        }
+
+        // Preview profile image function
+        function previewProfileImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('profilePreview');
+            
+            if (file) {
+                // Check file size
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire('Error', 'File too large. Maximum size is 5MB.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Profile preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '<i class="fas fa-user profile-preview-placeholder"></i>';
+            }
+        }
+
+        async function loadInstructors() {
+            showLoading();
+            try {
+                const response = await fetch('/instructors/api/all');
+                const data = await response.json();
+                
+                if (data.success) {
+                    instructors = data.instructors;
+                    displayInstructors();
+                }
+            } catch (error) {
+                console.error('Error loading instructors:', error);
+                Swal.fire('Error', 'Failed to load instructors', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayInstructors() {
+            const grid = document.getElementById('instructorGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (instructors.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = instructors.map(instructor => createInstructorCard(instructor)).join('');
+        }
+
+        function createInstructorCard(instructor) {
+            const initials = `${instructor.firstName[0]}${instructor.lastName[0]}`.toUpperCase();
+            const statusClass = `status-${instructor.status.toLowerCase().replace(' ', '-')}`;
+            
+            // Use profile image with fallback
+            const avatarContent = instructor.profileImage 
+                ? `<img src="${instructor.profileImage}" alt="${instructor.firstName} ${instructor.lastName}" onerror="this.style.display='none'; this.parentElement.innerHTML='<span>${initials}</span>'">`
+                : `<span>${initials}</span>`;
+            
+            return `
+                <div class="instructor-card">
+                    <div class="instructor-header">
+                        <div class="instructor-info">
+                            <div class="instructor-avatar">${avatarContent}</div>
+                            <div class="instructor-details">
+                                <h3>${instructor.firstName} ${instructor.lastName}</h3>
+                                <div class="instructor-email">${instructor.email}</div>
+                            </div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${instructor.status}</span>
+                    </div>
+                    
+                    <div class="instructor-body">
+                        ${instructor.designation ? `
+                            <div class="instructor-stat">
+                                <span><i class="fas fa-briefcase"></i> Designation</span>
+                                <strong>${instructor.designation}</strong>
+                            </div>
+                        ` : ''}
+                        
+                        ${instructor.assignedCourses ? `
+                            <div class="instructor-stat">
+                                <span><i class="fas fa-book"></i> Assigned Courses</span>
+                                <strong>${instructor.assignedCourses.length}</strong>
+                            </div>
+                        ` : ''}
+                        
+                        ${instructor.expertise && instructor.expertise.length > 0 ? `
+                            <div class="instructor-expertise">
+                                ${instructor.expertise.map(exp => `<span class="expertise-tag">${exp}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="instructor-actions">
+                        <button class="btn btn-primary" onclick="editInstructor('${instructor._id}')" style="padding: 8px 16px; font-size: 14px;">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteInstructor('${instructor._id}')" style="padding: 8px 16px; font-size: 14px;">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterInstructors() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            
+            const filtered = instructors.filter(instructor => {
+                const fullName = `${instructor.firstName} ${instructor.lastName}`.toLowerCase();
+                const email = instructor.email.toLowerCase();
+                const expertise = (instructor.expertise || []).join(' ').toLowerCase();
+                
+                return fullName.includes(searchTerm) || 
+                       email.includes(searchTerm) || 
+                       expertise.includes(searchTerm);
+            });
+            
+            // Update display with filtered instructors
+            const grid = document.getElementById('instructorGrid');
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h3>No instructors found</h3><p>Try adjusting your search</p></div>';
+            } else {
+                grid.innerHTML = filtered.map(instructor => createInstructorCard(instructor)).join('');
+            }
+        }
+
+        function showCreateModal() {
+            editingInstructorId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Instructor';
+            document.getElementById('submitBtnText').textContent = 'Save Instructor';
+            document.getElementById('instructorForm').reset();
+            
+            // Reset profile preview
+            document.getElementById('profilePreview').innerHTML = '<i class="fas fa-user profile-preview-placeholder"></i>';
+            
+            document.getElementById('instructorModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('instructorModal').style.display = 'none';
+            editingInstructorId = null;
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(event.target);
+                
+                // Handle checkboxes for preferredCourseTypes
+                const courseTypes = [];
+                document.querySelectorAll('input[name="preferredCourseTypes"]:checked').forEach(cb => {
+                    courseTypes.push(cb.value);
+                });
+                formData.delete('preferredCourseTypes');
+                formData.append('preferredCourseTypes', JSON.stringify(courseTypes));
+                
+                // Handle expertise as array
+                const expertiseValue = formData.get('expertise');
+                if (expertiseValue) {
+                    const expertiseArray = expertiseValue.split(',').map(e => e.trim()).filter(e => e);
+                    formData.set('expertise', JSON.stringify(expertiseArray));
+                }
+                
+                const url = editingInstructorId 
+                    ? `/instructors/api/${editingInstructorId}`
+                    : '/instructors/api';
+                
+                const method = editingInstructorId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: editingInstructorId ? 'Instructor Updated!' : 'Instructor Added!',
+                        text: result.message,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    
+                    closeModal();
+                    loadInstructors();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error saving instructor:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to save instructor'
+                });
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function editInstructor(instructorId) {
+            const instructor = instructors.find(i => i._id === instructorId);
+            if (!instructor) return;
+            
+            editingInstructorId = instructorId;
+            document.getElementById('modalTitle').textContent = 'Edit Instructor';
+            document.getElementById('submitBtnText').textContent = 'Update Instructor';
+            
+            // Reset and populate profile preview
+            const preview = document.getElementById('profilePreview');
+            if (instructor.profileImage) {
+                preview.innerHTML = `<img src="${instructor.profileImage}" alt="Profile preview">`;
+            } else {
+                preview.innerHTML = '<i class="fas fa-user profile-preview-placeholder"></i>';
+            }
+            
+            // Clear the file input
+            document.getElementById('profileImage').value = '';
+            
+            // Populate form
+            const form = document.getElementById('instructorForm');
+            form.firstName.value = instructor.firstName || '';
+            form.lastName.value = instructor.lastName || '';
+            form.email.value = instructor.email || '';
+            form.phoneNumber.value = instructor.phoneNumber || '';
+            form.title.value = instructor.title || '';
+            form.designation.value = instructor.designation || '';
+            form.experience.value = instructor.experience || '';
+            form.bio.value = instructor.bio || '';
+            form.status.value = instructor.status || 'Active';
+            form.contractType.value = instructor.contractType || 'Contract';
+            form.hourlyRate.value = instructor.hourlyRate || '';
+            form.notes.value = instructor.notes || '';
+            
+            // Handle expertise
+            if (instructor.expertise && instructor.expertise.length > 0) {
+                form.expertise.value = instructor.expertise.join(', ');
+            } else {
+                form.expertise.value = '';
+            }
+            
+            // Handle social media
+            if (instructor.socialMedia) {
+                form.linkedin.value = instructor.socialMedia.linkedin || '';
+                form.website.value = instructor.socialMedia.website || '';
+            } else {
+                form.linkedin.value = '';
+                form.website.value = '';
+            }
+            
+            // Handle preferred course types
+            const checkboxes = form.querySelectorAll('input[name="preferredCourseTypes"]');
+            checkboxes.forEach(cb => {
+                cb.checked = instructor.preferredCourseTypes && instructor.preferredCourseTypes.includes(cb.value);
+            });
+            
+            document.getElementById('instructorModal').style.display = 'block';
+        }
+
+        async function deleteInstructor(instructorId) {
+            const instructor = instructors.find(i => i._id === instructorId);
+            
+            const result = await Swal.fire({
+                title: 'Delete Instructor?',
+                html: `
+                    <p>Are you sure you want to delete this instructor?</p>
+                    <p><strong>${instructor.firstName} ${instructor.lastName}</strong></p>
+                    <p style="color: var(--text-muted); font-size: 14px;">This action cannot be undone.</p>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete'
+            });
+            
+            if (result.isConfirmed) {
+                try {
+                    showLoading();
+                    const response = await fetch(`/instructors/api/${instructorId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        Swal.fire('Deleted!', 'Instructor has been deleted.', 'success');
+                        loadInstructors();
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting instructor:', error);
+                    Swal.fire('Error', 'Failed to delete instructor', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+        }
+
+        function showLoading() {
+            document.querySelector('.loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.querySelector('.loading-overlay').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('instructorModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat Support - IAAI</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .chat-header {
+            text-align: center;
+            background: #17a2b8;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .chat-status {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .status-online {
+            color: #28a745;
+        }
+        .status-offline {
+            color: #dc3545;
+        }
+        .chat-window {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        .message.user {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        .message.agent {
+            background: #f8f9fa;
+            color: #333;
+        }
+        .chat-input {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .send-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .send-btn:hover {
+            background: #0056b3;
+        }
+        .start-chat-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .start-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        .start-btn:hover {
+            background: #218838;
+        }
+        .start-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .quick-actions {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .quick-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .quick-btn:hover {
+            background: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1><i class="fas fa-comments"></i> Live Chat Support</h1>
+            <p>Get instant help from our support team</p>
+        </div>
+
+        <div class="chat-status">
+            <div class="status-online">
+                <i class="fas fa-circle"></i> Support is currently ONLINE
+            </div>
+            <p>Average response time: 2 minutes</p>
+        </div>
+
+        <div class="quick-actions">
+            <h3>Quick Questions</h3>
+            <button class="quick-btn" onclick="quickMessage('How do I access my courses?')">
+                <i class="fas fa-graduation-cap"></i> Course Access
+            </button>
+            <button class="quick-btn" onclick="quickMessage('I need help with my password')">
+                <i class="fas fa-key"></i> Password Help
+            </button>
+            <button class="quick-btn" onclick="quickMessage('Where is my certificate?')">
+                <i class="fas fa-certificate"></i> Certificate Issue
+            </button>
+            <button class="quick-btn" onclick="quickMessage('I have a billing question')">
+                <i class="fas fa-credit-card"></i> Billing Question
+            </button>
+        </div>
+
+        <!-- Chat Interface (hidden by default) -->
+        <div id="chatWindow" class="chat-window" style="display: none;">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message agent">
+                    <strong>Support Agent:</strong><br>
+                    Hello! How can I help you today?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" class="message-input" placeholder="Type your message..." onkeypress="handleEnter(event)">
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Start Chat Form -->
+        <div id="startChatForm" class="start-chat-form">
+            <h3>Start a chat session</h3>
+            <form onsubmit="startChat(event)">
+                <div class="form-group">
+                    <label for="chatName">Your Name</label>
+                    <input type="text" id="chatName" class="form-control" value="<%= user ? user.firstName + ' ' + user.lastName : '' %>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="chatEmail">Email Address</label>
+                    <input type="email" id="chatEmail" class="form-control" value="<%= user ? user.email : '' %>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="chatMessage">How can we help you?</label>
+                    <textarea id="chatMessage" class="form-control" rows="3" placeholder="Describe your question or issue..." required></textarea>
+                </div>
+                
+                <button type="submit" class="start-btn">
+                    <i class="fas fa-comments"></i> Start Chat
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+        let chatActive = false;
+
+        function quickMessage(message) {
+            document.getElementById('chatMessage').value = message;
+        }
+
+        function startChat(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('chatName').value;
+            const email = document.getElementById('chatEmail').value;
+            const message = document.getElementById('chatMessage').value;
+            
+            if (name && email && message) {
+                // Hide start form and show chat window
+                document.getElementById('startChatForm').style.display = 'none';
+                document.getElementById('chatWindow').style.display = 'flex';
+                
+                // Add initial user message
+                addMessage('user', message);
+                
+                // Simulate agent response
+                setTimeout(() => {
+                    addMessage('agent', 'Thank you for contacting us! I\'ll help you with that right away.');
+                }, 1000);
+                
+                chatActive = true;
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message && chatActive) {
+                addMessage('user', message);
+                input.value = '';
+                
+                // Simulate agent response
+                setTimeout(() => {
+                    const responses = [
+                        'I understand your question. Let me help you with that.',
+                        'That\'s a great question! Here\'s what I recommend...',
+                        'I can definitely assist you with this issue.',
+                        'Let me check that information for you.'
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage('agent', randomResponse);
+                }, 1000 + Math.random() * 2000);
+            }
+        }
+
+        function addMessage(sender, text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `<strong>You:</strong><br>${text}`;
+            } else {
+                messageDiv.innerHTML = `<strong>Support Agent:</strong><br>${text}`;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Auto-focus on message input when chat is active
+        setInterval(() => {
+            if (chatActive) {
+                document.getElementById('messageInput').focus();
+            }
+        }, 100);
+    </script>
+</body>
+</html>

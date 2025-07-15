@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Live Course Management - IAAI Admin</title>
+    <link rel="stylesheet" href="/css/admin-courses.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body>
+
+    <%- include('partials/header') %>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1><i class="fas fa-video"></i> Online Live Course Management</h1>
+                    <p>Manage virtual training courses and webinars</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="addCourseBtn">
+                        <i class="fas fa-plus"></i> Add New Course
+                    </button>
+                    <button class="btn btn-info" id="createFromInPersonBtn">
+                        <i class="fas fa-arrows-alt-h"></i> Create from In-Person
+                    </button>
+                    <button class="btn btn-secondary" id="exportBtn">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <section class="stats-dashboard">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalCourses">0</h3>
+                    <p>Total Courses</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="upcomingCourses">0</h3>
+                    <p>Upcoming</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalEnrollments">0</h3>
+                    <p>Total Enrollments</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-broadcast-tower"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="activeSessions">0</h3>
+                    <p>Active Sessions</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="filters-section">
+            <div class="filters-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search courses, instructors, or platforms...">
+                </div>
+                <div class="filter-group">
+                    <select id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="draft">Draft</option>
+                        <option value="open">Open to Register</option>
+                        <option value="full">Full</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="aesthetic">Aesthetic</option>
+                        <option value="medical">Medical</option>
+                        <option value="business">Business</option>
+                        <option value="technical">Technical</option>
+                    </select>
+                    <select id="platformFilter">
+                        <option value="">All Platforms</option>
+                        <option value="Zoom">Zoom</option>
+                        <option value="Microsoft Teams">Microsoft Teams</option>
+                        <option value="Google Meet">Google Meet</option>
+                        <option value="Webex">Webex</option>
+                        <option value="GoToWebinar">GoToWebinar</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="table">
+                        <i class="fas fa-table"></i>
+                    </button>
+                    <button class="view-btn" data-view="grid">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="view-btn" data-view="calendar">
+                        <i class="fas fa-calendar"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="courses-section">
+            <div class="table-container" id="tableView">
+                <table class="courses-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th>Course Details</th>
+                            <th>Schedule</th>
+                            <th>Platform</th>
+                            <th>Instructor(s)</th>
+                            <th>Enrollment</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="coursesTableBody">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="grid-container hidden" id="gridView">
+                </div>
+
+            <div class="calendar-container hidden" id="calendarView">
+                <div id="courseCalendar"></div>
+            </div>
+        </section>
+
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="currentRange">1-10</span> of <span id="totalItems">0</span> courses
+            </div>
+            <div class="pagination-controls">
+                <button class="btn-pagination" id="prevPage">Previous</button>
+                <div class="page-numbers" id="pageNumbers"></div>
+                <button class="btn-pagination" id="nextPage">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="courseModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Online Course</h2>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="courseForm" enctype="multipart/form-data">
+                    <input type="hidden" id="courseId" name="courseId">
+                    
+                    <div class="form-steps">
+                        <div class="step active" data-step="1">
+                            <span class="step-number">1</span>
+                            <span class="step-title">Basic Info</span>
+                        </div>
+                        <div class="step" data-step="2">
+                            <span class="step-number">2</span>
+                            <span class="step-title">Schedule</span>
+                        </div>
+                        <div class="step" data-step="3">
+                            <span class="step-number">3</span>
+                            <span class="step-title">Pricing</span>
+                        </div>
+                        <div class="step" data-step="4">
+                            <span class="step-number">4</span>
+                            <span class="step-title">Instructors</span>
+                        </div>
+                        <div class="step" data-step="5">
+                            <span class="step-number">5</span>
+                            <span class="step-title">Platform</span>
+                        </div>
+                        <div class="step" data-step="6">
+                            <span class="step-number">6</span>
+                            <span class="step-title">Content</span>
+                        </div>
+                        <div class="step" data-step="7">
+                            <span class="step-number">7</span>
+                            <span class="step-title">Technical</span>
+                        </div>
+                        <div class="step" data-step="8">
+                            <span class="step-number">8</span>
+                            <span class="step-title">Interaction</span>
+                        </div>
+                        <div class="step" data-step="9">
+                            <span class="step-number">9</span>
+                            <span class="step-title">Recording</span>
+                        </div>
+                        <div class="step" data-step="10">
+                            <span class="step-number">10</span>
+                            <span class="step-title">Media</span>
+                        </div>
+                        <div class="step" data-step="11">
+                            <span class="step-number">11</span>
+                            <span class="step-title">Materials</span>
+                        </div>
+                        <div class="step" data-step="12">
+                            <span class="step-number">12</span>
+                            <span class="step-title">Assessment</span>
+                        </div>
+                        <div class="step" data-step="13">
+                            <span class="step-number">13</span>
+                            <span class="step-title">Attendance</span>
+                        </div>
+                        <div class="step" data-step="14">
+                            <span class="step-number">14</span>
+                            <span class="step-title">Support</span>
+                        </div>
+                        <div class="step" data-step="15">
+                            <span class="step-number">15</span>
+                            <span class="step-title">Post-Course</span>
+                        </div>
+                        <div class="step" data-step="16">
+                            <span class="step-number">16</span>
+                            <span class="step-title">Experience</span>
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="1">
+                        <h3>Basic Course Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="courseCode">Course Code *</label>
+                                <input type="text" id="courseCode" name="basic[courseCode]" required 
+                                       placeholder="e.g., ONLINE-2024-001" maxlength="50" style="text-transform: uppercase;">
+                                <small class="help-text">Unique course identifier</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">Course Title *</label>
+                                <input type="text" id="title" name="basic[title]" required 
+                                       placeholder="Advanced Online Aesthetics Training" maxlength="200">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="description">Description *</label>
+                                <textarea id="description" name="basic[description]" required 
+                                               placeholder="Detailed course description..." maxlength="2000"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="aboutThisCourse">About This Course</label>
+                                <textarea id="aboutThisCourse" name="basic[aboutThisCourse]" 
+                                               placeholder="Brief course overview..." maxlength="500"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="category">Category *</label>
+                                <select id="category" name="basic[category]" required>
+                                    <option value="">Select Category</option>
+                                    <option value="aesthetic">Aesthetic</option>
+                                    <option value="medical">Medical</option>
+                                    <option value="business">Business</option>
+                                    <option value="technical">Technical</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select id="status" name="basic[status]">
+                                    <option value="draft">Draft</option>
+                                    <option value="open">Open to Register</option>
+                                    <option value="full">Full</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="basic[courseType]" value="online-live">
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="2">
+                        <h3>Schedule & Time Zones</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="startDate">Start Date *</label>
+                                <input type="datetime-local" id="startDate" name="schedule[startDate]" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="endDate">End Date</label>
+                                <input type="datetime-local" id="endDate" name="schedule[endDate]">
+                            </div>
+                            <div class="form-group">
+                                <label for="duration">Duration *</label>
+                                <input type="text" id="duration" name="schedule[duration]" required 
+                                       placeholder="e.g., 2 days, 8 hours">
+                            </div>
+                            <div class="form-group">
+                                <label for="registrationDeadline">Registration Deadline</label>
+                                <input type="datetime-local" id="registrationDeadline" name="schedule[registrationDeadline]">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="primaryTimezone">Primary Time Zone *</label>
+                                <select id="primaryTimezone" name="schedule[primaryTimezone]" required>
+                                    <option value="UTC">UTC</option>
+                                    <option value="America/New_York">Eastern Time (ET)</option>
+                                    <option value="America/Chicago">Central Time (CT)</option>
+                                    <option value="America/Denver">Mountain Time (MT)</option>
+                                    <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                                    <option value="Europe/London">London (GMT)</option>
+                                    <option value="Europe/Istanbul">Istanbul</option>
+                                    <option value="Asia/Dubai">Dubai</option>
+                                    <option value="Asia/Singapore">Singapore</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="displayTimezones">Display Time Zones</label>
+                                <input type="text" id="displayTimezones" name="schedule[displayTimezones]" 
+                                       placeholder="EST, PST, GMT (comma-separated)">
+                                <small class="help-text">Time zones to show in marketing materials</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pattern">Session Pattern</label>
+                                <select id="pattern" name="schedule[pattern]">
+                                    <option value="single">Single Session</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="biweekly">Biweekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="sessionStartTime">Session Start Time</label>
+                                <input type="time" id="sessionStartTime" name="schedule[sessionTime][startTime]" value="14:00">
+                            </div>
+                            <div class="form-group">
+                                <label for="sessionEndTime">Session End Time</label>
+                                <input type="time" id="sessionEndTime" name="schedule[sessionTime][endTime]" value="16:00">
+                            </div>
+                            <div class="form-group">
+                                <label for="breakDuration">Break Duration (minutes)</label>
+                                <input type="number" id="breakDuration" name="schedule[sessionTime][breakDuration]" 
+                                       min="0" max="60" value="10">
+                            </div>
+                        </div>
+                        
+                        <div class="sessions-section" id="sessionsSection">
+                            <h4>Session Schedule</h4>
+                            <div id="sessionsContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addSession">
+                                <i class="fas fa-plus"></i> Add Session
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="3">
+                        <h3>Pricing & Enrollment</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="price">Price (USD) *</label>
+                                <input type="number" id="price" name="enrollment[price]" required min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="earlyBirdPrice">Early Bird Price</label>
+                                <input type="number" id="earlyBirdPrice" name="enrollment[earlyBirdPrice]" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="currency">Currency</label>
+                                <select id="currency" name="enrollment[currency]">
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="TRY">TRY</option>
+                                    <option value="GBP">GBP</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="seatsAvailable">Seats Available *</label>
+                                <input type="number" id="seatsAvailable" name="enrollment[seatsAvailable]" required min="1" value="50">
+                            </div>
+                            <div class="form-group">
+                                <label for="minEnrollment">Minimum Enrollment</label>
+                                <input type="number" id="minEnrollment" name="enrollment[minEnrollment]" min="1" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="currentEnrollment">Current Enrollment</label>
+                                <input type="number" id="currentEnrollment" name="enrollment[currentEnrollment]" min="0" value="0" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="waitlistEnabled">Enable Waitlist</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="waitlistEnabled" name="enrollment[waitlistEnabled]" checked>
+                                    <label for="waitlistEnabled">Allow waitlist when full</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="registrationUrl">Registration URL</label>
+                                <input type="url" id="registrationUrl" name="enrollment[registrationUrl]" 
+                                       placeholder="https://...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="4">
+                        <h3>Instructors</h3>
+                        
+                        <div class="primary-instructor-section">
+                            <h4>Primary Instructor</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="primaryInstructorId">Primary Instructor *</label>
+                                    <select id="primaryInstructorId" name="instructors[primary][instructorId]" required>
+                                        <option value="">Select Primary Instructor</option>
+                                        </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="primaryInstructorName">Instructor Name</label>
+                                    <input type="text" id="primaryInstructorName" name="instructors[primary][name]" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="primaryInstructorRole">Role</label>
+                                    <input type="text" id="primaryInstructorRole" name="instructors[primary][role]" 
+                                           value="Lead Instructor" placeholder="Lead Instructor">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="additional-instructors-section">
+                            <h4>Additional Instructors</h4>
+                            <div id="additionalInstructorsContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addInstructor">
+                                <i class="fas fa-plus"></i> Add Additional Instructor
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="5">
+                        <h3>Platform & Access</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="platformName">Platform *</label>
+                                <select id="platformName" name="platform[name]" required>
+                                    <option value="">Select Platform</option>
+                                    <option value="Zoom">Zoom</option>
+                                    <option value="Microsoft Teams">Microsoft Teams</option>
+                                    <option value="Google Meet">Google Meet</option>
+                                    <option value="Webex">Webex</option>
+                                    <option value="GoToWebinar">GoToWebinar</option>
+                                    <option value="Custom">Custom</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="accessUrl">Access URL *</label>
+                                <input type="url" id="accessUrl" name="platform[accessUrl]" required 
+                                       placeholder="https://zoom.us/j/123456789">
+                            </div>
+                            <div class="form-group">
+                                <label for="meetingId">Meeting ID</label>
+                                <input type="text" id="meetingId" name="platform[meetingId]" 
+                                       placeholder="123-456-789">
+                            </div>
+                            <div class="form-group">
+                                <label for="passcode">Passcode</label>
+                                <input type="text" id="passcode" name="platform[passcode]" 
+                                       placeholder="Optional passcode">
+                            </div>
+                            <div class="form-group">
+                                <label for="backupPlatform">Backup Platform</label>
+                                <input type="text" id="backupPlatform" name="platform[backupPlatform]" 
+                                       placeholder="e.g., Google Meet">
+                            </div>
+                            <div class="form-group">
+                                <label for="backupUrl">Backup URL</label>
+                                <input type="url" id="backupUrl" name="platform[backupUrl]" 
+                                       placeholder="Backup meeting link">
+                            </div>
+                        </div>
+                        
+                        <div class="platform-features-section">
+                            <h4>Platform Features</h4>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="platform[features][breakoutRooms]" checked> Breakout Rooms</label>
+                                <label><input type="checkbox" name="platform[features][polling]" checked> Polling</label>
+                                <label><input type="checkbox" name="platform[features][whiteboard]" checked> Whiteboard</label>
+                                <label><input type="checkbox" name="platform[features][recording]" checked> Recording</label>
+                                <label><input type="checkbox" name="platform[features][chat]" checked> Chat</label>
+                                <label><input type="checkbox" name="platform[features][screenSharing]" checked> Screen Sharing</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="6">
+                        <h3>Course Content</h3>
+                        
+                        <div class="objectives-section">
+                            <h4>Learning Objectives</h4>
+                            <div id="objectivesContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addObjective">
+                                <i class="fas fa-plus"></i> Add Objective
+                            </button>
+                        </div>
+
+                        <div class="modules-section">
+                            <h4>Course Modules</h4>
+                            <div id="modulesContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addModule">
+                                <i class="fas fa-plus"></i> Add Module
+                            </button>
+                        </div>
+
+                        <div class="target-audience-section">
+                            <h4>Target Audience</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="experienceLevel">Experience Level</label>
+                                    <select id="experienceLevel" name="content[experienceLevel]">
+                                        <option value="all-levels">All Levels</option>
+                                        <option value="beginner">Beginner</option>
+                                        <option value="intermediate">Intermediate</option>
+                                        <option value="advanced">Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="targetAudienceContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addTargetAudience">
+                                <i class="fas fa-plus"></i> Add Target Audience
+                            </button>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="prerequisites">Prerequisites</label>
+                            <textarea id="prerequisites" name="content[prerequisites]" 
+                                           placeholder="Course prerequisites and requirements..."></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="detailedSyllabus">Detailed Syllabus</label>
+                            <textarea id="detailedSyllabus" name="content[detailedSyllabus]" 
+                                           placeholder="Detailed course syllabus..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="7">
+                        <h3>Technical Requirements</h3>
+                        
+                        <div class="system-requirements-section">
+                            <h4>System Requirements</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="os">Operating Systems</label>
+                                    <input type="text" id="os" name="technical[systemRequirements][os]" 
+                                           placeholder="Windows 10+, macOS 10.14+ (comma-separated)">
+                                </div>
+                                <div class="form-group">
+                                    <label for="browsers">Supported Browsers</label>
+                                    <input type="text" id="browsers" name="technical[systemRequirements][browsers]" 
+                                           placeholder="Chrome 80+, Firefox 78+ (comma-separated)">
+                                </div>
+                                <div class="form-group">
+                                    <label for="minimumRAM">Minimum RAM</label>
+                                    <input type="text" id="minimumRAM" name="technical[systemRequirements][minimumRAM]" 
+                                           value="4GB">
+                                </div>
+                                <div class="form-group">
+                                    <label for="processor">Processor</label>
+                                    <input type="text" id="processor" name="technical[systemRequirements][processor]" 
+                                           value="Dual-core 2GHz">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="internet-requirements-section">
+                            <h4>Internet Speed Requirements</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="minimumSpeed">Minimum Speed</label>
+                                    <input type="text" id="minimumSpeed" name="technical[internetSpeed][minimum]" 
+                                           value="5 Mbps">
+                                </div>
+                                <div class="form-group">
+                                    <label for="recommendedSpeed">Recommended Speed</label>
+                                    <input type="text" id="recommendedSpeed" name="technical[internetSpeed][recommended]" 
+                                           value="25 Mbps">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="required-software-section">
+                            <h4>Required Software</h4>
+                            <div id="requiredSoftwareContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addRequiredSoftware">
+                                <i class="fas fa-plus"></i> Add Software
+                            </button>
+                        </div>
+                        
+                        <div class="equipment-requirements-section">
+                            <h4>Equipment Requirements</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="camera">Camera</label>
+                                    <select id="camera" name="technical[equipment][camera]">
+                                        <option value="recommended">Recommended</option>
+                                        <option value="required">Required</option>
+                                        <option value="optional">Optional</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="microphone">Microphone</label>
+                                    <select id="microphone" name="technical[equipment][microphone]">
+                                        <option value="required">Required</option>
+                                        <option value="recommended">Recommended</option>
+                                        <option value="optional">Optional</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="headset">Headset</label>
+                                    <select id="headset" name="technical[equipment][headset]">
+                                        <option value="recommended">Recommended</option>
+                                        <option value="required">Required</option>
+                                        <option value="optional">Optional</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tech-check-section">
+                            <h4>Technical Check</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="techCheckRequired">Tech Check Required</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="techCheckRequired" name="technical[techCheckRequired]" checked>
+                                        <label for="techCheckRequired">Require technical check before course</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="techCheckDate">Tech Check Date</label>
+                                    <input type="datetime-local" id="techCheckDate" name="technical[techCheckDate]">
+                                </div>
+                                <div class="form-group">
+                                    <label for="techCheckUrl">Tech Check URL</label>
+                                    <input type="url" id="techCheckUrl" name="technical[techCheckUrl]" 
+                                           placeholder="Test meeting link">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="8">
+                        <h3>Interaction & Engagement</h3>
+                        
+                        <div class="participation-section">
+                            <h4>Participation Requirements</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="participationRequired">Active Participation Required</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="participationRequired" name="interaction[participationRequired]" checked>
+                                        <label for="participationRequired">Require active participation</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cameraRequired">Camera Required</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="cameraRequired" name="interaction[cameraRequired]">
+                                        <label for="cameraRequired">Participants must have camera on</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="interactive-features-section">
+                            <h4>Interactive Features</h4>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="interaction[features][polls]" checked> Polls</label>
+                                <label><input type="checkbox" name="interaction[features][quizzes]" checked> Quizzes</label>
+                                <label><input type="checkbox" name="interaction[features][breakoutRooms]" checked> Breakout Rooms</label>
+                                <label><input type="checkbox" name="interaction[features][qa]" checked> Q&A Sessions</label>
+                                <label><input type="checkbox" name="interaction[features][chat]" checked> Chat</label>
+                                <label><input type="checkbox" name="interaction[features][reactions]" checked> Reactions/Emojis</label>
+                            </div>
+                        </div>
+                        
+                        <div class="engagement-tools-section">
+                            <h4>Engagement Tools</h4>
+                            <div id="engagementToolsContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addEngagementTool">
+                                <i class="fas fa-plus"></i> Add Tool
+                            </button>
+                        </div>
+                        
+                        <div class="networking-section">
+                            <h4>Networking Options</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="virtualCoffeeBreaks">Virtual Coffee Breaks</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="virtualCoffeeBreaks" name="interaction[networkingOptions][virtualCoffeeBreaks]">
+                                        <label for="virtualCoffeeBreaks">Enable virtual coffee breaks</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="discussionForum">Discussion Forum</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="discussionForum" name="interaction[networkingOptions][discussionForum]" checked>
+                                        <label for="discussionForum">Enable discussion forum</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="linkedInGroup">LinkedIn Group</label>
+                                    <input type="text" id="linkedInGroup" name="interaction[networkingOptions][linkedInGroup]" 
+                                           placeholder="LinkedIn group URL">
+                                </div>
+                                <div class="form-group">
+                                    <label for="slackChannel">Slack Channel</label>
+                                    <input type="text" id="slackChannel" name="interaction[networkingOptions][slackChannel]" 
+                                           placeholder="Slack workspace/channel">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="9">
+                        <h3>Recording & Replay</h3>
+                        
+                        <div class="recording-settings-section">
+                            <h4>Recording Settings</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="recordingEnabled">Enable Recording</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="recordingEnabled" name="recording[enabled]" checked>
+                                        <label for="recordingEnabled">Record sessions</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="recordingType">Recording Type</label>
+                                    <select id="recordingType" name="recording[type]">
+                                        <option value="cloud">Cloud Recording</option>
+                                        <option value="local">Local Recording</option>
+                                        <option value="none">No Recording</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="recording-availability-section">
+                            <h4>Recording Availability</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="recordingForStudents">Available to Students</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="recordingForStudents" name="recording[availability][forStudents]" checked>
+                                        <label for="recordingForStudents">Make recordings available to students</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="recordingDuration">Availability Duration (days)</label>
+                                    <input type="number" id="recordingDuration" name="recording[availability][duration]" 
+                                           min="1" max="365" value="90">
+                                </div>
+                                <div class="form-group">
+                                    <label for="recordingDownloadable">Allow Download</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="recordingDownloadable" name="recording[availability][downloadable]">
+                                        <label for="recordingDownloadable">Students can download recordings</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="recordingPasswordProtected">Password Protected</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="recordingPasswordProtected" name="recording[availability][passwordProtected]">
+                                        <label for="recordingPasswordProtected">Require password for recordings</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="autoTranscription">Auto Transcription</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="autoTranscription" name="recording[autoTranscription]">
+                                        <label for="autoTranscription">Generate automatic transcriptions</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="10">
+                        <h3>Media & Resources</h3>
+                        
+                        <div class="main-image-section">
+                            <h4>Main Course Image</h4>
+                            <div class="form-grid">
+                                <div class="form-group file-upload-section">
+                                    <label for="mainImageInput">Course Image</label>
+                                    <input type="file" id="mainImageInput" name="mainImage" accept="image/*">
+                                    <small class="help-text">Recommended: 1200x800px, JPG/PNG, max 5MB</small>
+                                    <div class="file-preview-container main-image-container" id="mainImagePreview"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="mainImageAlt">Alt Text</label>
+                                    <input type="text" id="mainImageAlt" name="media[mainImage][alt]" 
+                                           placeholder="Describe the image for accessibility">
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <div class="course-documents-section">
+                            <h4>Course Documents</h4>
+                            <div class="form-group file-upload-section">
+                                <label for="documentsInput">Upload Documents</label>
+                                <input type="file" id="documentsInput" name="documents" multiple 
+                                       accept=".pdf,.ppt,.pptx,.doc,.docx">
+                                <small class="help-text">Multiple files allowed. PDF, PPT, PPTX, DOC, DOCX (max 50MB each)</small>
+                                <div class="file-preview-container" id="documentsPreview"></div>
+                            </div>
+                        </div>
+
+
+                  <!-- Enhanced Gallery Images Section -->
+<div class="gallery-section">
+    <h4>Gallery Images</h4>
+    <div class="form-group file-upload-section">
+        <label for="galleryImagesInput">Upload Gallery Images</label>
+        <input type="file" id="galleryImagesInput" name="images" multiple 
+               accept=".jpg,.jpeg,.png,.webp">
+        <small class="help-text">Multiple files allowed. JPG, PNG, WebP (max 5MB each)</small>
+        <div class="file-preview-container" id="galleryImagesPreview"></div>
+    </div>
+</div>
+
+<!-- Enhanced Course Videos Section (for uploaded video files, not external links) -->
+<div class="uploaded-videos-section">
+    <h4>Upload Video Files</h4>
+    <div class="form-group file-upload-section">
+        <label for="uploadedVideosInput">Upload Video Files</label>
+        <input type="file" id="uploadedVideosInput" name="videos" multiple 
+               accept=".mp4,.webm,.ogg">
+        <small class="help-text">Multiple files allowed. MP4, WebM, OGG (max 100MB each)</small>
+        <div class="file-preview-container" id="uploadedVideosPreview"></div>
+    </div>
+</div>
+
+<!-- External Video Links Section (separate from uploaded videos) -->
+<div class="videos-section">
+    <h4>External Video Links</h4>
+    <div id="videoLinksContainer">
+        <!-- Dynamic video links will be added here -->
+    </div>
+    <button type="button" class="btn btn-secondary" id="addVideoLink">
+        <i class="fas fa-plus"></i> Add Video Link
+    </button>
+</div>
+
+                        <div class="promotional-section">
+                            <h4>Promotional Content</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="brochureUrl">Brochure URL</label>
+                                    <input type="url" id="brochureUrl" name="media[promotional][brochureUrl]" 
+                                           placeholder="Link to course brochure">
+                                </div>
+                                <div class="form-group">
+                                    <label for="videoUrl">Promotional Video URL</label>
+                                    <input type="url" id="videoUrl" name="media[promotional][videoUrl]" 
+                                           placeholder="YouTube or Vimeo URL">
+                                </div>
+                                <div class="form-group">
+                                    <label for="catalogUrl">Catalog URL</label>
+                                    <input type="url" id="catalogUrl" name="media[promotional][catalogUrl]" 
+                                           placeholder="Link to course catalog">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="links-section">
+                            <h4>External Links</h4>
+                            <div id="linksContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addLink">
+                                <i class="fas fa-plus"></i> Add Link
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="11">
+                        <h3>Digital Materials</h3>
+                        
+                        <div class="handouts-section">
+                            <h4>Course Handouts</h4>
+                            <div id="handoutsContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addHandout">
+                                <i class="fas fa-plus"></i> Add Handout
+                            </button>
+                        </div>
+                        
+                        <div class="virtual-labs-section">
+                            <h4>Virtual Labs</h4>
+                            <div id="virtualLabsContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addVirtualLab">
+                                <i class="fas fa-plus"></i> Add Virtual Lab
+                            </button>
+                        </div>
+                        
+                        <div class="lms-section">
+                            <h4>Learning Management System</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="lmsEnabled">LMS Integration</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="lmsEnabled" name="materials[lms][enabled]">
+                                        <label for="lmsEnabled">Enable LMS integration</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lmsPlatform">LMS Platform</label>
+                                    <input type="text" id="lmsPlatform" name="materials[lms][platform]" 
+                                           placeholder="e.g., Moodle, Canvas">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lmsCourseUrl">Course URL</label>
+                                    <input type="url" id="lmsCourseUrl" name="materials[lms][courseUrl]" 
+                                           placeholder="LMS course link">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="12">
+                        <h3>Assessment & Certification</h3>
+                        
+                        <div class="assessment-section">
+                            <h4>Assessment</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="assessmentRequired">Assessment Required</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="assessmentRequired" name="assessment[required]">
+                                        <label for="assessmentRequired">Assessment is required</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="assessmentType">Assessment Type</label>
+                                    <select id="assessmentType" name="assessment[type]">
+                                        <option value="none">None</option>
+                                        <option value="quiz">Quiz</option>
+                                        <option value="practical">Practical</option>
+                                        <option value="both">Both</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="passingScore">Passing Score (%)</label>
+                                    <input type="number" id="passingScore" name="assessment[passingScore]" 
+                                           min="0" max="100" value="70">
+                                </div>
+                                <div class="form-group">
+                                    <label for="retakesAllowed">Retakes Allowed</label>
+                                    <input type="number" id="retakesAllowed" name="assessment[retakesAllowed]" 
+                                           min="0" max="5" value="1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="assessmentPlatform">Assessment Platform</label>
+                                    <input type="text" id="assessmentPlatform" name="assessment[platform]" 
+                                           placeholder="e.g., Google Forms, Typeform">
+                                </div>
+                                <div class="form-group">
+                                    <label for="timeLimit">Time Limit (minutes)</label>
+                                    <input type="number" id="timeLimit" name="assessment[timeLimit]" 
+                                           min="0" placeholder="No limit if empty">
+                                </div>
+                            </div>
+                            
+                            <div class="proctoring-section">
+                                <h5>Proctoring Settings</h5>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="proctoringEnabled">Enable Proctoring</label>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="proctoringEnabled" name="assessment[proctoring][enabled]">
+                                            <label for="proctoringEnabled">Enable online proctoring</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="proctoringType">Proctoring Type</label>
+                                        <select id="proctoringType" name="assessment[proctoring][type]">
+                                            <option value="none">None</option>
+                                            <option value="live">Live Proctoring</option>
+                                            <option value="ai">AI Proctoring</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="quiz-section" id="quizSection" style="display: none;">
+                                <h4>Quiz Questions</h4>
+                                <div id="questionsContainer">
+                                    </div>
+                                <button type="button" class="btn btn-secondary" id="addQuestion">
+                                    <i class="fas fa-plus"></i> Add Question
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="certification-section">
+                            <h4>Certification</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="certificationEnabled">Certification Enabled</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="certificationEnabled" name="certification[enabled]" checked>
+                                        <label for="certificationEnabled">Provide certification</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="certificationType">Certificate Types</label>
+                                    <select id="certificationType" name="certification[type]">
+                                        <option value="completion">Completion</option>
+                                        <option value="achievement">Achievement</option>
+                                        <option value="participation">Participation</option>
+                                    </select>
+                                    <small class="help-text">Select only one type</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="issuingAuthorityId">Primary Certification Body</label>
+                                    <select id="issuingAuthorityId" name="certification[issuingAuthorityId]">
+                                        <option value="">Select Certification Body</option>
+                                        </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="issuingAuthority">Issuing Authority Name</label>
+                                    <input type="text" id="issuingAuthority" name="certification[issuingAuthority]" 
+                                               value="IAAI Training Institute" readonly>
+                                    <small class="help-text">This field updates automatically based on your selection above</small>
+                                </div>
+                            </div>
+                            
+                            <h5>Certificate Requirements</h5>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="minimumAttendance">Minimum Attendance (%)</label>
+                                    <input type="number" id="minimumAttendance" name="certification[requirements][minimumAttendance]" 
+                                               min="0" max="100" value="80">
+                                </div>
+                                <div class="form-group">
+                                    <label for="minimumScore">Minimum Score (%)</label>
+                                    <input type="number" id="minimumScore" name="certification[requirements][minimumScore]" 
+                                               min="0" max="100" value="70">
+                                </div>
+                                <div class="form-group">
+                                    <label for="practicalRequired">Practical Required</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="practicalRequired" name="certification[requirements][practicalRequired]">
+                                        <label for="practicalRequired">Practical assessment required</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="projectRequired">Project Required</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="projectRequired" name="certification[requirements][projectRequired]">
+                                        <label for="projectRequired">Project submission required</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h5>Certificate Validity</h5>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="isLifetime">Lifetime Validity</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="isLifetime" name="certification[validity][isLifetime]" checked>
+                                        <label for="isLifetime">Certificate is valid for lifetime</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="validityYears">Validity Years</label>
+                                    <input type="number" id="validityYears" name="certification[validity][years]" 
+                                               min="1" max="10" placeholder="Years if not lifetime">
+                                </div>
+                            </div>
+                            
+                            <h5>Certificate Features</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="certification[features][digitalBadge]" checked> Digital Badge</label>
+                                <label><input type="checkbox" name="certification[features][blockchain]"> Blockchain Verified</label>
+                                <label><input type="checkbox" name="certification[features][qrVerification]" checked> QR Verification</label>
+                                <label><input type="checkbox" name="certification[features][autoGenerate]" checked> Auto Generate</label>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="certificateTemplate">Certificate Template</label>
+                                <select id="certificateTemplate" name="certification[template]">
+                                    <option value="professional_v1">Professional v1</option>
+                                    <option value="modern_v1">Modern v1</option>
+                                    <option value="classic_v1">Classic v1</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="certification-bodies-section">
+                            <h4>Additional Certification Bodies</h4>
+                            <div id="certificationBodiesContainer">
+                                </div>
+                            <button type="button" class="btn btn-secondary" id="addCertificationBody">
+                                <i class="fas fa-plus"></i> Add Certification Body
+                            </button>
+                        </div>
+
+                        <div class="form-actions" style="margin-top: 20px;">
+                            <a href="/admin/certification-bodies" target="_blank" class="btn btn-secondary">
+                                <i class="fas fa-building"></i> Manage Certification Bodies
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="13">
+                        <h3>Attendance & Tracking</h3>
+                        
+                        <div class="attendance-config-section">
+                            <h4>Attendance Configuration</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="trackingEnabled">Attendance Tracking</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="trackingEnabled" name="attendance[trackingEnabled]" checked>
+                                        <label for="trackingEnabled">Enable attendance tracking</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="attendanceMethod">Tracking Method</label>
+                                    <select id="attendanceMethod" name="attendance[method]">
+                                        <option value="automatic">Automatic</option>
+                                        <option value="manual">Manual</option>
+                                        <option value="hybrid">Hybrid</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="minimumAttendanceRequired">Minimum Required (%)</label>
+                                    <input type="number" id="minimumAttendanceRequired" name="attendance[minimumRequired]" 
+                                               min="0" max="100" value="80">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lateJoinWindow">Late Join Window (minutes)</label>
+                                    <input type="number" id="lateJoinWindow" name="attendance[lateJoinWindow]" 
+                                               min="0" max="60" value="15">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="attendance-rules-section">
+                            <h4>Attendance Rules</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="minimumSessionTime">Minimum Session Time (%)</label>
+                                    <input type="number" id="minimumSessionTime" name="attendance[rules][minimumSessionTime]" 
+                                               min="0" max="100" value="80">
+                                    <small class="help-text">Percentage of session duration required for attendance</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="breakAttendanceRequired">Break Attendance Required</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="breakAttendanceRequired" name="attendance[rules][breakAttendanceRequired]">
+                                        <label for="breakAttendanceRequired">Track attendance during breaks</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-section">
+                            <h4>Analytics & Reporting</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="engagementTracking">Track Engagement</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="engagementTracking" name="analytics[engagement][enabled]" checked>
+                                        <label for="engagementTracking">Track participant engagement metrics</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="participationTracking">Track Participation</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="participationTracking" name="analytics[participation][enabled]" checked>
+                                        <label for="participationTracking">Track questions, polls, and chat activity</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="14">
+                        <h3>Support & Contact</h3>
+                        
+                        <div class="contact-section">
+                            <h4>Contact Information</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="contactEmail">Contact Email</label>
+                                    <input type="email" id="contactEmail" name="support[contact][email]" 
+                                               value="info@iaa-i.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactPhone">Contact Phone</label>
+                                    <input type="tel" id="contactPhone" name="support[contact][phone]">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactWhatsapp">WhatsApp</label>
+                                    <input type="tel" id="contactWhatsapp" name="support[contact][whatsapp]" 
+                                               value="+90 536 745 86 66">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="support-hours-section">
+                            <h4>Support Hours</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="supportAvailable">Support Available</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="supportAvailable" name="support[hours][available]" checked>
+                                        <label for="supportAvailable">Technical support available during course</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="supportSchedule">Support Schedule</label>
+                                    <input type="text" id="supportSchedule" name="support[hours][schedule]" 
+                                               value="9 AM - 6 PM (Monday-Friday)">
+                                </div>
+                                <div class="form-group">
+                                    <label for="supportTimezone">Support Time Zone</label>
+                                    <input type="text" id="supportTimezone" name="support[hours][timezone]" 
+                                               placeholder="e.g., EST, PST">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="support-channels-section">
+                            <h4>Support Channels</h4>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="support[channels][email]" checked> Email Support</label>
+                                <label><input type="checkbox" name="support[channels][liveChat]"> Live Chat</label>
+                                <label><input type="checkbox" name="support[channels][ticketing]"> Ticketing System</label>
+                            </div>
+                        </div>
+                        
+                        <div class="emergency-procedures-section">
+                            <h4>Emergency Procedures</h4>
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="platformFailure">Platform Failure Procedure</label>
+                                    <textarea id="platformFailure" name="support[emergencyProcedures][platformFailure]" 
+                                                   placeholder="Steps to follow if the platform fails..."></textarea>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="instructorDisconnection">Instructor Disconnection Procedure</label>
+                                    <textarea id="instructorDisconnection" name="support[emergencyProcedures][instructorDisconnection]" 
+                                                   placeholder="Steps to follow if instructor disconnects..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="15">
+                        <h3>Post-Course Access</h3>
+                        
+                        <div class="access-duration-section">
+                            <h4>Access Duration</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="recordingsAccess">Recordings Access (days)</label>
+                                    <input type="number" id="recordingsAccess" name="postCourse[accessDuration][recordings]" 
+                                               min="1" max="365" value="90">
+                                </div>
+                                <div class="form-group">
+                                    <label for="materialsAccess">Materials Access (days)</label>
+                                    <input type="number" id="materialsAccess" name="postCourse[accessDuration][materials]" 
+                                               min="1" max="365" value="180">
+                                </div>
+                                <div class="form-group">
+                                    <label for="forumAccess">Forum Access (days)</label>
+                                    <input type="number" id="forumAccess" name="postCourse[accessDuration][forum]" 
+                                               min="1" max="365" value="365">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alumni-benefits-section">
+                            <h4>Alumni Benefits</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="refresherAccess">Refresher Sessions</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="refresherAccess" name="postCourse[alumni][refresherAccess]" checked>
+                                        <label for="refresherAccess">Access to refresher sessions</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="updatesIncluded">Course Updates</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="updatesIncluded" name="postCourse[alumni][updatesIncluded]" checked>
+                                        <label for="updatesIncluded">Receive course material updates</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="communityAccess">Community Access</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="communityAccess" name="postCourse[alumni][communityAccess]" checked>
+                                        <label for="communityAccess">Access to alumni community</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="futureDiscount">Future Course Discount (%)</label>
+                                    <input type="number" id="futureDiscount" name="postCourse[alumni][futureDiscount]" 
+                                               min="0" max="100" placeholder="Discount percentage">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="continued-learning-section">
+                            <h4>Continued Learning</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="monthlyWebinars">Monthly Webinars</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="monthlyWebinars" name="postCourse[continuedLearning][monthlyWebinars]">
+                                        <label for="monthlyWebinars">Offer monthly follow-up webinars</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newsletter">Newsletter Subscription</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="newsletter" name="postCourse[continuedLearning][newsletter]" checked>
+                                        <label for="newsletter">Subscribe to course newsletter</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="advanced-courses-section">
+                                <h5>Advanced Course Pathway</h5>
+                                <div id="advancedCoursesContainer">
+                                    </div>
+                                <button type="button" class="btn btn-secondary" id="addAdvancedCourse">
+                                    <i class="fas fa-plus"></i> Add Advanced Course
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-step hidden" data-step="16">
+                        <h3>Participant Experience & Settings</h3>
+                        
+                        <div class="onboarding-section">
+                            <h4>Participant Onboarding</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="welcomeVideoUrl">Welcome Video URL</label>
+                                    <input type="url" id="welcomeVideoUrl" name="experience[onboarding][welcomeVideoUrl]" 
+                                               placeholder="Welcome video link">
+                                </div>
+                                <div class="form-group">
+                                    <label for="platformGuideUrl">Platform Guide URL</label>
+                                    <input type="url" id="platformGuideUrl" name="experience[onboarding][platformGuideUrl]" 
+                                               placeholder="Platform tutorial link">
+                                </div>
+                                <div class="form-group">
+                                    <label for="checklistUrl">Pre-Course Checklist URL</label>
+                                    <input type="url" id="checklistUrl" name="experience[onboarding][checklistUrl]" 
+                                               placeholder="Checklist document link">
+                                </div>
+                                <div class="form-group">
+                                    <label for="orientationDate">Orientation Session Date</label>
+                                    <input type="datetime-local" id="orientationDate" name="experience[onboarding][orientationDate]">
+                                </div>
+                                <div class="form-group">
+                                    <label for="orientationRequired">Orientation Required</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="orientationRequired" name="experience[onboarding][orientationRequired]">
+                                        <label for="orientationRequired">Require orientation attendance</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accessibility-section">
+                            <h4>Accessibility Features</h4>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="experience[accessibility][closedCaptions]" checked> Closed Captions</label>
+                                <label><input type="checkbox" name="experience[accessibility][transcripts]" checked> Transcripts</label>
+                                <label><input type="checkbox" name="experience[accessibility][signLanguage]"> Sign Language Interpreter</label>
+                                <label><input type="checkbox" name="experience[accessibility][audioDescription]"> Audio Descriptions</label>
+                            </div>
+                        </div>
+                        
+                        <div class="gamification-section">
+                            <h4>Gamification</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="gamificationEnabled">Enable Gamification</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="gamificationEnabled" name="experience[gamification][enabled]">
+                                        <label for="gamificationEnabled">Enable gamification features</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checkbox-grid" id="gamificationFeatures" style="display: none;">
+                                <label><input type="checkbox" name="experience[gamification][points]"> Points System</label>
+                                <label><input type="checkbox" name="experience[gamification][badges]"> Achievement Badges</label>
+                                <label><input type="checkbox" name="experience[gamification][leaderboard]"> Leaderboard</label>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-settings-section">
+                            <h4>Notification Settings</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="courseUpdates">Course Updates</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="courseUpdates" name="notificationSettings[courseUpdates]" checked>
+                                        <label for="courseUpdates">Send course update notifications</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="emailNotifications">Email Notifications</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="emailNotifications" name="notificationSettings[emailNotifications]" checked>
+                                        <label for="emailNotifications">Send email notifications</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reminderSchedule">Reminder Schedule (days before)</label>
+                                    <input type="text" id="reminderSchedule" name="notificationSettings[reminderSchedule]" 
+                                               value="7,3,1" placeholder="e.g., 7,3,1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="marketingEmails">Marketing Emails</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="marketingEmails" name="notificationSettings[marketingEmails]" checked>
+                                        <label for="marketingEmails">Include in marketing emails</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="weeklyDigest">Weekly Digest</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="weeklyDigest" name="notificationSettings[weeklyDigest]">
+                                        <label for="weeklyDigest">Include in weekly digest</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="metadata-section">
+                            <h4>Metadata</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="version">Version</label>
+                                    <input type="number" id="version" name="metadata[version]" min="1" value="1" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="isTemplate">Save as Template</label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="isTemplate" name="metadata[isTemplate]">
+                                        <label for="isTemplate">Save this course as a template</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="templateName">Template Name</label>
+                                    <input type="text" id="templateName" name="metadata[templateName]" 
+                                               placeholder="Template name (if saving as template)">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="tags">Tags</label>
+                                    <input type="text" id="tags" name="metadata[tags]" 
+                                               placeholder="Comma-separated tags for organization">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="internalNotes">Internal Notes</label>
+                                    <textarea id="internalNotes" name="metadata[internalNotes]" 
+                                                   placeholder="Internal notes and comments..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" id="prevStep">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <div class="step-indicator">
+                            Step <span id="currentStepNumber">1</span> of <span id="totalSteps">16</span>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="nextStep">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success hidden" id="submitForm">
+                            <i class="fas fa-save"></i> Save Course
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cloneOptionsModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Clone Online Course: <span id="cloneCourseName"></span></h3>
+                <button class="close-btn" onclick="adminOnlineCourses.closeCloneOptionsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="cloneOptionsForm">
+                    <div class="form-group">
+                        <label for="cloneTitle">New Course Title *</label>
+                        <input type="text" id="cloneTitle" name="title" required
+                                       placeholder="Enter new course title" maxlength="200">
+                        <small class="help-text">The title for the cloned course</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cloneCourseCode">New Course Code *</label>
+                        <input type="text" id="cloneCourseCode" name="courseCode" required
+                                       placeholder="Enter unique course code" maxlength="50"
+                                       style="text-transform: uppercase;">
+                        <small class="help-text">Must be unique across all courses</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cloneStartDate">New Start Date *</label>
+                        <input type="datetime-local" id="cloneStartDate" name="startDate" required>
+                        <small class="help-text">Course will be scheduled for this date</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cloneStatus">Initial Status</label>
+                        <select id="cloneStatus" name="status">
+                            <option value="draft">Draft</option>
+                            <option value="open" selected>Open to Register</option>
+                            <option value="full">Full</option>
+                        </select>
+                        <small class="help-text">Status for the cloned course</small>
+                    </div>
+
+                    <div class="clone-options-section">
+                        <h4>Clone Options</h4>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneInstructors" checked>
+                                <span>Clone Instructors</span>
+                                <small>Copy instructor assignments</small>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneContent" checked>
+                                <span>Clone Content</span>
+                                <small>Copy objectives, modules, and materials</small>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneAssessment" checked>
+                                <span>Clone Assessment & Certification</span>
+                                <small>Copy assessment questions and certification settings</small>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="clonePlatform" checked>
+                                <span>Clone Platform & Access</span>
+                                <small>Copy virtual platform details</small>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneTechnical" checked>
+                                <span>Clone Technical Requirements</span>
+                                <small>Copy system, internet, and equipment needs</small>
+                            </label>
+                            
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneInteraction" checked>
+                                <span>Clone Interaction & Engagement</span>
+                                <small>Copy participation and engagement settings</small>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneRecording" checked>
+                                <span>Clone Recording & Replay</span>
+                                <small>Copy recording settings and replay availability</small>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneMedia">
+                                <span>Clone Media Files</span>
+                                <small>Copy uploaded images and documents (references only)</small>
+                            </label>
+                            
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneMaterials" checked>
+                                <span>Clone Digital Materials</span>
+                                <small>Copy handouts, virtual labs, and LMS settings</small>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="clonePostCourse" checked>
+                                <span>Clone Post-Course & Alumni</span>
+                                <small>Copy access durations and alumni benefits</small>
+                            </label>
+                            
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="cloneExperience" checked>
+                                <span>Clone Participant Experience</span>
+                                <small>Copy onboarding and accessibility settings</small>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="resetEnrollment" checked>
+                                <span>Reset Enrollment</span>
+                                <small>Start with 0 enrolled students</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cloneNotes">Clone Notes (Optional)</label>
+                        <textarea id="cloneNotes" name="notes"
+                                       placeholder="Add any notes about this clone..."></textarea>
+                    </div>
+                </form>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="adminOnlineCourses.closeCloneOptionsModal()">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="adminOnlineCourses.executeClone(document.getElementById('cloneCourseId').value)">
+                        <i class="fas fa-copy"></i> Clone Course
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="createFromInPersonModal">
+        <div class="modal-container large">
+            <div class="modal-header">
+                <h3>Create Online Course from In-Person Template</h3>
+                <button class="close-btn" onclick="adminOnlineCourses.closeCreateFromInPersonModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Select an existing In-Person Course to use as a template for your new Online Live Course. Only core content will be transferred.</p>
+                <input type="text" id="inPersonSearchInput" placeholder="Search In-Person courses by title, code, city..." class="form-control mb-3 in-person-search-input">
+                <div id="inPersonCoursesList" class="grid-view in-person-items-grid">
+                    <div class="text-center in-person-empty-message hidden">No matching In-Person courses found.</div>
+                </div>
+                <div class="text-center mt-3" id="inPersonPagination"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/template" id="sessionTemplate">
+        <div class="session-item dynamic-item" data-index="{{index}}">
+            <div class="dynamic-item-header">
+                <h6>Session <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveSession(this.closest('.dynamic-item'))" title="Save session">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'sessions')" title="Remove session">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Day Number</label>
+                    <input type="number" name="schedule[sessions][{{index}}][dayNumber]" min="1" value="{{dayNumber}}" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="datetime-local" name="schedule[sessions][{{index}}][date]" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="time" name="schedule[sessions][{{index}}][startTime]" required>
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <input type="time" name="schedule[sessions][{{index}}][endTime]" required>
+                </div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="schedule[sessions][{{index}}][title]" placeholder="Session title" required>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select name="schedule[sessions][{{index}}][type]">
+                        <option value="lecture">Lecture</option>
+                        <option value="practical">Practical</option>
+                        <option value="workshop">Workshop</option>
+                        <option value="q&a">Q&A</option>
+                        <option value="exam">Exam</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Instructor</label>
+                    <select name="schedule[sessions][{{index}}][instructorId]">
+                        <option value="">Select Instructor</option>
+                        </select>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="additionalInstructorTemplate">
+        <div class="additional-instructor-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Additional Instructor <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveInstructor(this.closest('.dynamic-item'))" title="Save instructor">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'instructors')" title="Remove instructor">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Additional Instructor</label>
+                    <select name="instructors[additional][{{index}}][instructorId]" required onchange="adminOnlineCourses.updateInstructorName(this)">
+                        <option value="">Select Instructor</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="instructors[additional][{{index}}][name]" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select name="instructors[additional][{{index}}][role]">
+                        <option value="Co-Instructor">Co-Instructor</option>
+                        <option value="Guest Instructor">Guest Instructor</option>
+                        <option value="Assistant">Assistant</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sessions</label>
+                    <input type="text" name="instructors[additional][{{index}}][sessions]" placeholder="Session IDs (comma-separated)">
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="objectiveTemplate">
+        <div class="objective-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Learning Objective <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveObjective(this.closest('.dynamic-item'))" title="Save objective">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'objectives')" title="Remove objective">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Learning Objective <span class="item-number"></span></label>
+                <input type="text" name="content[objectives][{{index}}]" placeholder="What will students learn?" required maxlength="200">
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="moduleTemplate">
+        <div class="module-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Module <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveModule(this.closest('.dynamic-item'))" title="Save module">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'modules')" title="Remove module">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Module Title</label>
+                    <input type="text" name="content[modules][{{index}}][title]" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration</label>
+                    <input type="text" name="content[modules][{{index}}][duration]" placeholder="e.g., 2 hours">
+                </div>
+                <div class="form-group">
+                    <label>Order</label>
+                    <input type="number" name="content[modules][{{index}}][order]" min="1">
+                </div>
+                <div class="form-group full-width">
+                    <label>Description</label>
+                    <textarea name="content[modules][{{index}}][description]" placeholder="Module description..."></textarea>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="targetAudienceTemplate">
+        <div class="target-audience-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Target Audience <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveTargetAudience(this.closest('.dynamic-item'))" title="Save target audience">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'targetAudience')" title="Remove target audience">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Target Audience <span class="item-number"></span></label>
+                <input type="text" name="content[targetAudience][{{index}}]" placeholder="Target audience (e.g., Medical doctors)" required>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="requiredSoftwareTemplate">
+        <div class="software-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Software <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveRequiredSoftware(this.closest('.dynamic-item'))" title="Save software">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'requiredSoftware')" title="Remove software">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Software Name</label>
+                <input type="text" name="technical[requiredSoftware][{{index}}]" placeholder="Software name" required>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="engagementToolTemplate">
+        <div class="tool-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Engagement Tool <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveEngagementTool(this.closest('.dynamic-item'))" title="Save tool">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'engagementTools')" title="Remove tool">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Tool Name</label>
+                <input type="text" name="interaction[engagementTools][{{index}}]" placeholder="Tool name (e.g., Mentimeter, Kahoot)" required>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="videoLinkTemplate">
+        <div class="video-link-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Video Link <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveVideoLink(this.closest('.dynamic-item'))" title="Save video link">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'videoLinks')" title="Remove video link">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Video URL</label>
+                <input type="url" name="media[videos][{{index}}]" placeholder="YouTube, Vimeo, etc." required>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="linkTemplate">
+        <div class="link-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>External Link <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveLink(this.closest('.dynamic-item'))" title="Save link">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'links')" title="Remove link">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="media[links][{{index}}][title]" placeholder="Link title" required>
+                </div>
+                <div class="form-group">
+                    <label>URL</label>
+                    <input type="url" name="media[links][{{index}}][url]" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select name="media[links][{{index}}][type]">
+                        <option value="article">Article</option>
+                        <option value="video">Video</option>
+                        <option value="tool">Tool</option>
+                        <option value="website">Website</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="handoutTemplate">
+        <div class="handout-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Handout <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveHandout(this.closest('.dynamic-item'))" title="Save handout">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'handouts')" title="Remove handout">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="materials[handouts][{{index}}][title]" placeholder="Handout title" required>
+                </div>
+                <div class="form-group">
+                    <label>URL</label>
+                    <input type="url" name="materials[handouts][{{index}}][url]" placeholder="File URL" required>
+                </div>
+                <div class="form-group">
+                    <label>Release Time</label>
+                    <select name="materials[handouts][{{index}}][releaseTime]">
+                        <option value="immediate">Immediate</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="after-session">After Session</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Scheduled Date</label>
+                    <input type="datetime-local" name="materials[handouts][{{index}}][scheduledDate]">
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="virtualLabTemplate">
+        <div class="lab-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Virtual Lab <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveVirtualLab(this.closest('.dynamic-item'))" title="Save virtual lab">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'virtualLabs')" title="Remove virtual lab">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Lab Name</label>
+                    <input type="text" name="materials[virtualLabs][{{index}}][name]" placeholder="Lab name" required>
+                </div>
+                <div class="form-group">
+                    <label>Platform</label>
+                    <input type="text" name="materials[virtualLabs][{{index}}][platform]" placeholder="Lab platform">
+                </div>
+                <div class="form-group">
+                    <label>Access URL</label>
+                    <input type="url" name="materials[virtualLabs][{{index}}][url]" placeholder="Lab URL" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration (hours)</label>
+                    <input type="number" name="materials[virtualLabs][{{index}}][duration]" min="1" placeholder="Access duration">
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="questionTemplate">
+        <div class="question-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Question <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveQuestion(this.closest('.dynamic-item'))" title="Save question">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'questions')" title="Remove question">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Question</label>
+                    <textarea name="assessment[questions][{{index}}][question]" placeholder="Question text" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Answer 1</label>
+                    <input type="text" name="assessment[questions][{{index}}][answers][0]" placeholder="Answer option 1" required>
+                </div>
+                <div class="form-group">
+                    <label>Answer 2</label>
+                    <input type="text" name="assessment[questions][{{index}}][answers][1]" placeholder="Answer option 2" required>
+                </div>
+                <div class="form-group">
+                    <label>Answer 3</label>
+                    <input type="text" name="assessment[questions][{{index}}][answers][2]" placeholder="Answer option 3">
+                </div>
+                <div class="form-group">
+                    <label>Answer 4</label>
+                    <input type="text" name="assessment[questions][{{index}}][answers][3]" placeholder="Answer option 4">
+                </div>
+                <div class="form-group">
+                    <label>Correct Answer (1-4)</label>
+                    <input type="number" name="assessment[questions][{{index}}][correctAnswer]" min="1" max="4" required>
+                </div>
+                <div class="form-group">
+                    <label>Points</label>
+                    <input type="number" name="assessment[questions][{{index}}][points]" min="1" value="1">
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="advancedCourseTemplate">
+        <div class="advanced-course-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Advanced Course <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveAdvancedCourse(this.closest('.dynamic-item'))" title="Save course">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'advancedCourses')" title="Remove course">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Advanced Course Code</label>
+                <input type="text" name="postCourse[continuedLearning][advancedCourses][{{index}}]" placeholder="Advanced course code" required>
+            </div>
+        </div>
+    </script>
+    
+    <script type="text/template" id="certificationBodyTemplate">
+        <div class="certification-body-item dynamic-item">
+            <div class="dynamic-item-header">
+                <h6>Additional Certification Body <span class="item-number"></span></h6>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="save-item-btn" onclick="adminOnlineCourses.saveCertificationBody(this.closest('.dynamic-item'))" title="Save certification body">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="remove-btn" onclick="adminOnlineCourses.removeDynamicItem(this.closest('.dynamic-item'), 'certificationBodies')" title="Remove certification body">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Certification Body</label>
+                    <select name="certification[certificationBodies][{{index}}][bodyId]" required onchange="adminOnlineCourses.updateCertificationBodyInfo(this)">
+                        <option value="">Select Certification Body</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label>Body Name</label>
+                    <input type="text" name="certification[certificationBodies][{{index}}][name]" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select name="certification[certificationBodies][{{index}}][role]">
+                        <option value="co-issuer">Co-Issuer</option>
+                        <option value="endorser">Endorser</option>
+                        <option value="partner">Partner</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </script>
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-container small">
+            <div class="modal-header">
+                <h3 id="confirmTitle">Confirm Action</h3>
+                <button class="close-btn" id="closeConfirmModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to perform this action?</p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelAction">Cancel</button>
+                    <button class="btn btn-danger" id="confirmAction">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <script src="/js/admin-online-courses.js"></script>
+</body>
+</html>

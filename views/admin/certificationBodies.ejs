@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certification Bodies Management - IAAI Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #7c3aed;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-color: #1f2937;
+            --light-bg: #f9fafb;
+            --white: #ffffff;
+            --border-color: #e5e7eb;
+            --text-muted: #6b7280;
+            --gold-color: #f59e0b;
+            --silver-color: #6b7280;
+            --bronze-color: #d97706;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light-bg);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header-title p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37,99,235,0.3);
+        }
+
+        /* Certification Body Grid */
+        .body-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .body-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .body-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .body-card.preferred {
+            border-left-color: var(--gold-color);
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+        }
+
+        .body-header {
+            padding: 25px;
+            background: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .body-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .body-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: var(--light-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .body-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .body-logo .logo-placeholder {
+            font-size: 24px;
+            color: var(--text-muted);
+        }
+
+        .body-details h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .body-short-name {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .preferred-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--gold-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .body-content {
+            padding: 25px;
+        }
+
+        .body-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: var(--light-bg);
+            border-radius: 8px;
+        }
+
+        .body-stat i {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+
+        .specializations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .specialization-tag {
+            padding: 4px 12px;
+            background: #e0e7ff;
+            color: var(--primary-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .membership-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .membership-gold {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .membership-silver {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .membership-bronze {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .membership-standard {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .body-actions {
+            display: flex;
+            gap: 10px;
+            padding: 20px 25px;
+            background: var(--light-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .close {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        /* Form Styles */
+        .form-section {
+            background: var(--light-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .form-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Logo Upload Styles */
+        .logo-upload-area {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .logo-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            border: 4px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+            background: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .logo-preview:hover {
+            border-color: var(--primary-color);
+        }
+
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-preview-placeholder {
+            font-size: 40px;
+            color: var(--text-muted);
+        }
+
+        .logo-upload-btn {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .logo-upload-btn input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .logo-upload-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            gap: 8px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .logo-upload-label:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37,99,235,0.3);
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .body-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<%- include('../partials/header') %>
+
+<body>
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1><i class="fas fa-certificate"></i> Certification Bodies Management</h1>
+                    <p>Manage aesthetic industry certification organizations</p>
+                </div>
+                <div class="header-actions">
+                    <a href="/dashboard" class="btn btn-primary" style="background: white; color: var(--primary-color);">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="showCreateModal()">
+                    <i class="fas fa-plus-circle"></i> Add Certification Body
+                </button>
+            </div>
+            
+            <div class="filter-section">
+                <input type="text" class="form-control" id="searchBox" placeholder="Search certification bodies..." style="width: 300px;">
+            </div>
+        </div>
+
+        <!-- Certification Bodies Grid -->
+        <div class="body-grid" id="bodyGrid">
+            <!-- Certification bodies will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-certificate"></i>
+            <h3>No certification bodies found</h3>
+            <p>Start by adding your first certification body</p>
+        </div>
+    </div>
+
+    <!-- Certification Body Modal -->
+    <div id="bodyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Certification Body</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="bodyForm" enctype="multipart/form-data">
+                    <!-- Basic Information with Logo -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-building"></i> Basic Information</h3>
+                        
+                        <!-- Logo Upload Section -->
+                        <div class="logo-upload-area">
+                            <div class="logo-preview" id="logoPreview">
+                                <i class="fas fa-image logo-preview-placeholder"></i>
+                            </div>
+                            <div class="logo-upload-btn">
+                                <label for="logo" class="logo-upload-label">
+                                    <i class="fas fa-upload"></i> Upload Logo
+                                </label>
+                                <input type="file" id="logo" name="logo" accept="image/*" onchange="previewLogo(event)">
+                            </div>
+                            <small class="form-text">Maximum file size: 5MB (JPG, PNG, GIF, WEBP, SVG)</small>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Company Name *</label>
+                                <input type="text" name="companyName" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Short Name / Acronym</label>
+                                <input type="text" name="shortName" class="form-control" placeholder="e.g., AAAM">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" name="phone" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Website</label>
+                                <input type="url" name="website" class="form-control" placeholder="https://...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Registration Number</label>
+                                <input type="text" name="registrationNumber" class="form-control" placeholder="Business registration number">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" class="form-control" rows="3" placeholder="Brief description of the organization..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Address Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Street Address</label>
+                                <input type="text" name="street" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>City *</label>
+                                <input type="text" name="city" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>State/Province</label>
+                                <input type="text" name="state" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Country *</label>
+                                <input type="text" name="country" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>ZIP/Postal Code</label>
+                                <input type="text" name="zipCode" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Established Year</label>
+                                <input type="number" name="establishedYear" class="form-control" min="1900" max="2025">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-certificate"></i> Certification Details</h3>
+                        <div class="form-group">
+                            <label>Specializations</label>
+                            <input type="text" name="specializations" class="form-control" placeholder="Separate with commas (e.g., Botox, Dermal Fillers, PDO Threads, Skincare)">
+                            <small class="form-text">Enter specialization areas separated by commas</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Accreditation Bodies</label>
+                            <input type="text" name="accreditation" class="form-control" placeholder="Separate with commas (e.g., NCCA, ANSI, ISO)">
+                            <small class="form-text">Organizations that accredit this certification body</small>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Membership Level</label>
+                                <select name="membershipLevel" class="form-control">
+                                    <option value="Standard">Standard</option>
+                                    <option value="Bronze">Bronze Partner</option>
+                                    <option value="Silver">Silver Partner</option>
+                                    <option value="Gold">Gold Partner</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 15px;">
+                                <label style="margin-bottom: 0;">Status & Preferences</label>
+                                <label style="font-weight: normal; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" name="isActive" checked>
+                                    Active Status
+                                </label>
+                                <label style="font-weight: normal; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" name="isPreferred">
+                                    Preferred Partner
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Administrative Notes -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-sticky-note"></i> Administrative Notes</h3>
+                        <div class="form-group">
+                            <label>Internal Notes</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Internal administrative notes..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()" style="background: var(--text-muted); color: white; margin-right: 10px;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save"></i> <span id="submitBtnText">Save Certification Body</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let certificationBodies = [];
+        let editingBodyId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCertificationBodies();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchBox').addEventListener('input', filterBodies);
+            document.getElementById('bodyForm').addEventListener('submit', handleFormSubmit);
+        }
+
+        // Preview logo function
+        function previewLogo(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('logoPreview');
+            
+            if (file) {
+                // Check file size
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire('Error', 'File too large. Maximum size is 5MB.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Logo preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '<i class="fas fa-image logo-preview-placeholder"></i>';
+            }
+        }
+
+        async function loadCertificationBodies() {
+            showLoading();
+            try {
+                const response = await fetch('/api/certification-bodies');
+                const data = await response.json();
+                
+                if (data.success) {
+                    certificationBodies = data.certificationBodies;
+                    displayBodies();
+                }
+            } catch (error) {
+                console.error('Error loading certification bodies:', error);
+                Swal.fire('Error', 'Failed to load certification bodies', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayBodies() {
+            const grid = document.getElementById('bodyGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (certificationBodies.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = certificationBodies.map(body => createBodyCard(body)).join('');
+        }
+
+        function createBodyCard(body) {
+            const membershipClass = `membership-${body.membershipLevel.toLowerCase()}`;
+            const statusClass = body.isActive ? 'status-active' : 'status-inactive';
+            const cardClass = body.isPreferred ? 'body-card preferred' : 'body-card';
+            
+            const logoContent = body.logo 
+                ? `<img src="${body.logo}" alt="${body.companyName} logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                : '<i class="fas fa-building logo-placeholder"></i>';
+            
+            return `
+                <div class="${cardClass}">
+                    <div class="body-header">
+                        ${body.isPreferred ? '<div class="preferred-badge"><i class="fas fa-star"></i> Preferred</div>' : ''}
+                        <div class="body-info">
+                            <div class="body-logo">${logoContent}</div>
+                            <div class="body-details">
+                                <h3>${body.companyName}</h3>
+                                ${body.shortName ? `<div class="body-short-name">${body.shortName}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="body-content">
+                        ${body.address && body.address.city ? `
+                            <div class="body-stat">
+                                <span><i class="fas fa-map-marker-alt"></i> Location</span>
+                                <strong>${body.address.city}, ${body.address.country}</strong>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="body-stat">
+                            <span><i class="fas fa-trophy"></i> Membership</span>
+                            <span class="membership-badge ${membershipClass}">${body.membershipLevel}</span>
+                        </div>
+                        
+                        <div class="body-stat">
+                            <span><i class="fas fa-toggle-${body.isActive ? 'on' : 'off'}"></i> Status</span>
+                            <span class="status-badge ${statusClass}">${body.isActive ? 'Active' : 'Inactive'}</span>
+                        </div>
+                        
+                        ${body.specializations && body.specializations.length > 0 ? `
+                            <div class="specializations">
+                                ${body.specializations.slice(0, 3).map(spec => `<span class="specialization-tag">${spec}</span>`).join('')}
+                                ${body.specializations.length > 3 ? `<span class="specialization-tag">+${body.specializations.length - 3} more</span>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="body-actions">
+                        <button class="btn btn-primary" onclick="editBody('${body._id}')" style="padding: 8px 16px; font-size: 14px;">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteBody('${body._id}')" style="padding: 8px 16px; font-size: 14px; background: var(--danger-color);">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterBodies() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            
+            const filtered = certificationBodies.filter(body => {
+                const companyName = body.companyName.toLowerCase();
+                const shortName = (body.shortName || '').toLowerCase();
+                const specializations = (body.specializations || []).join(' ').toLowerCase();
+                const location = `${body.address?.city || ''} ${body.address?.country || ''}`.toLowerCase();
+                
+                return companyName.includes(searchTerm) || 
+                       shortName.includes(searchTerm) || 
+                       specializations.includes(searchTerm) ||
+                       location.includes(searchTerm);
+            });
+            
+            const grid = document.getElementById('bodyGrid');
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h3>No certification bodies found</h3><p>Try adjusting your search</p></div>';
+            } else {
+                grid.innerHTML = filtered.map(body => createBodyCard(body)).join('');
+            }
+        }
+
+        function showCreateModal() {
+            editingBodyId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Certification Body';
+            document.getElementById('submitBtnText').textContent = 'Save Certification Body';
+            document.getElementById('bodyForm').reset();
+            
+            // Reset logo preview
+            document.getElementById('logoPreview').innerHTML = '<i class="fas fa-image logo-preview-placeholder"></i>';
+            
+            // Set default values
+            document.querySelector('input[name="isActive"]').checked = true;
+            
+            document.getElementById('bodyModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('bodyModal').style.display = 'none';
+            editingBodyId = null;
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(event.target);
+                
+                const url = editingBodyId 
+                    ? `/api/certification-bodies/${editingBodyId}`
+                    : '/api/certification-bodies';
+                
+                const method = editingBodyId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: editingBodyId ? 'Certification Body Updated!' : 'Certification Body Added!',
+                        text: result.message,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    
+                    closeModal();
+                    loadCertificationBodies();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error saving certification body:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to save certification body'
+                });
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function editBody(bodyId) {
+            const body = certificationBodies.find(b => b._id === bodyId);
+            if (!body) return;
+            
+            editingBodyId = bodyId;
+            document.getElementById('modalTitle').textContent = 'Edit Certification Body';
+            document.getElementById('submitBtnText').textContent = 'Update Certification Body';
+            
+            // Reset and populate logo preview
+            const preview = document.getElementById('logoPreview');
+            if (body.logo) {
+                preview.innerHTML = `<img src="${body.logo}" alt="Logo preview">`;
+            } else {
+                preview.innerHTML = '<i class="fas fa-image logo-preview-placeholder"></i>';
+            }
+            
+            // Clear the file input
+            document.getElementById('logo').value = '';
+            
+            // Populate form
+            const form = document.getElementById('bodyForm');
+            form.companyName.value = body.companyName || '';
+            form.shortName.value = body.shortName || '';
+            form.registrationNumber.value = body.registrationNumber || '';
+            form.email.value = body.email || '';
+            form.phone.value = body.phone || '';
+            form.website.value = body.website || '';
+            form.description.value = body.description || '';
+            form.establishedYear.value = body.establishedYear || '';
+            
+            // Address
+            if (body.address) {
+                form.street.value = body.address.street || '';
+                form.city.value = body.address.city || '';
+                form.state.value = body.address.state || '';
+                form.country.value = body.address.country || '';
+                form.zipCode.value = body.address.zipCode || '';
+            }
+            
+            form.membershipLevel.value = body.membershipLevel || 'Standard';
+            form.notes.value = body.notes || '';
+            
+            // Handle specializations
+            if (body.specializations && body.specializations.length > 0) {
+                form.specializations.value = body.specializations.join(', ');
+            } else {
+                form.specializations.value = '';
+            }
+            
+            // Handle accreditation
+            if (body.accreditation && body.accreditation.length > 0) {
+                form.accreditation.value = body.accreditation.join(', ');
+            } else {
+                form.accreditation.value = '';
+            }
+            
+            // Handle checkboxes
+            form.isActive.checked = body.isActive;
+            form.isPreferred.checked = body.isPreferred;
+            
+            document.getElementById('bodyModal').style.display = 'block';
+        }
+
+        async function deleteBody(bodyId) {
+            const body = certificationBodies.find(b => b._id === bodyId);
+            
+            const result = await Swal.fire({
+                title: 'Delete Certification Body?',
+                html: `
+                    <p>Are you sure you want to delete this certification body?</p>
+                    <p><strong>${body.companyName}</strong></p>
+                    <p style="color: var(--text-muted); font-size: 14px;">This action cannot be undone.</p>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete'
+            });
+            
+            if (result.isConfirmed) {
+                try {
+                    showLoading();
+                    const response = await fetch(`/api/certification-bodies/${bodyId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        Swal.fire('Deleted!', 'Certification body has been deleted.', 'success');
+                        loadCertificationBodies();
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting certification body:', error);
+                    Swal.fire('Error', 'Failed to delete certification body', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+        }
+
+        function showLoading() {
+            document.querySelector('.loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.querySelector('.loading-overlay').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('bodyModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

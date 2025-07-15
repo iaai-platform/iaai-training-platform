@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .assessment-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    
+    .assessment-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .assessment-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid #17a2b8;
+    }
+    
+    .question-card {
+      background: white;
+      padding: 25px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .question-number {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    
+    .question-text {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    .answer-option {
+      display: block;
+      padding: 12px 20px;
+      margin-bottom: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .answer-option:hover {
+      background: #f8f9fa;
+      border-color: #667eea;
+    }
+    
+    .answer-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .answer-option input[type="radio"]:checked + .answer-text {
+      color: #667eea;
+      font-weight: 600;
+    }
+    
+    .answer-option input[type="radio"]:checked ~ .answer-check {
+      display: inline;
+    }
+    
+    .answer-check {
+      display: none;
+      color: #667eea;
+      float: right;
+    }
+    
+    .assessment-history {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .history-item {
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    
+    .score-badge {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .score-passed {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .score-failed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .submit-section {
+      text-align: center;
+      margin-top: 40px;
+      padding: 30px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .no-attempts {
+      text-align: center;
+      padding: 40px;
+      background: #f8d7da;
+      border-radius: 8px;
+      color: #721c24;
+    }
+    
+    /* Results Modal Styles */
+    .results-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow: auto;
+    }
+    
+    .results-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 0;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .results-header {
+      padding: 30px;
+      color: white;
+      text-align: center;
+    }
+    
+    .results-header.passed {
+      background: linear-gradient(135deg, #28a745, #20c997);
+    }
+    
+    .results-header.failed {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+    
+    .results-body {
+      padding: 30px;
+      max-height: calc(90vh - 200px);
+      overflow-y: auto;
+    }
+    
+    .result-question {
+      background: #f8f9fa;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #dee2e6;
+    }
+    
+    .result-question.correct {
+      border-left-color: #28a745;
+    }
+    
+    .result-question.incorrect {
+      border-left-color: #dc3545;
+    }
+    
+    .result-answer {
+      padding: 10px 15px;
+      margin: 5px 0;
+      border-radius: 6px;
+      position: relative;
+    }
+    
+    .result-answer.user-answer {
+      background: #e3f2fd;
+      border: 2px solid #2196f3;
+    }
+    
+    .result-answer.correct-answer {
+      background: #d4edda;
+      border: 2px solid #28a745;
+    }
+    
+    .result-answer.user-correct {
+      background: #d4edda;
+      border: 2px solid #28a745;
+    }
+    
+    .result-answer.user-incorrect {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+    }
+    
+    .answer-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      background: white;
+      padding: 0 5px;
+    }
+    
+    .results-footer {
+      padding: 20px 30px;
+      background: #f8f9fa;
+      text-align: center;
+      border-top: 1px solid #dee2e6;
+    }
+    
+    .score-summary {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .score-display {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+    
+    .score-display.passed {
+      color: #28a745;
+    }
+    
+    .score-display.failed {
+      color: #dc3545;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+  <div class="assessment-container">
+    <!-- Assessment Header -->
+    <div class="assessment-header">
+      <h1><i class="fas fa-clipboard-check"></i> Course Assessment</h1>
+      <h2><%= course.basic.title %></h2>
+      <p><%= course.basic.courseCode %></p>
+    </div>
+
+    <!-- Assessment Info -->
+    <div class="assessment-info">
+      <h3><i class="fas fa-info-circle"></i> Assessment Information</h3>
+      <ul style="margin: 10px 0; padding-left: 20px;">
+        <li>Type: <%= assessment.type === 'quiz' ? 'Quiz' : assessment.type === 'practical' ? 'Practical' : 'Quiz & Practical' %></li>
+        <li>Total Questions: <%= assessment.questions ? assessment.questions.length : 0 %></li>
+        <li>Passing Score: <%= assessment.passingScore %>%</li>
+        <li>Total Attempts Allowed: <%= maxAttempts %> (1 initial + <%= (assessment.retakesAllowed || 0) %> retake<%= (assessment.retakesAllowed || 0) !== 1 ? 's' : '' %>)</li>
+        <li>Attempts Used: <%= currentAttempts %> of <%= maxAttempts %></li>
+        <li>Attempts Remaining: <%= maxAttempts - currentAttempts %></li>
+      </ul>
+    </div>
+
+    <!-- Assessment History -->
+    <% if (assessmentHistory && assessmentHistory.length > 0) { %>
+      <div class="assessment-history">
+        <h3><i class="fas fa-history"></i> Your Previous Attempts</h3>
+        <% assessmentHistory.forEach(attempt => { %>
+          <div class="history-item">
+            <div>
+              <strong>Attempt <%= attempt.attemptNumber %></strong>
+              <br>
+              <small><%= new Date(attempt.date).toLocaleDateString() + ' at ' + new Date(attempt.date).toLocaleTimeString() %></small>
+            </div>
+            <div style="text-align: right;">
+              <span class="score-badge <%= attempt.passed ? 'score-passed' : 'score-failed' %>">
+                <%= attempt.score %>% - <%= attempt.passed ? 'PASSED' : 'FAILED' %>
+              </span>
+              <% if (attempt.detailedResults) { %>
+                <br>
+                <button class="btn btn-sm btn-link" style="margin-top: 5px; padding: 2px 8px; font-size: 0.8rem;" 
+                        onclick="viewAttemptDetails(<%= JSON.stringify(attempt) %>)">
+                  <i class="fas fa-eye"></i> View Details
+                </button>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <!-- Assessment Form -->
+    <% if (canTakeAssessment && !hasPassedAssessment) { %>
+      <form id="assessmentForm" method="POST" action="/library/in-person/assessment/<%= course._id %>">
+        <% if (assessment.questions && assessment.questions.length > 0) { %>
+          <% assessment.questions.forEach((question, qIndex) => { %>
+            <div class="question-card">
+              <span class="question-number">Question <%= qIndex + 1 %></span>
+              <% if (question.points > 1) { %>
+                <span style="float: right; color: #666;">(<%= question.points %> points)</span>
+              <% } %>
+              <p class="question-text"><%= question.question %></p>
+              
+              <% question.answers.forEach((answer, aIndex) => { %>
+                <label class="answer-option">
+                  <input type="radio" name="answers[<%= qIndex %>]" value="<%= aIndex %>" required>
+                  <span class="answer-text"><%= answer %></span>
+                  <span class="answer-check"><i class="fas fa-check-circle"></i></span>
+                </label>
+              <% }) %>
+            </div>
+          <% }) %>
+          
+          <div class="submit-section">
+            <p style="margin-bottom: 20px; color: #666;">
+              <strong>Important:</strong> Please review all your answers before submitting.<br>
+              You are on attempt <strong><%= currentAttempts + 1 %></strong> of <strong><%= maxAttempts %></strong> total attempts allowed.<br>
+              <% if ((maxAttempts - currentAttempts - 1) > 0) { %>
+                After this submission, you will have <strong><%= maxAttempts - currentAttempts - 1 %></strong> attempt<%= (maxAttempts - currentAttempts - 1) !== 1 ? 's' : '' %> remaining.
+              <% } else { %>
+                <span style="color: #dc3545;">This is your final attempt!</span>
+              <% } %>
+            </p>
+            <button type="submit" class="cta-btn btn-primary" id="submitBtn">
+              <i class="fas fa-paper-plane"></i> Submit Assessment
+            </button>
+          </div>
+        <% } else { %>
+          <div class="no-attempts">
+            <p>No questions available for this assessment.</p>
+          </div>
+        <% } %>
+      </form>
+    <% } else if (hasPassedAssessment) { %>
+      <div class="submit-section" style="background: #d4edda;">
+        <h3 style="color: #155724;"><i class="fas fa-check-circle"></i> Assessment Completed Successfully!</h3>
+        <p style="color: #155724;">You have already passed this assessment. You can now confirm your attendance.</p>
+        <a href="/library/in-person" class="cta-btn btn-primary">
+          <i class="fas fa-arrow-left"></i> Back to Library
+        </a>
+      </div>
+    <% } else { %>
+      <div class="no-attempts">
+        <h3><i class="fas fa-exclamation-triangle"></i> No Attempts Remaining</h3>
+        <p>You have used all <%= assessment.retakesAllowed || 1 %> attempt(s) for this assessment.</p>
+        <a href="/library/in-person" class="cta-btn btn-secondary">
+          <i class="fas fa-arrow-left"></i> Back to Library
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Results Modal -->
+  <div id="resultsModal" class="results-modal">
+    <div class="results-content">
+      <div id="resultsHeader" class="results-header">
+        <h2 id="resultsTitle"></h2>
+        <div class="score-display" id="scoreDisplay"></div>
+        <p id="resultsMessage"></p>
+      </div>
+      
+      <div class="results-body">
+        <div class="score-summary">
+          <h3>Score Summary</h3>
+          <p id="scoreSummary"></p>
+        </div>
+        
+        <h3 style="margin-bottom: 20px;">Review Your Answers</h3>
+        <div id="resultsQuestions"></div>
+      </div>
+      
+      <div class="results-footer">
+        <button id="returnToLibraryBtn" class="cta-btn btn-primary">
+          <i class="fas fa-arrow-left"></i> Return to Library
+        </button>
+        <button id="retakeBtn" class="cta-btn btn-secondary" style="display: none; margin-left: 10px;">
+          <i class="fas fa-redo"></i> Retake Assessment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Form submission handler
+    document.getElementById('assessmentForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!confirm('Are you sure you want to submit your assessment? This action cannot be undone.')) {
+        return;
+      }
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+      
+      // Collect answers
+      const formData = new FormData(e.target);
+      const answers = [];
+      
+      // Get total questions count
+      const totalQuestions = <%= assessment.questions ? assessment.questions.length : 0 %>;
+      
+      for (let i = 0; i < totalQuestions; i++) {
+        const answer = formData.get(`answers[${i}]`);
+        answers[i] = answer ? parseInt(answer) : undefined;
+      }
+      
+      try {
+        const response = await fetch(`/library/in-person/assessment/<%= course._id %>`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ answers })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Show results modal
+          showResultsModal(result);
+        } else {
+          alert('❌ ' + result.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Assessment';
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        alert('❌ Error submitting assessment. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Assessment';
+      }
+    });
+    
+    function showResultsModal(result) {
+      const modal = document.getElementById('resultsModal');
+      const header = document.getElementById('resultsHeader');
+      const title = document.getElementById('resultsTitle');
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const message = document.getElementById('resultsMessage');
+      const scoreSummary = document.getElementById('scoreSummary');
+      const questionsDiv = document.getElementById('resultsQuestions');
+      const retakeBtn = document.getElementById('retakeBtn');
+      
+      // Set header based on pass/fail
+      if (result.passed) {
+        header.className = 'results-header passed';
+        title.innerHTML = '<i class="fas fa-trophy"></i> Congratulations!';
+        scoreDisplay.className = 'score-display passed';
+        message.textContent = 'You have successfully passed the assessment!';
+      } else {
+        header.className = 'results-header failed';
+        title.innerHTML = '<i class="fas fa-times-circle"></i> Assessment Not Passed';
+        scoreDisplay.className = 'score-display failed';
+        message.textContent = `You need ${result.passingScore}% to pass. ${result.canRetake ? 'You can retake the assessment.' : 'No retakes remaining.'}`;
+      }
+      
+      // Display score
+      scoreDisplay.textContent = result.score + '%';
+      
+      // Score summary
+      const correctCount = result.detailedResults.filter(r => r.isCorrect).length;
+      scoreSummary.innerHTML = `
+        You answered <strong>${correctCount}</strong> out of <strong>${result.detailedResults.length}</strong> questions correctly.<br>
+        Points earned: <strong>${result.detailedResults.reduce((sum, r) => sum + r.earnedPoints, 0)}</strong> out of 
+        <strong>${result.detailedResults.reduce((sum, r) => sum + r.points, 0)}</strong>
+      `;
+      
+      // Display detailed results
+      questionsDiv.innerHTML = '';
+      result.detailedResults.forEach((questionResult, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = `result-question ${questionResult.isCorrect ? 'correct' : 'incorrect'}`;
+        
+        let answersHtml = '';
+        questionResult.answers.forEach((answer, answerIndex) => {
+          const isUserAnswer = questionResult.userAnswer === answerIndex;
+          const isCorrectAnswer = questionResult.correctAnswer === answerIndex;
+          
+          let answerClass = 'result-answer';
+          let label = '';
+          
+          if (isUserAnswer && isCorrectAnswer) {
+            answerClass += ' user-correct';
+            label = '<span class="answer-label" style="color: #28a745;">Your Answer ✓</span>';
+          } else if (isUserAnswer && !isCorrectAnswer) {
+            answerClass += ' user-incorrect';
+            label = '<span class="answer-label" style="color: #dc3545;">Your Answer ✗</span>';
+          } else if (isCorrectAnswer) {
+            answerClass += ' correct-answer';
+            label = '<span class="answer-label" style="color: #28a745;">Correct Answer</span>';
+          }
+          
+          answersHtml += `
+            <div class="${answerClass}">
+              ${label}
+              ${answer}
+            </div>
+          `;
+        });
+        
+        questionDiv.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span class="question-number">Question ${index + 1}</span>
+            <span style="font-weight: 600; color: ${questionResult.isCorrect ? '#28a745' : '#dc3545'};">
+              ${questionResult.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+              ${questionResult.points > 1 ? `(${questionResult.earnedPoints}/${questionResult.points} points)` : ''}
+            </span>
+          </div>
+          <p class="question-text">${questionResult.question}</p>
+          <div style="margin-top: 15px;">
+            ${answersHtml}
+          </div>
+        `;
+        
+        questionsDiv.appendChild(questionDiv);
+      });
+      
+      // Show/hide retake button
+      if (result.canRetake) {
+        retakeBtn.style.display = 'inline-block';
+        retakeBtn.onclick = () => location.reload();
+      } else {
+        retakeBtn.style.display = 'none';
+      }
+      
+      // Show modal
+      modal.style.display = 'block';
+    }
+    
+    // Return to library button
+    document.getElementById('returnToLibraryBtn').addEventListener('click', () => {
+      window.location.href = '/library/in-person';
+    });
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('resultsModal');
+      if (event.target == modal) {
+        // Don't allow closing by clicking outside - force user to use button
+        return false;
+      }
+    }
+    
+    // View previous attempt details
+    function viewAttemptDetails(attempt) {
+      const result = {
+        passed: attempt.passed,
+        score: attempt.score,
+        passingScore: <%= assessment.passingScore %>,
+        detailedResults: attempt.detailedResults,
+        canRetake: false // Viewing history, no retake from here
+      };
+      
+      showResultsModal(result);
+      
+      // Update buttons for history view
+      document.getElementById('retakeBtn').style.display = 'none';
+      document.getElementById('returnToLibraryBtn').innerHTML = '<i class="fas fa-times"></i> Close';
+      document.getElementById('returnToLibraryBtn').onclick = () => {
+        document.getElementById('resultsModal').style.display = 'none';
+        // Reset button
+        document.getElementById('returnToLibraryBtn').innerHTML = '<i class="fas fa-arrow-left"></i> Return to Library';
+        document.getElementById('returnToLibraryBtn').onclick = () => {
+          window.location.href = '/library/in-person';
+        };
+      };
+    }
+  </script>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

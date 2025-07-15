@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>International Aesthetic Academic Institution (IAAI)</title>
+    <link rel="stylesheet" href="/css/dashboard.css"> <!-- Link to the main CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+  </head>
+  
+  
+  <%- include('partials/header') %>
+
+<body>
+
+  <h1>Exam for <%= course.title %></h1>
+
+  <form id="examForm">
+    <% course.examQuestions.forEach((question, index) => { %>
+      <div>
+        <h3><%= question.questionText %></h3>
+        <% question.options.forEach((option, i) => { %>
+          <label>
+            <input type="radio" name="question<%= index %>" value="<%= option %>">
+            <%= option %>
+          </label>
+        <% }) %>
+      </div>
+    <% }) %>
+
+    <button type="submit">Submit Exam</button>
+  </form>
+
+  <script>
+    document.getElementById('examForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const answers = [];
+      <% course.examQuestions.forEach((question, index) => { %>
+        const selectedAnswer = document.querySelector('input[name="question<%= index %]"]:checked');
+        if (selectedAnswer) {
+          answers.push({ question: '<%= question.questionText %>', answer: selectedAnswer.value });
+        }
+      <% }) %>
+
+      try {
+        const response = await fetch('/submit-exam', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            courseId: '<%= course._id %>',
+            answers
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Exam submitted successfully');
+        } else {
+          alert('Error submitting exam');
+        }
+      } catch (err) {
+        console.error('Error submitting exam:', err);
+        alert('Error submitting exam');
+      }
+    });
+  </script>
+
+<%- include('partials/footer') %>
+</body>
+</html>

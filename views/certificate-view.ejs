@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional Certificate - IAAI Training</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.03"/><circle cx="50" cy="10" r="0.5" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .certificate-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      background: rgba(0,0,0,0.3);
+      padding: 15px 30px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .breadcrumb a {
+      color: #f59e0b;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .breadcrumb a:hover {
+      color: #fbbf24;
+    }
+
+    /* Main Certificate */
+    .certificate-main {
+      background: linear-gradient(135deg, #ffffff 0%, #fefbf3 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 
+        0 25px 50px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+      position: relative;
+    }
+
+    /* Gold Border Frame */
+    .certificate-frame {
+      background: linear-gradient(45deg, #d97706 0%, #f59e0b 25%, #fbbf24 50%, #f59e0b 75%, #d97706 100%);
+      padding: 15px;
+      position: relative;
+    }
+
+    .certificate-frame::before {
+      content: '';
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      right: 25px;
+      bottom: 25px;
+      border: 3px solid #92400e;
+      border-radius: 10px;
+      opacity: 0.6;
+    }
+
+    .certificate-inner {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fffbeb 100%);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Header Section */
+    .certificate-header {
+      text-align: center;
+      padding: 50px 40px 30px;
+      position: relative;
+      background: linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(245,158,11,0.05) 100%);
+    }
+
+    .certificate-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 4px;
+      background: linear-gradient(90deg, transparent 0%, #f59e0b 50%, transparent 100%);
+    }
+
+    /* IAAI Logo Area */
+    .institution-logo {
+      margin-bottom: 25px;
+    }
+
+    .logo-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        0 10px 25px rgba(245,158,11,0.3),
+        inset 0 2px 5px rgba(255,255,255,0.3);
+      position: relative;
+    }
+
+    .logo-circle::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #f59e0b, #fbbf24, #f59e0b);
+      z-index: -1;
+    }
+
+    .logo-text {
+      color: white;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .institution-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #92400e;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .institution-subtitle {
+      font-size: 1rem;
+      color: #a16207;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Certificate Title */
+    .certificate-title {
+      margin: 40px 0;
+      text-align: center;
+    }
+
+    .certificate-main-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 4rem;
+      font-weight: 900;
+      color: #92400e;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      text-shadow: 2px 2px 4px rgba(146,64,14,0.1);
+      line-height: 1.1;
+    }
+
+    .certificate-subtitle {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: #a16207;
+      font-style: italic;
+      font-weight: 500;
+    }
+
+    /* Course Type Badge */
+    .course-type-badge {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      z-index: 10;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .badge-live-online {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+    }
+
+    .badge-in-person {
+      background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+      color: white;
+    }
+
+    .badge-self-paced {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+    }
+
+    /* Main Content */
+    .certificate-content {
+      padding: 0 60px 40px;
+      text-align: center;
+    }
+
+    .certifies-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: #78716c;
+      font-style: italic;
+      margin-bottom: 25px;
+    }
+
+    .recipient-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: #92400e;
+      margin: 30px 0;
+      text-decoration: underline;
+      text-decoration-color: #f59e0b;
+      text-decoration-thickness: 4px;
+      text-underline-offset: 15px;
+      line-height: 1.2;
+    }
+
+    .completion-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: #78716c;
+      font-style: italic;
+      margin: 25px 0;
+    }
+
+    .course-title-display {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #a16207;
+      font-style: italic;
+      margin: 30px 0;
+      line-height: 1.3;
+      position: relative;
+    }
+
+    .course-title-display::before,
+    .course-title-display::after {
+      content: '"';
+      font-size: 3rem;
+      color: #f59e0b;
+      opacity: 0.6;
+    }
+
+    /* Course Details Section */
+    .course-details-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(251,191,36,0.1) 100%);
+      padding: 25px;
+      margin: 35px 0;
+      border-radius: 15px;
+      border: 2px solid rgba(245,158,11,0.2);
+      position: relative;
+    }
+
+    .course-details-banner::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      background: linear-gradient(45deg, #f59e0b, #fbbf24, #f59e0b);
+      border-radius: 15px;
+      z-index: -1;
+      opacity: 0.3;
+    }
+
+    .delivery-method {
+      font-size: 1.1rem;
+      color: #92400e;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .delivery-method i {
+      color: #f59e0b;
+      font-size: 1.3rem;
+    }
+
+    /* ✅ FIXED: Certification Bodies Section */
+    .certification-bodies {
+      margin: 25px 0;
+    }
+
+    .cert-bodies-title {
+      font-size: 1rem;
+      color: #a16207;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cert-bodies-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .cert-body-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 20px;
+      border: 1px solid rgba(245,158,11,0.3);
+      font-size: 0.9rem;
+      color: #92400e;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      min-height: 50px;
+    }
+
+    .cert-body-item:hover {
+      background: rgba(255,255,255,0.9);
+      border-color: #f59e0b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245,158,11,0.2);
+    }
+
+    .cert-body-primary {
+      background: linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(251,191,36,0.15) 100%);
+      border-color: #f59e0b;
+      font-weight: 600;
+    }
+
+    /* ✅ FIXED: Certification body logos */
+    .cert-body-logo {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.9);
+      padding: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+
+    .cert-body-primary .cert-body-logo {
+      box-shadow: 0 2px 6px rgba(245,158,11,0.3);
+      border: 1px solid #f59e0b;
+    }
+
+    .cert-body-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .cert-body-name {
+      font-weight: inherit;
+      line-height: 1.2;
+    }
+
+    .cert-body-role {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-style: italic;
+    }
+
+    /* Signature Section */
+    .signature-section {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 40px;
+      align-items: end;
+      margin: 50px 0 30px;
+      padding: 30px 0;
+      border-top: 2px solid rgba(245,158,11,0.3);
+    }
+
+    .signature-block {
+      text-align: center;
+    }
+
+    .signature-line {
+      width: 180px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, #a16207 20%, #a16207 80%, transparent 100%);
+      margin: 0 auto 15px;
+      border-radius: 2px;
+    }
+
+    .signature-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 5px;
+    }
+
+    .signature-title {
+      font-size: 0.9rem;
+      color: #a16207;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .signature-date {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 5px;
+    }
+
+    /* Official Seal */
+    .official-seal {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #92400e 0%, #a16207 50%, #92400e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 
+        0 10px 25px rgba(146,64,14,0.3),
+        inset 0 2px 10px rgba(255,255,255,0.2);
+    }
+
+    .official-seal::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #f59e0b, #fbbf24, #f59e0b);
+      z-index: -1;
+      opacity: 0.8;
+    }
+
+    .seal-content {
+      text-align: center;
+      color: white;
+      font-weight: 700;
+      font-size: 0.8rem;
+      line-height: 1.2;
+    }
+
+    .seal-text-large {
+      font-size: 1rem;
+      font-family: 'Playfair Display', serif;
+      margin-bottom: 3px;
+    }
+
+    /* Details Section */
+    .certificate-details {
+      background: linear-gradient(135deg, #f7f7f7 0%, #f0f0f0 100%);
+      padding: 50px;
+      position: relative;
+    }
+
+    .details-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .details-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: #92400e;
+      margin-bottom: 10px;
+    }
+
+    .details-subtitle {
+      color: #a16207;
+      font-size: 1.1rem;
+    }
+
+    /* Verification Section */
+    .verification-section {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 3px solid #f59e0b;
+      border-radius: 20px;
+      padding: 30px;
+      margin: 30px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .verification-section::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #f59e0b, #fbbf24, #f59e0b);
+      border-radius: 20px;
+      z-index: -1;
+    }
+
+    .verification-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: #92400e;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .verification-code {
+      font-family: 'Courier New', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #92400e;
+      background: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      display: inline-block;
+      margin: 15px 0;
+      letter-spacing: 3px;
+      border: 2px solid #f59e0b;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .verification-code:hover {
+      background: #fffbeb;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(245,158,11,0.2);
+    }
+
+    /* Details Grid */
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin: 30px 0;
+    }
+
+    .detail-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      border-left: 5px solid #f59e0b;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+
+    .detail-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(245,158,11,0.15);
+    }
+
+    .detail-label {
+      font-size: 0.9rem;
+      color: #78716c;
+      margin-bottom: 8px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      font-size: 1.2rem;
+      color: #1f2937;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    /* ✅ FIXED: Instructors Section */
+    .instructors-section {
+      background: linear-gradient(135deg, rgba(245,158,11,0.05) 0%, rgba(251,191,36,0.03) 100%);
+      border-radius: 20px;
+      padding: 30px;
+      margin: 30px 0;
+    }
+
+    .instructors-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: #92400e;
+      margin-bottom: 25px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .instructors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .instructor-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .instructor-primary {
+      border-color: #f59e0b;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    }
+
+    .instructor-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(245,158,11,0.1);
+    }
+
+    .instructor-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 15px;
+      border: 3px solid #f59e0b;
+      box-shadow: 0 4px 12px rgba(245,158,11,0.2);
+    }
+
+    .instructor-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 8px;
+    }
+
+    .instructor-title {
+      font-size: 1rem;
+      color: #a16207;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .instructor-role {
+      font-size: 0.85rem;
+      color: #78716c;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 5px 10px;
+      background: rgba(245,158,11,0.1);
+      border-radius: 15px;
+      display: inline-block;
+    }
+
+    .instructor-credentials {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #78716c;
+      font-style: italic;
+    }
+
+    /* Achievement Stats */
+    .achievement-stats {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin: 30px 0;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .stats-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: #92400e;
+      margin-bottom: 25px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 25px 15px;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border-radius: 15px;
+      border: 2px solid rgba(245,158,11,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+      transform: translateY(-5px);
+      border-color: #f59e0b;
+      box-shadow: 0 10px 25px rgba(245,158,11,0.15);
+    }
+
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #92400e;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #a16207;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 40px 0;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      box-shadow: 0 5px 20px rgba(245,158,11,0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: white;
+      box-shadow: 0 5px 20px rgba(5,150,105,0.3);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+      box-shadow: 0 5px 20px rgba(107,114,128,0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    /* Social Share */
+    .social-share {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .social-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: #92400e;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .social-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .social-btn {
+      padding: 12px 25px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .social-linkedin {
+      background: #0077b5;
+      color: white;
+    }
+
+    .social-copy {
+      background: #6b7280;
+      color: white;
+    }
+
+    .social-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Debug Section */
+    .debug-section {
+      background: #f3f4f6;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      border: 2px dashed #d1d5db;
+    }
+
+    .debug-title {
+      font-weight: bold;
+      color: #374151;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+
+    .debug-item {
+      margin: 5px 0;
+      padding: 5px;
+      background: white;
+      border-radius: 4px;
+      border-left: 3px solid #f59e0b;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .certificate-main-title {
+        font-size: 2.5rem;
+      }
+
+      .recipient-name {
+        font-size: 2.2rem;
+      }
+
+      .course-title-display {
+        font-size: 1.6rem;
+      }
+
+      .certificate-content {
+        padding: 0 30px 40px;
+      }
+
+      .certificate-details {
+        padding: 30px 20px;
+      }
+
+      .signature-section {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        text-align: center;
+      }
+
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .cert-bodies-list {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .instructors-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cert-body-logo {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .breadcrumb,
+      .action-buttons,
+      .social-share,
+      .debug-section {
+        display: none;
+      }
+
+      .certificate-container {
+        max-width: none;
+        margin: 0;
+      }
+
+      .certificate-details {
+        break-before: page;
+      }
+    }
+
+    /* Loading Animation */
+    @keyframes shimmer {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .loading {
+      animation: shimmer 1.5s infinite;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="certificate-container">
+    <!-- Breadcrumb Navigation -->
+    <div class="breadcrumb">
+      <a href="/dashboard">Dashboard</a> / 
+      <a href="/library">My Library</a> / 
+      <a href="/certificates">My Certificates</a> / 
+      <span>Professional Certificate</span>
+    </div>
+
+    <!-- ✅ DEBUG SECTION (only in development) -->
+    <% if (process.env.NODE_ENV === 'development') { %>
+      <div class="debug-section">
+        <div class="debug-title">🔍 DEBUG: Certificate Data</div>
+        <div class="debug-item">
+          <strong>Certificate ID:</strong> <%= certificate.certificateId %><br>
+          <strong>Course Type:</strong> <%= certificate.courseType %><br>
+          <strong>Has Course Details:</strong> <%= !!certificate.courseDetails %><br>
+          <strong>Certification Bodies Count:</strong> <%= certificate.courseDetails?.certificationBodies?.length || 0 %><br>
+          <strong>Instructors Count:</strong> <%= certificate.courseDetails?.instructors?.length || 0 %>
+        </div>
+        
+        <% if (certificate.courseDetails?.certificationBodies) { %>
+          <div class="debug-item">
+            <strong>📋 Certification Bodies:</strong><br>
+            <% certificate.courseDetails.certificationBodies.forEach(function(body, index) { %>
+              <%= index %>: <%= body.name %> (<%= body.role %>) - Logo: <%= body.logo ? 'YES' : 'NO' %><br>
+            <% }); %>
+          </div>
+        <% } %>
+        
+        <% if (certificate.courseDetails?.instructors) { %>
+          <div class="debug-item">
+            <strong>👨‍🏫 Instructors:</strong><br>
+            <% certificate.courseDetails.instructors.forEach(function(instructor, index) { %>
+              <%= index %>: <%= instructor.name %> (<%= instructor.role %>) - Primary: <%= instructor.isPrimary %><br>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+
+    <!-- Main Certificate -->
+    <div class="certificate-main">
+      <div class="certificate-frame">
+        <div class="certificate-inner">
+          
+          <!-- Course Type Badge -->
+          <div class="course-type-badge 
+            <%= certificate.courseType === 'OnlineLiveTraining' ? 'badge-live-online' : 
+                certificate.courseType === 'InPersonAestheticTraining' ? 'badge-in-person' : 'badge-self-paced' %>">
+            <% if (certificate.courseType === 'OnlineLiveTraining') { %>
+              <i class="fas fa-video"></i> Live Online Training
+            <% } else if (certificate.courseType === 'InPersonAestheticTraining') { %>
+              <i class="fas fa-users"></i> In-Person Training
+            <% } else { %>
+              <i class="fas fa-play-circle"></i> Self-Paced Learning
+            <% } %>
+          </div>
+
+          <!-- Header -->
+          <div class="certificate-header">
+            <div class="institution-logo">
+              <div class="logo-circle">
+                <div class="logo-text">
+                  IAAI
+                </div>
+              </div>
+              <div class="institution-name">International Aesthetics</div>
+              <div class="institution-subtitle">Academic Institution</div>
+            </div>
+
+            <div class="certificate-title">
+              <h1 class="certificate-main-title">CERTIFICATE</h1>
+              <p class="certificate-subtitle">of Completion</p>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <div class="certificate-content">
+            <p class="certifies-text">This certificate is proudly presented to</p>
+            
+            <h2 class="recipient-name"><%= certificate.certificateData.recipientName %></h2>
+            
+            <p class="completion-text">For successfully completion of</p>
+            
+            <h3 class="course-title-display"><%= certificate.certificateData.courseTitle %></h3>
+
+            <!-- Course Details Banner -->
+            <div class="course-details-banner">
+              <div class="delivery-method">
+                <% if (certificate.courseType === 'OnlineLiveTraining') { %>
+                  <i class="fas fa-video"></i>
+                  <span>Live Online Training</span>
+                  <% if (certificate.courseDetails?.platform?.name) { %>
+                    via <%= certificate.courseDetails.platform.name %>
+                  <% } %>
+                <% } else if (certificate.courseType === 'InPersonAestheticTraining') { %>
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>In-Person Training</span>
+                  <% if (certificate.courseDetails?.venue) { %>
+                    at <%= certificate.courseDetails.venue.city %>, <%= certificate.courseDetails.venue.country %>
+                  <% } %>
+                <% } else { %>
+                  <i class="fas fa-laptop"></i>
+                  <span>Self-Paced Online Learning Program</span>
+                <% } %>
+              </div>
+
+              <!-- ✅ FIXED: Certification Bodies Section -->
+              <% if (certificate.courseDetails?.certificationBodies && certificate.courseDetails.certificationBodies.length > 0) { %>
+                <div class="certification-bodies">
+                  <div class="cert-bodies-title">Certified By</div>
+                  <div class="cert-bodies-list">
+                    <% certificate.courseDetails.certificationBodies.forEach(function(body) { %>
+                      <div class="cert-body-item <%= body.isPrimary ? 'cert-body-primary' : '' %>">
+                        <!-- Logo with fallback -->
+                        <% if (body.logo) { %>
+                          <img src="<%= body.logo %>" 
+                               alt="<%= body.name %> Logo" 
+                               class="cert-body-logo"
+                               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                          <i class="<%= body.isPrimary ? 'fas fa-certificate' : 'fas fa-award' %>" 
+                             style="display: none; color: #f59e0b; font-size: 1.2rem;"></i>
+                        <% } else { %>
+                          <i class="<%= body.isPrimary ? 'fas fa-certificate' : 'fas fa-award' %>" 
+                             style="color: #f59e0b; font-size: 1.2rem;"></i>
+                        <% } %>
+                        
+                        <!-- Body content -->
+                        <div class="cert-body-content">
+                          <div class="cert-body-name"><%= body.name %></div>
+                          <div class="cert-body-role"><%= body.role %></div>
+                        </div>
+                      </div>
+                    <% }); %>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Signature Section -->
+            <div class="signature-section">
+              <!-- Primary Instructor Signature -->
+              <div class="signature-block">
+                <div class="signature-line"></div>
+                <div class="signature-name">
+                  <% if (certificate.courseDetails?.instructors && certificate.courseDetails.instructors.length > 0) { %>
+                    <%= certificate.courseDetails.instructors.find(i => i.isPrimary)?.name || certificate.courseDetails.instructors[0].name || 'IAAI Training Team' %>
+                  <% } else { %>
+                    IAAI Training Team
+                  <% } %>
+                </div>
+                <div class="signature-title">Lead Instructor</div>
+              </div>
+
+              <!-- Official Seal -->
+              <div class="official-seal">
+                <div class="seal-content">
+                  <div class="seal-text-large">OFFICIAL</div>
+                  <div>SEAL</div>
+                </div>
+              </div>
+
+              <!-- Date -->
+              <div class="signature-block">
+                <div class="signature-line"></div>
+                <div class="signature-date">
+                  <%= new Date(certificate.certificateData.issueDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long', 
+                    day: 'numeric'
+                  }) %>
+                </div>
+                <div class="signature-title">Date</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details Section -->
+    <div class="certificate-details">
+      <div class="details-header">
+        <h2 class="details-title">Certificate Information</h2>
+        <p class="details-subtitle">Professional certification details and verification</p>
+      </div>
+
+      <!-- Verification Section -->
+      <div class="verification-section">
+        <h3 class="verification-title">
+          <i class="fas fa-shield-alt"></i>
+          Certificate Verification
+        </h3>
+        <p style="color: #92400e; margin-bottom: 15px; font-size: 1.1rem;">
+          This certificate can be verified using the code below:
+        </p>
+        <div class="verification-code" id="verificationCode" title="Click to copy">
+          <%= certificate.certificateData.verificationCode %>
+        </div>
+        <div style="margin-top: 15px;">
+          <a href="/certificates/verify-page/<%= certificate.certificateData.verificationCode %>" 
+             target="_blank" 
+             style="color: #f59e0b; text-decoration: underline; font-weight: 600;">
+            <i class="fas fa-external-link-alt"></i> Verify this certificate publicly
+          </a>
+        </div>
+      </div>
+
+      <!-- Certificate Details Grid -->
+      <div class="details-grid">
+        <div class="detail-card">
+          <div class="detail-label">Certificate ID</div>
+          <div class="detail-value"><%= certificate.certificateId %></div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-label">Course Code</div>
+          <div class="detail-value"><%= certificate.certificateData.courseCode %></div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-label">Course Type</div>
+          <div class="detail-value">
+            <% if (certificate.courseType === 'SelfPacedOnlineTraining') { %>
+              <i class="fas fa-play-circle"></i> Self-Paced Online
+            <% } else if (certificate.courseType === 'OnlineLiveTraining') { %>
+              <i class="fas fa-video"></i> Live Online Training
+            <% } else if (certificate.courseType === 'InPersonAestheticTraining') { %>
+              <i class="fas fa-users"></i> In-Person Training
+            <% } else { %>
+              <%= certificate.courseType %>
+            <% } %>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-label">Completion Date</div>
+          <div class="detail-value">
+            <%= new Date(certificate.certificateData.completionDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) %>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-label">Issue Date</div>
+          <div class="detail-value">
+            <%= new Date(certificate.certificateData.issueDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) %>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-label">Status</div>
+          <div class="detail-value" style="color: #059669;">
+            <i class="fas fa-check-circle"></i> Active & Verified
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ FIXED: Instructors Section -->
+      <% if (certificate.courseDetails?.instructors && certificate.courseDetails.instructors.length > 0) { %>
+        <div class="instructors-section">
+          <h3 class="instructors-title">
+            <i class="fas fa-chalkboard-teacher"></i>
+            Course Instructors
+          </h3>
+          <div class="instructors-grid">
+            <% certificate.courseDetails.instructors.forEach(function(instructor) { %>
+              <div class="instructor-card <%= instructor.isPrimary ? 'instructor-primary' : '' %>">
+                <!-- Instructor Avatar -->
+                <% if (instructor.profileImage) { %>
+                  <img src="<%= instructor.profileImage %>" 
+                       alt="<%= instructor.name %>" 
+                       class="instructor-avatar"
+                       onerror="this.style.display='none';">
+                <% } %>
+                
+                <div class="instructor-name"><%= instructor.name %></div>
+                <% if (instructor.title) { %>
+                  <div class="instructor-title"><%= instructor.title %></div>
+                <% } %>
+                <div class="instructor-role"><%= instructor.role %></div>
+                
+                <% if (instructor.credentials && instructor.credentials.length > 0) { %>
+                  <div class="instructor-credentials">
+                    <%= instructor.credentials.join(', ') %>
+                  </div>
+                <% } %>
+                
+                <% if (instructor.bio) { %>
+                  <div style="margin-top: 10px; font-size: 0.8rem; color: #78716c; font-style: italic;">
+                    <%= instructor.bio.length > 100 ? instructor.bio.substring(0, 100) + '...' : instructor.bio %>
+                  </div>
+                <% } %>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Achievement Statistics -->
+      <div class="achievement-stats">
+        <h3 class="stats-title">
+          <i class="fas fa-trophy"></i>
+          Achievement Details
+        </h3>
+        <div class="stats-grid">
+          <% if (certificate.certificateData.achievement) { %>
+            <% if (certificate.certificateData.achievement.examScore !== undefined && certificate.certificateData.achievement.examScore !== null) { %>
+              <div class="stat-item">
+                <span class="stat-number"><%= certificate.certificateData.achievement.examScore %>%</span>
+                <div class="stat-label">Assessment Score</div>
+              </div>
+            <% } %>
+            
+            <% if (certificate.certificateData.achievement.totalHours) { %>
+              <div class="stat-item">
+                <span class="stat-number"><%= certificate.certificateData.achievement.totalHours %></span>
+                <div class="stat-label">Training Hours</div>
+              </div>
+            <% } %>
+            
+            <% if (certificate.certificateData.achievement.attendancePercentage) { %>
+              <div class="stat-item">
+                <span class="stat-number"><%= certificate.certificateData.achievement.attendancePercentage %>%</span>
+                <div class="stat-label">Attendance</div>
+              </div>
+            <% } %>
+            
+            <div class="stat-item">
+              <span class="stat-number"><%= certificate.certificateData.achievement.grade || 'Pass' %></span>
+              <div class="stat-label">Final Grade</div>
+            </div>
+
+            <!-- Course-Specific Statistics -->
+            <% if (certificate.certificateData.achievement.courseSpecificData) { %>
+              <% const courseData = certificate.certificateData.achievement.courseSpecificData; %>
+              
+              <% if (certificate.courseType === 'OnlineLiveTraining') { %>
+                <% if (courseData.totalSessions && courseData.attendedSessions) { %>
+                  <div class="stat-item">
+                    <span class="stat-number"><%= courseData.attendedSessions %>/<%= courseData.totalSessions %></span>
+                    <div class="stat-label">Live Sessions</div>
+                  </div>
+                <% } %>
+                
+                <% if (courseData.interactionLevel) { %>
+                  <div class="stat-item">
+                    <span class="stat-number"><%= courseData.interactionLevel %></span>
+                    <div class="stat-label">Interaction Level</div>
+                  </div>
+                <% } %>
+                
+              <% } else if (certificate.courseType === 'InPersonAestheticTraining') { %>
+                <% if (courseData.totalHoursAttended) { %>
+                  <div class="stat-item">
+                    <span class="stat-number"><%= courseData.totalHoursAttended %></span>
+                    <div class="stat-label">Practical Hours</div>
+                  </div>
+                <% } %>
+                
+                <% if (courseData.practicalComponent) { %>
+                  <div class="stat-item">
+                    <span class="stat-number"><i class="fas fa-hands"></i></span>
+                    <div class="stat-label">Hands-On Training</div>
+                  </div>
+                <% } %>
+                
+              <% } else if (certificate.courseType === 'SelfPacedOnlineTraining') { %>
+                <% if (courseData.completedVideos && courseData.totalVideos) { %>
+                  <div class="stat-item">
+                    <span class="stat-number"><%= courseData.completedVideos %>/<%= courseData.totalVideos %></span>
+                    <div class="stat-label">Videos Completed</div>
+                  </div>
+                <% } %>
+                
+                <% if (courseData.completedExams && courseData.totalExams) { %>
+                  <div class="stat-item">
+                    <span class="stat-number"><%= courseData.completedExams %>/<%= courseData.totalExams %></span>
+                    <div class="stat-label">Exams Passed</div>
+                  </div>
+                <% } %>
+              <% } %>
+            <% } %>
+            
+          <% } else { %>
+            <!-- Fallback statistics if achievement data is missing -->
+            <div class="stat-item">
+              <span class="stat-number">100%</span>
+              <div class="stat-label">Course Completed</div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">Pass</span>
+              <div class="stat-label">Grade</div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number"><%= certificate.downloadCount || 0 %></span>
+              <div class="stat-label">Views</div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">Active</span>
+              <div class="stat-label">Status</div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Additional Course Information -->
+      <% if (certificate.courseDetails?.schedule || certificate.courseDetails?.venue) { %>
+        <div class="achievement-stats">
+          <h3 class="stats-title">
+            <i class="fas fa-info-circle"></i>
+            Course Information
+          </h3>
+          <div class="details-grid">
+            <% if (certificate.courseDetails.schedule?.duration) { %>
+              <div class="detail-card">
+                <div class="detail-label">Course Duration</div>
+                <div class="detail-value"><%= certificate.courseDetails.schedule.duration %></div>
+              </div>
+            <% } %>
+            
+            <% if (certificate.courseDetails.venue?.name) { %>
+              <div class="detail-card">
+                <div class="detail-label">Training Venue</div>
+                <div class="detail-value"><%= certificate.courseDetails.venue.name %></div>
+              </div>
+            <% } %>
+            
+            <% if (certificate.courseDetails.platform?.name) { %>
+              <div class="detail-card">
+                <div class="detail-label">Platform Used</div>
+                <div class="detail-value"><%= certificate.courseDetails.platform.name %></div>
+              </div>
+            <% } %>
+            
+            <% if (certificate.courseDetails.basic?.category) { %>
+              <div class="detail-card">
+                <div class="detail-label">Course Category</div>
+                <div class="detail-value" style="text-transform: capitalize;">
+                  <%= certificate.courseDetails.basic.category %>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Social Sharing Section -->
+      <div class="social-share">
+        <h3 class="social-title">
+          <i class="fas fa-share-alt"></i>
+          Share Your Achievement
+        </h3>
+        <div class="social-buttons">
+          <button class="social-btn social-linkedin" onclick="shareOnLinkedIn()">
+            <i class="fab fa-linkedin"></i> Share on LinkedIn
+          </button>
+          <button class="social-btn social-copy" onclick="copyVerificationLink()">
+            <i class="fas fa-link"></i> Copy Verification Link
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-success" onclick="downloadCertificate()">
+          <i class="fas fa-download"></i>
+          Download PDF
+        </button>
+        <button class="btn btn-primary" onclick="shareCertificate()">
+          <i class="fas fa-share"></i>
+          Share Certificate
+        </button>
+        <a href="/certificates" class="btn btn-secondary">
+          <i class="fas fa-certificate"></i>
+          My Certificates
+        </a>
+        <a href="/library" class="btn btn-secondary">
+          <i class="fas fa-arrow-left"></i>
+          Back to Library
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Certificate functionality with enhanced logging
+    const certificateData = {
+      id: '<%= certificate.certificateId %>',
+      verificationCode: '<%= certificate.certificateData.verificationCode %>',
+      shareUrl: '<%= certificate.shareUrl || ("https://training.iaai.com/certificates/verify/" + certificate.certificateData.verificationCode) %>',
+      title: '<%= certificate.certificateData.courseTitle %>',
+      recipient: '<%= certificate.certificateData.recipientName %>',
+      courseType: '<%= certificate.courseType %>',
+      instructors: <%- JSON.stringify(certificate.courseDetails?.instructors || []) %>,
+      certificationBodies: <%- JSON.stringify(certificate.courseDetails?.certificationBodies || []) %>
+    };
+
+    // Debug certificate data
+    console.log('🔍 Certificate Data:', certificateData);
+
+    // Enhanced download certificate
+    function downloadCertificate() {
+      const btn = event.target.closest('.btn');
+      btn.classList.add('loading');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+      
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
+        
+        Swal.fire({
+          icon: 'info',
+          title: 'PDF Generation Coming Soon',
+          html: `
+            <div style="text-align: center;">
+              <div style="font-size: 4rem; color: #f59e0b; margin-bottom: 20px;">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              <h3 style="color: #92400e; margin-bottom: 15px;">Professional PDF Certificates</h3>
+              <p style="color: #78716c; margin-bottom: 20px;">
+                We're preparing beautiful PDF certificates that match this design. 
+                Meanwhile, you can share your achievement using the verification link.
+              </p>
+            </div>
+          `,
+          confirmButtonColor: '#f59e0b',
+          confirmButtonText: 'Share My Certificate',
+          cancelButtonText: 'Close',
+          showCancelButton: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            shareCertificate();
+          }
+        });
+      }, 2000);
+    }
+
+    // Enhanced share certificate
+    function shareCertificate() {
+      const courseTypeDisplay = getCourseTypeDisplay();
+      const instructorsList = certificateData.instructors.map(i => i.name).join(', ') || 'IAAI Training Team';
+      const certBodiesList = certificateData.certificationBodies.map(cb => cb.name).join(', ') || 'IAAI Training Institute';
+      
+      Swal.fire({
+        title: '🏆 Share Your Professional Achievement',
+        html: `
+          <div style="text-align: center; margin: 20px 0;">
+            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+                       color: white; padding: 25px; border-radius: 20px; margin-bottom: 25px;">
+              <h3>${certificateData.title}</h3>
+              <p>Instructor: ${instructorsList}</p>
+              <p>Certified by: ${certBodiesList}</p>
+            </div>
+            <input type="text" id="shareUrl" value="${certificateData.shareUrl}" readonly 
+                   style="width: 100%; padding: 12px; border: 2px solid #f59e0b; border-radius: 8px; margin: 20px 0;">
+          </div>
+        `,
+        showConfirmButton: false,
+        showCloseButton: true
+      });
+    }
+
+    function getCourseTypeDisplay() {
+      switch(certificateData.courseType) {
+        case 'OnlineLiveTraining': return 'Live Online Training';
+        case 'InPersonAestheticTraining': return 'In-Person Training';
+        case 'SelfPacedOnlineTraining': return 'Self-Paced Online Learning';
+        default: return 'Professional Training';
+      }
+    }
+
+    function copyVerificationLink() {
+      navigator.clipboard.writeText(certificateData.shareUrl).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Link Copied!',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      });
+    }
+
+    function shareOnLinkedIn() {
+      const text = `🎓 Proud to announce that I've successfully completed "${certificateData.title}" and earned my professional certificate from IAAI Training Institute!`;
+      const url = encodeURIComponent(certificateData.shareUrl);
+      const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&summary=${encodeURIComponent(text)}`;
+      window.open(linkedinUrl, '_blank');
+    }
+
+    function copyVerificationCode() {
+      navigator.clipboard.writeText(certificateData.verificationCode).then(() => {
+        const element = document.getElementById('verificationCode');
+        const original = element.innerHTML;
+        element.innerHTML = 'Copied! ✓';
+        element.style.background = '#059669';
+        element.style.color = 'white';
+        
+        setTimeout(() => {
+          element.innerHTML = original;
+          element.style.background = 'white';
+          element.style.color = '#92400e';
+        }, 2000);
+      });
+    }
+
+    // Add click event to verification code
+    document.getElementById('verificationCode').addEventListener('click', copyVerificationCode);
+
+    // Page load animations
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ Certificate page loaded with data:', {
+        certificationBodies: certificateData.certificationBodies.length,
+        instructors: certificateData.instructors.length
+      });
+    });
+  </script>
+</body>
+</html>

@@ -343,7 +343,7 @@ app.use("/api", certificateDebugRoutes);
 // ============================================
 
 // Contact and support
-const contactUsRoutes = require("./routes/contactUSRoutes");
+const contactUsRoutes = require("./routes/contactUsRoutes");
 const customerSupportRoutes = require("./routes/customerSupportRoute");
 
 app.use("/", contactUsRoutes);

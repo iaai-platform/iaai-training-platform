@@ -5,6 +5,20 @@ const axios = require("axios");
 // Render the login page
 exports.renderLoginPage = (req, res) => {
   console.log("📄 Rendering login page...");
+  // DEBUG: Check environment variables
+  console.log(
+    "🔑 RECAPTCHA_SITE_KEY:",
+    process.env.RECAPTCHA_SITE_KEY ? "EXISTS" : "MISSING"
+  );
+  console.log(
+    "🔑 RECAPTCHA_SECRET_KEY:",
+    process.env.RECAPTCHA_SECRET_KEY ? "EXISTS" : "MISSING"
+  );
+  console.log(
+    "🔑 All ENV vars:",
+    Object.keys(process.env).filter((key) => key.includes("RECAPTCHA"))
+  );
+
   console.log(
     "🔍 Current user:",
     req.user ? `${req.user.firstName} (${req.user.email})` : "None"

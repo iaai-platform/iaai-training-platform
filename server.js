@@ -79,10 +79,15 @@ app.use(methodOverride("_method"));
 // Session configuration - MUST be before Passport
 app.use(
   session({
-    secret: "yourSecretKey", // TODO: Use environment variable in production
+    secret:
+      process.env.SESSION_SECRET ||
+      "iaai-training-platform-secret-2025-fallback",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // TODO: Set to true in production with HTTPS
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
   })
 );
 

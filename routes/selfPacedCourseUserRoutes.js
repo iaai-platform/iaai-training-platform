@@ -1,4 +1,4 @@
-// routes/selfPacedOnlineTrainingRoutes.js
+// routes/selfPacedCourseUserRoutes.js
 const express = require("express");
 const router = express.Router();
 const {

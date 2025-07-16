@@ -1,82 +1,1159 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>new-trainers-required</title>
-    <link rel="stylesheet" href="/css/formpages.css"> <!-- Correct -->
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Join Our Team - International Aesthetic Academic Institution (IAAI)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
-  </head>
-  
-  <%- include('partials/header') %>
-  
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
-    <!-- ✅ Hero Section -->
+        /* Header Placeholder */
+        .header-placeholder {
+            height: 80px;
+            background: #002147;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #ffcc00;
+            display: block;
+        }
+
+        .hero-stat .label {
+            font-size: 14px;
+            color: #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .benefits-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .benefits-section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .benefits-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .benefits-section p {
+            font-size: 18px;
+            color: #555;
+            text-align: center;
+            margin-bottom: 50px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .benefit-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .benefit-card .icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .benefit-card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 15px;
+        }
+
+        .benefit-card p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Requirements Section */
+        .requirements-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .requirements-card {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .requirements-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #002147, #ffcc00, #b8860b);
+        }
+
+        .requirements-card h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .requirements-card h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .requirements-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .requirements-list li {
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #ffcc00;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .requirements-list li:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .requirements-list li i {
+            color: #ffcc00;
+            font-size: 20px;
+            width: 25px;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .requirements-list li .content {
+            flex: 1;
+        }
+
+        .requirements-list li .title {
+            font-weight: 700;
+            color: #002147;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .requirements-list li .description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Application Form */
+        .application-form {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .application-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .application-form h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .application-form h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .form-intro {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 40px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* Form Styling */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #002147;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffcc00;
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 204, 0, 0.5);
+            background: linear-gradient(135deg, #b8860b, #ffcc00);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        /* Process Section */
+        .process-section {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            margin: 80px 0;
+            color: #ffffff;
+        }
+
+        .process-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .section-title p {
+            font-size: 18px;
+            color: #e0e0e0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .process-step {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .process-step:hover {
+            transform: translateY(-10px);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .process-step .icon {
+            font-size: 40px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .process-step h4 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .process-step p {
+            font-size: 14px;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero-stats {
+                gap: 40px;
+            }
+
+            .requirements-section {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .benefits-section,
+            .requirements-card,
+            .application-form {
+                padding: 40px 30px;
+            }
+
+            .benefits-section h2,
+            .requirements-card h2,
+            .application-form h2 {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .benefits-section,
+            .requirements-card,
+            .application-form {
+                padding: 30px 20px;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <a href="/training-programs">Training Programs</a> > <span>Join Our Team</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
     <section class="hero">
-        <h1>Become a Trainer with IAAI</h1>
-        <p>Join our academy and train the next generation of aesthetic professionals.</p>
+        <div class="hero-content">
+            <h1>Become a Trainer with IAAI</h1>
+            <p>Join our world-class team of aesthetic medicine educators and help shape the future of aesthetic training. Share your expertise with the next generation of aesthetic professionals worldwide.</p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="number">15+</span>
+                    <span class="label">Expert Trainers</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="number">3</span>
+                    <span class="label">Training Locations</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="number">1000+</span>
+                    <span class="label">Students Trained</span>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- ✅ Requirements Section -->
-    <section class="requirements">
-        <h2>Trainer Requirements</h2>
-        <ul>
-            <li>Minimum 3 years of experience in the aesthetic field.</li>
-            <li>Certification in aesthetic medicine.</li>
-            <li>Strong teaching and presentation skills.</li>
-            <li>Ability to conduct online and in-person training.</li>
-        </ul>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Benefits Section -->
+        <section class="benefits-section fade-in">
+            <h2>Why Teach with IAAI?</h2>
+            <p>Join a prestigious institution that values excellence, innovation, and professional growth. Make a meaningful impact while advancing your own career.</p>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="icon"><i class="fas fa-globe"></i></div>
+                    <h3>Global Recognition</h3>
+                    <p>Gain international recognition as an expert trainer with IAAI's globally respected brand and certification programs.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+                    <h3>Competitive Compensation</h3>
+                    <p>Enjoy excellent compensation packages, travel allowances, and performance-based bonuses for exceptional results.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>Professional Development</h3>
+                    <p>Access continuous learning opportunities, advanced training, and collaboration with leading industry experts.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <h3>Expert Network</h3>
+                    <p>Connect with a global network of aesthetic medicine professionals and thought leaders in the industry.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="icon"><i class="fas fa-plane"></i></div>
+                    <h3>Travel Opportunities</h3>
+                    <p>Teach in premium locations including Istanbul, Dubai, and Verona with all expenses covered.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="icon"><i class="fas fa-clock"></i></div>
+                    <h3>Flexible Schedule</h3>
+                    <p>Maintain work-life balance with flexible teaching schedules that accommodate your practice and commitments.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Requirements Section -->
+        <div class="requirements-section">
+            <div class="requirements-card fade-in">
+                <h2>Essential Requirements</h2>
+                <ul class="requirements-list">
+                    <li>
+                        <i class="fas fa-user-md"></i>
+                        <div class="content">
+                            <div class="title">Medical Qualification</div>
+                            <div class="description">Medical degree (MD/MBBS) or equivalent healthcare qualification with valid practice license</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-clock"></i>
+                        <div class="content">
+                            <div class="title">Professional Experience</div>
+                            <div class="description">Minimum 5 years of hands-on experience in aesthetic medicine or related field</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-certificate"></i>
+                        <div class="content">
+                            <div class="title">Aesthetic Certification</div>
+                            <div class="description">Board certification or advanced training in aesthetic medicine, dermatology, or plastic surgery</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <div class="content">
+                            <div class="title">Teaching Skills</div>
+                            <div class="description">Demonstrated ability to teach, mentor, and communicate complex concepts effectively</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-language"></i>
+                        <div class="content">
+                            <div class="title">Language Proficiency</div>
+                            <div class="description">Fluent English (required) with additional languages being a strong advantage</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="requirements-card fade-in">
+                <h2>Preferred Qualifications</h2>
+                <ul class="requirements-list">
+                    <li>
+                        <i class="fas fa-award"></i>
+                        <div class="content">
+                            <div class="title">Teaching Experience</div>
+                            <div class="description">Prior experience in medical education, training, or academic positions</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-laptop"></i>
+                        <div class="content">
+                            <div class="title">Digital Proficiency</div>
+                            <div class="description">Experience with online teaching platforms and digital learning technologies</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-book"></i>
+                        <div class="content">
+                            <div class="title">Publications & Research</div>
+                            <div class="description">Published research, articles, or contributions to aesthetic medicine literature</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-handshake"></i>
+                        <div class="content">
+                            <div class="title">Professional Networks</div>
+                            <div class="description">Active participation in professional associations and aesthetic medicine communities</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-star"></i>
+                        <div class="content">
+                            <div class="title">Specializations</div>
+                            <div class="description">Expertise in specialized areas like rhinoplasty, gynecologic aesthetics, or advanced techniques</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Application Form -->
+        <section class="application-form fade-in">
+            <h2>Apply to Join Our Team</h2>
+            <p class="form-intro">Ready to make a difference in aesthetic medicine education? Submit your application below and our recruitment team will contact you within 48 hours to discuss opportunities.</p>
+            
+            <div id="messageContainer" class="message"></div>
+            
+            <form id="trainerApplicationForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number *</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter your phone number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country of Practice *</label>
+                        <input type="text" id="country" name="country" placeholder="Enter your country" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="experience">Years of Experience *</label>
+                        <select id="experience" name="experience" required>
+                            <option value="">Select experience level</option>
+                            <option value="5-10">5-10 years</option>
+                            <option value="11-15">11-15 years</option>
+                            <option value="16-20">16-20 years</option>
+                            <option value="20+">20+ years</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="specialization">Primary Specialization *</label>
+                        <select id="specialization" name="specialization" required>
+                            <option value="">Select specialization</option>
+                            <option value="dermal-fillers">Dermal Fillers</option>
+                            <option value="botox">Botox & Neurotoxins</option>
+                            <option value="rhinoplasty">Rhinoplasty</option>
+                            <option value="cosmetic-gynecology">Cosmetic Gynecology</option>
+                            <option value="hair-transplant">Hair Transplant</option>
+                            <option value="skin-rejuvenation">Skin Rejuvenation</option>
+                            <option value="plastic-surgery">Plastic Surgery</option>
+                            <option value="dermatology">Dermatology</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="qualifications">Medical Qualifications & Certifications *</label>
+                    <textarea id="qualifications" name="qualifications" placeholder="List your medical degree, board certifications, and relevant qualifications..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="expertise">Areas of Expertise & Teaching Interest *</label>
+                    <textarea id="expertise" name="expertise" placeholder="Describe your areas of expertise and which topics you would like to teach..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="teachingExperience">Teaching & Training Experience</label>
+                    <textarea id="teachingExperience" name="teachingExperience" placeholder="Describe any previous teaching, training, or mentoring experience..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cvUrl">CV/Resume Upload Link *</label>
+                        <input type="url" id="cvUrl" name="cvUrl" placeholder="Google Drive, Dropbox, or cloud storage link" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="availability">Availability *</label>
+                        <select id="availability" name="availability" required>
+                            <option value="">Select availability</option>
+                            <option value="full-time">Full-time</option>
+                            <option value="part-time">Part-time</option>
+                            <option value="freelance">Freelance/Contract</option>
+                            <option value="occasional">Occasional Workshops</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="additionalInfo">Additional Information</label>
+                    <textarea id="additionalInfo" name="additionalInfo" placeholder="Any additional information you'd like to share about your background, achievements, or motivation to join IAAI..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Submit Application
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Application Process Section -->
+    <section class="process-section">
+        <div class="process-container">
+            <div class="section-title">
+                <h2>Application Process</h2>
+                <p>Our streamlined process ensures we find the best trainers while respecting your time and expertise</p>
+            </div>
+            <div class="process-steps">
+                <div class="process-step fade-in">
+                    <div class="step-number">1</div>
+                    <div class="icon"><i class="fas fa-file-alt"></i></div>
+                    <h4>Application Review</h4>
+                    <p>Submit your application and CV. Our team reviews all submissions within 48 hours.</p>
+                </div>
+                <div class="process-step fade-in">
+                    <div class="step-number">2</div>
+                    <div class="icon"><i class="fas fa-video"></i></div>
+                    <h4>Initial Interview</h4>
+                    <p>Video call with our academic director to discuss your experience and teaching interests.</p>
+                </div>
+                <div class="process-step fade-in">
+                    <div class="step-number">3</div>
+                    <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <h4>Teaching Demo</h4>
+                    <p>Conduct a brief demonstration lesson to showcase your teaching style and expertise.</p>
+                </div>
+                <div class="process-step fade-in">
+                    <div class="step-number">4</div>
+                    <div class="icon"><i class="fas fa-handshake"></i></div>
+                    <h4>Final Decision</h4>
+                    <p>Contract discussion, onboarding process, and welcome to the IAAI trainer family.</p>
+                </div>
+            </div>
+        </div>
     </section>
-
-    <!-- ✅ Application Form -->
-    <section class="trainer-application">
-        <h2>Apply Now</h2>
-        <form id="trainerApplicationForm">
-            <label for="fullName">Full Name:</label>
-            <input type="text" id="fullName" name="fullName" required>
-
-            <label for="email">Email Address:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="phoneNumber">Phone Number:</label>
-            <input type="text" id="phoneNumber" name="phoneNumber" required>
-
-            <label for="experience">Experience (Years):</label>
-            <input type="text" id="experience" name="experience" required>
-
-            <label for="expertise">Expertise:</label>
-            <textarea id="expertise" name="expertise" required></textarea>
-
-            <label for="cvUrl">CV Upload (Link):</label>
-            <input type="text" id="cvUrl" name="cvUrl" required>
-
-            <button type="submit" class="cta-btn">Submit Application</button>
-        </form>
-    </section>
-
 
     <%- include('partials/footer') %>
-    <script>
-        document.getElementById('trainerApplicationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
 
-            const response = await fetch('/apply-trainer', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+    <script>
+        // Enhanced form functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('trainerApplicationForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const messageContainer = document.getElementById('messageContainer');
+
+            // Show message function
+            function showMessage(message, type) {
+                messageContainer.textContent = message;
+                messageContainer.className = `message ${type}`;
+                messageContainer.style.display = 'block';
+                
+                // Auto-hide success messages after 5 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        messageContainer.style.display = 'none';
+                    }, 5000);
+                }
+                
+                // Scroll to message
+                messageContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Form submission handler
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                // Disable submit button and show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Application...';
+                
+                // Hide previous messages
+                messageContainer.style.display = 'none';
+                
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/apply-trainer', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success !== false) {
+                        showMessage('✅ Application submitted successfully! Our recruitment team will contact you within 48 hours to discuss next steps.', 'success');
+                        form.reset();
+                        // Reset field borders
+                        document.querySelectorAll('input, select, textarea').forEach(field => {
+                            field.style.borderColor = '#e0e0e0';
+                        });
+                    } else {
+                        showMessage('❌ ' + (result.message || 'Application submission failed. Please try again.'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error submitting application:', error);
+                    showMessage('❌ Network error. Please check your connection and try again.', 'error');
+                }
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Application';
             });
 
-            const result = await response.json();
-            alert(result.message);
+            // Enhanced form validation
+            const requiredFields = ['fullName', 'email', 'phoneNumber', 'country', 'experience', 'specialization', 'qualifications', 'expertise', 'cvUrl', 'availability'];
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('blur', function() {
+                        if (this.value.trim() === '') {
+                            this.style.borderColor = '#dc3545';
+                        } else {
+                            this.style.borderColor = '#28a745';
+                        }
+                    });
+                }
+            });
+
+            // Email validation
+            document.getElementById('email').addEventListener('blur', function() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.value) && this.value !== '') {
+                    this.style.borderColor = '#dc3545';
+                    showMessage('Please enter a valid email address.', 'error');
+                } else if (this.value !== '') {
+                    this.style.borderColor = '#28a745';
+                }
+            });
+
+            // CV URL validation
+            document.getElementById('cvUrl').addEventListener('blur', function() {
+                const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+                if (!urlRegex.test(this.value) && this.value !== '') {
+                    this.style.borderColor = '#dc3545';
+                    showMessage('Please enter a valid URL for your CV.', 'error');
+                } else if (this.value !== '') {
+                    this.style.borderColor = '#28a745';
+                }
+            });
+
+            // Phone number formatting
+            document.getElementById('phoneNumber').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.startsWith('971') || value.startsWith('90')) {
+                        e.target.value = '+' + value;
+                    } else {
+                        e.target.value = value;
+                    }
+                }
+            });
+
+            // Character count for textareas
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                const maxLength = 1000;
+                const counter = document.createElement('div');
+                counter.style.fontSize = '12px';
+                counter.style.color = '#666';
+                counter.style.textAlign = 'right';
+                counter.style.marginTop = '5px';
+                textarea.parentNode.appendChild(counter);
+                
+                function updateCounter() {
+                    const remaining = maxLength - textarea.value.length;
+                    counter.textContent = `${textarea.value.length}/${maxLength} characters`;
+                    if (remaining < 100) {
+                        counter.style.color = '#dc3545';
+                    } else {
+                        counter.style.color = '#666';
+                    }
+                }
+                
+                textarea.addEventListener('input', updateCounter);
+                updateCounter();
+            });
+
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all fade-in elements
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Form progress indication
+            const formInputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+            const progressBar = document.createElement('div');
+            progressBar.style.cssText = `
+                position: fixed;
+                top: 80px;
+                left: 0;
+                width: 0%;
+                height: 4px;
+                background: linear-gradient(90deg, #ffcc00, #b8860b);
+                transition: width 0.3s ease;
+                z-index: 1000;
+            `;
+            document.body.appendChild(progressBar);
+
+            function updateProgress() {
+                const filledFields = Array.from(formInputs).filter(input => input.value.trim() !== '').length;
+                const progress = (filledFields / formInputs.length) * 100;
+                progressBar.style.width = progress + '%';
+            }
+
+            formInputs.forEach(input => {
+                input.addEventListener('input', updateProgress);
+            });
+
+            // Auto-save draft functionality
+            function saveDraft() {
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                localStorage.setItem('iaai_trainer_application_draft', JSON.stringify(data));
+            }
+
+            function loadDraft() {
+                const draft = localStorage.getItem('iaai_trainer_application_draft');
+                if (draft) {
+                    const data = JSON.parse(draft);
+                    Object.keys(data).forEach(key => {
+                        const field = document.getElementById(key);
+                        if (field && data[key]) {
+                            field.value = data[key];
+                        }
+                    });
+                    updateProgress();
+                    showMessage('Previous application draft loaded. Continue where you left off!', 'success');
+                }
+            }
+
+            // Load draft on page load
+            loadDraft();
+
+            // Save draft on input changes
+            form.addEventListener('input', () => {
+                setTimeout(saveDraft, 1000); // Debounced save
+            });
+
+            // Clear draft on successful submission
+            form.addEventListener('submit', () => {
+                setTimeout(() => {
+                    if (messageContainer.classList.contains('success')) {
+                        localStorage.removeItem('iaai_trainer_application_draft');
+                        progressBar.style.width = '0%';
+                    }
+                }, 1000);
+            });
         });
     </script>
-
 </body>
 </html>

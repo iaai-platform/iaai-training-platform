@@ -1,11 +1,11 @@
 /* ============================================================
-   ✅ HEADER STYLING
+   ✅ HEADER STYLING - Based on Original with Instructors Menu Added
 ============================================================ */
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #E2E2E2 ; /* Clean white background */
+  background-color: #E2E2E2; /* Clean white background */
   border-bottom: 3px solid #b8860b; /* Gold accent */
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   padding: 15px 20px;
@@ -47,66 +47,126 @@ header {
   color: #b8860b; /* Gold hover effect */
 }
 
-/* ✅ "All Programs" Dropdown */
-.program-menu-trigger {
+/* ✅ "All Programs" and "Instructors" Dropdown */
+.program-menu-trigger,
+.instructors-menu-trigger {
   position: relative;
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  border-radius: 50px;
+  padding: 10px 15px;
+  border-radius: 8px;
   font-weight: 500;
   gap: 5px;
   transition: all 0.3s ease;
+  color: #0C2340;
+  text-decoration: none;
+  font-size: 16px;
+  text-transform: uppercase;
 }
 
-.program-menu-trigger i {
+.program-menu-trigger a,
+.instructors-menu-trigger a {
+  color: inherit;
+  text-decoration: none;
+  margin: 0;
+  padding: 0;
+}
+
+.program-menu-trigger i,
+.instructors-menu-trigger i {
   font-size: 12px;
   transition: transform 0.3s ease;
+  color: #b8860b;
 }
 
-.program-menu-trigger:hover {
-  background-color: white;
-  color: black;
-  border-radius: 60px;
-  transform: scale(1.7);
+.program-menu-trigger:hover,
+.instructors-menu-trigger:hover {
+  background-color: rgba(184, 134, 11, 0.1);
+  color: #b8860b;
+  border-radius: 8px;
+  transform: none; /* Remove the scale effect */
 }
 
-/* ✅ Dropdown Styling */
-.program-menu {
+.program-menu-trigger:hover i,
+.instructors-menu-trigger:hover i {
+  transform: rotate(180deg);
+}
+
+/* ✅ Enhanced Dropdown Styling */
+.program-menu,
+.instructors-menu {
   display: none;
   position: absolute;
   top: 100%;
   left: 0;
-  width: 100%;
-  background: #E2E2E2 ;
-  padding: 10px 0;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-  text-align: center;
+  min-width: 280px;
+  background: #ffffff;
+  padding: 15px 0;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  border: 2px solid #b8860b;
   z-index: 1000;
   font-family: 'Montserrat', sans-serif;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
 }
 
-.program-menu-trigger:hover + .program-menu,
-.program-menu:hover {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
+.program-menu-trigger:hover .program-menu,
+.program-menu:hover,
+.instructors-menu-trigger:hover .instructors-menu,
+.instructors-menu:hover {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
-.program-menu a {
-  color: #002147;
-  padding: 10px 20px;
+.program-menu a,
+.instructors-menu a {
+  color: #0C2340 !important;
+  padding: 12px 20px !important;
   text-decoration: none;
-  font-size: 16px;
-  font-weight: bold;
-  display: inline-block;
-  transition: background 0.3s ease;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: block !important;
+  transition: all 0.3s ease;
+  text-transform: none !important;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
 }
 
-.program-menu a:hover {
-  background: #f4f4f4;
-  border-radius: 5px;
+.program-menu a:last-child,
+.instructors-menu a:last-child {
+  border-bottom: none;
+}
+
+.program-menu a:hover,
+.instructors-menu a:hover {
+  background: linear-gradient(135deg, #b8860b, #ffd700) !important;
+  color: #ffffff !important;
+  transform: translateX(5px);
+  border-radius: 0 25px 25px 0;
+}
+
+.program-menu a:before,
+.instructors-menu a:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #b8860b;
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.program-menu a:hover:before,
+.instructors-menu a:hover:before {
+  transform: scaleY(1);
 }
 
 /* ✅ Search Bar */
@@ -185,6 +245,26 @@ header {
 
 .profile-dropdown:hover .dropdown-content {
   display: block;
+}
+
+/* ✅ Login/Register Button Styling */
+.login-register button {
+  background: linear-gradient(135deg, #b8860b, #ffd700);
+  color: #ffffff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+}
+
+.login-register button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(184, 134, 11, 0.5);
 }
 
 /* ✅ Mobile Responsive */

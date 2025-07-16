@@ -1,86 +1,1179 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>in-company-courses</title>
-    <link rel="stylesheet" href="/css/formpages.css"> <!-- Link to the main CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>In-Company Training - International Aesthetic Academic Institution (IAAI)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
-  </head>
-  
-  <%- include('partials/header') %>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
-    <!-- ✅ Breadcrumb Navigation -->
+        /* Header Placeholder */
+        .header-placeholder {
+            height: 80px;
+            background: #002147;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-features {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .hero-feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e0e0e0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .hero-feature i {
+            color: #ffcc00;
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        /* Training Info Section */
+        .training-info {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .training-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .training-info h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .training-info h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .training-info p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 40px;
+        }
+
+        .features-list li {
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #ffcc00;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .features-list li:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .features-list li i {
+            color: #ffcc00;
+            font-size: 20px;
+            width: 25px;
+            text-align: center;
+        }
+
+        .features-list li span {
+            font-weight: 600;
+            color: #002147;
+        }
+
+        /* Training Options */
+        .training-options {
+            margin-top: 40px;
+        }
+
+        .training-options h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .option-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .option-card i {
+            font-size: 32px;
+            color: #ffcc00;
+            margin-bottom: 15px;
+        }
+
+        .option-card h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 10px;
+        }
+
+        .option-card p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Application Form Section */
+        .application-form {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .application-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #002147, #ffcc00, #b8860b);
+        }
+
+        .application-form h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .application-form h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .form-intro {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #002147;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffcc00;
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 204, 0, 0.5);
+            background: linear-gradient(135deg, #b8860b, #ffcc00);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            margin: 80px 0;
+            color: #ffffff;
+        }
+
+        .benefits-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .section-title p {
+            font-size: 18px;
+            color: #e0e0e0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .benefit-card .icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .benefit-card h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .benefit-card p {
+            font-size: 14px;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        /* Training Programs Preview */
+        .programs-section {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 80px 0;
+        }
+
+        .programs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .program-card {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .program-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .program-card-header {
+            background: linear-gradient(135deg, #002147, #003366);
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .program-card-header .icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 15px;
+        }
+
+        .program-card-header h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .program-card-header p {
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        .program-card-content {
+            padding: 30px;
+        }
+
+        .program-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .program-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .program-features li:last-child {
+            border-bottom: none;
+        }
+
+        .program-features li i {
+            color: #ffcc00;
+            font-size: 16px;
+        }
+
+        .program-features li span {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero-features {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .training-info,
+            .application-form {
+                padding: 40px 30px;
+            }
+
+            .training-info h2,
+            .application-form h2 {
+                font-size: 28px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .training-info,
+            .application-form {
+                padding: 30px 20px;
+            }
+
+            .programs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <!-- Breadcrumb -->
     <nav class="breadcrumb">
-        <a href="/">Home</a> > <a href="/in-company-courses">In-Company Training</a>
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <a href="/training-programs">Training Programs</a> > <span>In-Company Training</span>
+        </div>
     </nav>
 
-    <!-- ✅ In-Company Training Section -->
-    <section class="training-info">
-        <h1>In-Company Aesthetic Training</h1>
-        <p>
-            Enhance your team’s expertise with customized **In-Company Aesthetic Training**.
-            Delivered **on-site or online**, our programs are designed to meet **your team's unique needs**.
-        </p>
-        <ul>
-            <li>💡 **Tailored Training Programs** for your team.</li>
-            <li>🌎 **Flexible Online or On-Site Delivery**.</li>
-            <li>📜 **Certification upon Completion**.</li>
-        </ul>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>In-Company Aesthetic Training</h1>
+            <p>Transform your team's capabilities with customized aesthetic medicine training delivered directly to your organization. Tailored programs designed to meet your specific needs and objectives.</p>
+            <div class="hero-features">
+                <div class="hero-feature">
+                    <i class="fas fa-building"></i>
+                    <span>On-Site or Virtual Training</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-users"></i>
+                    <span>Team-Based Learning</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-cogs"></i>
+                    <span>Customized Curriculum</span>
+                </div>
+                <div class="hero-feature">
+                    <i class="fas fa-certificate"></i>
+                    <span>Group Certification</span>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- ✅ Application Form -->
-    <section class="application-form">
-        <h2>Apply for In-Company Training</h2>
-        <form id="inCompanyForm">
-            <input type="hidden" name="courseType" value="In-Company">
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Training Info Section -->
+        <div class="training-info fade-in">
+            <h2>Customized Training Solutions</h2>
+            <p>Our in-company training programs are designed to enhance your team's expertise with flexible delivery options that fit your organization's schedule and requirements. Whether delivered on-site at your facility or through our advanced virtual platform, we ensure your team receives world-class aesthetic medicine education.</p>
             
-            <label for="fullName">Full Name:</label>
-            <input type="text" name="fullName" required>
+            <ul class="features-list">
+                <li>
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Tailored Training Programs</span> designed specifically for your team's skill level and objectives
+                </li>
+                <li>
+                    <i class="fas fa-globe"></i>
+                    <span>Flexible Delivery Options</span> including on-site, virtual, or hybrid training formats
+                </li>
+                <li>
+                    <i class="fas fa-certificate"></i>
+                    <span>Group Certification</span> with internationally recognized credentials upon completion
+                </li>
+                <li>
+                    <i class="fas fa-clock"></i>
+                    <span>Flexible Scheduling</span> to minimize disruption to your business operations
+                </li>
+                <li>
+                    <i class="fas fa-user-md"></i>
+                    <span>Expert Instructors</span> with extensive experience in aesthetic medicine and corporate training
+                </li>
+                <li>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progress Tracking</span> and performance assessment for all participants
+                </li>
+            </ul>
 
-            <label for="email">Email:</label>
-            <input type="email" name="email" required>
+            <div class="training-options">
+                <h3>Training Delivery Options</h3>
+                <div class="options-grid">
+                    <div class="option-card">
+                        <i class="fas fa-building"></i>
+                        <h4>On-Site Training</h4>
+                        <p>Expert instructors come to your facility with equipment and materials</p>
+                    </div>
+                    <div class="option-card">
+                        <i class="fas fa-laptop"></i>
+                        <h4>Virtual Training</h4>
+                        <p>Interactive online sessions with live demonstrations and Q&A</p>
+                    </div>
+                    <div class="option-card">
+                        <i class="fas fa-layer-group"></i>
+                        <h4>Hybrid Approach</h4>
+                        <p>Combination of virtual theory and on-site practical sessions</p>
+                    </div>
+                    <div class="option-card">
+                        <i class="fas fa-calendar"></i>
+                        <h4>Modular Programs</h4>
+                        <p>Split training into multiple sessions over extended periods</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <label for="phoneNumber">Phone Number:</label>
-            <input type="text" name="phoneNumber" required>
+        <!-- Application Form Section -->
+        <div class="application-form fade-in">
+            <h2>Request In-Company Training</h2>
+            <p class="form-intro">Complete the form below to request a customized training proposal for your organization. Our team will contact you within 24 hours to discuss your specific requirements and provide a detailed quote.</p>
+            
+            <div id="messageContainer" class="message"></div>
+            
+            <form id="inCompanyForm">
+                <input type="hidden" name="courseType" value="In-Company">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fullName">Contact Person *</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="Enter full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobTitle">Job Title *</label>
+                        <input type="text" id="jobTitle" name="jobTitle" placeholder="Enter job title" required>
+                    </div>
+                </div>
 
-            <label for="companyName">Company Name:</label>
-            <input type="text" name="companyName">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" placeholder="Enter email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number *</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter phone number" required>
+                    </div>
+                </div>
 
-            <label for="message">Describe your team’s training needs:</label>
-            <textarea name="message" required></textarea>
+                <div class="form-group">
+                    <label for="companyName">Company/Organization Name *</label>
+                    <input type="text" id="companyName" name="companyName" placeholder="Enter company name" required>
+                </div>
 
-            <button type="submit">Submit Application</button>
-        </form>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="industry">Industry/Sector</label>
+                        <select id="industry" name="industry">
+                            <option value="">Select industry</option>
+                            <option value="medical-practice">Medical Practice</option>
+                            <option value="dermatology-clinic">Dermatology Clinic</option>
+                            <option value="cosmetic-surgery">Cosmetic Surgery Center</option>
+                            <option value="wellness-spa">Medical Spa/Wellness Center</option>
+                            <option value="dental-practice">Dental Practice</option>
+                            <option value="hospital">Hospital/Medical Center</option>
+                            <option value="pharmaceutical">Pharmaceutical Company</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="teamSize">Team Size *</label>
+                        <select id="teamSize" name="teamSize" required>
+                            <option value="">Select team size</option>
+                            <option value="5-10">5-10 people</option>
+                            <option value="11-20">11-20 people</option>
+                            <option value="21-50">21-50 people</option>
+                            <option value="50+">50+ people</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="trainingType">Preferred Training Type *</label>
+                        <select id="trainingType" name="trainingType" required>
+                            <option value="">Select training type</option>
+                            <option value="on-site">On-Site Training</option>
+                            <option value="virtual">Virtual Training</option>
+                            <option value="hybrid">Hybrid (Virtual + On-Site)</option>
+                            <option value="consultation">Need Consultation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="timeframe">Preferred Timeframe</label>
+                        <select id="timeframe" name="timeframe">
+                            <option value="">Select timeframe</option>
+                            <option value="asap">As soon as possible</option>
+                            <option value="1-3-months">1-3 months</option>
+                            <option value="3-6-months">3-6 months</option>
+                            <option value="6-12-months">6-12 months</option>
+                            <option value="flexible">Flexible</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainingTopics">Training Topics of Interest</label>
+                    <select id="trainingTopics" name="trainingTopics">
+                        <option value="">Select primary topic</option>
+                        <option value="botox-fillers">Botox & Dermal Fillers</option>
+                        <option value="facial-aesthetics">Facial Aesthetics</option>
+                        <option value="skin-rejuvenation">Skin Rejuvenation</option>
+                        <option value="prp-therapy">PRP Therapy</option>
+                        <option value="rhinoplasty">Non-Surgical Rhinoplasty</option>
+                        <option value="comprehensive">Comprehensive Aesthetic Medicine</option>
+                        <option value="custom">Custom Program</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="currentLevel">Team's Current Experience Level</label>
+                    <select id="currentLevel" name="currentLevel">
+                        <option value="">Select experience level</option>
+                        <option value="beginner">Beginner (No prior experience)</option>
+                        <option value="basic">Basic (Some experience)</option>
+                        <option value="intermediate">Intermediate (Regular practice)</option>
+                        <option value="advanced">Advanced (Extensive experience)</option>
+                        <option value="mixed">Mixed levels</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainingGoals">Training Goals & Objectives *</label>
+                    <textarea id="trainingGoals" name="trainingGoals" placeholder="Describe what you want to achieve with this training, specific skills to develop, and expected outcomes..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="additionalRequirements">Additional Requirements or Questions</label>
+                    <textarea id="additionalRequirements" name="additionalRequirements" placeholder="Any specific requirements, budget considerations, or questions about the training program..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Request Training Proposal
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section">
+        <div class="benefits-container">
+            <div class="section-title">
+                <h2>Why Choose IAAI for In-Company Training?</h2>
+                <p>We bring world-class aesthetic medicine education directly to your organization with proven results</p>
+            </div>
+            <div class="benefits-grid">
+                <div class="benefit-card fade-in">
+                    <div class="icon"><i class="fas fa-award"></i></div>
+                    <h4>International Expertise</h4>
+                    <p>Learn from globally recognized experts with decades of experience in aesthetic medicine and training delivery.</p>
+                </div>
+                <div class="benefit-card fade-in">
+                    <div class="icon"><i class="fas fa-cogs"></i></div>
+                    <h4>Customized Curriculum</h4>
+                    <p>Every program is tailored to your team's current skill level, learning objectives, and organizational goals.</p>
+                </div>
+                <div class="benefit-card fade-in">
+                    <div class="icon"><i class="fas fa-chart-line"></i></div>
+                    <h4>Proven ROI</h4>
+                    <p>Organizations see immediate improvements in patient satisfaction, treatment outcomes, and revenue generation.</p>
+                </div>
+                <div class="benefit-card fade-in">
+                    <div class="icon"><i class="fas fa-hands"></i></div>
+                    <h4>Hands-On Learning</h4>
+                    <p>Extensive practical training with real equipment and supervised practice sessions for skill development.</p>
+                </div>
+                <div class="benefit-card fade-in">
+                    <div class="icon"><i class="fas fa-headset"></i></div>
+                    <h4>Ongoing Support</h4>
+                    <p>Post-training support, follow-up sessions, and access to our expert network for continued learning.</p>
+                </div>
+                <div class="benefit-card fade-in">
+                    <div class="icon"><i class="fas fa-certificate"></i></div>
+                    <h4>International Certification</h4>
+                    <p>Participants receive globally recognized certifications that enhance credibility and career prospects.</p>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- ✅ JavaScript for Form Submission -->
-    <script>
-        document.getElementById('inCompanyForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
+    <!-- Training Programs Preview -->
+    <section class="programs-section">
+        <div class="programs-container">
+            <div class="section-title">
+                <h2 style="color: #002147;">Popular In-Company Training Programs</h2>
+                <p style="color: #666;">Explore our most requested corporate training programs designed for team development</p>
+            </div>
+            <div class="programs-grid">
+                <div class="program-card fade-in">
+                    <div class="program-card-header">
+                        <div class="icon"><i class="fas fa-syringe"></i></div>
+                        <h3>Foundation Aesthetics</h3>
+                        <p>Complete introduction to aesthetic medicine</p>
+                    </div>
+                    <div class="program-card-content">
+                        <ul class="program-features">
+                            <li><i class="fas fa-check"></i><span>Botox injection techniques</span></li>
+                            <li><i class="fas fa-check"></i><span>Dermal filler applications</span></li>
+                            <li><i class="fas fa-check"></i><span>Safety protocols</span></li>
+                            <li><i class="fas fa-check"></i><span>Patient consultation</span></li>
+                            <li><i class="fas fa-check"></i><span>Hands-on practice</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="program-card fade-in">
+                    <div class="program-card-header">
+                        <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+                        <h3>Advanced Techniques</h3>
+                        <p>Specialized training for experienced practitioners</p>
+                    </div>
+                    <div class="program-card-content">
+                        <ul class="program-features">
+                            <li><i class="fas fa-check"></i><span>Advanced injection patterns</span></li>
+                            <li><i class="fas fa-check"></i><span>Combination treatments</span></li>
+                            <li><i class="fas fa-check"></i><span>Complication management</span></li>
+                            <li><i class="fas fa-check"></i><span>Practice optimization</span></li>
+                            <li><i class="fas fa-check"></i><span>Master class sessions</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="program-card fade-in">
+                    <div class="program-card-header">
+                        <div class="icon"><i class="fas fa-users"></i></div>
+                        <h3>Team Development</h3>
+                        <p>Comprehensive skill building for entire teams</p>
+                    </div>
+                    <div class="program-card-content">
+                        <ul class="program-features">
+                            <li><i class="fas fa-check"></i><span>Multi-level training</span></li>
+                            <li><i class="fas fa-check"></i><span>Role-specific modules</span></li>
+                            <li><i class="fas fa-check"></i><span>Team coordination</span></li>
+                            <li><i class="fas fa-check"></i><span>Quality standards</span></li>
+                            <li><i class="fas fa-check"></i><span>Ongoing mentorship</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            const response = await fetch('/apply-in-company', { // ✅ Fix route name
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+    <%- include('partials/footer') %>
+
+    <script>
+        // Enhanced form functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('inCompanyForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const messageContainer = document.getElementById('messageContainer');
+
+            // Show message function
+            function showMessage(message, type) {
+                messageContainer.textContent = message;
+                messageContainer.className = `message ${type}`;
+                messageContainer.style.display = 'block';
+                
+                // Auto-hide success messages after 5 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        messageContainer.style.display = 'none';
+                    }, 5000);
+                }
+                
+                // Scroll to message
+                messageContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Form submission handler
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                // Disable submit button and show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Request...';
+                
+                // Hide previous messages
+                messageContainer.style.display = 'none';
+                
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/apply-in-company', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success !== false) {
+                        showMessage('✅ Training request submitted successfully! Our team will contact you within 24 hours with a customized proposal.', 'success');
+                        form.reset();
+                        // Reset field borders
+                        document.querySelectorAll('input, select, textarea').forEach(field => {
+                            field.style.borderColor = '#e0e0e0';
+                        });
+                    } else {
+                        showMessage('❌ ' + (result.message || 'Request submission failed. Please try again.'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error submitting request:', error);
+                    showMessage('❌ Network error. Please check your connection and try again.', 'error');
+                }
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Request Training Proposal';
             });
 
-            const result = await response.json();
-            alert(result.message);
-            if (result.success) {
-                e.target.reset();
+            // Enhanced form validation
+            const requiredFields = ['fullName', 'jobTitle', 'email', 'phoneNumber', 'companyName', 'teamSize', 'trainingType', 'trainingGoals'];
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('blur', function() {
+                        if (this.value.trim() === '') {
+                            this.style.borderColor = '#dc3545';
+                        } else {
+                            this.style.borderColor = '#28a745';
+                        }
+                    });
+                }
+            });
+
+            // Email validation
+            document.getElementById('email').addEventListener('blur', function() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.value) && this.value !== '') {
+                    this.style.borderColor = '#dc3545';
+                    showMessage('Please enter a valid email address.', 'error');
+                } else if (this.value !== '') {
+                    this.style.borderColor = '#28a745';
+                }
+            });
+
+            // Phone number formatting
+            document.getElementById('phoneNumber').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.startsWith('971') || value.startsWith('90')) {
+                        e.target.value = '+' + value;
+                    } else {
+                        e.target.value = value;
+                    }
+                }
+            });
+
+            // Character count for textareas
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                const maxLength = 1000;
+                const counter = document.createElement('div');
+                counter.style.fontSize = '12px';
+                counter.style.color = '#666';
+                counter.style.textAlign = 'right';
+                counter.style.marginTop = '5px';
+                textarea.parentNode.appendChild(counter);
+                
+                function updateCounter() {
+                    const remaining = maxLength - textarea.value.length;
+                    counter.textContent = `${textarea.value.length}/${maxLength} characters`;
+                    if (remaining < 100) {
+                        counter.style.color = '#dc3545';
+                    } else {
+                        counter.style.color = '#666';
+                    }
+                }
+                
+                textarea.addEventListener('input', updateCounter);
+                updateCounter();
+            });
+
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all fade-in elements
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Dynamic form updates based on selections
+            const trainingType = document.getElementById('trainingType');
+            const teamSize = document.getElementById('teamSize');
+            
+            function updateFormContext() {
+                const type = trainingType.value;
+                const size = teamSize.value;
+                
+                if (type === 'on-site' && size) {
+                    showMessage(`💡 Tip: For ${size} people choosing on-site training, we'll need 2-3 days advance notice to arrange equipment and materials.`, 'success');
+                }
             }
+            
+            trainingType.addEventListener('change', updateFormContext);
+            teamSize.addEventListener('change', updateFormContext);
+
+            // Auto-save draft functionality
+            function saveDraft() {
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                localStorage.setItem('iaai_in_company_draft', JSON.stringify(data));
+            }
+
+            function loadDraft() {
+                const draft = localStorage.getItem('iaai_in_company_draft');
+                if (draft) {
+                    const data = JSON.parse(draft);
+                    Object.keys(data).forEach(key => {
+                        const field = document.getElementById(key);
+                        if (field && data[key]) {
+                            field.value = data[key];
+                        }
+                    });
+                    showMessage('Previous form draft loaded. Continue where you left off!', 'success');
+                }
+            }
+
+            // Load draft on page load
+            loadDraft();
+
+            // Save draft on input changes
+            form.addEventListener('input', () => {
+                setTimeout(saveDraft, 1000); // Debounced save
+            });
+
+            // Clear draft on successful submission
+            form.addEventListener('submit', () => {
+                setTimeout(() => {
+                    if (messageContainer.classList.contains('success')) {
+                        localStorage.removeItem('iaai_in_company_draft');
+                    }
+                }, 1000);
+            });
         });
     </script>
-
-<%- include('partials/footer') %>
-
 </body>
 </html>

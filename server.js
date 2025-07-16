@@ -242,6 +242,12 @@ app.use("/", inCompanyCoursesRoutes);
 const instructorManageRoutes = require("./routes/instructorManageRoutes");
 app.use("/instructors", instructorManageRoutes);
 
+//new
+// Instructors routes - ADD THIS LINE
+const instructorsRoutes = require("./routes/instructorsRoutes");
+app.use("/", instructorsRoutes);
+console.log("👥 Instructors routes loaded");
+
 // Admin In-Person Courses Routes
 const inPersonCoursesRoutes = require("./routes/admin/inPersonCoursesRoutes");
 app.use("/admin-courses/inperson", inPersonCoursesRoutes);

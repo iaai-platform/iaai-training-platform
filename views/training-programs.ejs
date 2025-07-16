@@ -1,169 +1,1218 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>International Aesthetic Academic Institution (IAAI)</title>
-  <link rel="stylesheet" href="/css/style.css"> <!-- Link to the main CSS -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Programs - International Aesthetic Academic Institution (IAAI)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Placeholder */
+        .header-placeholder {
+            height: 80px;
+            background: #002147;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #ffcc00;
+            display: block;
+        }
+
+        .hero-stat .label {
+            font-size: 14px;
+            color: #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: #ffffff;
+            padding: 40px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .filter-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: #f8f9fa;
+            color: #666;
+            padding: 12px 24px;
+            border: 2px solid transparent;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-tab.active,
+        .filter-tab:hover {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            border-color: #ffcc00;
+            transform: translateY(-2px);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .view-btn.active,
+        .view-btn:hover {
+            background: #002147;
+            color: #ffffff;
+            border-color: #002147;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        /* Cards Container */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .cards-container.list-view {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        /* Enhanced Card Styling */
+        .program-card {
+            background: #ffffff;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .program-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        .program-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+            z-index: 2;
+        }
+
+        .card-image {
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 33, 71, 0.8), rgba(255, 204, 0, 0.3));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .program-card:hover .card-image::before {
+            opacity: 1;
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 3;
+        }
+
+        .card-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 64px;
+            color: rgba(255, 255, 255, 0.9);
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .program-card:hover .card-icon {
+            transform: translate(-50%, -50%) scale(1.2);
+            color: #ffffff;
+        }
+
+        .card-content {
+            padding: 40px 30px;
+            position: relative;
+        }
+
+        .card-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .card-content p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .card-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .feature-tag {
+            background: #f8f9fa;
+            color: #666;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .card-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #002147;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+            background: linear-gradient(135deg, #b8860b, #ffcc00);
+        }
+
+        .cta-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .cta-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* List View Styling */
+        .cards-container.list-view .program-card {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 0;
+            align-items: center;
+        }
+
+        .cards-container.list-view .card-image {
+            height: 200px;
+        }
+
+        .cards-container.list-view .card-content {
+            padding: 30px 40px;
+        }
+
+        /* Featured Programs Section */
+        .featured-section {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            margin: 80px 0;
+            color: #ffffff;
+        }
+
+        .featured-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .featured-section h2 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .featured-section p {
+            font-size: 18px;
+            color: #e0e0e0;
+            margin-bottom: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .featured-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .featured-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .featured-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .featured-card h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .featured-card p {
+            font-size: 14px;
+            color: #e0e0e0;
+            margin-bottom: 0;
+        }
+
+        /* Call to Action Section */
+        .cta-section {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn-primary {
+            background: #002147;
+            color: #ffffff;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
+            background: #001a3a;
+        }
+
+        .cta-btn-secondary {
+            background: transparent;
+            border: 2px solid #002147;
+            color: #002147;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-btn-secondary:hover {
+            background: #002147;
+            color: #ffffff;
+            transform: translateY(-3px);
+        }
+
+        /* Search and Sort */
+        .search-sort-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #ffcc00;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .sort-dropdown {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sort-dropdown:focus {
+            outline: none;
+            border-color: #ffcc00;
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 48px;
+            color: #ffcc00;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero-stats {
+                gap: 40px;
+            }
+
+            .filter-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-tabs {
+                justify-content: center;
+            }
+
+            .cards-container {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 30px;
+            }
+
+            .cards-container.list-view .program-card {
+                grid-template-columns: 1fr;
+            }
+
+            .cards-container.list-view .card-image {
+                height: 250px;
+            }
+
+            .search-sort-container {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .card-content {
+                padding: 30px 20px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Hidden class for filtering */
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
-
-
-
-
 <body>
   <%- include('partials/header') %>
 
-  <!-- Breadcrumb Navigation -->
-  <nav class="breadcrumb">
-    <a href="/">Home</a> > <a href="/training-programs">Our Training Programs</a>
-  </nav>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <span>Our Training Programs</span>
+        </div>
+    </nav>
 
-  <!-- Hero Section -->
-  <section id="hero">
-    <div class="hero-content">
-        <h1>Our Training Programs</h1>
-        <p>Explore a variety of training programs offered to enhance your aesthetic skills.</p>
-    </div>
-</section>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>World-Class Training Programs</h1>
+            <p>Advance your career in aesthetic medicine with our comprehensive training programs, delivered by internationally recognized experts across multiple formats and locations.</p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="number">25+</span>
+                    <span class="label">Programs</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="number">1000+</span>
+                    <span class="label">Graduates</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="number">3</span>
+                    <span class="label">Countries</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <!-- Cards Section (9 Boxes) -->
-  <section id="cards-section" class="section-box">
-    <div class="card-container">
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="filter-container">
+            <div class="filter-tabs">
+                <div class="filter-tab active" data-filter="all">All Programs</div>
+                <div class="filter-tab" data-filter="in-person">In-Person</div>
+                <div class="filter-tab" data-filter="online">Online</div>
+                <div class="filter-tab" data-filter="advanced">Advanced</div>
+                <div class="filter-tab" data-filter="corporate">Corporate</div>
+            </div>
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="view-btn" data-view="list">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </section>
 
-      <!-- Card 1: In-Person Aesthetic Training -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image2.jpg');">
-          <a href="/in-person-aesthetic-training" class="cta-btn arrow-btn">→</a>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Search and Sort -->
+        <div class="search-sort-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search training programs...">
+                <i class="fas fa-search"></i>
+            </div>
+            <select class="sort-dropdown" id="sortSelect">
+                <option value="name">Sort by Name</option>
+                <option value="type">Sort by Type</option>
+                <option value="level">Sort by Level</option>
+            </select>
         </div>
-        <div class="card-content">
-          <h3>In-Person Aesthetic Training</h3>
-          <p>Comprehensive aesthetic training covering injectables, contouring, PRP, microneedling, chemical peels, and laser treatments.</p>
-        </div>
-      </div>
 
-      <!-- Card 2: Online Live Training -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image3.jpg');">
-          <a href="/online-live-training" class="cta-btn">→</a>
-        </div>
-        <div class="card-content">
-          <h3>Online Live Training</h3>
-          <p>Interactive online live courses teaching aesthetic techniques, including injectables, skin treatments, and facial contouring.</p>
-        </div>
-      </div>
+        <!-- Cards Container -->
+        <div class="cards-container" id="cardsContainer">
+            <!-- Card 1: In-Person Aesthetic Training -->
+            <div class="program-card fade-in" data-category="in-person" data-level="foundation">
+                <div class="card-image" style="background-image: url('/images/image2.jpg');">
+                    <div class="card-badge">Foundation</div>
+                    <div class="card-icon"><i class="fas fa-user-md"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>In-Person Aesthetic Training</h3>
+                    <p>Comprehensive hands-on aesthetic training covering injectables, contouring, PRP, microneedling, chemical peels, and laser treatments with expert supervision.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">Hands-on Training</span>
+                        <span class="feature-tag">Expert Supervision</span>
+                        <span class="feature-tag">Certificate</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">Contact for Pricing</span>
+                        <a href="/in-person-aesthetic-training" class="cta-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Card 3: Self-Paced Online Training -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image4.jpg');">
-          <a href="/self-paced-online-training" class="cta-btn">→</a>
-        </div>
-        <div class="card-content">
-          <h3>Self-Paced Online Training</h3>
-          <p>Learn aesthetic techniques at your own pace with pre-recorded expert-led training sessions.</p>
-        </div>
-      </div>
+            <!-- Card 2: Online Live Training -->
+            <div class="program-card fade-in" data-category="online" data-level="intermediate">
+                <div class="card-image" style="background-image: url('/images/image3.jpg');">
+                    <div class="card-badge">Live Online</div>
+                    <div class="card-icon"><i class="fas fa-video"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>Online Live Training</h3>
+                    <p>Interactive online live courses teaching aesthetic techniques, including injectables, skin treatments, and facial contouring with real-time instructor feedback.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">Live Interaction</span>
+                        <span class="feature-tag">Real-time Q&A</span>
+                        <span class="feature-tag">Flexible Schedule</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">From $799</span>
+                        <a href="/online-live-training" class="cta-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Card 4: On-Demand Courses -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image5.jpg');">
-          <a href="/on-demand-courses" class="cta-btn">→</a>
-        </div>
-        <div class="card-content">
-          <h3>On-Demand Courses</h3>
-          <p>Access expert-led aesthetic training anytime with flexible, on-demand courses tailored to your schedule.</p>
-        </div>
-      </div>
+            <!-- Card 3: Self-Paced Online Training -->
+            <div class="program-card fade-in" data-category="online" data-level="beginner">
+                <div class="card-image" style="background-image: url('/images/image4.jpg');">
+                    <div class="card-badge">Self-Paced</div>
+                    <div class="card-icon"><i class="fas fa-clock"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>Self-Paced Online Training</h3>
+                    <p>Learn aesthetic techniques at your own pace with pre-recorded expert-led training sessions, downloadable resources, and lifetime access.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">Own Pace</span>
+                        <span class="feature-tag">Lifetime Access</span>
+                        <span class="feature-tag">Downloadable</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">From $499</span>
+                        <a href="/self-paced-online-training" class="cta-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Card 5: New Trainers Required -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image6.jpg');">
-          <a href="/new-trainers-required" class="cta-btn">→</a>
-        </div>
-        <div class="card-content">
-          <h3>New Trainers Required</h3>
-          <p>Work with us to deliver our courses.</p>
-        </div>
-      </div>
+            <!-- Card 4: On-Demand Courses -->
+            <div class="program-card fade-in" data-category="online" data-level="intermediate">
+                <div class="card-image" style="background-image: url('/images/image5.jpg');">
+                    <div class="card-badge">On-Demand</div>
+                    <div class="card-icon"><i class="fas fa-play-circle"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>On-Demand Courses</h3>
+                    <p>Access expert-led aesthetic training anytime with flexible, on-demand courses tailored to your schedule and learning preferences.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">24/7 Access</span>
+                        <span class="feature-tag">Mobile Friendly</span>
+                        <span class="feature-tag">Progress Tracking</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">From $399</span>
+                        <a href="/on-demand-courses" class="cta-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Card 6: In-Company Courses -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image7.jpg');">
-          <a href="/in-company-courses" class="cta-btn">→</a>
+            <!-- Card 5: New Trainers Program -->
+            <div class="program-card fade-in" data-category="corporate" data-level="professional">
+                <div class="card-image" style="background-image: url('/images/image6.jpg');">
+                    <div class="card-badge">Partnership</div>
+                    <div class="card-icon"><i class="fas fa-handshake"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>New Trainers Required</h3>
+                    <p>Join our team of expert instructors and help deliver world-class aesthetic training programs to professionals worldwide.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">Instructor Role</span>
+                        <span class="feature-tag">Global Reach</span>
+                        <span class="feature-tag">Competitive Pay</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">Apply Now</span>
+                        <a href="/new-trainers-required" class="cta-btn">
+                            Apply <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6: In-Company Courses -->
+            <div class="program-card fade-in" data-category="corporate" data-level="customized">
+                <div class="card-image" style="background-image: url('/images/image7.jpg');">
+                    <div class="card-badge">Corporate</div>
+                    <div class="card-icon"><i class="fas fa-building"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>In-Company Courses</h3>
+                    <p>Customized in-company aesthetic training delivered on-site or online, tailored to your team's specific needs and skill levels.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">Customized</span>
+                        <span class="feature-tag">On-site/Online</span>
+                        <span class="feature-tag">Team Training</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">Custom Quote</span>
+                        <a href="/in-company-courses" class="cta-btn">
+                            Get Quote <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 7: Mentorship Program -->
+            <div class="program-card fade-in" data-category="advanced" data-level="professional">
+                <div class="card-image" style="background-image: url('/images/image8.jpg');">
+                    <div class="card-badge">Mentorship</div>
+                    <div class="card-icon"><i class="fas fa-user-graduate"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>Mentorship Program</h3>
+                    <p>Connect with experienced professionals for one-on-one mentorship to enhance your skills and accelerate your career growth.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">1-on-1 Guidance</span>
+                        <span class="feature-tag">Expert Mentors</span>
+                        <span class="feature-tag">Career Growth</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">From $1,299</span>
+                        <a href="/mentorship-program" class="cta-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 8: Advanced Aesthetic Techniques -->
+            <div class="program-card fade-in" data-category="advanced" data-level="expert">
+                <div class="card-image" style="background-image: url('/images/image9.jpg');">
+                    <div class="card-badge">Advanced</div>
+                    <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>Advanced Aesthetic Techniques</h3>
+                    <p>Master advanced techniques for injectables, skin treatments, and specialized procedures from top international professionals.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">Expert Level</span>
+                        <span class="feature-tag">Advanced Techniques</span>
+                        <span class="feature-tag">Master Class</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">From $2,499</span>
+                        <a href="/advanced-aesthetic-techniques" class="cta-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 9: Corporate Aesthetic Training -->
+            <div class="program-card fade-in" data-category="corporate" data-level="enterprise">
+                <div class="card-image" style="background-image: url('/images/image10.jpg');">
+                    <div class="card-badge">Enterprise</div>
+                    <div class="card-icon"><i class="fas fa-users"></i></div>
+                </div>
+                <div class="card-content">
+                    <h3>Corporate Aesthetic Training</h3>
+                    <p>Comprehensive training solutions for large organizations, including curriculum development, instructor certification, and ongoing support.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">Enterprise Scale</span>
+                        <span class="feature-tag">Custom Curriculum</span>
+                        <span class="feature-tag">Ongoing Support</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-price">Enterprise Pricing</span>
+                        <a href="/corporate-aesthetic-training" class="cta-btn">
+                            Contact Us <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-content">
-          <h3>In-Company Courses</h3>
-          <p>Customized in-company aesthetic training delivered on-site or online, tailored to your team’s needs.</p>
+    </main>
+
+    <!-- Featured Programs Section -->
+    <section class="featured-section">
+        <div class="featured-container">
+            <h2>Why Choose IAAI Training Programs?</h2>
+            <p>Our training programs are designed to provide you with the skills, knowledge, and confidence to excel in aesthetic medicine</p>
+            <div class="featured-grid">
+                <div class="featured-card fade-in">
+                    <div class="featured-icon"><i class="fas fa-award"></i></div>
+                    <h4>Internationally Accredited</h4>
+                    <p>All our programs come with internationally recognized certifications including Europass and CPD accreditation.</p>
+                </div>
+                <div class="featured-card fade-in">
+                    <div class="featured-icon"><i class="fas fa-users"></i></div>
+                    <h4>Expert Instructors</h4>
+                    <p>Learn from internationally renowned experts with decades of experience in aesthetic medicine and training.</p>
+                </div>
+                <div class="featured-card fade-in">
+                    <div class="featured-icon"><i class="fas fa-hands"></i></div>
+                    <h4>Hands-on Experience</h4>
+                    <p>Extensive practical training with real patients and cutting-edge equipment in professional medical facilities.</p>
+                </div>
+                <div class="featured-card fade-in">
+                    <div class="featured-icon"><i class="fas fa-globe"></i></div>
+                    <h4>Global Locations</h4>
+                    <p>Training programs available in Istanbul, Dubai, and Verona with world-class facilities and accommodations.</p>
+                </div>
+            </div>
         </div>
-      </div>
+    </section>
 
-      <!-- Card 7: Mentorship Program -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image8.jpg');">
-          <a href="/mentorship-program" class="cta-btn">→</a>
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>Ready to Advance Your Career?</h2>
+            <p>Join thousands of medical professionals who have transformed their practice with IAAI's world-class training programs. Start your journey to aesthetic excellence today.</p>
+            <div class="cta-buttons">
+                <a href="/contact" class="cta-btn-primary">Get Started Today</a>
+                <a href="/about" class="cta-btn-secondary">Learn More About IAAI</a>
+            </div>
         </div>
-        <div class="card-content">
-          <h3>Mentorship Program</h3>
-          <p>Connect with experienced professionals for one-on-one mentorship to enhance your skills.</p>
-        </div>
-      </div>
+    </section>
 
-      <!-- Card 8: Advanced Aesthetic Techniques -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image9.jpg');">
-          <a href="/advanced-aesthetic-techniques" class="cta-btn">→</a>
-        </div>
-        <div class="card-content">
-          <h3>Advanced Aesthetic Techniques</h3>
-          <p>Learn advanced techniques for injectables, skin treatments, and more from top professionals.</p>
-        </div>
-      </div>
+    <%- include('partials/footer') %>
 
-      <!-- Card 9: Corporate Aesthetic Training -->
-      <div class="card">
-        <div class="card-image" style="background-image: url('/images/image10.jpg');">
-          <a href="/corporate-aesthetic-training" class="cta-btn">→</a>
-        </div>
-        <div class="card-content">
-          <h3>Corporate Aesthetic Training</h3>
-          <p>Offer tailored training to your employees to advance their aesthetic skills within your company.</p>
-        </div>
-      </div>
+    <script>
+        // Enhanced JavaScript functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter functionality
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            const cards = document.querySelectorAll('.program-card');
+            const cardsContainer = document.getElementById('cardsContainer');
+            
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    
+                    const filter = tab.getAttribute('data-filter');
+                    
+                    cards.forEach(card => {
+                        if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                            card.style.display = 'block';
+                            setTimeout(() => {
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0)';
+                            }, 100);
+                        } else {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(20px)';
+                            setTimeout(() => {
+                                card.style.display = 'none';
+                            }, 300);
+                        }
+                    });
+                });
+            });
 
-    </div>
-  </section>
+            // View toggle functionality
+            const viewButtons = document.querySelectorAll('.view-btn');
+            
+            viewButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    viewButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const view = btn.getAttribute('data-view');
+                    
+                    if (view === 'list') {
+                        cardsContainer.classList.add('list-view');
+                    } else {
+                        cardsContainer.classList.remove('list-view');
+                    }
+                });
+            });
 
-  <%- include('partials/footer') %>
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                cards.forEach(card => {
+                    const title = card.querySelector('h3').textContent.toLowerCase();
+                    const description = card.querySelector('p').textContent.toLowerCase();
+                    
+                    if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
 
+            // Sort functionality
+            const sortSelect = document.getElementById('sortSelect');
+            
+            sortSelect.addEventListener('change', (e) => {
+                const sortBy = e.target.value;
+                const cardsArray = Array.from(cards);
+                
+                cardsArray.sort((a, b) => {
+                    let aValue, bValue;
+                    
+                    switch(sortBy) {
+                        case 'name':
+                            aValue = a.querySelector('h3').textContent;
+                            bValue = b.querySelector('h3').textContent;
+                            break;
+                        case 'type':
+                            aValue = a.getAttribute('data-category');
+                            bValue = b.getAttribute('data-category');
+                            break;
+                        case 'level':
+                            aValue = a.getAttribute('data-level');
+                            bValue = b.getAttribute('data-level');
+                            break;
+                        default:
+                            return 0;
+                    }
+                    
+                    return aValue.localeCompare(bValue);
+                });
+                
+                // Clear container and re-append sorted cards
+                cardsContainer.innerHTML = '';
+                cardsArray.forEach(card => cardsContainer.appendChild(card));
+            });
 
-  <script>
-    // Function to confirm if the user really wants to delete the course
-  function confirmDelete(courseName, courseId) {
-    const confirmation = confirm(`Are you sure you want to delete the course: ${courseName}? This action cannot be undone.`);
-    if (confirmation) {
-      // Proceed with course deletion
-      deleteCourse(courseId); // Call the function to delete the course
-    } else {
-      alert("Course deletion canceled.");
-    }
-  }
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
 
-  // Function to actually delete the course (example for using AJAX)
- 
-  // Function to confirm if the user really wants to delete the course
-  function confirmDelete(courseName) {
-    const confirmation = confirm(`Are you sure you want to delete the course: ${courseName}? This action cannot be undone.`);
-    if (confirmation) {
-      alert(`The course "${courseName}" has been deleted.`); // Placeholder action
-      // Implement the actual delete logic here, for example, using an AJAX request
-    }
-  }
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, observerOptions);
 
-  </script>
-  
+            // Observe all cards and sections
+            document.querySelectorAll('.program-card, .featured-card').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Card hover effects
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-15px)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add loading state simulation
+            function showLoading() {
+                cardsContainer.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <h3>Loading Programs...</h3>
+                    </div>
+                `;
+            }
+
+            // Enhanced card interaction
+            cards.forEach(card => {
+                const ctaBtn = card.querySelector('.cta-btn');
+                
+                ctaBtn.addEventListener('click', (e) => {
+                    // Add click animation
+                    ctaBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        ctaBtn.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+        });
+
+        // Function to confirm course deletion (keeping your original function)
+        function confirmDelete(courseName, courseId) {
+            const confirmation = confirm(`Are you sure you want to delete the course: ${courseName}? This action cannot be undone.`);
+            if (confirmation) {
+                deleteCourse(courseId);
+            } else {
+                alert("Course deletion canceled.");
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,110 +1,1315 @@
 <!DOCTYPE html>
 <html lang="en">
-
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>International Aesthetic Academic Institution (IAAI)</title>
-  <link rel="stylesheet" href="/css/aboutus.css"> <!-- Link to the main CSS -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About IAAI - International Aesthetic Academic Institution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Statistics Section */
+        .stats-section {
+            background: #ffffff;
+            padding: 80px 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .stat-number {
+            font-size: 42px;
+            font-weight: 800;
+            color: #002147;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .content-section {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            margin-bottom: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .content-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            align-items: center;
+        }
+
+        .section-content {
+            padding: 60px;
+        }
+
+        .section-content h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .section-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .section-content p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .section-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .section-content li {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .section-content li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .section-image {
+            position: relative;
+            overflow: hidden;
+            height: 400px;
+        }
+
+        .section-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .section-image:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Services Grid */
+        .services-section {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 80px 0;
+        }
+
+        .services-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .section-title p {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .service-card {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .service-header {
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        }
+
+        .service-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .service-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 15px;
+        }
+
+        .service-card p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .service-features {
+            padding: 0 30px 30px;
+        }
+
+        .service-features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .service-features li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .service-features li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #ffcc00;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .service-cta {
+            padding: 0 30px 30px;
+        }
+
+        .service-btn {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .service-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+        }
+
+        /* Technology Section */
+        .technology-section {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            color: #ffffff;
+        }
+
+        .technology-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .tech-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .tech-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 25px;
+        }
+
+        .tech-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .tech-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* Instructors Preview */
+        .instructors-section {
+            background: #ffffff;
+            padding: 80px 0;
+        }
+
+        .instructors-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .instructors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .instructor-card {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .instructor-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .instructor-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .instructor-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 10px;
+        }
+
+        .instructor-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffcc00;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .instructor-card p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Learning Paths Section */
+        .learning-paths-section {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 80px 0;
+        }
+
+        .paths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .path-card {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #ffcc00;
+        }
+
+        .path-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .path-badge {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .path-card h4 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 15px;
+        }
+
+        .path-steps {
+            list-style: none;
+            padding: 0;
+        }
+
+        .path-steps li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .path-steps li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            background: #002147;
+            color: #ffffff;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
+            background: #001a3a;
+        }
+
+        .cta-btn.secondary {
+            background: transparent;
+            border: 2px solid #002147;
+            color: #002147;
+        }
+
+        .cta-btn.secondary:hover {
+            background: #002147;
+            color: #ffffff;
+        }
+
+        /* Values Section */
+        .values-section {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            color: #ffffff;
+        }
+
+        .values-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .value-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .value-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 25px;
+        }
+
+        .value-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .value-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .section-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-content {
+                padding: 40px 30px;
+            }
+
+            .section-content h2 {
+                font-size: 28px;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 20px;
+            }
+
+            .services-grid,
+            .instructors-grid,
+            .values-grid,
+            .tech-grid,
+            .paths-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
 </head>
+<body>
+    <%- include('partials/header') %>
 
-<%- include('partials/header') %>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <span>About Us</span>
+        </div>
+    </nav>
 
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Leading the Future of Aesthetic Medicine Education</h1>
+            <p>International Aesthetic Academic Institution (IAAI) is the world's premier destination for comprehensive aesthetic medicine training, certification, and professional development across multiple modalities and global locations.</p>
+        </div>
+    </section>
 
+    <!-- Statistics Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-number">5,000+</div>
+                <div class="stat-label">Trained Professionals</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-award"></i></div>
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Training Programs</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                <div class="stat-number">75+</div>
+                <div class="stat-label">Countries Served</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-number">4.9/5</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                <div class="stat-number">25+</div>
+                <div class="stat-label">Expert Instructors</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-certificate"></i></div>
+                <div class="stat-number">15,000+</div>
+                <div class="stat-label">Certificates Issued</div>
+            </div>
+        </div>
+    </section>
 
-  <!-- Breadcrumb Navigation -->
-  <nav class="breadcrumb">
-    <a href="/">Home</a> > <span>About Us</span>
-  </nav>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mission Section -->
+        <div class="content-section fade-in">
+            <div class="section-grid">
+                <div class="section-content">
+                    <h2>Our Mission</h2>
+                    <p><strong>Empowering Aesthetic Excellence Worldwide.</strong> We are dedicated to advancing the field of aesthetic medicine through comprehensive education, innovative training methodologies, and internationally recognized certification programs.</p>
+                    <p>Our mission is to equip healthcare professionals with the knowledge, skills, and confidence needed to deliver exceptional patient care while driving innovation in aesthetic medicine across the globe.</p>
+                </div>
+                <div class="section-image">
+                    <img src="/images/mission.jpg" alt="Our Mission">
+                </div>
+            </div>
+        </div>
 
-  <!-- Hero Section -->
-  <section id="hero">
-    <div class="hero-content">
-      <h1>About the International Aesthetic Academic Institution</h1>
-      <p>We are the global leader in aesthetic medicine and cosmetic surgery education, providing hands-on training for doctors worldwide.</p>
-    </div>
-  </section>
+        <!-- Vision Section -->
+        <div class="content-section fade-in">
+            <div class="section-grid">
+                <div class="section-image">
+                    <img src="/images/vision.jpg" alt="Our Vision">
+                </div>
+                <div class="section-content">
+                    <h2>Our Vision</h2>
+                    <p><strong>Shaping the Global Standard for Aesthetic Education.</strong> To be the world's leading authority in aesthetic medicine education, recognized for excellence, innovation, and transformative impact on the industry.</p>
+                    <p>We envision a future where every aesthetic professional has access to world-class training, enabling them to achieve exceptional results while advancing evidence-based practices globally.</p>
+                </div>
+            </div>
+        </div>
 
-  <!-- Our Mission and Vision -->
-  <section class="section-box">
-    <div class="news-left">
-      <img src="/images/mission.jpg" alt="Mission Image">
-    </div>
-    <div class="news-right">
-      <h3>Our Mission</h3>
-      <p>Empowering Aesthetic Excellence. We equip aesthetic professionals with the knowledge, skills, and resources needed to redefine patient care and drive industry innovation.</p>
-    </div>
-  </section>
+        <!-- Why Choose Us Section -->
+        <div class="content-section fade-in">
+            <div class="section-grid">
+                <div class="section-content">
+                    <h2>Why Choose IAAI?</h2>
+                    <p>Our commitment to excellence and comprehensive approach sets us apart in aesthetic medicine education:</p>
+                    <ul>
+                        <li>Internationally recognized expert instructors with decades of experience</li>
+                        <li>Multiple training modalities: In-person, Live Online, and Self-paced learning</li>
+                        <li>Premium global locations: Istanbul, Dubai, and Verona, Italy</li>
+                        <li>Comprehensive certification programs with international accreditation</li>
+                        <li>State-of-the-art facilities and latest medical technologies</li>
+                        <li>Small class sizes ensuring personalized attention and mentorship</li>
+                        <li>Ongoing support through our digital learning platform</li>
+                        <li>Global professional network and career advancement opportunities</li>
+                        <li>Comprehensive assessment and quality assurance systems</li>
+                    </ul>
+                </div>
+                <div class="section-image">
+                    <img src="/images/choose-us.jpg" alt="Why Choose IAAI">
+                </div>
+            </div>
+        </div>
+    </main>
 
-  <section class="section-box">
-    <div class="news-left">
-      <img src="/images/vision.jpg" alt="Vision Image">
-    </div>
-    <div class="news-right">
-      <h3>Our Vision</h3>
-      <p>Leading the Aesthetic Revolution. To be the global authority in aesthetic education, shaping the future through unparalleled expertise, innovation, and a commitment to excellence.</p>
-    </div>
-  </section>
+    <!-- Comprehensive Services Section -->
+    <section class="services-section">
+        <div class="services-container">
+            <div class="section-title">
+                <h2>Comprehensive Training Solutions</h2>
+                <p>From foundational courses to advanced specializations, we offer complete educational pathways for aesthetic medicine professionals at every career stage.</p>
+            </div>
+            
+            <div class="services-grid">
+                <!-- In-Person Training -->
+                <div class="service-card fade-in">
+                    <div class="service-header">
+                        <div class="service-icon"><i class="fas fa-users"></i></div>
+                        <h3>In-Person Aesthetic Training</h3>
+                        <p>Immersive hands-on training with direct patient interaction and expert supervision in premium medical facilities.</p>
+                    </div>
+                    <div class="service-features">
+                        <ul>
+                            <li>Live patient treatments under expert guidance</li>
+                            <li>Advanced injection techniques and safety protocols</li>
+                            <li>Facial anatomy and aesthetic assessment</li>
+                            <li>PRP therapy and regenerative treatments</li>
+                            <li>Chemical peels and skin rejuvenation</li>
+                            <li>Laser treatments and energy-based devices</li>
+                            <li>Complication management and emergency protocols</li>
+                        </ul>
+                    </div>
+                    <div class="service-cta">
+                        <a href="/in-person-aesthetic-training" class="service-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
 
-  <!-- Why Choose Us? -->
-  <section class="section-box">
-    <div class="news-left">
-      <img src="/images/choose-us.jpg" alt="Why Choose Us">
-    </div>
-    <div class="news-right">
-      <h3>Why Choose Us?</h3>
-      <p>Hands-on training with expert doctors, courses conducted in Istanbul, Dubai, and Verona, Italy, and international accreditation including Europass and CPD certificates.</p>
-    </div>
-  </section>
+                <!-- Online Live Training -->
+                <div class="service-card fade-in">
+                    <div class="service-header">
+                        <div class="service-icon"><i class="fas fa-video"></i></div>
+                        <h3>Live Online Training</h3>
+                        <p>Interactive real-time training sessions with world-class instructors, featuring live demonstrations and Q&A.</p>
+                    </div>
+                    <div class="service-features">
+                        <ul>
+                            <li>Real-time interaction with expert instructors</li>
+                            <li>HD video demonstrations and case studies</li>
+                            <li>Live Q&A and personalized feedback</li>
+                            <li>Interactive assessments and evaluations</li>
+                            <li>Digital resource libraries and materials</li>
+                            <li>Flexible scheduling across time zones</li>
+                            <li>Recording access for review and reference</li>
+                        </ul>
+                    </div>
+                    <div class="service-cta">
+                        <a href="/online-live-training" class="service-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
 
-  <!-- Meet Our Expert Instructors -->
-  <section class="section-box">
-    <div class="news-left">
-      <img src="/images/instructors.jpg" alt="Instructors Image">
-    </div>
-    <div class="news-right">
-      <h3>Meet Our Expert Instructors</h3>
-      <p><strong>Dr. Fatma Gökçe Haspolat:</strong> Medical Aesthetician with 18 years of experience, specialized in Botox, Dermal Fillers, Mesotherapy, and Thread Lifting.</p>
-      <p><strong>Dr. Jamila Atannaz:</strong> Plastic Surgeon and CEO of Atannaz Plastic Surgery in Morocco, specializing in plastic surgery with honors in her medical thesis.</p>
-    </div>
-  </section>
+                <!-- Self-Paced Learning -->
+                <div class="service-card fade-in">
+                    <div class="service-header">
+                        <div class="service-icon"><i class="fas fa-play-circle"></i></div>
+                        <h3>Self-Paced Online Courses</h3>
+                        <p>Comprehensive video-based learning with lifetime access, progress tracking, and expert-led content.</p>
+                    </div>
+                    <div class="service-features">
+                        <ul>
+                            <li>Lifetime access to course materials</li>
+                            <li>HD video lectures and demonstrations</li>
+                            <li>Downloadable resources and guides</li>
+                            <li>Interactive assessments and quizzes</li>
+                            <li>Progress tracking and completion certificates</li>
+                            <li>Mobile and desktop compatibility</li>
+                            <li>Expert instructor support and guidance</li>
+                        </ul>
+                    </div>
+                    <div class="service-cta">
+                        <a href="/self-paced-online-training" class="service-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
 
-  <!-- Our Goals -->
-  <section class="section-box">
-    <div class="news-left">
-      <img src="/images/goals.jpg" alt="Goals Image">
-    </div>
-    <div class="news-right">
-      <h3>Our Goals</h3>
-      <ul>
-        <li>To be a global leader in aesthetic education</li>
-        <li>To provide transformative education for aesthetic excellence</li>
-        <li>To be your partner in aesthetic success</li>
-      </ul>
-    </div>
-  </section>
+                <!-- On-Demand Courses -->
+                <div class="service-card fade-in">
+                    <div class="service-header">
+                        <div class="service-icon"><i class="fas fa-laptop"></i></div>
+                        <h3>On-Demand Courses</h3>
+                        <p>Flexible learning solutions with 24/7 access to expert-led content and comprehensive resource libraries.</p>
+                    </div>
+                    <div class="service-features">
+                        <ul>
+                            <li>24/7 access to course content</li>
+                            <li>Modular learning approach</li>
+                            <li>Expert-curated content libraries</li>
+                            <li>Multi-device synchronization</li>
+                            <li>Personalized learning paths</li>
+                            <li>Community discussion forums</li>
+                            <li>Regular content updates and new releases</li>
+                        </ul>
+                    </div>
+                    <div class="service-cta">
+                        <a href="/on-demand-courses" class="service-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
 
-  <!-- Our Values -->
-  <section class="section-box">
-    <div class="news-left">
-      <img src="/images/values.jpg" alt="Values Image">
-    </div>
-    <div class="news-right">
-      <h3>Our Values</h3>
-      <ul>
-        <li>Pioneering Innovation</li>
-        <li>Unmatched Expertise</li>
-        <li>Lifelong Learning Commitment</li>
-      </ul>
-    </div>
-  </section>
+                <!-- Corporate Training -->
+                <div class="service-card fade-in">
+                    <div class="service-header">
+                        <div class="service-icon"><i class="fas fa-building"></i></div>
+                        <h3>Corporate & In-Company Training</h3>
+                        <p>Customized training solutions for organizations, delivered on-site or virtually with tailored curricula.</p>
+                    </div>
+                    <div class="service-features">
+                        <ul>
+                            <li>Customized curriculum development</li>
+                            <li>On-site or virtual delivery options</li>
+                            <li>Team-based learning approaches</li>
+                            <li>Performance tracking and analytics</li>
+                            <li>Ongoing support and consultation</li>
+                            <li>Group certification programs</li>
+                            <li>Enterprise-level resource access</li>
+                        </ul>
+                    </div>
+                    <div class="service-cta">
+                        <a href="/in-company-courses" class="service-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
 
-  <%- include('partials/footer') %>
+                <!-- Mentorship Program -->
+                <div class="service-card fade-in">
+                    <div class="service-header">
+                        <div class="service-icon"><i class="fas fa-user-graduate"></i></div>
+                        <h3>Professional Mentorship</h3>
+                        <p>One-on-one guidance from industry experts to accelerate career growth and skill development.</p>
+                    </div>
+                    <div class="service-features">
+                        <ul>
+                            <li>Personalized mentorship matching</li>
+                            <li>Regular one-on-one coaching sessions</li>
+                            <li>Career development planning</li>
+                            <li>Practice growth strategies</li>
+                            <li>Advanced technique refinement</li>
+                            <li>Professional network expansion</li>
+                            <li>Ongoing support and guidance</li>
+                        </ul>
+                    </div>
+                    <div class="service-cta">
+                        <a href="/mentorship-program" class="service-btn">
+                            Learn More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- Learning Paths Section -->
+    <section class="learning-paths-section">
+        <div class="services-container">
+            <div class="section-title">
+                <h2>Specialized Learning Pathways</h2>
+                <p>Structured progression paths designed to take you from beginner to expert in specific aesthetic medicine specialties.</p>
+            </div>
+            
+            <div class="paths-grid">
+                <div class="path-card fade-in">
+                    <div class="path-badge">Foundation</div>
+                    <h4>Injectable Fundamentals</h4>
+                    <ol class="path-steps">
+                        <li>Facial Anatomy & Assessment</li>
+                        <li>Botox Injection Techniques</li>
+                        <li>Dermal Filler Applications</li>
+                        <li>Safety & Complication Management</li>
+                        <li>Patient Consultation Skills</li>
+                    </ol>
+                </div>
+
+                <div class="path-card fade-in">
+                    <div class="path-badge">Advanced</div>
+                    <h4>Facial Contouring Mastery</h4>
+                    <ol class="path-steps">
+                        <li>Advanced Facial Analysis</li>
+                        <li>Liquid Facelift Techniques</li>
+                        <li>Non-Surgical Rhinoplasty</li>
+                        <li>Jawline & Cheek Enhancement</li>
+                        <li>Advanced Lip Augmentation</li>
+                    </ol>
+                </div>
+
+                <div class="path-card fade-in">
+                    <div class="path-badge">Specialized</div>
+                    <h4>Skin Rejuvenation Expert</h4>
+                    <ol class="path-steps">
+                        <li>PRP & Regenerative Therapies</li>
+                        <li>Chemical Peel Protocols</li>
+                        <li>Microneedling & RF Treatments</li>
+                        <li>Laser Therapy Applications</li>
+                        <li>Combination Treatment Planning</li>
+                    </ol>
+                </div>
+
+                <div class="path-card fade-in">
+                    <div class="path-badge">Expert</div>
+                    <h4>Cosmetic Gynecology</h4>
+                    <ol class="path-steps">
+                        <li>Intimate Area Anatomy</li>
+                        <li>Non-Surgical Vaginal Rejuvenation</li>
+                        <li>Labiaplasty Techniques</li>
+                        <li>G-Shot & O-Shot Procedures</li>
+                        <li>Patient Care & Aftercare</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology & Innovation Section -->
+    <section class="technology-section">
+        <div class="technology-container">
+            <div class="section-title">
+                <h2 style="color: #ffffff;">Advanced Learning Technologies</h2>
+                <p style="color: #e0e0e0;">Cutting-edge educational technologies and platforms that enhance learning outcomes and professional development.</p>
+            </div>
+            <div class="tech-grid">
+                <div class="tech-card fade-in">
+                    <div class="tech-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h3>Digital Learning Platform</h3>
+                    <p>Advanced LMS with progress tracking, interactive assessments, digital certificates, and comprehensive student dashboards.</p>
+                </div>
+                <div class="tech-card fade-in">
+                    <div class="tech-icon"><i class="fas fa-vr-cardboard"></i></div>
+                    <h3>Virtual Reality Training</h3>
+                    <p>Immersive VR simulations for safe practice of injection techniques and patient interaction scenarios.</p>
+                </div>
+                <div class="tech-card fade-in">
+                    <div class="tech-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Mobile Learning</h3>
+                    <p>Fully responsive mobile applications enabling learning anywhere, anytime with offline content access.</p>
+                </div>
+                <div class="tech-card fade-in">
+                    <div class="tech-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Analytics & Reporting</h3>
+                    <p>Comprehensive learning analytics, progress monitoring, and performance assessment tools for continuous improvement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expert Instructors Section -->
+    <section class="instructors-section">
+        <div class="instructors-container">
+            <div class="section-title">
+                <h2>World-Class Expert Instructors</h2>
+                <p>Learn from internationally recognized leaders in aesthetic medicine with decades of experience and proven track records of excellence.</p>
+            </div>
+            <div class="instructors-grid">
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">FG</div>
+                    <h3>Dr. Fatma Gökçe Haspolat</h3>
+                    <h4>Lead Medical Aesthetician</h4>
+                    <p>18+ years specializing in advanced injection techniques, facial contouring, and non-surgical aesthetic procedures. International speaker and published researcher.</p>
+                </div>
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">JA</div>
+                    <h3>Dr. Jamila Atannaz</h3>
+                    <h4>Plastic Surgeon & CEO</h4>
+                    <p>Leading plastic surgeon and CEO of Atannaz Plastic Surgery Morocco. Expert in facial aesthetics, reconstructive surgery, and advanced aesthetic techniques.</p>
+                </div>
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">GA</div>
+                    <h3>Dr. Giovanni Angiolini</h3>
+                    <h4>Aesthetic Physician</h4>
+                    <p>Renowned aesthetic physician with expertise in advanced facial enhancement, non-surgical procedures, and innovative treatment protocols.</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/instructor-profile" class="service-btn">
+                    View All Instructors <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="values-container">
+            <div class="section-title">
+                <h2 style="color: #ffffff;">Our Core Values</h2>
+                <p style="color: #e0e0e0;">The fundamental principles that guide our educational approach and institutional philosophy.</p>
+            </div>
+            <div class="values-grid">
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-lightbulb"></i></div>
+                    <h3>Innovation & Excellence</h3>
+                    <p>Continuously advancing educational methodologies and maintaining the highest standards in aesthetic medicine training worldwide.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-medal"></i></div>
+                    <h3>Professional Integrity</h3>
+                    <p>Upholding ethical standards, evidence-based practices, and professional responsibility in all educational and clinical activities.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-globe"></i></div>
+                    <h3>Global Accessibility</h3>
+                    <p>Making world-class aesthetic education accessible to healthcare professionals worldwide through diverse delivery modalities.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-handshake"></i></div>
+                    <h3>Partnership & Support</h3>
+                    <p>Building lasting relationships with our graduates and providing ongoing support throughout their professional journey.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Safety & Quality</h3>
+                    <p>Prioritizing patient safety, evidence-based techniques, and rigorous quality assurance in all training programs.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>Lifelong Learning</h3>
+                    <p>Fostering a culture of continuous education, professional development, and career advancement in aesthetic medicine.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Global Impact Section -->
+    <section class="content-section fade-in" style="margin: 80px auto;">
+        <div class="section-grid">
+            <div class="section-content">
+                <h2>Global Impact & Recognition</h2>
+                <p><strong>Transforming Aesthetic Medicine Education Worldwide.</strong> Our comprehensive programs have trained thousands of professionals across 75+ countries, establishing IAAI as the global leader in aesthetic medicine education.</p>
+                <ul>
+                    <li>International accreditation including Europass and CPD certification</li>
+                    <li>Recognition by leading aesthetic medicine associations worldwide</li>
+                    <li>Partnerships with premier medical institutions globally</li>
+                    <li>Alumni network spanning 75+ countries and 6 continents</li>
+                    <li>Featured in international medical journals and conferences</li>
+                    <li>Continuous curriculum updates based on latest research and techniques</li>
+                    <li>Quality assurance through rigorous assessment and feedback systems</li>
+                </ul>
+            </div>
+            <div class="section-image">
+                <img src="/images/global-impact.jpg" alt="Global Impact">
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>Ready to Transform Your Career?</h2>
+            <p>Join thousands of healthcare professionals who have advanced their careers through IAAI's comprehensive training programs. Start your journey to aesthetic excellence today.</p>
+            <div class="cta-buttons">
+                <a href="/training-programs" class="cta-btn">Explore Training Programs</a>
+                <a href="/instructors" class="cta-btn secondary">Meet Our Instructors</a>
+                <a href="/contact-us" class="cta-btn secondary">Contact Us</a>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('.fade-in').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target, duration = 2000) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (target > 100) {
+                    element.textContent = Math.floor(current).toLocaleString() + '+';
+                } else if (target < 10) {
+                    element.textContent = current.toFixed(1) + '/5';
+                } else {
+                    element.textContent = Math.floor(current) + '+';
+                }
+            }, 16);
+        }
+
+        // Animate counters when they come into view
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target.querySelector('.stat-number');
+                    const text = counter.textContent;
+                    let target;
+                    
+                    if (text.includes('/5')) {
+                        target = 4.9;
+                    } else {
+                        target = parseInt(text.replace(/\D/g, ''));
+                    }
+                    
+                    animateCounter(counter, target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-item').forEach(item => {
+            counterObserver.observe(item);
+        });
+
+        // Smooth scrolling for service buttons
+        document.querySelectorAll('.service-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Add a subtle click animation
+                this.style.transform = 'translateY(-2px) scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-2px)';
+                }, 150);
+            });
+        });
+
+        // Enhanced hover effects for cards
+        document.querySelectorAll('.service-card, .instructor-card, .value-card, .tech-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
 </body>
 </html>

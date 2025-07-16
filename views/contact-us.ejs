@@ -1,104 +1,888 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>contact-us</title>
-  <link rel="stylesheet" href="/css/formpages.css"> <!-- Link to the main CSS -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - International Aesthetic Academic Institution (IAAI)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Placeholder */
+        .header-placeholder {
+            height: 80px;
+            background: #002147;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        /* Contact Form Section */
+        .contact-form-section {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .contact-form-section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .contact-form-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .contact-form-section p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #002147;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffcc00;
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            transform: scale(1.2);
+        }
+
+        .checkbox-group label {
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .checkbox-group a {
+            color: #ffcc00;
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            width: 100%;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 204, 0, 0.5);
+            background: linear-gradient(135deg, #b8860b, #ffcc00);
+        }
+
+        /* Contact Information Section */
+        .contact-info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .contact-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .contact-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .contact-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-card .icon {
+            font-size: 28px;
+            color: #ffcc00;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .contact-item i {
+            font-size: 18px;
+            color: #ffcc00;
+            width: 20px;
+            text-align: center;
+        }
+
+        .contact-item a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-item a:hover {
+            color: #ffcc00;
+        }
+
+        /* Office Locations */
+        .office-locations {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            color: #ffffff;
+        }
+
+        .office-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .section-title p {
+            font-size: 18px;
+            color: #e0e0e0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .offices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .office-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .office-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .office-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffcc00;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .office-card .flag {
+            font-size: 28px;
+        }
+
+        .office-info {
+            color: #e0e0e0;
+            line-height: 1.8;
+        }
+
+        .office-info strong {
+            color: #ffffff;
+        }
+
+        /* Course Inquiry Section */
+        .course-inquiry {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 80px 0;
+        }
+
+        .inquiry-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .inquiry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .inquiry-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .inquiry-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .inquiry-card .course-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .inquiry-card h4 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 15px;
+        }
+
+        .inquiry-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .inquiry-btn {
+            background: #002147;
+            color: #ffffff;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .inquiry-btn:hover {
+            background: #001a3a;
+            transform: translateY(-2px);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .contact-form-section {
+                padding: 40px 30px;
+            }
+
+            .contact-form-section h2 {
+                font-size: 28px;
+            }
+
+            .offices-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .contact-form-section {
+                padding: 30px 20px;
+            }
+
+            .contact-card {
+                padding: 30px 20px;
+            }
+
+            .office-card {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+<!-- Header Section -->
 <%- include('partials/header') %>
 
-<!-- Contact Us Section -->
-<section id="contact-us">
-  <h1>Contact Us</h1>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <span>Contact Us</span>
+        </div>
+    </nav>
 
-  <p>We would love to hear from you! Please reach out to us using the form below, or find our contact information and address.</p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Get in Touch with IAAI</h1>
+            <p>Ready to advance your career in aesthetic medicine? Contact us to learn more about our world-class training programs, certifications, and how we can help you achieve excellence in aesthetic practice.</p>
+        </div>
+    </section>
 
-  <!-- Contact Information -->
-  <div class="contact-info">
-    <h2>Our Contact Details</h2>
-    <ul>
-      <li><strong>Address:</strong> 123 Academy Street, London, UK</li>
-      <li><strong>Phone:</strong> +44 123 456 789</li>
-      <li><strong>Fax:</strong> +44 987 654 321</li>
-      <li><strong>Email:</strong> <a href="mailto:contact@iaa-i.com">contact@iaa-i.com</a></li>
-      <li><strong>Business Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM</li>
-    </ul>
-  </div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Contact Form Section -->
+        <div class="contact-form-section fade-in">
+            <h2>Send Us a Message</h2>
+            <p>Fill out the form below and our team will get back to you within 24 hours. We're here to answer your questions and help you choose the right training program for your career goals.</p>
 
+            <!-- Success Message -->
+            <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+                <div class="alert success">
+                    <%= successMessage %>
+                </div>
+            <% } %>
 
+            <!-- Error Message -->
+            <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                <div class="alert error">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
 
+            <!-- Contact Form -->
+            <form action="/contact-us" method="POST">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
 
-  <!-- Contact Us Section -->
-  <section id="contact-us">
-    <h1>Contact Us</h1>
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+                </div>
 
-    <!-- Success Message -->
-    <% if (successMessage) { %>
-      <div class="alert success">
-        <%= successMessage %>
-      </div>
-    <% } %>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number (optional)">
+                </div>
 
-    <!-- Error Message -->
-    <% if (errorMessage) { %>
-      <div class="alert error">
-        <%= errorMessage %>
-      </div>
-    <% } %>
+                <div class="form-group">
+                    <label for="specialty">Medical Specialty</label>
+                    <select id="specialty" name="specialty">
+                        <option value="">Select your medical specialty</option>
+                        <option value="general-practitioner">General Practitioner</option>
+                        <option value="dermatologist">Dermatologist</option>
+                        <option value="plastic-surgeon">Plastic Surgeon</option>
+                        <option value="cosmetic-surgeon">Cosmetic Surgeon</option>
+                        <option value="gynecologist">Gynecologist</option>
+                        <option value="dentist">Dentist</option>
+                        <option value="nurse">Nurse</option>
+                        <option value="other">Other Medical Professional</option>
+                        <option value="student">Medical Student</option>
+                    </select>
+                </div>
 
-    <!-- Contact Form -->
-    <form action="/contact-us" method="POST">
-      <!-- Name -->
-      <div class="form-group">
-        <label for="name">Your Name:</label>
-        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
-      </div>
+                <div class="form-group">
+                    <label for="course-interest">Course of Interest</label>
+                    <select id="course-interest" name="course-interest">
+                        <option value="">Select a course you're interested in</option>
+                        <option value="foundation-fillers">Foundation Fillers Course</option>
+                        <option value="full-face-harmonization">Full Face Harmonization</option>
+                        <option value="cosmetic-gynecology">Cosmetic Gynecology</option>
+                        <option value="hair-transplant">Hair Transplant Course</option>
+                        <option value="rhinoplasty">Rhinoplasty & Cadaver Dissection</option>
+                        <option value="botox-upper-face">Botox Upper Face Training</option>
+                        <option value="advanced-techniques">Advanced Aesthetic Techniques</option>
+                        <option value="general-inquiry">General Inquiry</option>
+                    </select>
+                </div>
 
-      <!-- Email -->
-      <div class="form-group">
-        <label for="email">Your Email:</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email address" required>
-      </div>
+                <div class="form-group">
+                    <label for="subject">Subject *</label>
+                    <input type="text" id="subject" name="subject" placeholder="Enter the subject of your message" required>
+                </div>
 
-      <!-- Subject -->
-      <div class="form-group">
-        <label for="subject">Subject:</label>
-        <input type="text" id="subject" name="subject" placeholder="Enter the subject of your message" required>
-      </div>
+                <div class="form-group">
+                    <label for="message">Message *</label>
+                    <textarea id="message" name="message" placeholder="Tell us about your background, experience level, preferred course dates, or any specific questions you have about our programs..." rows="6" required></textarea>
+                </div>
 
-      <!-- Message -->
-      <div class="form-group">
-        <label for="message">Your Message:</label>
-        <textarea id="message" name="message" placeholder="Write your message here" rows="6" required></textarea>
-      </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">I agree to the <a href="/terms-of-service">Terms and Conditions</a> and consent to being contacted by IAAI regarding course information and updates.</label>
+                </div>
 
-      <!-- Terms and Conditions -->
-      <div class="form-group">
-        <input type="checkbox" id="terms" name="terms" required>
-        <label for="terms">I agree to the <a href="/terms-of-service">Terms and Conditions</a></label>
-      </div>
+                <div class="form-group">
+                    <button type="submit" class="cta-btn">Send Message</button>
+                </div>
+            </form>
+        </div>
 
-      <div class="form-group">
-        <button type="submit" class="cta-btn">Send Message</button>
-      </div>
-    </form>
+        <!-- Contact Information Section -->
+        <div class="contact-info-section fade-in">
+            <!-- Primary Contact -->
+            <div class="contact-card">
+                <h3><i class="fas fa-envelope icon"></i>Primary Contact</h3>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:info@iaa-i.com">info@iaa-i.com</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <a href="tel:+971563310487">+971 56 331 0487</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <a href="tel:+905326675355">+90 532 667 53 55</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <a href="tel:+905367458666">+90 536 745 86 66</a>
+                </div>
+            </div>
 
-    
-  </section>
+            <!-- Headquarters -->
+            <div class="contact-card">
+                <h3><i class="fas fa-building icon"></i>Headquarters</h3>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>RAKEZ Al Hulaila Industrial Zone<br>Ras Al Khaimah, United Arab Emirates</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Sunday - Thursday: 9:00 AM - 6:00 PM (GST)</span>
+                </div>
+            </div>
 
-  <%- include('partials/footer') %>
+            <!-- Social Media -->
+            <div class="contact-card">
+                <h3><i class="fas fa-share-alt icon"></i>Follow Us</h3>
+                <div class="contact-item">
+                    <i class="fab fa-facebook"></i>
+                    <a href="#" target="_blank">Facebook</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-instagram"></i>
+                    <a href="#" target="_blank">Instagram</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-linkedin"></i>
+                    <a href="#" target="_blank">LinkedIn</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <a href="https://wa.me/971563310487" target="_blank">WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </main>
 
-  <script>
-    // Additional JavaScript for form handling or interactions
-  </script>
+    <!-- Office Locations -->
+    <section class="office-locations">
+        <div class="office-container">
+            <div class="section-title">
+                <h2>Our Training Locations</h2>
+                <p>We conduct our world-class training programs in premium locations across three continents</p>
+            </div>
+            <div class="offices-grid">
+                <div class="office-card fade-in">
+                    <h3><span class="flag">🇹🇷</span>Istanbul, Turkey</h3>
+                    <div class="office-info">
+                        <strong>Training Venue:</strong> Liv Hospital Ulus<br>
+                        <strong>Courses Offered:</strong> Full Face Harmonization, Foundation Fillers, Cosmetic Gynecology, Hair Transplant<br>
+                        <strong>Features:</strong> State-of-the-art hospital facilities, operating theaters, hands-on surgical training
+                    </div>
+                </div>
+                <div class="office-card fade-in">
+                    <h3><span class="flag">🇦🇪</span>Dubai, UAE</h3>
+                    <div class="office-info">
+                        <strong>Training Venue:</strong> Premium Medical Centers<br>
+                        <strong>Courses Offered:</strong> Advanced Aesthetic Techniques, Botox Training, Dermal Fillers<br>
+                        <strong>Features:</strong> Modern clinical facilities, international standard equipment, luxury accommodations nearby
+                    </div>
+                </div>
+                <div class="office-card fade-in">
+                    <h3><span class="flag">🇮🇹</span>Verona, Italy</h3>
+                    <div class="office-info">
+                        <strong>Training Venue:</strong> ICLO Teaching and Research Center<br>
+                        <strong>Courses Offered:</strong> Rhinoplasty & Cadaver Dissection, Advanced Surgical Techniques<br>
+                        <strong>Features:</strong> European medical center, cadaver lab facilities, Europass certification
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- Course Inquiry Section -->
+    <section class="course-inquiry">
+        <div class="inquiry-container">
+            <div class="section-title">
+                <h2 style="color: #002147;">Interested in Specific Courses?</h2>
+                <p style="color: #666;">Get detailed information about our specialized training programs</p>
+            </div>
+            <div class="inquiry-grid">
+                <div class="inquiry-card fade-in">
+                    <div class="course-icon"><i class="fas fa-syringe"></i></div>
+                    <h4>Foundation Fillers</h4>
+                    <p>Master dermal filler techniques, facial anatomy, and injection safety with hands-on training.</p>
+                    <a href="/courses/foundation-fillers" class="inquiry-btn">Learn More</a>
+                </div>
+                <div class="inquiry-card fade-in">
+                    <div class="course-icon"><i class="fas fa-user-md"></i></div>
+                    <h4>Full Face Harmonization</h4>
+                    <p>Comprehensive aesthetic training covering multiple treatment modalities with Dr. Giovanni Angiolini.</p>
+                    <a href="/courses/full-face-harmonization" class="inquiry-btn">Learn More</a>
+                </div>
+                <div class="inquiry-card fade-in">
+                    <div class="course-icon"><i class="fas fa-female"></i></div>
+                    <h4>Cosmetic Gynecology</h4>
+                    <p>Surgical and non-surgical cosmetic gynecology procedures with hospital-based training.</p>
+                    <a href="/courses/cosmetic-gynecology" class="inquiry-btn">Learn More</a>
+                </div>
+                <div class="inquiry-card fade-in">
+                    <div class="course-icon"><i class="fas fa-cut"></i></div>
+                    <h4>Hair Transplant</h4>
+                    <p>Comprehensive hair transplantation training including FUE techniques and patient care protocols.</p>
+                    <a href="/courses/hair-transplant" class="inquiry-btn">Learn More</a>
+                </div>
+                <div class="inquiry-card fade-in">
+                    <div class="course-icon"><i class="fas fa-head-side-mask"></i></div>
+                    <h4>Rhinoplasty</h4>
+                    <p>Advanced rhinoplasty techniques with cadaver dissection training in Verona, Italy.</p>
+                    <a href="/courses/rhinoplasty" class="inquiry-btn">Learn More</a>
+                </div>
+                <div class="inquiry-card fade-in">
+                    <div class="course-icon"><i class="fas fa-eye"></i></div>
+                    <h4>Botox Training</h4>
+                    <p>Comprehensive Botox injection training for upper face rejuvenation and wrinkle management.</p>
+                    <a href="/courses/botox-training" class="inquiry-btn">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+  
+    <%- include('partials/footer') %>
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('.fade-in').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Form validation and enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const submitButton = document.querySelector('.cta-btn');
+            
+            form.addEventListener('submit', function(e) {
+                // Add loading state
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                submitButton.disabled = true;
+            });
+
+            // Auto-populate subject based on course interest
+            const courseSelect = document.getElementById('course-interest');
+            const subjectInput = document.getElementById('subject');
+            
+            courseSelect.addEventListener('change', function() {
+                if (this.value && !subjectInput.value) {
+                    const courseName = this.options[this.selectedIndex].text;
+                    subjectInput.value = `Inquiry about ${courseName}`;
+                }
+            });
+
+            // Phone number formatting
+            const phoneInput = document.getElementById('phone');
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.startsWith('971')) {
+                        e.target.value = '+' + value;
+                    } else if (value.startsWith('90')) {
+                        e.target.value = '+' + value;
+                    } else {
+                        e.target.value = value;
+                    }
+                }
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
-
 </html>

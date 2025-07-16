@@ -143,7 +143,7 @@
         <!-- Google reCAPTCHA -->
         <div class="recaptcha-container">
           <div class="g-recaptcha" 
-               data-sitekey="<%= process.env.RECAPTCHA_SITE_KEY %>"
+          data-sitekey="<%= recaptcha_site_key %>"
                data-callback="onRecaptchaSuccess"
                data-expired-callback="onRecaptchaExpired">
           </div>

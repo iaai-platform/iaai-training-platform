@@ -77,17 +77,21 @@ app.use(cookieParser());
 app.use(methodOverride("_method"));
 
 // Session configuration - MUST be before Passport
+
 app.use(
   session({
     secret:
       process.env.SESSION_SECRET ||
       "iaai-training-platform-secret-2025-fallback",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, // Change to false for production
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Keep false since you're using HTTP redirect
+      httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: "lax", // Add this for better compatibility
     },
+    name: "sessionId", // Add custom session name
   })
 );
 

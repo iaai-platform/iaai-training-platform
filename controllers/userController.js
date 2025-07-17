@@ -8,7 +8,11 @@ const axios = require("axios");
 // -------------------- REGISTER/SIGNUP USER --------------------
 exports.registerUser = async (req, res) => {
   console.log("📝 Signup route hit!");
-  console.log("📥 Request body:", req.body);
+  console.log("📥 Request body:", {
+    ...req.body,
+    password: "[HIDDEN]",
+    confirmPassword: "[HIDDEN]",
+  });
 
   const {
     firstName,
@@ -25,83 +29,107 @@ exports.registerUser = async (req, res) => {
     cv,
   } = req.body;
 
-  // Validation: Ensure required fields are filled
-  if (!firstName || !lastName || !email || !password || !confirmPassword) {
-    console.log("❌ Validation failed: Missing required fields");
-    req.flash(
-      "error_message",
-      "First name, last name, email, password, and password confirmation are required."
-    );
-    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
-    return res.redirect("/signup");
-  }
-
-  // Validation: Check if passwords match
-  if (password !== confirmPassword) {
-    console.log("❌ Validation failed: Passwords do not match");
-    req.flash(
-      "error_message",
-      "Passwords do not match. Please make sure both password fields are identical."
-    );
-    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
-    return res.redirect("/signup");
-  }
-
-  // Validation: Check password strength
-  if (password.length < 8) {
-    console.log("❌ Validation failed: Password too weak");
-    req.flash("error_message", "Password must be at least 8 characters long.");
-    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
-    return res.redirect("/signup");
-  }
-
-  // Optional: Additional password strength validation
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumbers = /\d/.test(password);
-  const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-  if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
-    console.log("❌ Validation failed: Password not strong enough");
-    req.flash(
-      "error_message",
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number."
-    );
-    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
-    return res.redirect("/signup");
-  }
-
   try {
-    console.log("🔍 Checking for existing user with email:", email);
-
-    // Check if user already exists (now using flat structure)
-    const existingUser = await User.findOne({ email: email });
-    if (existingUser) {
-      console.log("❌ User already exists");
-      console.log("🔄 Setting flash message and redirecting...");
+    // Validation: Ensure required fields are filled
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      console.log("❌ Validation failed: Missing required fields");
       req.flash(
         "error_message",
-        "Email already registered. Please use a different email or login if you already have an account."
+        "All required fields must be filled out. Please check the form and try again."
       );
-      req.flash("formData", JSON.stringify(req.body)); // Preserve form data
-      console.log("💾 Flash message set (not consuming it for debug)");
+      req.flash("formData", JSON.stringify(req.body));
+      return res.redirect("/signup");
+    }
+
+    // Validation: Check if passwords match
+    if (password !== confirmPassword) {
+      console.log("❌ Validation failed: Passwords do not match");
+      req.flash(
+        "error_message",
+        "Passwords do not match. Please make sure both password fields are identical."
+      );
+      req.flash("formData", JSON.stringify(req.body));
+      return res.redirect("/signup");
+    }
+
+    // Validation: Check password length
+    if (password.length < 8) {
+      console.log("❌ Validation failed: Password too short");
+      req.flash(
+        "error_message",
+        "Password must be at least 8 characters long for security."
+      );
+      req.flash("formData", JSON.stringify(req.body));
+      return res.redirect("/signup");
+    }
+
+    // Validation: Check password strength
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    console.log("🔍 Password validation details:");
+    console.log("  Password length:", password.length);
+    console.log("  Has uppercase:", hasUpperCase);
+    console.log("  Has lowercase:", hasLowerCase);
+    console.log("  Has numbers:", hasNumbers);
+    console.log("  Has special chars:", hasSpecialChars);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      console.log("❌ Validation failed: Password not strong enough");
+      let missingRequirements = [];
+      if (!hasUpperCase) missingRequirements.push("uppercase letter");
+      if (!hasLowerCase) missingRequirements.push("lowercase letter");
+      if (!hasNumbers) missingRequirements.push("number");
+
+      req.flash(
+        "error_message",
+        `Password is not strong enough. It must contain at least one ${missingRequirements.join(
+          ", "
+        )}. Please choose a stronger password.`
+      );
+      req.flash("formData", JSON.stringify(req.body));
+      return res.redirect("/signup");
+    }
+
+    // Validation: Email format (basic check)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.log("❌ Validation failed: Invalid email format");
+      req.flash("error_message", "Please enter a valid email address.");
+      req.flash("formData", JSON.stringify(req.body));
+      return res.redirect("/signup");
+    }
+
+    console.log("🔍 Checking for existing user with email:", email);
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      console.log("❌ User already exists");
+      req.flash(
+        "error_message",
+        "An account with this email already exists. Please use a different email address or try logging in."
+      );
+      req.flash("formData", JSON.stringify(req.body));
       return res.redirect("/signup");
     }
 
     console.log("🔐 Hashing password...");
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12); // Increased rounds for better security
 
     console.log("👤 Creating user data object...");
     // Create user object with flat structure
     const userData = {
-      firstName,
-      lastName,
-      email,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
-      phoneNumber: phoneNumber || "",
-      profession: profession || "",
-      country: country || "",
+      phoneNumber: phoneNumber ? phoneNumber.trim() : "",
+      profession: profession ? profession.trim() : "",
+      country: country ? country.trim() : "",
       isConfirmed: false,
       role: role || "user",
       myInPersonCourses: [],
@@ -113,9 +141,9 @@ exports.registerUser = async (req, res) => {
     if (role === "instructor") {
       console.log("👨‍🏫 Adding instructor fields...");
       userData.myTrainingInstruction = {
-        experience: experience || "",
-        expertise: expertise || "",
-        cv: cv || "", // Handle file upload separately if needed
+        experience: experience ? experience.trim() : "",
+        expertise: expertise ? expertise.trim() : "",
+        cv: cv ? cv.trim() : "",
         appliedForCourses: [],
         allocatedCourses: [],
       };
@@ -129,8 +157,10 @@ exports.registerUser = async (req, res) => {
 
     // -------------------- EMAIL NOTIFICATION --------------------
     try {
-      // Configure nodemailer (FIXED: use createTransport, not createTransporter)
-      let transporter = nodemailer.createTransporter({
+      console.log("📧 Attempting to send email notification...");
+
+      // Configure nodemailer
+      let transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
           user: process.env.EMAIL_USER || "m.minepour@gmail.com",
@@ -141,38 +171,60 @@ exports.registerUser = async (req, res) => {
       let mailOptions = {
         from: process.env.EMAIL_USER || "m.minepour@gmail.com",
         to: process.env.ADMIN_EMAIL || "admin-email@example.com",
-        subject: "New User Signup",
+        subject: "New User Registration - IAAI Training",
         html: `
-          <h3>New User Registration</h3>
-          <p><strong>Name:</strong> ${firstName} ${lastName}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Role:</strong> ${role}</p>
-          <p><strong>Profession:</strong> ${profession}</p>
-          <p><strong>Country:</strong> ${country}</p>
-          ${
-            role === "instructor"
-              ? `
-            <p><strong>Experience:</strong> ${experience}</p>
-            <p><strong>Expertise:</strong> ${expertise}</p>
-          `
-              : ""
-          }
-          <p>Please review and confirm this account.</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2c3e50;">New User Registration</h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Role:</strong> ${role}</p>
+              <p><strong>Phone:</strong> ${phoneNumber || "Not provided"}</p>
+              <p><strong>Profession:</strong> ${
+                profession || "Not provided"
+              }</p>
+              <p><strong>Country:</strong> ${country || "Not provided"}</p>
+              ${
+                role === "instructor"
+                  ? `
+                <hr style="margin: 15px 0;">
+                <h4>Instructor Details:</h4>
+                <p><strong>Experience:</strong> ${
+                  experience || "Not provided"
+                }</p>
+                <p><strong>Expertise:</strong> ${
+                  expertise || "Not provided"
+                }</p>
+                <p><strong>CV:</strong> ${cv || "Not provided"}</p>
+              `
+                  : ""
+              }
+            </div>
+            <p style="color: #e74c3c; font-weight: bold;">⚠️ Please review and confirm this account to allow login.</p>
+            <div style="margin: 20px 0;">
+              <a href="${
+                process.env.SITE_URL || "http://localhost:3000"
+              }/confirm-user/${email}" 
+                 style="background: #27ae60; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                Confirm Account
+              </a>
+            </div>
+          </div>
         `,
       };
 
       await transporter.sendMail(mailOptions);
-      console.log("📧 Email notification sent successfully");
+      console.log("📧 Email notification sent successfully to admin");
     } catch (emailError) {
-      console.log("📧 Error sending email:", emailError);
-      // Don't fail the registration if email fails
+      console.log("📧 Error sending email notification:", emailError.message);
+      // Don't fail the registration if email fails, but log it
     }
 
     // Flash success message and redirect
     console.log("🎉 Setting success flash message...");
     req.flash(
       "success_message",
-      "Your request for creating an account has been received. We will review and get back to you."
+      `Thank you ${firstName}! Your account application has been submitted successfully. Our team will review your application and send you a confirmation email once approved. This usually takes 24-48 hours.`
     );
     console.log("✅ Success message set, redirecting to /signup...");
     res.redirect("/signup");
@@ -181,17 +233,26 @@ exports.registerUser = async (req, res) => {
 
     // Check if it's a MongoDB duplicate key error
     if (err.code === 11000) {
+      console.log("💥 Duplicate key error - email already exists");
       req.flash(
         "error_message",
-        "Email already registered. Please use a different email."
+        "An account with this email already exists. Please use a different email address."
       );
-      req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+      req.flash("formData", JSON.stringify(req.body));
+    } else if (err.name === "ValidationError") {
+      console.log("💥 MongoDB validation error:", err.message);
+      req.flash(
+        "error_message",
+        "There was an issue with the information provided. Please check all fields and try again."
+      );
+      req.flash("formData", JSON.stringify(req.body));
     } else {
+      console.log("💥 Unexpected error:", err.message);
       req.flash(
         "error_message",
-        "Something went wrong while creating your account. Please try again."
+        "We're sorry, but something went wrong while creating your account. Please try again in a few minutes or contact support if the problem persists."
       );
-      req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+      req.flash("formData", JSON.stringify(req.body));
     }
 
     res.redirect("/signup");

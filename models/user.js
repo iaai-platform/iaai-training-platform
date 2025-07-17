@@ -379,7 +379,12 @@ const userSchema = new mongoose.Schema(
     // ========================================
     myCertificates: [
       {
-        certificateId: { type: String, required: true, unique: true },
+        certificateId: {
+          type: String,
+          required: function () {
+            return this.courseId != null;
+          },
+        },
         courseId: { type: mongoose.Schema.Types.ObjectId, required: true },
         courseType: {
           type: String,
@@ -536,7 +541,13 @@ userSchema.index({ email: 1 });
 userSchema.index({ "myInPersonCourses.courseId": 1 });
 userSchema.index({ "myLiveCourses.courseId": 1 });
 userSchema.index({ "mySelfPacedCourses.courseId": 1 });
-userSchema.index({ "myCertificates.certificateId": 1 });
+userSchema.index(
+  { "myCertificates.certificateId": 1 },
+  {
+    sparse: true,
+    partialFilterExpression: { "myCertificates.certificateId": { $ne: null } },
+  }
+);
 userSchema.index({ "myCertificates.verificationCode": 1 });
 userSchema.index({ "paymentTransactions.transactionId": 1 });
 

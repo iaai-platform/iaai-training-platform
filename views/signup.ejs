@@ -126,23 +126,44 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="password">
-                            Password <span class="required">*</span>
-                        </label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input 
-                                type="password" 
-                                name="password" 
-                                id="password"
-                                placeholder="Create a strong password"
-                                required>
-                            <button type="button" class="toggle-password" onclick="togglePassword()">
-                                <i class="fas fa-eye" id="toggleIcon"></i>
-                            </button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password">
+                                Password <span class="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input 
+                                    type="password" 
+                                    name="password" 
+                                    id="password"
+                                    placeholder="Create a strong password"
+                                    required>
+                                <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggleIcon1')">
+                                    <i class="fas fa-eye" id="toggleIcon1"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength" id="passwordStrength"></div>
                         </div>
-                        <div class="password-strength" id="passwordStrength"></div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">
+                                Confirm Password <span class="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input 
+                                    type="password" 
+                                    name="confirmPassword" 
+                                    id="confirmPassword"
+                                    placeholder="Confirm your password"
+                                    required>
+                                <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                                    <i class="fas fa-eye" id="toggleIcon2"></i>
+                                </button>
+                            </div>
+                            <div class="password-match" id="passwordMatch"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -286,10 +307,10 @@
     </div>
 
     <script>
-        // Toggle password visibility
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('toggleIcon');
+        // Toggle password visibility - Updated to handle multiple password fields
+        function togglePassword(fieldId, iconId) {
+            const passwordInput = document.getElementById(fieldId);
+            const toggleIcon = document.getElementById(iconId);
             
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
@@ -339,7 +360,32 @@
             } else {
                 strengthBar.style.display = 'none';
             }
+
+            // Check password match when password changes
+            checkPasswordMatch();
         });
+
+        // Password match validation
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const matchIndicator = document.getElementById('passwordMatch');
+
+            if (confirmPassword.length > 0) {
+                if (password === confirmPassword) {
+                    matchIndicator.innerHTML = '<div class="match-indicator match">✓ Passwords match</div>';
+                    matchIndicator.style.display = 'block';
+                } else {
+                    matchIndicator.innerHTML = '<div class="match-indicator no-match">✗ Passwords do not match</div>';
+                    matchIndicator.style.display = 'block';
+                }
+            } else {
+                matchIndicator.style.display = 'none';
+            }
+        }
+
+        // Check password match when confirm password changes
+        document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
 
         // Show/Hide Instructor Fields
         document.getElementById('role').addEventListener('change', function () {
@@ -372,23 +418,43 @@
             });
         }, 10000);
 
-        // Form validation
+        // Enhanced form validation
         document.getElementById('signup-form').addEventListener('submit', function(e) {
             const requiredFields = this.querySelectorAll('[required]');
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
             let isValid = true;
+            let errorMessage = '';
 
+            // Check required fields
             requiredFields.forEach(field => {
                 if (!field.value.trim()) {
                     isValid = false;
                     field.classList.add('error');
-                } else {
-                    field.classList.remove('error');
                 }
             });
 
+            // Check password strength
+            if (password.length < 8) {
+                isValid = false;
+                errorMessage += 'Password must be at least 8 characters long.\n';
+                document.getElementById('password').classList.add('error');
+            }
+
+            // Check password match
+            if (password !== confirmPassword) {
+                isValid = false;
+                errorMessage += 'Passwords do not match.\n';
+                document.getElementById('confirmPassword').classList.add('error');
+            }
+
             if (!isValid) {
                 e.preventDefault();
-                alert('Please fill in all required fields.');
+                if (errorMessage) {
+                    alert(errorMessage);
+                } else {
+                    alert('Please fill in all required fields.');
+                }
             }
         });
 
@@ -399,5 +465,67 @@
             });
         });
     </script>
+
+    <style>
+        /* Additional CSS for password confirmation styling */
+        .password-match, .password-strength {
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .strength-indicator {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .strength-indicator.weak {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .strength-indicator.fair {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffcc02;
+        }
+
+        .strength-indicator.good {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+            border: 1px solid #ce93d8;
+        }
+
+        .strength-indicator.strong {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .match-indicator {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .match-indicator.match {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .match-indicator.no-match {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .input-wrapper .error {
+            border-color: #c62828 !important;
+            box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.2) !important;
+        }
+    </style>
 </body>
 </html>

@@ -15,6 +15,7 @@ exports.registerUser = async (req, res) => {
     lastName,
     email,
     password,
+    confirmPassword,
     phoneNumber,
     profession,
     country,
@@ -25,11 +26,46 @@ exports.registerUser = async (req, res) => {
   } = req.body;
 
   // Validation: Ensure required fields are filled
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !email || !password || !confirmPassword) {
     console.log("❌ Validation failed: Missing required fields");
     req.flash(
       "error_message",
-      "First name, last name, email, and password are required."
+      "First name, last name, email, password, and password confirmation are required."
+    );
+    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+    return res.redirect("/signup");
+  }
+
+  // Validation: Check if passwords match
+  if (password !== confirmPassword) {
+    console.log("❌ Validation failed: Passwords do not match");
+    req.flash(
+      "error_message",
+      "Passwords do not match. Please make sure both password fields are identical."
+    );
+    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+    return res.redirect("/signup");
+  }
+
+  // Validation: Check password strength
+  if (password.length < 8) {
+    console.log("❌ Validation failed: Password too weak");
+    req.flash("error_message", "Password must be at least 8 characters long.");
+    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+    return res.redirect("/signup");
+  }
+
+  // Optional: Additional password strength validation
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+    console.log("❌ Validation failed: Password not strong enough");
+    req.flash(
+      "error_message",
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number."
     );
     req.flash("formData", JSON.stringify(req.body)); // Preserve form data
     return res.redirect("/signup");
@@ -94,7 +130,7 @@ exports.registerUser = async (req, res) => {
     // -------------------- EMAIL NOTIFICATION --------------------
     try {
       // Configure nodemailer (FIXED: use createTransport, not createTransporter)
-      let transporter = nodemailer.createTransport({
+      let transporter = nodemailer.createTransporter({
         service: "gmail",
         auth: {
           user: process.env.EMAIL_USER || "m.minepour@gmail.com",

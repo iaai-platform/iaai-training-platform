@@ -302,11 +302,14 @@ app.use("/", inCompanyCoursesRoutes);
 const instructorManageRoutes = require("./routes/instructorManageRoutes");
 app.use("/instructors", instructorManageRoutes);
 
-//new
-// Instructors routes - ADD THIS LINE
+// ============================================
+// 10.1 PUBLIC INSTRUCTOR ROUTES (UPDATED)
+// ============================================
+
+// Public instructors routes - Mount at ROOT level to create /our-instructors paths
 const instructorsRoutes = require("./routes/instructorsRoutes");
-app.use("/", instructorsRoutes);
-console.log("👥 Instructors routes loaded");
+app.use("/", instructorsRoutes); // This handles /our-instructors and /our-instructors/:id
+console.log("👥 Public instructor routes loaded at /our-instructors");
 
 // Admin In-Person Courses Routes
 const inPersonCoursesRoutes = require("./routes/admin/inPersonCoursesRoutes");

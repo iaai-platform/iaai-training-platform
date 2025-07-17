@@ -923,7 +923,7 @@
                             </div>
                             
                             <div class="instructor-actions">
-                                <a href="/instructors/<%= instructor._id %>" class="btn-view">
+                                <a href="/our-instructors/<%= instructor._id %>" class="btn-view">
                                     <i class="fas fa-user"></i> View Profile
                                 </a>
                                 <button class="btn-contact" onclick="contactInstructor('<%= instructor._id %>')">
@@ -992,7 +992,7 @@
                             </div>
                             
                             <div class="list-actions">
-                                <a href="/instructors/<%= instructor._id %>" class="btn-view">
+                                <a href="/our-instructors/<%= instructor._id %>" class="btn-view">
                                     <i class="fas fa-user"></i> View Full Profile
                                 </a>
                                 <button class="btn-contact" onclick="contactInstructor('<%= instructor._id %>')">
@@ -1087,7 +1087,7 @@
 
             async function fetchSearchSuggestions(term) {
                 try {
-                    const response = await fetch(`/api/instructors/search?term=${encodeURIComponent(term)}`);
+                    const response = await fetch(`/api/our-instructors/search?term=${encodeURIComponent(term)}`);
                     const suggestions = await response.json();
                     
                     displaySuggestions(suggestions);

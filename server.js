@@ -201,6 +201,62 @@ app.get("/training-programs", (req, res) => {
 });
 
 // ============================================
+// ADD THESE ROUTES TO YOUR SERVER.JS FILE
+// Insert after line 94 (after training-programs route)
+// ============================================
+
+// ============================================
+// 9.5 ALL COURSES ROUTES (NEW)
+// ============================================
+
+// Main All Courses page
+app.get("/all-courses", (req, res) => {
+  const user = req.user || null;
+  res.render("all-courses", {
+    user: user,
+    title: "All Courses - IAAI",
+  });
+});
+
+// Hands-On Surgical & Non-Surgical Courses
+app.get("/hands-on-surgical-courses", (req, res) => {
+  const user = req.user || null;
+  res.render("hands-on-surgical-courses", {
+    user: user,
+    title: "Hands-On Surgical & Non-Surgical Courses - IAAI",
+  });
+});
+
+// Comprehensive & Progressive Training Programs
+app.get("/comprehensive-training-programs", (req, res) => {
+  const user = req.user || null;
+  res.render("comprehensive-training-programs", {
+    user: user,
+    title: "Comprehensive & Progressive Training Programs - IAAI",
+  });
+});
+
+// Specialized Training Programs
+app.get("/specialized-training-programs", (req, res) => {
+  const user = req.user || null;
+  res.render("specialized-training-programs", {
+    user: user,
+    title: "Specialized Training Programs - IAAI",
+  });
+});
+
+// Interactive Webinar Programs
+app.get("/interactive-webinar-programs", (req, res) => {
+  const user = req.user || null;
+  res.render("interactive-webinar-programs", {
+    user: user,
+    title: "Interactive Webinar Programs - IAAI",
+  });
+});
+
+console.log("📚 All Courses routes loaded");
+
+// ============================================
 // 9.1 IN-PERSON TRAINING USER ROUTES (NEW)
 // ============================================
 // IMPORTANT: User routes for in-person training MUST come before admin routes

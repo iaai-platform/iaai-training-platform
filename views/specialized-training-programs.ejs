@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Specialized Training Programs - IAAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Specialization Grid */
+        .specialization-grid {
+            background: #ffffff;
+            padding: 80px 0;
+            margin-bottom: 40px;
+        }
+
+        .specialization-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .specialization-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .specialization-header h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .specialization-header p {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .specialization-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .specialization-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .specialization-card:hover {
+            transform: translateY(-10px);
+            border-color: #ffcc00;
+            box-shadow: 0 20px 40px rgba(255, 204, 0, 0.2);
+        }
+
+        .spec-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .specialization-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 15px;
+        }
+
+        .specialization-card p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Course Card */
+        .course-card {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            margin-bottom: 60px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            align-items: center;
+        }
+
+        .course-content {
+            padding: 60px;
+        }
+
+        .course-badge {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .course-content h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .course-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .course-content p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .course-highlights {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+
+        .course-highlights li {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .course-highlights li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .course-applications {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .applications-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #002147;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .application-item {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #666;
+            border-left: 4px solid #ffcc00;
+            transition: transform 0.2s ease;
+        }
+
+        .application-item:hover {
+            transform: translateX(5px);
+        }
+
+        .course-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .detail-item i {
+            font-size: 24px;
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+
+        .detail-item h4 {
+            font-size: 14px;
+            color: #002147;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .detail-item p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .course-image {
+            position: relative;
+            overflow: hidden;
+            height: 500px;
+        }
+
+        .course-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .course-card:hover .course-image img {
+            transform: scale(1.05);
+        }
+
+        .course-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #002147;
+            border: 2px solid #002147;
+            padding: 13px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-secondary:hover {
+            background: #002147;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            padding: 80px 0;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            background: #002147;
+            color: #ffffff;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
+            background: #001a3a;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .specialization-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .course-content {
+                padding: 40px 30px;
+            }
+
+            .course-content h2 {
+                font-size: 24px;
+            }
+
+            .course-details {
+                grid-template-columns: 1fr;
+            }
+
+            .applications-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .course-buttons {
+                flex-direction: column;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <a href="/all-courses">All Courses</a> > <span>Specialized Training Programs</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Specialized Training Programs</h1>
+            <p>Advanced focused training in specific aesthetic medicine techniques and cutting-edge procedures. Master specialized skills with expert instruction and comprehensive hands-on experience.</p>
+        </div>
+    </section>
+
+    <!-- Specialization Grid -->
+    <section class="specialization-grid">
+        <div class="specialization-container">
+            <div class="specialization-header">
+                <h2>Areas of Specialization</h2>
+                <p>Choose your specialization path and become an expert in cutting-edge aesthetic medicine techniques</p>
+            </div>
+
+            <div class="specialization-cards">
+                <div class="specialization-card fade-in">
+                    <div class="spec-icon"><i class="fas fa-tint"></i></div>
+                    <h3>Regenerative Medicine</h3>
+                    <p>Advanced PRP therapy, stem cell applications, and biostimulatory treatments for comprehensive rejuvenation</p>
+                </div>
+                <div class="specialization-card fade-in">
+                    <div class="spec-icon"><i class="fas fa-spa"></i></div>
+                    <h3>Skin Rejuvenation</h3>
+                    <p>Modern approaches to skin aging, advanced treatment protocols, and combination therapies</p>
+                </div>
+                <div class="specialization-card fade-in">
+                    <div class="spec-icon"><i class="fas fa-magic"></i></div>
+                    <h3>Biostimulation</h3>
+                    <p>Poly-L-Lactic Acid applications for face and body rejuvenation with advanced injection techniques</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- PRP in Aesthetic Medicine Course -->
+        <div class="course-card fade-in">
+            <div class="course-grid">
+                <div class="course-content">
+                    <div class="course-badge">Regenerative Medicine</div>
+                    <h2>Platelet Rich Plasma (PRP) in Aesthetic Medicine Course</h2>
+                    <p>This comprehensive PRP training program covers the complete spectrum of platelet-rich plasma applications in aesthetic medicine, from fundamental preparation techniques to advanced clinical applications.</p>
+                    
+                    <div class="course-applications">
+                        <div class="applications-title">
+                            <i class="fas fa-flask"></i>
+                            Clinical Applications
+                        </div>
+                        <div class="applications-grid">
+                            <div class="application-item">Periorbital Rejuvenation</div>
+                            <div class="application-item">Skin Aging Treatment</div>
+                            <div class="application-item">Scar Reduction</div>
+                            <div class="application-item">Hair Restoration</div>
+                            <div class="application-item">Mesotherapy Applications</div>
+                            <div class="application-item">Dermaroller Treatments</div>
+                        </div>
+                    </div>
+
+                    <ul class="course-highlights">
+                        <li>Multiple PRP preparation methods including buffy coat technique</li>
+                        <li>Advanced centrifugation parameters and temperature control</li>
+                        <li>Innovative PRP modifications with heparin carriers</li>
+                        <li>Hyaluronic acid combinations for enhanced results</li>
+                        <li>Comprehensive safety protocols and contraindications</li>
+                    </ul>
+
+                    <div class="course-details">
+                        <div class="detail-item">
+                            <i class="fas fa-microscope"></i>
+                            <h4>Focus</h4>
+                            <p>Regenerative</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-flask"></i>
+                            <h4>Methods</h4>
+                            <p>Multiple Prep</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-syringe"></i>
+                            <h4>Applications</h4>
+                            <p>Face & Body</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-certificate"></i>
+                            <h4>Level</h4>
+                            <p>Specialized</p>
+                        </div>
+                    </div>
+
+                    <div class="course-buttons">
+                        <a href="/contact-us" class="btn-primary">
+                            Master PRP <i class="fas fa-dna"></i>
+                        </a>
+                        <a href="/training-programs" class="btn-secondary">
+                            All Programs <i class="fas fa-list"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="course-image">
+                    <img src="/images/prp-course.jpg" alt="PRP Course">
+                </div>
+            </div>
+        </div>
+
+        <!-- Skin Rejuvenation Course -->
+        <div class="course-card fade-in">
+            <div class="course-grid">
+                <div class="course-image">
+                    <img src="/images/skin-rejuvenation-course.jpg" alt="Skin Rejuvenation Course">
+                </div>
+                <div class="course-content">
+                    <div class="course-badge">Advanced Rejuvenation</div>
+                    <h2>Skin Rejuvenation Course</h2>
+                    <p>This advanced skin rejuvenation program provides comprehensive training in modern aesthetic medicine approaches, covering the complete spectrum from skin aging assessment to advanced treatment protocols.</p>
+                    
+                    <div class="course-applications">
+                        <div class="applications-title">
+                            <i class="fas fa-leaf"></i>
+                            Treatment Modalities
+                        </div>
+                        <div class="applications-grid">
+                            <div class="application-item">Retinoids & Ascorbic Acid</div>
+                            <div class="application-item">Glycolic Acid Treatments</div>
+                            <div class="application-item">Peptide Therapy</div>
+                            <div class="application-item">Carboxytherapy</div>
+                            <div class="application-item">Radiofrequency</div>
+                            <div class="application-item">HIFU Technology</div>
+                        </div>
+                    </div>
+
+                    <ul class="course-highlights">
+                        <li>Skin aging exposome concept and evaluation techniques</li>
+                        <li>Fitzpatrick skin classification system mastery</li>
+                        <li>Fibroblast reactivation and ECM quality improvement</li>
+                        <li>Personalized treatment protocol development</li>
+                        <li>Advanced camouflage techniques and complication management</li>
+                    </ul>
+
+                    <div class="course-details">
+                        <div class="detail-item">
+                            <i class="fas fa-search"></i>
+                            <h4>Assessment</h4>
+                            <p>Comprehensive</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-palette"></i>
+                            <h4>Approach</h4>
+                            <p>Personalized</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-cogs"></i>
+                            <h4>Technology</h4>
+                            <p>Advanced</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-chart-line"></i>
+                            <h4>Evidence</h4>
+                            <p>Based</p>
+                        </div>
+                    </div>
+
+                    <div class="course-buttons">
+                        <a href="/contact-us" class="btn-primary">
+                            Advanced Rejuvenation <i class="fas fa-magic"></i>
+                        </a>
+                        <a href="/instructors" class="btn-secondary">
+                            Expert Instructors <i class="fas fa-user-md"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLLA Course -->
+        <div class="course-card fade-in">
+            <div class="course-grid">
+                <div class="course-content">
+                    <div class="course-badge">Biostimulation</div>
+                    <h2>Poly-L-Lactic Acid (PLLA) for Face & Body Rejuvenation Course</h2>
+                    <p>This specialized 2-day biostimulatory training program focuses exclusively on the revolutionary collagen-stimulating treatment using Poly-L-Lactic Acid for comprehensive facial and body rejuvenation.</p>
+                    
+                    <div class="course-applications">
+                        <div class="applications-title">
+                            <i class="fas fa-body"></i>
+                            Treatment Areas
+                        </div>
+                        <div class="applications-grid">
+                            <div class="application-item">Facial Zones</div>
+                            <div class="application-item">Neck & Décolleté</div>
+                            <div class="application-item">Arms & Hands</div>
+                            <div class="application-item">Abdomen</div>
+                            <div class="application-item">Buttocks</div>
+                            <div class="application-item">Thighs</div>
+                        </div>
+                    </div>
+
+                    <ul class="course-highlights">
+                        <li>Advanced reconstitution protocols and extended use techniques</li>
+                        <li>Specialized injection methods: linear threading, fanning, cross-hatching</li>
+                        <li>Complex anatomical considerations for facial and body applications</li>
+                        <li>Comprehensive complication management including nodule prevention</li>
+                        <li>Business integration and long-term treatment planning</li>
+                    </ul>
+
+                    <div class="course-details">
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <h4>Duration</h4>
+                            <p>2 Days</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-dna"></i>
+                            <h4>Mechanism</h4>
+                            <p>Collagen Stimulation</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-user-md"></i>
+                            <h4>Instructor</h4>
+                            <p>Prof. Noura Lebbar</p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-star"></i>
+                            <h4>Level</h4>
+                            <p>Advanced</p>
+                        </div>
+                    </div>
+
+                    <div class="course-buttons">
+                        <a href="/contact-us" class="btn-primary">
+                            Master PLLA <i class="fas fa-leaf"></i>
+                        </a>
+                        <a href="/about" class="btn-secondary">
+                            About IAAI <i class="fas fa-info-circle"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="course-image">
+                    <img src="/images/plla-course.jpg" alt="PLLA Course">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>Ready to Specialize in Advanced Techniques?</h2>
+            <p>Develop expertise in cutting-edge aesthetic medicine specializations. Join our focused training programs and become a leader in regenerative medicine, skin rejuvenation, and biostimulation.</p>
+            <div class="cta-buttons">
+                <a href="/contact-us" class="cta-btn">Choose Your Specialization</a>
+                <a href="/instructors" class="cta-btn">Meet Our Specialists</a>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all elements
+        document.querySelectorAll('.course-card, .specialization-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Application item hover effects
+        document.querySelectorAll('.application-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.backgroundColor = '#f0f8ff';
+                item.style.borderLeftColor = '#b8860b';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.backgroundColor = '#ffffff';
+                item.style.borderLeftColor = '#ffcc00';
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

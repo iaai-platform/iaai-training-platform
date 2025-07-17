@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Courses - International Aesthetic Academic Institution (IAAI)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Statistics Section */
+        .stats-section {
+            background: #ffffff;
+            padding: 80px 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .stat-number {
+            font-size: 42px;
+            font-weight: 800;
+            color: #002147;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Course Categories */
+        .categories-section {
+            background: #f8f9fa;
+            padding: 80px 0;
+        }
+
+        .categories-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .section-header p {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .category-card {
+            background: #ffffff;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+            z-index: 2;
+        }
+
+        .category-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 33, 71, 0.8), rgba(255, 204, 0, 0.3));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .category-card:hover .category-image::before {
+            opacity: 1;
+        }
+
+        .category-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 64px;
+            color: rgba(255, 255, 255, 0.9);
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover .category-icon {
+            transform: translate(-50%, -50%) scale(1.2);
+            color: #ffffff;
+        }
+
+        .category-content {
+            padding: 40px 30px;
+        }
+
+        .category-badge {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .category-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .category-content p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .course-count {
+            font-size: 14px;
+            color: #ffcc00;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .category-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 25px;
+        }
+
+        .category-features li {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .category-features li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .category-btn {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+        }
+
+        /* Quick Access */
+        .quick-access {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            color: #ffffff;
+        }
+
+        .quick-access-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .quick-access h2 {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 50px;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .quick-link {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quick-link:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .quick-link i {
+            font-size: 36px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .quick-link h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .quick-link p {
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            background: #002147;
+            color: #ffffff;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
+            background: #001a3a;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 20px;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-links {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <span>All Courses</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Complete Course Catalog</h1>
+            <p>Explore our comprehensive range of aesthetic medicine courses, from hands-on surgical training to interactive webinars. Find the perfect learning path for your professional development.</p>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-book"></i></div>
+                <div class="stat-number">15+</div>
+                <div class="stat-label">Total Courses</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                <div class="stat-number">4</div>
+                <div class="stat-label">Course Categories</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                <div class="stat-number">3</div>
+                <div class="stat-label">Training Locations</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
+                <div class="stat-number">5000+</div>
+                <div class="stat-label">Graduates</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Course Categories -->
+    <section class="categories-section">
+        <div class="categories-container">
+            <div class="section-header">
+                <h2>Course Categories</h2>
+                <p>Choose from our specialized categories designed to meet your professional development needs</p>
+            </div>
+
+            <div class="categories-grid">
+                <!-- Hands-On Surgical & Non-Surgical -->
+                <div class="category-card fade-in" onclick="location.href='/hands-on-surgical-courses'">
+                    <div class="category-image" style="background-image: url('/images/surgical-training.jpg');">
+                        <div class="category-icon"><i class="fas fa-user-md"></i></div>
+                    </div>
+                    <div class="category-content">
+                        <div class="category-badge">Intensive Training</div>
+                        <h3>Hands-On Surgical & Non-Surgical Courses</h3>
+                        <p>Master advanced aesthetic procedures through intensive practical training with real patients and cadaveric dissection.</p>
+                        <div class="course-count">6 Specialized Courses</div>
+                        <ul class="category-features">
+                            <li>Real patient procedures</li>
+                            <li>Cadaveric dissection training</li>
+                            <li>Expert surgical supervision</li>
+                            <li>International certifications</li>
+                        </ul>
+                        <a href="/hands-on-surgical-courses" class="category-btn">
+                            Explore Courses <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Comprehensive & Progressive Training -->
+                <div class="category-card fade-in" onclick="location.href='/comprehensive-progressive-training'">
+                    <div class="category-image" style="background-image: url('/images/progressive-training.jpg');">
+                        <div class="category-icon"><i class="fas fa-chart-line"></i></div>
+                    </div>
+                    <div class="category-content">
+                        <div class="category-badge">Structured Learning</div>
+                        <h3>Comprehensive & Progressive Training Programs</h3>
+                        <p>Systematic learning pathways with structured progression from foundation to advanced levels.</p>
+                        <div class="course-count">3 Progressive Levels</div>
+                        <ul class="category-features">
+                            <li>Step-by-step skill building</li>
+                            <li>11-module comprehensive framework</li>
+                            <li>One-on-one mentorship</li>
+                            <li>Systematic competency development</li>
+                        </ul>
+                        <a href="/comprehensive-progressive-training" class="category-btn">
+                            Start Your Journey <i class="fas fa-play"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Specialized Training -->
+                <div class="category-card fade-in" onclick="location.href='/specialized-training-programs'">
+                    <div class="category-image" style="background-image: url('/images/specialized-training.jpg');">
+                        <div class="category-icon"><i class="fas fa-microscope"></i></div>
+                    </div>
+                    <div class="category-content">
+                        <div class="category-badge">Advanced Focus</div>
+                        <h3>Specialized Training Programs</h3>
+                        <p>Advanced focused training in specific aesthetic medicine techniques and cutting-edge procedures.</p>
+                        <div class="course-count">3 Specialized Areas</div>
+                        <ul class="category-features">
+                            <li>PRP & regenerative medicine</li>
+                            <li>Advanced skin rejuvenation</li>
+                            <li>Biostimulation techniques</li>
+                            <li>Evidence-based protocols</li>
+                        </ul>
+                        <a href="/specialized-training-programs" class="category-btn">
+                            Specialize Now <i class="fas fa-star"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Interactive Webinars -->
+                <div class="category-card fade-in" onclick="location.href='/interactive-webinar-programs'">
+                    <div class="category-image" style="background-image: url('/images/webinar-training.jpg');">
+                        <div class="category-icon"><i class="fas fa-video"></i></div>
+                    </div>
+                    <div class="category-content">
+                        <div class="category-badge">Live Online</div>
+                        <h3>Interactive Webinar Programs</h3>
+                        <p>Expert-led virtual training sessions with real-time demonstrations and live Q&A sessions.</p>
+                        <div class="course-count">2 Live Sessions</div>
+                        <ul class="category-features">
+                            <li>Real-time expert interaction</li>
+                            <li>HD video demonstrations</li>
+                            <li>Global accessibility</li>
+                            <li>Recording access included</li>
+                        </ul>
+                        <a href="/interactive-webinar-programs" class="category-btn">
+                            Join Webinars <i class="fas fa-desktop"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Access -->
+    <section class="quick-access">
+        <div class="quick-access-container">
+            <h2>Quick Access</h2>
+            <div class="quick-links">
+                <a href="/training-programs" class="quick-link">
+                    <i class="fas fa-list"></i>
+                    <h4>All Training Programs</h4>
+                    <p>View comprehensive program listings</p>
+                </a>
+                <a href="/instructors" class="quick-link">
+                    <i class="fas fa-user-tie"></i>
+                    <h4>Expert Instructors</h4>
+                    <p>Meet our world-class faculty</p>
+                </a>
+                <a href="/about" class="quick-link">
+                    <i class="fas fa-info-circle"></i>
+                    <h4>About IAAI</h4>
+                    <p>Learn about our institution</p>
+                </a>
+                <a href="/contact-us" class="quick-link">
+                    <i class="fas fa-phone"></i>
+                    <h4>Contact Us</h4>
+                    <p>Get personalized guidance</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>Ready to Transform Your Career?</h2>
+            <p>Join thousands of healthcare professionals who have advanced their careers through IAAI's comprehensive training programs. Choose your path and start your journey to aesthetic excellence today.</p>
+            <div class="cta-buttons">
+                <a href="/contact-us" class="cta-btn">Get Started Now</a>
+                <a href="/training-programs" class="cta-btn">Browse All Programs</a>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('.fade-in').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target, duration = 2000) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (target > 100) {
+                    element.textContent = Math.floor(current).toLocaleString() + '+';
+                } else {
+                    element.textContent = Math.floor(current) + '+';
+                }
+            }, 16);
+        }
+
+        // Animate counters when they come into view
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target.querySelector('.stat-number');
+                    const text = counter.textContent;
+                    const target = parseInt(text.replace(/\D/g, ''));
+                    
+                    animateCounter(counter, target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-item').forEach(item => {
+            counterObserver.observe(item);
+        });
+
+        // Enhanced hover effects for cards
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-15px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Quick link hover effects
+        document.querySelectorAll('.quick-link').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.05)';
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

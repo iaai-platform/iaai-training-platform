@@ -126,44 +126,23 @@
                         </div>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="password">
-                                Password <span class="required">*</span>
-                            </label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-lock input-icon"></i>
-                                <input 
-                                    type="password" 
-                                    name="password" 
-                                    id="password"
-                                    placeholder="Create a strong password"
-                                    required>
-                                <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggleIcon1')">
-                                    <i class="fas fa-eye" id="toggleIcon1"></i>
-                                </button>
-                            </div>
-                            <div class="password-strength" id="passwordStrength"></div>
+                    <div class="form-group">
+                        <label for="password">
+                            Password <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input 
+                                type="password" 
+                                name="password" 
+                                id="password"
+                                placeholder="Create a strong password"
+                                required>
+                            <button type="button" class="toggle-password" onclick="togglePassword()">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="confirmPassword">
-                                Confirm Password <span class="required">*</span>
-                            </label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-lock input-icon"></i>
-                                <input 
-                                    type="password" 
-                                    name="confirmPassword" 
-                                    id="confirmPassword"
-                                    placeholder="Confirm your password"
-                                    required>
-                                <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
-                                    <i class="fas fa-eye" id="toggleIcon2"></i>
-                                </button>
-                            </div>
-                            <div class="password-match" id="passwordMatch"></div>
-                        </div>
+                        <div class="password-strength" id="passwordStrength"></div>
                     </div>
                 </div>
 
@@ -307,10 +286,10 @@
     </div>
 
     <script>
-        // Toggle password visibility - Updated to handle multiple password fields
-        function togglePassword(fieldId, iconId) {
-            const passwordInput = document.getElementById(fieldId);
-            const toggleIcon = document.getElementById(iconId);
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
             
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
@@ -328,24 +307,11 @@
             let strength = 0;
             let strengthText = '';
             let strengthClass = '';
-            let requirements = [];
 
-            const hasLength = password.length >= 8;
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasLowerCase = /[a-z]/.test(password);
-            const hasNumbers = /[0-9]/.test(password);
-            const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-            if (hasLength) strength++;
-            if (hasUpperCase) strength++;
-            if (hasLowerCase) strength++;
-            if (hasNumbers) strength++;
-
-            // Build requirements list
-            if (!hasLength) requirements.push("8+ characters");
-            if (!hasUpperCase) requirements.push("uppercase letter");
-            if (!hasLowerCase) requirements.push("lowercase letter");
-            if (!hasNumbers) requirements.push("number");
+            if (password.length >= 8) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^A-Za-z0-9]/)) strength++;
 
             switch(strength) {
                 case 0:
@@ -368,41 +334,12 @@
             }
 
             if (password.length > 0) {
-                let content = `<div class="strength-indicator ${strengthClass}">${strengthText}</div>`;
-                if (requirements.length > 0 && strength < 4) {
-                    content += `<div class="requirements">Missing: ${requirements.join(", ")}</div>`;
-                }
-                strengthBar.innerHTML = content;
+                strengthBar.innerHTML = `<div class="strength-indicator ${strengthClass}">${strengthText}</div>`;
                 strengthBar.style.display = 'block';
             } else {
                 strengthBar.style.display = 'none';
             }
-
-            // Check password match when password changes
-            checkPasswordMatch();
         });
-
-        // Password match validation
-        function checkPasswordMatch() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const matchIndicator = document.getElementById('passwordMatch');
-
-            if (confirmPassword.length > 0) {
-                if (password === confirmPassword) {
-                    matchIndicator.innerHTML = '<div class="match-indicator match">✓ Passwords match</div>';
-                    matchIndicator.style.display = 'block';
-                } else {
-                    matchIndicator.innerHTML = '<div class="match-indicator no-match">✗ Passwords do not match</div>';
-                    matchIndicator.style.display = 'block';
-                }
-            } else {
-                matchIndicator.style.display = 'none';
-            }
-        }
-
-        // Check password match when confirm password changes
-        document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
 
         // Show/Hide Instructor Fields
         document.getElementById('role').addEventListener('change', function () {
@@ -435,119 +372,25 @@
             });
         }, 10000);
 
-        // Enhanced form validation with better user feedback
+        // Form validation
         document.getElementById('signup-form').addEventListener('submit', function(e) {
             const requiredFields = this.querySelectorAll('[required]');
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const submitBtn = this.querySelector('.submit-btn');
             let isValid = true;
-            let errorMessage = '';
 
-            // Clear previous error states
-            document.querySelectorAll('.error').forEach(field => {
-                field.classList.remove('error');
-            });
-
-            // Check required fields
             requiredFields.forEach(field => {
                 if (!field.value.trim()) {
                     isValid = false;
                     field.classList.add('error');
+                } else {
+                    field.classList.remove('error');
                 }
             });
 
-            // Check password strength
-            if (password.length < 8) {
-                isValid = false;
-                errorMessage += 'Password must be at least 8 characters long.\n';
-                document.getElementById('password').classList.add('error');
-            }
-
-            // Check for required password components
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasLowerCase = /[a-z]/.test(password);
-            const hasNumbers = /[0-9]/.test(password);
-
-            if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
-                isValid = false;
-                let missing = [];
-                if (!hasUpperCase) missing.push("uppercase letter");
-                if (!hasLowerCase) missing.push("lowercase letter");
-                if (!hasNumbers) missing.push("number");
-                errorMessage += `Password must contain at least one ${missing.join(", ")}.\n`;
-                document.getElementById('password').classList.add('error');
-            }
-
-            // Check password match
-            if (password !== confirmPassword) {
-                isValid = false;
-                errorMessage += 'Passwords do not match.\n';
-                document.getElementById('confirmPassword').classList.add('error');
-            }
-
             if (!isValid) {
                 e.preventDefault();
-                
-                // Show error notification
-                showNotification('error', 'Validation Error', errorMessage || 'Please fill in all required fields correctly.');
-                
-                // Scroll to first error field
-                const firstError = document.querySelector('.error');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstError.focus();
-                }
-            } else {
-                // Show loading state
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-                
-                // Show submitting notification
-                showNotification('info', 'Submitting Application', 'Please wait while we process your application...');
+                alert('Please fill in all required fields.');
             }
         });
-
-        // Function to show custom notifications
-        function showNotification(type, title, message) {
-            const messageContainer = document.querySelector('.message-container');
-            const notificationId = 'notification-' + Date.now();
-            
-            const iconClass = {
-                'success': 'fas fa-check-circle',
-                'error': 'fas fa-exclamation-circle',
-                'info': 'fas fa-info-circle',
-                'warning': 'fas fa-exclamation-triangle'
-            }[type] || 'fas fa-info-circle';
-
-            const notification = document.createElement('div');
-            notification.className = `message ${type}-message`;
-            notification.id = notificationId;
-            notification.innerHTML = `
-                <div class="message-icon">
-                    <i class="${iconClass}"></i>
-                </div>
-                <div class="message-content">
-                    <h4>${title}</h4>
-                    <p>${message.replace(/\n/g, '<br>')}</p>
-                </div>
-                <button class="message-close" onclick="closeMessage('${notificationId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            messageContainer.appendChild(notification);
-            
-            // Auto-hide after 8 seconds (except for error messages)
-            if (type !== 'error') {
-                setTimeout(() => {
-                    closeMessage(notificationId);
-                }, 8000);
-            }
-            
-            // Scroll notification into view
-            notification.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
 
         // Remove error class on input
         document.querySelectorAll('input, select').forEach(field => {
@@ -556,247 +399,5 @@
             });
         });
     </script>
-
-    <style>
-        /* Enhanced notification styles that work with existing CSS */
-        .password-match, .password-strength {
-            margin-top: 5px;
-            font-size: 12px;
-        }
-
-        .strength-indicator {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-
-        .strength-indicator.weak {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .strength-indicator.fair {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .strength-indicator.good {
-            background-color: #cce5ff;
-            color: #004085;
-            border: 1px solid #a6d8ff;
-        }
-
-        .strength-indicator.strong {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .match-indicator {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-            font-size: 12px;
-        }
-
-        .match-indicator.match {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .match-indicator.no-match {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .requirements {
-            padding: 2px 8px;
-            margin-top: 2px;
-            font-size: 11px;
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-            border-radius: 4px;
-        }
-
-        .input-wrapper input.error,
-        .input-wrapper select.error {
-            border-color: #e74c3c !important;
-            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
-        }
-
-        /* Enhanced Message Container - Override existing styles */
-        .message-container {
-            padding: 0 40px !important;
-            margin-top: -20px !important;
-            position: relative !important;
-            z-index: 10 !important;
-        }
-
-        /* Enhanced Message Styling - More specific selectors */
-        .message-container .message {
-            display: flex !important;
-            align-items: flex-start !important;
-            padding: 20px !important;
-            border-radius: 12px !important;
-            margin-bottom: 20px !important;
-            position: relative !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-            animation: slideInDown 0.5s ease-out !important;
-            border: none !important;
-            min-height: auto !important;
-        }
-
-        .message-container .success-message {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
-            color: #155724 !important;
-            border-left: 4px solid #28a745 !important;
-        }
-
-        .message-container .error-message {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
-            color: #721c24 !important;
-            border-left: 4px solid #dc3545 !important;
-        }
-
-        .message-container .info-message {
-            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%) !important;
-            color: #0c5460 !important;
-            border-left: 4px solid #17a2b8 !important;
-        }
-
-        .message-container .warning-message {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
-            color: #856404 !important;
-            border-left: 4px solid #ffc107 !important;
-        }
-
-        .message-container .message-icon {
-            font-size: 24px !important;
-            margin-right: 15px !important;
-            flex-shrink: 0 !important;
-            margin-top: 2px !important;
-        }
-
-        .message-container .success-message .message-icon {
-            color: #28a745 !important;
-        }
-
-        .message-container .error-message .message-icon {
-            color: #dc3545 !important;
-        }
-
-        .message-container .info-message .message-icon {
-            color: #17a2b8 !important;
-        }
-
-        .message-container .warning-message .message-icon {
-            color: #ffc107 !important;
-        }
-
-        .message-container .message-content {
-            flex-grow: 1 !important;
-        }
-
-        .message-container .message-content h4 {
-            margin: 0 0 8px 0 !important;
-            font-size: 16px !important;
-            font-weight: 600 !important;
-        }
-
-        .message-container .message-content p {
-            margin: 0 !important;
-            font-size: 14px !important;
-            line-height: 1.5 !important;
-        }
-
-        .message-container .message-close {
-            position: absolute !important;
-            top: 10px !important;
-            right: 10px !important;
-            background: none !important;
-            border: none !important;
-            color: inherit !important;
-            font-size: 18px !important;
-            cursor: pointer !important;
-            opacity: 0.6 !important;
-            transition: opacity 0.3s ease !important;
-            padding: 5px !important;
-        }
-
-        .message-container .message-close:hover {
-            opacity: 1 !important;
-        }
-
-        /* Loading state for submit button */
-        .submit-btn.loading {
-            opacity: 0.7 !important;
-            cursor: not-allowed !important;
-            position: relative !important;
-        }
-
-        .submit-btn.loading::after {
-            content: '' !important;
-            position: absolute !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            width: 20px !important;
-            height: 20px !important;
-            border: 2px solid #fff !important;
-            border-top: 2px solid transparent !important;
-            border-radius: 50% !important;
-            animation: spin 1s linear infinite !important;
-        }
-
-        .submit-btn.loading i {
-            opacity: 0 !important;
-        }
-
-        @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* Enhanced slideInDown animation */
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-        }
-
-        /* Focus states for better accessibility */
-        .message-container .message:focus {
-            outline: 2px solid #2196f3 !important;
-            outline-offset: 2px !important;
-        }
-
-        /* Responsive adjustments for notifications */
-        @media (max-width: 768px) {
-            .message-container {
-                padding: 0 20px !important;
-            }
-        }
-    </style>
 </body>
 </html>

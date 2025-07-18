@@ -1,5 +1,5 @@
-// Optimized User Model - Store Only User-Specific Data
-// Course details are fetched from course models when needed
+// Final Complete User Model - All Index Issues Fixed
+// This model removes all problematic certificate indexes that cause registration errors
 
 const mongoose = require("mongoose");
 
@@ -342,7 +342,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
-    // 4. Instructor assignments (unchanged)
+    // 4. Instructor assignments
     myTrainingInstruction: {
       experience: { type: String },
       expertise: { type: String },
@@ -376,16 +376,13 @@ const userSchema = new mongoose.Schema(
 
     // ========================================
     // CERTIFICATES (Store actual certificates)
+    // NO UNIQUE CONSTRAINTS TO PREVENT INDEX ERRORS
     // ========================================
     myCertificates: [
       {
-        certificateId: {
-          type: String,
-          required: function () {
-            return this.courseId != null;
-          },
-        },
-        courseId: { type: mongoose.Schema.Types.ObjectId, required: true },
+        // No unique constraint - prevents registration errors
+        certificateId: { type: String },
+        courseId: { type: mongoose.Schema.Types.ObjectId },
         courseType: {
           type: String,
           enum: [
@@ -393,16 +390,15 @@ const userSchema = new mongoose.Schema(
             "OnlineLiveTraining",
             "InPersonAestheticTraining",
           ],
-          required: true,
         },
 
-        // Certificate is immutable once issued
+        // Certificate data
         certificateData: {
-          recipientName: { type: String, required: true },
-          courseTitle: { type: String, required: true },
-          courseCode: { type: String, required: true },
+          recipientName: String,
+          courseTitle: String,
+          courseCode: String,
           instructorName: String,
-          completionDate: { type: Date, required: true },
+          completionDate: Date,
           issueDate: { type: Date, default: Date.now },
           expiryDate: Date,
 
@@ -414,8 +410,8 @@ const userSchema = new mongoose.Schema(
             grade: String,
           },
 
-          // Verification
-          verificationCode: { type: String, required: true, unique: true },
+          // Verification - No unique constraint
+          verificationCode: String,
           digitalSignature: String,
           qrCodeUrl: String,
 
@@ -433,12 +429,12 @@ const userSchema = new mongoose.Schema(
     ],
 
     // ========================================
-    // SIMPLIFIED PAYMENT TRANSACTIONS
+    // PAYMENT TRANSACTIONS
     // ========================================
     paymentTransactions: [
       {
-        transactionId: { type: String, required: true, unique: true },
-        receiptNumber: { type: String, required: true, unique: true },
+        transactionId: { type: String, required: true },
+        receiptNumber: { type: String, required: true },
         transactionDate: { type: Date, default: Date.now },
 
         // Payment details
@@ -456,7 +452,7 @@ const userSchema = new mongoose.Schema(
         finalAmount: { type: Number, required: true },
         currency: { type: String, default: "USD" },
 
-        // Items purchased (just references)
+        // Items purchased
         items: [
           {
             courseId: mongoose.Schema.Types.ObjectId,
@@ -535,21 +531,29 @@ const userSchema = new mongoose.Schema(
 );
 
 // ========================================
-// INDEXES
+// SAFE INDEXES - NO CERTIFICATE INDEXES
+// These indexes will not cause registration errors
 // ========================================
-userSchema.index({ email: 1 });
+
+// Essential indexes for performance
+userSchema.index({ email: 1 }, { unique: true }); // Keep email unique
 userSchema.index({ "myInPersonCourses.courseId": 1 });
 userSchema.index({ "myLiveCourses.courseId": 1 });
 userSchema.index({ "mySelfPacedCourses.courseId": 1 });
-userSchema.index(
-  { "myCertificates.certificateId": 1 },
-  {
-    sparse: true,
-    partialFilterExpression: { "myCertificates.certificateId": { $ne: null } },
-  }
-);
-userSchema.index({ "myCertificates.verificationCode": 1 });
+
+// Transaction indexes (these don't cause issues because they're required fields)
 userSchema.index({ "paymentTransactions.transactionId": 1 });
+userSchema.index({ "paymentTransactions.receiptNumber": 1 });
+
+// Role and status indexes for admin queries
+userSchema.index({ role: 1 });
+userSchema.index({ isConfirmed: 1 });
+userSchema.index({ "accountStatus.isActive": 1 });
+
+// REMOVED ALL CERTIFICATE INDEXES TO PREVENT REGISTRATION ERRORS:
+// userSchema.index({ "myCertificates.certificateId": 1 });
+// userSchema.index({ "myCertificates.verificationCode": 1 });
+// userSchema.index({ "myCertificates.certificateData.verificationCode": 1 });
 
 // ========================================
 // VIRTUAL FIELDS
@@ -936,26 +940,6 @@ userSchema.methods.getLibraryCourses = async function (options = {}) {
     });
   }
 
-  // Add this as a utility function or instance method in User model
-  userSchema.methods.cleanupOrphanedEnrollments = async function () {
-    // Clean up In-Person courses
-    this.myInPersonCourses = this.myInPersonCourses.filter(
-      (enrollment) => enrollment.courseId
-    );
-
-    // Clean up Live courses
-    this.myLiveCourses = this.myLiveCourses.filter(
-      (enrollment) => enrollment.courseId
-    );
-
-    // Clean up Self-Paced courses
-    this.mySelfPacedCourses = this.mySelfPacedCourses.filter(
-      (enrollment) => enrollment.courseId
-    );
-
-    return this.save();
-  };
-
   // Sort courses
   if (sortBy === "recent") {
     courses.sort((a, b) => b.sortDate - a.sortDate);
@@ -978,6 +962,26 @@ userSchema.methods.getLibraryCourses = async function (options = {}) {
   }
 
   return courses;
+};
+
+// Cleanup orphaned enrollments
+userSchema.methods.cleanupOrphanedEnrollments = async function () {
+  // Clean up In-Person courses
+  this.myInPersonCourses = this.myInPersonCourses.filter(
+    (enrollment) => enrollment.courseId
+  );
+
+  // Clean up Live courses
+  this.myLiveCourses = this.myLiveCourses.filter(
+    (enrollment) => enrollment.courseId
+  );
+
+  // Clean up Self-Paced courses
+  this.mySelfPacedCourses = this.mySelfPacedCourses.filter(
+    (enrollment) => enrollment.courseId
+  );
+
+  return this.save();
 };
 
 module.exports = mongoose.models.User || mongoose.model("User", userSchema);

@@ -16,30 +16,13 @@ const adminSelfPacedController = require("../../controllers/admin/selfpacedContr
 const isAdmin = require("../../middlewares/isAdmin");
 
 // ========================================
-// ENSURE UPLOAD DIRECTORIES EXIST
+// MULTER CONFIGURATION FOR CLOUDINARY
 // ========================================
-const videoUploadDir = path.join(__dirname, "../../uploads/selfpaced/videos");
-const thumbnailUploadDir = path.join(
-  __dirname,
-  "../../uploads/selfpaced/thumbnails"
-);
-
-if (!fs.existsSync(videoUploadDir)) {
-  fs.mkdirSync(videoUploadDir, { recursive: true });
-  console.log("📁 Created video upload directory:", videoUploadDir);
-}
-
-if (!fs.existsSync(thumbnailUploadDir)) {
-  fs.mkdirSync(thumbnailUploadDir, { recursive: true });
-  console.log("📸 Created thumbnail upload directory:", thumbnailUploadDir);
-}
-
-// ========================================
-// MULTER CONFIGURATION FOR VIDEOS
-// ========================================
-const videoStorage = multer.diskStorage({
+// Use memory storage for temporary files before uploading to Cloudinary
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, videoUploadDir);
+    // Use OS temp directory
+    cb(null, "/tmp");
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -50,46 +33,64 @@ const videoStorage = multer.diskStorage({
   },
 });
 
+// ========================================
+// VIDEO UPLOAD CONFIGURATION
+// ========================================
 const videoUpload = multer({
-  storage: videoStorage,
+  storage: storage,
   limits: {
     fileSize: 500 * 1024 * 1024, // 500MB limit for videos
   },
   fileFilter: function (req, file, cb) {
-    const allowedTypes = /mp4|mov|avi|webm|mkv|pdf|doc|docx|csv/;
+    const allowedTypes = /mp4|mov|avi|webm|mkv/;
     const extname = allowedTypes.test(
       path.extname(file.originalname).toLowerCase()
     );
-    const mimetype = allowedTypes.test(file.mimetype);
+    const mimetype =
+      allowedTypes.test(file.mimetype) || file.mimetype.startsWith("video/");
 
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error("Only video files and documents are allowed"));
+      cb(new Error("Only video files are allowed (MP4, MOV, AVI, WEBM, MKV)"));
     }
   },
 });
 
 // ========================================
-// MULTER CONFIGURATION FOR THUMBNAILS
+// THUMBNAIL UPLOAD CONFIGURATION
 // ========================================
-const thumbnailStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, thumbnailUploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "thumbnail-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
 const thumbnailUpload = multer({
-  storage: thumbnailStorage,
+  storage: storage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit for images
   },
   fileFilter: function (req, file, cb) {
-    const allowedTypes = /jpeg|jpg|png|webp|gif/;
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    const extname = allowedTypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
+    const mimetype =
+      allowedTypes.test(file.mimetype) || file.mimetype.startsWith("image/");
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed (JPEG, PNG, WebP)"));
+    }
+  },
+});
+
+// ========================================
+// GENERAL UPLOAD (for import/export)
+// ========================================
+const generalUpload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for general files
+  },
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = /csv|pdf|doc|docx/;
     const extname = allowedTypes.test(
       path.extname(file.originalname).toLowerCase()
     );
@@ -98,7 +99,7 @@ const thumbnailUpload = multer({
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error("Only image files are allowed (JPEG, PNG, WebP, GIF)"));
+      cb(new Error("Only CSV, PDF, DOC, DOCX files are allowed"));
     }
   },
 });
@@ -150,169 +151,57 @@ router.delete(
 );
 
 // ========================================
-// THUMBNAIL MANAGEMENT API
+// THUMBNAIL MANAGEMENT API - UPDATED FOR CLOUDINARY
 // ========================================
 
-// Upload course thumbnail
+// Upload course thumbnail - Now uses controller method
 router.post(
   "/api/courses/:courseId/thumbnail",
   isAdmin,
   thumbnailUpload.single("thumbnail"),
-  async (req, res) => {
-    try {
-      const { courseId } = req.params;
-
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: "No thumbnail file uploaded",
-        });
-      }
-
-      const course = await SelfPacedOnlineTraining.findById(courseId);
-      if (!course) {
-        // Clean up uploaded file
-        await fsPromises.unlink(req.file.path);
-        return res.status(404).json({
-          success: false,
-          message: "Course not found",
-        });
-      }
-
-      // Delete old thumbnail if exists
-      if (
-        course.media?.thumbnailUrl &&
-        course.media.thumbnailUrl.startsWith("/uploads/")
-      ) {
-        const oldFilePath = path.join(
-          __dirname,
-          "../..",
-          course.media.thumbnailUrl
-        );
-        try {
-          await fsPromises.unlink(oldFilePath);
-          console.log("Deleted old thumbnail:", oldFilePath);
-        } catch (err) {
-          console.error("Error deleting old thumbnail:", err);
-        }
-      }
-
-      // Update course with new thumbnail URL
-      const thumbnailUrl = `/uploads/selfpaced/thumbnails/${req.file.filename}`;
-
-      if (!course.media) {
-        course.media = {};
-      }
-      course.media.thumbnailUrl = thumbnailUrl;
-
-      await course.save();
-
-      console.log(
-        `✅ Thumbnail uploaded for course ${course.basic.title}: ${thumbnailUrl}`
-      );
-
-      res.json({
-        success: true,
-        message: "Thumbnail uploaded successfully",
-        thumbnailUrl: thumbnailUrl,
-        course: course,
-      });
-    } catch (error) {
-      console.error("❌ Error uploading thumbnail:", error);
-
-      // Clean up uploaded file on error
-      if (req.file) {
-        try {
-          await fsPromises.unlink(req.file.path);
-        } catch (err) {
-          console.error("Error deleting uploaded file:", err);
-        }
-      }
-
-      res.status(500).json({
-        success: false,
-        message: "Error uploading thumbnail",
-        error: error.message,
-      });
-    }
-  }
+  adminSelfPacedController.uploadThumbnail
 );
 
-// Delete course thumbnail
-router.delete("/api/courses/:courseId/thumbnail", isAdmin, async (req, res) => {
-  try {
-    const { courseId } = req.params;
-
-    const course = await SelfPacedOnlineTraining.findById(courseId);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
-    }
-
-    // Delete thumbnail file if exists
-    if (
-      course.media?.thumbnailUrl &&
-      course.media.thumbnailUrl.startsWith("/uploads/")
-    ) {
-      const filePath = path.join(__dirname, "../..", course.media.thumbnailUrl);
-      try {
-        await fsPromises.unlink(filePath);
-        console.log("Deleted thumbnail file:", filePath);
-      } catch (err) {
-        console.error("Error deleting thumbnail file:", err);
-      }
-    }
-
-    // Remove thumbnail URL from course
-    if (course.media) {
-      course.media.thumbnailUrl = "";
-    }
-
-    await course.save();
-
-    console.log(`✅ Thumbnail deleted for course ${course.basic.title}`);
-
-    res.json({
-      success: true,
-      message: "Thumbnail deleted successfully",
-    });
-  } catch (error) {
-    console.error("❌ Error deleting thumbnail:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error deleting thumbnail",
-      error: error.message,
-    });
-  }
-});
+// Delete course thumbnail - Now uses controller method
+router.delete(
+  "/api/courses/:courseId/thumbnail",
+  isAdmin,
+  adminSelfPacedController.deleteThumbnail
+);
 
 // ========================================
-// VIDEO MANAGEMENT API
+// VIDEO MANAGEMENT API - UPDATED FOR CLOUDINARY
 // ========================================
 router.get(
   "/api/videos/:courseId",
   isAdmin,
   adminSelfPacedController.getCourseVideos
 );
+
+// Add video - Controller now handles Cloudinary upload
 router.post(
   "/api/videos/:courseId",
   isAdmin,
   videoUpload.single("videoFile"),
   adminSelfPacedController.addVideo
 );
+
+// Update video - Controller now handles Cloudinary upload
 router.put(
   "/api/videos/:courseId/:videoId",
   isAdmin,
   videoUpload.single("videoFile"),
   adminSelfPacedController.updateVideo
 );
+
+// Delete video - Controller now handles Cloudinary deletion
 router.delete(
   "/api/videos/:courseId/:videoId",
   isAdmin,
   adminSelfPacedController.deleteVideo
 );
+
+// Reorder videos
 router.put(
   "/api/videos/:courseId/reorder",
   isAdmin,
@@ -327,15 +216,17 @@ router.get(
   isAdmin,
   adminSelfPacedController.exportCourses
 );
+
+// Updated to use general upload instead of video upload
 router.post(
   "/api/import/courses",
   isAdmin,
-  videoUpload.single("file"),
+  generalUpload.single("file"),
   adminSelfPacedController.importCourses
 );
 
 // ========================================
-// HELPER ROUTES - FIXED: No duplicates
+// HELPER ROUTES
 // ========================================
 router.get(
   "/api/instructors",
@@ -504,6 +395,36 @@ router.post("/api/migrate-courses", isAdmin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Migration failed",
+      error: error.message,
+    });
+  }
+});
+
+// ========================================
+// CLOUDINARY FOLDER SETUP UTILITY (Optional)
+// ========================================
+
+// Route to ensure Cloudinary folders exist (optional utility)
+router.post("/api/setup-cloudinary-folders", isAdmin, async (req, res) => {
+  try {
+    const cloudinary = require("cloudinary").v2;
+
+    // This will create the folders on first upload
+    // Cloudinary creates folders automatically when you upload to them
+    res.json({
+      success: true,
+      message:
+        "Cloudinary folders will be created automatically on first upload",
+      folders: [
+        "iaai-platform/selfpaced/videos",
+        "iaai-platform/selfpaced/thumbnails",
+      ],
+    });
+  } catch (error) {
+    console.error("Cloudinary setup error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error setting up Cloudinary folders",
       error: error.message,
     });
   }

@@ -7,6 +7,16 @@ const certificationBody = require("../../models/CertificationBody");
 const fs = require("fs").promises;
 const path = require("path");
 
+// ADD CLOUDINARY SETUP AT THE TOP
+const cloudinary = require("cloudinary").v2;
+
+// Configure cloudinary (make sure these are in your .env file)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 const { ObjectId } = mongoose.Types;
 
 // ========================================
@@ -41,8 +51,61 @@ const processSingleCertificationBody = async (certificationBodyId) => {
   }
 };
 
+// ADD CLOUDINARY HELPER FUNCTIONS
+const uploadToCloudinary = async (filePath, folder, resourceType = "auto") => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: `iaai-platform/selfpaced/${folder}`,
+      resource_type: resourceType,
+      use_filename: true,
+      unique_filename: true,
+    });
+
+    console.log(`✅ Uploaded to Cloudinary: ${result.secure_url}`);
+    return result;
+  } catch (error) {
+    console.error(`❌ Cloudinary upload error:`, error);
+    throw error;
+  }
+};
+
+const deleteFromCloudinary = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    console.log(`✅ Deleted from Cloudinary: ${publicId}`);
+    return result;
+  } catch (error) {
+    console.error(`❌ Cloudinary delete error:`, error);
+    throw error;
+  }
+};
+
+const extractPublicIdFromUrl = (url) => {
+  if (!url || !url.includes("cloudinary.com")) return null;
+
+  try {
+    // Extract public ID from Cloudinary URL
+    const parts = url.split("/");
+    const uploadIndex = parts.findIndex((part) => part === "upload");
+    if (uploadIndex === -1) return null;
+
+    // Get everything after 'upload/v{version}/'
+    const pathParts = parts.slice(uploadIndex + 2);
+    const publicIdWithExt = pathParts.join("/");
+
+    // Remove file extension
+    const lastDotIndex = publicIdWithExt.lastIndexOf(".");
+    return lastDotIndex !== -1
+      ? publicIdWithExt.substring(0, lastDotIndex)
+      : publicIdWithExt;
+  } catch (error) {
+    console.error("Error extracting public ID:", error);
+    return null;
+  }
+};
+
 // ========================================
-// STATISTICS
+// STATISTICS (UNCHANGED)
 // ========================================
 
 exports.getStatistics = async (req, res) => {
@@ -103,7 +166,7 @@ exports.getStatistics = async (req, res) => {
 };
 
 // ========================================
-// COURSE CRUD OPERATIONS
+// COURSE CRUD OPERATIONS (MOSTLY UNCHANGED)
 // ========================================
 
 exports.getAllCourses = async (req, res) => {
@@ -466,14 +529,31 @@ exports.deleteCourse = async (req, res) => {
       });
     }
 
-    // Delete video files
+    // UPDATED: Delete video files from Cloudinary
     for (const video of course.videos || []) {
-      if (video.videoUrl) {
-        const filePath = path.join(__dirname, "../..", video.videoUrl);
+      if (video.videoUrl && video.videoUrl.includes("cloudinary.com")) {
+        const publicId = extractPublicIdFromUrl(video.videoUrl);
+        if (publicId) {
+          try {
+            await deleteFromCloudinary(publicId);
+          } catch (err) {
+            console.error("Error deleting video from Cloudinary:", err);
+          }
+        }
+      }
+    }
+
+    // UPDATED: Delete course thumbnail from Cloudinary
+    if (
+      course.media?.thumbnailUrl &&
+      course.media.thumbnailUrl.includes("cloudinary.com")
+    ) {
+      const publicId = extractPublicIdFromUrl(course.media.thumbnailUrl);
+      if (publicId) {
         try {
-          await fs.unlink(filePath);
+          await deleteFromCloudinary(publicId);
         } catch (err) {
-          console.error("Error deleting video file:", err);
+          console.error("Error deleting thumbnail from Cloudinary:", err);
         }
       }
     }
@@ -495,7 +575,7 @@ exports.deleteCourse = async (req, res) => {
 };
 
 // ========================================
-// VIDEO MANAGEMENT (UNCHANGED)
+// VIDEO MANAGEMENT - UPDATED FOR CLOUDINARY
 // ========================================
 
 exports.getCourseVideos = async (req, res) => {
@@ -539,9 +619,41 @@ exports.addVideo = async (req, res) => {
       });
     }
 
-    // Process video file
+    // UPDATED: Process video file with Cloudinary
     if (req.file) {
-      videoData.videoUrl = `/uploads/selfpaced/videos/${req.file.filename}`;
+      try {
+        console.log("📹 Uploading video to Cloudinary...");
+        const uploadResult = await uploadToCloudinary(
+          req.file.path,
+          "videos",
+          "video"
+        );
+        videoData.videoUrl = uploadResult.secure_url;
+
+        // Clean up local file
+        try {
+          await fs.unlink(req.file.path);
+        } catch (err) {
+          console.error("Error deleting local file:", err);
+        }
+
+        console.log(
+          "✅ Video uploaded to Cloudinary:",
+          uploadResult.secure_url
+        );
+      } catch (uploadError) {
+        // Clean up local file on error
+        try {
+          await fs.unlink(req.file.path);
+        } catch (err) {
+          console.error("Error deleting local file:", err);
+        }
+
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading video to cloud storage",
+        });
+      }
     } else {
       return res.status(400).json({
         success: false,
@@ -654,18 +766,54 @@ exports.updateVideo = async (req, res) => {
       });
     }
 
-    // Process new video file if uploaded
+    // UPDATED: Process new video file if uploaded with Cloudinary
     if (req.file) {
-      // Delete old video file if it exists and is a local file
-      if (video.videoUrl && video.videoUrl.startsWith("/uploads/")) {
-        const oldFilePath = path.join(__dirname, "../..", video.videoUrl);
-        try {
-          await fs.unlink(oldFilePath);
-        } catch (err) {
-          console.error("Error deleting old video file:", err);
+      try {
+        console.log("📹 Uploading new video to Cloudinary...");
+        const uploadResult = await uploadToCloudinary(
+          req.file.path,
+          "videos",
+          "video"
+        );
+
+        // Delete old video from Cloudinary if it exists
+        if (video.videoUrl && video.videoUrl.includes("cloudinary.com")) {
+          const oldPublicId = extractPublicIdFromUrl(video.videoUrl);
+          if (oldPublicId) {
+            try {
+              await deleteFromCloudinary(oldPublicId);
+            } catch (err) {
+              console.error("Error deleting old video from Cloudinary:", err);
+            }
+          }
         }
+
+        updateData.videoUrl = uploadResult.secure_url;
+
+        // Clean up local file
+        try {
+          await fs.unlink(req.file.path);
+        } catch (err) {
+          console.error("Error deleting local file:", err);
+        }
+
+        console.log(
+          "✅ New video uploaded to Cloudinary:",
+          uploadResult.secure_url
+        );
+      } catch (uploadError) {
+        // Clean up local file on error
+        try {
+          await fs.unlink(req.file.path);
+        } catch (err) {
+          console.error("Error deleting local file:", err);
+        }
+
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading video to cloud storage",
+        });
       }
-      updateData.videoUrl = `/uploads/selfpaced/videos/${req.file.filename}`;
     }
 
     // Parse quiz questions if provided
@@ -767,14 +915,16 @@ exports.deleteVideo = async (req, res) => {
       });
     }
 
-    // Delete video file if it exists and is local
-    if (video.videoUrl && video.videoUrl.startsWith("/uploads/")) {
-      const filePath = path.join(__dirname, "../..", video.videoUrl);
-      try {
-        await fs.unlink(filePath);
-        console.log("Deleted video file:", filePath);
-      } catch (err) {
-        console.error("Error deleting video file:", err);
+    // UPDATED: Delete video file from Cloudinary
+    if (video.videoUrl && video.videoUrl.includes("cloudinary.com")) {
+      const publicId = extractPublicIdFromUrl(video.videoUrl);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId);
+          console.log("Deleted video from Cloudinary:", publicId);
+        } catch (err) {
+          console.error("Error deleting video from Cloudinary:", err);
+        }
       }
     }
 
@@ -834,6 +984,154 @@ exports.reorderVideos = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error reordering videos",
+    });
+  }
+};
+
+// ========================================
+// ADD NEW THUMBNAIL UPLOAD ENDPOINT
+// ========================================
+
+exports.uploadThumbnail = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No thumbnail file provided",
+      });
+    }
+
+    const course = await SelfPacedOnlineTraining.findById(courseId);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    try {
+      console.log("🖼️ Uploading thumbnail to Cloudinary...");
+      const uploadResult = await uploadToCloudinary(
+        req.file.path,
+        "thumbnails"
+      );
+
+      // Delete old thumbnail from Cloudinary if it exists
+      if (
+        course.media?.thumbnailUrl &&
+        course.media.thumbnailUrl.includes("cloudinary.com")
+      ) {
+        const oldPublicId = extractPublicIdFromUrl(course.media.thumbnailUrl);
+        if (oldPublicId) {
+          try {
+            await deleteFromCloudinary(oldPublicId);
+          } catch (err) {
+            console.error("Error deleting old thumbnail from Cloudinary:", err);
+          }
+        }
+      }
+
+      // Update course with new thumbnail URL
+      if (!course.media) course.media = {};
+      course.media.thumbnailUrl = uploadResult.secure_url;
+      await course.save();
+
+      // Clean up local file
+      try {
+        await fs.unlink(req.file.path);
+      } catch (err) {
+        console.error("Error deleting local file:", err);
+      }
+
+      console.log(
+        "✅ Thumbnail uploaded to Cloudinary:",
+        uploadResult.secure_url
+      );
+
+      res.json({
+        success: true,
+        message: "Thumbnail uploaded successfully",
+        thumbnailUrl: uploadResult.secure_url,
+        course: course,
+      });
+    } catch (uploadError) {
+      // Clean up local file on error
+      try {
+        await fs.unlink(req.file.path);
+      } catch (err) {
+        console.error("Error deleting local file:", err);
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Error uploading thumbnail to cloud storage",
+      });
+    }
+  } catch (error) {
+    console.error("❌ Error uploading thumbnail:", error);
+
+    // Clean up uploaded file on error
+    if (req.file) {
+      try {
+        await fs.unlink(req.file.path);
+      } catch (err) {
+        console.error("Error deleting uploaded file:", err);
+      }
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Error uploading thumbnail",
+      error: error.message,
+    });
+  }
+};
+
+exports.deleteThumbnail = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await SelfPacedOnlineTraining.findById(courseId);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    // Delete thumbnail from Cloudinary if it exists
+    if (
+      course.media?.thumbnailUrl &&
+      course.media.thumbnailUrl.includes("cloudinary.com")
+    ) {
+      const publicId = extractPublicIdFromUrl(course.media.thumbnailUrl);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId);
+          console.log("Deleted thumbnail from Cloudinary:", publicId);
+        } catch (err) {
+          console.error("Error deleting thumbnail from Cloudinary:", err);
+        }
+      }
+    }
+
+    // Remove thumbnail URL from course
+    if (course.media) {
+      course.media.thumbnailUrl = "";
+    }
+    await course.save();
+
+    res.json({
+      success: true,
+      message: "Thumbnail deleted successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error deleting thumbnail:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting thumbnail",
     });
   }
 };
@@ -985,7 +1283,7 @@ exports.importCourses = async (req, res) => {
 };
 
 // ========================================
-// HELPER FUNCTIONS (API ENDPOINTS)
+// HELPER FUNCTIONS (API ENDPOINTS) - UNCHANGED
 // ========================================
 
 exports.getInstructors = async (req, res) => {
@@ -1020,8 +1318,6 @@ exports.getInstructors = async (req, res) => {
     });
   }
 };
-
-// REPLACE your existing getCertificationBodies function in selfpacedController.js with this:
 
 exports.getCertificationBodies = async (req, res) => {
   try {

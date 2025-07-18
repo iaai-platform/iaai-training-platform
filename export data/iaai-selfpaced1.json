@@ -1,0 +1,252 @@
+{
+    "basic": {
+      "courseCode": "SELF-MED-001",
+      "title": "Advanced Single Point Lip Injection Technique by Dr. Masson Vitale",
+      "description": "Master the innovative single point lip injection technique developed by Dr. Masson Vitale from Bologna, Italy. This comprehensive course demonstrates a safer, less invasive approach to lip enhancement using hyaluronic acid fillers. Learn the precise vectorial injection method that minimizes complications while achieving natural, beautiful results with only 0.5ml of product.",
+      "aboutThisCourse": "This course features Dr. Masson Vitale's recently published personal technique for lip enhancement, demonstrating live patient treatment with detailed explanations of safety considerations and injection methodology.",
+      "category": "medical",
+      "status": "published",
+      "courseType": "self-paced"
+    },
+    "access": {
+      "price": 299,
+      "currency": "USD",
+      "accessDays": 365,
+      "totalEnrollments": 0
+    },
+    "content": {
+      "objectives": [
+        "Master the single point injection technique for upper lip enhancement",
+        "Understand the anatomy and safety considerations for lip injections",
+        "Learn proper needle depth and vectorial injection methods",
+        "Develop skills for natural lip volumization using minimal product",
+        "Apply multi-point technique for lower lip treatment"
+      ],
+      "targetAudience": [
+        "Aesthetic physicians",
+        "Dermatologists",
+        "Plastic surgeons",
+        "Advanced aesthetic practitioners"
+      ],
+      "experienceLevel": "intermediate",
+      "prerequisites": "Basic knowledge of facial anatomy and previous experience with dermal filler injections required",
+      "estimatedMinutes": 45,
+      "totalVideos": 0,
+      "totalQuestions": 0
+    },
+    "videos": [
+      {
+        "_id": "67890abcdef123456789abcd",
+        "title": "Introduction and Patient Assessment",
+        "description": "Dr. Masson Vitale introduces his innovative lip injection technique and assesses the patient's lips for treatment planning.",
+        "videoUrl": "https://example.com/videos/lip-technique-intro",
+        "duration": 5,
+        "sequence": 1,
+        "transcript": "Hi. I am Dr Masson Vitale, exterior physician from Italy in Bologna. Now today I will perform my personal technique on lips. This is my patient, so I decided to improve the shape of her lips to make them more beautiful, more with more definition and more hydrated...",
+        "dateUploaded": "2025-01-15T10:00:00.000Z",
+        "exam": [
+          {
+            "_id": "67890abcdef123456789abc1",
+            "questionText": "What is the primary advantage of Dr. Vitale's single point technique?",
+            "type": "multiple-choice",
+            "options": [
+              "Uses more product for better results",
+              "Less painful with only one entry point per side",
+              "Requires deeper injection depth",
+              "Can be performed without anesthesia"
+            ],
+            "correctAnswer": "Less painful with only one entry point per side",
+            "points": 1,
+            "explanation": "The single point technique reduces patient discomfort by minimizing the number of injection sites while maintaining effectiveness."
+          }
+        ],
+        "assessmentSettings": {
+          "passingScore": 70,
+          "timeLimit": 0,
+          "instructions": "Answer the question based on the introduction and technique overview."
+        },
+        "isPreview": true
+      },
+      {
+        "_id": "67890abcdef123456789abce",
+        "title": "Anatomy and Safety Considerations",
+        "description": "Critical anatomical knowledge focusing on the superior labial artery location and injection depth requirements for safe practice.",
+        "videoUrl": "https://example.com/videos/lip-anatomy-safety",
+        "duration": 8,
+        "sequence": 2,
+        "transcript": "Three crucial aspects must be considered, first, the injection depth, which must be superficial at the subcutaneous level, as the superior labial artery is deeper in 87% of cases where it's located in submucosa...",
+        "dateUploaded": "2025-01-15T10:00:00.000Z",
+        "exam": [
+          {
+            "_id": "67890abcdef123456789abc2",
+            "questionText": "At what depth should injections be performed to avoid the superior labial artery?",
+            "type": "multiple-choice",
+            "options": [
+              "Deep subcutaneous level",
+              "Superficial subcutaneous level",
+              "Intramuscular level",
+              "Submucosal level"
+            ],
+            "correctAnswer": "Superficial subcutaneous level",
+            "points": 1,
+            "explanation": "Superficial subcutaneous injection is safer as the superior labial artery is located deeper in the submucosa in 87% of cases."
+          }
+        ],
+        "assessmentSettings": {
+          "passingScore": 70,
+          "timeLimit": 0,
+          "instructions": "Focus on the anatomical safety considerations discussed."
+        },
+        "isPreview": false
+      },
+      {
+        "_id": "67890abcdef123456789abcf",
+        "title": "Upper Lip Single Point Technique - Part 1",
+        "description": "Detailed demonstration of the vectorial injection technique for the upper lip, showing the first injection vectors and proper needle manipulation.",
+        "videoUrl": "https://example.com/videos/upper-lip-technique-1",
+        "duration": 12,
+        "sequence": 3,
+        "transcript": "The main access point corresponds to the peak of the copied bow. And the insertion of the needle must be delicate. The technique involves the use of multiple retrograde lineal vectors with the release of the very fine lines of hyaluronic acid...",
+        "dateUploaded": "2025-01-15T10:00:00.000Z",
+        "exam": [
+          {
+            "_id": "67890abcdef123456789abc3",
+            "questionText": "Where is the main access point for the upper lip injection?",
+            "type": "multiple-choice",
+            "options": [
+              "Center of the lip",
+              "Peak of the cupid's bow",
+              "Corner of the mouth",
+              "Lower border of the lip"
+            ],
+            "correctAnswer": "Peak of the cupid's bow",
+            "points": 1,
+            "explanation": "The peak of the cupid's bow provides the optimal access point for the vectorial technique."
+          }
+        ],
+        "assessmentSettings": {
+          "passingScore": 70,
+          "timeLimit": 0,
+          "instructions": "Pay attention to the injection entry point and technique details."
+        },
+        "isPreview": false
+      },
+      {
+        "_id": "67890abcdef123456789abcg",
+        "title": "Upper Lip Single Point Technique - Part 2",
+        "description": "Continuation of the upper lip treatment showing the completion of vectorial injections and contralateral side treatment.",
+        "videoUrl": "https://example.com/videos/upper-lip-technique-2",
+        "duration": 10,
+        "sequence": 4,
+        "transcript": "Then proceed to perform the same technique on the opposite side, starting with the first vertical vector to avert the mucosa, followed by a second vector to add soft volume, then project the lip...",
+        "dateUploaded": "2025-01-15T10:00:00.000Z",
+        "exam": [
+          {
+            "_id": "67890abcdef123456789abc4",
+            "questionText": "How many vectors are typically performed on each side of the upper lip?",
+            "type": "multiple-choice",
+            "options": [
+              "Two vectors",
+              "Three vectors",
+              "Four vectors",
+              "Five vectors"
+            ],
+            "correctAnswer": "Three vectors",
+            "points": 1,
+            "explanation": "Three vectors are performed to achieve optimal shaping, eversion, projection, and soft volume."
+          }
+        ],
+        "assessmentSettings": {
+          "passingScore": 70,
+          "timeLimit": 0,
+          "instructions": "Focus on the number and purpose of injection vectors."
+        },
+        "isPreview": false
+      },
+      {
+        "_id": "67890abcdef123456789abch",
+        "title": "Lower Lip Multi-Point Technique and Results",
+        "description": "Demonstration of the lower lip treatment using multi-point technique, final results assessment, and product volume discussion.",
+        "videoUrl": "https://example.com/videos/lower-lip-results",
+        "duration": 10,
+        "sequence": 5,
+        "transcript": "Now I proceed with treatment of the lower lip, always aiming for a natural volumization for the lower lip, I prefer a multi point technique keep it superficial to minimize the risk of vascular complications...",
+        "dateUploaded": "2025-01-15T10:00:00.000Z",
+        "exam": [
+          {
+            "_id": "67890abcdef123456789abc5",
+            "questionText": "What total volume of hyaluronic acid filler was used for the complete lip treatment?",
+            "type": "multiple-choice",
+            "options": [
+              "1.0ml",
+              "0.5ml",
+              "0.75ml",
+              "1.5ml"
+            ],
+            "correctAnswer": "0.5ml",
+            "points": 1,
+            "explanation": "Only 0.5ml of product was used, demonstrating the efficiency of this minimally invasive approach."
+          }
+        ],
+        "assessmentSettings": {
+          "passingScore": 70,
+          "timeLimit": 0,
+          "instructions": "Note the volume used and the rationale for the lower lip technique."
+        },
+        "isPreview": false
+      }
+    ],
+    "instructor": {
+      "instructorId": "67890abcdef123456789instructor",
+      "name": "Dr. Masson Vitale",
+      "title": "Aesthetic Physician, Bologna, Italy"
+    },
+    "certification": {
+      "enabled": false,
+      "type": "completion",
+      "issuingAuthorityId": null,
+      "issuingAuthority": "IAAI Training Institute",
+      "certificationBodies": [],
+      "requirements": {
+        "minimumAttendance": 100,
+        "minimumScore": 70,
+        "practicalRequired": false,
+        "requireAllVideos": true
+      },
+      "validity": {
+        "isLifetime": true,
+        "years": null
+      },
+      "features": {
+        "digitalBadge": false,
+        "qrVerification": false,
+        "autoGenerate": false,
+        "blockchain": false
+      },
+      "template": "professional_v1"
+    },
+    "media": {
+      "thumbnailUrl": "https://example.com/thumbnails/lip-injection-course.jpg",
+      "previewVideoUrl": "https://example.com/previews/lip-technique-preview.mp4"
+    },
+    "support": {
+      "email": "support@iaa-i.com",
+      "responseTime": "48 hours"
+    },
+    "metadata": {
+      "createdBy": "67890abcdef123456789admin",
+      "lastModifiedBy": "67890abcdef123456789admin",
+      "publishedDate": "2025-01-15T10:00:00.000Z",
+      "tags": [
+        "lip injection",
+        "hyaluronic acid",
+        "dermal fillers",
+        "aesthetic medicine",
+        "facial enhancement",
+        "single point technique",
+        "Dr Vitale",
+        "lip augmentation"
+      ],
+      "internalNotes": "Course based on Dr. Masson Vitale's recently published lip injection technique. No certification offered as requested."
+    }
+  }

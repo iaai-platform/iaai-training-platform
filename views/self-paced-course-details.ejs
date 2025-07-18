@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= course.basic?.title || course.title || 'Course' %> - Self-Paced Online Training</title>
+  <meta name="description" content="<%= course.basic.description %>">
+  <!-- Social Media Preview Tags -->
+  <meta property="og:title" content="<%= course.basic.title %>">
+  <meta property="og:description" content="<%= course.basic.description %>">
+  <meta property="og:image" content="<%= course.media && course.media.thumbnailUrl ? course.media.thumbnailUrl : '/images/IAAI-Logo.jpg' %>">
+  <meta property="og:url" content="http://localhost:3000/self-paced-online-training/courses/<%= course._id %>">
+  
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   

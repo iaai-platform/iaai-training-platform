@@ -8,8 +8,7 @@ router.get("/signup", (req, res) => {
   console.log("📄 Rendering signup page...");
 
   // Get flash messages (these will be consumed after reading)
-  const error_message = req.flash("error_message")[0] || null;
-  const success_message = req.flash("success_message")[0] || null;
+
   const formDataStr = req.flash("formData")[0] || null;
 
   // Parse form data if available

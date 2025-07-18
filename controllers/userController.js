@@ -6,6 +6,7 @@ const nodemailer = require("nodemailer");
 const axios = require("axios");
 
 // -------------------- REGISTER/SIGNUP USER --------------------
+// -------------------- REGISTER/SIGNUP USER --------------------
 exports.registerUser = async (req, res) => {
   console.log("📝 Signup route hit!");
   console.log("📥 Request body:", req.body);
@@ -15,6 +16,7 @@ exports.registerUser = async (req, res) => {
     lastName,
     email,
     password,
+    confirmPassword,
     phoneNumber,
     profession,
     country,
@@ -25,11 +27,22 @@ exports.registerUser = async (req, res) => {
   } = req.body;
 
   // Validation: Ensure required fields are filled
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !email || !password || !confirmPassword) {
     console.log("❌ Validation failed: Missing required fields");
     req.flash(
       "error_message",
-      "First name, last name, email, and password are required."
+      "First name, last name, email, password, and password confirmation are required."
+    );
+    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+    return res.redirect("/signup");
+  }
+
+  // Validation: Check if passwords match
+  if (password !== confirmPassword) {
+    console.log("❌ Validation failed: Passwords do not match");
+    req.flash(
+      "error_message",
+      "Passwords do not match. Please check your password confirmation."
     );
     req.flash("formData", JSON.stringify(req.body)); // Preserve form data
     return res.redirect("/signup");

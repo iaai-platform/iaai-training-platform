@@ -126,23 +126,44 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="password">
-                            Password <span class="required">*</span>
-                        </label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input 
-                                type="password" 
-                                name="password" 
-                                id="password"
-                                placeholder="Create a strong password"
-                                required>
-                            <button type="button" class="toggle-password" onclick="togglePassword()">
-                                <i class="fas fa-eye" id="toggleIcon"></i>
-                            </button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password">
+                                Password <span class="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input 
+                                    type="password" 
+                                    name="password" 
+                                    id="password"
+                                    placeholder="Create a strong password"
+                                    required>
+                                <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggleIcon1')">
+                                    <i class="fas fa-eye" id="toggleIcon1"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength" id="passwordStrength"></div>
                         </div>
-                        <div class="password-strength" id="passwordStrength"></div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">
+                                Confirm Password <span class="required">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input 
+                                    type="password" 
+                                    name="confirmPassword" 
+                                    id="confirmPassword"
+                                    placeholder="Confirm your password"
+                                    required>
+                                <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                                    <i class="fas fa-eye" id="toggleIcon2"></i>
+                                </button>
+                            </div>
+                            <div class="password-match" id="passwordMatch"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -287,9 +308,9 @@
 
     <script>
         // Toggle password visibility
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('toggleIcon');
+        function togglePassword(fieldId, iconId) {
+            const passwordInput = document.getElementById(fieldId);
+            const toggleIcon = document.getElementById(iconId);
             
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
@@ -339,7 +360,32 @@
             } else {
                 strengthBar.style.display = 'none';
             }
+            
+            // Check password match when password changes
+            checkPasswordMatch();
         });
+
+        // Password match validation
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const matchIndicator = document.getElementById('passwordMatch');
+
+            if (confirmPassword.length > 0) {
+                if (password === confirmPassword) {
+                    matchIndicator.innerHTML = '<div class="match-indicator match">Passwords match</div>';
+                    matchIndicator.style.display = 'block';
+                } else {
+                    matchIndicator.innerHTML = '<div class="match-indicator no-match">Passwords do not match</div>';
+                    matchIndicator.style.display = 'block';
+                }
+            } else {
+                matchIndicator.style.display = 'none';
+            }
+        }
+
+        // Check password match on confirm password input
+        document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
 
         // Show/Hide Instructor Fields
         document.getElementById('role').addEventListener('change', function () {
@@ -374,6 +420,16 @@
 
         // Form validation
         document.getElementById('signup-form').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match. Please check your password confirmation.');
+                return;
+            }
+
             const requiredFields = this.querySelectorAll('[required]');
             let isValid = true;
 
@@ -399,5 +455,31 @@
             });
         });
     </script>
+
+    <style>
+        .password-match, .password-strength {
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        
+        .match-indicator.match {
+            color: #28a745;
+        }
+        
+        .match-indicator.no-match {
+            color: #dc3545;
+        }
+        
+        .strength-indicator {
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        
+        .strength-indicator.weak { background: #dc3545; color: white; }
+        .strength-indicator.fair { background: #fd7e14; color: white; }
+        .strength-indicator.good { background: #ffc107; color: black; }
+        .strength-indicator.strong { background: #28a745; color: white; }
+    </style>
 </body>
 </html>

@@ -5,8 +5,41 @@ const passport = require("passport");
 const nodemailer = require("nodemailer");
 const axios = require("axios");
 
-// -------------------- REGISTER/SIGNUP USER --------------------
-// -------------------- REGISTER/SIGNUP USER --------------------
+// ============================================
+// EMAIL CONFIGURATION HELPER
+// ============================================
+function createEmailTransporter() {
+  // Validate required environment variables
+  if (
+    !process.env.EMAIL_HOST ||
+    !process.env.EMAIL_USER ||
+    !process.env.EMAIL_PASS
+  ) {
+    console.error(
+      "❌ Missing required email configuration environment variables:"
+    );
+    console.error("Required: EMAIL_HOST, EMAIL_USER, EMAIL_PASS");
+    throw new Error("Email configuration incomplete");
+  }
+
+  return nodemailer.createTransporter({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT || 587,
+    secure: process.env.EMAIL_SECURE === "true", // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      // Do not fail on invalid certs (useful for development)
+      rejectUnauthorized: process.env.NODE_ENV === "production",
+    },
+  });
+}
+
+// ============================================
+// REGISTER/SIGNUP USER
+// ============================================
 exports.registerUser = async (req, res) => {
   console.log("📝 Signup route hit!");
   console.log("📥 Request body:", req.body);
@@ -33,7 +66,7 @@ exports.registerUser = async (req, res) => {
       "error_message",
       "First name, last name, email, password, and password confirmation are required."
     );
-    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+    req.flash("formData", JSON.stringify(req.body));
     return res.redirect("/signup");
   }
 
@@ -44,24 +77,22 @@ exports.registerUser = async (req, res) => {
       "error_message",
       "Passwords do not match. Please check your password confirmation."
     );
-    req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+    req.flash("formData", JSON.stringify(req.body));
     return res.redirect("/signup");
   }
 
   try {
     console.log("🔍 Checking for existing user with email:", email);
 
-    // Check if user already exists (now using flat structure)
+    // Check if user already exists
     const existingUser = await User.findOne({ email: email });
     if (existingUser) {
       console.log("❌ User already exists");
-      console.log("🔄 Setting flash message and redirecting...");
       req.flash(
         "error_message",
         "Email already registered. Please use a different email or login if you already have an account."
       );
-      req.flash("formData", JSON.stringify(req.body)); // Preserve form data
-      console.log("💾 Flash message set (not consuming it for debug)");
+      req.flash("formData", JSON.stringify(req.body));
       return res.redirect("/signup");
     }
 
@@ -92,7 +123,7 @@ exports.registerUser = async (req, res) => {
       userData.myTrainingInstruction = {
         experience: experience || "",
         expertise: expertise || "",
-        cv: cv || "", // Handle file upload separately if needed
+        cv: cv || "",
         appliedForCourses: [],
         allocatedCourses: [],
       };
@@ -104,52 +135,149 @@ exports.registerUser = async (req, res) => {
 
     console.log("✅ User saved successfully! ID:", newUser._id);
 
-    // -------------------- EMAIL NOTIFICATION --------------------
+    // ============================================
+    // ADMIN EMAIL NOTIFICATION
+    // ============================================
     try {
-      // Configure nodemailer (FIXED: use createTransport, not createTransporter)
-      let transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER || "m.minepour@gmail.com",
-          pass: process.env.EMAIL_PASS || "38313831Minemn",
-        },
-      });
+      console.log("📧 Sending admin notification email...");
 
-      let mailOptions = {
-        from: process.env.EMAIL_USER || "m.minepour@gmail.com",
-        to: process.env.ADMIN_EMAIL || "admin-email@example.com",
-        subject: "New User Signup",
+      // Create email transporter with company email settings
+      const transporter = createEmailTransporter();
+
+      // Email content for admin notification
+      const mailOptions = {
+        from: {
+          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          address: process.env.EMAIL_USER,
+        },
+        to: process.env.ADMIN_EMAIL,
+        subject: `New User Registration - ${
+          role === "instructor" ? "Instructor" : "Student"
+        } Application`,
         html: `
-          <h3>New User Registration</h3>
-          <p><strong>Name:</strong> ${firstName} ${lastName}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Role:</strong> ${role}</p>
-          <p><strong>Profession:</strong> ${profession}</p>
-          <p><strong>Country:</strong> ${country}</p>
-          ${
-            role === "instructor"
-              ? `
-            <p><strong>Experience:</strong> ${experience}</p>
-            <p><strong>Expertise:</strong> ${expertise}</p>
-          `
-              : ""
-          }
-          <p>Please review and confirm this account.</p>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center; }
+              .content { padding: 20px 0; }
+              .user-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+              .role-badge { 
+                display: inline-block; 
+                padding: 4px 12px; 
+                border-radius: 12px; 
+                font-size: 12px; 
+                font-weight: bold;
+                ${
+                  role === "instructor"
+                    ? "background-color: #e3f2fd; color: #1976d2;"
+                    : "background-color: #f3e5f5; color: #7b1fa2;"
+                }
+              }
+              .action-button {
+                display: inline-block;
+                padding: 12px 24px;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 10px 5px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h2>🆕 New User Registration</h2>
+                <span class="role-badge">${
+                  role === "instructor" ? "👨‍🏫 INSTRUCTOR" : "🎓 STUDENT"
+                }</span>
+              </div>
+              
+              <div class="content">
+                <p>A new user has registered on the IAAI Training Platform and requires your approval.</p>
+                
+                <div class="user-info">
+                  <h3>👤 User Information:</h3>
+                  <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+                  <p><strong>Email:</strong> ${email}</p>
+                  <p><strong>Phone:</strong> ${
+                    phoneNumber || "Not provided"
+                  }</p>
+                  <p><strong>Profession:</strong> ${
+                    profession || "Not provided"
+                  }</p>
+                  <p><strong>Country:</strong> ${country || "Not provided"}</p>
+                  <p><strong>Role:</strong> ${role}</p>
+                  
+                  ${
+                    role === "instructor"
+                      ? `
+                    <hr style="margin: 15px 0;">
+                    <h4>👨‍🏫 Instructor Details:</h4>
+                    <p><strong>Experience:</strong> ${
+                      experience || "Not provided"
+                    }</p>
+                    <p><strong>Expertise:</strong> ${
+                      expertise || "Not provided"
+                    }</p>
+                    <p><strong>CV/Resume:</strong> ${cv || "Not provided"}</p>
+                  `
+                      : ""
+                  }
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${
+                    process.env.SITE_URL || "http://localhost:3000"
+                  }/confirm-user/${email}" class="action-button">
+                    ✅ Approve Account
+                  </a>
+                  <a href="${
+                    process.env.SITE_URL || "http://localhost:3000"
+                  }/admin/users" class="action-button" style="background-color: #6c757d;">
+                    👥 Manage Users
+                  </a>
+                </div>
+                
+                <p style="color: #666; font-size: 14px;">
+                  <strong>Next Steps:</strong><br>
+                  1. Review the user information above<br>
+                  2. Click "Approve Account" to confirm the registration<br>
+                  3. The user will receive a confirmation email automatically
+                </p>
+              </div>
+            </div>
+          </body>
+          </html>
         `,
       };
 
+      // Send email
       await transporter.sendMail(mailOptions);
-      console.log("📧 Email notification sent successfully");
+      console.log(
+        "📧 Admin notification email sent successfully to:",
+        process.env.ADMIN_EMAIL
+      );
     } catch (emailError) {
-      console.log("📧 Error sending email:", emailError);
-      // Don't fail the registration if email fails
+      console.error("📧 Error sending admin notification email:", emailError);
+      // Log specific error details for debugging
+      if (emailError.code) {
+        console.error("📧 Email error code:", emailError.code);
+      }
+      if (emailError.response) {
+        console.error("📧 Email server response:", emailError.response);
+      }
+      // Continue with registration even if email fails (don't block user registration)
     }
 
     // Flash success message and redirect
     console.log("🎉 Setting success flash message...");
     req.flash(
       "success_message",
-      "Your request for creating an account has been received. We will review and get back to you."
+      "Your request for creating an account has been received. We will review and get back to you within 24 hours."
     );
     console.log("✅ Success message set, redirecting to /signup...");
     res.redirect("/signup");
@@ -162,30 +290,28 @@ exports.registerUser = async (req, res) => {
         "error_message",
         "Email already registered. Please use a different email."
       );
-      req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+      req.flash("formData", JSON.stringify(req.body));
     } else {
       req.flash(
         "error_message",
         "Something went wrong while creating your account. Please try again."
       );
-      req.flash("formData", JSON.stringify(req.body)); // Preserve form data
+      req.flash("formData", JSON.stringify(req.body));
     }
 
     res.redirect("/signup");
   }
 };
 
-// Alternative method name for backward compatibility
-exports.signupUser = exports.registerUser;
-
-// -------------------- CONFIRM USER ACCOUNT --------------------
+// ============================================
+// CONFIRM USER ACCOUNT
+// ============================================
 exports.confirmUser = async (req, res) => {
   const { email } = req.params;
 
   try {
     console.log("🔍 Looking for user to confirm:", email);
 
-    // Now using flat structure
     const user = await User.findOne({ email: email });
 
     if (!user) {
@@ -198,46 +324,130 @@ exports.confirmUser = async (req, res) => {
       return res.send("Account already confirmed");
     }
 
+    // Confirm the user account
     user.isConfirmed = true;
     await user.save();
 
     console.log("✅ Account confirmed successfully");
 
-    // Optional: Send confirmation email to user
+    // ============================================
+    // USER CONFIRMATION EMAIL
+    // ============================================
     try {
-      let transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER || "m.minepour@gmail.com",
-          pass: process.env.EMAIL_PASS || "38313831Minemn",
-        },
-      });
+      console.log("📧 Sending user confirmation email...");
 
-      let mailOptions = {
-        from: process.env.EMAIL_USER || "m.minepour@gmail.com",
+      // Create email transporter
+      const transporter = createEmailTransporter();
+
+      const mailOptions = {
+        from: {
+          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          address: process.env.EMAIL_USER,
+        },
         to: email,
-        subject: "Account Confirmed - IAAI Training",
+        subject: "🎉 Welcome to IAAI Training - Account Confirmed!",
         html: `
-          <h3>Welcome to IAAI Training!</h3>
-          <p>Hi ${user.firstName},</p>
-          <p>Your account has been confirmed and you can now log in to access our platform.</p>
-          <p><a href="${
-            process.env.SITE_URL || "http://localhost:3000"
-          }/login">Login here</a></p>
-          <p>Thank you for joining us!</p>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; text-align: center; }
+              .content { padding: 30px 20px; }
+              .welcome-box { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+              .login-button {
+                display: inline-block;
+                padding: 15px 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: bold;
+                margin: 20px 0;
+              }
+              .footer { color: #666; font-size: 14px; text-align: center; margin-top: 30px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>🎉 Welcome to IAAI Training!</h1>
+                <p>Your account has been approved and activated</p>
+              </div>
+              
+              <div class="content">
+                <p>Hi <strong>${user.firstName}</strong>,</p>
+                
+                <div class="welcome-box">
+                  <h3>✅ Account Successfully Confirmed</h3>
+                  <p>Congratulations! Your account has been reviewed and approved by our team. You now have full access to the IAAI Training Platform.</p>
+                </div>
+                
+                <h3>🚀 What's Next?</h3>
+                <ul>
+                  <li>🔐 Log in to your account using your email and password</li>
+                  <li>📚 Browse our comprehensive training programs</li>
+                  <li>🎓 Enroll in courses that match your interests</li>
+                  <li>📈 Track your learning progress</li>
+                  ${
+                    user.role === "instructor"
+                      ? "<li>👨‍🏫 Access instructor tools and resources</li>"
+                      : ""
+                  }
+                </ul>
+                
+                <div style="text-align: center;">
+                  <a href="${
+                    process.env.SITE_URL || "http://localhost:3000"
+                  }/login" class="login-button">
+                    🔐 Login to Your Account
+                  </a>
+                </div>
+                
+                <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+                
+                <p>Welcome aboard!<br>
+                <strong>The IAAI Training Team</strong></p>
+              </div>
+              
+              <div class="footer">
+                <p>This email was sent to ${email}. If you did not create an account, please ignore this email.</p>
+              </div>
+            </div>
+          </body>
+          </html>
         `,
       };
 
       await transporter.sendMail(mailOptions);
-      console.log("📧 Confirmation email sent to user");
+      console.log("📧 User confirmation email sent successfully to:", email);
     } catch (emailError) {
-      console.log("📧 Error sending confirmation email:", emailError);
+      console.error("📧 Error sending user confirmation email:", emailError);
     }
 
+    // Send response to admin
     res.send(`
-      <h2>Account confirmed successfully!</h2>
-      <p>The user ${email} can now log in to the platform.</p>
-      <p><a href="/admin/users">Back to User Management</a></p>
+      <html>
+        <head>
+          <title>Account Confirmed</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa; }
+            .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .success { color: #28a745; }
+            .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2 class="success">✅ Account Confirmed Successfully!</h2>
+            <p>The user <strong>${email}</strong> has been approved and can now access the platform.</p>
+            <p>A welcome email has been sent to the user automatically.</p>
+            <a href="/admin/users" class="btn">👥 Back to User Management</a>
+            <a href="/dashboard" class="btn">📊 Go to Dashboard</a>
+          </div>
+        </body>
+      </html>
     `);
   } catch (err) {
     console.error("💥 Error confirming user:", err);
@@ -245,7 +455,12 @@ exports.confirmUser = async (req, res) => {
   }
 };
 
-// -------------------- LOGIN FUNCTIONALITY --------------------
+// Alternative method name for backward compatibility
+exports.signupUser = exports.registerUser;
+
+// ============================================
+// LOGIN FUNCTIONALITY
+// ============================================
 exports.loginUser = (req, res, next) => {
   console.log("🔐 Login attempt for:", req.body.email);
 
@@ -267,7 +482,6 @@ exports.loginUser = (req, res, next) => {
         return next(err);
       }
 
-      // Now using flat structure
       if (!user.isConfirmed) {
         console.log("⚠️ Login blocked: Account not confirmed");
         req.flash(
@@ -283,7 +497,9 @@ exports.loginUser = (req, res, next) => {
   })(req, res, next);
 };
 
-// -------------------- GET USER PROFILE --------------------
+// ============================================
+// GET USER PROFILE
+// ============================================
 exports.getUserProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -303,7 +519,9 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
-// -------------------- UPDATE USER PROFILE --------------------
+// ============================================
+// UPDATE USER PROFILE
+// ============================================
 exports.updateUserProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -317,7 +535,7 @@ exports.updateUserProfile = async (req, res) => {
       return res.redirect("/login");
     }
 
-    // Update user profile (now using flat structure)
+    // Update user profile
     user.firstName = firstName || user.firstName;
     user.lastName = lastName || user.lastName;
     user.phoneNumber = phoneNumber || user.phoneNumber;
@@ -335,7 +553,9 @@ exports.updateUserProfile = async (req, res) => {
   }
 };
 
-// Add this function
+// ============================================
+// RECAPTCHA VERIFICATION
+// ============================================
 async function verifyRecaptcha(recaptchaResponse) {
   try {
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;

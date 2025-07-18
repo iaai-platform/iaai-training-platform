@@ -4,20 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - International Aesthetic Academic Institution (IAAI)</title>
-    <link rel="stylesheet" href="/css/profile.css"> <!-- Link to the main CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+    <link rel="stylesheet" href="/css/profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
     
     <style>
         .profile-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 50px auto;
             padding: 30px;
             background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         .profile-header {
             text-align: center;
@@ -26,22 +25,56 @@
             border-bottom: 2px solid #f8f9fa;
         }
         .profile-avatar {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             background: linear-gradient(135deg, #007bff, #6c757d);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 20px;
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: white;
+            position: relative;
+            overflow: hidden;
         }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .completion-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        .completion-low { background: #ffe6e6; color: #d63384; }
+        .completion-medium { background: #fff3cd; color: #856404; }
+        .completion-high { background: #d4edda; color: #155724; }
+        .completion-full { background: #d1ecf1; color: #0c5460; }
+        
         .form-section {
             margin-bottom: 40px;
-            padding: 25px;
+            padding: 30px;
             background: #f8f9fa;
-            border-radius: 8px;
+            border-radius: 12px;
+            border-left: 4px solid #007bff;
         }
         .form-section h2 {
             margin-bottom: 20px;
@@ -49,56 +82,147 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.4rem;
+        }
+        .certificate-note {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .certificate-note i {
+            color: #007bff;
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+        .certificate-note-text {
+            flex: 1;
+        }
+        .certificate-note-text h4 {
+            margin: 0 0 5px 0;
+            color: #007bff;
+            font-size: 1rem;
+        }
+        .certificate-note-text p {
+            margin: 0;
+            color: #495057;
+            font-size: 0.9rem;
         }
         .form-row {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 20px;
+            margin-bottom: 20px;
         }
         .form-row > div {
             flex: 1;
         }
+        .form-group {
+            margin-bottom: 20px;
+        }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 500;
             color: #555;
+            font-size: 0.95rem;
         }
-        input[type="text"], input[type="email"], input[type="password"] {
+        .required {
+            color: #dc3545;
+            font-size: 0.8rem;
+        }
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
             width: 100%;
-            padding: 12px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: white;
         }
-        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
         }
         input:disabled {
             background-color: #e9ecef;
             color: #6c757d;
         }
+        select {
+            cursor: pointer;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        .file-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .file-upload-area:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+        .file-info {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
         .btn {
             background: #007bff;
             color: white;
-            padding: 12px 24px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 1rem;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         .btn:hover {
             background: #0056b3;
+            transform: translateY(-1px);
         }
         .btn-secondary {
             background: #6c757d;
         }
         .btn-secondary:hover {
             background: #545b62;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #218838;
         }
         .password-hint {
             font-size: 0.85rem;
@@ -110,11 +234,12 @@
             top: 20px;
             right: 20px;
             padding: 15px 20px;
-            border-radius: 5px;
+            border-radius: 8px;
             color: white;
             font-weight: bold;
             z-index: 1000;
             animation: slideIn 0.3s ease-out;
+            max-width: 300px;
         }
         .notification.success {
             background-color: #28a745;
@@ -122,10 +247,39 @@
         .notification.error {
             background-color: #dc3545;
         }
+        .notification.info {
+            background-color: #17a2b8;
+        }
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            transition: width 0.3s ease;
+        }
+        .verification-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-verified { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .status-not-submitted { background: #e2e3e5; color: #6c757d; }
     </style>
 </head>
 
@@ -140,10 +294,17 @@
     </nav>
 
     <div class="profile-container">
-        <!-- ✅ Profile Header -->
+        <!-- Profile Header -->
         <div class="profile-header">
             <div class="profile-avatar">
-                <i class="fas fa-user"></i>
+                <% if (user.profileData?.profilePicture?.url) { %>
+                    <img src="<%= user.profileData.profilePicture.url %>" alt="Profile Picture">
+                <% } else { %>
+                    <i class="fas fa-user"></i>
+                <% } %>
+                <button class="avatar-upload" onclick="document.getElementById('profilePictureInputHeader').click();">
+                    <i class="fas fa-camera"></i>
+                </button>
             </div>
             <h1><%= user.firstName %> <%= user.lastName %></h1>
             <p style="color: #6c757d; font-size: 1.1rem;">
@@ -153,9 +314,22 @@
                 <i class="fas fa-user-tag"></i> 
                 <span style="text-transform: capitalize;"><%= user.role || 'User' %></span>
             </p>
+            
+            <!-- Profile Completion -->
+            <div class="completion-badge completion-<%= user.profileCompletionPercentage >= 90 ? 'full' : user.profileCompletionPercentage >= 70 ? 'high' : user.profileCompletionPercentage >= 40 ? 'medium' : 'low' %>">
+                <i class="fas fa-chart-pie"></i> Profile <%= user.profileCompletionPercentage || 25 %>% Complete
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: <%= user.profileCompletionPercentage || 25 %>%"></div>
+            </div>
         </div>
 
-        <!-- ✅ Account Information Form -->
+        <!-- Hidden file inputs -->
+        <input type="file" id="profilePictureInputHeader" accept="image/*" style="display: none;">
+        <input type="file" id="profilePictureInputSection" accept="image/*" style="display: none;">
+        <input type="file" id="idDocumentInput" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+
+        <!-- Account Information Form -->
         <div class="form-section">
             <h2><i class="fas fa-user-edit"></i> Account Information</h2>
             <form id="profileForm">
@@ -173,7 +347,7 @@
                 <div class="form-row">
                     <div>
                         <label>Email:</label>
-                        <input type="email" value="<%= user.email %>" disabled> <!-- Cannot be edited -->
+                        <input type="email" value="<%= user.email %>" disabled>
                         <small class="password-hint">Email cannot be changed</small>
                     </div>
                     <div>
@@ -199,20 +373,288 @@
             </form>
         </div>
 
-        <!-- ✅ Change Password Form -->
+        <!-- Detailed Information Section -->
+        <div class="form-section">
+            <h2><i class="fas fa-graduation-cap"></i> Detailed Information</h2>
+            
+            <!-- Certificate Note -->
+            <div class="certificate-note">
+                <i class="fas fa-certificate"></i>
+                <div class="certificate-note-text">
+                    <h4>Certificate Eligibility</h4>
+                    <p>This information is required if you need to receive certificates for courses you register for. Complete your professional profile and upload identification documents to unlock certificate features.</p>
+                </div>
+            </div>
+
+            <form id="detailedInfoForm">
+                <!-- Professional Information -->
+                <div class="form-group">
+                    <label>Title/Gender:</label>
+                    <select name="title">
+                        <option value="">Select Title</option>
+                        <option value="Mr." <%= user.professionalInfo?.title === 'Mr.' ? 'selected' : '' %>>Mr.</option>
+                        <option value="Mrs." <%= user.professionalInfo?.title === 'Mrs.' ? 'selected' : '' %>>Mrs.</option>
+                        <option value="Ms." <%= user.professionalInfo?.title === 'Ms.' ? 'selected' : '' %>>Ms.</option>
+                        <option value="Dr." <%= user.professionalInfo?.title === 'Dr.' ? 'selected' : '' %>>Dr.</option>
+                        <option value="Prof." <%= user.professionalInfo?.title === 'Prof.' ? 'selected' : '' %>>Prof.</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Field of Study <span class="required">*</span>:</label>
+                    <select name="fieldOfStudy" required>
+                        <option value="">Select your field of study</option>
+                        <option value="Doctor (MD, DO, OB/GYN)" <%= user.professionalInfo?.fieldOfStudy === 'Doctor (MD, DO, OB/GYN)' ? 'selected' : '' %>>Doctor (MD, DO, OB/GYN)</option>
+                        <option value="Dentist (DDS, DMD, BDS)" <%= user.professionalInfo?.fieldOfStudy === 'Dentist (DDS, DMD, BDS)' ? 'selected' : '' %>>Dentist (DDS, DMD, BDS)</option>
+                        <option value="Physician Assistant (PA)" <%= user.professionalInfo?.fieldOfStudy === 'Physician Assistant (PA)' ? 'selected' : '' %>>Physician Assistant (PA)</option>
+                        <option value="Nurse Practitioner (NP)" <%= user.professionalInfo?.fieldOfStudy === 'Nurse Practitioner (NP)' ? 'selected' : '' %>>Nurse Practitioner (NP)</option>
+                        <option value="Registered Nurse (RN)" <%= user.professionalInfo?.fieldOfStudy === 'Registered Nurse (RN)' ? 'selected' : '' %>>Registered Nurse (RN)</option>
+                        <option value="Licensed Practical Nurse (LPN)" <%= user.professionalInfo?.fieldOfStudy === 'Licensed Practical Nurse (LPN)' ? 'selected' : '' %>>Licensed Practical Nurse (LPN)</option>
+                        <option value="Medical Assistant" <%= user.professionalInfo?.fieldOfStudy === 'Medical Assistant' ? 'selected' : '' %>>Medical Assistant</option>
+                        <option value="Pharmacist" <%= user.professionalInfo?.fieldOfStudy === 'Pharmacist' ? 'selected' : '' %>>Pharmacist</option>
+                        <option value="Physical Therapist" <%= user.professionalInfo?.fieldOfStudy === 'Physical Therapist' ? 'selected' : '' %>>Physical Therapist</option>
+                        <option value="Occupational Therapist" <%= user.professionalInfo?.fieldOfStudy === 'Occupational Therapist' ? 'selected' : '' %>>Occupational Therapist</option>
+                        <option value="Medical Student" <%= user.professionalInfo?.fieldOfStudy === 'Medical Student' ? 'selected' : '' %>>Medical Student</option>
+                        <option value="Nursing Student" <%= user.professionalInfo?.fieldOfStudy === 'Nursing Student' ? 'selected' : '' %>>Nursing Student</option>
+                        <option value="Other Healthcare Professional" <%= user.professionalInfo?.fieldOfStudy === 'Other Healthcare Professional' ? 'selected' : '' %>>Other Healthcare Professional</option>
+                        <option value="Non-Healthcare Professional" <%= user.professionalInfo?.fieldOfStudy === 'Non-Healthcare Professional' ? 'selected' : '' %>>Non-Healthcare Professional</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Specify your specialty:</label>
+                    <input type="text" name="specialty" placeholder="e.g., Dermatology, Family Medicine, etc." value="<%= user.professionalInfo?.specialty || '' %>">
+                </div>
+
+                <div class="form-row">
+                    <div>
+                        <label>Experience in Aesthetics <span class="required">*</span>:</label>
+                        <select name="aestheticsExperience" required>
+                            <option value="">Select your experience level</option>
+                            <option value="Totally Beginner" <%= user.professionalInfo?.aestheticsExperience === 'Totally Beginner' ? 'selected' : '' %>>Totally Beginner</option>
+                            <option value="Beginner" <%= user.professionalInfo?.aestheticsExperience === 'Beginner' ? 'selected' : '' %>>Beginner</option>
+                            <option value="Intermediate" <%= user.professionalInfo?.aestheticsExperience === 'Intermediate' ? 'selected' : '' %>>Intermediate</option>
+                            <option value="Advanced" <%= user.professionalInfo?.aestheticsExperience === 'Advanced' ? 'selected' : '' %>>Advanced</option>
+                            <option value="Expert/Master" <%= user.professionalInfo?.aestheticsExperience === 'Expert/Master' ? 'selected' : '' %>>Expert/Master</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Years of Professional Experience:</label>
+                        <input type="number" name="yearsOfExperience" min="0" max="60" value="<%= user.professionalInfo?.yearsOfExperience || '' %>">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Workplace/Practice:</label>
+                    <input type="text" name="currentWorkplace" placeholder="Hospital, clinic, or practice name" value="<%= user.professionalInfo?.currentWorkplace || '' %>">
+                </div>
+
+                <!-- License Information -->
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="hasLicense" <%= user.professionalInfo?.licenseInfo?.hasLicense ? 'checked' : '' %>>
+                        I have a professional license
+                    </label>
+                </div>
+
+                <div id="licenseFields" style="display: <%= user.professionalInfo?.licenseInfo?.hasLicense ? 'block' : 'none' %>;">
+                    <div class="form-row">
+                        <div>
+                            <label>License Number:</label>
+                            <input type="text" name="licenseNumber" value="<%= user.professionalInfo?.licenseInfo?.licenseNumber || '' %>">
+                        </div>
+                        <div>
+                            <label>License State:</label>
+                            <input type="text" name="licenseState" value="<%= user.professionalInfo?.licenseInfo?.licenseState || '' %>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>License Country:</label>
+                        <input type="text" name="licenseCountry" value="<%= user.professionalInfo?.licenseInfo?.licenseCountry || '' %>">
+                    </div>
+                </div>
+
+                <!-- Areas of Interest -->
+                <div class="form-group">
+                    <label>Areas of Interest in Aesthetics:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Botox & Neurotoxins" <%= user.professionalInfo?.areasOfInterest?.includes('Botox & Neurotoxins') ? 'checked' : '' %>>
+                            <label>Botox & Neurotoxins</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Dermal Fillers" <%= user.professionalInfo?.areasOfInterest?.includes('Dermal Fillers') ? 'checked' : '' %>>
+                            <label>Dermal Fillers</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Chemical Peels" <%= user.professionalInfo?.areasOfInterest?.includes('Chemical Peels') ? 'checked' : '' %>>
+                            <label>Chemical Peels</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Laser Treatments" <%= user.professionalInfo?.areasOfInterest?.includes('Laser Treatments') ? 'checked' : '' %>>
+                            <label>Laser Treatments</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Microneedling" <%= user.professionalInfo?.areasOfInterest?.includes('Microneedling') ? 'checked' : '' %>>
+                            <label>Microneedling</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="PDO Threads" <%= user.professionalInfo?.areasOfInterest?.includes('PDO Threads') ? 'checked' : '' %>>
+                            <label>PDO Threads</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Body Contouring" <%= user.professionalInfo?.areasOfInterest?.includes('Body Contouring') ? 'checked' : '' %>>
+                            <label>Body Contouring</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Skin Rejuvenation" <%= user.professionalInfo?.areasOfInterest?.includes('Skin Rejuvenation') ? 'checked' : '' %>>
+                            <label>Skin Rejuvenation</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Hair Restoration" <%= user.professionalInfo?.areasOfInterest?.includes('Hair Restoration') ? 'checked' : '' %>>
+                            <label>Hair Restoration</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="IV Therapy" <%= user.professionalInfo?.areasOfInterest?.includes('IV Therapy') ? 'checked' : '' %>>
+                            <label>IV Therapy</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Weight Management" <%= user.professionalInfo?.areasOfInterest?.includes('Weight Management') ? 'checked' : '' %>>
+                            <label>Weight Management</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="areasOfInterest" value="Advanced Techniques" <%= user.professionalInfo?.areasOfInterest?.includes('Advanced Techniques') ? 'checked' : '' %>>
+                            <label>Advanced Techniques</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Training Goals:</label>
+                    <textarea name="trainingGoals" placeholder="What are your goals for aesthetic training?" rows="3"><%= user.professionalInfo?.trainingGoals || '' %></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Save Professional Information
+                </button>
+            </form>
+        </div>
+
+        <!-- Document Upload Section -->
+        <div class="form-section">
+            <h2><i class="fas fa-upload"></i> Document Upload</h2>
+            
+            <!-- 1️⃣ ID Document Upload Area -->
+            <div class="form-group">
+                <label>Passport or ID Document <span class="required">*</span>:</label>
+                <p class="password-hint">Required for certificate application. Upload a clear image of your passport or government-issued ID.</p>
+                
+                <!-- ID Document Upload Box -->
+                <div class="file-upload-area" onclick="document.getElementById('idDocumentInput').click();">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #007bff; margin-bottom: 10px;"></i>
+                    <p><%= user.profileData?.identificationDocument?.url ? 'Click to replace your ID document' : 'Click to upload your ID document' %></p>
+                    <div class="file-info">Supported formats: JPG, PNG, PDF (Max 5MB)</div>
+                    <input type="file" id="idDocumentInput" name="idDocument" accept=".jpg,.jpeg,.png,.pdf">
+                </div>
+
+                <!-- ID Document Preview Bar -->
+                <% if (user.profileData?.identificationDocument?.url) { %>
+                    <div id="idDocumentPreview" class="document-preview" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div class="document-thumbnail" style="width: 60px; height: 60px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                                <% if (user.profileData.identificationDocument.mimeType && user.profileData.identificationDocument.mimeType.includes('pdf')) { %>
+                                    <i class="fas fa-file-pdf" style="font-size: 24px; color: #dc3545;"></i>
+                                <% } else { %>
+                                    <img src="<%= user.profileData.identificationDocument.url %>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" alt="ID Document">
+                                <% } %>
+                            </div>
+                            <div style="flex: 1;">
+                                <p style="margin: 0; font-weight: 500; color: #002147;">
+                                    <i class="fas fa-id-card" style="margin-right: 8px; color: #007bff;"></i>
+                                    <%= user.profileData.identificationDocument.originalName || 'ID Document' %>
+                                </p>
+                                <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #6c757d;">
+                                    Uploaded: <%= user.profileData.identificationDocument.uploadDate ? new Date(user.profileData.identificationDocument.uploadDate).toLocaleDateString() : 'Unknown' %>
+                                </p>
+                                <span class="verification-status status-<%= user.profileData.identificationDocument.verificationStatus %>">
+                                    <i class="fas fa-<%= user.profileData.identificationDocument.verificationStatus === 'verified' ? 'check' : user.profileData.identificationDocument.verificationStatus === 'pending' ? 'clock' : 'times' %>"></i>
+                                    <%= user.profileData.identificationDocument.verificationStatus.charAt(0).toUpperCase() + user.profileData.identificationDocument.verificationStatus.slice(1).replace('_', ' ') %>
+                                </span>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <% if (user.profileData.identificationDocument.mimeType && !user.profileData.identificationDocument.mimeType.includes('pdf')) { %>
+                                    <button type="button" class="btn-icon" onclick="viewDocument('<%= user.profileData.identificationDocument.url %>')" style="background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="View Document">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                <% } %>
+                                <button type="button" class="btn-icon btn-danger" onclick="deleteDocument('id')" style="background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="Delete ID Document">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- 2️⃣ Profile Picture Upload Area -->
+            <div class="form-group">
+                <label>Profile Picture:</label>
+                <p class="password-hint">Upload a professional photo for your profile.</p>
+                
+                <!-- Profile Picture Upload Box -->
+                <div class="file-upload-area" onclick="document.getElementById('profilePictureInputSection').click();">
+                    <i class="fas fa-camera" style="font-size: 2rem; color: #007bff; margin-bottom: 10px;"></i>
+                    <p><%= user.profileData?.profilePicture?.url ? 'Click to replace your profile picture' : 'Click to upload your profile picture' %></p>
+                    <div class="file-info">Supported formats: JPG, PNG (Max 2MB)</div>
+                </div>
+
+                <!-- Profile Picture Preview Bar -->
+                <% if (user.profileData?.profilePicture?.url) { %>
+                    <div id="profilePicturePreview" class="document-preview" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div class="document-thumbnail" style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden;">
+                                <img src="<%= user.profileData.profilePicture.url %>" style="width: 100%; height: 100%; object-fit: cover;" alt="Profile Picture">
+                            </div>
+                            <div style="flex: 1;">
+                                <p style="margin: 0; font-weight: 500; color: #002147;">
+                                    <i class="fas fa-user-circle" style="margin-right: 8px; color: #28a745;"></i>
+                                    <%= user.profileData.profilePicture.originalName || 'Profile Picture' %>
+                                </p>
+                                <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #6c757d;">
+                                    Uploaded: <%= user.profileData.profilePicture.uploadDate ? new Date(user.profileData.profilePicture.uploadDate).toLocaleDateString() : 'Unknown' %>
+                                </p>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; background: #d4edda; color: #155724;">
+                                    <i class="fas fa-check"></i> Ready to use
+                                </span>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" class="btn-icon" onclick="viewDocument('<%= user.profileData.profilePicture.url %>')" style="background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="View Profile Picture">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn-icon btn-danger" onclick="deleteDocument('profile')" style="background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="Delete Profile Picture">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Change Password Form -->
         <div class="form-section">
             <h2><i class="fas fa-lock"></i> Change Password</h2>
             <form id="passwordForm">
-                <div style="margin-bottom: 15px;">
+                <div class="form-group">
                     <label>Current Password:</label>
                     <input type="password" name="currentPassword" required>
                 </div>
 
-                <div style="margin-bottom: 15px;">
+                <div class="form-group">
                     <label>New Password:</label>
                     <input type="password" name="newPassword" required>
                     <div class="password-hint">
-                        Password must be at least 8 characters long, contain a mix of uppercase, lowercase, numbers, and special characters (e.g., @, $, %, !).
+                        Password must be at least 8 characters long, contain a mix of uppercase, lowercase, numbers, and special characters.
                     </div>
                 </div>
 
@@ -226,15 +668,14 @@
     <%- include('partials/footer') %>
 
     <script>
-        // ✅ Show notification function
+        // Show notification function
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            notification.textContent = message;
+            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i> ${message}`;
             
             document.body.appendChild(notification);
             
-            // Auto remove after 5 seconds
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.parentNode.removeChild(notification);
@@ -242,14 +683,11 @@
             }, 5000);
         }
 
-        // ✅ Update Profile
+        // Update Profile
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
-
-            console.log('🔧 Updating profile with data:', data);
 
             try {
                 const response = await fetch('/update-profile', {
@@ -267,18 +705,55 @@
                 }
             } catch (error) {
                 console.error('Error updating profile:', error);
-                showNotification('❌ Error updating profile', 'error');
+                showNotification('Error updating profile', 'error');
             }
         });
 
-        // ✅ Update Password
+        // Update Detailed Information
+        document.getElementById('detailedInfoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Handle areas of interest checkboxes
+            const areasOfInterest = [];
+            const checkboxes = formData.getAll('areasOfInterest');
+            checkboxes.forEach(area => areasOfInterest.push(area));
+            
+            // Convert FormData to object
+            const data = Object.fromEntries(formData);
+            data.areasOfInterest = areasOfInterest;
+            data.hasLicense = document.querySelector('input[name="hasLicense"]').checked;
+
+            try {
+                const response = await fetch('/update-detailed-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    // Update completion percentage if provided
+                    if (result.completionPercentage) {
+                        const progressFill = document.querySelector('.progress-fill');
+                        progressFill.style.width = `${result.completionPercentage}%`;
+                    }
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating detailed info:', error);
+                showNotification('Error updating professional information', 'error');
+            }
+        });
+
+        // Update Password
         document.getElementById('passwordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
-
-            console.log('🔐 Updating password...');
 
             try {
                 const response = await fetch('/update-password', {
@@ -291,22 +766,153 @@
                 
                 if (result.success) {
                     showNotification(result.message, 'success');
-                    // Clear password fields
                     e.target.reset();
                 } else {
                     showNotification(result.message, 'error');
                 }
             } catch (error) {
                 console.error('Error updating password:', error);
-                showNotification('❌ Error updating password', 'error');
+                showNotification('Error updating password', 'error');
             }
         });
 
-        // ✅ Debug information
-        console.log('👤 Profile page loaded for:', '<%= user.firstName %> <%= user.lastName %>');
-        console.log('📧 User email:', '<%= user.email %>');
-        console.log('🎭 User role:', '<%= user.role %>');
-    </script>
+        // Handle license checkbox
+        document.querySelector('input[name="hasLicense"]').addEventListener('change', function() {
+            const licenseFields = document.getElementById('licenseFields');
+            licenseFields.style.display = this.checked ? 'block' : 'none';
+        });
 
+        // Handle file uploads - Completely separate systems
+        document.getElementById('idDocumentInput').addEventListener('change', function(event) {
+            handleFileUpload(event, 'id');
+        });
+        
+        document.getElementById('profilePictureInputHeader').addEventListener('change', function(event) {
+            handleFileUpload(event, 'profile');
+        });
+        
+        document.getElementById('profilePictureInputSection').addEventListener('change', function(event) {
+            handleFileUpload(event, 'profile');
+        });
+
+        function handleFileUpload(event, uploadType) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            console.log(`📤 Starting ${uploadType} upload:`, file.name);
+            console.log(`📤 Upload type being sent:`, uploadType);
+
+            // Validate file type based on upload type
+            if (uploadType === 'profile') {
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification('Please select a valid image file (JPG, PNG)', 'error');
+                    return;
+                }
+                if (file.size > 2 * 1024 * 1024) { // 2MB
+                    showNotification('Profile picture must be less than 2MB', 'error');
+                    return;
+                }
+            } else if (uploadType === 'id') {
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification('Please select a valid file (JPG, PNG, PDF)', 'error');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) { // 5MB
+                    showNotification('ID document must be less than 5MB', 'error');
+                    return;
+                }
+            }
+
+            // CRITICAL: Create FormData and append both file and type
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', uploadType);  // This is the key line!
+
+            console.log(`📤 FormData created with:`);
+            console.log(`📤 - file:`, file.name);
+            console.log(`📤 - type:`, uploadType);
+
+            // Debug: Log FormData contents
+            for (let pair of formData.entries()) {
+                console.log(`📤 FormData contains: ${pair[0]} = ${pair[1]}`);
+            }
+
+            // Show loading notification
+            showNotification(`Uploading ${uploadType === 'id' ? 'ID document' : 'profile picture'}...`, 'info');
+
+            fetch(`/upload-document?type=${uploadType}`, {
+                method: 'POST',
+                body: formData  // Don't set Content-Type header, let browser handle it
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log(`📤 Upload response for ${uploadType}:`, result);
+                
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    // Refresh page to show updated document status
+                    setTimeout(() => {
+                        console.log(`🔄 Refreshing page to show ${uploadType} preview`);
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error(`❌ Error uploading ${uploadType}:`, error);
+                showNotification(`Error uploading ${uploadType === 'id' ? 'ID document' : 'profile picture'}`, 'error');
+            })
+            .finally(() => {
+                // Clear the file input
+                event.target.value = '';
+            });
+        }
+
+        // View document in modal/new tab
+        function viewDocument(url) {
+            window.open(url, '_blank');
+        }
+
+        // Delete document function - Enhanced with specific messaging
+        function deleteDocument(type) {
+            const documentType = type === 'id' ? 'ID document' : 'profile picture';
+            
+            if (!confirm(`Are you sure you want to delete your ${documentType}? This action cannot be undone.`)) {
+                return;
+            }
+
+            console.log(`🗑️ Deleting ${type} document`);
+
+            fetch('/delete-document', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type })
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log(`🗑️ Delete response for ${type}:`, result);
+                
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    // Refresh page to hide the deleted document preview
+                    setTimeout(() => {
+                        console.log(`🔄 Refreshing page to hide ${type} preview`);
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error(`❌ Error deleting ${type}:`, error);
+                showNotification(`Error deleting ${documentType}`, 'error');
+            });
+        }
+
+        console.log('Profile page loaded for:', '<%= user.firstName %> <%= user.lastName %>');
+    </script>
 </body>
 </html>

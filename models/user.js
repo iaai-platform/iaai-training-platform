@@ -5,6 +5,9 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    // ========================================
+    // BASIC USER INFORMATION (EXISTING)
+    // ========================================
     // Basic User Information
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -13,6 +16,199 @@ const userSchema = new mongoose.Schema(
     phoneNumber: { type: String },
     profession: { type: String },
     country: { type: String },
+
+    // ========================================
+    // NEW: ENHANCED PROFESSIONAL INFORMATION
+    // ========================================
+    professionalInfo: {
+      // Gender/Title Selection
+      title: {
+        type: String,
+        enum: ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof."],
+        default: null,
+      },
+
+      // Field of Study (Professional Background)
+      fieldOfStudy: {
+        type: String,
+        enum: [
+          "Doctor (MD, DO, OB/GYN)",
+          "Dentist (DDS, DMD, BDS)",
+          "Physician Assistant (PA)",
+          "Nurse Practitioner (NP)",
+          "Registered Nurse (RN)",
+          "Licensed Practical Nurse (LPN)",
+          "Medical Assistant",
+          "Pharmacist",
+          "Physical Therapist",
+          "Occupational Therapist",
+          "Medical Student",
+          "Nursing Student",
+          "Other Healthcare Professional",
+          "Non-Healthcare Professional",
+        ],
+        default: null,
+      },
+
+      // Specialty within their field
+      specialty: {
+        type: String,
+        maxlength: 200,
+        trim: true,
+        default: null,
+      },
+
+      // Experience Level in Aesthetics
+      aestheticsExperience: {
+        type: String,
+        enum: [
+          "Totally Beginner",
+          "Beginner",
+          "Intermediate",
+          "Advanced",
+          "Expert/Master",
+        ],
+        default: null,
+      },
+
+      // Years of overall professional experience
+      yearsOfExperience: {
+        type: Number,
+        min: 0,
+        max: 60,
+        default: null,
+      },
+
+      // Current workplace/practice
+      currentWorkplace: {
+        type: String,
+        maxlength: 200,
+        trim: true,
+        default: null,
+      },
+
+      // Professional license information
+      licenseInfo: {
+        hasLicense: { type: Boolean, default: false },
+        licenseNumber: {
+          type: String,
+          trim: true,
+          default: null,
+        },
+        licenseState: {
+          type: String,
+          trim: true,
+          default: null,
+        },
+        licenseCountry: {
+          type: String,
+          trim: true,
+          default: null,
+        },
+      },
+
+      // Areas of interest in aesthetics
+      areasOfInterest: [
+        {
+          type: String,
+          enum: [
+            "Botox & Neurotoxins",
+            "Dermal Fillers",
+            "Chemical Peels",
+            "Laser Treatments",
+            "Microneedling",
+            "PDO Threads",
+            "Body Contouring",
+            "Skin Rejuvenation",
+            "Hair Restoration",
+            "IV Therapy",
+            "Weight Management",
+            "Advanced Techniques",
+          ],
+        },
+      ],
+
+      // Goals for aesthetic training
+      trainingGoals: {
+        type: String,
+        maxlength: 500,
+        trim: true,
+        default: null,
+      },
+    },
+
+    // ========================================
+    // NEW: PROFILE & DOCUMENTATION
+    // ========================================
+    profileData: {
+      // Profile Picture
+      profilePicture: {
+        filename: { type: String, default: null },
+        originalName: { type: String, default: null },
+        url: { type: String, default: null },
+        uploadDate: { type: Date, default: null },
+        fileSize: { type: Number, default: null }, // in bytes
+        mimeType: { type: String, default: null },
+      },
+
+      // ID/Passport for Certificate Application
+      identificationDocument: {
+        filename: { type: String, default: null },
+        originalName: { type: String, default: null },
+        url: { type: String, default: null },
+        uploadDate: { type: Date, default: null },
+        fileSize: { type: Number, default: null },
+        mimeType: { type: String, default: null },
+        documentType: {
+          type: String,
+          enum: ["passport", "drivers_license", "national_id", "other"],
+          default: null,
+        },
+        verificationStatus: {
+          type: String,
+          enum: ["pending", "verified", "rejected", "not_submitted"],
+          default: "not_submitted",
+        },
+        verificationNotes: { type: String, default: null },
+        verifiedBy: { type: String, default: null }, // Admin ID
+        verifiedAt: { type: Date, default: null },
+      },
+
+      // Additional professional documents
+      professionalDocuments: [
+        {
+          type: {
+            type: String,
+            enum: [
+              "cv",
+              "resume",
+              "license",
+              "certificate",
+              "diploma",
+              "other",
+            ],
+            required: true,
+          },
+          filename: { type: String, required: true },
+          originalName: { type: String, required: true },
+          url: { type: String, required: true },
+          uploadDate: { type: Date, default: Date.now },
+          fileSize: { type: Number },
+          mimeType: { type: String },
+          description: { type: String, maxlength: 200 },
+        },
+      ],
+
+      // Profile completion tracking
+      completionStatus: {
+        basicInfo: { type: Boolean, default: false },
+        professionalInfo: { type: Boolean, default: false },
+        profilePicture: { type: Boolean, default: false },
+        identificationDocument: { type: Boolean, default: false },
+        overallPercentage: { type: Number, default: 0 },
+        lastUpdated: { type: Date, default: Date.now },
+      },
+    },
 
     // Additional User Properties
     isConfirmed: { type: Boolean, default: false },
@@ -550,6 +746,13 @@ userSchema.index({ role: 1 });
 userSchema.index({ isConfirmed: 1 });
 userSchema.index({ "accountStatus.isActive": 1 });
 
+// New indexes for professional information
+userSchema.index({ "professionalInfo.fieldOfStudy": 1 });
+userSchema.index({ "professionalInfo.aestheticsExperience": 1 });
+userSchema.index({
+  "profileData.identificationDocument.verificationStatus": 1,
+});
+
 // REMOVED ALL CERTIFICATE INDEXES TO PREVENT REGISTRATION ERRORS:
 // userSchema.index({ "myCertificates.certificateId": 1 });
 // userSchema.index({ "myCertificates.verificationCode": 1 });
@@ -558,6 +761,95 @@ userSchema.index({ "accountStatus.isActive": 1 });
 // ========================================
 // VIRTUAL FIELDS
 // ========================================
+//new
+// Full name with title (for display purposes)
+userSchema.virtual("fullName").get(function () {
+  const title = this.professionalInfo?.title || "";
+  const firstName = this.firstName || "";
+  const lastName = this.lastName || "";
+
+  return `${title} ${firstName} ${lastName}`.trim();
+});
+
+// Display name without title (for casual display)
+userSchema.virtual("displayName").get(function () {
+  return `${this.firstName} ${this.lastName}`.trim();
+});
+
+// Profile completion percentage (calculated, not stored)
+userSchema.virtual("profileCompletionPercentage").get(function () {
+  let completion = 0;
+  const weights = {
+    basicInfo: 25, // firstName, lastName, email, phone
+    professionalInfo: 40, // fieldOfStudy, experience, specialty (OPTIONAL - filled later)
+    profilePicture: 15, // profile picture upload (OPTIONAL - filled later)
+    identification: 20, // ID/passport upload (OPTIONAL - filled later)
+  };
+
+  // Basic info completion (required at signup)
+  if (this.firstName && this.lastName && this.email) {
+    completion += weights.basicInfo;
+  }
+
+  // Professional info completion (OPTIONAL - user fills later)
+  if (
+    this.professionalInfo?.fieldOfStudy &&
+    this.professionalInfo?.aestheticsExperience
+  ) {
+    completion += weights.professionalInfo;
+  }
+
+  // Profile picture completion (OPTIONAL - user fills later)
+  if (this.profileData?.profilePicture?.url) {
+    completion += weights.profilePicture;
+  }
+
+  // ID document completion (OPTIONAL - user fills later)
+  if (this.profileData?.identificationDocument?.url) {
+    completion += weights.identification;
+  }
+
+  return Math.round(completion);
+});
+
+// Check if user completed basic registration (minimal signup)
+userSchema.virtual("hasCompletedBasicRegistration").get(function () {
+  return !!(this.firstName && this.lastName && this.email && this.isConfirmed);
+});
+
+// Check if professional profile is complete (for advanced features)
+userSchema.virtual("isProfessionalProfileComplete").get(function () {
+  return (
+    this.professionalInfo?.fieldOfStudy &&
+    this.professionalInfo?.aestheticsExperience &&
+    this.professionalInfo?.specialty &&
+    this.profileData?.identificationDocument?.verificationStatus === "verified"
+  );
+});
+
+// Check if user can receive certificates (needs ID verification)
+userSchema.virtual("canReceiveCertificates").get(function () {
+  return (
+    this.profileData?.identificationDocument?.verificationStatus === "verified"
+  );
+});
+
+// Get user's experience level for course recommendations
+userSchema.virtual("experienceLevel").get(function () {
+  return this.professionalInfo?.aestheticsExperience || "Not specified";
+});
+
+// Get professional status for display
+userSchema.virtual("professionalStatus").get(function () {
+  const field = this.professionalInfo?.fieldOfStudy;
+  const experience = this.professionalInfo?.aestheticsExperience;
+
+  if (!field || !experience) {
+    return "Profile incomplete";
+  }
+
+  return `${field} - ${experience}`;
+});
 
 // Get all enrolled courses with populated data
 userSchema.virtual("enrolledCourses").get(async function () {
@@ -618,7 +910,122 @@ userSchema.virtual("enrolledCourses").get(async function () {
 // ========================================
 // INSTANCE METHODS
 // ========================================
+//new
+// Update profile completion status
+userSchema.methods.updateProfileCompletion = function () {
+  if (!this.profileData) {
+    this.profileData = {};
+  }
 
+  if (!this.profileData.completionStatus) {
+    this.profileData.completionStatus = {};
+  }
+
+  const completion = this.profileData.completionStatus;
+
+  // Check basic info completion
+  completion.basicInfo = !!(
+    this.firstName &&
+    this.lastName &&
+    this.email &&
+    this.phoneNumber &&
+    this.country
+  );
+
+  // Check professional info completion
+  completion.professionalInfo = !!(
+    this.professionalInfo?.fieldOfStudy &&
+    this.professionalInfo?.aestheticsExperience
+  );
+
+  // Check profile picture
+  completion.profilePicture = !!this.profileData?.profilePicture?.url;
+
+  // Check ID document
+  completion.identificationDocument =
+    !!this.profileData?.identificationDocument?.url;
+
+  // Calculate overall percentage
+  completion.overallPercentage = this.profileCompletionPercentage;
+  completion.lastUpdated = new Date();
+
+  return this;
+};
+
+// Upload profile picture
+userSchema.methods.uploadProfilePicture = function (fileData) {
+  if (!this.profileData) {
+    this.profileData = {};
+  }
+
+  this.profileData.profilePicture = {
+    filename: fileData.filename,
+    originalName: fileData.originalname,
+    url: fileData.url || `/uploads/profiles/${fileData.filename}`,
+    uploadDate: new Date(),
+    fileSize: fileData.size,
+    mimeType: fileData.mimetype,
+  };
+
+  this.updateProfileCompletion();
+  return this.save();
+};
+
+// Upload identification document
+userSchema.methods.uploadIdentificationDocument = function (
+  fileData,
+  documentType = "passport"
+) {
+  if (!this.profileData) {
+    this.profileData = {};
+  }
+
+  this.profileData.identificationDocument = {
+    filename: fileData.filename,
+    originalName: fileData.originalname,
+    url: fileData.url || `/uploads/identification/${fileData.filename}`,
+    uploadDate: new Date(),
+    fileSize: fileData.size,
+    mimeType: fileData.mimetype,
+    documentType: documentType,
+    verificationStatus: "pending",
+  };
+
+  this.updateProfileCompletion();
+  return this.save();
+};
+
+// Update professional information
+userSchema.methods.updateProfessionalInfo = function (professionalData) {
+  if (!this.professionalInfo) {
+    this.professionalInfo = {};
+  }
+
+  // Update fields that are provided
+  Object.keys(professionalData).forEach((key) => {
+    if (professionalData[key] !== undefined && professionalData[key] !== null) {
+      this.professionalInfo[key] = professionalData[key];
+    }
+  });
+
+  this.updateProfileCompletion();
+  return this.save();
+};
+
+// Get professional summary for display
+userSchema.methods.getProfessionalSummary = function () {
+  const prof = this.professionalInfo || {};
+
+  return {
+    title: prof.title || null,
+    fieldOfStudy: prof.fieldOfStudy || "Not specified",
+    specialty: prof.specialty || "Not specified",
+    experience: prof.aestheticsExperience || "Not specified",
+    yearsOfExperience: prof.yearsOfExperience || null,
+    hasLicense: prof.licenseInfo?.hasLicense || false,
+    areasOfInterest: prof.areasOfInterest || [],
+  };
+};
 // Check if user has access to a course
 userSchema.methods.hasAccessToCourse = function (courseId, courseType) {
   const courseIdStr = courseId.toString();

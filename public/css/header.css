@@ -190,7 +190,7 @@ header {
   outline: none;
 }
 
-/* ✅ Profile Dropdown */
+/* ✅ Profile Dropdown - UPDATED with smaller icon size */
 .profile-dropdown {
   position: relative;
   display: inline-block;
@@ -202,20 +202,30 @@ header {
   border: none;
   cursor: pointer;
   color: #333;
-  font-size: 22px;
-  padding: 10px;
+  font-size: 16px; /* ✅ REDUCED from 22px to 16px */
+  padding: 8px; /* ✅ REDUCED padding from 10px to 8px */
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px; /* ✅ REDUCED gap from 8px to 6px */
   transition: color 0.3s ease-in-out;
 }
 
+/* Profile picture styling - KEPT original size */
+.profile-picture {
+  width: 32px; /* ✅ KEPT original 32px size */
+  height: 32px; /* ✅ KEPT original 32px size */
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #b8860b;
+}
+
+/* Fallback icon styling (when no profile picture) - REDUCED to fit within profile picture container */
 .profile-icon i {
-  font-size: 32px;
+  font-size: 28px; /* ✅ REDUCED from 32px to 28px to fit better within the 32px container */
   color: #b80b0b;
 }
 
-/* ✅ Dropdown Content */
+/* ✅ Dropdown Content - FIXED to match original pattern */
 .dropdown-content {
   display: none;
   position: absolute;
@@ -227,6 +237,10 @@ header {
   border-radius: 8px;
   overflow: hidden;
   z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
 }
 
 .dropdown-content a {
@@ -243,8 +257,21 @@ header {
   background-color: #f1f1f1;
 }
 
-.profile-dropdown:hover .dropdown-content {
+/* FIXED: Use exact same pattern as your original program-menu */
+.profile-dropdown:hover .dropdown-content,
+.dropdown-content:hover {
   display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ✅ Login/Register Container - FIXED alignment */
+.login-register {
+  display: flex;
+  align-items: center;
+  margin-left: 10px; /* Align with search bar */
+  margin-right: 0;   /* Closer to page margin */
 }
 
 /* ✅ Login/Register Button Styling */

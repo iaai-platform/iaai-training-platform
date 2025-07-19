@@ -111,6 +111,26 @@
             box-shadow: 0 5px 15px rgba(37,99,235,0.3);
         }
 
+        .btn-secondary {
+            background: var(--text-muted);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
         /* Certification Body Grid */
         .body-grid {
             display: grid;
@@ -304,11 +324,11 @@
 
         .modal-content {
             background: white;
-            margin: 2% auto;
+            margin: 1% auto;
             padding: 0;
             border-radius: 20px;
-            width: 90%;
-            max-width: 800px;
+            width: 95%;
+            max-width: 1000px;
             max-height: 95vh;
             overflow-y: auto;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
@@ -469,6 +489,52 @@
             margin-top: 8px;
         }
 
+        /* Dynamic List Styles */
+        .dynamic-list {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            background: white;
+        }
+
+        .dynamic-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: var(--light-bg);
+            position: relative;
+        }
+
+        .dynamic-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .add-item-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -535,11 +601,14 @@
             .form-grid {
                 grid-template-columns: 1fr;
             }
+
+            .modal-content {
+                width: 98%;
+                margin: 1% auto;
+            }
         }
     </style>
 </head>
-
-<%- include('../partials/header') %>
 
 <body>
     <div class="loading-overlay">
@@ -692,6 +761,7 @@
                     <!-- Professional Information -->
                     <div class="form-section">
                         <h3><i class="fas fa-certificate"></i> Certification Details</h3>
+                        
                         <div class="form-group">
                             <label>Specializations</label>
                             <input type="text" name="specializations" class="form-control" placeholder="Separate with commas (e.g., Botox, Dermal Fillers, PDO Threads, Skincare)">
@@ -702,6 +772,12 @@
                             <label>Accreditation Bodies</label>
                             <input type="text" name="accreditation" class="form-control" placeholder="Separate with commas (e.g., NCCA, ANSI, ISO)">
                             <small class="form-text">Organizations that accredit this certification body</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Recognized By</label>
+                            <input type="text" name="recognizedBy" class="form-control" placeholder="Separate with commas (e.g., FDA, OSHA, Medical Boards)">
+                            <small class="form-text">Organizations that recognize this certification body</small>
                         </div>
                         
                         <div class="form-grid">
@@ -729,6 +805,39 @@
                         </div>
                     </div>
 
+                    <!-- Certification Types -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-award"></i> Certification Types Offered</h3>
+                        <div id="certificationTypesContainer" class="dynamic-list">
+                            <!-- Certification types will be added here -->
+                        </div>
+                        <button type="button" class="add-item-btn" onclick="addCertificationType()">
+                            <i class="fas fa-plus"></i> Add Certification Type
+                        </button>
+                    </div>
+
+                    <!-- Contact Persons -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-users"></i> Contact Persons</h3>
+                        <div id="contactPersonsContainer" class="dynamic-list">
+                            <!-- Contact persons will be added here -->
+                        </div>
+                        <button type="button" class="add-item-btn" onclick="addContactPerson()">
+                            <i class="fas fa-plus"></i> Add Contact Person
+                        </button>
+                    </div>
+
+                    <!-- Licenses -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-file-certificate"></i> Licenses & Credentials</h3>
+                        <div id="licensesContainer" class="dynamic-list">
+                            <!-- Licenses will be added here -->
+                        </div>
+                        <button type="button" class="add-item-btn" onclick="addLicense()">
+                            <i class="fas fa-plus"></i> Add License
+                        </button>
+                    </div>
+
                     <!-- Administrative Notes -->
                     <div class="form-section">
                         <h3><i class="fas fa-sticky-note"></i> Administrative Notes</h3>
@@ -739,7 +848,7 @@
                     </div>
 
                     <div style="text-align: right; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal()" style="background: var(--text-muted); color: white; margin-right: 10px;">Cancel</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()" style="margin-right: 10px;">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">
                             <i class="fas fa-save"></i> <span id="submitBtnText">Save Certification Body</span>
                         </button>
@@ -785,6 +894,112 @@
             } else {
                 preview.innerHTML = '<i class="fas fa-image logo-preview-placeholder"></i>';
             }
+        }
+
+        // Dynamic form functions
+        function addCertificationType() {
+            const container = document.getElementById('certificationTypesContainer');
+            const index = container.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Certification Name</label>
+                        <input type="text" name="certificationTypes[${index}][name]" class="form-control" placeholder="e.g., Advanced Botox Certification">
+                    </div>
+                    <div class="form-group">
+                        <label>Validity Period (months)</label>
+                        <input type="number" name="certificationTypes[${index}][validityPeriod]" class="form-control" placeholder="24">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="certificationTypes[${index}][description]" class="form-control" rows="2" placeholder="Brief description of this certification..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Requirements</label>
+                    <input type="text" name="certificationTypes[${index}][requirements]" class="form-control" placeholder="Separate with commas (e.g., Medical degree, 2 years experience)">
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addContactPerson() {
+            const container = document.getElementById('contactPersonsContainer');
+            const index = container.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="contactPersons[${index}][name]" class="form-control" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Position</label>
+                        <input type="text" name="contactPersons[${index}][position]" class="form-control" placeholder="Certification Manager">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="contactPersons[${index}][email]" class="form-control" placeholder="john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" name="contactPersons[${index}][phone]" class="form-control" placeholder="+1 555-1234">
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select name="contactPersons[${index}][department]" class="form-control">
+                            <option value="">Select Department</option>
+                            <option value="Certification">Certification</option>
+                            <option value="Admin">Administration</option>
+                            <option value="Quality">Quality Assurance</option>
+                            <option value="Support">Customer Support</option>
+                            <option value="Management">Management</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addLicense() {
+            const container = document.getElementById('licensesContainer');
+            const index = container.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>License Type</label>
+                        <input type="text" name="licenses[${index}][type]" class="form-control" placeholder="e.g., Medical Training License">
+                    </div>
+                    <div class="form-group">
+                        <label>License Number</label>
+                        <input type="text" name="licenses[${index}][number]" class="form-control" placeholder="LIC-12345">
+                    </div>
+                    <div class="form-group">
+                        <label>Issuing Authority</label>
+                        <input type="text" name="licenses[${index}][issuingAuthority]" class="form-control" placeholder="State Medical Board">
+                    </div>
+                    <div class="form-group">
+                        <label>Issue Date</label>
+                        <input type="date" name="licenses[${index}][issueDate]" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="date" name="licenses[${index}][expiryDate]" class="form-control">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
         }
 
         async function loadCertificationBodies() {
@@ -908,7 +1123,15 @@
             editingBodyId = null;
             document.getElementById('modalTitle').textContent = 'Add New Certification Body';
             document.getElementById('submitBtnText').textContent = 'Save Certification Body';
-            document.getElementById('bodyForm').reset();
+            
+            // Reset form and clear dynamic sections
+            const form = document.getElementById('bodyForm');
+            form.reset();
+            
+            // Clear dynamic sections
+            document.getElementById('certificationTypesContainer').innerHTML = '';
+            document.getElementById('contactPersonsContainer').innerHTML = '';
+            document.getElementById('licensesContainer').innerHTML = '';
             
             // Reset logo preview
             document.getElementById('logoPreview').innerHTML = '<i class="fas fa-image logo-preview-placeholder"></i>';
@@ -976,66 +1199,152 @@
         }
 
         async function editBody(bodyId) {
-            const body = certificationBodies.find(b => b._id === bodyId);
-            if (!body) return;
-            
-            editingBodyId = bodyId;
-            document.getElementById('modalTitle').textContent = 'Edit Certification Body';
-            document.getElementById('submitBtnText').textContent = 'Update Certification Body';
-            
-            // Reset and populate logo preview
-            const preview = document.getElementById('logoPreview');
-            if (body.logo) {
-                preview.innerHTML = `<img src="${body.logo}" alt="Logo preview">`;
-            } else {
-                preview.innerHTML = '<i class="fas fa-image logo-preview-placeholder"></i>';
+            try {
+                const body = certificationBodies.find(b => b._id === bodyId);
+                if (!body) {
+                    console.error('Certification body not found:', bodyId);
+                    Swal.fire('Error', 'Certification body not found', 'error');
+                    return;
+                }
+                
+                editingBodyId = bodyId;
+                document.getElementById('modalTitle').textContent = 'Edit Certification Body';
+                document.getElementById('submitBtnText').textContent = 'Update Certification Body';
+                
+                // Reset form first
+                const form = document.getElementById('bodyForm');
+                form.reset();
+                
+                // Clear dynamic sections
+                document.getElementById('certificationTypesContainer').innerHTML = '';
+                document.getElementById('contactPersonsContainer').innerHTML = '';
+                document.getElementById('licensesContainer').innerHTML = '';
+                
+                // Reset and populate logo preview
+                const preview = document.getElementById('logoPreview');
+                if (body.logo) {
+                    preview.innerHTML = `<img src="${body.logo}" alt="Logo preview" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\"fas fa-exclamation-triangle\\"></i> Logo failed to load';">`;
+                } else {
+                    preview.innerHTML = '<i class="fas fa-image logo-preview-placeholder"></i>';
+                }
+                
+                // Clear the file input
+                document.getElementById('logo').value = '';
+                
+                // Populate basic form fields
+                form.companyName.value = body.companyName || '';
+                form.shortName.value = body.shortName || '';
+                form.registrationNumber.value = body.registrationNumber || '';
+                form.email.value = body.email || '';
+                form.phone.value = body.phone || '';
+                form.website.value = body.website || '';
+                form.description.value = body.description || '';
+                if (form.establishedYear) {
+                    form.establishedYear.value = body.establishedYear || '';
+                }
+                
+                // Address fields
+                const address = body.address || {};
+                form.street.value = address.street || '';
+                form.city.value = address.city || '';
+                form.state.value = address.state || '';
+                form.country.value = address.country || '';
+                form.zipCode.value = address.zipCode || '';
+                
+                form.membershipLevel.value = body.membershipLevel || 'Standard';
+                form.notes.value = body.notes || '';
+                
+                // Handle specializations
+                if (body.specializations && body.specializations.length > 0) {
+                    form.specializations.value = body.specializations.join(', ');
+                } else {
+                    form.specializations.value = '';
+                }
+                
+                // Handle accreditation
+                if (body.accreditation && body.accreditation.length > 0) {
+                    form.accreditation.value = body.accreditation.join(', ');
+                } else {
+                    form.accreditation.value = '';
+                }
+
+                // Handle recognizedBy
+                if (body.recognizedBy && body.recognizedBy.length > 0) {
+                    form.recognizedBy.value = body.recognizedBy.join(', ');
+                } else {
+                    form.recognizedBy.value = '';
+                }
+                
+                // Handle checkboxes
+                form.isActive.checked = body.isActive;
+                form.isPreferred.checked = body.isPreferred;
+                
+                // Populate certification types
+                if (body.certificationTypes && body.certificationTypes.length > 0) {
+                    body.certificationTypes.forEach((certType, index) => {
+                        addCertificationType();
+                        const container = document.getElementById('certificationTypesContainer');
+                        const item = container.children[index];
+                        
+                        if (item) {
+                            item.querySelector(`input[name="certificationTypes[${index}][name]"]`).value = certType.name || '';
+                            item.querySelector(`input[name="certificationTypes[${index}][validityPeriod]"]`).value = certType.validityPeriod || '';
+                            item.querySelector(`textarea[name="certificationTypes[${index}][description]"]`).value = certType.description || '';
+                            if (certType.requirements && certType.requirements.length > 0) {
+                                item.querySelector(`input[name="certificationTypes[${index}][requirements]"]`).value = certType.requirements.join(', ');
+                            }
+                        }
+                    });
+                }
+                
+                // Populate contact persons
+                if (body.contactPersons && body.contactPersons.length > 0) {
+                    body.contactPersons.forEach((contact, index) => {
+                        addContactPerson();
+                        const container = document.getElementById('contactPersonsContainer');
+                        const item = container.children[index];
+                        
+                        if (item) {
+                            item.querySelector(`input[name="contactPersons[${index}][name]"]`).value = contact.name || '';
+                            item.querySelector(`input[name="contactPersons[${index}][position]"]`).value = contact.position || '';
+                            item.querySelector(`input[name="contactPersons[${index}][email]"]`).value = contact.email || '';
+                            item.querySelector(`input[name="contactPersons[${index}][phone]"]`).value = contact.phone || '';
+                            item.querySelector(`select[name="contactPersons[${index}][department]"]`).value = contact.department || '';
+                        }
+                    });
+                }
+                
+                // Populate licenses
+                if (body.licenses && body.licenses.length > 0) {
+                    body.licenses.forEach((license, index) => {
+                        addLicense();
+                        const container = document.getElementById('licensesContainer');
+                        const item = container.children[index];
+                        
+                        if (item) {
+                            item.querySelector(`input[name="licenses[${index}][type]"]`).value = license.type || '';
+                            item.querySelector(`input[name="licenses[${index}][number]"]`).value = license.number || '';
+                            item.querySelector(`input[name="licenses[${index}][issuingAuthority]"]`).value = license.issuingAuthority || '';
+                            
+                            // Handle dates
+                            if (license.issueDate) {
+                                const issueDate = new Date(license.issueDate).toISOString().split('T')[0];
+                                item.querySelector(`input[name="licenses[${index}][issueDate]"]`).value = issueDate;
+                            }
+                            if (license.expiryDate) {
+                                const expiryDate = new Date(license.expiryDate).toISOString().split('T')[0];
+                                item.querySelector(`input[name="licenses[${index}][expiryDate]"]`).value = expiryDate;
+                            }
+                        }
+                    });
+                }
+                
+                document.getElementById('bodyModal').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error populating edit form:', error);
+                Swal.fire('Error', 'Failed to load certification body data', 'error');
             }
-            
-            // Clear the file input
-            document.getElementById('logo').value = '';
-            
-            // Populate form
-            const form = document.getElementById('bodyForm');
-            form.companyName.value = body.companyName || '';
-            form.shortName.value = body.shortName || '';
-            form.registrationNumber.value = body.registrationNumber || '';
-            form.email.value = body.email || '';
-            form.phone.value = body.phone || '';
-            form.website.value = body.website || '';
-            form.description.value = body.description || '';
-            form.establishedYear.value = body.establishedYear || '';
-            
-            // Address
-            if (body.address) {
-                form.street.value = body.address.street || '';
-                form.city.value = body.address.city || '';
-                form.state.value = body.address.state || '';
-                form.country.value = body.address.country || '';
-                form.zipCode.value = body.address.zipCode || '';
-            }
-            
-            form.membershipLevel.value = body.membershipLevel || 'Standard';
-            form.notes.value = body.notes || '';
-            
-            // Handle specializations
-            if (body.specializations && body.specializations.length > 0) {
-                form.specializations.value = body.specializations.join(', ');
-            } else {
-                form.specializations.value = '';
-            }
-            
-            // Handle accreditation
-            if (body.accreditation && body.accreditation.length > 0) {
-                form.accreditation.value = body.accreditation.join(', ');
-            } else {
-                form.accreditation.value = '';
-            }
-            
-            // Handle checkboxes
-            form.isActive.checked = body.isActive;
-            form.isPreferred.checked = body.isPreferred;
-            
-            document.getElementById('bodyModal').style.display = 'block';
         }
 
         async function deleteBody(bodyId) {

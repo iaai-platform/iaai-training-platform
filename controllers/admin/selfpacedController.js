@@ -1,4 +1,4 @@
-// controllers/admin/selfpacedController.js
+// controllers/admin/selfpacedController.js - COMPLETE UPDATE WITH STREAMLINED CERTIFICATION
 const SelfPacedOnlineTraining = require("../../models/selfPacedOnlineTrainingModel");
 const User = require("../../models/user");
 const Instructor = require("../../models/Instructor");
@@ -30,14 +30,15 @@ const processSingleCertificationBody = async (certificationBodyId) => {
     const CertificationBody = require("../../models/CertificationBody");
     const body = await CertificationBody.findOne({
       _id: certificationBodyId,
-      status: "Active",
-    }).select("companyName");
+      isActive: true, // UPDATED: Use isActive instead of status
+      isDeleted: { $ne: true },
+    }).select("companyName displayName");
 
     if (body) {
       console.log(`✅ Found certification body: ${body.companyName}`);
       return {
         issuingAuthorityId: body._id,
-        issuingAuthority: body.companyName,
+        issuingAuthority: body.displayName || body.companyName,
       };
     }
 
@@ -51,7 +52,7 @@ const processSingleCertificationBody = async (certificationBodyId) => {
   }
 };
 
-// ADD CLOUDINARY HELPER FUNCTIONS
+// ADD CLOUDINARY HELPER FUNCTIONS (unchanged)
 const uploadToCloudinary = async (filePath, folder, resourceType = "auto") => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
@@ -166,7 +167,7 @@ exports.getStatistics = async (req, res) => {
 };
 
 // ========================================
-// COURSE CRUD OPERATIONS (MOSTLY UNCHANGED)
+// COURSE CRUD OPERATIONS - UPDATED WITH STREAMLINED CERTIFICATION
 // ========================================
 
 exports.getAllCourses = async (req, res) => {
@@ -282,9 +283,17 @@ exports.getCourseById = async (req, res) => {
   }
 };
 
+// UPDATED - Create course with streamlined certification
 exports.createCourse = async (req, res) => {
   try {
     const courseData = req.body;
+
+    console.log("📝 Creating course with data:", {
+      title: courseData.basic?.title,
+      certificateEnabled: courseData.certification?.enabled,
+      assessmentRequired:
+        courseData.certification?.requirements?.assessmentRequired,
+    });
 
     // Check if course code already exists
     const existingCourse = await SelfPacedOnlineTraining.findOne({
@@ -316,21 +325,137 @@ exports.createCourse = async (req, res) => {
       courseData.instructor.title = instructor.designation;
     }
 
-    // Handle certification body using helper function
-    if (courseData.certification?.issuingAuthorityId) {
-      const certBodyData = await processSingleCertificationBody(
-        courseData.certification.issuingAuthorityId
+    // UPDATED - Handle streamlined certification processing
+    if (courseData.certification) {
+      console.log(
+        "🏆 Processing certification data:",
+        courseData.certification
       );
-      if (certBodyData) {
-        courseData.certification.issuingAuthorityId =
-          certBodyData.issuingAuthorityId;
-        courseData.certification.issuingAuthority =
-          certBodyData.issuingAuthority;
+
+      // Handle primary certification body
+      if (courseData.certification.issuingAuthorityId) {
+        const certBodyData = await processSingleCertificationBody(
+          courseData.certification.issuingAuthorityId
+        );
+        if (certBodyData) {
+          courseData.certification.issuingAuthorityId =
+            certBodyData.issuingAuthorityId;
+          courseData.certification.issuingAuthority =
+            certBodyData.issuingAuthority;
+          console.log(
+            "✅ Primary certification body set:",
+            certBodyData.issuingAuthority
+          );
+        } else {
+          // If certification body not found, clear the ID but keep default authority
+          courseData.certification.issuingAuthorityId = undefined;
+          courseData.certification.issuingAuthority = "IAAI Training Institute";
+          console.log("⚠️ Primary certification body not found, using default");
+        }
       } else {
-        // If certification body not found, clear the ID but keep default authority
-        courseData.certification.issuingAuthorityId = undefined;
-        // Keep the default issuingAuthority value
+        // Ensure default values
+        courseData.certification.issuingAuthority = "IAAI Training Institute";
+        console.log("📋 Using default certification authority");
       }
+
+      // Handle additional certification bodies
+      if (
+        courseData.certification.certificationBodies &&
+        Array.isArray(courseData.certification.certificationBodies)
+      ) {
+        const validatedCertBodies = [];
+        for (const certBody of courseData.certification.certificationBodies) {
+          if (certBody.bodyId) {
+            const certBodyData = await processSingleCertificationBody(
+              certBody.bodyId
+            );
+            if (certBodyData) {
+              validatedCertBodies.push({
+                bodyId: certBodyData.issuingAuthorityId,
+                name: certBodyData.issuingAuthority,
+                role: certBody.role || "co-issuer",
+              });
+              console.log(
+                "✅ Added secondary certification body:",
+                certBodyData.issuingAuthority
+              );
+            }
+          }
+        }
+        courseData.certification.certificationBodies = validatedCertBodies;
+        console.log(
+          `📝 Total secondary certification bodies: ${validatedCertBodies.length}`
+        );
+      } else {
+        courseData.certification.certificationBodies = [];
+      }
+
+      // UPDATED - Handle assessment requirements logic
+      if (courseData.certification.requirements) {
+        const assessmentRequired =
+          courseData.certification.requirements.assessmentRequired === true;
+
+        // If assessment is not required, set minimum score to 0
+        if (!assessmentRequired) {
+          courseData.certification.requirements.minimumScore = 0;
+          console.log("📝 Assessment not required, setting minimum score to 0");
+        } else {
+          console.log(
+            "📝 Assessment required with minimum score:",
+            courseData.certification.requirements.minimumScore
+          );
+        }
+
+        // Ensure all required fields have defaults
+        courseData.certification.requirements = {
+          minimumAttendance: 100, // Always 100% for self-paced
+          minimumScore: assessmentRequired
+            ? courseData.certification.requirements.minimumScore || 70
+            : 0,
+          practicalRequired: false, // Never required for self-paced
+          requireAllVideos:
+            courseData.certification.requirements.requireAllVideos !== false,
+          assessmentRequired: assessmentRequired,
+        };
+      } else {
+        // Set default requirements if none provided
+        courseData.certification.requirements = {
+          minimumAttendance: 100,
+          minimumScore: 0,
+          practicalRequired: false,
+          requireAllVideos: true,
+          assessmentRequired: false,
+        };
+      }
+
+      // Ensure other certification fields have defaults
+      courseData.certification = {
+        enabled: courseData.certification.enabled === true,
+        type: courseData.certification.type || "completion",
+        issuingAuthorityId: courseData.certification.issuingAuthorityId,
+        issuingAuthority:
+          courseData.certification.issuingAuthority ||
+          "IAAI Training Institute",
+        certificationBodies: courseData.certification.certificationBodies || [],
+        requirements: courseData.certification.requirements,
+        validity: courseData.certification.validity || { isLifetime: true },
+        features: courseData.certification.features || {
+          digitalBadge: true,
+          qrVerification: true,
+          autoGenerate: true,
+          blockchain: false,
+        },
+        template: courseData.certification.template || "professional_v1",
+      };
+
+      console.log("🏆 Final certification config:", {
+        enabled: courseData.certification.enabled,
+        primary: courseData.certification.issuingAuthority,
+        secondary: courseData.certification.certificationBodies.length,
+        assessmentRequired:
+          courseData.certification.requirements.assessmentRequired,
+        minimumScore: courseData.certification.requirements.minimumScore,
+      });
     }
 
     // Create new course
@@ -367,6 +492,19 @@ exports.createCourse = async (req, res) => {
       "firstName lastName title designation"
     );
 
+    console.log(
+      "✅ Course created successfully with streamlined certification:",
+      {
+        courseId: newCourse._id,
+        title: newCourse.basic.title,
+        certificateEnabled: newCourse.certification.enabled,
+        primaryAuthority: newCourse.certification.issuingAuthority,
+        additionalBodies: newCourse.certification.certificationBodies.length,
+        assessmentRequired:
+          newCourse.certification.requirements.assessmentRequired,
+      }
+    );
+
     res.status(201).json({
       success: true,
       message: "Course created successfully",
@@ -382,10 +520,19 @@ exports.createCourse = async (req, res) => {
   }
 };
 
+// UPDATED - Update course with streamlined certification
 exports.updateCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
     const updateData = req.body;
+
+    console.log("📝 Updating course with data:", {
+      courseId,
+      title: updateData.basic?.title,
+      certificateEnabled: updateData.certification?.enabled,
+      assessmentRequired:
+        updateData.certification?.requirements?.assessmentRequired,
+    });
 
     // Check if course code is being changed
     if (updateData.basic?.courseCode) {
@@ -420,28 +567,88 @@ exports.updateCourse = async (req, res) => {
       updateData.instructor.title = instructor.designation;
     }
 
-    // Handle certification body using helper function
-    if (updateData.certification?.issuingAuthorityId) {
-      const certBodyData = await processSingleCertificationBody(
-        updateData.certification.issuingAuthorityId
+    // UPDATED - Handle streamlined certification processing for updates
+    if (updateData.certification) {
+      console.log(
+        "🏆 Processing certification update:",
+        updateData.certification
       );
-      if (certBodyData) {
-        updateData.certification.issuingAuthorityId =
-          certBodyData.issuingAuthorityId;
-        updateData.certification.issuingAuthority =
-          certBodyData.issuingAuthority;
-      } else {
-        // If certification body not found, clear the ID but keep default authority
+
+      // Handle primary certification body
+      if (updateData.certification.issuingAuthorityId) {
+        const certBodyData = await processSingleCertificationBody(
+          updateData.certification.issuingAuthorityId
+        );
+        if (certBodyData) {
+          updateData.certification.issuingAuthorityId =
+            certBodyData.issuingAuthorityId;
+          updateData.certification.issuingAuthority =
+            certBodyData.issuingAuthority;
+          console.log(
+            "✅ Updated primary certification body:",
+            certBodyData.issuingAuthority
+          );
+        } else {
+          // If certification body not found, clear the ID but keep default authority
+          updateData.certification.issuingAuthorityId = undefined;
+          updateData.certification.issuingAuthority = "IAAI Training Institute";
+          console.log("⚠️ Primary certification body not found, using default");
+        }
+      } else if (updateData.certification.issuingAuthorityId === "") {
+        // If explicitly clearing the certification body
         updateData.certification.issuingAuthorityId = undefined;
-        // Keep the default issuingAuthority value
+        updateData.certification.issuingAuthority = "IAAI Training Institute";
+        console.log("📋 Cleared primary certification body, using default");
       }
-    } else if (
-      updateData.certification &&
-      updateData.certification.issuingAuthorityId === ""
-    ) {
-      // If explicitly clearing the certification body
-      updateData.certification.issuingAuthorityId = undefined;
-      updateData.certification.issuingAuthority = "IAAI Training Institute";
+
+      // Handle additional certification bodies
+      if (
+        updateData.certification.certificationBodies &&
+        Array.isArray(updateData.certification.certificationBodies)
+      ) {
+        const validatedCertBodies = [];
+        for (const certBody of updateData.certification.certificationBodies) {
+          if (certBody.bodyId) {
+            const certBodyData = await processSingleCertificationBody(
+              certBody.bodyId
+            );
+            if (certBodyData) {
+              validatedCertBodies.push({
+                bodyId: certBodyData.issuingAuthorityId,
+                name: certBodyData.issuingAuthority,
+                role: certBody.role || "co-issuer",
+              });
+              console.log(
+                "✅ Updated secondary certification body:",
+                certBodyData.issuingAuthority
+              );
+            }
+          }
+        }
+        updateData.certification.certificationBodies = validatedCertBodies;
+        console.log(
+          `📝 Total secondary certification bodies: ${validatedCertBodies.length}`
+        );
+      }
+
+      // UPDATED - Handle assessment requirements logic for updates
+      if (updateData.certification.requirements) {
+        const assessmentRequired =
+          updateData.certification.requirements.assessmentRequired === true;
+
+        // If assessment is not required, set minimum score to 0
+        if (!assessmentRequired) {
+          updateData.certification.requirements.minimumScore = 0;
+          console.log(
+            "📝 Assessment not required in update, setting minimum score to 0"
+          );
+        } else {
+          console.log(
+            "📝 Assessment required in update with minimum score:",
+            updateData.certification.requirements.minimumScore
+          );
+        }
+      }
     }
 
     const updatedCourse = await SelfPacedOnlineTraining.findByIdAndUpdate(
@@ -489,6 +696,20 @@ exports.updateCourse = async (req, res) => {
         console.error("Error updating instructor assignment:", error);
       }
     }
+
+    console.log(
+      "✅ Course updated successfully with streamlined certification:",
+      {
+        courseId: updatedCourse._id,
+        title: updatedCourse.basic.title,
+        certificateEnabled: updatedCourse.certification.enabled,
+        primaryAuthority: updatedCourse.certification.issuingAuthority,
+        additionalBodies:
+          updatedCourse.certification.certificationBodies.length,
+        assessmentRequired:
+          updatedCourse.certification.requirements.assessmentRequired,
+      }
+    );
 
     res.json({
       success: true,
@@ -575,7 +796,7 @@ exports.deleteCourse = async (req, res) => {
 };
 
 // ========================================
-// VIDEO MANAGEMENT - UPDATED FOR CLOUDINARY
+// VIDEO MANAGEMENT - UPDATED FOR CLOUDINARY (unchanged from previous version)
 // ========================================
 
 exports.getCourseVideos = async (req, res) => {
@@ -989,7 +1210,7 @@ exports.reorderVideos = async (req, res) => {
 };
 
 // ========================================
-// ADD NEW THUMBNAIL UPLOAD ENDPOINT
+// THUMBNAIL UPLOAD ENDPOINTS (unchanged)
 // ========================================
 
 exports.uploadThumbnail = async (req, res) => {
@@ -1137,7 +1358,7 @@ exports.deleteThumbnail = async (req, res) => {
 };
 
 // ========================================
-// EXPORT/IMPORT (UNCHANGED)
+// EXPORT/IMPORT (unchanged)
 // ========================================
 
 exports.exportCourses = async (req, res) => {
@@ -1319,70 +1540,29 @@ exports.getInstructors = async (req, res) => {
   }
 };
 
+// UPDATED - Get certification bodies with proper filtering
 exports.getCertificationBodies = async (req, res) => {
   try {
     const CertificationBody = require("../../models/CertificationBody");
 
-    console.log("🔍 Loading certification bodies...");
+    console.log("🔍 Loading certification bodies for course creation...");
 
-    // FIXED: Use the correct field names and don't filter by status if it doesn't exist
-    // First, let's check what fields exist in the model
-    const sampleDoc = await CertificationBody.findOne().lean();
-    console.log("📋 Sample certification body document:", sampleDoc);
-
-    // Try different possible status field names and approaches
-    let certificationBodies;
-
-    // Approach 1: Try with 'isActive' field (from your model)
-    certificationBodies = await CertificationBody.find({
+    // Use the correct field names based on the certification body model
+    const certificationBodies = await CertificationBody.find({
       isActive: true,
-      isDeleted: { $ne: true }, // Also check if not deleted
+      isDeleted: { $ne: true },
     })
-      .select("companyName email isActive createdAt shortName displayName")
-      .sort({ companyName: 1 })
+      .select("companyName shortName displayName email isActive createdAt")
+      .sort({ isPreferred: -1, companyName: 1 }) // Preferred first, then alphabetical
       .lean();
 
     console.log(
-      `📋 Found ${certificationBodies.length} active certification bodies (isActive: true)`
+      `📋 Found ${certificationBodies.length} active certification bodies`
     );
-
-    // If no results with isActive, try without status filter
-    if (certificationBodies.length === 0) {
-      console.log("⚠️ No active bodies found, trying without status filter...");
-
-      certificationBodies = await CertificationBody.find({
-        isDeleted: { $ne: true }, // Only exclude deleted ones
-      })
-        .select("companyName email isActive createdAt shortName displayName")
-        .sort({ companyName: 1 })
-        .lean();
-
-      console.log(
-        `📋 Found ${certificationBodies.length} total certification bodies (excluding deleted)`
-      );
-    }
-
-    // If still no results, get all documents
-    if (certificationBodies.length === 0) {
-      console.log("⚠️ No bodies found with filters, getting all...");
-
-      certificationBodies = await CertificationBody.find({})
-        .select("companyName email isActive createdAt shortName displayName")
-        .sort({ companyName: 1 })
-        .lean();
-
-      console.log(
-        `📋 Found ${certificationBodies.length} total certification bodies (no filters)`
-      );
-    }
 
     // Log each certification body for debugging
     certificationBodies.forEach((body, index) => {
-      console.log(
-        `  ${index + 1}. ${body.companyName} (ID: ${body._id}, Active: ${
-          body.isActive
-        })`
-      );
+      console.log(`  ${index + 1}. ${body.companyName} (ID: ${body._id})`);
     });
 
     res.json({

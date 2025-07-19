@@ -379,35 +379,165 @@ function removeCertificationBody(bodyId) {
   updateAdditionalCertificationBodies();
 }
 
+// ===========================================
+// NEW STREAMLINED CERTIFICATION FUNCTIONS
+// ===========================================
+
+/**
+ * Toggle certification options visibility
+ */
+function toggleCertificationOptions() {
+  const checkbox = document.getElementById("certificateEnabled");
+  const options = document.getElementById("certificationOptions");
+
+  if (options) {
+    options.style.display = checkbox.checked ? "block" : "none";
+  }
+
+  updateCertificatePreview();
+}
+
+/**
+ * Toggle assessment requirements visibility
+ */
+function toggleAssessmentRequirements() {
+  const checkbox = document.getElementById("requireAssessment");
+  const requirements = document.getElementById("assessmentRequirements");
+
+  if (requirements) {
+    requirements.style.display = checkbox.checked ? "block" : "none";
+  }
+
+  updateCertificatePreview();
+}
+
+/**
+ * Update primary certification authority
+ */
+function updatePrimaryCertificationAuthority() {
+  const select = document.getElementById("issuingAuthorityId");
+  const authorityInput = document.getElementById("issuingAuthority");
+
+  if (!select || !authorityInput) return;
+
+  const selectedId = select.value;
+
+  if (selectedId && certificationBodies) {
+    const selectedBody = certificationBodies.find(
+      (body) => body._id === selectedId
+    );
+    if (selectedBody) {
+      authorityInput.value = selectedBody.companyName;
+    }
+  } else {
+    authorityInput.value = "IAAI Training Institute";
+  }
+
+  updateCertificatePreview();
+}
+
+/**
+ * Update secondary certification bodies display
+ */
+function updateSecondaryCertificationBodies() {
+  const select = document.getElementById("additionalCertificationBodies");
+  const displayDiv = document.getElementById("secondaryCertBodiesDisplay");
+  const tagsContainer = document.getElementById("secondaryCertBodiesTags");
+
+  if (!select || !displayDiv || !tagsContainer) return;
+
+  const selectedOptions = Array.from(select.selectedOptions);
+
+  if (selectedOptions.length === 0) {
+    displayDiv.style.display = "none";
+    return;
+  }
+
+  displayDiv.style.display = "block";
+  tagsContainer.innerHTML = selectedOptions
+    .map((option) => {
+      const body = certificationBodies.find((b) => b._id === option.value);
+      return `
+          <div class="cert-body-tag" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 6px; font-size: 0.875rem; color: #1e40af; font-weight: 500;">
+              <span>${body ? body.companyName : option.text}</span>
+              <span class="remove-cert" onclick="removeSecondaryCertificationBody('${
+                option.value
+              }')" style="cursor: pointer; color: #dc2626; font-weight: bold; padding: 0.25rem; border-radius: 3px; transition: all 0.2s ease;">&times;</span>
+          </div>
+      `;
+    })
+    .join("");
+
+  updateCertificatePreview();
+}
+
+/**
+ * Remove secondary certification body
+ */
+function removeSecondaryCertificationBody(bodyId) {
+  const select = document.getElementById("additionalCertificationBodies");
+  if (!select) return;
+
+  const option = select.querySelector(`option[value="${bodyId}"]`);
+  if (option) {
+    option.selected = false;
+  }
+
+  updateSecondaryCertificationBodies();
+}
+
 // NEW - Update certificate preview in real-time
 function updateCertificatePreview() {
+  const certificateEnabled =
+    document.getElementById("certificateEnabled")?.checked;
+  const requireAssessment =
+    document.getElementById("requireAssessment")?.checked;
   const primarySelect = document.getElementById("issuingAuthorityId");
   const additionalSelect = document.getElementById(
     "additionalCertificationBodies"
   );
+
   const previewPrimary = document.getElementById("previewPrimary");
-  const previewAdditional = document.getElementById("previewAdditional");
-  const previewAdditionalList = document.getElementById(
-    "previewAdditionalList"
+  const previewSecondary = document.getElementById("previewSecondary");
+  const previewSecondaryList = document.getElementById("previewSecondaryList");
+  const previewRequirementText = document.getElementById(
+    "previewRequirementText"
   );
+
+  if (!certificateEnabled) {
+    return; // Preview is hidden when certificate is disabled
+  }
 
   // Update primary authority preview
   if (primarySelect && previewPrimary) {
     const selectedPrimary = primarySelect.options[primarySelect.selectedIndex];
-    previewPrimary.textContent = selectedPrimary.text;
+    previewPrimary.textContent = selectedPrimary.text
+      .replace(" (Default)", "")
+      .replace("Use Default (", "")
+      .replace(")", "");
   }
 
-  // Update additional bodies preview
-  if (additionalSelect && previewAdditional && previewAdditionalList) {
-    const selectedAdditional = Array.from(additionalSelect.selectedOptions);
+  // Update secondary bodies preview
+  if (additionalSelect && previewSecondary && previewSecondaryList) {
+    const selectedSecondary = Array.from(additionalSelect.selectedOptions);
 
-    if (selectedAdditional.length > 0) {
-      previewAdditional.style.display = "block";
-      previewAdditionalList.textContent = selectedAdditional
+    if (selectedSecondary.length > 0) {
+      previewSecondary.style.display = "block";
+      previewSecondaryList.textContent = selectedSecondary
         .map((opt) => opt.text)
         .join(", ");
     } else {
-      previewAdditional.style.display = "none";
+      previewSecondary.style.display = "none";
+    }
+  }
+
+  // Update requirement preview
+  if (previewRequirementText) {
+    if (requireAssessment) {
+      const minScore = document.getElementById("minimumScore")?.value || "70";
+      previewRequirementText.textContent = `Passing assessments with ${minScore}% score`;
+    } else {
+      previewRequirementText.textContent = "Watching all videos";
     }
   }
 }

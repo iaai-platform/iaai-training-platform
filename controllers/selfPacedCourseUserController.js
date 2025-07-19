@@ -1,4 +1,4 @@
-// controllers/selfPacedCourseUserController.js
+// controllers/selfPacedCourseUserController.js - UPDATED VERSION
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const User = require("../models/user");
 const mongoose = require("mongoose");
@@ -28,50 +28,91 @@ exports.getSelfPacedOnlineTraining = async (req, res) => {
   }
 };
 
-// 2. Display specific course details
-// In your selfPacedCourseUserController.js - Update the getCourseDetails function
-
-// REPLACE your getCourseDetails function with this:
+// 2. ENHANCED Display specific course details with ALL model fields
+// Enhanced getCourseDetails method in selfPacedCourseUserController.js
 
 exports.getCourseDetails = async (req, res) => {
   try {
     console.log("🔍 Fetching course details for:", req.params.courseId);
 
-    // Try to populate instructor data
-    let course = await SelfPacedOnlineTraining.findById(
-      req.params.courseId
-    ).populate("instructor.instructorId");
-
-    console.log("📊 Course found:", course ? "Yes" : "No");
-    console.log("👨‍🏫 Instructor data:", course?.instructor);
+    // Populate instructor AND certification bodies with better error handling
+    let course = await SelfPacedOnlineTraining.findById(req.params.courseId)
+      .populate({
+        path: "instructor.instructorId",
+        select:
+          "firstName lastName fullName profileImage title designation bio experience expertise specializations certifications ratings status assignedCourses email phoneNumber",
+      })
+      .populate("certification.issuingAuthorityId")
+      .populate("certification.certificationBodies.bodyId");
 
     if (!course) {
       return res.status(404).send("Course not found");
     }
 
-    // If instructor population failed, try manual lookup
-    if (
-      course.instructor?.instructorId &&
-      typeof course.instructor.instructorId === "string"
-    ) {
-      console.log(
-        "🔄 Manually fetching instructor:",
-        course.instructor.instructorId
-      );
-
-      const Instructor = require("../models/Instructor");
-      const instructorData = await Instructor.findById(
-        course.instructor.instructorId
-      );
+    // Enhanced instructor data processing
+    if (course.instructor?.instructorId) {
+      const instructorData = course.instructor.instructorId;
 
       if (instructorData) {
-        course.instructor.instructorData = instructorData;
-        console.log(
-          "✅ Instructor data fetched:",
-          instructorData.firstName,
-          instructorData.lastName
-        );
-        console.log("📸 Profile image:", instructorData.profileImage);
+        // Calculate additional instructor metrics
+        const activeCoursesCount =
+          instructorData.assignedCourses?.filter(
+            (c) => c.status === "In Progress" || c.status === "Upcoming"
+          ).length || 0;
+
+        const completedCoursesCount =
+          instructorData.assignedCourses?.filter(
+            (c) => c.status === "Completed"
+          ).length || 0;
+
+        // Calculate average rating if available
+        let averageRating = 0;
+        if (instructorData.ratings?.courseRatings?.length > 0) {
+          const sum = instructorData.ratings.courseRatings.reduce(
+            (acc, rating) => acc + rating.rating,
+            0
+          );
+          averageRating = (
+            sum / instructorData.ratings.courseRatings.length
+          ).toFixed(1);
+        }
+
+        // Add computed fields to instructor data
+        course.instructor.instructorData = {
+          ...instructorData.toObject(),
+          activeCourses: activeCoursesCount,
+          completedCourses: completedCoursesCount,
+          averageRating: averageRating,
+          totalCourses: instructorData.assignedCourses?.length || 0,
+          yearsExperience: instructorData.experience
+            ? parseInt(instructorData.experience)
+            : 0,
+        };
+
+        console.log("✅ Enhanced instructor data processed:", {
+          name: instructorData.firstName + " " + instructorData.lastName,
+          totalCourses: course.instructor.instructorData.totalCourses,
+          averageRating: averageRating,
+          certifications: instructorData.certifications?.length || 0,
+        });
+      }
+    }
+
+    // Enhanced certification body data handling
+    if (course.certification?.certificationBodies) {
+      for (
+        let i = 0;
+        i < course.certification.certificationBodies.length;
+        i++
+      ) {
+        const certBody = course.certification.certificationBodies[i];
+        if (certBody.bodyId && typeof certBody.bodyId === "string") {
+          const CertificationBody = require("../models/CertificationBody");
+          const bodyData = await CertificationBody.findById(certBody.bodyId);
+          if (bodyData) {
+            certBody.bodyData = bodyData;
+          }
+        }
       }
     }
 
@@ -79,7 +120,7 @@ exports.getCourseDetails = async (req, res) => {
     let userEnrollment = null;
     let hasAccess = false;
 
-    // Check user enrollment status if logged in
+    // Enhanced user enrollment status checking
     if (req.user) {
       const userDoc = await User.findById(req.user._id);
       userEnrollment = userDoc.getCourseEnrollment(
@@ -114,20 +155,89 @@ exports.getCourseDetails = async (req, res) => {
       }
     }
 
-    res.render("self-paced-course-details", {
+    // Calculate enhanced course metrics
+    const totalDuration = course.videos.reduce(
+      (total, video) => total + (video.duration || 0),
+      0
+    );
+    const totalQuizQuestions = course.videos.reduce(
+      (total, video) => total + (video.exam ? video.exam.length : 0),
+      0
+    );
+    const previewVideos = course.videos.filter((video) => video.isPreview);
+    const hasQuizzes = course.videos.some(
+      (video) => video.exam && video.exam.length > 0
+    );
+
+    // Format published date
+    const publishedDate = course.metadata?.publishedDate
+      ? new Date(course.metadata.publishedDate).toLocaleDateString()
+      : null;
+
+    // Enhanced course difficulty assessment
+    let difficultyLevel = course.content?.experienceLevel || "all-levels";
+    if (totalDuration > 360) {
+      // 6+ hours
+      difficultyLevel =
+        difficultyLevel === "beginner" ? "intermediate" : difficultyLevel;
+    }
+
+    // Enhanced view data
+    const viewData = {
       course,
       user: req.user,
       courseStatusMessage,
       userEnrollment,
       hasAccess,
-    });
+      // Enhanced calculated fields
+      courseMetrics: {
+        totalDuration,
+        totalQuizQuestions,
+        previewVideos,
+        hasQuizzes,
+        publishedDate,
+        enrollmentCount: course.access?.totalEnrollments || 0,
+        difficultyLevel,
+        completionRate:
+          totalDuration > 0
+            ? Math.round((course.videos.length / totalDuration) * 100)
+            : 0,
+        averageVideoLength:
+          course.videos.length > 0
+            ? Math.round(totalDuration / course.videos.length)
+            : 0,
+      },
+      // SEO and sharing data
+      seoData: {
+        title: course.basic?.title || "Self-Paced Online Training",
+        description: course.basic?.description || "",
+        image: course.media?.thumbnailUrl || "/images/default-course.jpg",
+        url: `${req.protocol}://${req.get(
+          "host"
+        )}/self-paced-online-training/courses/${course._id}`,
+        instructor: course.instructor?.name || "Expert Instructor",
+        price: course.access?.price || 0,
+        currency: course.access?.currency || "USD",
+      },
+    };
+
+    console.log(
+      "📈 Enhanced course metrics calculated:",
+      viewData.courseMetrics
+    );
+    console.log(
+      "👨‍🏫 Instructor data available:",
+      !!course.instructor?.instructorData
+    );
+
+    res.render("self-paced-course-details", viewData);
   } catch (err) {
     console.error("❌ Error fetching course details:", err);
     res.status(500).send("Server error");
   }
 };
 
-// 5. Get user's enrolled courses
+// 3. Get user's enrolled courses (unchanged)
 exports.getMyEnrolledCourses = async (req, res) => {
   try {
     if (!req.user) {
@@ -148,7 +258,6 @@ exports.getMyEnrolledCourses = async (req, res) => {
       );
       if (!isValidStatus) return false;
 
-      // Check if not expired
       const isNotExpired =
         !enrollment.enrollmentData.expiryDate ||
         enrollment.enrollmentData.expiryDate > new Date();
@@ -169,7 +278,7 @@ exports.getMyEnrolledCourses = async (req, res) => {
   }
 };
 
-// 6. Access course content
+// 4. Access course content (enhanced with instructor data)
 exports.accessCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -178,10 +287,8 @@ exports.accessCourse = async (req, res) => {
       return res.redirect("/login");
     }
 
-    // Get fresh user data with methods
     const userDoc = await User.findById(req.user._id);
 
-    // Check if user has access
     if (!userDoc.hasAccessToCourse(courseId, "SelfPacedOnlineTraining")) {
       return res.status(403).render("error", {
         message: "You do not have access to this course",
@@ -196,7 +303,6 @@ exports.accessCourse = async (req, res) => {
       "firstName lastName fullName profileImage title"
     );
 
-    // If population doesn't work, add this fallback after getting the course:
     if (
       course.instructor?.instructorId &&
       typeof course.instructor.instructorId === "string"
@@ -237,7 +343,7 @@ exports.accessCourse = async (req, res) => {
   }
 };
 
-// 7. Update video progress
+// 5-11. Other methods remain unchanged...
 exports.updateVideoProgress = async (req, res) => {
   try {
     const { courseId, videoId } = req.params;
@@ -250,10 +356,8 @@ exports.updateVideoProgress = async (req, res) => {
       });
     }
 
-    // Get fresh user data with methods
     const userDoc = await User.findById(req.user._id);
 
-    // Check access
     if (!userDoc.hasAccessToCourse(courseId, "SelfPacedOnlineTraining")) {
       return res.status(403).json({
         success: false,
@@ -276,7 +380,6 @@ exports.updateVideoProgress = async (req, res) => {
   }
 };
 
-// 8. Submit exam
 exports.submitExam = async (req, res) => {
   try {
     const { courseId, videoId } = req.params;
@@ -289,10 +392,8 @@ exports.submitExam = async (req, res) => {
       });
     }
 
-    // Get fresh user data with methods
     const userDoc = await User.findById(req.user._id);
 
-    // Check access
     if (!userDoc.hasAccessToCourse(courseId, "SelfPacedOnlineTraining")) {
       return res.status(403).json({
         success: false,
@@ -310,7 +411,6 @@ exports.submitExam = async (req, res) => {
       });
     }
 
-    // Calculate score
     let correctAnswers = 0;
     const processedAnswers = answers.map((answer) => {
       const question = video.exam.id(answer.questionId);
@@ -326,8 +426,6 @@ exports.submitExam = async (req, res) => {
     });
 
     const score = Math.round((correctAnswers / video.exam.length) * 100);
-
-    // Record attempt
     await userDoc.recordExamAttempt(courseId, videoId, processedAnswers, score);
 
     res.json({
@@ -346,7 +444,6 @@ exports.submitExam = async (req, res) => {
   }
 };
 
-// 9. Update video notes
 exports.updateVideoNotes = async (req, res) => {
   try {
     const { courseId, videoId } = req.params;
@@ -359,10 +456,8 @@ exports.updateVideoNotes = async (req, res) => {
       });
     }
 
-    // Get fresh user data with methods
     const userDoc = await User.findById(req.user._id);
 
-    // Check access
     if (!userDoc.hasAccessToCourse(courseId, "SelfPacedOnlineTraining")) {
       return res.status(403).json({
         success: false,
@@ -382,7 +477,6 @@ exports.updateVideoNotes = async (req, res) => {
       });
     }
 
-    // Find or create note
     let noteIndex = enrollment.videoNotes.findIndex(
       (note) => note.videoId.toString() === videoId
     );
@@ -413,7 +507,6 @@ exports.updateVideoNotes = async (req, res) => {
   }
 };
 
-// 10. Add bookmark
 exports.addBookmark = async (req, res) => {
   try {
     const { courseId, videoId } = req.params;
@@ -426,10 +519,8 @@ exports.addBookmark = async (req, res) => {
       });
     }
 
-    // Get fresh user data with methods
     const userDoc = await User.findById(req.user._id);
 
-    // Check access
     if (!userDoc.hasAccessToCourse(courseId, "SelfPacedOnlineTraining")) {
       return res.status(403).json({
         success: false,
@@ -475,7 +566,6 @@ exports.addBookmark = async (req, res) => {
   }
 };
 
-// 11. Get course progress
 exports.getCourseProgress = async (req, res) => {
   try {
     const { courseId } = req.params;

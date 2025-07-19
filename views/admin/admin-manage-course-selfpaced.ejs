@@ -714,6 +714,34 @@
             transform: translateX(24px);
         }
 
+        /* Certification Body Selection Styles */
+        .cert-body-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #1e40af;
+            font-weight: 500;
+        }
+
+        .cert-body-tag .remove-cert {
+            cursor: pointer;
+            color: #dc2626;
+            font-weight: bold;
+            padding: 0 0.25rem;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .cert-body-tag .remove-cert:hover {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
         /* Video Management Styles */
         .video-grid {
             display: grid;
@@ -986,196 +1014,7 @@
         .toast-error {
             border-left: 4px solid var(--danger);
         }
-    
-    /* Certification Body Selection Styles */
-.cert-body-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.375rem 0.75rem;
-    background: #dbeafe;
-    border: 1px solid #93c5fd;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    color: #1e40af;
-    font-weight: 500;
-}
-
-.cert-body-tag .remove-cert {
-    cursor: pointer;
-    color: #dc2626;
-    font-weight: bold;
-    padding: 0 0.25rem;
-    border-radius: 3px;
-    transition: all 0.2s ease;
-}
-
-.cert-body-tag .remove-cert:hover {
-    background: #fecaca;
-    color: #991b1b;
-}
-
-/* Multiple select styling */
-#certificationBodies {
-    min-height: 42px;
-    max-height: 150px;
-    overflow-y: auto;
-    resize: vertical;
-}
-
-#certificationBodies option {
-    padding: 0.5rem;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-#certificationBodies option:checked {
-    background: #dbeafe;
-    color: #1e40af;
-    font-weight: 500;
-}
-
-/* Loading state for certification bodies */
-.cert-body-loading {
-    color: #6b7280;
-    font-style: italic;
-    padding: 0.5rem;
-    text-align: center;
-}
-
-/* Empty state for certification bodies */
-.cert-body-empty {
-    color: #9ca3af;
-    font-style: italic;
-    padding: 0.5rem;
-    text-align: center;
-}
-
-/* Enhanced styling for multiple certification body selection */
-#issuingAuthorityId {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border: 2px solid #e2e8f0;
-}
-
-#issuingAuthorityId:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-#additionalCertificationBodies {
-    min-height: 100px;
-    max-height: 150px;
-    overflow-y: auto;
-    background: linear-gradient(135deg, #fefefe 0%, #f9fafb 100%);
-    border: 2px solid #e5e7eb;
-}
-
-#additionalCertificationBodies option {
-    padding: 8px 12px;
-    margin: 2px 0;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-#additionalCertificationBodies option:checked {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: white;
-    font-weight: 600;
-}
-
-#additionalCertificationBodies option:hover:not(:checked) {
-    background: #f3f4f6;
-}
-
-/* Tags for selected additional certification bodies */
-.cert-body-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
-    border: 1px solid #93c5fd;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    color: #1e40af;
-    font-weight: 500;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
-}
-
-.cert-body-tag:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.cert-body-tag .remove-cert {
-    cursor: pointer;
-    color: #dc2626;
-    font-weight: bold;
-    padding: 0.25rem;
-    border-radius: 3px;
-    transition: all 0.2s ease;
-    font-size: 1rem;
-    line-height: 1;
-}
-
-.cert-body-tag .remove-cert:hover {
-    background: #fecaca;
-    color: #991b1b;
-    transform: scale(1.1);
-}
-
-/* Section styling */
-.cert-section {
-    background: white;
-    padding: 1rem;
-    border-radius: 6px;
-    border: 1px solid #e5e7eb;
-    margin-bottom: 1rem;
-}
-
-.cert-section h5 {
-    margin-bottom: 1rem;
-    color: #374151;
-    font-size: 0.875rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* Certificate preview styling */
-#certificatePreview {
-    font-family: 'Courier New', monospace;
-    font-size: 0.75rem;
-    color: #78716c;
-    line-height: 1.4;
-}
-
-#certificatePreview div {
-    margin-bottom: 0.25rem;
-}
-
-#previewPrimary, #previewAdditionalList {
-    font-weight: 600;
-    color: #92400e;
-}
-
-/* Animation for showing/hiding sections */
-.fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-</style>
+    </style>
 </head>
 
 <body>
@@ -1503,115 +1342,133 @@
                             <div class="form-hint">0 = lifetime access</div>
                         </div>
                     </div>
-            
-                    <!-- CERTIFICATION SECTION - UPDATED -->
-<!-- CERTIFICATION SECTION - SIMPLE VERSION -->
-<div style="margin-bottom: 2rem; padding: 1.5rem; background: #f0f9ff; border-radius: 8px;">
-    <h4 style="margin-bottom: 1rem; color: #1f2937;">🏆 Certification Settings</h4>
-    
-    <div class="form-group">
-        <label class="switch-group">
-            <span>Enable Certificate</span>
-            <label class="switch">
-                <input type="checkbox" id="certificateEnabled" name="certificateEnabled" checked>
-                <span class="slider"></span>
-            </label>
-        </label>
-    </div>
-    
-    <div id="certificationOptions" style="margin-top: 1rem;">
-        <!-- PRIMARY CERTIFICATION BODY -->
-        <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
-            <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
-                📋 Primary Certification Authority
-            </h5>
-            
-            <div class="form-group">
-                <label>Primary Certification Body <span style="color: #6b7280; font-size: 0.75rem;">(Optional)</span></label>
-                <select class="form-control" id="issuingAuthorityId" name="issuingAuthorityId">
-                    <option value="">Use Default (IAAI Training Institute)</option>
-                    <!-- Options will be loaded dynamically -->
-                </select>
-                <div class="form-hint">Select the main certification body that will issue certificates</div>
-            </div>
-            
-            <div class="form-group">
-                <label>Authority Name</label>
-                <input type="text" class="form-control" id="issuingAuthority" name="issuingAuthority" 
-                       placeholder="IAAI Training Institute" value="IAAI Training Institute" readonly>
-                <div class="form-hint">This will be updated automatically when you select a certification body above</div>
-            </div>
-        </div>
 
-        <!-- ADDITIONAL CERTIFICATION BODIES -->
-        <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
-            <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
-                🤝 Additional Certification Bodies
-            </h5>
-            
-            <div class="form-group">
-                <label>Co-issuing/Partner Bodies <span style="color: #6b7280; font-size: 0.75rem;">(Optional - Hold Ctrl/Cmd to select multiple)</span></label>
-                <select class="form-control" id="additionalCertificationBodies" name="additionalCertificationBodies" 
-                        multiple style="min-height: 100px;">
-                    <!-- Options will be loaded dynamically -->
-                </select>
-                <div class="form-hint">
-                    Select additional certification bodies that will co-issue or endorse certificates.
-                    Hold Ctrl (Windows) or Cmd (Mac) to select multiple.
-                </div>
-            </div>
+                    <!-- STREAMLINED CERTIFICATION SECTION -->
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f0f9ff; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem; color: #1f2937;">🏆 Certification Settings</h4>
+                        
+                        <!-- Step 1: Enable/Disable Certificate -->
+                        <div class="form-group">
+                            <label class="switch-group">
+                                <span style="font-weight: 600;">Does this course provide a certificate?</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="certificateEnabled" name="certificateEnabled" onchange="toggleCertificationOptions()">
+                                    <span class="slider"></span>
+                                </label>
+                            </label>
+                            <div class="form-hint">If disabled, course completion is based on watching all videos only</div>
+                        </div>
+                        
+                        <!-- Certification Options (shown only when certificate is enabled) -->
+                        <div id="certificationOptions" style="display: none; margin-top: 1.5rem;">
+                            
+                            <!-- Step 2: Primary Certification Body -->
+                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                                    📋 Primary Certification Authority
+                                </h5>
+                                
+                                <div class="form-group">
+                                    <label>Who will issue the certificate? <span style="color: #6b7280; font-size: 0.75rem;">(Optional)</span></label>
+                                    <select class="form-control" id="issuingAuthorityId" name="issuingAuthorityId" onchange="updatePrimaryCertificationAuthority()">
+                                        <option value="">Use Default (IAAI Training Institute)</option>
+                                        <!-- Options will be loaded dynamically -->
+                                    </select>
+                                    <div class="form-hint">Select the main organization that will issue certificates</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Certificate Issuer Name</label>
+                                    <input type="text" class="form-control" id="issuingAuthority" name="issuingAuthority" 
+                                           placeholder="IAAI Training Institute" value="IAAI Training Institute" readonly>
+                                    <div class="form-hint">This will be printed on the certificate</div>
+                                </div>
+                            </div>
 
-            <!-- Display Selected Additional Bodies -->
-            <div id="additionalCertBodiesDisplay" style="display: none; margin-top: 1rem;">
-                <label style="font-size: 0.875rem; margin-bottom: 0.5rem; display: block; font-weight: 500;">
-                    Selected Additional Bodies:
-                </label>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
-                    <!-- Selected items will be displayed here as tags -->
-                </div>
-            </div>
-        </div>
+                            <!-- Step 3: Secondary/Partner Certification Bodies (Optional) -->
+                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                                    🤝 Secondary Certification Bodies <span style="color: #6b7280; font-weight: 400;">(Optional)</span>
+                                </h5>
+                                
+                                <div class="form-group">
+                                    <label>Partner/Co-issuing Bodies <span style="color: #6b7280; font-size: 0.75rem;">(Hold Ctrl/Cmd to select multiple)</span></label>
+                                    <select class="form-control" id="additionalCertificationBodies" name="additionalCertificationBodies" 
+                                            multiple style="min-height: 100px;" onchange="updateSecondaryCertificationBodies()">
+                                        <!-- Options will be loaded dynamically -->
+                                    </select>
+                                    <div class="form-hint">
+                                        Select additional organizations that will co-issue or endorse certificates (optional)
+                                    </div>
+                                </div>
 
-        <!-- CERTIFICATION REQUIREMENTS -->
-        <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
-            <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
-                ✅ Certification Requirements
-            </h5>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Minimum Score (%)</label>
-                    <input type="number" class="form-control" id="minimumScore" name="minimumScore" 
-                           placeholder="70" min="0" max="100" value="70">
-                </div>
-                
-                <div class="form-group">
-                    <label class="switch-group">
-                        <span>Require All Videos Completion</span>
-                        <label class="switch">
-                            <input type="checkbox" id="requireAllVideos" name="requireAllVideos" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </label>
-                </div>
-            </div>
-        </div>
+                                <!-- Display Selected Secondary Bodies -->
+                                <div id="secondaryCertBodiesDisplay" style="display: none; margin-top: 1rem;">
+                                    <label style="font-size: 0.875rem; margin-bottom: 0.5rem; display: block; font-weight: 500;">
+                                        Selected Secondary Bodies:
+                                    </label>
+                                    <div id="secondaryCertBodiesTags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+                                        <!-- Selected items will be displayed here as tags -->
+                                    </div>
+                                </div>
+                            </div>
 
-        <!-- CERTIFICATE PREVIEW -->
-        <div style="margin-top: 1rem; padding: 1rem; background: #fefce8; border-radius: 6px; border: 1px solid #fde047;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                <i class="fas fa-certificate" style="color: #ca8a04;"></i>
-                <span style="font-weight: 600; color: #92400e; font-size: 0.875rem;">Certificate Preview</span>
-            </div>
-            <div id="certificatePreview" style="font-size: 0.75rem; color: #78716c;">
-                <div>Primary Authority: <span id="previewPrimary">IAAI Training Institute</span></div>
-                <div id="previewAdditional" style="display: none;">
-                    Additional Bodies: <span id="previewAdditionalList"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Step 4: Assessment Requirements -->
+                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.875rem; font-weight: 600;">
+                                    📝 Certificate Requirements
+                                </h5>
+                                
+                                <div class="form-group">
+                                    <label class="switch-group">
+                                        <span style="font-weight: 500;">Require assessment/test to earn certificate?</span>
+                                        <label class="switch">
+                                            <input type="checkbox" id="requireAssessment" name="requireAssessment" onchange="toggleAssessmentRequirements()">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </label>
+                                    <div class="form-hint">If disabled, certificate is awarded by completing all videos. If enabled, students must pass assessments.</div>
+                                </div>
+                                
+                                <!-- Assessment Requirements (shown only when assessment is required) -->
+                                <div id="assessmentRequirements" style="display: none; margin-top: 1rem; padding: 1rem; background: #fef7ff; border-radius: 6px; border: 1px solid #e879f9;">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Minimum Passing Score (%)</label>
+                                            <input type="number" class="form-control" id="minimumScore" name="minimumScore" 
+                                                   placeholder="70" min="0" max="100" value="70">
+                                            <div class="form-hint">Students must score at least this percentage to pass</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="switch-group">
+                                            <span>Must complete ALL videos before taking assessments?</span>
+                                            <label class="switch">
+                                                <input type="checkbox" id="requireAllVideos" name="requireAllVideos" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </label>
+                                        <div class="form-hint">If enabled, students must watch all videos before they can take any assessments</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Certificate Preview -->
+                            <div style="margin-top: 1rem; padding: 1rem; background: #fefce8; border-radius: 6px; border: 1px solid #fde047;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-certificate" style="color: #ca8a04;"></i>
+                                    <span style="font-weight: 600; color: #92400e; font-size: 0.875rem;">Certificate Summary</span>
+                                </div>
+                                <div id="certificatePreview" style="font-size: 0.75rem; color: #78716c;">
+                                    <div>✓ Certificate will be issued by: <span id="previewPrimary" style="font-weight: 600;">IAAI Training Institute</span></div>
+                                    <div id="previewSecondary" style="display: none;">✓ Co-issued with: <span id="previewSecondaryList" style="font-weight: 600;"></span></div>
+                                    <div id="previewRequirement">✓ Earned by: <span id="previewRequirementText" style="font-weight: 600;">Watching all videos</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- MEDIA SECTION -->
                     <div style="margin-bottom: 2rem; padding: 1.5rem; background: #fef7ff; border-radius: 8px;">
                         <h4 style="margin-bottom: 1rem; color: #1f2937;">🎨 Media & Thumbnails</h4>
@@ -1708,47 +1565,6 @@
                                     <option value="72 hours">72 hours</option>
                                     <option value="1 week">1 week</option>
                                 </select>
-                            </div>
-                        </div>
-                    </div>
-            
-                    <!-- CERTIFICATION SECTION -->
-                    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f0f9ff; border-radius: 8px;">
-                        <h4 style="margin-bottom: 1rem; color: #1f2937;">🏆 Certification Settings</h4>
-                        
-                        <div class="form-group">
-                            <label class="switch-group">
-                                <span>Enable Certificate</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="certificateEnabled" name="certificateEnabled" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </label>
-                        </div>
-                        
-                        <div id="certificationOptions" style="margin-top: 1rem;">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Minimum Score (%)</label>
-                                    <input type="number" class="form-control" id="minimumScore" name="minimumScore" 
-                                           placeholder="70" min="0" max="100" value="70">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Issuing Authority</label>
-                                    <input type="text" class="form-control" id="issuingAuthority" name="issuingAuthority" 
-                                           placeholder="IAAI Training Institute" value="IAAI Training Institute">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="switch-group">
-                                    <span>Require All Videos Completion</span>
-                                    <label class="switch">
-                                        <input type="checkbox" id="requireAllVideos" name="requireAllVideos" checked>
-                                        <span class="slider"></span>
-                                    </label>
-                                </label>
                             </div>
                         </div>
                     </div>
@@ -1917,51 +1733,165 @@
 
     <!-- Load the external JavaScript file -->
     <script src="/js/admin-selfpaced-courses.js"></script>
+    
+    <!-- STREAMLINED CERTIFICATION JAVASCRIPT -->
     <script>
-        // Add this JavaScript to update the certificate preview in real-time
+        /**
+         * Toggle certification options visibility
+         */
+        function toggleCertificationOptions() {
+            const checkbox = document.getElementById('certificateEnabled');
+            const options = document.getElementById('certificationOptions');
+            
+            if (options) {
+                options.style.display = checkbox.checked ? 'block' : 'none';
+            }
+            
+            updateCertificatePreview();
+        }
+
+        /**
+         * Toggle assessment requirements visibility
+         */
+        function toggleAssessmentRequirements() {
+            const checkbox = document.getElementById('requireAssessment');
+            const requirements = document.getElementById('assessmentRequirements');
+            
+            if (requirements) {
+                requirements.style.display = checkbox.checked ? 'block' : 'none';
+            }
+            
+            updateCertificatePreview();
+        }
+
+        /**
+         * Update primary certification authority
+         */
+        function updatePrimaryCertificationAuthority() {
+            const select = document.getElementById('issuingAuthorityId');
+            const authorityInput = document.getElementById('issuingAuthority');
+            
+            if (!select || !authorityInput) return;
+            
+            const selectedId = select.value;
+            
+            if (selectedId && certificationBodies) {
+                const selectedBody = certificationBodies.find(body => body._id === selectedId);
+                if (selectedBody) {
+                    authorityInput.value = selectedBody.companyName;
+                }
+            } else {
+                authorityInput.value = 'IAAI Training Institute';
+            }
+            
+            updateCertificatePreview();
+        }
+
+        /**
+         * Update secondary certification bodies display
+         */
+        function updateSecondaryCertificationBodies() {
+            const select = document.getElementById('additionalCertificationBodies');
+            const displayDiv = document.getElementById('secondaryCertBodiesDisplay');
+            const tagsContainer = document.getElementById('secondaryCertBodiesTags');
+            
+            if (!select || !displayDiv || !tagsContainer) return;
+            
+            const selectedOptions = Array.from(select.selectedOptions);
+            
+            if (selectedOptions.length === 0) {
+                displayDiv.style.display = 'none';
+                return;
+            }
+            
+            displayDiv.style.display = 'block';
+            tagsContainer.innerHTML = selectedOptions.map(option => {
+                const body = certificationBodies.find(b => b._id === option.value);
+                return `
+                    <div class="cert-body-tag" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 6px; font-size: 0.875rem; color: #1e40af; font-weight: 500;">
+                        <span>${body ? body.companyName : option.text}</span>
+                        <span class="remove-cert" onclick="removeSecondaryCertificationBody('${option.value}')" style="cursor: pointer; color: #dc2626; font-weight: bold; padding: 0.25rem; border-radius: 3px; transition: all 0.2s ease;">&times;</span>
+                    </div>
+                `;
+            }).join('');
+            
+            updateCertificatePreview();
+        }
+
+        /**
+         * Remove secondary certification body
+         */
+        function removeSecondaryCertificationBody(bodyId) {
+            const select = document.getElementById('additionalCertificationBodies');
+            if (!select) return;
+            
+            const option = select.querySelector(`option[value="${bodyId}"]`);
+            if (option) {
+                option.selected = false;
+            }
+            
+            updateSecondaryCertificationBodies();
+        }
+
+        /**
+         * Update certificate preview in real-time
+         */
         function updateCertificatePreview() {
-            const primarySelect = document.getElementById("issuingAuthorityId");
-            const additionalSelect = document.getElementById("additionalCertificationBodies");
-            const previewPrimary = document.getElementById("previewPrimary");
-            const previewAdditional = document.getElementById("previewAdditional");
-            const previewAdditionalList = document.getElementById("previewAdditionalList");
-        
+            const certificateEnabled = document.getElementById('certificateEnabled')?.checked;
+            const requireAssessment = document.getElementById('requireAssessment')?.checked;
+            const primarySelect = document.getElementById('issuingAuthorityId');
+            const additionalSelect = document.getElementById('additionalCertificationBodies');
+            
+            const previewPrimary = document.getElementById('previewPrimary');
+            const previewSecondary = document.getElementById('previewSecondary');
+            const previewSecondaryList = document.getElementById('previewSecondaryList');
+            const previewRequirementText = document.getElementById('previewRequirementText');
+            
+            if (!certificateEnabled) {
+                return; // Preview is hidden when certificate is disabled
+            }
+            
             // Update primary authority preview
             if (primarySelect && previewPrimary) {
                 const selectedPrimary = primarySelect.options[primarySelect.selectedIndex];
-                previewPrimary.textContent = selectedPrimary.text;
+                previewPrimary.textContent = selectedPrimary.text.replace(' (Default)', '').replace('Use Default (', '').replace(')', '');
             }
-        
-            // Update additional bodies preview
-            if (additionalSelect && previewAdditional && previewAdditionalList) {
-                const selectedAdditional = Array.from(additionalSelect.selectedOptions);
+            
+            // Update secondary bodies preview
+            if (additionalSelect && previewSecondary && previewSecondaryList) {
+                const selectedSecondary = Array.from(additionalSelect.selectedOptions);
                 
-                if (selectedAdditional.length > 0) {
-                    previewAdditional.style.display = "block";
-                    previewAdditionalList.textContent = selectedAdditional.map(opt => opt.text).join(", ");
+                if (selectedSecondary.length > 0) {
+                    previewSecondary.style.display = 'block';
+                    previewSecondaryList.textContent = selectedSecondary.map(opt => opt.text).join(', ');
                 } else {
-                    previewAdditional.style.display = "none";
+                    previewSecondary.style.display = 'none';
+                }
+            }
+            
+            // Update requirement preview
+            if (previewRequirementText) {
+                if (requireAssessment) {
+                    const minScore = document.getElementById('minimumScore')?.value || '70';
+                    previewRequirementText.textContent = `Passing assessments with ${minScore}% score`;
+                } else {
+                    previewRequirementText.textContent = 'Watching all videos';
                 }
             }
         }
-        
-        // Add event listeners when the form is loaded
-        document.addEventListener("DOMContentLoaded", function() {
-            const primarySelect = document.getElementById("issuingAuthorityId");
-            const additionalSelect = document.getElementById("additionalCertificationBodies");
+
+        // Add event listeners when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add change listeners to update preview
+            const fieldsToWatch = ['certificateEnabled', 'requireAssessment', 'issuingAuthorityId', 'additionalCertificationBodies', 'minimumScore'];
             
-            if (primarySelect) {
-                primarySelect.addEventListener("change", updateCertificatePreview);
-            }
-            
-            if (additionalSelect) {
-                additionalSelect.addEventListener("change", function() {
-                    updateAdditionalCertificationBodies();
-                    updateCertificatePreview();
-                });
-            }
+            fieldsToWatch.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('change', updateCertificatePreview);
+                }
+            });
         });
-        </script>
-        
+    </script>
 </body>
 </html>

@@ -15,6 +15,7 @@ const emailService = require("../../utils/emailService");
 const fs = require("fs").promises;
 const courseNotificationController = require("./courseNotificationController");
 const CoursePoolItem = require("../../models/CoursePoolItem");
+const cloudinary = require("cloudinary").v2;
 
 class InPersonCoursesController {
   // ==========================================
@@ -2272,6 +2273,9 @@ class InPersonCoursesController {
     };
   }
 
+  /**
+   * Process media data - FIXED VERSION with correct folder handling
+   */
   _processMediaData(
     body,
     files,
@@ -2286,8 +2290,8 @@ class InPersonCoursesController {
     console.log("  Existing media:", existing);
 
     const media = {
-      // MODIFIED: Fixed logic for preserving existing main image
-      mainImage: existing?.mainImage ? existing.mainImage : null, // CHANGED: removed nested .media reference
+      // Preserve existing main image or set to null
+      mainImage: existing?.mainImage ? existing.mainImage : null,
       documents: [...(existing?.documents || [])],
       images: [...(existing?.images || [])],
       videos: [...(existing?.videos || [])],
@@ -2308,128 +2312,134 @@ class InPersonCoursesController {
       links: this._mergeLinks(body, savedDynamicItems, existing?.links),
     };
 
-    // Process separately uploaded files (from AJAX uploads that send file URLs in body)
+    // Process uploaded files from AJAX uploads (Cloudinary URLs)
     if (uploadedFiles && Object.keys(uploadedFiles).length > 0) {
-      console.log("📁 Processing uploadedFiles..."); // ADDED: Debug log
+      console.log("📁 Processing uploadedFiles...");
 
-      // Handle main image
+      // Handle main image - should be in iaai-platform/inperson/main-images/
       if (uploadedFiles.mainImage && uploadedFiles.mainImage.length > 0) {
-        // MODIFIED: Added validation for URL
         const mainImageUrl = uploadedFiles.mainImage[0];
         if (
           mainImageUrl &&
           typeof mainImageUrl === "string" &&
           mainImageUrl.trim()
         ) {
-          media.mainImage = {
-            url: mainImageUrl.trim(), // ADDED: .trim() for safety
-            alt:
-              body.media?.mainImage?.alt || body.basic?.title || "Course Image", // ADDED: default alt text
-          };
-          console.log(
-            "  ✅ Set mainImage from uploadedFiles:",
-            media.mainImage.url
-          );
-        } else {
-          console.log(
-            "  ⚠️ Invalid mainImage URL in uploadedFiles:",
-            mainImageUrl
-          ); // ADDED: Error logging
+          // Verify it's from the correct folder
+          if (mainImageUrl.includes("iaai-platform/inperson/main-images/")) {
+            media.mainImage = {
+              url: mainImageUrl.trim(),
+              alt:
+                body.media?.mainImage?.alt ||
+                body.basic?.title ||
+                "Course Image",
+            };
+            console.log(
+              "  ✅ Set mainImage from correct folder:",
+              media.mainImage.url
+            );
+          } else {
+            console.warn(
+              "  ⚠️ Main image not from expected folder:",
+              mainImageUrl
+            );
+          }
         }
-      } else {
-        console.log("  📋 No mainImage found in uploadedFiles"); // ADDED: Debug log
       }
 
-      // Handle documents
+      // Handle documents - should be in iaai-platform/inperson/coursedocuments/
       if (uploadedFiles.documents && uploadedFiles.documents.length > 0) {
-        // MODIFIED: Added validation and logging
-        const validDocuments = uploadedFiles.documents.filter(
-          (doc) => doc && typeof doc === "string" && doc.trim()
-        );
+        const validDocuments = uploadedFiles.documents.filter((doc) => {
+          if (!doc || typeof doc !== "string" || !doc.trim()) return false;
+
+          // Verify document is from correct folder
+          if (doc.includes("iaai-platform/inperson/coursedocuments/")) {
+            return true;
+          } else {
+            console.warn("  ⚠️ Document not from expected folder:", doc);
+            return false;
+          }
+        });
+
         media.documents.push(...validDocuments);
         console.log(
-          "  ✅ Added documents from uploadedFiles:",
+          "  ✅ Added documents from correct folder:",
           validDocuments.length,
           "files"
         );
       }
 
-      // Handle images
+      // Handle gallery images - should be in iaai-platform/inperson/gallery-images/
       if (uploadedFiles.images && uploadedFiles.images.length > 0) {
-        // MODIFIED: Added validation and logging
-        const validImages = uploadedFiles.images.filter(
-          (img) => img && typeof img === "string" && img.trim()
-        );
+        const validImages = uploadedFiles.images.filter((img) => {
+          if (!img || typeof img !== "string" || !img.trim()) return false;
+
+          // Verify image is from correct folder
+          if (img.includes("iaai-platform/inperson/gallery-images/")) {
+            return true;
+          } else {
+            console.warn("  ⚠️ Gallery image not from expected folder:", img);
+            return false;
+          }
+        });
+
         media.images.push(...validImages);
         console.log(
-          "  ✅ Added images from uploadedFiles:",
+          "  ✅ Added gallery images from correct folder:",
           validImages.length,
           "files"
         );
       }
 
-      // Handle videos
+      // Handle videos - should be in iaai-platform/inperson/course-videos/
       if (uploadedFiles.videos && uploadedFiles.videos.length > 0) {
-        // MODIFIED: Added validation and logging
-        const validVideos = uploadedFiles.videos.filter(
-          (vid) => vid && typeof vid === "string" && vid.trim()
-        );
+        const validVideos = uploadedFiles.videos.filter((vid) => {
+          if (!vid || typeof vid !== "string" || !vid.trim()) return false;
+
+          // Verify video is from correct folder
+          if (vid.includes("iaai-platform/inperson/course-videos/")) {
+            return true;
+          } else {
+            console.warn("  ⚠️ Video not from expected folder:", vid);
+            return false;
+          }
+        });
+
         media.videos.push(...validVideos);
         console.log(
-          "  ✅ Added videos from uploadedFiles:",
+          "  ✅ Added videos from correct folder:",
           validVideos.length,
           "files"
         );
       }
     } else {
-      console.log("  📋 No uploadedFiles provided or uploadedFiles is empty"); // ADDED: Debug log
+      console.log("  📋 No uploadedFiles provided or uploadedFiles is empty");
     }
 
-    // Process files from multipart form (if any - these come from multer as req.files)
+    // Process files from multipart form (legacy support)
     if (files) {
-      console.log("📁 Processing multipart files..."); // ADDED: Debug log
+      console.log("📁 Processing multipart files...");
 
       if (files.mainImage && files.mainImage[0]) {
-        media.mainImage = {
-          url: `/uploads/courses/images/${files.mainImage[0].filename}`,
-          alt:
-            body.media?.mainImage?.alt || body.basic?.title || "Course Image", // ADDED: default alt text
-        };
-        console.log(
-          "  ✅ Set mainImage from multipart files:",
-          media.mainImage.url
+        // This would be local storage - deprecated in favor of Cloudinary
+        console.warn(
+          "  ⚠️ Multipart main image upload detected - should use Cloudinary instead"
         );
       }
 
       if (files.documents) {
-        const newDocs = files.documents.map(
-          (file) => `/uploads/courses/documents/${file.filename}`
+        console.warn(
+          "  ⚠️ Multipart document upload detected - should use Cloudinary instead"
         );
-        media.documents.push(...newDocs);
-        console.log(
-          "  ✅ Added documents from multipart files:",
-          newDocs.length,
-          "files"
-        ); // MODIFIED: Better logging
       }
 
       if (files.images) {
-        const newImages = files.images.map(
-          (file) => `/uploads/courses/images/${file.filename}`
+        console.warn(
+          "  ⚠️ Multipart image upload detected - should use Cloudinary instead"
         );
-        media.images.push(...newImages);
-        console.log(
-          "  ✅ Added images from multipart files:",
-          newImages.length,
-          "files"
-        ); // MODIFIED: Better logging
       }
-      // Note: videos are expected as URLs, not direct file uploads in this context
-    } else {
-      console.log("  📋 No multipart files provided"); // ADDED: Debug log
     }
 
-    // Process video links from dynamic items (if they were added via a dynamic form field)
+    // Process video links from dynamic items
     if (
       savedDynamicItems.videoLinks &&
       savedDynamicItems.videoLinks.length > 0
@@ -2442,15 +2452,15 @@ class InPersonCoursesController {
         "  ✅ Added video links from dynamic items:",
         videoUrls.length,
         "links"
-      ); // ADDED: Debug log
+      );
     }
 
-    // Remove duplicates and filter out empty values (e.g., null, undefined, empty strings)
+    // Remove duplicates and filter out empty values
     media.documents = [...new Set(media.documents.filter(Boolean))];
     media.images = [...new Set(media.images.filter(Boolean))];
     media.videos = [...new Set(media.videos.filter(Boolean))];
 
-    // ADDED: Log final counts for debugging
+    // Log final counts for debugging
     console.log("📊 Final media counts:", {
       mainImage: media.mainImage ? "present" : "null",
       documents: media.documents.length,
@@ -2459,9 +2469,62 @@ class InPersonCoursesController {
       links: media.links.length,
     });
 
+    // Validate folder structure
+    this._validateMediaFolderStructure(media);
+
     console.log("✅ Final media object:", JSON.stringify(media, null, 2));
 
     return media;
+  }
+
+  /**
+   * Validate that media files are in correct Cloudinary folders
+   */
+  _validateMediaFolderStructure(media) {
+    const expectedFolders = {
+      mainImage: "iaai-platform/inperson/main-images/",
+      documents: "iaai-platform/inperson/coursedocuments/",
+      images: "iaai-platform/inperson/gallery-images/",
+      videos: "iaai-platform/inperson/course-videos/",
+    };
+
+    // Check main image
+    if (
+      media.mainImage?.url &&
+      !media.mainImage.url.includes(expectedFolders.mainImage)
+    ) {
+      console.warn(
+        "⚠️ Main image not in expected folder:",
+        media.mainImage.url
+      );
+    }
+
+    // Check documents
+    media.documents.forEach((doc, index) => {
+      if (!doc.includes(expectedFolders.documents)) {
+        console.warn(`⚠️ Document ${index + 1} not in expected folder:`, doc);
+      }
+    });
+
+    // Check gallery images
+    media.images.forEach((img, index) => {
+      if (!img.includes(expectedFolders.images)) {
+        console.warn(
+          `⚠️ Gallery image ${index + 1} not in expected folder:`,
+          img
+        );
+      }
+    });
+
+    // Check videos (only Cloudinary videos, not external links)
+    media.videos.forEach((vid, index) => {
+      if (
+        vid.includes("cloudinary.com") &&
+        !vid.includes(expectedFolders.videos)
+      ) {
+        console.warn(`⚠️ Video ${index + 1} not in expected folder:`, vid);
+      }
+    });
   }
 
   _processAttendanceData(body) {
@@ -2717,21 +2780,31 @@ class InPersonCoursesController {
     return false;
   }
 
+  // Update the _deletePhysicalFile method in your controller
   async _deletePhysicalFile(fileUrl) {
     try {
-      if (!fileUrl || !fileUrl.startsWith("/uploads/")) return;
+      if (!fileUrl) return;
 
-      const filePath = path.join(process.cwd(), "public", fileUrl);
-      await fs.unlink(filePath);
-      console.log("✅ Physical file deleted:", fileUrl);
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        console.warn(
-          `⚠️ File not found at path for deletion (already removed or invalid path): ${fileUrl}`
-        );
+      // Check if it's a Cloudinary URL
+      if (fileUrl.includes("cloudinary.com")) {
+        // Extract public_id from Cloudinary URL
+        const urlParts = fileUrl.split("/");
+        const versionIndex = urlParts.findIndex((part) => part.startsWith("v"));
+        if (versionIndex !== -1) {
+          const publicIdWithExt = urlParts.slice(versionIndex + 1).join("/");
+          const publicId = publicIdWithExt.split(".")[0];
+
+          const result = await cloudinary.uploader.destroy(publicId);
+          console.log("✅ Cloudinary file deleted:", result);
+        }
       } else {
-        console.error("⚠️ Error deleting physical file:", error);
+        // Handle local files (legacy)
+        const filePath = path.join(process.cwd(), "public", fileUrl);
+        await fs.unlink(filePath);
+        console.log("✅ Local file deleted:", fileUrl);
       }
+    } catch (error) {
+      console.error("⚠️ Error deleting file:", error);
     }
   }
 

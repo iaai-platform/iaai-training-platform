@@ -681,9 +681,6 @@
           </div>
         </div>
       </div>
-      
-      <
-      </div>
     <% } %>
 
     <!-- Enhanced Requirements & System Specs -->
@@ -900,6 +897,7 @@
     <% } %>
 
     <!-- FAQ Section -->
+    !-- Fixed FAQ Section -->
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
@@ -916,9 +914,7 @@
           </div>
           <div class="faq-answer">
             <p>
-              You have 
-              <%= course.access?.accessDays === 0 || !course.access?.accessDays ? 'lifetime' : course.access.accessDays + ' days' %> 
-              access to this course. Once enrolled, you can access all materials anytime, anywhere, and revisit content as often as you'd like.
+              You have lifetime access to this course. Once enrolled, you can access all materials anytime, anywhere, and revisit content as often as you'd like.
             </p>
           </div>
         </div>
@@ -933,21 +929,15 @@
           </div>
         </div>
         
-        <% if (course.certification?.enabled) { %>
         <div class="faq-item">
           <div class="faq-question" onclick="toggleFaq(this)">
             <h4>Is there a certificate provided upon completion?</h4>
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
           <div class="faq-answer">
-            <p>Yes! Upon successful completion of all course requirements, you'll receive a digital 
-            <%= course.certification?.type === 'achievement' ? 'Certificate of Achievement' : 
-                course.certification?.type === 'participation' ? 'Certificate of Participation' : 
-                'Certificate of Completion' %>
-            that you can download and share on professional networks.</p>
+            <p>Yes! Upon successful completion of all course requirements, you'll receive a digital Certificate of Completion that you can download and share on professional networks.</p>
           </div>
         </div>
-        <% } %>
         
         <div class="faq-item">
           <div class="faq-question" onclick="toggleFaq(this)">
@@ -955,7 +945,7 @@
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
           <div class="faq-answer">
-            <p>Our support team is available to help with technical issues, and you can reach out to instructors for course-related questions. We typically respond within <%= course.support?.responseTime || '24-48 hours' %>.</p>
+            <p>Our support team is available to help with technical issues, and you can reach out to instructors for course-related questions. We typically respond within 24-48 hours.</p>
           </div>
         </div>
         
@@ -970,6 +960,7 @@
         </div>
       </div>
     </div>
+    
 
     <!-- Contact Section -->
     <div class="content-section">
@@ -1438,6 +1429,35 @@
     console.log('📜 Certificate enabled:', <%= course.certification?.enabled || false %>);
     console.log('📊 Course metrics:', <%= JSON.stringify(courseMetrics || {}) %>);
 </script>
+<script>
+  // FAQ Toggle Function
+  function toggleFaq(element) {
+    console.log('FAQ clicked'); // Debug log
+    const faqItem = element.parentElement;
+    const wasActive = faqItem.classList.contains('active');
+    
+    console.log('Was active:', wasActive); // Debug log
+    
+    // Close all FAQ items
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    // Open clicked item if it wasn't active
+    if (!wasActive) {
+      faqItem.classList.add('active');
+      console.log('Added active class'); // Debug log
+    }
+  }
+  
+  // Test that FAQ is working
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('FAQ section loaded');
+    const faqItems = document.querySelectorAll('.faq-item');
+    console.log('Found', faqItems.length, 'FAQ items');
+  });
+  </script>
+  
 
   <%- include('partials/footer') %>
 </body>

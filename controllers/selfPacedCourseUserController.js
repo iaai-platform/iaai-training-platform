@@ -2,7 +2,14 @@
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const User = require("../models/user");
 const mongoose = require("mongoose");
+const cloudinary = require("cloudinary").v2;
 
+// Configure Cloudinary (add to your config or at top of controller)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 // 1. Display Self-Paced Online Training Courses
 exports.getSelfPacedOnlineTraining = async (req, res) => {
   try {

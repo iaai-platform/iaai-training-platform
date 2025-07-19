@@ -2,97 +2,51 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+
 const adminInPersonCoursesController = require("../../controllers/admin/inPersonCoursesController");
 const InPersonAestheticTraining = require("../../models/InPersonAestheticTraining");
 const CoursePoolItem = require("../../models/CoursePoolItem"); // <<< NEW: Pool Model
+const cloudinary = require("cloudinary").v2;
 
-//const isAdmin = require('../../middlewares/isAdmin');
+// Configure Cloudinary - ADD THIS AFTER OTHER IMPORTS
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// Ensure upload directories exist
-const ensureDirectoryExists = (dirPath) => {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-    console.log(`✅ Created directory: ${dirPath}`);
-  }
-};
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  fileFilter: (req, file, cb) => {
+    // Define allowed file types
+    const allowedTypes = {
+      "image/jpeg": true,
+      "image/jpg": true,
+      "image/png": true,
+      "image/webp": true,
+      "application/pdf": true,
+      "application/msword": true,
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
+      "application/vnd.ms-powerpoint": true,
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation": true,
+      "video/mp4": true,
+      "video/webm": true,
+      "video/ogg": true,
+    };
 
-// Create upload directories - EXACTLY AS MODEL EXPECTS
-const uploadDirs = [
-  "public/uploads/courses/images",
-  "public/uploads/courses/documents",
-  "public/uploads/courses/videos",
-];
-
-uploadDirs.forEach((dir) => ensureDirectoryExists(dir));
-
-// Configure multer - EXACT MATCH WITH FRONTEND VALIDATION
-const createMulterConfig = (uploadPath, allowedTypes, maxSize) => {
-  const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      ensureDirectoryExists(uploadPath);
-      cb(null, uploadPath);
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      cb(
-        null,
-        file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
-      );
-    },
-  });
-
-  const fileFilter = (req, file, cb) => {
-    if (allowedTypes.includes(file.mimetype)) {
+    if (allowedTypes[file.mimetype]) {
       cb(null, true);
     } else {
-      cb(new Error(`Only ${allowedTypes.join(", ")} files are allowed`), false);
+      cb(new Error(`File type ${file.mimetype} not allowed`), false);
     }
-  };
-
-  return multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: { fileSize: maxSize },
-  });
-};
-
-// Upload configurations - EXACT MATCH WITH FRONTEND CONFIG
-const uploadConfigs = {
-  documents: createMulterConfig(
-    "public/uploads/courses/documents",
-    [
-      "application/pdf",
-      "application/vnd.ms-powerpoint",
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ],
-    50 * 1024 * 1024
-  ), // 50MB - MATCHES FRONTEND
-
-  images: createMulterConfig(
-    "public/uploads/courses/images",
-    ["image/jpeg", "image/jpg", "image/png", "image/webp"],
-    5 * 1024 * 1024
-  ), // 5MB - MATCHES FRONTEND
-
-  videos: createMulterConfig(
-    "public/uploads/courses/videos",
-    ["video/mp4", "video/webm", "video/ogg"],
-    100 * 1024 * 1024
-  ), // 100MB - MATCHES FRONTEND
-
-  mainImage: createMulterConfig(
-    "public/uploads/courses/images",
-    ["image/jpeg", "image/jpg", "image/png", "image/webp"],
-    5 * 1024 * 1024
-  ), // 5MB - MATCHES FRONTEND
-};
+  },
+});
+const isAdmin = require("../../middlewares/isAdmin");
 
 // Apply admin authentication middleware to all routes
-//router.use(isAdmin);
+router.use(isAdmin);
 
 /**
  * @route   GET /admin-courses/inperson
@@ -205,24 +159,56 @@ router.get("/api", adminInPersonCoursesController.getAllCourses);
  */
 router.post(
   "/api/upload/documents",
-  uploadConfigs.documents.array("files", 10),
-  (req, res) => {
+  upload.array("files", 10), // Keep as "files" - frontend will send this
+  async (req, res) => {
     try {
+      console.log(
+        "📁 Documents upload - Files received:",
+        req.files?.length || 0
+      );
+
       if (!req.files || req.files.length === 0) {
         return res
           .status(400)
           .json({ success: false, message: "No files uploaded" });
       }
-      const files = req.files.map(
-        (file) => `/uploads/courses/documents/${file.filename}`
+
+      const uploadPromises = req.files.map((file) => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: "iaai-platform/inperson/coursedocuments",
+              resource_type: "auto",
+              format: file.mimetype.includes("pdf") ? "pdf" : undefined,
+            },
+            (error, result) => {
+              if (error) {
+                console.error("❌ Cloudinary upload error:", error);
+                reject(error);
+              } else {
+                console.log("✅ Document uploaded:", result.secure_url);
+                resolve(result.secure_url);
+              }
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      console.log(
+        "✅ All documents uploaded successfully:",
+        uploadedUrls.length
       );
+
       res.json({
         success: true,
-        message: `${files.length} file(s) uploaded successfully`,
-        files: files,
+        message: `${uploadedUrls.length} document(s) uploaded successfully`,
+        files: uploadedUrls,
       });
     } catch (error) {
-      console.error("Error uploading documents:", error);
+      console.error("❌ Error uploading documents:", error);
       res.status(500).json({
         success: false,
         message: "Error uploading documents",
@@ -239,61 +225,56 @@ router.post(
  */
 router.post(
   "/api/upload/images",
-  uploadConfigs.images.array("files", 20),
-  (req, res) => {
+  upload.array("files", 20), // Keep as "files" - frontend will send this
+  async (req, res) => {
     try {
+      console.log("🖼️ Images upload - Files received:", req.files?.length || 0);
+
       if (!req.files || req.files.length === 0) {
         return res
           .status(400)
           .json({ success: false, message: "No files uploaded" });
       }
-      const files = req.files.map(
-        (file) => `/uploads/courses/images/${file.filename}`
-      );
+
+      const uploadPromises = req.files.map((file) => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: "iaai-platform/inperson/gallery-images",
+              resource_type: "image",
+              format: "webp",
+              transformation: [
+                { width: 800, height: 600, crop: "fill", quality: "auto" },
+              ],
+            },
+            (error, result) => {
+              if (error) {
+                console.error("❌ Cloudinary upload error:", error);
+                reject(error);
+              } else {
+                console.log("✅ Image uploaded:", result.secure_url);
+                resolve(result.secure_url);
+              }
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      console.log("✅ All images uploaded successfully:", uploadedUrls.length);
+
       res.json({
         success: true,
-        message: `${files.length} file(s) uploaded successfully`,
-        files: files,
+        message: `${uploadedUrls.length} gallery image(s) uploaded successfully`,
+        files: uploadedUrls,
       });
     } catch (error) {
-      console.error("Error uploading images:", error);
+      console.error("❌ Error uploading images:", error);
       res.status(500).json({
         success: false,
         message: "Error uploading images",
-        error: error.message,
-      });
-    }
-  }
-);
-
-/**
- * @route   POST /admin-courses/inperson/api/upload/videos
- * @desc    Upload course videos
- * @access  Admin
- */
-router.post(
-  "/api/upload/videos",
-  uploadConfigs.videos.array("files", 5),
-  (req, res) => {
-    try {
-      if (!req.files || req.files.length === 0) {
-        return res
-          .status(400)
-          .json({ success: false, message: "No files uploaded" });
-      }
-      const files = req.files.map(
-        (file) => `/uploads/courses/videos/${file.filename}`
-      );
-      res.json({
-        success: true,
-        message: `${files.length} file(s) uploaded successfully`,
-        files: files,
-      });
-    } catch (error) {
-      console.error("Error uploading videos:", error);
-      res.status(500).json({
-        success: false,
-        message: "Error uploading videos",
         error: error.message,
       });
     }
@@ -307,22 +288,48 @@ router.post(
  */
 router.post(
   "/api/upload/main-image",
-  uploadConfigs.mainImage.array("files", 1),
-  (req, res) => {
+  upload.single("file"), // Keep as "file" - frontend will send this
+  async (req, res) => {
     try {
-      if (!req.files || req.files.length === 0) {
+      console.log("🖼️ Main image upload - File received:", !!req.file);
+
+      if (!req.file) {
         return res
           .status(400)
           .json({ success: false, message: "No image uploaded" });
       }
-      const fileUrl = `/uploads/courses/images/${req.files[0].filename}`;
+
+      // Upload to Cloudinary with specific folder
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "iaai-platform/inperson/main-images",
+            resource_type: "image",
+            format: "webp",
+            transformation: [
+              { width: 1200, height: 800, crop: "fill", quality: "auto" },
+            ],
+          },
+          (error, result) => {
+            if (error) {
+              console.error("❌ Cloudinary upload error:", error);
+              reject(error);
+            } else {
+              console.log("✅ Main image uploaded:", result.secure_url);
+              resolve(result);
+            }
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+
       res.json({
         success: true,
         message: "Main image uploaded successfully",
-        files: [fileUrl],
+        files: [result.secure_url],
       });
     } catch (error) {
-      console.error("Error uploading main image:", error);
+      console.error("❌ Error uploading main image:", error);
       res.status(500).json({
         success: false,
         message: "Error uploading main image",
@@ -332,69 +339,89 @@ router.post(
   }
 );
 
-/**
- * @route   POST /admin-courses/inperson/api/save-uploaded-files
- * @desc    Save uploaded file references for a course
- * @access  Admin
- */
-router.post("/api/save-uploaded-files", async (req, res) => {
+// ===========================================
+// 4. ADD DELETE ROUTE FOR CLOUDINARY FILES
+// ===========================================
+
+// Add this route to your inPersonCoursesRoutes.js
+router.post("/api/delete-cloudinary-file", async (req, res) => {
   try {
-    const { courseId, fileType, fileUrls } = req.body;
-    console.log("💾 Saving uploaded files:", { courseId, fileType, fileUrls });
+    const { publicId } = req.body;
 
-    if (courseId) {
-      const course = await InPersonAestheticTraining.findById(courseId);
-      if (!course) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Course not found" });
-      }
-
-      if (!course.media) course.media = {};
-
-      switch (fileType) {
-        case "mainImage":
-          course.media.mainImage = {
-            url: fileUrls[0],
-            alt: req.body.alt || "",
-          };
-          break;
-        case "documents":
-          if (!course.media.documents) course.media.documents = [];
-          course.media.documents.push(...fileUrls);
-          break;
-        case "images":
-          if (!course.media.images) course.media.images = [];
-          course.media.images.push(...fileUrls);
-          break;
-        case "videos":
-          if (!course.media.videos) course.media.videos = [];
-          course.media.videos.push(...fileUrls);
-          break;
-      }
-
-      await course.save();
-      res.json({
-        success: true,
-        message: "Files saved successfully",
-        media: course.media,
-      });
-    } else {
-      res.json({
-        success: true,
-        message: "Files ready for course creation",
-        savedFiles: { [fileType]: fileUrls },
+    if (!publicId) {
+      return res.status(400).json({
+        success: false,
+        message: "Public ID is required",
       });
     }
+
+    const result = await cloudinary.uploader.destroy(publicId);
+
+    res.json({
+      success: result.result === "ok",
+      message:
+        result.result === "ok" ? "File deleted successfully" : "File not found",
+    });
   } catch (error) {
-    console.error("Error saving uploaded files:", error);
+    console.error("Error deleting Cloudinary file:", error);
     res.status(500).json({
       success: false,
-      message: "Error saving uploaded files",
+      message: "Error deleting file",
       error: error.message,
     });
   }
 });
+
+/**
+ * @route   POST /admin-courses/inperson/api/upload/videos
+ * @desc    Upload course videos
+ * @access  Admin
+ */
+router.post(
+  "/api/upload/videos",
+  upload.array("files", 5), // CHANGED: Use memory storage upload
+  async (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No files uploaded" });
+      }
+
+      const uploadPromises = req.files.map((file) => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: "iaai-platform/inperson/course-videos", // ADDED: Video folder
+              resource_type: "video",
+              format: file.mimetype.includes("mp4") ? "mp4" : undefined,
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result.secure_url);
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      res.json({
+        success: true,
+        message: `${uploadedUrls.length} file(s) uploaded successfully`,
+        files: uploadedUrls,
+      });
+    } catch (error) {
+      console.error("Error uploading videos:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error uploading videos",
+        error: error.message,
+      });
+    }
+  }
+);
 
 // ========================================
 // MAIN COURSE CRUD ROUTES (These should typically come AFTER more specific routes)
@@ -407,7 +434,8 @@ router.post("/api/save-uploaded-files", async (req, res) => {
  */
 router.post(
   "/api",
-  uploadConfigs.mainImage.fields([
+  upload.fields([
+    // CHANGED: Use single upload config
     { name: "mainImage", maxCount: 1 },
     { name: "documents", maxCount: 10 },
     { name: "images", maxCount: 20 },
@@ -423,7 +451,8 @@ router.post(
  */
 router.put(
   "/api/:id",
-  uploadConfigs.mainImage.fields([
+  upload.fields([
+    // CHANGED: Use single upload config
     { name: "mainImage", maxCount: 1 },
     { name: "documents", maxCount: 10 },
     { name: "images", maxCount: 20 },
@@ -431,7 +460,6 @@ router.put(
   ]),
   adminInPersonCoursesController.updateCourse
 );
-
 /**
  * @route   DELETE /admin-courses/inperson/api/:id
  * @desc    Delete an in-person course

@@ -28,19 +28,18 @@ class AdminCoursesManager {
 
     // File upload endpoints aligned with model
     this.uploadEndpoints = {
-      documents: "/admin-courses/inperson/api/upload/documents",
-      images: "/admin-courses/inperson/api/upload/images",
-      videos: "/admin-courses/inperson/api/upload/videos",
-      mainImage: "/admin-courses/inperson/api/upload/main-image",
+      documents: "/admin-courses/inperson/api/upload/documents", // -> iaai-platform/inperson/coursedocuments/
+      images: "/admin-courses/inperson/api/upload/images", // -> iaai-platform/inperson/gallery-images/
+      videos: "/admin-courses/inperson/api/upload/videos", // -> iaai-platform/inperson/course-videos/
+      mainImage: "/admin-courses/inperson/api/upload/main-image", // -> iaai-platform/inperson/main-images/
     };
 
     // ENHANCEMENT: File upload configuration with validation
     this.fileUploadConfig = {
       maxFileSize: {
         documents: 50 * 1024 * 1024, // 50MB
-        images: 5 * 1024 * 1024, // 5MB
-        videos: 100 * 1024 * 1024, // 100MB
-        mainImage: 5 * 1024 * 1024, // 5MB
+        images: 10 * 1024 * 1024, // 10MB
+        mainImage: 10 * 1024 * 1024, // 10MB
       },
       allowedTypes: {
         documents: [
@@ -49,9 +48,11 @@ class AdminCoursesManager {
           "application/vnd.openxmlformats-officedocument.presentationml.presentation",
           "application/msword",
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "text/plain",
+          "application/vnd.ms-excel",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ],
         images: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
-        videos: ["video/mp4", "video/webm", "video/ogg"],
         mainImage: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
       },
       maxFiles: {
@@ -497,6 +498,14 @@ class AdminCoursesManager {
       container.innerHTML = "";
     }
 
+    // Define folder info for display
+    const folderInfo = {
+      documents: "📄 Course Documents",
+      images: "🖼️ Gallery Images",
+      videos: "🎥 Course Videos",
+      mainImage: "🖼️ Main Image",
+    };
+
     // For multiple files, only add new ones
     const existingFileNames = Array.from(
       container.querySelectorAll(".file-name")
@@ -512,28 +521,62 @@ class AdminCoursesManager {
       fileItem.className = "file-item pending-upload";
       fileItem.dataset.fileName = file.name;
       fileItem.innerHTML = `
-            <div class="file-info">
-                <i class="fas fa-${this.getFileIcon(file.type)}"></i>
-                <span class="file-name">${file.name}</span>
-                <span class="file-size">(${this.formatFileSize(
-                  file.size
-                )})</span>
-                <span class="file-status pending"> - Pending</span>
-            </div>
-            <div class="file-actions">
-                <button type="button" class="btn btn-sm btn-success save-file-btn" onclick="adminCourses.saveIndividualFile('${uploadType}', '${
+        <div class="file-info">
+          <i class="fas fa-${this.getFileIcon(file.type)}"></i>
+          <span class="file-name">${file.name}</span>
+          <span class="file-size">(${this.formatFileSize(file.size)})</span>
+          <span class="file-destination">${
+            folderInfo[uploadType] || uploadType
+          }</span>
+          <span class="file-status pending"> - Pending</span>
+        </div>
+        <div class="file-actions">
+          <button type="button" class="btn btn-sm btn-success save-file-btn" onclick="adminCourses.saveIndividualFile('${uploadType}', '${
         file.name
       }')" title="Save file">
-                    <i class="fas fa-save"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-danger remove-file-btn" onclick="adminCourses.removeLocalFile('${uploadType}', '${
+            <i class="fas fa-save"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-danger remove-file-btn" onclick="adminCourses.removeLocalFile('${uploadType}', '${
         file.name
       }')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
       container.appendChild(fileItem);
+    });
+  }
+
+  debugUploadedFiles() {
+    console.log("🔍 DEBUG: Current uploaded files structure");
+
+    const expectedFolders = {
+      documents: "iaai-platform/inperson/coursedocuments/",
+      images: "iaai-platform/inperson/gallery-images/",
+      videos: "iaai-platform/inperson/course-videos/",
+      mainImage: "iaai-platform/inperson/main-images/",
+    };
+
+    Object.keys(this.uploadedFiles || {}).forEach((uploadType) => {
+      const files = this.uploadedFiles[uploadType];
+      const expectedFolder = expectedFolders[uploadType];
+
+      console.log(`\n📁 ${uploadType.toUpperCase()}:`);
+      console.log(`   Expected folder: ${expectedFolder}`);
+      console.log(
+        `   File count: ${Array.isArray(files) ? files.length : files ? 1 : 0}`
+      );
+
+      const filesList = Array.isArray(files) ? files : files ? [files] : [];
+      filesList.forEach((file, index) => {
+        const isCorrectFolder = file.includes(expectedFolder);
+        console.log(
+          `   ${index + 1}. ${file} ${isCorrectFolder ? "✅" : "❌"}`
+        );
+        if (!isCorrectFolder) {
+          console.warn(`      ⚠️  Expected to be in: ${expectedFolder}`);
+        }
+      });
     });
   }
 
@@ -958,13 +1001,20 @@ class AdminCoursesManager {
   }
 
   // ENHANCEMENT: Enhanced file upload with comprehensive error handling
+  // FIXED: Enhanced file upload with comprehensive error handling
   async handleFileUpload(files, uploadType) {
-    console.log(`📤 Handling file upload for type: ${uploadType}`);
-    console.log(`📁 Files to upload:`, files.length);
+    console.log(`📤 Handling Cloudinary upload for type: ${uploadType}`);
+    console.log(`📤 Number of files: ${files.length}`);
 
-    // Validate files first
+    // Define expected folder mappings
+    const expectedFolders = {
+      documents: "iaai-platform/inperson/coursedocuments/",
+      images: "iaai-platform/inperson/gallery-images/",
+      videos: "iaai-platform/inperson/course-videos/",
+      mainImage: "iaai-platform/inperson/main-images/",
+    };
+
     const validation = this.validateFiles(files, uploadType);
-
     if (!validation.isValid) {
       validation.errors.forEach((error) => {
         this.showToast("error", "Validation Error", error);
@@ -972,109 +1022,134 @@ class AdminCoursesManager {
       return;
     }
 
-    if (validation.validFiles.length === 0) {
-      this.showToast("warning", "No Valid Files", "No valid files to upload");
-      return;
+    // Initialize uploadedFiles if not exists
+    if (!this.uploadedFiles) {
+      this.uploadedFiles = {};
+    }
+    if (!this.uploadedFiles[uploadType]) {
+      this.uploadedFiles[uploadType] = [];
     }
 
-    // Check if upload endpoint exists
-    if (!this.uploadEndpoints[uploadType]) {
-      this.showToast(
-        "error",
-        "Configuration Error",
-        `Upload endpoint not configured for ${uploadType}`
-      );
-      return;
-    }
+    // Process files one by one for better error handling
+    for (const file of validation.validFiles) {
+      try {
+        const formData = new FormData();
 
-    const formData = new FormData();
-    const fileArray = validation.validFiles;
-
-    // Add files to FormData
-    fileArray.forEach((file, index) => {
-      formData.append("files", file);
-    });
-
-    // Add upload type
-    formData.append("uploadType", uploadType);
-
-    // Add course ID if editing
-    if (this.editingCourse) {
-      formData.append("courseId", this.editingCourse);
-    }
-
-    try {
-      this.showFileUploadProgress(uploadType, true, "Uploading files...");
-
-      console.log(`📡 Uploading to: ${this.uploadEndpoints[uploadType]}`);
-
-      const response = await fetch(this.uploadEndpoints[uploadType], {
-        method: "POST",
-        body: formData,
-      });
-
-      console.log(`📊 Upload response status: ${response.status}`);
-
-      if (!response.ok) {
-        await this.handleUploadError(response, uploadType, fileArray.length);
-        return;
-      }
-
-      const result = await response.json();
-      console.log(`📋 Upload result:`, result);
-
-      if (result.success && result.files) {
-        // CRITICAL: Initialize uploadedFiles if not exists
-        if (!this.uploadedFiles) {
-          this.uploadedFiles = {};
-          console.log("📦 Initialized this.uploadedFiles");
+        // FIXED: Use correct field names based on backend expectations
+        if (uploadType === "mainImage") {
+          // Single file upload - backend expects "file" field name
+          formData.append("file", file);
+        } else {
+          // Multiple file uploads - backend expects "files" field name
+          formData.append("files", file);
         }
 
-        if (!this.uploadedFiles[uploadType]) {
-          this.uploadedFiles[uploadType] = [];
+        this.showFileUploadProgress(
+          uploadType,
+          true,
+          `Uploading ${file.name}...`
+        );
+
+        console.log(`📤 Uploading to: ${this.uploadEndpoints[uploadType]}`);
+        console.log(
+          `📤 Field name: ${uploadType === "mainImage" ? "file" : "files"}`
+        );
+
+        const response = await fetch(this.uploadEndpoints[uploadType], {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`❌ Upload error response:`, errorText);
+          throw new Error(`Upload failed: ${response.status} - ${errorText}`);
         }
 
-        // Add the URLs returned from the server
-        this.uploadedFiles[uploadType].push(...result.files);
+        const result = await response.json();
+        console.log(`✅ Upload response:`, result);
 
-        // IMPORTANT: Log the state
-        console.log(
-          "✅ URLs stored in this.uploadedFiles:",
-          this.uploadedFiles
-        );
-        console.log(
-          `✅ this.uploadedFiles[${uploadType}]:`,
-          this.uploadedFiles[uploadType]
-        );
-        console.log(
-          "✅ Stored uploaded file URLs:",
-          this.uploadedFiles[uploadType]
-        );
-        console.log(
-          "📁 All uploaded files now:",
-          JSON.stringify(this.uploadedFiles, null, 2)
-        );
+        if (result.success && result.files) {
+          // Validate folder structure before adding
+          const validatedFiles = result.files.filter((fileUrl) => {
+            const expectedFolder = expectedFolders[uploadType];
+            if (fileUrl.includes(expectedFolder)) {
+              console.log(
+                `✅ File uploaded to correct folder: ${expectedFolder}`
+              );
+              return true;
+            } else {
+              console.error(
+                `❌ File uploaded to wrong folder. Expected: ${expectedFolder}, Got: ${fileUrl}`
+              );
+              this.showToast(
+                "warning",
+                "Folder Warning",
+                `File uploaded to unexpected location: ${fileUrl}`
+              );
+              return false;
+            }
+          });
 
-        this.showToast(
-          "success",
-          "Upload Successful",
-          `${fileArray.length} file(s) uploaded successfully`
-        );
+          // Add validated Cloudinary URLs
+          this.uploadedFiles[uploadType].push(...validatedFiles);
 
-        // Update the file display to show "Uploaded" status
-        this.refreshFileDisplay(uploadType);
-      } else {
+          this.showToast(
+            "success",
+            "Upload Successful",
+            `${file.name} uploaded successfully to ${expectedFolders[uploadType]}`
+          );
+
+          console.log(
+            `✅ Current uploadedFiles for ${uploadType}:`,
+            this.uploadedFiles[uploadType]
+          );
+        } else {
+          throw new Error(
+            result.message || "Upload failed - no files returned"
+          );
+        }
+      } catch (error) {
+        console.error(`❌ Error uploading ${file.name}:`, error);
         this.showToast(
           "error",
           "Upload Failed",
-          result.message || "Server rejected the upload"
+          `Failed to upload ${file.name}: ${error.message}`
         );
       }
+    }
+
+    this.showFileUploadProgress(uploadType, false);
+    this.refreshFileDisplay(uploadType);
+
+    // Debug current state
+    console.log("📊 Current uploadedFiles state:", this.uploadedFiles);
+  }
+  // Add method to delete files from Cloudinary
+  async deleteCloudinaryFile(fileUrl) {
+    try {
+      // Extract public_id from Cloudinary URL
+      const urlParts = fileUrl.split("/");
+      const versionIndex = urlParts.findIndex((part) => part.startsWith("v"));
+      const publicIdWithExt = urlParts.slice(versionIndex + 1).join("/");
+      const publicId = publicIdWithExt.split(".")[0];
+
+      const response = await fetch(
+        "/admin-courses/inperson/api/delete-cloudinary-file",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ publicId }),
+        }
+      );
+
+      const result = await response.json();
+      return result.success;
     } catch (error) {
-      console.error("File upload error:", error);
-      await this.handleUploadError(error, uploadType, fileArray.length);
-    } finally {
-      this.showFileUploadProgress(uploadType, false);
+      console.error("Error deleting Cloudinary file:", error);
+      return false;
     }
   }
 
@@ -3470,20 +3545,41 @@ class AdminCoursesManager {
         );
       }
 
-      // Send saved files as JSON
+      // FIXED: Send uploaded files in the correct format expected by backend
       if (this.savedUploadedFiles) {
-        // Append each saved file URL individually with a structured key
+        console.log(
+          "📁 Processing savedUploadedFiles:",
+          this.savedUploadedFiles
+        );
+
+        // Create a structured uploadedFiles object
+        const uploadedFilesForBackend = {};
+
         Object.keys(this.savedUploadedFiles).forEach((fileType) => {
           const files = this.savedUploadedFiles[fileType];
+
           if (fileType === "mainImage" && files) {
-            formData.append(`uploadedFiles[mainImage][0]`, files);
-          } else if (Array.isArray(files)) {
-            files.forEach((fileUrl, index) => {
-              formData.append(`uploadedFiles[${fileType}][${index}]`, fileUrl);
-            });
+            // Main image is a single file
+            uploadedFilesForBackend[fileType] = [files];
+            console.log(`📁 Added mainImage: ${files}`);
+          } else if (Array.isArray(files) && files.length > 0) {
+            // Multiple files
+            uploadedFilesForBackend[fileType] = files;
+            console.log(`📁 Added ${fileType}: ${files.length} files`);
           }
         });
-        console.log("📎 Added saved files to formData with structured keys.");
+
+        // Send as JSON string that backend can parse
+        formData.append(
+          "uploadedFiles",
+          JSON.stringify(uploadedFilesForBackend)
+        );
+        console.log(
+          "📁 Added uploadedFiles to formData:",
+          uploadedFilesForBackend
+        );
+      } else {
+        console.log("📁 No savedUploadedFiles to process");
       }
 
       // Add savedDynamicItems as JSON string
@@ -3498,6 +3594,8 @@ class AdminCoursesManager {
       for (let [key, value] of formData.entries()) {
         if (key.length < 50 && typeof value === "string") {
           console.log(`"${key}": "${value}"`);
+        } else if (key === "uploadedFiles") {
+          console.log(`"${key}": ${value}`);
         }
       }
 

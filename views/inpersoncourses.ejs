@@ -3,12 +3,1145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= course.basic?.title || 'Course' %> - Luxury Medical Training</title>
-  <link rel="stylesheet" href="/css/course-details.css">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  
+  <title><%= course.basic?.title || 'Course' %> - Professional Medical Training</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* Enhanced Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2rem; }
+    h3 { font-size: 1.5rem; }
+    h4 { font-size: 1.25rem; }
+
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.7;
+    }
+
+    /* Breadcrumb Styling */
+    .breadcrumb {
+      margin: 0;
+      padding: 20px 5%;
+      background: linear-gradient(to right, rgba(0, 33, 71, 0.05), rgba(184, 134, 11, 0.05));
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    .breadcrumb a {
+      color: #002147;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .breadcrumb a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: #b8860b;
+      transition: width 0.3s ease;
+    }
+
+    .breadcrumb a:hover::after {
+      width: 100%;
+    }
+
+    .breadcrumb span {
+      color: #b8860b;
+      font-weight: 600;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      background: linear-gradient(135deg, #002147 0%, #001633 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 80px 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(184, 134, 11, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-30px) rotate(180deg); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .hero-info {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .course-status-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      background: rgba(184, 134, 11, 0.2);
+      border: 1px solid rgba(184, 134, 11, 0.3);
+      border-radius: 30px;
+      color: #b8860b;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .hero-description {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 15px;
+    }
+
+    .meta-item i {
+      color: #b8860b;
+      font-size: 18px;
+    }
+
+    .hero-actions {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 30px;
+      min-width: 320px;
+    }
+
+    .pricing-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .price-tag {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .price-amount {
+      font-size: 42px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 5px;
+    }
+
+    .price-currency {
+      font-size: 24px;
+      font-weight: 400;
+    }
+
+    .early-bird-badge {
+      background: #28a745;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 10px;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(184, 134, 11, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: white;
+      padding: 15px 30px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-full {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .availability-info {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .seats-info {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .availability-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Main Content Structure */
+    .main-content {
+      max-width: 1200px;
+      margin: -40px auto 60px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Unified Section Styling */
+    .quick-info-bar,
+    .content-section {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quick-info-bar {
+      padding: 30px;
+    }
+
+    .content-section {
+      padding: 40px;
+    }
+
+    .content-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(180deg, #b8860b 0%, #002147 100%);
+    }
+
+    /* Quick Info Bar - Aligned Grid */
+    .quick-info-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 25px;
+    }
+
+    .info-stat {
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+
+    .info-stat:hover {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      transform: translateY(-5px);
+    }
+
+    .info-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+    }
+
+    .info-icon i {
+      color: white;
+      font-size: 20px;
+    }
+
+    .info-label {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #002147;
+    }
+
+    /* Standardized Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-icon i {
+      color: white;
+      font-size: 18px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #002147;
+      margin: 0;
+    }
+
+    /* Image Gallery */
+    .image-gallery {
+      margin-bottom: 2rem;
+    }
+
+    .main-image {
+      position: relative;
+      border-radius: 15px;
+      overflow: hidden;
+      background: #f8f9fa;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-placeholder {
+      color: #666;
+      font-size: 4rem;
+    }
+
+    /* Learning Objectives Grid */
+    .objectives-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .objective-card {
+      display: flex;
+      gap: 15px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .objective-card:hover {
+      background: #f0f7ff;
+      transform: translateX(5px);
+    }
+
+    .objective-number {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .objective-text {
+      flex: 1;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* Curriculum Timeline */
+    .curriculum-timeline {
+      position: relative;
+    }
+
+    .curriculum-timeline::before {
+      content: '';
+      position: absolute;
+      left: 30px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e0e0e0;
+    }
+
+    .module-item {
+      position: relative;
+      margin-bottom: 3rem;
+      padding-left: 4rem;
+    }
+
+    .module-item::before {
+      content: '';
+      position: absolute;
+      left: 24px;
+      top: 8px;
+      width: 12px;
+      height: 12px;
+      background: #b8860b;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 0 0 3px #b8860b;
+    }
+
+    .module-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .module-title {
+      margin: 0;
+      color: #002147;
+      font-size: 1.25rem;
+    }
+
+    .module-duration {
+      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .module-description {
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .module-topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .topic-tag {
+      background: #f8f9fa;
+      color: #333;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      border: 1px solid #e0e0e0;
+    }
+
+    /* Schedule Grid */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .schedule-card {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      transition: all 0.3s ease;
+    }
+
+    .schedule-card:hover {
+      background: white;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      transform: translateY(-5px);
+      border-color: #b8860b;
+    }
+
+    .schedule-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+    }
+
+    .schedule-icon i {
+      color: white;
+      font-size: 20px;
+    }
+
+    .schedule-label {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .schedule-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #002147;
+      margin-bottom: 0.5rem;
+    }
+
+    .schedule-detail {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Instructor Profiles */
+    .instructor-profile {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      padding: 25px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      align-items: flex-start;
+    }
+
+    .instructor-avatar {
+      flex-shrink: 0;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid #b8860b;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .instructor-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .instructor-avatar .avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+    }
+
+    .instructor-info h3 {
+      margin-bottom: 0.5rem;
+      color: #002147;
+    }
+
+    .instructor-title {
+      color: #b8860b;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .instructor-bio {
+      color: #555;
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+    }
+
+    .credentials-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .credential-badge {
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      color: #1976d2;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid rgba(25, 118, 210, 0.2);
+    }
+
+    .instructor-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #002147;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    .instructor-link:hover {
+      color: #b8860b;
+    }
+
+    /* Info Box Component */
+    .info-box {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 25px;
+      margin: 2rem 0;
+      border-left: 5px solid #002147;
+    }
+
+    .info-box.warning {
+      border-left-color: #ffc107;
+      background: #fffbf0;
+    }
+
+    .info-box.success {
+      border-left-color: #28a745;
+      background: #f0fff4;
+    }
+
+    .info-box-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #002147;
+    }
+
+    .info-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .info-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .info-list li:last-child {
+      border-bottom: none;
+    }
+
+    .info-list li i {
+      color: #b8860b;
+      margin-top: 0.25rem;
+    }
+
+    /* Enhanced FAQ */
+    .faq-accordion {
+      margin-top: 2rem;
+    }
+
+    .faq-item {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .faq-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .faq-item:hover {
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .faq-question {
+      padding: 20px 25px;
+      background: #f8f9fa;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    .faq-question:hover {
+      background: #f0f0f0;
+    }
+
+    .faq-question h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #002147;
+      margin: 0;
+      flex: 1;
+      padding-right: 20px;
+    }
+
+    .faq-icon {
+      font-size: 16px;
+      color: #b8860b;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .faq-item.active .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      padding: 0 25px;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      background: white;
+    }
+
+    .faq-item.active .faq-answer {
+      padding: 25px;
+      max-height: 1000px;
+    }
+
+    .faq-answer p {
+      color: #555;
+      line-height: 1.6;
+      font-size: 14px;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Mobile Action Bar */
+    .mobile-action-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 15px 20px;
+      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+
+    .mobile-action-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .mobile-price {
+      font-size: 24px;
+      font-weight: 700;
+      color: #002147;
+    }
+
+    /* Notification System */
+    #notificationContainer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 400px;
+    }
+
+    .notification {
+      position: relative;
+      max-width: 400px;
+      padding: 20px 25px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform: translateX(400px);
+      margin-bottom: 10px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .notification.success .notification-icon {
+      background: #d4f4dd;
+      color: #2e7d3e;
+    }
+
+    .notification.error .notification-icon {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .notification.warning .notification-icon {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .notification-content h4 {
+      margin: 0 0 5px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .notification-content p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Loading State */
+    .btn-loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .btn-loading i {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero-header {
+        flex-direction: column;
+      }
+      
+      .hero-title {
+        font-size: 32px;
+      }
+      
+      .hero-actions {
+        margin-top: 20px;
+      }
+      
+      .quick-info-bar {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        padding: 20px;
+      }
+      
+      .content-section {
+        padding: 25px 20px;
+      }
+      
+      .section-title {
+        font-size: 24px;
+      }
+      
+      .objectives-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .schedule-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .mobile-action-bar {
+        display: block;
+      }
+      
+      .main-content {
+        margin-bottom: 100px;
+      }
+      
+      .notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+      }
+      
+      .notification.show {
+        right: 10px;
+      }
+      
+      .instructor-profile {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .instructor-avatar {
+        align-self: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 28px;
+      }
+
+      .hero-actions {
+        padding: 20px;
+      }
+
+      .price-amount {
+        font-size: 36px;
+      }
+
+      .content-section {
+        padding: 20px 15px;
+        margin-bottom: 20px;
+      }
+
+      .quick-info-bar {
+        grid-template-columns: 1fr;
+        padding: 15px;
+      }
+    }
+
+    /* Accessibility Enhancements */
+    .btn-primary:focus,
+    .btn-secondary:focus,
+    .instructor-link:focus {
+      outline: 2px solid #b8860b;
+      outline-offset: 2px;
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      .content-section,
+      .quick-info-bar {
+        border: 2px solid #000;
+      }
+      
+      .credential-badge,
+      .topic-tag {
+        border: 1px solid #000;
+      }
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .instructor-avatar,
+      .btn-primary,
+      .btn-secondary,
+      .schedule-card,
+      .objective-card,
+      .module-item {
+        animation: none;
+        transition: none;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      .content-section,
+      .quick-info-bar {
+        background: white;
+        border: 1px solid #000;
+        box-shadow: none;
+      }
+      
+      .mobile-action-bar {
+        display: none;
+      }
+      
+      .hero-section {
+        background: white;
+        color: #000;
+      }
+    }
+    Print styles */
+    @media print {
+      .breadcrumb,
+      .mobile-action-bar,
+      #notificationContainer,
+      .btn,
+      .faq-accordion {
+        display: none !important;
+      }
+
+      .hero-section {
+        background: white !important;
+        color: black !important;
+      }
+
+      .content-section {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -17,24 +1150,26 @@
   <!-- Enhanced Breadcrumb -->
   <nav class="breadcrumb">
     <a href="/"><i class="fas fa-home"></i> Home</a> 
-    <i class="fas fa-chevron-right" style="margin: 0 10px; color: #999; font-size: 12px;"></i>
+    <span class="separator"><i class="fas fa-chevron-right"></i></span>
     <a href="/training-programs">Training Programs</a> 
-    <i class="fas fa-chevron-right" style="margin: 0 10px; color: #999; font-size: 12px;"></i>
-    <a href="/in-person-aesthetic-training">In-Person Aesthetic Training</a>
-    <i class="fas fa-chevron-right" style="margin: 0 10px; color: #999; font-size: 12px;"></i>
+    <span class="separator"><i class="fas fa-chevron-right"></i></span>
+    <a href="/in-person-aesthetic-training">In-Person Training</a>
+    <span class="separator"><i class="fas fa-chevron-right"></i></span>
     <span><%= course.basic?.title || 'Course Details' %></span>
   </nav>
 
-  <!-- Hero Section -->
+  <!-- Enhanced Hero Section -->
   <section class="hero-section">
     <div class="hero-content">
       <div class="hero-header">
         <div class="hero-info">
-          <div class="course-code-badge">
-            <i class="fas fa-tag"></i> <%= course.basic?.courseCode || 'N/A' %>
+          <div class="course-status-badge">
+            <i class="fas fa-circle" style="color: <%= course.basic?.status === 'open' ? '#28a745' : course.basic?.status === 'full' ? '#ffc107' : '#dc3545' %>;"></i>
+            <%= course.basic?.status?.toUpperCase() || 'AVAILABLE' %>
           </div>
-          <h1 class="hero-title"><%= course.basic?.title || 'Aesthetic Training Course' %></h1>
-          <p class="hero-description"><%= course.basic?.description || 'Elevate your practice with our comprehensive hands-on training program.' %></p>
+          
+          <h1 class="hero-title"><%= course.basic?.title || 'Advanced Aesthetic Training Course' %></h1>
+          <p class="hero-description"><%= course.basic?.description || 'Transform your practice with our comprehensive hands-on training program designed for medical professionals.' %></p>
           
           <div class="hero-meta">
             <div class="meta-item">
@@ -43,25 +1178,31 @@
             </div>
             <div class="meta-item">
               <i class="fas fa-calendar"></i>
-              <span><%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'TBD' %></span>
+              <span><%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'To Be Announced' %></span>
             </div>
             <div class="meta-item">
               <i class="fas fa-map-marker-alt"></i>
-              <span><%= course.venue?.name || 'Premium Training Facility' %></span>
+              <span><%= course.venue?.city && course.venue?.country ? `${course.venue.city}, ${course.venue.country}` : 'Premium Training Facility' %></span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-clock"></i>
+              <span><%= course.schedule?.duration || 'Multi-day Program' %></span>
             </div>
           </div>
         </div>
         
+        <!-- Enhanced Pricing Card -->
         <div class="hero-actions">
-          <div class="price-display">
-            <span class="price-label">Investment</span>
+          <div class="pricing-header">
+            <div class="price-tag">Course Investment</div>
             <div class="price-amount">
               <span class="price-currency">$</span><%= course.enrollment?.price || 0 %>
             </div>
-            <% if (course.enrollment?.earlyBirdPrice && course.enrollment?.earlyBirdDeadline && new Date() < new Date(course.enrollment.earlyBirdDeadline)) { %>
-              <span class="early-bird-tag">
-                <i class="fas fa-tag"></i> Early Bird: $<%= course.enrollment.earlyBirdPrice %>
-              </span>
+            <% if (course.enrollment?.earlyBirdPrice && course.schedule?.registrationDeadline && new Date() < new Date(course.schedule.registrationDeadline)) { %>
+              <div class="early-bird-badge">
+                <i class="fas fa-tag"></i>
+                Early Bird: $<%= course.enrollment.earlyBirdPrice %>
+              </div>
             <% } %>
           </div>
           
@@ -75,7 +1216,7 @@
                       data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
                       <%= (course.enrollment?.seatsAvailable <= 0 || course.basic?.status !== 'open') ? 'disabled' : '' %>>
                 <i class="fas fa-shopping-cart"></i> 
-                <%= (course.enrollment?.seatsAvailable <= 0) ? 'Course Full' : 'Add to Cart' %>
+                <%= (course.enrollment?.seatsAvailable <= 0) ? 'Course Full' : 'Enroll Now' %>
               </button>
               
               <button class="btn-secondary add-to-wishlist-btn" 
@@ -88,7 +1229,7 @@
               </button>
             <% } else { %>
               <button class="btn-primary" onclick="showLoginRequired()">
-                <i class="fas fa-shopping-cart"></i> Add to Cart
+                <i class="fas fa-shopping-cart"></i> Enroll Now
               </button>
               <button class="btn-secondary" onclick="showLoginRequired()">
                 <i class="fas fa-heart"></i> Save to Wishlist
@@ -96,18 +1237,25 @@
             <% } %>
           </div>
           
+          <!-- Enhanced Availability Info -->
           <div class="availability-info">
-            <div class="seats-available">
-              <strong><%= course.enrollment?.seatsAvailable || 0 %></strong> of <strong><%= course.enrollment?.maxEnrollment || 20 %></strong> seats available
+            <div class="seats-info">
+              <span>Availability</span>
+              <span><strong><%= course.enrollment?.seatsAvailable || 0 %></strong> of <strong><%= course.enrollment?.maxEnrollment || course.enrollment?.seatsAvailable + (course.enrollment?.currentEnrollment || 0) || 20 %></strong> seats</span>
             </div>
-            <div class="seats-bar">
-              <div class="seats-fill" style="width: <%= ((course.enrollment?.maxEnrollment - course.enrollment?.seatsAvailable) / course.enrollment?.maxEnrollment * 100) || 0 %>%"></div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: <%= ((course.enrollment?.currentEnrollment || 0) / (course.enrollment?.seatsAvailable + (course.enrollment?.currentEnrollment || 0)) * 100) || 0 %>%"></div>
             </div>
-            <div class="seats-text">
+            <div class="availability-status">
               <% if (course.enrollment?.seatsAvailable <= 5 && course.enrollment?.seatsAvailable > 0) { %>
-                <i class="fas fa-exclamation-circle"></i> Limited availability - Register soon!
+                <i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i>
+                <span>Limited seats remaining!</span>
               <% } else if (course.enrollment?.seatsAvailable <= 0) { %>
-                <i class="fas fa-times-circle"></i> This course is fully booked
+                <i class="fas fa-times-circle" style="color: #dc3545;"></i>
+                <span>This course is fully booked</span>
+              <% } else { %>
+                <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                <span>Good availability</span>
               <% } %>
             </div>
           </div>
@@ -120,53 +1268,53 @@
   <div class="main-content">
     <!-- Quick Info Bar -->
     <div class="quick-info-bar">
-      <div class="info-item">
+      <div class="info-stat">
         <div class="info-icon">
           <i class="fas fa-clock"></i>
         </div>
         <div class="info-label">Duration</div>
-        <div class="info-value"><%= course.schedule?.duration || 'TBD' %></div>
+        <div class="info-value"><%= course.schedule?.duration || 'Multi-day' %></div>
       </div>
       
-      <div class="info-item">
+      <div class="info-stat">
         <div class="info-icon">
           <i class="fas fa-certificate"></i>
         </div>
         <div class="info-label">Certification</div>
-        <div class="info-value"><%= course.certification?.certificateProvided ? 'Yes' : 'No' %></div>
+        <div class="info-value"><%= course.certification?.enabled ? 'Included' : 'Available' %></div>
       </div>
       
-      <div class="info-item">
+      <div class="info-stat">
         <div class="info-icon">
           <i class="fas fa-graduation-cap"></i>
         </div>
         <div class="info-label">Level</div>
-        <div class="info-value"><%= course.basic?.difficultyLevel || 'All Levels' %></div>
+        <div class="info-value"><%= course.content?.experienceLevel?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'All Levels' %></div>
       </div>
       
-      <div class="info-item">
+      <div class="info-stat">
         <div class="info-icon">
           <i class="fas fa-language"></i>
         </div>
         <div class="info-label">Language</div>
-        <div class="info-value"><%= course.basic?.language || 'English' %></div>
+        <div class="info-value"><%= (course.instructors?.primary?.languages && course.instructors.primary.languages[0]) || 'English' %></div>
       </div>
       
-      <div class="info-item">
+      <div class="info-stat">
         <div class="info-icon">
           <i class="fas fa-users"></i>
         </div>
         <div class="info-label">Class Size</div>
-        <div class="info-value">Max <%= course.enrollment?.maxEnrollment || 20 %></div>
+        <div class="info-value">Max <%= course.enrollment?.seatsAvailable + (course.enrollment?.currentEnrollment || 0) || 20 %></div>
       </div>
     </div>
 
-    <% if (course.media?.uploadedPicture) { %>
     <!-- Course Image -->
+    <% if (course.media?.mainImage?.url) { %>
     <div class="content-section">
       <div class="image-gallery">
         <div class="main-image">
-          <img src="<%= course.media.uploadedPicture %>" alt="<%= course.basic?.title %>" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <img src="<%= course.media.mainImage.url %>" alt="<%= course.media.mainImage.alt || course.basic?.title %>" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="image-placeholder" style="display: none;">
             <i class="fas fa-image"></i>
           </div>
@@ -185,20 +1333,32 @@
       </div>
       
       <div class="overview-content">
-        <p><%= course.overview?.aboutThisCourse || course.basic?.description || 'This comprehensive training program is designed to provide healthcare professionals with the knowledge and practical skills needed to excel in aesthetic medicine.' %></p>
+        <p><%= course.basic?.description || 'This comprehensive training program is designed to provide healthcare professionals with the knowledge and practical skills needed to excel in aesthetic medicine.' %></p>
         
-        <% if (course.overview?.targetAudience) { %>
-        <p><strong>Who Should Attend:</strong> <%= course.overview.targetAudience %></p>
+        <% if (course.content?.targetAudience && course.content.targetAudience.length > 0) { %>
+        <div class="info-box">
+          <div class="info-box-title">
+            <i class="fas fa-users"></i>
+            Target Audience
+          </div>
+          <p><%= course.content.targetAudience.join(', ') %></p>
+        </div>
         <% } %>
         
-        <% if (course.overview?.prerequisites) { %>
-        <p><strong>Prerequisites:</strong> <%= course.overview.prerequisites %></p>
+        <% if (course.content?.prerequisites) { %>
+        <div class="info-box warning">
+          <div class="info-box-title">
+            <i class="fas fa-exclamation-triangle"></i>
+            Prerequisites
+          </div>
+          <p><%= course.content.prerequisites %></p>
+        </div>
         <% } %>
       </div>
     </div>
 
     <!-- Learning Objectives -->
-    <% if (course.overview?.objectives && course.overview.objectives.length > 0) { %>
+    <% if (course.content?.objectives && course.content.objectives.length > 0) { %>
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
@@ -208,8 +1368,8 @@
       </div>
       
       <div class="objectives-grid">
-        <% course.overview.objectives.forEach((objective, index) => { %>
-        <div class="objective-item">
+        <% course.content.objectives.forEach((objective, index) => { %>
+        <div class="objective-card">
           <div class="objective-number"><%= index + 1 %></div>
           <div class="objective-text"><%= objective %></div>
         </div>
@@ -219,7 +1379,7 @@
     <% } %>
 
     <!-- Course Curriculum -->
-    <% if (course.modules && course.modules.length > 0) { %>
+    <% if (course.content?.modules && course.content.modules.length > 0) { %>
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
@@ -229,14 +1389,14 @@
       </div>
       
       <div class="curriculum-timeline">
-        <% course.modules.forEach((module, index) => { %>
+        <% course.content.modules.forEach((module, index) => { %>
         <div class="module-item">
           <div class="module-header">
             <h3 class="module-title">Module <%= index + 1 %>: <%= module.title %></h3>
             <% if (module.duration) { %>
-            <span class="module-duration">
+            <div class="module-duration">
               <i class="far fa-clock"></i> <%= module.duration %>
-            </span>
+            </div>
             <% } %>
           </div>
           
@@ -257,7 +1417,7 @@
     </div>
     <% } %>
 
-    <!-- Schedule Details -->
+    <!-- Schedule & Location -->
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
@@ -273,7 +1433,7 @@
           </div>
           <div class="schedule-label">Start Date</div>
           <div class="schedule-value">
-            <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %>
+            <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'To Be Announced' %>
           </div>
           <div class="schedule-detail">
             <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { weekday: 'long' }) : '' %>
@@ -295,438 +1455,423 @@
         </div>
         <% } %>
         
+        <% if (course.schedule?.timeSlots) { %>
         <div class="schedule-card">
           <div class="schedule-icon">
-            <i class="fas fa-hourglass-half"></i>
+            <i class="fas fa-clock"></i>
           </div>
-          <div class="schedule-label">Duration</div>
-          <div class="schedule-value"><%= course.schedule?.duration || 'TBD' %></div>
+          <div class="schedule-label">Daily Schedule</div>
+          <div class="schedule-value">
+            <%= course.schedule.timeSlots.startTime || '09:00' %> - <%= course.schedule.timeSlots.endTime || '17:00' %>
+          </div>
           <div class="schedule-detail">
-            <%= course.schedule?.scheduleType || 'Full-time' %>
+            <% if (course.schedule.timeSlots.lunchBreak) { %>
+            Lunch: <%= course.schedule.timeSlots.lunchBreak %>
+            <% } %>
           </div>
         </div>
+        <% } %>
         
         <div class="schedule-card">
           <div class="schedule-icon">
             <i class="fas fa-map-marked-alt"></i>
           </div>
-          <div class="schedule-label">Location</div>
-          <div class="schedule-value"><%= course.venue?.name || 'TBD' %></div>
+          <div class="schedule-label">Venue</div>
+          <div class="schedule-value"><%= course.venue?.name || 'Premium Training Facility' %></div>
           <div class="schedule-detail">
-            <%= course.venue?.city ? `${course.venue.city}, ${course.venue.state}` : course.basic?.location || '' %>
+            <%= course.venue?.city && course.venue?.country ? `${course.venue.city}, ${course.venue.country}` : 'Location Details Available Soon' %>
           </div>
         </div>
+
+        <% if (course.schedule?.registrationDeadline) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="schedule-label">Registration Deadline</div>
+          <div class="schedule-value">
+            <%= new Date(course.schedule.registrationDeadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+          </div>
+          <div class="schedule-detail">
+            <%= Math.ceil((new Date(course.schedule.registrationDeadline) - new Date()) / (1000 * 60 * 60 * 24)) %> days remaining
+          </div>
+        </div>
+        <% } %>
       </div>
       
-      <% if (course.venue?.address || course.venue?.facilities) { %>
-      <div class="terms-box" style="margin-top: 30px;">
-        <h4 class="terms-title">
-          <i class="fas fa-building"></i> Venue Details
-        </h4>
+      <!-- Venue Details -->
+      <% if (course.venue?.address || (course.venue?.facilities && course.venue.facilities.length > 0)) { %>
+      <div class="info-box" style="margin-top: 2rem;">
+        <div class="info-box-title">
+          <i class="fas fa-building"></i> Venue Information
+        </div>
         <% if (course.venue?.address) { %>
-        <p style="margin-bottom: 10px;"><strong>Address:</strong> <%= course.venue.address %></p>
+        <p><strong>Address:</strong> <%= course.venue.address %></p>
         <% } %>
         <% if (course.venue?.facilities && course.venue.facilities.length > 0) { %>
-        <p style="margin-bottom: 10px;"><strong>Facilities:</strong></p>
-        <ul class="terms-list">
+        <p><strong>Facilities:</strong></p>
+        <ul class="info-list">
           <% course.venue.facilities.forEach(facility => { %>
-          <li><%= facility %></li>
+          <li><i class="fas fa-check"></i> <%= facility %></li>
           <% }) %>
         </ul>
         <% } %>
+        <% if (course.venue?.parkingAvailable) { %>
+        <p><i class="fas fa-parking"></i> <strong>Parking:</strong> Available on-site</p>
+        <% } %>
       </div>
       <% } %>
     </div>
 
-
-
-<!-- Instructor Information -->
-<% if (course.instructorDetails && (course.instructorDetails.primary || course.instructorDetails.additional)) { %>
-  <div class="content-section">
-    <div class="section-header">
-      <div class="section-icon">
-        <i class="fas fa-user-md"></i>
-      </div>
-      <h2 class="section-title">Meet Your Instructors</h2>
-    </div>
-    
-    <!-- Primary Instructor -->
-    <% if (course.instructorDetails.primary) { %>
-    <div class="instructor-profile" style="margin-bottom: 30px;">
-      <div class="instructor-image">
-        <% if (course.instructorDetails.primary.profileImage) { %>
-        <img src="<%= course.instructorDetails.primary.profileImage %>" alt="<%= course.instructorDetails.primary.fullName %>">
-        <% } else { %>
-        <div class="image-placeholder">
-          <i class="fas fa-user"></i>
-        </div>
-        <% } %>
-      </div>
-      
-      <div class="instructor-info">
-        <h3 class="instructor-name"><%= course.instructorDetails.primary.fullName || `${course.instructorDetails.primary.firstName} ${course.instructorDetails.primary.lastName}` %></h3>
-        <p class="instructor-title"><%= course.instructorDetails.primary.title || '' %> <%= course.instructorDetails.primary.designation || 'Lead Instructor' %></p>
-        <p class="instructor-bio"><%= course.instructorDetails.primary.bio || 'Experienced practitioner with extensive expertise in aesthetic medicine.' %></p>
-        
-        <% if (course.instructorDetails.primary.qualifications && course.instructorDetails.primary.qualifications.length > 0) { %>
-        <div class="instructor-credentials">
-          <% course.instructorDetails.primary.qualifications.forEach(qualification => { %>
-          <span class="credential-badge">
-            <i class="fas fa-award"></i> <%= qualification %>
-          </span>
-          <% }) %>
-        </div>
-        <% } %>
-        
-        <% if (course.instructorDetails.primary.specializations && course.instructorDetails.primary.specializations.length > 0) { %>
-        <div class="instructor-credentials" style="margin-top: 10px;">
-          <% course.instructorDetails.primary.specializations.forEach(specialization => { %>
-          <span class="credential-badge" style="background: #f0f7ff; color: #002147;">
-            <i class="fas fa-star"></i> <%= specialization %>
-          </span>
-          <% }) %>
-        </div>
-        <% } %>
-        
-        <% if (course.instructorDetails.primary.experience) { %>
-        <p style="margin-top: 15px; color: #666;">
-          <i class="fas fa-briefcase"></i> <%= course.instructorDetails.primary.experience %> of experience
-        </p>
-        <% } %>
-      </div>
-    </div>
-    <% } %>
-    
-    <!-- Additional Instructors -->
-    <% if (course.instructorDetails.additional && course.instructorDetails.additional.length > 0) { %>
-    <h3 style="margin: 30px 0 20px; color: #002147;">Co-Instructors</h3>
-    <div class="requirements-grid">
-      <% course.instructorDetails.additional.forEach(instructor => { %>
-      <div class="requirement-card">
-        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-          <div style="width: 60px; height: 60px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-            <% if (instructor.profileImage) { %>
-            <img src="<%= instructor.profileImage %>" alt="<%= instructor.fullName %>" style="width: 100%; height: 100%; object-fit: cover;">
-            <% } else { %>
-            <i class="fas fa-user" style="color: #999; font-size: 24px;"></i>
-            <% } %>
-          </div>
-          <div>
-            <h4 style="margin: 0; color: #002147;"><%= instructor.fullName || `${instructor.firstName} ${instructor.lastName}` %></h4>
-            <p style="margin: 0; color: #666; font-size: 14px;"><%= instructor.title || '' %> <%= instructor.designation || instructor.role || 'Co-Instructor' %></p>
-          </div>
-        </div>
-        <% if (instructor.bio) { %>
-        <p style="color: #555; font-size: 14px; line-height: 1.6;"><%= instructor.bio %></p>
-        <% } %>
-        <% if (instructor.specializations && instructor.specializations.length > 0) { %>
-        <div style="margin-top: 10px;">
-          <% instructor.specializations.forEach(spec => { %>
-          <span style="display: inline-block; padding: 3px 10px; background: #f0f7ff; border-radius: 15px; font-size: 12px; color: #002147; margin-right: 5px; margin-bottom: 5px;">
-            <%= spec %>
-          </span>
-          <% }) %>
-        </div>
-        <% } %>
-      </div>
-      <% }) %>
-    </div>
-    <% } %>
-  </div>
-  <% } %>
-    
-
-
-
-<!-- Certification Body Information -->
-<% if (course.certificationBodyDetails) { %>
-  <div class="content-section">
-    <div class="section-header">
-      <div class="section-icon">
-        <i class="fas fa-building"></i>
-      </div>
-      <h2 class="section-title">Certification Authority</h2>
-    </div>
-    
-    <div class="instructor-profile">
-      <% if (course.certificationBodyDetails.logo) { %>
-      <div class="instructor-image">
-        <img src="<%= course.certificationBodyDetails.logo %>" alt="<%= course.certificationBodyDetails.companyName %>" style="object-fit: contain; padding: 10px;">
-      </div>
-      <% } %>
-      
-      <div class="instructor-info">
-        <h3 class="instructor-name"><%= course.certificationBodyDetails.companyName %></h3>
-        <% if (course.certificationBodyDetails.shortName) { %>
-        <p class="instructor-title">(<%= course.certificationBodyDetails.shortName %>)</p>
-        <% } %>
-        
-        <% if (course.certificationBodyDetails.description) { %>
-        <p class="instructor-bio"><%= course.certificationBodyDetails.description %></p>
-        <% } %>
-        
-        <% if (course.certificationBodyDetails.establishedYear) { %>
-        <p style="color: #666; margin-top: 10px;">
-          <i class="fas fa-calendar-alt"></i> Established: <%= course.certificationBodyDetails.establishedYear %>
-        </p>
-        <% } %>
-        
-        <% if (course.certificationBodyDetails.accreditation && course.certificationBodyDetails.accreditation.length > 0) { %>
-        <div class="instructor-credentials" style="margin-top: 15px;">
-          <h4 style="font-size: 14px; color: #002147; margin-bottom: 10px;">Accreditations:</h4>
-          <% course.certificationBodyDetails.accreditation.forEach(accred => { %>
-          <span class="credential-badge">
-            <i class="fas fa-certificate"></i> <%= accred %>
-          </span>
-          <% }) %>
-        </div>
-        <% } %>
-        
-        <% if (course.certificationBodyDetails.recognizedBy && course.certificationBodyDetails.recognizedBy.length > 0) { %>
-        <div class="instructor-credentials" style="margin-top: 10px;">
-          <h4 style="font-size: 14px; color: #002147; margin-bottom: 10px;">Recognized By:</h4>
-          <% course.certificationBodyDetails.recognizedBy.forEach(org => { %>
-          <span class="credential-badge" style="background: #f0f7ff; color: #002147;">
-            <i class="fas fa-check-circle"></i> <%= org %>
-          </span>
-          <% }) %>
-        </div>
-        <% } %>
-      </div>
-    </div>
-    
-    <% if (course.certificationBodyDetails.specializations && course.certificationBodyDetails.specializations.length > 0) { %>
-    <div class="terms-box" style="margin-top: 30px;">
-      <h4 class="terms-title">
-        <i class="fas fa-graduation-cap"></i> Certification Specializations
-      </h4>
-      <ul class="terms-list">
-        <% course.certificationBodyDetails.specializations.forEach(spec => { %>
-        <li><%= spec %></li>
-        <% }) %>
-      </ul>
-    </div>
-    <% } %>
-    
-    <% if (course.certificationBodyDetails.website || course.certificationBodyDetails.email) { %>
-    <div class="schedule-grid" style="margin-top: 30px;">
-      <% if (course.certificationBodyDetails.website) { %>
-      <div class="schedule-card">
-        <div class="schedule-icon">
-          <i class="fas fa-globe"></i>
-        </div>
-        <div class="schedule-label">Website</div>
-        <div class="schedule-value">
-          <a href="<%= course.certificationBodyDetails.website %>" target="_blank" style="color: #002147; text-decoration: none;">
-            Visit Website
-          </a>
-        </div>
-      </div>
-      <% } %>
-      
-      <% if (course.certificationBodyDetails.email) { %>
-      <div class="schedule-card">
-        <div class="schedule-icon">
-          <i class="fas fa-envelope"></i>
-        </div>
-        <div class="schedule-label">Contact</div>
-        <div class="schedule-value">
-          <a href="mailto:<%= course.certificationBodyDetails.email %>" style="color: #002147; text-decoration: none;">
-            <%= course.certificationBodyDetails.email %>
-          </a>
-        </div>
-      </div>
-      <% } %>
-      
-      <% if (course.certificationBodyDetails.phone) { %>
-      <div class="schedule-card">
-        <div class="schedule-icon">
-          <i class="fas fa-phone"></i>
-        </div>
-        <div class="schedule-label">Phone</div>
-        <div class="schedule-value">
-          <a href="tel:<%= course.certificationBodyDetails.phone %>" style="color: #002147; text-decoration: none;">
-            <%= course.certificationBodyDetails.phone %>
-          </a>
-        </div>
-      </div>
-      <% } %>
-      
-      <% if (course.certificationBodyDetails.address) { %>
-      <div class="schedule-card">
-        <div class="schedule-icon">
-          <i class="fas fa-map-marker-alt"></i>
-        </div>
-        <div class="schedule-label">Location</div>
-        <div class="schedule-value">
-          <%= course.certificationBodyDetails.address.city %>, <%= course.certificationBodyDetails.address.country %>
-        </div>
-      </div>
-      <% } %>
-    </div>
-    <% } %>
-  </div>
-  <% } %>
-
-
-
-
-
-    <!-- Course Content Details -->
-    <% if (course.content) { %>
+    <!-- Instructor Information -->
+    <% if (course.instructorDetails && (course.instructorDetails.primary || course.instructorDetails.additional)) { %>
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
-          <i class="fas fa-book"></i>
+          <i class="fas fa-user-md"></i>
         </div>
-        <h2 class="section-title">Course Content</h2>
+        <h2 class="section-title">Meet Your Expert Instructors</h2>
       </div>
       
-      <div class="requirements-grid">
-        <% if (course.content.totalDuration) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-clock"></i> Total Duration</h4>
-          <p><%= course.content.totalDuration %> hours of comprehensive training</p>
+      <!-- Primary Instructor -->
+      <% if (course.instructorDetails.primary) { %>
+      <div class="instructor-profile">
+        <div class="instructor-avatar">
+          <% if (course.instructorDetails.primary.profileImage) { %>
+          <img src="<%= course.instructorDetails.primary.profileImage %>" alt="<%= course.instructorDetails.primary.fullName %>">
+          <% } else { %>
+          <div class="avatar-placeholder">
+            <i class="fas fa-user"></i>
+          </div>
+          <% } %>
         </div>
-        <% } %>
         
-        <% if (course.content.totalModules) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-layer-group"></i> Course Structure</h4>
-          <p><%= course.content.totalModules %> modules covering all essential topics</p>
-        </div>
-        <% } %>
-        
-        <% if (course.content.teachingMethods && course.content.teachingMethods.length > 0) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-chalkboard-teacher"></i> Teaching Methods</h4>
-          <ul class="requirement-list">
-            <% course.content.teachingMethods.forEach(method => { %>
-            <li><%= method %></li>
+        <div class="instructor-info">
+          <h3><%= course.instructorDetails.primary.fullName || `${course.instructorDetails.primary.firstName} ${course.instructorDetails.primary.lastName}` %></h3>
+          <p class="instructor-title"><%= course.instructorDetails.primary.title || '' %> <%= course.instructorDetails.primary.designation || 'Lead Instructor' %></p>
+          <p class="instructor-bio"><%= course.instructorDetails.primary.bio || 'Renowned expert in aesthetic medicine with extensive clinical experience and a passion for education.' %></p>
+          
+          <% if (course.instructorDetails.primary.qualifications && course.instructorDetails.primary.qualifications.length > 0) { %>
+          <div class="credentials-list">
+            <% course.instructorDetails.primary.qualifications.forEach(qualification => { %>
+            <span class="credential-badge">
+              <i class="fas fa-award"></i> <%= qualification %>
+            </span>
             <% }) %>
-          </ul>
-        </div>
-        <% } %>
-        
-        <% if (course.content.learningActivities && course.content.learningActivities.length > 0) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-tasks"></i> Learning Activities</h4>
-          <ul class="requirement-list">
-            <% course.content.learningActivities.forEach(activity => { %>
-            <li><%= activity %></li>
+          </div>
+          <% } %>
+          
+          <% if (course.instructorDetails.primary.specializations && course.instructorDetails.primary.specializations.length > 0) { %>
+          <div class="credentials-list">
+            <% course.instructorDetails.primary.specializations.forEach(specialization => { %>
+            <span class="credential-badge" style="background: var(--gradient-gold);">
+              <i class="fas fa-star"></i> <%= specialization %>
+            </span>
             <% }) %>
-          </ul>
+          </div>
+          <% } %>
+          
+          <% if (course.instructorDetails.primary.experience) { %>
+          <p style="color: var(--text-secondary); margin-top: 1rem;">
+            <i class="fas fa-briefcase"></i> <%= course.instructorDetails.primary.experience %> of experience
+          </p>
+          <% } %>
+          
+          <!-- Link to instructor profile -->
+          <a href="/our-instructors/<%= course.instructorDetails.primary._id %>" class="instructor-link">
+            <i class="fas fa-user-circle"></i>
+            View Full Profile
+          </a>
         </div>
-        <% } %>
       </div>
+      <% } %>
       
-      <% if (course.content.supplementaryResources && course.content.supplementaryResources.length > 0) { %>
-      <div class="terms-box" style="margin-top: 30px;">
-        <h4 class="terms-title">
-          <i class="fas fa-folder-open"></i> Supplementary Resources
-        </h4>
-        <ul class="terms-list">
-          <% course.content.supplementaryResources.forEach(resource => { %>
-          <li><%= resource %></li>
-          <% }) %>
-        </ul>
+      <!-- Additional Instructors -->
+      <% if (course.instructorDetails.additional && course.instructorDetails.additional.length > 0) { %>
+      <h3 style="margin: 2rem 0 1rem; color: var(--primary-color);">Supporting Instructors</h3>
+      <div class="schedule-grid">
+        <% course.instructorDetails.additional.forEach(instructor => { %>
+        <div class="schedule-card" style="text-align: left; padding: 2rem;">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <% if (instructor.profileImage) { %>
+              <img src="<%= instructor.profileImage %>" alt="<%= instructor.fullName %>" style="width: 100%; height: 100%; object-fit: cover;">
+              <% } else { %>
+              <i class="fas fa-user" style="color: var(--text-light); font-size: 1.5rem;"></i>
+              <% } %>
+            </div>
+            <div>
+              <h4 style="margin: 0; color: var(--primary-color);"><%= instructor.fullName || `${instructor.firstName} ${instructor.lastName}` %></h4>
+              <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;"><%= instructor.title || '' %> <%= instructor.designation || instructor.role || 'Co-Instructor' %></p>
+            </div>
+          </div>
+          <% if (instructor.bio) { %>
+          <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1rem;"><%= instructor.bio %></p>
+          <% } %>
+          <% if (instructor.specializations && instructor.specializations.length > 0) { %>
+          <div style="margin-bottom: 1rem;">
+            <% instructor.specializations.slice(0, 3).forEach(spec => { %>
+            <span class="topic-tag" style="margin-right: 0.5rem; margin-bottom: 0.5rem;">
+              <%= spec %>
+            </span>
+            <% }) %>
+          </div>
+          <% } %>
+          <a href="/our-instructors/<%= instructor._id %>" class="instructor-link">
+            <i class="fas fa-arrow-right"></i>
+            View Profile
+          </a>
+        </div>
+        <% }) %>
       </div>
       <% } %>
     </div>
     <% } %>
 
-    <!-- Practical Training Details -->
+    <!-- Practical Training -->
     <% if (course.practical) { %>
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
-          <i class="fas fa-hand-holding-medical"></i>
+          <i class="fas fa-hands"></i>
         </div>
         <h2 class="section-title">Hands-On Practical Training</h2>
       </div>
       
-      <% if (course.practical.handsOnComponents && course.practical.handsOnComponents.length > 0) { %>
-      <div class="objectives-grid" style="margin-bottom: 30px;">
-        <% course.practical.handsOnComponents.forEach((component, index) => { %>
-        <div class="objective-item">
+      <% if (course.practical.procedures && course.practical.procedures.length > 0) { %>
+      <div class="objectives-grid" style="margin-bottom: 2rem;">
+        <% course.practical.procedures.forEach((procedure, index) => { %>
+        <div class="objective-card">
           <div class="objective-number"><i class="fas fa-syringe"></i></div>
-          <div class="objective-text"><%= component %></div>
+          <div class="objective-text"><%= procedure %></div>
         </div>
         <% }) %>
       </div>
       <% } %>
       
       <div class="schedule-grid">
-        <% if (course.practical.clinicalHours) { %>
+        <% if (course.practical.studentRatio) { %>
         <div class="schedule-card">
           <div class="schedule-icon">
-            <i class="fas fa-user-clock"></i>
+            <i class="fas fa-user-friends"></i>
           </div>
-          <div class="schedule-label">Clinical Hours</div>
-          <div class="schedule-value"><%= course.practical.clinicalHours %> Hours</div>
-          <div class="schedule-detail">Supervised Practice</div>
+          <div class="schedule-label">Student-Instructor Ratio</div>
+          <div class="schedule-value"><%= course.practical.studentRatio %></div>
+          <div class="schedule-detail">Personalized Attention</div>
         </div>
         <% } %>
         
-        <% if (course.practical.patientInteractions) { %>
+        <% if (course.practical.trainingType && course.practical.trainingType.length > 0) { %>
         <div class="schedule-card">
           <div class="schedule-icon">
-            <i class="fas fa-users"></i>
+            <i class="fas fa-microscope"></i>
           </div>
-          <div class="schedule-label">Patient Interactions</div>
-          <div class="schedule-value"><%= course.practical.patientInteractions %></div>
-          <div class="schedule-detail">Real Cases</div>
+          <div class="schedule-label">Training Methods</div>
+          <div class="schedule-value"><%= course.practical.trainingType.length %> Methods</div>
+          <div class="schedule-detail"><%= course.practical.trainingType.join(', ') %></div>
         </div>
         <% } %>
         
-        <% if (course.practical.proceduresCount) { %>
+        <% if (course.practical.equipment && course.practical.equipment.length > 0) { %>
         <div class="schedule-card">
           <div class="schedule-icon">
-            <i class="fas fa-procedures"></i>
+            <i class="fas fa-tools"></i>
           </div>
-          <div class="schedule-label">Procedures</div>
-          <div class="schedule-value"><%= course.practical.proceduresCount %>+</div>
-          <div class="schedule-detail">Hands-on Practice</div>
+          <div class="schedule-label">Equipment Provided</div>
+          <div class="schedule-value"><%= course.practical.equipment.length %> Types</div>
+          <div class="schedule-detail">Professional Grade</div>
         </div>
         <% } %>
         
-        <% if (course.practical.simulationTraining) { %>
+        <% if (course.practical.hasHandsOn) { %>
         <div class="schedule-card">
           <div class="schedule-icon">
-            <i class="fas fa-vr-cardboard"></i>
+            <i class="fas fa-hand-holding-medical"></i>
           </div>
-          <div class="schedule-label">Simulation</div>
-          <div class="schedule-value">Available</div>
-          <div class="schedule-detail">Advanced Training</div>
+          <div class="schedule-label">Hands-On Practice</div>
+          <div class="schedule-value">Included</div>
+          <div class="schedule-detail">Real-world Experience</div>
         </div>
         <% } %>
       </div>
       
-      <% if (course.practical.practiceProtocols && course.practical.practiceProtocols.length > 0) { %>
-      <div class="terms-box" style="margin-top: 30px;">
-        <h4 class="terms-title">
-          <i class="fas fa-clipboard-check"></i> Practice Protocols
-        </h4>
-        <ul class="terms-list">
-          <% course.practical.practiceProtocols.forEach(protocol => { %>
-          <li><%= protocol %></li>
-          <% }) %>
+      <!-- Safety Requirements -->
+      <% if (course.practical.safetyRequirements) { %>
+      <div class="info-box warning" style="margin-top: 2rem;">
+        <div class="info-box-title">
+          <i class="fas fa-shield-alt"></i>
+          Safety Requirements
+        </div>
+        <ul class="info-list">
+          <% if (course.practical.safetyRequirements.ppeRequired) { %>
+          <li><i class="fas fa-check"></i> Personal Protective Equipment (PPE) required</li>
+          <% } %>
+          <% if (course.practical.safetyRequirements.healthClearance) { %>
+          <li><i class="fas fa-check"></i> Health clearance documentation required</li>
+          <% } %>
+          <% if (course.practical.safetyRequirements.insuranceRequired) { %>
+          <li><i class="fas fa-check"></i> Professional insurance recommended</li>
+          <% } %>
         </ul>
       </div>
       <% } %>
+    </div>
+    <% } %>
+
+    <!-- Assessment & Certification -->
+    <% if (course.assessment?.required || course.certification?.enabled) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <h2 class="section-title">Assessment & Certification</h2>
+      </div>
       
-      <% if (course.practical.safetyGuidelines && course.practical.safetyGuidelines.length > 0) { %>
-      <div class="terms-box" style="margin-top: 20px; border-color: #dc3545;">
-        <h4 class="terms-title" style="color: #dc3545;">
-          <i class="fas fa-exclamation-triangle"></i> Safety Guidelines
-        </h4>
-        <ul class="terms-list">
-          <% course.practical.safetyGuidelines.forEach(guideline => { %>
-          <li><%= guideline %></li>
-          <% }) %>
+      <div class="schedule-grid">
+        <% if (course.assessment?.required) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <div class="schedule-label">Assessment Type</div>
+          <div class="schedule-value">
+            <%= course.assessment.type?.replace(/\b\w/g, l => l.toUpperCase()) || 'Comprehensive' %>
+          </div>
+          <div class="schedule-detail">
+            Passing Score: <%= course.assessment.passingScore || 70 %>%
+          </div>
+        </div>
+        <% } %>
+        
+        <% if (course.certification?.enabled) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-award"></i>
+          </div>
+          <div class="schedule-label">Certificate Type</div>
+          <div class="schedule-value">
+            <%= course.certification.type?.replace(/\b\w/g, l => l.toUpperCase()) || 'Professional' %>
+          </div>
+          <div class="schedule-detail">
+            <% if (course.certification.validity?.isLifetime) { %>
+            Lifetime Validity
+            <% } else if (course.certification.validity?.years) { %>
+            Valid for <%= course.certification.validity.years %> years
+            <% } else { %>
+            Official Recognition
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+        
+        <% if (course.certification?.features?.digitalBadge) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-badge"></i>
+          </div>
+          <div class="schedule-label">Digital Badge</div>
+          <div class="schedule-value">Included</div>
+          <div class="schedule-detail">Shareable Credentials</div>
+        </div>
+        <% } %>
+        
+        <% if (course.certification?.features?.qrVerification) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <div class="schedule-label">Verification</div>
+          <div class="schedule-value">QR Code</div>
+          <div class="schedule-detail">Instant Verification</div>
+        </div>
+        <% } %>
+      </div>
+      
+      <!-- Certification Requirements -->
+      <% if (course.certification?.requirements) { %>
+      <div class="info-box success" style="margin-top: 2rem;">
+        <div class="info-box-title">
+          <i class="fas fa-list-check"></i>
+          Certification Requirements
+        </div>
+        <ul class="info-list">
+          <% if (course.certification.requirements.minimumAttendance) { %>
+          <li><i class="fas fa-check"></i> Minimum <%= course.certification.requirements.minimumAttendance %>% attendance required</li>
+          <% } %>
+          <% if (course.certification.requirements.minimumScore) { %>
+          <li><i class="fas fa-check"></i> Minimum <%= course.certification.requirements.minimumScore %>% assessment score</li>
+          <% } %>
+          <% if (course.certification.requirements.practicalRequired) { %>
+          <li><i class="fas fa-check"></i> Successful completion of practical assessments</li>
+          <% } %>
         </ul>
       </div>
       <% } %>
+    </div>
+    <% } %>
+
+    <!-- Certification Body Information -->
+    <% if (course.certificationBodyDetails) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-building"></i>
+        </div>
+        <h2 class="section-title">Certification Authority</h2>
+      </div>
+      
+      <div class="instructor-profile">
+        <% if (course.certificationBodyDetails.logo) { %>
+        <div class="instructor-avatar" style="background: white; padding: 1rem;">
+          <img src="<%= course.certificationBodyDetails.logo %>" alt="<%= course.certificationBodyDetails.companyName %>" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <% } %>
+        
+        <div class="instructor-info">
+          <h3><%= course.certificationBodyDetails.companyName %></h3>
+          <% if (course.certificationBodyDetails.shortName) { %>
+          <p class="instructor-title">(<%= course.certificationBodyDetails.shortName %>)</p>
+          <% } %>
+          
+          <% if (course.certificationBodyDetails.description) { %>
+          <p class="instructor-bio"><%= course.certificationBodyDetails.description %></p>
+          <% } %>
+          
+          <% if (course.certificationBodyDetails.establishedYear) { %>
+          <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            <i class="fas fa-calendar-alt"></i> Established: <%= course.certificationBodyDetails.establishedYear %>
+          </p>
+          <% } %>
+          
+          <% if (course.certificationBodyDetails.accreditation && course.certificationBodyDetails.accreditation.length > 0) { %>
+          <div class="credentials-list">
+            <% course.certificationBodyDetails.accreditation.forEach(accred => { %>
+            <span class="credential-badge">
+              <i class="fas fa-certificate"></i> <%= accred %>
+            </span>
+            <% }) %>
+          </div>
+          <% } %>
+          
+          <% if (course.certificationBodyDetails.recognizedBy && course.certificationBodyDetails.recognizedBy.length > 0) { %>
+          <div class="credentials-list">
+            <% course.certificationBodyDetails.recognizedBy.forEach(org => { %>
+            <span class="credential-badge" style="background: var(--gradient-gold);">
+              <i class="fas fa-check-circle"></i> <%= org %>
+            </span>
+            <% }) %>
+          </div>
+          <% } %>
+          
+          <% if (course.certificationBodyDetails.website) { %>
+          <a href="<%= course.certificationBodyDetails.website %>" target="_blank" class="instructor-link">
+            <i class="fas fa-external-link-alt"></i>
+            Visit Official Website
+          </a>
+          <% } %>
+        </div>
+      </div>
     </div>
     <% } %>
 
@@ -740,139 +1885,143 @@
         <h2 class="section-title">What's Included</h2>
       </div>
       
-      <div class="certification-features">
-        <% if (course.inclusions.courseMaterials && course.inclusions.courseMaterials.length > 0) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-book-open"></i>
+      <div class="schedule-grid">
+        <% if (course.inclusions.materials?.courseMaterials) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-book"></i>
           </div>
-          <h4 class="cert-title">Course Materials</h4>
-          <p class="cert-description">
-            <%= course.inclusions.courseMaterials.join(', ') %>
-          </p>
+          <div class="schedule-label">Course Materials</div>
+          <div class="schedule-value">Included</div>
+          <div class="schedule-detail">Digital & Physical Resources</div>
         </div>
         <% } %>
         
-        <% if (course.inclusions.mealsIncluded) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
+        <% if (course.inclusions.meals?.lunch) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
             <i class="fas fa-utensils"></i>
           </div>
-          <h4 class="cert-title">Meals & Refreshments</h4>
-          <p class="cert-description">
-            <%= course.inclusions.mealDetails || 'Lunch and refreshments provided' %>
-          </p>
+          <div class="schedule-label">Meals</div>
+          <div class="schedule-value">
+            <%= course.inclusions.meals.breakfast ? 'Full' : 'Lunch' %> Service
+          </div>
+          <div class="schedule-detail">
+            <% if (course.inclusions.meals.dietaryOptions) { %>
+            Dietary options available
+            <% } else { %>
+            Standard menu
+            <% } %>
+          </div>
         </div>
         <% } %>
         
-        <% if (course.inclusions.accommodationIncluded) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
+        <% if (course.inclusions.accommodation?.assistanceProvided) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
             <i class="fas fa-bed"></i>
           </div>
-          <h4 class="cert-title">Accommodation</h4>
-          <p class="cert-description">
-            <%= course.inclusions.accommodationDetails || 'Accommodation assistance available' %>
-          </p>
+          <div class="schedule-label">Accommodation</div>
+          <div class="schedule-value">
+            <%= course.inclusions.accommodation.included ? 'Included' : 'Assistance' %>
+          </div>
+          <div class="schedule-detail">
+            <%= course.inclusions.accommodation.partnerHotels ? 'Partner hotels available' : 'Booking support provided' %>
+          </div>
         </div>
         <% } %>
         
-        <% if (course.inclusions.transportationIncluded) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-shuttle-van"></i>
+        <% if (course.inclusions.materials?.certificatePrinting) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-certificate"></i>
           </div>
-          <h4 class="cert-title">Transportation</h4>
-          <p class="cert-description">
-            <%= course.inclusions.transportationDetails || 'Local transportation provided' %>
-          </p>
+          <div class="schedule-label">Certificate</div>
+          <div class="schedule-value">Physical Copy</div>
+          <div class="schedule-detail">Professional printing included</div>
+        </div>
+        <% } %>
+        
+        <% if (course.inclusions.services?.airportTransfer) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-plane"></i>
+          </div>
+          <div class="schedule-label">Airport Transfer</div>
+          <div class="schedule-value">Included</div>
+          <div class="schedule-detail">Round-trip service</div>
+        </div>
+        <% } %>
+        
+        <% if (course.inclusions.materials?.takeHome) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-box"></i>
+          </div>
+          <div class="schedule-label">Take-Home Kit</div>
+          <div class="schedule-value">Included</div>
+          <div class="schedule-detail">Professional supplies</div>
         </div>
         <% } %>
       </div>
-      
-      <% if (course.inclusions.kitContents && course.inclusions.kitContents.length > 0) { %>
-      <div class="terms-box" style="margin-top: 30px;">
-        <h4 class="terms-title">
-          <i class="fas fa-toolbox"></i> Training Kit Contents
-        </h4>
-        <ul class="terms-list">
-          <% course.inclusions.kitContents.forEach(item => { %>
-          <li><%= item %></li>
-          <% }) %>
-        </ul>
-      </div>
-      <% } %>
-      
-      <% if (course.inclusions.certificateDetails) { %>
-      <div class="terms-box" style="margin-top: 20px;">
-        <h4 class="terms-title">
-          <i class="fas fa-certificate"></i> Certificate Information
-        </h4>
-        <p><%= course.inclusions.certificateDetails %></p>
-      </div>
-      <% } %>
-      
-      <% if (course.inclusions.postCourseSupport && course.inclusions.postCourseSupport.length > 0) { %>
-      <div class="terms-box" style="margin-top: 20px;">
-        <h4 class="terms-title">
-          <i class="fas fa-headset"></i> Post-Course Support
-        </h4>
-        <ul class="terms-list">
-          <% course.inclusions.postCourseSupport.forEach(support => { %>
-          <li><%= support %></li>
-          <% }) %>
-        </ul>
-      </div>
-      <% } %>
     </div>
     <% } %>
 
     <!-- Attendance Policy -->
-    <% if (course.attendance) { %>
+    <% if (course.attendance || course.certification?.requirements) { %>
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
           <i class="fas fa-user-check"></i>
         </div>
-        <h2 class="section-title">Attendance & Completion Requirements</h2>
+        <h2 class="section-title">Attendance & Requirements</h2>
       </div>
       
-      <div class="requirements-grid">
-        <div class="requirement-card">
-          <h4><i class="fas fa-percentage"></i> Minimum Attendance</h4>
-          <p><%= course.attendance.minimumAttendance %>% attendance required for certification</p>
-        </div>
-        
-        <% if (course.attendance.attendanceTracking) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-clipboard-check"></i> Attendance Tracking</h4>
-          <p><%= course.attendance.attendanceTracking %></p>
-        </div>
-        <% } %>
-        
-        <% if (course.attendance.makeUpPolicy) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-redo"></i> Make-Up Policy</h4>
-          <p><%= course.attendance.makeUpPolicy %></p>
+      <div class="schedule-grid">
+        <% if (course.attendance?.minimumRequired || course.certification?.requirements?.minimumAttendance) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-percentage"></i>
+          </div>
+          <div class="schedule-label">Minimum Attendance</div>
+          <div class="schedule-value">
+            <%= course.attendance?.minimumRequired || course.certification?.requirements?.minimumAttendance || 80 %>%
+          </div>
+          <div class="schedule-detail">Required for certification</div>
         </div>
         <% } %>
         
-        <% if (course.attendance.tardyPolicy) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-clock"></i> Punctuality Policy</h4>
-          <p><%= course.attendance.tardyPolicy %></p>
+        <% if (course.attendance?.trackingEnabled) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <div class="schedule-label">Tracking Method</div>
+          <div class="schedule-value">
+            <%= course.attendance.checkInMethod?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Digital' %>
+          </div>
+          <div class="schedule-detail">Automated system</div>
         </div>
         <% } %>
+        
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="schedule-label">Punctuality</div>
+          <div class="schedule-value">Required</div>
+          <div class="schedule-detail">Sessions start on time</div>
+        </div>
+        
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fas fa-redo"></i>
+          </div>
+          <div class="schedule-label">Make-up Policy</div>
+          <div class="schedule-value">Limited</div>
+          <div class="schedule-detail">Subject to availability</div>
+        </div>
       </div>
-      
-      <% if (course.attendance.attendanceImpact) { %>
-      <div class="terms-box" style="margin-top: 20px;">
-        <h4 class="terms-title">
-          <i class="fas fa-exclamation-circle"></i> Impact of Poor Attendance
-        </h4>
-        <p><%= course.attendance.attendanceImpact %></p>
-      </div>
-      <% } %>
     </div>
     <% } %>
 
@@ -881,230 +2030,65 @@
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
-          <i class="fas fa-address-book"></i>
+          <i class="fas fa-headset"></i>
         </div>
-        <h2 class="section-title">Contact Information</h2>
+        <h2 class="section-title">Course Support & Contact</h2>
       </div>
       
       <div class="schedule-grid">
-        <% if (course.contact.courseCoordinator) { %>
-        <div class="schedule-card">
-          <div class="schedule-icon">
-            <i class="fas fa-user-tie"></i>
-          </div>
-          <div class="schedule-label">Course Coordinator</div>
-          <div class="schedule-value"><%= course.contact.courseCoordinator.name %></div>
-          <% if (course.contact.courseCoordinator.email) { %>
-          <div class="schedule-detail">
-            <a href="mailto:<%= course.contact.courseCoordinator.email %>" style="color: #b8860b;">
-              <%= course.contact.courseCoordinator.email %>
-            </a>
-          </div>
-          <% } %>
-        </div>
-        <% } %>
-        
-        <% if (course.contact.supportEmail) { %>
+        <% if (course.contact.email) { %>
         <div class="schedule-card">
           <div class="schedule-icon">
             <i class="fas fa-envelope"></i>
           </div>
-          <div class="schedule-label">Support Email</div>
+          <div class="schedule-label">Email Support</div>
           <div class="schedule-value">
-            <a href="mailto:<%= course.contact.supportEmail %>" style="color: #002147; text-decoration: none;">
-              <%= course.contact.supportEmail %>
+            <a href="mailto:<%= course.contact.email %>" style="color: var(--primary-color); text-decoration: none;">
+              <%= course.contact.email %>
             </a>
           </div>
+          <div class="schedule-detail">General inquiries</div>
         </div>
         <% } %>
         
-        <% if (course.contact.supportPhone) { %>
+        <% if (course.contact.phone) { %>
         <div class="schedule-card">
           <div class="schedule-icon">
             <i class="fas fa-phone"></i>
           </div>
-          <div class="schedule-label">Support Phone</div>
+          <div class="schedule-label">Phone Support</div>
           <div class="schedule-value">
-            <a href="tel:<%= course.contact.supportPhone %>" style="color: #002147; text-decoration: none;">
-              <%= course.contact.supportPhone %>
+            <a href="tel:<%= course.contact.phone %>" style="color: var(--primary-color); text-decoration: none;">
+              <%= course.contact.phone %>
             </a>
           </div>
+          <div class="schedule-detail">Direct assistance</div>
         </div>
         <% } %>
         
-        <% if (course.contact.officeHours) { %>
+        <% if (course.contact.whatsapp) { %>
+        <div class="schedule-card">
+          <div class="schedule-icon">
+            <i class="fab fa-whatsapp"></i>
+          </div>
+          <div class="schedule-label">WhatsApp</div>
+          <div class="schedule-value">
+            <a href="https://wa.me/<%= course.contact.whatsapp.replace(/[^0-9]/g, '') %>" target="_blank" style="color: var(--primary-color); text-decoration: none;">
+              <%= course.contact.whatsapp %>
+            </a>
+          </div>
+          <div class="schedule-detail">Quick responses</div>
+        </div>
+        <% } %>
+        
+        <% if (course.contact.supportHours) { %>
         <div class="schedule-card">
           <div class="schedule-icon">
             <i class="fas fa-business-time"></i>
           </div>
-          <div class="schedule-label">Office Hours</div>
-          <div class="schedule-value"><%= course.contact.officeHours %></div>
-        </div>
-        <% } %>
-      </div>
-      
-      <% if (course.contact.emergencyContact) { %>
-      <div class="terms-box" style="margin-top: 20px; border-color: #dc3545;">
-        <h4 class="terms-title" style="color: #dc3545;">
-          <i class="fas fa-phone-alt"></i> Emergency Contact
-        </h4>
-        <p>
-          <strong><%= course.contact.emergencyContact.name %></strong><br>
-          Phone: <a href="tel:<%= course.contact.emergencyContact.phone %>" style="color: #dc3545;">
-            <%= course.contact.emergencyContact.phone %>
-          </a>
-          <% if (course.contact.emergencyContact.available) { %>
-          <br><small>Available: <%= course.contact.emergencyContact.available %></small>
-          <% } %>
-        </p>
-      </div>
-      <% } %>
-      
-      <% if (course.contact.socialMedia) { %>
-      <div style="text-align: center; margin-top: 30px;">
-        <h4 style="color: #002147; margin-bottom: 15px;">Connect With Us</h4>
-        <div style="display: flex; justify-content: center; gap: 15px;">
-          <% if (course.contact.socialMedia.facebook) { %>
-          <a href="<%= course.contact.socialMedia.facebook %>" target="_blank" class="credential-badge" style="background: #1877f2; color: white; border: none;">
-            <i class="fab fa-facebook-f"></i> Facebook
-          </a>
-          <% } %>
-          <% if (course.contact.socialMedia.twitter) { %>
-          <a href="<%= course.contact.socialMedia.twitter %>" target="_blank" class="credential-badge" style="background: #1da1f2; color: white; border: none;">
-            <i class="fab fa-twitter"></i> Twitter
-          </a>
-          <% } %>
-          <% if (course.contact.socialMedia.linkedin) { %>
-          <a href="<%= course.contact.socialMedia.linkedin %>" target="_blank" class="credential-badge" style="background: #0077b5; color: white; border: none;">
-            <i class="fab fa-linkedin-in"></i> LinkedIn
-          </a>
-          <% } %>
-          <% if (course.contact.socialMedia.instagram) { %>
-          <a href="<%= course.contact.socialMedia.instagram %>" target="_blank" class="credential-badge" style="background: #e4405f; color: white; border: none;">
-            <i class="fab fa-instagram"></i> Instagram
-          </a>
-          <% } %>
-        </div>
-      </div>
-      <% } %>
-    </div>
-    <% } %>
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-clipboard-list"></i>
-        </div>
-        <h2 class="section-title">Requirements & Materials</h2>
-      </div>
-      
-      <div class="requirements-grid">
-        <% if (course.requirements?.prerequisites) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-check-circle"></i> Prerequisites</h4>
-          <p><%= course.requirements.prerequisites %></p>
-        </div>
-        <% } %>
-        
-        <% if (course.requirements?.technicalRequirements || course.requirements?.systemRequirements) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-laptop"></i> Technical Requirements</h4>
-          <ul class="requirement-list">
-            <% if (course.requirements.technicalRequirements) { %>
-            <li><%= course.requirements.technicalRequirements %></li>
-            <% } %>
-            <% if (course.requirements.systemRequirements) { %>
-            <li><%= course.requirements.systemRequirements %></li>
-            <% } %>
-          </ul>
-        </div>
-        <% } %>
-        
-        <% if (course.requirements?.requiredMaterials && course.requirements.requiredMaterials.length > 0) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-tools"></i> Required Materials</h4>
-          <ul class="requirement-list">
-            <% course.requirements.requiredMaterials.forEach(material => { %>
-            <li><%= material %></li>
-            <% }) %>
-          </ul>
-        </div>
-        <% } %>
-        
-        <% if (course.requirements?.providedMaterials && course.requirements.providedMaterials.length > 0) { %>
-        <div class="requirement-card">
-          <h4><i class="fas fa-gift"></i> Provided Materials</h4>
-          <ul class="requirement-list">
-            <% course.requirements.providedMaterials.forEach(material => { %>
-            <li><%= material %></li>
-            <% }) %>
-          </ul>
-        </div>
-        <% } %>
-      </div>
-    </div>
-
-    <!-- Certification Information -->
-    <% if (course.certification?.certificateProvided) { %>
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-certificate"></i>
-        </div>
-        <h2 class="section-title">Certification</h2>
-      </div>
-      
-      <div class="certification-features">
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-award"></i>
-          </div>
-          <h4 class="cert-title">Certificate Type</h4>
-          <p class="cert-description">
-            <%= course.certification.certificateType || 'Certificate of Completion' %>
-          </p>
-        </div>
-        
-        <% if (course.certification.ceuCredits) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-graduation-cap"></i>
-          </div>
-          <h4 class="cert-title">CEU Credits</h4>
-          <p class="cert-description">
-            <%= course.certification.ceuCredits %> Continuing Education Units
-          </p>
-        </div>
-        <% } %>
-        
-        <% if (course.certification.validityPeriod) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-calendar-check"></i>
-          </div>
-          <h4 class="cert-title">Validity Period</h4>
-          <p class="cert-description">
-            <%= course.certification.validityPeriod %> months
-          </p>
-        </div>
-        <% } else { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-infinity"></i>
-          </div>
-          <h4 class="cert-title">Validity</h4>
-          <p class="cert-description">Lifetime Certification</p>
-        </div>
-        <% } %>
-        
-        <% if (course.certification.verificationMethod) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <h4 class="cert-title">Verification</h4>
-          <p class="cert-description">
-            <%= course.certification.verificationMethod %>
-          </p>
+          <div class="schedule-label">Support Hours</div>
+          <div class="schedule-value"><%= course.contact.supportHours %></div>
+          <div class="schedule-detail">Local time</div>
         </div>
         <% } %>
       </div>
@@ -1120,38 +2104,63 @@
         <h2 class="section-title">Enrollment Information</h2>
       </div>
       
-      <div class="terms-box">
-        <h4 class="terms-title">
-          <i class="fas fa-info-circle"></i> Important Information
-        </h4>
-        <ul class="terms-list">
-          <% if (course.enrollment?.registrationDeadline) { %>
-          <li>Registration deadline: <%= new Date(course.enrollment.registrationDeadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></li>
-          <% } %>
-          <% if (course.enrollment?.cancellationPolicy) { %>
-          <li><%= course.enrollment.cancellationPolicy %></li>
-          <% } %>
-          <% if (course.enrollment?.refundPolicy) { %>
-          <li>Refund Policy: <%= course.enrollment.refundPolicy %></li>
-          <% } %>
-          <% if (course.enrollment?.paymentOptions && course.enrollment.paymentOptions.length > 0) { %>
-          <li>Payment options: <%= course.enrollment.paymentOptions.join(', ') %></li>
+      <div class="info-box">
+        <div class="info-box-title">
+          <i class="fas fa-info-circle"></i>
+          Important Enrollment Details
+        </div>
+        <ul class="info-list">
+          <% if (course.schedule?.registrationDeadline) { %>
+          <li><i class="fas fa-calendar-times"></i> Registration deadline: <%= new Date(course.schedule.registrationDeadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></li>
           <% } %>
           <% if (course.enrollment?.minEnrollment) { %>
-          <li>Minimum enrollment: <%= course.enrollment.minEnrollment %> students required</li>
+          <li><i class="fas fa-users"></i> Minimum enrollment: <%= course.enrollment.minEnrollment %> students required</li>
           <% } %>
+          <li><i class="fas fa-credit-card"></i> Payment options: Credit card, bank transfer, installment plans available</li>
+          <li><i class="fas fa-shield-alt"></i> Refund policy: Full refunds available up to 14 days before course start</li>
+          <li><i class="fas fa-exchange-alt"></i> Transfer policy: Course transfers subject to availability and terms</li>
         </ul>
       </div>
-      
-      <% if (course.enrollment?.enrollmentInstructions) { %>
-      <div class="terms-box" style="margin-top: 20px;">
-        <h4 class="terms-title">
-          <i class="fas fa-clipboard-check"></i> How to Enroll
-        </h4>
-        <p><%= course.enrollment.enrollmentInstructions %></p>
-      </div>
-      <% } %>
     </div>
+
+    <!-- Related Courses -->
+    <% if (course.relatedCourses && course.relatedCourses.length > 0) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+        <h2 class="section-title">Related Courses</h2>
+      </div>
+      
+      <div class="schedule-grid">
+        <% course.relatedCourses.forEach(relatedCourse => { %>
+        <div class="schedule-card" style="text-align: left;">
+          <h4 style="margin-bottom: 1rem; color: var(--primary-color);"><%= relatedCourse.basic?.title %></h4>
+          <div style="margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <i class="fas fa-calendar" style="color: var(--accent-color);"></i>
+              <span style="font-size: 0.875rem;">
+                <%= relatedCourse.schedule?.startDate ? new Date(relatedCourse.schedule.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'TBA' %>
+              </span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <i class="fas fa-map-marker-alt" style="color: var(--accent-color);"></i>
+              <span style="font-size: 0.875rem;"><%= relatedCourse.venue?.city || 'Various locations' %></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fas fa-dollar-sign" style="color: var(--gold-color);"></i>
+              <span style="font-size: 0.875rem; font-weight: 600;">$<%= relatedCourse.enrollment?.price || 'TBA' %></span>
+            </div>
+          </div>
+          <a href="/in-person/courses/<%= relatedCourse._id %>" class="btn btn-secondary" style="width: 100%; padding: 0.75rem;">
+            View Details
+          </a>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
 
     <!-- FAQ Section -->
     <div class="content-section">
@@ -1165,21 +2174,25 @@
       <div class="faq-accordion">
         <div class="faq-item">
           <div class="faq-question" onclick="toggleFaq(this)">
-            <h4>What is the dress code for the training?</h4>
+            <h4>What should I bring to the training?</h4>
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
           <div class="faq-answer">
-            <p>Professional medical attire or business casual is recommended. Closed-toe shoes are required for all practical sessions. We recommend bringing a lab coat for hands-on training.</p>
+            <p>Please bring a notepad, writing materials, and comfortable clothing suitable for a professional medical environment. All training materials, equipment, and supplies will be provided. We recommend bringing business cards for networking opportunities.</p>
           </div>
         </div>
         
         <div class="faq-item">
           <div class="faq-question" onclick="toggleFaq(this)">
-            <h4>Are meals provided during the training?</h4>
+            <h4>Is accommodation included in the course fee?</h4>
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
           <div class="faq-answer">
-            <p>Light refreshments and lunch are provided on all training days. Please inform us of any dietary restrictions during registration.</p>
+            <% if (course.inclusions?.accommodation?.included) { %>
+            <p>Yes, accommodation is included in your course fee. We provide comfortable hotel accommodation for the duration of the training.</p>
+            <% } else { %>
+            <p>Accommodation is not included in the course fee, but we provide assistance with booking and have partnerships with nearby hotels for discounted rates.</p>
+            <% } %>
           </div>
         </div>
         
@@ -1189,38 +2202,60 @@
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
           <div class="faq-answer">
-            <p><%= course.enrollment?.refundPolicy || 'Full refunds are available up to 14 days before the course start date. Cancellations made within 14 days are subject to a 50% cancellation fee.' %></p>
+            <p>Full refunds are available up to 14 days before the course start date. Cancellations made within 14 days are subject to a 50% cancellation fee. Emergency cancellations due to medical reasons may be considered on a case-by-case basis.</p>
           </div>
         </div>
         
         <div class="faq-item">
           <div class="faq-question" onclick="toggleFaq(this)">
-            <h4>Will I receive support after the training?</h4>
+            <h4>Will I receive ongoing support after the training?</h4>
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
           <div class="faq-answer">
-            <p>Yes! All participants receive 3 months of post-training support, including access to our online community, monthly Q&A sessions, and email support from instructors.</p>
+            <p>Yes! All participants receive 3 months of post-training support, including access to our online community, monthly Q&A sessions, email support from instructors, and access to updated course materials.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h4>Is the certificate internationally recognized?</h4>
+            <i class="fas fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Our certificates are recognized by major aesthetic medicine organizations and accepted in most countries. The certification includes digital verification and is accredited by <%= course.certificationBodyDetails?.companyName || 'leading industry bodies' %>.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Contact Section -->
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-envelope"></i>
-        </div>
-        <h2 class="section-title">Need More Information?</h2>
-      </div>
-      
-      <div style="text-align: center; padding: 20px;">
-        <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
-          Have questions about this course? Our training advisors are here to help you make the right decision for your professional development.
+    <!-- Final Call to Action -->
+    <div class="content-section" style="text-align: center; background: linear-gradient(135deg, #002147 0%, #001633 100%); color: white;">
+      <div style="max-width: 600px; margin: 0 auto;">
+        <h2 style="color: white; margin-bottom: 1rem;">Ready to Advance Your Career?</h2>
+        <p style="font-size: 1.125rem; opacity: 0.9; margin-bottom: 2rem; color: rgba(255, 255, 255, 0.9);">
+          Join thousands of medical professionals who have transformed their practice with our world-class training programs.
         </p>
-        <a href="/contact" class="btn-primary" style="display: inline-block; text-decoration: none;">
-          <i class="fas fa-phone"></i> Contact Training Advisor
-        </a>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <% if (user) { %>
+            <button class="btn-primary add-to-cart-btn" 
+                    data-course-id="<%= course._id %>" 
+                    data-course-type="InPersonAestheticTraining"
+                    data-price="<%= course.enrollment?.price || 0 %>"
+                    data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                    data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
+                    <%= (course.enrollment?.seatsAvailable <= 0 || course.basic?.status !== 'open') ? 'disabled' : '' %>
+                    style="background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%); color: white; border: none;">
+              <i class="fas fa-shopping-cart"></i> Enroll Now
+            </button>
+          <% } else { %>
+            <button class="btn-secondary" onclick="showLoginRequired()" style="background: transparent; border: 2px solid white; color: white;">
+              <i class="fas fa-shopping-cart"></i> Enroll Now
+            </button>
+          <% } %>
+          <a href="/contact" class="btn" style="background: transparent; border: 2px solid white; color: white; text-decoration: none; padding: 15px 30px; border-radius: 50px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-phone"></i> Contact Us
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -1231,21 +2266,21 @@
       <div class="mobile-price">
         $<%= course.enrollment?.price || 0 %>
       </div>
-      <div class="mobile-buttons">
+      <div>
         <% if (user) { %>
-          <button class="btn-primary add-to-cart-btn" 
+          <button class="btn btn-primary add-to-cart-btn" 
                   data-course-id="<%= course._id %>" 
                   data-course-type="InPersonAestheticTraining"
                   data-price="<%= course.enrollment?.price || 0 %>"
                   data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
                   data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
                   <%= (course.enrollment?.seatsAvailable <= 0 || course.basic?.status !== 'open') ? 'disabled' : '' %>
-                  style="padding: 12px 20px; font-size: 14px;">
-            <i class="fas fa-shopping-cart"></i> Add to Cart
+                  style="padding: 0.75rem 1.5rem; font-size: 0.875rem;">
+            <i class="fas fa-shopping-cart"></i> Enroll
           </button>
         <% } else { %>
-          <button class="btn-primary" onclick="showLoginRequired()" style="padding: 12px 20px; font-size: 14px;">
-            <i class="fas fa-shopping-cart"></i> Add to Cart
+          <button class="btn btn-primary" onclick="showLoginRequired()" style="padding: 0.75rem 1.5rem; font-size: 0.875rem;">
+            <i class="fas fa-shopping-cart"></i> Enroll
           </button>
         <% } %>
       </div>
@@ -1256,7 +2291,7 @@
   <div id="notificationContainer"></div>
 
   <script>
-    // Show notification function
+    // Enhanced Notification System
     function showNotification(title, message, type = 'success') {
       const container = document.getElementById('notificationContainer');
       const notification = document.createElement('div');
@@ -1280,10 +2315,10 @@
       
       container.appendChild(notification);
       
-      // Show notification
+      // Show notification with animation
       setTimeout(() => notification.classList.add('show'), 10);
       
-      // Auto remove
+      // Auto remove after 5 seconds
       setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 500);
@@ -1292,13 +2327,13 @@
 
     // Show login required message
     function showLoginRequired() {
-      showNotification('Authentication Required', 'Please log in to continue', 'warning');
+      showNotification('Authentication Required', 'Please log in to continue with enrollment', 'warning');
       setTimeout(() => {
         window.location.href = '/login';
       }, 2000);
     }
 
-    // Set button loading state
+    // Enhanced button loading state
     function setButtonLoading(button, loading) {
       if (loading) {
         button.classList.add('btn-loading');
@@ -1308,6 +2343,10 @@
           const originalClass = icon.className;
           icon.setAttribute('data-original-class', originalClass);
           icon.className = 'fas fa-spinner fa-spin';
+        }
+        const text = button.childNodes[button.childNodes.length - 1];
+        if (text && text.nodeType === Node.TEXT_NODE) {
+          text.textContent = ' Processing...';
         }
       } else {
         button.classList.remove('btn-loading');
@@ -1322,7 +2361,7 @@
       }
     }
 
-    // Add to Cart functionality
+    // Enhanced Add to Cart functionality
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
       button.addEventListener('click', async (e) => {
         const button = e.currentTarget;
@@ -1349,23 +2388,29 @@
           const result = await response.json();
           
           if (result.success) {
-            showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
-            // Update button state
-            button.style.background = '#2e7d3e';
-            setTimeout(() => button.style.background = '', 2000);
+            showNotification('Successfully Added!', `"${courseTitle}" has been added to your cart`, 'success');
+            
+            // Update button appearance temporarily
+            button.style.background = 'var(--success-color)';
+            button.innerHTML = '<i class="fas fa-check"></i> Added to Cart';
+            
+            setTimeout(() => {
+              button.style.background = '';
+              button.innerHTML = '<i class="fas fa-shopping-cart"></i> Enroll Now';
+            }, 3000);
           } else {
-            showNotification('Unable to Add', result.message, 'warning');
+            showNotification('Unable to Add', result.message || 'Please try again', 'warning');
           }
         } catch (err) {
           console.error('Cart error:', err);
-          showNotification('Error', 'Failed to add course to cart', 'error');
+          showNotification('Error Occurred', 'Failed to add course to cart. Please try again.', 'error');
         } finally {
           setButtonLoading(button, false);
         }
       });
     });
 
-    // Add to Wishlist functionality
+    // Enhanced Add to Wishlist functionality
     document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
       button.addEventListener('click', async (e) => {
         const button = e.currentTarget;
@@ -1390,16 +2435,18 @@
           
           if (result.success) {
             showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
-            // Update button appearance
+            
+            // Update button appearance permanently
             button.innerHTML = '<i class="fas fa-heart" style="color: #e74c3c;"></i> Saved to Wishlist';
             button.style.borderColor = '#e74c3c';
             button.style.color = '#e74c3c';
+            button.disabled = true;
           } else {
-            showNotification('Unable to Add', result.message, 'warning');
+            showNotification('Unable to Add', result.message || 'Please try again', 'warning');
           }
         } catch (err) {
           console.error('Wishlist error:', err);
-          showNotification('Error', 'Failed to add course to wishlist', 'error');
+          showNotification('Error Occurred', 'Failed to add course to wishlist. Please try again.', 'error');
         } finally {
           if (!button.innerHTML.includes('Saved')) {
             setButtonLoading(button, false);
@@ -1408,25 +2455,26 @@
       });
     });
 
-    // FAQ Toggle
+    // Enhanced FAQ Toggle with smooth animations
     function toggleFaq(element) {
       const faqItem = element.parentElement;
       const wasActive = faqItem.classList.contains('active');
       
-      // Close all FAQ items
-      document.querySelectorAll('.faq-item').forEach(item => {
-        item.classList.remove('active');
+      // Close all FAQ items with smooth animation
+      document.querySelectorAll('.faq-item.active').forEach(item => {
+        if (item !== faqItem) {
+          item.classList.remove('active');
+        }
       });
       
-      // Open clicked item if it wasn't active
+      // Toggle clicked item
       if (!wasActive) {
         faqItem.classList.add('active');
+      } else {
+        faqItem.classList.remove('active');
       }
     }
 
-
-
-    
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
@@ -1441,36 +2489,67 @@
       });
     });
 
-    // Initialize
-    console.log('📚 Course details page loaded');
-    console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe all content sections for scroll animations
+    document.querySelectorAll('.content-section').forEach(section => {
+      section.style.opacity = '0';
+      section.style.transform = 'translateY(20px)';
+      section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(section);
+    });
+
+    // Enhanced mobile experience
+    if (window.innerWidth <= 768) {
+      // Add padding to body for mobile action bar
+      document.body.style.paddingBottom = '80px';
+      
+      // Optimize touch interactions
+      document.querySelectorAll('.btn, .schedule-card, .faq-question').forEach(element => {
+        element.style.minHeight = '44px'; // iOS recommended touch target size
+      });
+    }
+
+    // Performance optimization: Lazy load images
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+              imageObserver.unobserve(img);
+            }
+          }
+        });
+      });
+
+      document.querySelectorAll('img[data-src]').forEach(img => {
+        imageObserver.observe(img);
+      });
+    }
+
+    // Initialize page
+    console.log('🎓 Enhanced course details page loaded successfully');
+    console.log('👤 User authenticated:', <%= user ? 'true' : 'false' %>);
     console.log('💺 Seats available:', <%= course.enrollment?.seatsAvailable || 0 %>);
+    console.log('📱 Mobile optimizations:', window.innerWidth <= 768 ? 'enabled' : 'disabled');
   </script>
 
-
-<!-- TEMPORARY DEBUG - Remove after testing -->
-<div style="background: #f0f0f0; padding: 20px; margin: 20px; border: 2px solid red;">
-  <h3>Debug Information:</h3>
-  <p><strong>Course ID:</strong> <%= course._id %></p>
-  <p><strong>Course Title:</strong> <%= course.basic?.title %></p>
-  
-  <h4>Instructor Data Check:</h4>
-  <p><strong>Primary Instructor ID in Course:</strong> <%= course.instructors?.primary?.instructorId || 'NONE' %></p>
-  <p><strong>Primary Instructor Name in Course:</strong> <%= course.instructors?.primary?.name || 'NONE' %></p>
-  <p><strong>Has instructorDetails object:</strong> <%= !!course.instructorDetails %></p>
-  <p><strong>Has primary in instructorDetails:</strong> <%= !!course.instructorDetails?.primary %></p>
-  <% if (course.instructorDetails?.primary) { %>
-    <p><strong>Primary Instructor Full Name:</strong> <%= course.instructorDetails.primary.firstName %> <%= course.instructorDetails.primary.lastName %></p>
-  <% } %>
-  
-  <h4>Certification Body Check:</h4>
-  <p><strong>Certification Body ID in Course:</strong> <%= course.certification?.issuingAuthorityId || 'NONE' %></p>
-  <p><strong>Certification Body Name in Course:</strong> <%= course.certification?.issuingAuthority || 'NONE' %></p>
-  <p><strong>Has certificationBodyDetails:</strong> <%= !!course.certificationBodyDetails %></p>
-  <% if (course.certificationBodyDetails) { %>
-    <p><strong>Certification Body Company Name:</strong> <%= course.certificationBodyDetails.companyName %></p>
-  <% } %>
-</div>
   <%- include('partials/footer') %>
 </body>
 </html>

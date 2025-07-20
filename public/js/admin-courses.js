@@ -2520,6 +2520,9 @@ class AdminCoursesManager {
                 <div class="form-group">
                     <label>Role</label>
                     <select name="instructors[additional][${index}][role]">
+                        <option value="Lead Instructor" ${
+                          data?.role === "Lead Instructor" ? "selected" : ""
+                        }>Lead Instructor</option>
                         <option value="Co-Instructor" ${
                           data?.role === "Co-Instructor" ? "selected" : ""
                         }>Co-Instructor</option>

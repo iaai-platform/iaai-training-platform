@@ -29,6 +29,9 @@
       background: linear-gradient(to right, rgba(0, 33, 71, 0.05), rgba(184, 134, 11, 0.05));
       font-size: 14px;
       backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
     
     .breadcrumb a {
@@ -79,6 +82,18 @@
       animation: float 20s ease-in-out infinite;
     }
     
+    .hero-section::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(184, 134, 11, 0.05) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 25s ease-in-out infinite reverse;
+    }
+    
     @keyframes float {
       0%, 100% { transform: translateY(0) rotate(0deg); }
       50% { transform: translateY(-30px) rotate(180deg); }
@@ -105,8 +120,17 @@
       min-width: 300px;
     }
     
+    .course-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
     .course-code-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 8px 20px;
       background: rgba(184, 134, 11, 0.2);
       border: 1px solid rgba(184, 134, 11, 0.3);
@@ -114,7 +138,6 @@
       color: #b8860b;
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: 20px;
       backdrop-filter: blur(10px);
     }
     
@@ -130,7 +153,19 @@
       font-size: 14px;
       font-weight: 600;
       animation: pulse 2s infinite;
-      margin-left: 10px;
+    }
+    
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(40, 167, 69, 0.2);
+      border: 1px solid rgba(40, 167, 69, 0.3);
+      border-radius: 20px;
+      color: #28a745;
+      font-size: 14px;
+      font-weight: 600;
     }
     
     @keyframes pulse {
@@ -156,9 +191,10 @@
     }
     
     .hero-meta {
-      display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
     }
     
     .meta-item {
@@ -167,11 +203,17 @@
       gap: 10px;
       color: rgba(255, 255, 255, 0.8);
       font-size: 15px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
     }
     
     .meta-item i {
       color: #b8860b;
       font-size: 18px;
+      width: 20px;
+      text-align: center;
     }
     
     .hero-actions {
@@ -181,6 +223,18 @@
       border-radius: 15px;
       padding: 30px;
       min-width: 320px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero-actions::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #b8860b 0%, #002147 100%);
     }
     
     .price-display {
@@ -218,6 +272,12 @@
       font-size: 13px;
       font-weight: 600;
       margin-top: 10px;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow {
+      from { box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }
+      to { box-shadow: 0 0 15px rgba(40, 167, 69, 0.8); }
     }
     
     .action-buttons {
@@ -239,6 +299,21 @@
       text-align: center;
       position: relative;
       overflow: hidden;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-primary:hover::before {
+      left: 100%;
     }
     
     .btn-primary:hover {
@@ -332,6 +407,18 @@
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 30px;
       margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .quick-info-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #002147 0%, #b8860b 50%, #002147 100%);
     }
     
     .info-item {
@@ -340,11 +427,29 @@
       border-radius: 10px;
       background: #f8f9fa;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .info-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, transparent 0%, rgba(184, 134, 11, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .info-item:hover::before {
+      opacity: 1;
     }
     
     .info-item:hover {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
       transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
     
     .info-icon {
@@ -356,6 +461,8 @@
       align-items: center;
       justify-content: center;
       margin: 0 auto 15px;
+      position: relative;
+      z-index: 1;
     }
     
     .info-icon i {
@@ -369,12 +476,16 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 5px;
+      position: relative;
+      z-index: 1;
     }
     
     .info-value {
       font-size: 18px;
       font-weight: 600;
       color: #002147;
+      position: relative;
+      z-index: 1;
     }
     
     /* Content Sections */
@@ -386,6 +497,11 @@
       box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
       position: relative;
       overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .content-section:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     }
     
     .content-section::before {
@@ -406,18 +522,37 @@
     }
     
     .section-icon {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+    }
+    
+    .section-icon::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #b8860b, #002147);
+      border-radius: 14px;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .content-section:hover .section-icon::after {
+      opacity: 1;
     }
     
     .section-icon i {
       color: white;
-      font-size: 18px;
+      font-size: 20px;
     }
     
     .section-title {
@@ -438,6 +573,18 @@
       margin-bottom: 20px;
     }
     
+    .highlight-box {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-left: 4px solid #b8860b;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 0 10px 10px 0;
+    }
+    
+    .highlight-box strong {
+      color: #002147;
+    }
+    
     /* Learning Objectives */
     .objectives-grid {
       display: grid;
@@ -448,20 +595,39 @@
     .objective-item {
       display: flex;
       gap: 15px;
-      padding: 20px;
+      padding: 25px;
       background: #f8f9fa;
-      border-radius: 10px;
+      border-radius: 12px;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .objective-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, #b8860b 0%, #002147 100%);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .objective-item:hover::before {
+      transform: scaleY(1);
     }
     
     .objective-item:hover {
       background: #f0f7ff;
-      transform: translateX(5px);
+      transform: translateX(8px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
     
     .objective-number {
-      width: 40px;
-      height: 40px;
+      width: 45px;
+      height: 45px;
       background: linear-gradient(135deg, #002147 0%, #003366 100%);
       color: white;
       border-radius: 50%;
@@ -470,56 +636,134 @@
       justify-content: center;
       font-weight: 700;
       flex-shrink: 0;
+      font-size: 18px;
+      position: relative;
+    }
+    
+    .objective-number::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(135deg, #b8860b, #002147);
+      border-radius: 50%;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .objective-item:hover .objective-number::after {
+      opacity: 1;
     }
     
     .objective-text {
       flex: 1;
       color: #333;
       line-height: 1.6;
+      font-size: 15px;
+    }
+    
+    /* Prerequisites Section */
+    .prerequisites-box {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border: 1px solid #b8860b;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .prerequisites-box::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(184, 134, 11, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    
+    .prerequisites-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #002147;
+      margin-bottom: 15px;
+    }
+    
+    .prerequisites-title i {
+      color: #b8860b;
     }
     
     /* Course Schedule */
     .schedule-timeline {
       position: relative;
-      padding-left: 40px;
+      padding-left: 50px;
     }
     
     .schedule-timeline::before {
       content: '';
       position: absolute;
-      left: 15px;
+      left: 20px;
       top: 0;
       bottom: 0;
-      width: 2px;
-      background: #e0e0e0;
+      width: 3px;
+      background: linear-gradient(180deg, #b8860b 0%, #002147 100%);
+      border-radius: 2px;
     }
     
     .session-item {
       position: relative;
-      margin-bottom: 30px;
-      padding: 25px;
+      margin-bottom: 35px;
+      padding: 30px;
       background: #f8f9fa;
-      border-radius: 10px;
+      border-radius: 15px;
       transition: all 0.3s ease;
-    }
-    
-    .session-item:hover {
-      background: white;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-      transform: translateX(10px);
+      overflow: hidden;
     }
     
     .session-item::before {
       content: '';
       position: absolute;
-      left: -33px;
-      top: 30px;
-      width: 16px;
-      height: 16px;
+      left: -38px;
+      top: 35px;
+      width: 20px;
+      height: 20px;
       background: #b8860b;
       border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border: 4px solid white;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      z-index: 2;
+    }
+    
+    .session-item::after {
+      content: '';
+      position: absolute;
+      left: -41px;
+      top: 32px;
+      width: 26px;
+      height: 26px;
+      background: linear-gradient(135deg, #b8860b, #002147);
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1;
+    }
+    
+    .session-item:hover::after {
+      opacity: 1;
+    }
+    
+    .session-item:hover {
+      background: white;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateX(15px);
     }
     
     .session-header {
@@ -527,29 +771,39 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 15px;
     }
     
     .session-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
       color: #002147;
+      flex: 1;
     }
     
     .session-datetime {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 5px 15px;
+      gap: 8px;
+      padding: 8px 16px;
       background: white;
-      border-radius: 20px;
-      font-size: 13px;
+      border: 1px solid #e0e0e0;
+      border-radius: 25px;
+      font-size: 14px;
       color: #666;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .session-datetime i {
+      color: #b8860b;
     }
     
     .session-description {
       color: #555;
       line-height: 1.6;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      font-size: 15px;
     }
     
     .session-topics {
@@ -559,11 +813,11 @@
     }
     
     .topic-tag {
-      padding: 5px 12px;
+      padding: 6px 14px;
       background: white;
       border: 1px solid #e0e0e0;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 13px;
       color: #666;
       transition: all 0.3s ease;
     }
@@ -571,56 +825,99 @@
     .topic-tag:hover {
       border-color: #b8860b;
       color: #b8860b;
+      background: #f9f6f0;
     }
     
     /* Technical Requirements */
     .requirements-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 25px;
     }
     
     .requirement-card {
       background: #f8f9fa;
-      border-radius: 10px;
+      border-radius: 15px;
       padding: 30px;
       text-align: center;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .requirement-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, transparent 0%, rgba(184, 134, 11, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .requirement-card:hover::before {
+      opacity: 1;
     }
     
     .requirement-card:hover {
       background: white;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      transform: translateY(-8px);
     }
     
     .requirement-icon {
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       background: linear-gradient(135deg, #002147 0%, #003366 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 15px;
+      margin: 0 auto 20px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .requirement-icon::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(135deg, #b8860b, #002147);
+      border-radius: 50%;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .requirement-card:hover .requirement-icon::after {
+      opacity: 1;
     }
     
     .requirement-icon i {
       color: white;
-      font-size: 24px;
+      font-size: 28px;
     }
     
     .requirement-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
       color: #002147;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
     }
     
     .requirement-detail {
       font-size: 14px;
       color: #666;
-      line-height: 1.5;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
     }
     
     /* Instructor Section */
@@ -629,15 +926,39 @@
       gap: 30px;
       align-items: start;
       flex-wrap: wrap;
+      padding: 30px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 15px;
+      margin-bottom: 30px;
     }
     
     .instructor-image {
-      width: 150px;
-      height: 150px;
-      border-radius: 15px;
+      width: 160px;
+      height: 160px;
+      border-radius: 20px;
       overflow: hidden;
       background: #f0f0f0;
       flex-shrink: 0;
+      position: relative;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .instructor-image::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(135deg, #b8860b, #002147);
+      border-radius: 23px;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .instructor-profile:hover .instructor-image::before {
+      opacity: 1;
     }
     
     .instructor-image img {
@@ -648,32 +969,35 @@
     
     .instructor-info {
       flex: 1;
-      min-width: 250px;
+      min-width: 300px;
     }
     
     .instructor-name {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 600;
       color: #002147;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     
     .instructor-title {
       font-size: 16px;
-      color: #666;
+      color: #b8860b;
       margin-bottom: 20px;
+      font-weight: 500;
     }
     
     .instructor-bio {
       color: #555;
       line-height: 1.6;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      font-size: 15px;
     }
     
     .instructor-credentials {
       display: flex;
       flex-wrap: wrap;
-      gap: 15px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
     
     .credential-badge {
@@ -681,14 +1005,46 @@
       align-items: center;
       gap: 8px;
       padding: 8px 16px;
-      background: #f0f7ff;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4ff 100%);
       border: 1px solid #002147;
       border-radius: 25px;
       font-size: 14px;
       color: #002147;
+      transition: all 0.3s ease;
     }
     
-    /* Platform Details */
+    .credential-badge:hover {
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      color: white;
+    }
+    
+    .instructor-specializations {
+      margin-top: 20px;
+    }
+    
+    .specialization-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #002147;
+      margin-bottom: 10px;
+    }
+    
+    .specialization-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .specialization-tag {
+      padding: 5px 12px;
+      background: #b8860b;
+      color: white;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    /* Platform Features */
     .platform-features {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -698,45 +1054,69 @@
     
     .platform-feature {
       text-align: center;
-      padding: 25px;
+      padding: 30px;
       background: #f8f9fa;
-      border-radius: 10px;
+      border-radius: 15px;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .platform-feature::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(184, 134, 11, 0.1) 0%, rgba(0, 33, 71, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .platform-feature:hover::before {
+      opacity: 1;
     }
     
     .platform-feature:hover {
       background: white;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      transform: translateY(-8px);
     }
     
     .platform-icon {
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 15px;
+      margin: 0 auto 20px;
+      position: relative;
+      z-index: 1;
     }
     
     .platform-icon i {
       color: white;
-      font-size: 24px;
+      font-size: 28px;
     }
     
     .platform-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
       color: #002147;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
     }
     
     .platform-description {
       font-size: 14px;
       color: #666;
-      line-height: 1.5;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
     }
     
     /* Materials Section */
@@ -748,14 +1128,32 @@
     
     .material-card {
       background: #f8f9fa;
-      border-radius: 10px;
+      border-radius: 15px;
       padding: 25px;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .material-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, #b8860b 0%, #002147 100%);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .material-card:hover::before {
+      transform: scaleY(1);
     }
     
     .material-card:hover {
       background: white;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       transform: translateY(-5px);
     }
     
@@ -767,10 +1165,10 @@
     }
     
     .material-icon {
-      width: 40px;
-      height: 40px;
+      width: 45px;
+      height: 45px;
       background: linear-gradient(135deg, #002147 0%, #003366 100%);
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -778,7 +1176,7 @@
     
     .material-icon i {
       color: white;
-      font-size: 18px;
+      font-size: 20px;
     }
     
     .material-title {
@@ -793,10 +1191,11 @@
     
     .material-list li {
       position: relative;
-      padding-left: 25px;
+      padding-left: 30px;
       margin-bottom: 12px;
       color: #555;
       line-height: 1.6;
+      font-size: 15px;
     }
     
     .material-list li::before {
@@ -807,29 +1206,44 @@
       left: 0;
       top: 2px;
       color: #28a745;
+      font-size: 14px;
     }
     
     /* Assessment Info */
     .assessment-info-box {
-      background: #f0f7ff;
-      border: 1px solid #002147;
-      border-radius: 10px;
-      padding: 25px;
-      margin-top: 20px;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4ff 100%);
+      border: 2px solid #002147;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .assessment-info-box::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, rgba(0, 33, 71, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
     }
     
     .assessment-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
       color: #002147;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     
     .assessment-title i {
       color: #b8860b;
+      font-size: 24px;
     }
     
     .assessment-details {
@@ -841,18 +1255,24 @@
     .assessment-detail {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
     
     .assessment-detail i {
       color: #b8860b;
       width: 20px;
       text-align: center;
+      font-size: 16px;
     }
     
     .assessment-detail span {
       color: #555;
       font-size: 14px;
+      font-weight: 500;
     }
     
     /* Certification Features */
@@ -865,22 +1285,154 @@
     
     .cert-feature {
       text-align: center;
-      padding: 25px;
+      padding: 30px;
       background: #f8f9fa;
-      border-radius: 10px;
+      border-radius: 15px;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cert-feature::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(184, 134, 11, 0.1) 0%, rgba(0, 33, 71, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .cert-feature:hover::before {
+      opacity: 1;
     }
     
     .cert-feature:hover {
+      background: white;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      transform: translateY(-8px);
+    }
+    
+    .cert-icon {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cert-icon i {
+      color: white;
+      font-size: 28px;
+    }
+    
+    .cert-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #002147;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cert-description {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Certification Body Section */
+    .certification-body-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border: 2px solid #e0e0e0;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 25px;
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      transition: all 0.3s ease;
+    }
+    
+    .certification-body-card:hover {
+      border-color: #b8860b;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .cert-body-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .cert-body-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    .cert-body-info h3 {
+      color: #002147;
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+    
+    .cert-body-info p {
+      color: #666;
+      margin-bottom: 10px;
+    }
+    
+    .cert-body-info a {
+      color: #b8860b;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .cert-body-info a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Support Section */
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .support-card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .support-card:hover {
       background: white;
       box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
       transform: translateY(-5px);
     }
     
-    .cert-icon {
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+    .support-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -888,19 +1440,19 @@
       margin: 0 auto 15px;
     }
     
-    .cert-icon i {
+    .support-icon i {
       color: white;
-      font-size: 24px;
+      font-size: 20px;
     }
     
-    .cert-title {
+    .support-title {
       font-size: 16px;
       font-weight: 600;
       color: #002147;
       margin-bottom: 8px;
     }
     
-    .cert-description {
+    .support-detail {
       font-size: 14px;
       color: #666;
       line-height: 1.5;
@@ -908,25 +1460,38 @@
     
     /* Registration Terms */
     .terms-box {
-      background: #f8f9fa;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
       border: 1px solid #e0e0e0;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 25px;
       margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .terms-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, #b8860b 0%, #002147 100%);
     }
     
     .terms-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
       color: #002147;
       margin-bottom: 15px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     
     .terms-title i {
       color: #b8860b;
+      font-size: 20px;
     }
     
     .terms-list {
@@ -935,8 +1500,8 @@
     
     .terms-list li {
       position: relative;
-      padding-left: 25px;
-      margin-bottom: 10px;
+      padding-left: 30px;
+      margin-bottom: 12px;
       font-size: 14px;
       color: #555;
       line-height: 1.6;
@@ -961,14 +1526,15 @@
     .faq-item {
       background: white;
       border: 1px solid #e0e0e0;
-      border-radius: 10px;
+      border-radius: 12px;
       margin-bottom: 15px;
       overflow: hidden;
       transition: all 0.3s ease;
     }
     
     .faq-item:hover {
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      border-color: #b8860b;
     }
     
     .faq-question {
@@ -979,6 +1545,24 @@
       justify-content: space-between;
       align-items: center;
       transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .faq-question::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, #b8860b 0%, #002147 100%);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .faq-item.active .faq-question::before,
+    .faq-question:hover::before {
+      transform: scaleY(1);
     }
     
     .faq-question:hover {
@@ -993,7 +1577,7 @@
     }
     
     .faq-icon {
-      font-size: 20px;
+      font-size: 18px;
       color: #b8860b;
       transition: transform 0.3s ease;
     }
@@ -1017,25 +1601,39 @@
     .faq-answer p {
       color: #555;
       line-height: 1.6;
+      font-size: 15px;
     }
     
     /* Course Status Message */
     .course-status-message {
       background: linear-gradient(135deg, #f0f7ff 0%, #e8f4ff 100%);
-      border: 1px solid #002147;
-      border-radius: 10px;
-      padding: 20px;
+      border: 2px solid #002147;
+      border-radius: 12px;
+      padding: 25px;
       margin: 30px auto;
       max-width: 800px;
       text-align: center;
       font-size: 16px;
       color: #002147;
       font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .course-status-message::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #b8860b 0%, #002147 100%);
     }
     
     .course-status-message i {
       margin-right: 10px;
       color: #b8860b;
+      font-size: 18px;
     }
     
     /* Mobile Action Bar */
@@ -1049,6 +1647,7 @@
       padding: 15px 20px;
       box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
       z-index: 100;
+      border-top: 3px solid #b8860b;
     }
     
     .mobile-action-content {
@@ -1077,17 +1676,26 @@
       max-width: 400px;
       padding: 20px 25px;
       background: white;
-      border-radius: 10px;
+      border-radius: 12px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
       gap: 15px;
       transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
       z-index: 1000;
+      border-left: 4px solid #28a745;
     }
     
     .notification.show {
       right: 20px;
+    }
+    
+    .notification.error {
+      border-left-color: #dc3545;
+    }
+    
+    .notification.warning {
+      border-left-color: #ffc107;
     }
     
     .notification-icon {
@@ -1154,6 +1762,8 @@
       
       .hero-actions {
         margin-top: 20px;
+        min-width: auto;
+        width: 100%;
       }
       
       .quick-info-bar {
@@ -1181,10 +1791,13 @@
       .instructor-profile {
         flex-direction: column;
         text-align: center;
+        padding: 20px;
       }
       
       .instructor-image {
         margin: 0 auto;
+        width: 120px;
+        height: 120px;
       }
       
       .mobile-action-bar {
@@ -1203,6 +1816,44 @@
       
       .notification.show {
         right: 10px;
+      }
+      
+      .objectives-grid,
+      .requirements-grid,
+      .platform-features,
+      .materials-grid,
+      .certification-features {
+        grid-template-columns: 1fr;
+      }
+      
+      .hero-meta {
+        grid-template-columns: 1fr;
+      }
+      
+      .assessment-details {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 28px;
+      }
+      
+      .price-amount {
+        font-size: 36px;
+      }
+      
+      .quick-info-bar {
+        grid-template-columns: 1fr;
+      }
+      
+      .content-section {
+        padding: 20px 15px;
+      }
+      
+      .instructor-profile {
+        padding: 15px;
       }
     }
   </style>
@@ -1227,12 +1878,18 @@
     <div class="hero-content">
       <div class="hero-header">
         <div class="hero-info">
-          <div class="course-code-badge">
-            <i class="fas fa-tag"></i> <%= course.courseCode || 'N/A' %>
+          <div class="course-badges">
+            <div class="course-code-badge">
+              <i class="fas fa-tag"></i> <%= course.courseCode || 'N/A' %>
+            </div>
+            <span class="live-indicator">
+              <i class="fas fa-circle"></i> LIVE TRAINING
+            </span>
+            <span class="level-badge">
+              <i class="fas fa-layer-group"></i> <%= course.experienceLevel || 'All Levels' %>
+            </span>
           </div>
-          <span class="live-indicator">
-            <i class="fas fa-circle"></i> LIVE TRAINING
-          </span>
+          
           <h1 class="hero-title"><%= course.title || 'Online Live Training Course' %></h1>
           <p class="hero-description"><%= course.description || 'Join our interactive live online training session and learn from expert instructors in real-time.' %></p>
           
@@ -1253,6 +1910,12 @@
               <i class="fas fa-clock"></i>
               <span><%= course.duration || '2 hours' %></span>
             </div>
+            <% if (course.primaryTimezone) { %>
+            <div class="meta-item">
+              <i class="fas fa-globe"></i>
+              <span><%= course.primaryTimezone %></span>
+            </div>
+            <% } %>
           </div>
         </div>
         
@@ -1367,8 +2030,18 @@
           <i class="fas fa-signal"></i>
         </div>
         <div class="info-label">Level</div>
-        <div class="info-value"><%= course.level || 'All Levels' %></div>
+        <div class="info-value"><%= course.experienceLevel ? course.experienceLevel.charAt(0).toUpperCase() + course.experienceLevel.slice(1).replace('-', ' ') : 'All Levels' %></div>
       </div>
+      
+      <% if (course.recordingAvailable) { %>
+      <div class="info-item">
+        <div class="info-icon">
+          <i class="fas fa-video"></i>
+        </div>
+        <div class="info-label">Recording</div>
+        <div class="info-value"><%= course.recordingDuration || 30 %> Days Access</div>
+      </div>
+      <% } %>
     </div>
 
     <!-- Course Status Message -->
@@ -1388,17 +2061,35 @@
       </div>
       
       <div class="overview-content">
-        <p><%= course.Aboutthiscourse || course.description || 'This comprehensive online live training program is designed to provide healthcare professionals with the knowledge and practical skills needed to excel in aesthetic medicine.' %></p>
+        <p><%= course.aboutThisCourse || course.description || 'This comprehensive online live training program is designed to provide healthcare professionals with the knowledge and practical skills needed to excel in aesthetic medicine.' %></p>
         
         <% if (course.targetAudience) { %>
-        <p><strong>Who Should Attend:</strong> <%= course.targetAudience %></p>
-        <% } %>
-        
-        <% if (course.prerequisites) { %>
-        <p><strong>Prerequisites:</strong> <%= course.prerequisites %></p>
+        <div class="highlight-box">
+          <strong>Who Should Attend:</strong> <%= course.targetAudience %>
+        </div>
         <% } %>
       </div>
     </div>
+
+    <!-- Prerequisites -->
+    <% if (course.prerequisites && course.prerequisites !== 'None') { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-clipboard-list"></i>
+        </div>
+        <h2 class="section-title">Prerequisites</h2>
+      </div>
+      
+      <div class="prerequisites-box">
+        <div class="prerequisites-title">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Requirements Before Enrollment</span>
+        </div>
+        <p><%= course.prerequisites %></p>
+      </div>
+    </div>
+    <% } %>
 
     <!-- Learning Objectives -->
     <% if (course.objectives && course.objectives.length > 0) { %>
@@ -1439,6 +2130,9 @@
             <span class="session-datetime">
               <i class="far fa-calendar"></i> <%= new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %>
               <i class="far fa-clock" style="margin-left: 10px;"></i> <%= day.startTime %> - <%= day.endTime %>
+              <% if (course.primaryTimezone) { %>
+                (<%= course.primaryTimezone %>)
+              <% } %>
             </span>
           </div>
           
@@ -1510,9 +2204,24 @@
             <i class="fas fa-wifi"></i>
           </div>
           <h4 class="requirement-title">Internet Speed</h4>
-          <p class="requirement-detail">Minimum 5 Mbps for HD video streaming</p>
+          <p class="requirement-detail">
+            <% if (course.internetSpeed?.minimum) { %>
+              Min: <%= course.internetSpeed.minimum %><% if (course.internetSpeed.recommended) { %>, Recommended: <%= course.internetSpeed.recommended %><% } %>
+            <% } else { %>
+              Minimum 5 Mbps for HD video streaming
+            <% } %>
+          </p>
         </div>
         
+        <% if (course.systemRequirements?.os && course.systemRequirements.os.length > 0) { %>
+        <div class="requirement-card">
+          <div class="requirement-icon">
+            <i class="fas fa-desktop"></i>
+          </div>
+          <h4 class="requirement-title">Operating System</h4>
+          <p class="requirement-detail"><%= course.systemRequirements.os.join(', ') %></p>
+        </div>
+        <% } else { %>
         <div class="requirement-card">
           <div class="requirement-icon">
             <i class="fas fa-desktop"></i>
@@ -1520,22 +2229,56 @@
           <h4 class="requirement-title">Device</h4>
           <p class="requirement-detail">Computer with webcam and microphone</p>
         </div>
+        <% } %>
         
         <div class="requirement-card">
           <div class="requirement-icon">
             <i class="fas fa-headset"></i>
           </div>
-          <h4 class="requirement-title">Audio</h4>
-          <p class="requirement-detail">Headset recommended for best experience</p>
+          <h4 class="requirement-title">Audio Equipment</h4>
+          <p class="requirement-detail">
+            <% if (course.equipment?.microphone === 'required') { %>
+              Microphone required
+            <% } else if (course.equipment?.headset === 'required') { %>
+              Headset required
+            <% } else { %>
+              Headset recommended for best experience
+            <% } %>
+          </p>
         </div>
+        
+        <% if (course.systemRequirements?.browsers && course.systemRequirements.browsers.length > 0) { %>
+        <div class="requirement-card">
+          <div class="requirement-icon">
+            <i class="fas fa-globe"></i>
+          </div>
+          <h4 class="requirement-title">Browser</h4>
+          <p class="requirement-detail"><%= course.systemRequirements.browsers.join(', ') %></p>
+        </div>
+        <% } %>
+        
+        <% if (course.requiredSoftware && course.requiredSoftware.length > 0) { %>
+        <div class="requirement-card">
+          <div class="requirement-icon">
+            <i class="fas fa-download"></i>
+          </div>
+          <h4 class="requirement-title">Required Software</h4>
+          <p class="requirement-detail"><%= course.requiredSoftware.join(', ') %></p>
+        </div>
+        <% } %>
       </div>
       
       <% if (course.technicalRequirements || course.systemRequirements) { %>
       <div class="terms-box" style="margin-top: 30px;">
         <h4 class="terms-title">
-          <i class="fas fa-exclamation-triangle"></i> Additional Requirements
+          <i class="fas fa-exclamation-triangle"></i> Additional Technical Information
         </h4>
-        <p><%= course.technicalRequirements || course.systemRequirements %></p>
+        <% if (course.technicalRequirements) { %>
+          <p><%= course.technicalRequirements %></p>
+        <% } %>
+        <% if (course.techCheckRequired) { %>
+          <p><strong>Tech Check:</strong> A technical check session is recommended before the course starts.</p>
+        <% } %>
       </div>
       <% } %>
     </div>
@@ -1556,7 +2299,7 @@
           <% if (course.instructorDetails?.profilePicture) { %>
           <img src="<%= course.instructorDetails.profilePicture %>" alt="<%= course.instructor %>">
           <% } else { %>
-          <div class="image-placeholder" style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0;">
+          <div class="image-placeholder" style="display: flex; align-items: center; justify-content: center; height: 100%; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);">
             <i class="fas fa-user" style="font-size: 48px; color: #999;"></i>
           </div>
           <% } %>
@@ -1565,6 +2308,13 @@
         <div class="instructor-info">
           <h3 class="instructor-name"><%= course.instructor || 'Lead Instructor' %></h3>
           <p class="instructor-title"><%= course.instructorDetails?.title || 'Expert Trainer' %></p>
+          
+          <% if (course.instructorDetails?.yearsOfExperience) { %>
+          <p style="color: #b8860b; font-weight: 600; margin-bottom: 15px;">
+            <i class="fas fa-award"></i> <%= course.instructorDetails.yearsOfExperience %> years of experience
+          </p>
+          <% } %>
+          
           <p class="instructor-bio"><%= course.instructorDetails?.bio || 'Experienced practitioner with extensive expertise in aesthetic medicine and online education.' %></p>
           
           <% if (course.instructorDetails?.qualifications && course.instructorDetails.qualifications.length > 0) { %>
@@ -1576,17 +2326,39 @@
             <% }) %>
           </div>
           <% } %>
+          
+          <% if (course.instructorDetails?.specializations && course.instructorDetails.specializations.length > 0) { %>
+          <div class="instructor-specializations">
+            <div class="specialization-title">Specializations:</div>
+            <div class="specialization-list">
+              <% course.instructorDetails.specializations.forEach(spec => { %>
+              <span class="specialization-tag"><%= spec %></span>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (course.instructorDetails?.achievements && course.instructorDetails.achievements.length > 0) { %>
+          <div style="margin-top: 20px;">
+            <div class="specialization-title">Notable Achievements:</div>
+            <ul style="margin-top: 10px; padding-left: 20px;">
+              <% course.instructorDetails.achievements.forEach(achievement => { %>
+              <li style="color: #555; margin-bottom: 8px;"><%= achievement %></li>
+              <% }) %>
+            </ul>
+          </div>
+          <% } %>
         </div>
       </div>
       
       <!-- Co-Instructors -->
       <% if (course.coInstructors && course.coInstructors.length > 0) { %>
-      <h3 style="margin: 30px 0 20px; color: #002147;">Co-Instructors</h3>
+      <h3 style="margin: 30px 0 20px; color: #002147; font-size: 22px;">Co-Instructors</h3>
       <div class="requirements-grid">
         <% course.coInstructors.forEach((coInstructor, index) => { %>
         <div class="requirement-card">
           <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-            <div style="width: 60px; height: 60px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center; overflow: hidden;">
               <% if (course.coInstructorDetails && course.coInstructorDetails[index]?.profilePicture) { %>
               <img src="<%= course.coInstructorDetails[index].profilePicture %>" alt="<%= coInstructor %>" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
               <% } else { %>
@@ -1594,8 +2366,10 @@
               <% } %>
             </div>
             <div>
-              <h4 style="margin: 0; color: #002147;"><%= coInstructor %></h4>
-              <p style="margin: 0; color: #666; font-size: 14px;">Co-Instructor</p>
+              <h4 style="margin: 0; color: #002147; font-size: 16px;"><%= coInstructor %></h4>
+              <p style="margin: 0; color: #b8860b; font-size: 14px; font-weight: 500;">
+                <%= (course.coInstructorDetails && course.coInstructorDetails[index]?.role) ? course.coInstructorDetails[index].role : 'Co-Instructor' %>
+              </p>
             </div>
           </div>
           <% if (course.coInstructorDetails && course.coInstructorDetails[index]?.bio) { %>
@@ -1618,6 +2392,7 @@
       </div>
       
       <div class="platform-features">
+        <% if (!course.platformFeatures || course.platformFeatures.chat !== false) { %>
         <div class="platform-feature">
           <div class="platform-icon">
             <i class="fas fa-comments"></i>
@@ -1625,15 +2400,27 @@
           <h4 class="platform-title">Real-time Q&A</h4>
           <p class="platform-description">Ask questions and get immediate answers from instructors</p>
         </div>
+        <% } %>
         
+        <% if (course.platformFeatures?.breakoutRooms) { %>
+        <div class="platform-feature">
+          <div class="platform-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h4 class="platform-title">Breakout Rooms</h4>
+          <p class="platform-description">Participate in small group discussions and activities</p>
+        </div>
+        <% } else { %>
         <div class="platform-feature">
           <div class="platform-icon">
             <i class="fas fa-users"></i>
           </div>
           <h4 class="platform-title">Interactive Sessions</h4>
-          <p class="platform-description">Participate in breakout rooms and group discussions</p>
+          <p class="platform-description">Participate in group discussions and activities</p>
         </div>
+        <% } %>
         
+        <% if (course.platformFeatures?.screenSharing !== false) { %>
         <div class="platform-feature">
           <div class="platform-icon">
             <i class="fas fa-desktop"></i>
@@ -1641,29 +2428,54 @@
           <h4 class="platform-title">Screen Sharing</h4>
           <p class="platform-description">View demonstrations and presentations in high quality</p>
         </div>
+        <% } %>
         
         <div class="platform-feature">
           <div class="platform-icon">
             <i class="fas fa-video"></i>
           </div>
           <h4 class="platform-title">Recording Access</h4>
-          <p class="platform-description"><%= course.recordingAvailable ? 'Session recording available for 30 days' : 'Live attendance required' %></p>
+          <p class="platform-description">
+            <% if (course.recordingAvailable) { %>
+              Session recording available for <%= course.recordingDuration || 30 %> days
+            <% } else { %>
+              Live attendance required
+            <% } %>
+          </p>
         </div>
+        
+        <% if (course.platformFeatures?.polling) { %>
+        <div class="platform-feature">
+          <div class="platform-icon">
+            <i class="fas fa-poll"></i>
+          </div>
+          <h4 class="platform-title">Live Polling</h4>
+          <p class="platform-description">Participate in interactive polls and quizzes</p>
+        </div>
+        <% } %>
+        
+        <% if (course.platformFeatures?.whiteboard) { %>
+        <div class="platform-feature">
+          <div class="platform-icon">
+            <i class="fas fa-chalkboard"></i>
+          </div>
+          <h4 class="platform-title">Digital Whiteboard</h4>
+          <p class="platform-description">Collaborative whiteboard for demonstrations</p>
+        </div>
+        <% } %>
       </div>
     </div>
 
     <!-- Course Materials -->
-    <% if (course.materials || course.resources) { %>
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
           <i class="fas fa-folder-open"></i>
         </div>
-        <h2 class="section-title">Course Materials</h2>
+        <h2 class="section-title">Course Materials & Resources</h2>
       </div>
       
       <div class="materials-grid">
-        <% if (course.materials?.presentations || course.materials?.notes) { %>
         <div class="material-card">
           <div class="material-header">
             <div class="material-icon">
@@ -1672,13 +2484,17 @@
             <h4 class="material-title">Digital Resources</h4>
           </div>
           <ul class="material-list">
-            <li>Presentation slides</li>
-            <li>Course notes and handouts</li>
-            <li>Reference materials</li>
-            <li>Additional reading lists</li>
+            <% if (course.materials?.handouts && course.materials.handouts.length > 0) { %>
+              <% course.materials.handouts.forEach(handout => { %>
+              <li><%= handout.title || 'Course handout' %></li>
+              <% }) %>
+            <% } else { %>
+              <li>Presentation slides</li>
+              <li>Course notes and handouts</li>
+              <li>Reference materials</li>
+            <% } %>
           </ul>
         </div>
-        <% } %>
         
         <% if (course.resources && course.resources.length > 0) { %>
         <div class="material-card">
@@ -1690,7 +2506,23 @@
           </div>
           <ul class="material-list">
             <% course.resources.forEach(resource => { %>
-            <li><%= resource %></li>
+            <li><%= typeof resource === 'object' ? resource.title : resource %></li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+        
+        <% if (course.materials?.virtualLabs && course.materials.virtualLabs.length > 0) { %>
+        <div class="material-card">
+          <div class="material-header">
+            <div class="material-icon">
+              <i class="fas fa-flask"></i>
+            </div>
+            <h4 class="material-title">Virtual Labs</h4>
+          </div>
+          <ul class="material-list">
+            <% course.materials.virtualLabs.forEach(lab => { %>
+            <li><%= lab.name %> - <%= lab.duration %> hours access</li>
             <% }) %>
           </ul>
         </div>
@@ -1701,17 +2533,24 @@
             <div class="material-icon">
               <i class="fas fa-headset"></i>
             </div>
-            <h4 class="material-title">Support</h4>
+            <h4 class="material-title">Support & Access</h4>
           </div>
           <ul class="material-list">
             <li>Technical support during session</li>
+            <% if (course.postCourseAccess?.forum) { %>
+            <li>Post-session Q&A forum access for <%= course.postCourseAccess.forum %> days</li>
+            <% } else { %>
             <li>Post-session Q&A forum access</li>
+            <% } %>
+            <% if (course.postCourseAccess?.materials) { %>
+            <li>Material access for <%= course.postCourseAccess.materials %> days</li>
+            <% } else { %>
             <li>Email support for 30 days</li>
+            <% } %>
           </ul>
         </div>
       </div>
     </div>
-    <% } %>
 
     <!-- Assessment & Certification -->
     <% if (course.certificateProvided || (typeof assessmentInfo !== 'undefined' && assessmentInfo?.hasAssessment)) { %>
@@ -1765,7 +2604,7 @@
           </div>
           <h4 class="cert-title">Certificate Type</h4>
           <p class="cert-description">
-            Certificate of <%= course.certificateType || 'Completion' %>
+            Certificate of <%= course.certificateType?.charAt(0).toUpperCase() + course.certificateType?.slice(1) || 'Completion' %>
           </p>
         </div>
         
@@ -1787,7 +2626,11 @@
           </div>
           <h4 class="cert-title">Requirements</h4>
           <p class="cert-description">
-            <%= (typeof assessmentInfo !== 'undefined' && assessmentInfo?.mustPassToGetCertificate) ? 'Pass assessment &' : '' %> Attend full session
+            <% if (course.certificateRequirements?.minimumAttendance) { %>
+              <%= course.certificateRequirements.minimumAttendance %>% attendance required
+            <% } else { %>
+              <%= (typeof assessmentInfo !== 'undefined' && assessmentInfo?.mustPassToGetCertificate) ? 'Pass assessment & ' : '' %>Attend full session
+            <% } %>
           </p>
         </div>
         
@@ -1797,11 +2640,129 @@
           </div>
           <h4 class="cert-title">Digital Certificate</h4>
           <p class="cert-description">
-            Download immediately after completion
+            <% if (course.certificateFeatures?.autoGenerate) { %>
+              Generated automatically after completion
+            <% } else { %>
+              Download immediately after completion
+            <% } %>
           </p>
         </div>
+        
+        <% if (course.certificateFeatures?.digitalBadge) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-badge"></i>
+          </div>
+          <h4 class="cert-title">Digital Badge</h4>
+          <p class="cert-description">
+            Verifiable digital badge for LinkedIn
+          </p>
+        </div>
+        <% } %>
+        
+        <% if (course.certificateFeatures?.qrVerification) { %>
+        <div class="cert-feature">
+          <div class="cert-icon">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <h4 class="cert-title">QR Verification</h4>
+          <p class="cert-description">
+            QR code for instant certificate verification
+          </p>
+        </div>
+        <% } %>
       </div>
       <% } %>
+    </div>
+    <% } %>
+
+    <!-- Certification Body Information -->
+    <% if (course.certificationBody) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-building"></i>
+        </div>
+        <h2 class="section-title">Certification Issued By</h2>
+      </div>
+      
+      <div class="certification-body-card">
+        <% if (course.certificationBody.logo) { %>
+        <div class="cert-body-logo">
+          <img src="<%= course.certificationBody.logo %>" alt="<%= course.certificationBody.name %>">
+        </div>
+        <% } else { %>
+        <div class="cert-body-logo">
+          <i class="fas fa-building" style="font-size: 32px; color: #999;"></i>
+        </div>
+        <% } %>
+        
+        <div class="cert-body-info">
+          <h3><%= course.certificationBody.displayName || course.certificationBody.name %></h3>
+          <% if (course.certificationBody.accreditation && course.certificationBody.accreditation.length > 0) { %>
+          <p><strong>Accredited by:</strong> <%= course.certificationBody.accreditation.join(', ') %></p>
+          <% } %>
+          <% if (course.certificationBody.website) { %>
+          <a href="<%= course.certificationBody.website %>" target="_blank" rel="noopener">
+            <i class="fas fa-external-link-alt"></i> Visit Website
+          </a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Course Support -->
+    <% if (course.supportContact || course.supportHours) { %>
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-headset"></i>
+        </div>
+        <h2 class="section-title">Course Support</h2>
+      </div>
+      
+      <div class="support-grid">
+        <% if (course.supportContact?.email) { %>
+        <div class="support-card">
+          <div class="support-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h4 class="support-title">Email Support</h4>
+          <p class="support-detail"><%= course.supportContact.email %></p>
+        </div>
+        <% } %>
+        
+        <% if (course.supportContact?.phone) { %>
+        <div class="support-card">
+          <div class="support-icon">
+            <i class="fas fa-phone"></i>
+          </div>
+          <h4 class="support-title">Phone Support</h4>
+          <p class="support-detail"><%= course.supportContact.phone %></p>
+        </div>
+        <% } %>
+        
+        <% if (course.supportContact?.whatsapp) { %>
+        <div class="support-card">
+          <div class="support-icon">
+            <i class="fab fa-whatsapp"></i>
+          </div>
+          <h4 class="support-title">WhatsApp</h4>
+          <p class="support-detail"><%= course.supportContact.whatsapp %></p>
+        </div>
+        <% } %>
+        
+        <% if (course.supportHours?.schedule) { %>
+        <div class="support-card">
+          <div class="support-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h4 class="support-title">Support Hours</h4>
+          <p class="support-detail"><%= course.supportHours.schedule %></p>
+        </div>
+        <% } %>
+      </div>
     </div>
     <% } %>
 
@@ -1820,6 +2781,9 @@
         </h4>
         <ul class="terms-list">
           <li>Start Date: <%= course.startDate ? new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'TBD' %></li>
+          <% if (course.endDate) { %>
+          <li>End Date: <%= new Date(course.endDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></li>
+          <% } %>
           <% if (course.registrationDeadline) { %>
           <li>Registration Deadline: <%= new Date(course.registrationDeadline).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></li>
           <% } %>
@@ -1836,9 +2800,16 @@
         <ul class="terms-list">
           <li>Full payment required to confirm registration</li>
           <li>Access link will be sent 24 hours before the session</li>
-          <li>Recording access (if available) for 30 days post-session</li>
+          <% if (course.recordingAvailable) { %>
+          <li>Recording access for <%= course.recordingDuration || 30 %> days post-session</li>
+          <% } %>
+          <% if (course.certificateProvided) { %>
           <li>Certificate issued upon successful completion</li>
+          <% } %>
           <li>Cancellation policy: Full refund up to 7 days before start</li>
+          <% if (course.waitlistEnabled) { %>
+          <li>Waitlist available if course is full</li>
+          <% } %>
         </ul>
       </div>
     </div>
@@ -1859,7 +2830,7 @@
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
           <div class="faq-answer">
-            <p><%= course.recordingAvailable ? 'If you cannot attend live, you will have access to the recording for 30 days. However, live attendance is recommended for the best learning experience and interaction with instructors.' : 'Live attendance is required for this course. Please ensure you can attend before registering.' %></p>
+            <p><%= course.recordingAvailable ? `If you cannot attend live, you will have access to the recording for ${course.recordingDuration || 30} days. However, live attendance is recommended for the best learning experience and interaction with instructors.` : 'Live attendance is required for this course. Please ensure you can attend before registering.' %></p>
           </div>
         </div>
         
@@ -1879,10 +2850,11 @@
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
           <div class="faq-answer">
-            <p>You'll need a computer with a stable internet connection (minimum 5 Mbps), webcam, and microphone. We recommend using a headset for better audio quality. Make sure to test your setup before the session starts.</p>
+            <p>You'll need a computer with a stable internet connection (minimum <%= course.internetSpeed?.minimum || '5 Mbps' %>), webcam, and microphone. We recommend using a headset for better audio quality. Make sure to test your setup before the session starts.</p>
           </div>
         </div>
         
+        <% if (course.certificateProvided) { %>
         <div class="faq-item">
           <div class="faq-question" onclick="toggleFaq(this)">
             <h4>How do I get my certificate?</h4>
@@ -1892,6 +2864,31 @@
             <p>Upon successful completion of the course <%= (typeof assessmentInfo !== 'undefined' && assessmentInfo?.mustPassToGetCertificate) ? 'and passing the assessment' : '' %>, your certificate will be available for download from your dashboard. You'll receive an email notification when it's ready.</p>
           </div>
         </div>
+        <% } %>
+        
+        <% if (course.techCheckRequired) { %>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h4>Is there a technical check session?</h4>
+            <i class="fas fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Yes, we recommend attending our technical check session to ensure your setup works properly. You'll receive details about the tech check after registration.</p>
+          </div>
+        </div>
+        <% } %>
+        
+        <% if (course.networkingOptions?.virtualCoffeeBreaks) { %>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h4>Are there networking opportunities?</h4>
+            <i class="fas fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Yes! We include virtual coffee breaks and networking sessions where you can connect with fellow participants and instructors.</p>
+          </div>
+        </div>
+        <% } %>
       </div>
     </div>
 
@@ -2148,10 +3145,45 @@
       });
     });
 
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe content sections for scroll animations
+    document.addEventListener('DOMContentLoaded', function() {
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(section);
+      });
+    });
+
     // Initialize
-    console.log('📚 Online live course details page loaded');
+    console.log('📚 Enhanced online live course details page loaded');
     console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
     console.log('💺 Seats available:', <%= typeof course.availableSeats !== 'undefined' ? course.availableSeats : 'N/A' %>);
+    
+    // Add loading states to images
+    document.querySelectorAll('img').forEach(img => {
+      img.addEventListener('load', function() {
+        this.style.opacity = '1';
+      });
+      img.style.opacity = '0';
+      img.style.transition = 'opacity 0.3s ease';
+    });
   </script>
 
   <%- include('partials/footer') %>

@@ -103,6 +103,15 @@
             box-shadow: 0 5px 15px rgba(37,99,235,0.3);
         }
 
+        .btn-secondary {
+            background: var(--text-muted);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
         .btn-danger {
             background: var(--danger-color);
             color: white;
@@ -233,12 +242,12 @@
 
         .modal-content {
             background: white;
-            margin: 5% auto;
+            margin: 2% auto;
             padding: 0;
             border-radius: 20px;
-            width: 90%;
-            max-width: 700px;
-            max-height: 90vh;
+            width: 95%;
+            max-width: 900px;
+            max-height: 95vh;
             overflow-y: auto;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             animation: modalSlideIn 0.3s ease-out;
@@ -252,6 +261,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .modal-body {
@@ -398,6 +410,24 @@
             margin-top: 8px;
         }
 
+        /* Dynamic Items */
+        .dynamic-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+            position: relative;
+        }
+
+        .remove-item-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
         /* Status Badge */
         .status-badge {
             padding: 4px 12px;
@@ -458,6 +488,26 @@
             animation: spin 1s linear infinite;
         }
 
+        /* Checkbox Styles */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .checkbox-group label {
+            font-weight: normal !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-bottom: 0 !important;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin: 0;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -470,6 +520,27 @@
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 98%;
+                margin: 1% auto;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .instructor-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -606,6 +677,12 @@
                         </div>
                         
                         <div class="form-group">
+                            <label>Specializations</label>
+                            <input type="text" name="specializations" class="form-control" placeholder="Separate with commas (e.g., Non-surgical rhinoplasty, Advanced injection techniques)">
+                            <small class="form-text">Enter specializations separated by commas</small>
+                        </div>
+                        
+                        <div class="form-group">
                             <label>Biography</label>
                             <textarea name="bio" class="form-control" rows="4" placeholder="Brief professional biography..."></textarea>
                         </div>
@@ -623,35 +700,135 @@
                         </div>
                     </div>
 
-                    <!-- Teaching Preferences -->
+                    <!-- Education & Qualifications -->
                     <div class="form-section">
-                        <h3><i class="fas fa-chalkboard"></i> Teaching Preferences</h3>
+                        <h3><i class="fas fa-graduation-cap"></i> Education & Qualifications</h3>
+                        
+                        <div class="form-group">
+                            <label>Educational Qualifications</label>
+                            <textarea name="qualifications" class="form-control" rows="3" placeholder="Enter qualifications, one per line (e.g., MD - Medical University, Fellowship in Aesthetic Medicine)"></textarea>
+                            <small class="form-text">Enter one qualification per line</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Achievements & Awards</label>
+                            <textarea name="achievements" class="form-control" rows="3" placeholder="Enter achievements, one per line"></textarea>
+                            <small class="form-text">Enter one achievement per line</small>
+                        </div>
+                    </div>
+
+                    <!-- Certifications Section -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-certificate"></i> Certifications</h3>
+                        <div id="certificationsContainer">
+                            <!-- Certifications will be dynamically added here -->
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addCertification()">
+                            <i class="fas fa-plus"></i> Add Certification
+                        </button>
+                    </div>
+
+                    <!-- Publications Section -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-book"></i> Publications</h3>
+                        <div id="publicationsContainer">
+                            <!-- Publications will be dynamically added here -->
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addPublication()">
+                            <i class="fas fa-plus"></i> Add Publication
+                        </button>
+                    </div>
+
+                    <!-- Teaching Information -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-chalkboard"></i> Teaching Information</h3>
+                        
+                        <div class="form-group">
+                            <label>Teaching Style</label>
+                            <textarea name="teachingStyle" class="form-control" rows="3" placeholder="Describe your teaching approach and methodology..."></textarea>
+                        </div>
+                        
                         <div class="form-grid">
                             <div class="form-group">
+                                <label>Languages</label>
+                                <input type="text" name="languages" class="form-control" placeholder="Separate with commas (e.g., English, Turkish, Arabic)">
+                                <small class="form-text">Languages you can teach in</small>
+                            </div>
+                            
+                            <div class="form-group">
                                 <label>Preferred Course Types</label>
-                                <div style="display: flex; flex-direction: column; gap: 10px;">
-                                    <label style="font-weight: normal;">
+                                <div class="checkbox-group">
+                                    <label>
                                         <input type="checkbox" name="preferredCourseTypes" value="InPersonAestheticTraining">
                                         In-Person Training
                                     </label>
-                                    <label style="font-weight: normal;">
+                                    <label>
                                         <input type="checkbox" name="preferredCourseTypes" value="OnlineLiveTraining">
                                         Online Live Training
                                     </label>
-                                    <label style="font-weight: normal;">
+                                    <label>
                                         <input type="checkbox" name="preferredCourseTypes" value="SelfPacedOnlineTraining">
                                         Self-Paced Online Training
                                     </label>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Available Days</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" name="availableDays" value="Monday"> Monday
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="availableDays" value="Tuesday"> Tuesday
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="availableDays" value="Wednesday"> Wednesday
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="availableDays" value="Thursday"> Thursday
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="availableDays" value="Friday"> Friday
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="availableDays" value="Saturday"> Saturday
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="availableDays" value="Sunday"> Sunday
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Address Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Street Address</label>
+                                <input type="text" name="address.street" class="form-control">
+                            </div>
                             
                             <div class="form-group">
-                                <label>Status</label>
-                                <select name="status" class="form-control">
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                    <option value="On Leave">On Leave</option>
-                                </select>
+                                <label>City</label>
+                                <input type="text" name="address.city" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>State/Province</label>
+                                <input type="text" name="address.state" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Country</label>
+                                <input type="text" name="address.country" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>ZIP/Postal Code</label>
+                                <input type="text" name="address.zipCode" class="form-control">
                             </div>
                         </div>
                     </div>
@@ -660,6 +837,15 @@
                     <div class="form-section">
                         <h3><i class="fas fa-cog"></i> Administrative</h3>
                         <div class="form-grid">
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select name="status" class="form-control">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="On Leave">On Leave</option>
+                                </select>
+                            </div>
+                            
                             <div class="form-group">
                                 <label>Contract Type</label>
                                 <select name="contractType" class="form-control">
@@ -677,13 +863,13 @@
                         </div>
                         
                         <div class="form-group">
-                            <label>Notes</label>
+                            <label>Administrative Notes</label>
                             <textarea name="notes" class="form-control" rows="3" placeholder="Administrative notes..."></textarea>
                         </div>
                     </div>
 
                     <div style="text-align: right; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal()" style="background: var(--text-muted); color: white; margin-right: 10px;">Cancel</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()" style="margin-right: 10px;">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">
                             <i class="fas fa-save"></i> <span id="submitBtnText">Save Instructor</span>
                         </button>
@@ -696,6 +882,8 @@
     <script>
         let instructors = [];
         let editingInstructorId = null;
+        let certificationCounter = 0;
+        let publicationCounter = 0;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -729,6 +917,99 @@
             } else {
                 preview.innerHTML = '<i class="fas fa-user profile-preview-placeholder"></i>';
             }
+        }
+
+        // Dynamic certification management
+        function addCertification(certification = null) {
+            const container = document.getElementById('certificationsContainer');
+            const certId = `cert_${certificationCounter++}`;
+            
+            const certificationHTML = `
+                <div class="dynamic-item certification-item" id="${certId}">
+                    <button type="button" class="btn btn-danger remove-item-btn" onclick="removeCertification('${certId}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Certification Name</label>
+                            <input type="text" name="certifications[${certId}][name]" class="form-control" placeholder="e.g., Advanced Botox Certification" value="${certification?.name || ''}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Issuing Organization</label>
+                            <input type="text" name="certifications[${certId}][issuingOrganization]" class="form-control" placeholder="e.g., IAAI" value="${certification?.issuingOrganization || ''}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Issue Date</label>
+                            <input type="date" name="certifications[${certId}][issueDate]" class="form-control" value="${certification?.issueDate ? new Date(certification.issueDate).toISOString().split('T')[0] : ''}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="date" name="certifications[${certId}][expiryDate]" class="form-control" value="${certification?.expiryDate ? new Date(certification.expiryDate).toISOString().split('T')[0] : ''}">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', certificationHTML);
+        }
+
+        function removeCertification(certId) {
+            document.getElementById(certId).remove();
+        }
+
+        // Dynamic publication management
+        function addPublication(publication = null) {
+            const container = document.getElementById('publicationsContainer');
+            const pubId = `pub_${publicationCounter++}`;
+            
+            const publicationHTML = `
+                <div class="dynamic-item publication-item" id="${pubId}">
+                    <button type="button" class="btn btn-danger remove-item-btn" onclick="removePublication('${pubId}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" name="publications[${pubId}][title]" class="form-control" placeholder="Publication title" value="${publication?.title || ''}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select name="publications[${pubId}][type]" class="form-control">
+                                <option value="">Select Type</option>
+                                <option value="Article" ${publication?.type === 'Article' ? 'selected' : ''}>Article</option>
+                                <option value="Book" ${publication?.type === 'Book' ? 'selected' : ''}>Book</option>
+                                <option value="Research Paper" ${publication?.type === 'Research Paper' ? 'selected' : ''}>Research Paper</option>
+                                <option value="Journal" ${publication?.type === 'Journal' ? 'selected' : ''}>Journal</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Published In</label>
+                            <input type="text" name="publications[${pubId}][publishedIn]" class="form-control" placeholder="Journal/Publisher name" value="${publication?.publishedIn || ''}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="number" name="publications[${pubId}][year]" class="form-control" min="1900" max="2030" value="${publication?.year || ''}">
+                        </div>
+                        
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Link (Optional)</label>
+                            <input type="url" name="publications[${pubId}][link]" class="form-control" placeholder="https://..." value="${publication?.link || ''}">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', publicationHTML);
+        }
+
+        function removePublication(pubId) {
+            document.getElementById(pubId).remove();
         }
 
         async function loadInstructors() {
@@ -795,10 +1076,10 @@
                             </div>
                         ` : ''}
                         
-                        ${instructor.assignedCourses ? `
+                        ${instructor.courseStats ? `
                             <div class="instructor-stat">
                                 <span><i class="fas fa-book"></i> Assigned Courses</span>
-                                <strong>${instructor.assignedCourses.length}</strong>
+                                <strong>${instructor.courseStats.total}</strong>
                             </div>
                         ` : ''}
                         
@@ -852,6 +1133,14 @@
             // Reset profile preview
             document.getElementById('profilePreview').innerHTML = '<i class="fas fa-user profile-preview-placeholder"></i>';
             
+            // Clear dynamic sections
+            document.getElementById('certificationsContainer').innerHTML = '';
+            document.getElementById('publicationsContainer').innerHTML = '';
+            
+            // Reset counters
+            certificationCounter = 0;
+            publicationCounter = 0;
+            
             document.getElementById('instructorModal').style.display = 'block';
         }
 
@@ -871,20 +1160,8 @@
             try {
                 const formData = new FormData(event.target);
                 
-                // Handle checkboxes for preferredCourseTypes
-                const courseTypes = [];
-                document.querySelectorAll('input[name="preferredCourseTypes"]:checked').forEach(cb => {
-                    courseTypes.push(cb.value);
-                });
-                formData.delete('preferredCourseTypes');
-                formData.append('preferredCourseTypes', JSON.stringify(courseTypes));
-                
-                // Handle expertise as array
-                const expertiseValue = formData.get('expertise');
-                if (expertiseValue) {
-                    const expertiseArray = expertiseValue.split(',').map(e => e.trim()).filter(e => e);
-                    formData.set('expertise', JSON.stringify(expertiseArray));
-                }
+                // Handle enhanced form data
+                handleEnhancedFormData(formData);
                 
                 const url = editingInstructorId 
                     ? `/instructors/api/${editingInstructorId}`
@@ -926,63 +1203,345 @@
             }
         }
 
-        async function editInstructor(instructorId) {
-            const instructor = instructors.find(i => i._id === instructorId);
-            if (!instructor) return;
-            
-            editingInstructorId = instructorId;
-            document.getElementById('modalTitle').textContent = 'Edit Instructor';
-            document.getElementById('submitBtnText').textContent = 'Update Instructor';
-            
-            // Reset and populate profile preview
-            const preview = document.getElementById('profilePreview');
-            if (instructor.profileImage) {
-                preview.innerHTML = `<img src="${instructor.profileImage}" alt="Profile preview">`;
-            } else {
-                preview.innerHTML = '<i class="fas fa-user profile-preview-placeholder"></i>';
-            }
-            
-            // Clear the file input
-            document.getElementById('profileImage').value = '';
-            
-            // Populate form
-            const form = document.getElementById('instructorForm');
-            form.firstName.value = instructor.firstName || '';
-            form.lastName.value = instructor.lastName || '';
-            form.email.value = instructor.email || '';
-            form.phoneNumber.value = instructor.phoneNumber || '';
-            form.title.value = instructor.title || '';
-            form.designation.value = instructor.designation || '';
-            form.experience.value = instructor.experience || '';
-            form.bio.value = instructor.bio || '';
-            form.status.value = instructor.status || 'Active';
-            form.contractType.value = instructor.contractType || 'Contract';
-            form.hourlyRate.value = instructor.hourlyRate || '';
-            form.notes.value = instructor.notes || '';
-            
-            // Handle expertise
-            if (instructor.expertise && instructor.expertise.length > 0) {
-                form.expertise.value = instructor.expertise.join(', ');
-            } else {
-                form.expertise.value = '';
-            }
-            
-            // Handle social media
-            if (instructor.socialMedia) {
-                form.linkedin.value = instructor.socialMedia.linkedin || '';
-                form.website.value = instructor.socialMedia.website || '';
-            } else {
-                form.linkedin.value = '';
-                form.website.value = '';
-            }
-            
-            // Handle preferred course types
-            const checkboxes = form.querySelectorAll('input[name="preferredCourseTypes"]');
-            checkboxes.forEach(cb => {
-                cb.checked = instructor.preferredCourseTypes && instructor.preferredCourseTypes.includes(cb.value);
+        function handleEnhancedFormData(formData) {
+            // Handle checkboxes for preferredCourseTypes
+            const courseTypes = [];
+            document.querySelectorAll('input[name="preferredCourseTypes"]:checked').forEach(cb => {
+                courseTypes.push(cb.value);
             });
+            formData.delete('preferredCourseTypes');
+            formData.append('preferredCourseTypes', JSON.stringify(courseTypes));
             
-            document.getElementById('instructorModal').style.display = 'block';
+            // Handle available days
+            const availableDays = [];
+            document.querySelectorAll('input[name="availableDays"]:checked').forEach(cb => {
+                availableDays.push(cb.value);
+            });
+            formData.delete('availableDays');
+            formData.append('availableDays', JSON.stringify(availableDays));
+            
+            // Handle expertise as array
+            const expertiseValue = formData.get('expertise');
+            if (expertiseValue) {
+                const expertiseArray = expertiseValue.split(',').map(e => e.trim()).filter(e => e);
+                formData.set('expertise', JSON.stringify(expertiseArray));
+            }
+            
+            // Handle specializations as array
+            const specializationsValue = formData.get('specializations');
+            if (specializationsValue) {
+                const specArray = specializationsValue.split(',').map(s => s.trim()).filter(s => s);
+                formData.set('specializations', JSON.stringify(specArray));
+            }
+            
+            // Handle qualifications as array
+            const qualifications = formData.get('qualifications');
+            if (qualifications) {
+                const qualArray = qualifications.split('\n').map(q => q.trim()).filter(q => q);
+                formData.set('qualifications', JSON.stringify(qualArray));
+            }
+            
+            // Handle achievements as array
+            const achievements = formData.get('achievements');
+            if (achievements) {
+                const achArray = achievements.split('\n').map(a => a.trim()).filter(a => a);
+                formData.set('achievements', JSON.stringify(achArray));
+            }
+            
+            // Handle languages as array
+            const languages = formData.get('languages');
+            if (languages) {
+                const langArray = languages.split(',').map(l => l.trim()).filter(l => l);
+                formData.set('languages', JSON.stringify(langArray));
+            }
+            
+            // Handle certifications
+            const certifications = [];
+            document.querySelectorAll('.certification-item').forEach(certDiv => {
+                const inputs = certDiv.querySelectorAll('input');
+                if (inputs[0].value) { // Only add if name is provided
+                    certifications.push({
+                        name: inputs[0].value,
+                        issuingOrganization: inputs[1].value,
+                        issueDate: inputs[2].value || null,
+                        expiryDate: inputs[3].value || null
+                    });
+                }
+            });
+            formData.append('certifications', JSON.stringify(certifications));
+            
+            // Handle publications
+            const publications = [];
+            document.querySelectorAll('.publication-item').forEach(pubDiv => {
+                const inputs = pubDiv.querySelectorAll('input, select');
+                if (inputs[0].value) { // Only add if title is provided
+                    publications.push({
+                        title: inputs[0].value,
+                        type: inputs[1].value,
+                        publishedIn: inputs[2].value,
+                        year: inputs[3].value ? parseInt(inputs[3].value) : null,
+                        link: inputs[4].value
+                    });
+                }
+            });
+            formData.append('publications', JSON.stringify(publications));
+            
+            // Handle address as object
+            const address = {};
+            const addressFields = ['street', 'city', 'state', 'country', 'zipCode'];
+            addressFields.forEach(field => {
+                const value = formData.get(`address.${field}`);
+                if (value) {
+                    address[field] = value;
+                }
+                formData.delete(`address.${field}`);
+            });
+            if (Object.keys(address).length > 0) {
+                formData.append('address', JSON.stringify(address));
+            }
+        }
+
+        async function editInstructor(instructorId) {
+            try {
+                showLoading();
+                
+                console.log(`\n🔍 =================================================================`);
+                console.log(`🔍 FRONTEND: FETCHING INSTRUCTOR DATA FOR EDIT`);
+                console.log(`🔍 Instructor ID: ${instructorId}`);
+                console.log(`🔍 =================================================================`);
+                
+                // ✅ FETCH COMPLETE INSTRUCTOR DATA FROM API
+                const response = await fetch(`/instructors/api/${instructorId}`);
+                const data = await response.json();
+                
+                console.log('📥 FRONTEND: Raw API response received:', data);
+                
+                if (!data.success) {
+                    console.error('❌ FRONTEND: API returned error:', data.message);
+                    throw new Error(data.message || 'Failed to fetch instructor data');
+                }
+                
+                const instructor = data.instructor;
+                
+                console.log('\n📊 FRONTEND: Data completeness verification:');
+                if (data.completenessCheck) {
+                    Object.entries(data.completenessCheck).forEach(([key, value]) => {
+                        console.log(`   ${value ? '✅' : '❌'} ${key}: ${value}`);
+                    });
+                }
+                
+                console.log('\n📋 FRONTEND: Processing instructor data for form population...');
+                console.log('👤 Basic Info:', {
+                    firstName: instructor.firstName,
+                    lastName: instructor.lastName,
+                    email: instructor.email,
+                    title: instructor.title
+                });
+                console.log('💼 Professional:', {
+                    expertise: instructor.expertise?.length || 0,
+                    specializations: instructor.specializations?.length || 0,
+                    qualifications: instructor.qualifications?.length || 0,
+                    achievements: instructor.achievements?.length || 0
+                });
+                console.log('📜 Certifications:', instructor.certifications?.length || 0);
+                console.log('📚 Publications:', instructor.publications?.length || 0);
+                console.log('🏠 Address:', !!instructor.address);
+                console.log('🌐 Social Media:', !!instructor.socialMedia);
+                
+                editingInstructorId = instructorId;
+                document.getElementById('modalTitle').textContent = 'Edit Instructor';
+                document.getElementById('submitBtnText').textContent = 'Update Instructor';
+                
+                // Reset dynamic sections
+                document.getElementById('certificationsContainer').innerHTML = '';
+                document.getElementById('publicationsContainer').innerHTML = '';
+                certificationCounter = 0;
+                publicationCounter = 0;
+                
+                console.log('\n🖼️ FRONTEND: Setting up profile image...');
+                // Reset and populate profile preview
+                const preview = document.getElementById('profilePreview');
+                if (instructor.profileImage) {
+                    preview.innerHTML = `<img src="${instructor.profileImage}" alt="Profile preview">`;
+                    console.log('✅ Profile image set:', instructor.profileImage);
+                } else {
+                    preview.innerHTML = '<i class="fas fa-user profile-preview-placeholder"></i>';
+                    console.log('ℹ️ No profile image, using placeholder');
+                }
+                
+                // Clear the file input
+                document.getElementById('profileImage').value = '';
+                
+                console.log('\n📝 FRONTEND: Populating form fields...');
+                // Populate form with complete data
+                const form = document.getElementById('instructorForm');
+                
+                // Basic Information
+                console.log('   📋 Basic Information fields...');
+                form.firstName.value = instructor.firstName || '';
+                form.lastName.value = instructor.lastName || '';
+                form.email.value = instructor.email || '';
+                form.phoneNumber.value = instructor.phoneNumber || '';
+                form.title.value = instructor.title || '';
+                form.designation.value = instructor.designation || '';
+                form.experience.value = instructor.experience || '';
+                form.bio.value = instructor.bio || '';
+                form.teachingStyle.value = instructor.teachingStyle || '';
+                form.status.value = instructor.status || 'Active';
+                form.contractType.value = instructor.contractType || 'Contract';
+                form.hourlyRate.value = instructor.hourlyRate || '';
+                form.notes.value = instructor.notes || '';
+                console.log('   ✅ Basic fields populated');
+                
+                // Handle expertise array
+                console.log('   🎯 Processing expertise...');
+                if (instructor.expertise && instructor.expertise.length > 0) {
+                    form.expertise.value = instructor.expertise.join(', ');
+                    console.log(`   ✅ Expertise set: ${instructor.expertise.length} items`);
+                } else {
+                    form.expertise.value = '';
+                    console.log('   ℹ️ No expertise data');
+                }
+                
+                // Handle specializations array
+                console.log('   🎯 Processing specializations...');
+                if (instructor.specializations && instructor.specializations.length > 0) {
+                    form.specializations.value = instructor.specializations.join(', ');
+                    console.log(`   ✅ Specializations set: ${instructor.specializations.length} items`);
+                } else {
+                    form.specializations.value = '';
+                    console.log('   ℹ️ No specializations data');
+                }
+                
+                // Handle qualifications array
+                console.log('   🎓 Processing qualifications...');
+                if (instructor.qualifications && instructor.qualifications.length > 0) {
+                    form.qualifications.value = instructor.qualifications.join('\n');
+                    console.log(`   ✅ Qualifications set: ${instructor.qualifications.length} items`);
+                } else {
+                    form.qualifications.value = '';
+                    console.log('   ℹ️ No qualifications data');
+                }
+                
+                // Handle achievements array
+                console.log('   🏆 Processing achievements...');
+                if (instructor.achievements && instructor.achievements.length > 0) {
+                    form.achievements.value = instructor.achievements.join('\n');
+                    console.log(`   ✅ Achievements set: ${instructor.achievements.length} items`);
+                } else {
+                    form.achievements.value = '';
+                    console.log('   ℹ️ No achievements data');
+                }
+                
+                // Handle languages array
+                console.log('   🗣️ Processing languages...');
+                if (instructor.languages && instructor.languages.length > 0) {
+                    form.languages.value = instructor.languages.join(', ');
+                    console.log(`   ✅ Languages set: ${instructor.languages.length} items`);
+                } else {
+                    form.languages.value = '';
+                    console.log('   ℹ️ No languages data');
+                }
+                
+                // Handle social media object
+                console.log('   🌐 Processing social media...');
+                if (instructor.socialMedia) {
+                    form.linkedin.value = instructor.socialMedia.linkedin || '';
+                    form.website.value = instructor.socialMedia.website || '';
+                    console.log('   ✅ Social media set:', instructor.socialMedia);
+                } else {
+                    form.linkedin.value = '';
+                    form.website.value = '';
+                    console.log('   ℹ️ No social media data');
+                }
+                
+                // Handle address object
+                console.log('   🏠 Processing address...');
+                if (instructor.address) {
+                    const addressFields = ['street', 'city', 'state', 'country', 'zipCode'];
+                    addressFields.forEach(field => {
+                        const input = form.querySelector(`[name="address.${field}"]`);
+                        if (input) {
+                            input.value = instructor.address[field] || '';
+                        }
+                    });
+                    console.log('   ✅ Address set:', instructor.address);
+                } else {
+                    // Clear address fields if no address
+                    const addressFields = ['street', 'city', 'state', 'country', 'zipCode'];
+                    addressFields.forEach(field => {
+                        const input = form.querySelector(`[name="address.${field}"]`);
+                        if (input) {
+                            input.value = '';
+                        }
+                    });
+                    console.log('   ℹ️ No address data');
+                }
+                
+                // Handle preferred course types checkboxes
+                console.log('   📚 Processing preferred course types...');
+                const courseTypeCheckboxes = form.querySelectorAll('input[name="preferredCourseTypes"]');
+                courseTypeCheckboxes.forEach(cb => {
+                    cb.checked = instructor.preferredCourseTypes && instructor.preferredCourseTypes.includes(cb.value);
+                });
+                console.log(`   ✅ Course types set: ${instructor.preferredCourseTypes?.length || 0} selected`);
+                
+                // Handle available days checkboxes
+                console.log('   📅 Processing available days...');
+                const dayCheckboxes = form.querySelectorAll('input[name="availableDays"]');
+                dayCheckboxes.forEach(cb => {
+                    cb.checked = instructor.availableDays && instructor.availableDays.includes(cb.value);
+                });
+                console.log(`   ✅ Available days set: ${instructor.availableDays?.length || 0} selected`);
+                
+                // Populate existing certifications
+                console.log('   📜 Processing certifications...');
+                if (instructor.certifications && instructor.certifications.length > 0) {
+                    console.log(`   📜 Loading ${instructor.certifications.length} certifications:`);
+                    instructor.certifications.forEach((cert, index) => {
+                        console.log(`      ${index + 1}. ${cert.name} - ${cert.issuingOrganization}`);
+                        addCertification(cert);
+                    });
+                    console.log('   ✅ All certifications loaded');
+                } else {
+                    console.log('   ℹ️ No certifications data');
+                }
+                
+                // Populate existing publications
+                console.log('   📚 Processing publications...');
+                if (instructor.publications && instructor.publications.length > 0) {
+                    console.log(`   📚 Loading ${instructor.publications.length} publications:`);
+                    instructor.publications.forEach((pub, index) => {
+                        console.log(`      ${index + 1}. ${pub.title} - ${pub.type}`);
+                        addPublication(pub);
+                    });
+                    console.log('   ✅ All publications loaded');
+                } else {
+                    console.log('   ℹ️ No publications data');
+                }
+                
+                console.log('\n✅ =================================================================');
+                console.log('✅ FRONTEND: FORM POPULATION COMPLETED SUCCESSFULLY');
+                console.log('✅ ALL DATA FROM DATABASE IS NOW VISIBLE IN EDIT FORM');
+                console.log('✅ =================================================================\n');
+                
+                document.getElementById('instructorModal').style.display = 'block';
+                
+            } catch (error) {
+                console.error('\n❌ =================================================================');
+                console.error('❌ FRONTEND: ERROR LOADING INSTRUCTOR FOR EDIT');
+                console.error('❌ =================================================================');
+                console.error('❌ Error details:', error);
+                console.error('❌ =================================================================\n');
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load instructor data for editing'
+                });
+            } finally {
+                hideLoading();
+            }
         }
 
         async function deleteInstructor(instructorId) {

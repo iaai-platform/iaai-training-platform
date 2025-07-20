@@ -1055,7 +1055,7 @@
                 <label>Additional Instructor</label>
                 <select name="instructors[additional][{{index}}][instructorId]" required onchange="adminCourses.updateInstructorName(this)">
                     <option value="">Select Instructor</option>
-                    </select>
+                </select>
             </div>
             <div class="form-group">
                 <label>Name</label>
@@ -1064,10 +1064,13 @@
             <div class="form-group">
                 <label>Role</label>
                 <select name="instructors[additional][{{index}}][role]">
-                    <option value="Lead Instructor">Lead Instructor</option>
+                    <option value="Co-Lead Instructor">Co-Lead Instructor</option>
+                    <option value="Senior Instructor">Senior Instructor</option>
                     <option value="Co-Instructor">Co-Instructor</option>
                     <option value="Guest Instructor">Guest Instructor</option>
-                    <option value="Assistant">Assistant</option>
+                    <option value="Teaching Assistant">Teaching Assistant</option>
+                    <option value="Clinical Supervisor">Clinical Supervisor</option>
+                    <option value="Lab Supervisor">Lab Supervisor</option>
                 </select>
             </div>
         </div>

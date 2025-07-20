@@ -1647,6 +1647,9 @@ class InPersonCoursesController {
   /**
    * Validate and process instructors - FIXED to collect emails and handle saved dynamic items
    */
+  /**
+   * FIXED: Validate and process instructors with deletion support
+   */
   async _validateAndProcessInstructors(body, savedDynamicItems = {}) {
     // IMPORTANT: Ensure body.instructors.primary is correctly parsed if it's sent as a flat field
     const primaryInstructorId =
@@ -1693,6 +1696,26 @@ class InPersonCoursesController {
         });
       }
 
+      // FIXED: Process deletions first
+      const deletedInstructorIds = [];
+      if (body.deletedInstructors) {
+        // Handle both array and single value cases
+        const deletions = Array.isArray(body.deletedInstructors)
+          ? body.deletedInstructors
+          : [body.deletedInstructors];
+
+        deletions.forEach((id) => {
+          if (id && id.trim()) {
+            deletedInstructorIds.push(id.trim());
+          }
+        });
+
+        console.log(
+          `🗑️ Found ${deletedInstructorIds.length} instructors marked for deletion:`,
+          deletedInstructorIds
+        );
+      }
+
       // Process additional instructors from savedDynamicItems
       if (
         savedDynamicItems.instructors &&
@@ -1701,13 +1724,21 @@ class InPersonCoursesController {
         console.log(
           `🔍 Processing ${savedDynamicItems.instructors.length} additional instructors from savedDynamicItems`
         );
+
         for (const instData of savedDynamicItems.instructors) {
+          // FIXED: Skip if this instructor is marked for deletion
+          if (deletedInstructorIds.includes(instData.instructorId)) {
+            console.log(
+              `🗑️ Skipping deleted instructor: ${instData.instructorId}`
+            );
+            continue;
+          }
+
           // Ensure the instructorId is present and it's not the primary instructor
           if (
             instData.instructorId &&
             instData.instructorId !== primaryInstructor._id.toString()
           ) {
-            // Compare as string
             const instructor = await Instructor.findById(instData.instructorId);
             if (instructor) {
               instructors.additional.push({
@@ -1751,6 +1782,7 @@ class InPersonCoursesController {
         isValid: true,
         instructors: instructors,
         instructorEmails: instructorEmails,
+        deletedInstructorIds: deletedInstructorIds, // Return this for logging
       };
     } catch (error) {
       console.error("❌ Error processing instructors:", error);
@@ -1758,7 +1790,7 @@ class InPersonCoursesController {
         isValid: false,
         message:
           "Invalid instructor ID or error fetching instructor data: " +
-          error.message, // More general message
+          error.message,
       };
     }
   }

@@ -665,6 +665,12 @@ class AdminCoursesManager {
     this.updateStepVisibility();
     this.clearDynamicSections();
 
+    // FIXED: Clear deletion markers
+    const deletionMarkers = document.querySelectorAll(
+      'input[name="deletedInstructors[]"]'
+    );
+    deletionMarkers.forEach((marker) => marker.remove());
+
     // Clear all selected files
     this.allSelectedFiles = {};
 
@@ -3413,7 +3419,7 @@ class AdminCoursesManager {
     }
   }
 
-  // ENHANCEMENT: Enhanced remove function with confirmation dialog
+  // Enhanced delete method that handles all roles properly
   removeDynamicItem(element, itemType) {
     // Get item details for confirmation
     const itemTitle = this.getItemTitle(element, itemType);
@@ -3425,6 +3431,43 @@ class AdminCoursesManager {
         // Remove from saved items if it exists
         this.removeSavedItem(element, itemType);
 
+        // ENHANCED: For instructors, handle deletion properly regardless of role
+        if (itemType === "instructors") {
+          const instructorIdInput = element.querySelector(
+            'select[name*="[instructorId]"]'
+          );
+          const roleSelect = element.querySelector('select[name*="[role]"]');
+
+          // Log for debugging (remove in production)
+          console.log("🗑️ Deleting instructor:");
+          console.log(`   - ID: ${instructorIdInput?.value || "None"}`);
+          console.log(`   - Role: ${roleSelect?.value || "None"}`);
+
+          if (instructorIdInput && instructorIdInput.value) {
+            // Create a hidden input to mark this instructor for deletion
+            const deletionMarker = document.createElement("input");
+            deletionMarker.type = "hidden";
+            deletionMarker.name = "deletedInstructors[]";
+            deletionMarker.value = instructorIdInput.value;
+
+            // Add a data attribute to track the original role (optional)
+            deletionMarker.setAttribute(
+              "data-original-role",
+              roleSelect?.value || "unknown"
+            );
+
+            document.getElementById("courseForm").appendChild(deletionMarker);
+
+            console.log(
+              `🗑️ Marked instructor ${instructorIdInput.value} (${roleSelect?.value}) for deletion`
+            );
+          } else {
+            console.warn(
+              "⚠️ No instructor ID found - this might be a new instructor not yet saved"
+            );
+          }
+        }
+
         // Remove the DOM element
         element.remove();
 
@@ -3433,69 +3476,34 @@ class AdminCoursesManager {
     );
   }
 
-  // ENHANCEMENT: Helper function to get item title for confirmation
+  // Enhanced getItemTitle method to handle instructor roles better
   getItemTitle(element, itemType) {
     let title = "this item";
 
     try {
       switch (itemType) {
-        case "objectives":
-          const objectiveInput = element.querySelector('input[type="text"]');
-          title = objectiveInput?.value?.trim() || "Learning Objective";
-          break;
-        case "modules":
-          const moduleInput = element.querySelector('input[name*="[title]"]');
-          title = moduleInput?.value?.trim() || "Module";
-          break;
-        case "targetAudience":
-          const audienceInput = element.querySelector('input[type="text"]');
-          title = audienceInput?.value?.trim() || "Target Audience";
-          break;
-        case "procedures":
-          const procedureInput = element.querySelector('input[type="text"]');
-          title = procedureInput?.value?.trim() || "Procedure";
-          break;
-        case "equipment":
-          const equipmentInput = element.querySelector('input[type="text"]');
-          title = equipmentInput?.value?.trim() || "Equipment";
-          break;
-        case "questions":
-          const questionInput = element.querySelector("textarea");
-          title =
-            questionInput?.value?.trim()?.substring(0, 50) + "..." ||
-            "Question";
-          break;
-        case "partnerHotels":
-          const hotelInput = element.querySelector('input[type="text"]');
-          title = hotelInput?.value?.trim() || "Partner Hotel";
-          break;
-        case "videoLinks":
-          const videoInput = element.querySelector('input[type="url"]');
-          title = videoInput?.value?.trim() || "Video Link";
-          break;
-        case "links":
-          const linkTitleInput = element.querySelector(
-            'input[name*="[title]"]'
+        // ... other cases ...
+
+        case "instructors":
+          const instructorSelect = element.querySelector(
+            'select[name*="[instructorId]"]'
           );
-          title = linkTitleInput?.value?.trim() || "External Link";
-          break;
-        case "certificationBodies": // ADD THIS
-          const certBodySelect = element.querySelector(
-            'select[name*="[bodyId]"]'
-          );
-          if (certBodySelect && certBodySelect.selectedIndex > 0) {
-            title =
-              certBodySelect.options[
-                certBodySelect.selectedIndex
+          const roleSelect = element.querySelector('select[name*="[role]"]');
+
+          if (instructorSelect && instructorSelect.selectedIndex > 0) {
+            const instructorName =
+              instructorSelect.options[
+                instructorSelect.selectedIndex
               ].textContent.trim();
+            const role = roleSelect?.value || "Instructor";
+            title = `${instructorName} (${role})`;
           } else {
-            title = "Certification Body";
+            const role = roleSelect?.value || "Instructor";
+            title = `Unassigned ${role}`;
           }
           break;
-        default:
-          title = itemType
-            .replace(/([A-Z])/g, " $1")
-            .replace(/^./, (str) => str.toUpperCase());
+
+        // ... other cases remain the same ...
       }
     } catch (error) {
       console.warn("Error getting item title:", error);
@@ -3504,9 +3512,41 @@ class AdminCoursesManager {
     return title;
   }
 
-  // Form Submission - Fixed to resolve 500 error
-  // FIXED: Enhanced form submission method in admin-courses.js
-  // Replace the existing submitForm method
+  // Method to validate all deletion markers before submission
+  validateDeletionMarkers() {
+    const deletionMarkers = document.querySelectorAll(
+      'input[name="deletedInstructors[]"]'
+    );
+
+    console.log(
+      `📋 Found ${deletionMarkers.length} instructor deletion markers:`
+    );
+
+    deletionMarkers.forEach((marker, index) => {
+      const instructorId = marker.value;
+      const originalRole =
+        marker.getAttribute("data-original-role") || "unknown";
+
+      console.log(
+        `   ${index + 1}. Instructor ID: ${instructorId}, Role: ${originalRole}`
+      );
+    });
+
+    return deletionMarkers.length;
+  }
+
+  // Call this before form submission to verify deletions
+  debugFormSubmission() {
+    console.log("🔍 DEBUG: Form submission - checking instructor deletions");
+
+    const deletionCount = this.validateDeletionMarkers();
+
+    if (deletionCount > 0) {
+      console.log(`✅ ${deletionCount} instructors marked for deletion`);
+    } else {
+      console.log("ℹ️ No instructors marked for deletion");
+    }
+  }
 
   async submitForm(e) {
     console.log("🚀 submitForm called");

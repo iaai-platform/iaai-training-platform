@@ -129,16 +129,17 @@ exports.getActiveInstructors = async (req, res) => {
   }
 };
 
-// 4. Get instructor by ID with full course details
+// 4. Get instructor by ID with full course details - ENHANCED
 exports.getInstructorById = async (req, res) => {
   try {
-    const instructor = await Instructor.findById(
-      req.params.instructorId
-    ).populate({
-      path: "assignedCourses.courseId",
-      select:
-        "basic.title basic.courseCode schedule.startDate enrollment venue platform",
-    });
+    // ✅ FETCH ALL INSTRUCTOR DATA - NO FIELD RESTRICTIONS
+    const instructor = await Instructor.findById(req.params.instructorId)
+      .populate({
+        path: "assignedCourses.courseId",
+        select:
+          "basic.title basic.courseCode schedule.startDate enrollment venue platform",
+      })
+      .lean(); // Using lean() for better performance
 
     if (!instructor || instructor.isDeleted) {
       return res.status(404).json({
@@ -147,36 +148,75 @@ exports.getInstructorById = async (req, res) => {
       });
     }
 
+    // ✅ LOG COMPLETE DATA FOR DEBUGGING
+    console.log(
+      `📋 Fetching complete instructor data for: ${instructor.email}`
+    );
+    console.log(`📊 Data includes:`, {
+      hasProfileImage: !!instructor.profileImage,
+      hasExpertise: !!(instructor.expertise && instructor.expertise.length),
+      hasSpecializations: !!(
+        instructor.specializations && instructor.specializations.length
+      ),
+      hasQualifications: !!(
+        instructor.qualifications && instructor.qualifications.length
+      ),
+      hasAchievements: !!(
+        instructor.achievements && instructor.achievements.length
+      ),
+      hasCertifications: !!(
+        instructor.certifications && instructor.certifications.length
+      ),
+      hasPublications: !!(
+        instructor.publications && instructor.publications.length
+      ),
+      hasLanguages: !!(instructor.languages && instructor.languages.length),
+      hasAddress: !!instructor.address,
+      hasSocialMedia: !!instructor.socialMedia,
+      hasAvailableDays: !!(
+        instructor.availableDays && instructor.availableDays.length
+      ),
+      hasPreferredCourseTypes: !!(
+        instructor.preferredCourseTypes &&
+        instructor.preferredCourseTypes.length
+      ),
+    });
+
     // Calculate course statistics
     const courseStats = {
-      total: instructor.assignedCourses.length,
+      total: instructor.assignedCourses?.length || 0,
       byType: {
-        inPerson: instructor.assignedCourses.filter(
-          (c) => c.courseType === "InPersonAestheticTraining"
-        ).length,
-        onlineLive: instructor.assignedCourses.filter(
-          (c) => c.courseType === "OnlineLiveTraining"
-        ).length,
-        selfPaced: instructor.assignedCourses.filter(
-          (c) => c.courseType === "SelfPacedOnlineTraining"
-        ).length,
+        inPerson:
+          instructor.assignedCourses?.filter(
+            (c) => c.courseType === "InPersonAestheticTraining"
+          ).length || 0,
+        onlineLive:
+          instructor.assignedCourses?.filter(
+            (c) => c.courseType === "OnlineLiveTraining"
+          ).length || 0,
+        selfPaced:
+          instructor.assignedCourses?.filter(
+            (c) => c.courseType === "SelfPacedOnlineTraining"
+          ).length || 0,
       },
       byStatus: {
-        upcoming: instructor.assignedCourses.filter(
-          (c) => c.status === "Upcoming"
-        ).length,
-        inProgress: instructor.assignedCourses.filter(
-          (c) => c.status === "In Progress"
-        ).length,
-        completed: instructor.assignedCourses.filter(
-          (c) => c.status === "Completed"
-        ).length,
+        upcoming:
+          instructor.assignedCourses?.filter((c) => c.status === "Upcoming")
+            .length || 0,
+        inProgress:
+          instructor.assignedCourses?.filter((c) => c.status === "In Progress")
+            .length || 0,
+        completed:
+          instructor.assignedCourses?.filter((c) => c.status === "Completed")
+            .length || 0,
       },
     };
 
+    console.log(`✅ Fetched instructor: ${instructor.email} with all data`);
+
     res.json({
       success: true,
-      instructor: instructor.toObject(),
+      instructor: instructor,
       courseStats,
     });
   } catch (error) {
@@ -188,7 +228,7 @@ exports.getInstructorById = async (req, res) => {
   }
 };
 
-// 5. Create instructor
+// 5. Create instructor - ENHANCED
 exports.createInstructor = async (req, res) => {
   try {
     const instructorData = {};
@@ -196,21 +236,50 @@ exports.createInstructor = async (req, res) => {
     console.log("📝 Creating instructor with data:", req.body);
     console.log("📁 File uploaded:", req.file ? "YES (Cloudinary)" : "No file");
 
-    // Parse form data
+    // Parse form data with enhanced handling
     for (let [key, value] of Object.entries(req.body)) {
-      if (key === "expertise" || key === "preferredCourseTypes") {
+      if (
+        key === "expertise" ||
+        key === "specializations" ||
+        key === "languages"
+      ) {
         try {
           instructorData[key] = JSON.parse(value);
         } catch (e) {
-          // If parsing fails, handle as string
-          if (key === "expertise") {
-            instructorData[key] = value
-              .split(",")
-              .map((e) => e.trim())
-              .filter((e) => e);
-          } else {
-            instructorData[key] = [value];
-          }
+          // If parsing fails, handle as comma-separated string
+          instructorData[key] = value
+            .split(",")
+            .map((item) => item.trim())
+            .filter((item) => item);
+        }
+      } else if (key === "qualifications" || key === "achievements") {
+        try {
+          instructorData[key] = JSON.parse(value);
+        } catch (e) {
+          // If parsing fails, handle as line-separated string
+          instructorData[key] = value
+            .split("\n")
+            .map((item) => item.trim())
+            .filter((item) => item);
+        }
+      } else if (key === "preferredCourseTypes" || key === "availableDays") {
+        try {
+          instructorData[key] = JSON.parse(value);
+        } catch (e) {
+          instructorData[key] = Array.isArray(value) ? value : [value];
+        }
+      } else if (key === "certifications" || key === "publications") {
+        try {
+          instructorData[key] = JSON.parse(value);
+        } catch (e) {
+          console.error(`Error parsing ${key}:`, e);
+          instructorData[key] = [];
+        }
+      } else if (key === "address") {
+        try {
+          instructorData[key] = JSON.parse(value);
+        } catch (e) {
+          console.error("Error parsing address:", e);
         }
       } else if (key === "hourlyRate" && value) {
         instructorData[key] = parseFloat(value);
@@ -288,7 +357,7 @@ exports.createInstructor = async (req, res) => {
   }
 };
 
-// 6. Update instructor
+// 6. Update instructor - ENHANCED
 exports.updateInstructor = async (req, res) => {
   const { instructorId } = req.params;
 
@@ -298,21 +367,50 @@ exports.updateInstructor = async (req, res) => {
     console.log("📝 Updating instructor:", instructorId);
     console.log("📁 File uploaded:", req.file ? "YES (Cloudinary)" : "No file");
 
-    // Parse form data
+    // Parse form data with enhanced handling
     for (let [key, value] of Object.entries(req.body)) {
-      if (key === "expertise" || key === "preferredCourseTypes") {
+      if (
+        key === "expertise" ||
+        key === "specializations" ||
+        key === "languages"
+      ) {
         try {
           updateData[key] = JSON.parse(value);
         } catch (e) {
-          // If parsing fails, handle as string
-          if (key === "expertise") {
-            updateData[key] = value
-              .split(",")
-              .map((e) => e.trim())
-              .filter((e) => e);
-          } else {
-            updateData[key] = [value];
-          }
+          // If parsing fails, handle as comma-separated string
+          updateData[key] = value
+            .split(",")
+            .map((item) => item.trim())
+            .filter((item) => item);
+        }
+      } else if (key === "qualifications" || key === "achievements") {
+        try {
+          updateData[key] = JSON.parse(value);
+        } catch (e) {
+          // If parsing fails, handle as line-separated string
+          updateData[key] = value
+            .split("\n")
+            .map((item) => item.trim())
+            .filter((item) => item);
+        }
+      } else if (key === "preferredCourseTypes" || key === "availableDays") {
+        try {
+          updateData[key] = JSON.parse(value);
+        } catch (e) {
+          updateData[key] = Array.isArray(value) ? value : [value];
+        }
+      } else if (key === "certifications" || key === "publications") {
+        try {
+          updateData[key] = JSON.parse(value);
+        } catch (e) {
+          console.error(`Error parsing ${key}:`, e);
+          updateData[key] = [];
+        }
+      } else if (key === "address") {
+        try {
+          updateData[key] = JSON.parse(value);
+        } catch (e) {
+          console.error("Error parsing address:", e);
         }
       } else if (key === "hourlyRate" && value) {
         updateData[key] = parseFloat(value);
@@ -395,7 +493,6 @@ exports.updateInstructor = async (req, res) => {
     });
   } catch (error) {
     // If error occurs and file was uploaded, delete it
-
     if (req.file && req.file.public_id) {
       try {
         await cloudinary.uploader.destroy(req.file.public_id);
@@ -439,8 +536,6 @@ exports.deleteInstructor = async (req, res) => {
       });
     }
 
-    // Delete profile image if exists
-    // Fix:
     // Delete profile image from Cloudinary if exists
     if (
       instructor.profileImage &&
@@ -507,7 +602,7 @@ exports.searchInstructors = async (req, res) => {
   }
 };
 
-// 9. Bulk import instructors
+// 9. Bulk import instructors - ENHANCED
 exports.bulkImportInstructors = async (req, res) => {
   try {
     const { instructors } = req.body;
@@ -527,6 +622,53 @@ exports.bulkImportInstructors = async (req, res) => {
 
     for (const instructorData of instructors) {
       try {
+        // Process arrays and objects for bulk import
+        if (
+          instructorData.expertise &&
+          typeof instructorData.expertise === "string"
+        ) {
+          instructorData.expertise = instructorData.expertise
+            .split(",")
+            .map((e) => e.trim())
+            .filter((e) => e);
+        }
+        if (
+          instructorData.specializations &&
+          typeof instructorData.specializations === "string"
+        ) {
+          instructorData.specializations = instructorData.specializations
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s);
+        }
+        if (
+          instructorData.languages &&
+          typeof instructorData.languages === "string"
+        ) {
+          instructorData.languages = instructorData.languages
+            .split(",")
+            .map((l) => l.trim())
+            .filter((l) => l);
+        }
+        if (
+          instructorData.qualifications &&
+          typeof instructorData.qualifications === "string"
+        ) {
+          instructorData.qualifications = instructorData.qualifications
+            .split("\n")
+            .map((q) => q.trim())
+            .filter((q) => q);
+        }
+        if (
+          instructorData.achievements &&
+          typeof instructorData.achievements === "string"
+        ) {
+          instructorData.achievements = instructorData.achievements
+            .split("\n")
+            .map((a) => a.trim())
+            .filter((a) => a);
+        }
+
         instructorData.createdBy = req.user.email;
         const instructor = new Instructor(instructorData);
         await instructor.save();
@@ -1294,7 +1436,6 @@ exports.getInstructorStats = async (req, res) => {
 // HELPER FUNCTIONS
 // ============================================
 
-// ADD this helper function at the bottom of the file:
 // Helper function to extract public_id from Cloudinary URL
 function extractPublicIdFromUrl(url) {
   try {

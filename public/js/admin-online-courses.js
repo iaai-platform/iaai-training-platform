@@ -1051,28 +1051,56 @@ class AdminOnlineCoursesManager {
 
   // Enhanced method to get file icon from URL
   getFileIconFromUrl(fileUrl) {
-    const fileName = fileUrl.split("/").pop().toLowerCase();
-    const fileExtension = fileName.split(".").pop();
+    try {
+      // Handle Cloudinary URLs
+      if (fileUrl.includes("cloudinary.com")) {
+        // Check resource type in URL
+        if (fileUrl.includes("/image/upload/")) {
+          return "fas fa-image";
+        } else if (fileUrl.includes("/video/upload/")) {
+          return "fas fa-video";
+        } else if (fileUrl.includes("/raw/upload/")) {
+          // For raw files, try to determine type from filename or folder
+          if (fileUrl.includes("coursedocuments")) {
+            // Check for document patterns in filename
+            if (/pdf/i.test(fileUrl)) return "fas fa-file-pdf";
+            if (/doc/i.test(fileUrl)) return "fas fa-file-word";
+            if (/ppt/i.test(fileUrl)) return "fas fa-file-powerpoint";
+            if (/xls/i.test(fileUrl)) return "fas fa-file-excel";
+            return "fas fa-file";
+          }
+        }
+      }
 
-    switch (true) {
-      case ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(fileExtension):
-        return "fas fa-image";
-      case fileExtension === "pdf":
-        return "fas fa-file-pdf";
-      case ["doc", "docx"].includes(fileExtension):
-        return "fas fa-file-word";
-      case ["ppt", "pptx"].includes(fileExtension):
-        return "fas fa-file-powerpoint";
-      case ["xls", "xlsx"].includes(fileExtension):
-        return "fas fa-file-excel";
-      case ["mp4", "webm", "ogg", "mov", "avi"].includes(fileExtension):
-        return "fas fa-video";
-      case ["zip", "rar", "7z"].includes(fileExtension):
-        return "fas fa-file-archive";
-      case ["txt", "md"].includes(fileExtension):
-        return "fas fa-file-alt";
-      default:
-        return "fas fa-file";
+      // Fallback to original logic for non-Cloudinary URLs
+      const fileName = fileUrl.split("/").pop().toLowerCase();
+      const fileExtension = fileName.split(".").pop();
+
+      switch (true) {
+        case ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(
+          fileExtension
+        ):
+          return "fas fa-image";
+        case fileExtension === "pdf":
+          return "fas fa-file-pdf";
+        case ["doc", "docx"].includes(fileExtension):
+          return "fas fa-file-word";
+        case ["ppt", "pptx"].includes(fileExtension):
+          return "fas fa-file-powerpoint";
+        case ["xls", "xlsx"].includes(fileExtension):
+          return "fas fa-file-excel";
+        case ["mp4", "webm", "ogg", "mov", "avi"].includes(fileExtension):
+          return "fas fa-video";
+        case ["zip", "rar", "7z"].includes(fileExtension):
+          return "fas fa-file-archive";
+        case ["txt", "md"].includes(fileExtension):
+          return "fas fa-file-alt";
+        default:
+          return "fas fa-file";
+      }
+    } catch (error) {
+      console.warn("Error determining file icon:", error);
+      return "fas fa-file";
     }
   }
 
@@ -1093,8 +1121,18 @@ class AdminOnlineCoursesManager {
    * Check if file is an image
    */
   _isImageFile(fileUrl) {
+    // For Cloudinary URLs, check if it contains image transformations or file extensions
+    if (fileUrl.includes("cloudinary.com")) {
+      // Check for image resource type in URL or common image extensions
+      return (
+        fileUrl.includes("/image/upload/") ||
+        /\.(jpg|jpeg|png|gif|webp|svg)($|\?)/i.test(fileUrl)
+      );
+    }
+
+    // Fallback for non-Cloudinary URLs
     const imageExtensions = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
-    const extension = fileUrl.split(".").pop().toLowerCase();
+    const extension = fileUrl.split(".").pop()?.toLowerCase();
     return imageExtensions.includes(extension);
   }
 
@@ -1905,6 +1943,11 @@ class AdminOnlineCoursesManager {
           return cleanItem;
         });
 
+      // ADD THIS DEBUG LOG FOR INSTRUCTORS:
+      if (itemType === "instructors") {
+        console.log(`📝 Raw instructors:`, items);
+        console.log(`📝 Cleaned instructors:`, cleanedItems);
+      }
       console.log(`📝 Processing ${itemType}: ${cleanedItems.length} items`);
 
       // Map each dynamic item type to its proper location in the form structure
@@ -3557,7 +3600,8 @@ class AdminOnlineCoursesManager {
       } else if (name.includes("[type]")) {
         sessionData.type = input.value;
       } else if (name.includes("[instructorId]")) {
-        sessionData.instructorId = input.value || null;
+        sessionData.instructorId =
+          input.value.trim() === "" ? null : input.value;
       }
     });
 
@@ -3962,6 +4006,8 @@ class AdminOnlineCoursesManager {
       instructorElement,
       "Additional instructor saved locally"
     );
+    // ADD THIS ONE LINE:
+    instructorElement.setAttribute("data-saved", "true");
 
     // Debug: Log current state
     console.log(
@@ -6735,20 +6781,169 @@ class AdminOnlineCoursesManager {
       this.savedDynamicItems.sessions?.forEach((session) => {
         try {
           this.addSession(session);
+          // FIXED: Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "sessionsContainer",
+            "Session loaded from saved data"
+          );
         } catch (e) {
           console.warn("Error adding session:", e);
         }
       });
 
+      // FIXED: Add objectives and mark them as saved
       this.savedDynamicItems.objectives?.forEach((objective) => {
         try {
           this.addObjective(objective.text);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "objectivesContainer",
+            "Learning objective loaded from saved data"
+          );
         } catch (e) {
           console.warn("Error adding objective:", e);
         }
       });
 
-      // Continue with other dynamic sections...
+      // FIXED: Add modules and mark them as saved
+      this.savedDynamicItems.modules?.forEach((module) => {
+        try {
+          this.addModule(module);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "modulesContainer",
+            "Module loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding module:", e);
+        }
+      });
+
+      // FIXED: Add target audience and mark them as saved
+      this.savedDynamicItems.targetAudience?.forEach((audience) => {
+        try {
+          this.addTargetAudience(audience.text);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "targetAudienceContainer",
+            "Target audience loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding target audience:", e);
+        }
+      });
+
+      // FIXED: Add required software and mark them as saved
+      this.savedDynamicItems.requiredSoftware?.forEach((software) => {
+        try {
+          this.addRequiredSoftware(software.name);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "requiredSoftwareContainer",
+            "Required software loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding required software:", e);
+        }
+      });
+
+      // FIXED: Add engagement tools and mark them as saved
+      this.savedDynamicItems.engagementTools?.forEach((tool) => {
+        try {
+          this.addEngagementTool(tool.name);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "engagementToolsContainer",
+            "Engagement tool loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding engagement tool:", e);
+        }
+      });
+
+      // FIXED: Add questions and mark them as saved
+      this.savedDynamicItems.questions?.forEach((question) => {
+        try {
+          this.addQuestion(question);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "questionsContainer",
+            "Question loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding question:", e);
+        }
+      });
+
+      // FIXED: Add video links and mark them as saved
+      this.savedDynamicItems.videoLinks?.forEach((videoLink) => {
+        try {
+          this.addVideoLink(videoLink.url);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "videoLinksContainer",
+            "Video link loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding video link:", e);
+        }
+      });
+
+      // FIXED: Add links and mark them as saved
+      this.savedDynamicItems.links?.forEach((link) => {
+        try {
+          this.addLink(link);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "linksContainer",
+            "Link loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding link:", e);
+        }
+      });
+
+      // FIXED: Add handouts and mark them as saved
+      this.savedDynamicItems.handouts?.forEach((handout) => {
+        try {
+          this.addHandout(handout);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "handoutsContainer",
+            "Handout loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding handout:", e);
+        }
+      });
+
+      // FIXED: Add virtual labs and mark them as saved
+      this.savedDynamicItems.virtualLabs?.forEach((lab) => {
+        try {
+          this.addVirtualLab(lab);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "virtualLabsContainer",
+            "Virtual lab loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding virtual lab:", e);
+        }
+      });
+
+      // FIXED: Add advanced courses and mark them as saved
+      this.savedDynamicItems.advancedCourses?.forEach((course) => {
+        try {
+          this.addAdvancedCourse(course.code);
+          // Mark as saved after adding
+          this._markLastAddedItemAsSaved(
+            "advancedCoursesContainer",
+            "Advanced course loaded from saved data"
+          );
+        } catch (e) {
+          console.warn("Error adding advanced course:", e);
+        }
+      });
 
       console.log("✅ ALL dynamic sections rendered SAFELY");
     } catch (error) {
@@ -6756,6 +6951,16 @@ class AdminOnlineCoursesManager {
     }
   }
 
+  // ADD this new helper method to mark the last added item as saved:
+  _markLastAddedItemAsSaved(containerId, message) {
+    const container = document.getElementById(containerId);
+    if (container) {
+      const lastItem = container.lastElementChild;
+      if (lastItem && lastItem.classList.contains("dynamic-item")) {
+        this.markItemAsSaved(lastItem, message);
+      }
+    }
+  }
   /**
    * Helper method to set form field values, handling different input types.
    * @param {string} name - The name attribute of the input field (e.g., 'basic[title]').
@@ -6818,14 +7023,25 @@ class AdminOnlineCoursesManager {
    * Enhanced method to add existing file preview with proper edit controls
    */
   _addExistingFilePreview(container, uploadType, fileUrl, courseId) {
-    const fileName = fileUrl.split("/").pop();
+    // Extract filename from Cloudinary URL
+    let fileName;
+    if (fileUrl.includes("cloudinary.com")) {
+      // For Cloudinary URLs, extract the last part after the last slash
+      const urlParts = fileUrl.split("/");
+      fileName = urlParts[urlParts.length - 1];
+      // Remove version parameter if present
+      fileName = fileName.split("?")[0];
+    } else {
+      fileName = fileUrl.split("/").pop();
+    }
+
     const fileItem = document.createElement("div");
     fileItem.className = "file-item existing-file";
     fileItem.dataset.fileName = fileName;
     fileItem.dataset.fileUrl = fileUrl;
     fileItem.dataset.uploadType = uploadType;
 
-    // Determine the icon based on file extension
+    // Determine the icon based on file type
     let iconClass = this.getFileIconFromUrl(fileUrl);
 
     const isMainImage = uploadType === "mainImage";
@@ -6835,57 +7051,59 @@ class AdminOnlineCoursesManager {
     if (isMainImage || uploadType === "images") {
       // Show image preview for main image and gallery images
       previewContent = `
-      <div class="file-preview-image">
-        <img src="${fileUrl}" alt="${fileName}" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 4px;">
-      </div>
-    `;
+        <div class="file-preview-image">
+          <img src="${fileUrl}" alt="${fileName}" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 4px;">
+        </div>
+      `;
     } else {
       // Show icon for other file types
       previewContent = `<i class="${iconClass}" style="font-size: 24px; margin-right: 8px;"></i>`;
     }
 
     fileItem.innerHTML = `
-    <div class="file-info">
-      ${previewContent}
-      <div class="file-details">
-        <span class="file-name">${fileName}</span>
-        <span class="file-status existing"> - Existing File</span>
+      <div class="file-info">
+        ${previewContent}
+        <div class="file-details">
+          <span class="file-name">${fileName}</span>
+          <span class="file-status existing"> - Cloudinary File</span>
+        </div>
       </div>
-    </div>
-    <div class="file-actions">
-      <button type="button" class="btn btn-sm btn-info view-file-btn" 
-              onclick="adminOnlineCourses.viewFile('${fileUrl}')" 
-              title="View/Download file">
-        <i class="fas fa-eye"></i>
-      </button>
-      <button type="button" class="btn btn-sm btn-warning replace-file-btn" 
-              onclick="adminOnlineCourses.replaceExistingFile('${uploadType}', '${fileUrl}', '${courseId}')"
-              title="Replace this file">
-        <i class="fas fa-exchange-alt"></i>
-      </button>
-      <button type="button" class="btn btn-sm btn-danger remove-existing-file-btn" 
-              onclick="adminOnlineCourses.deleteExistingFile('${uploadType}', '${fileUrl}', '${courseId}')"
-              title="Delete this file from server">
-        <i class="fas fa-trash"></i>
-      </button>
-    </div>
-  `;
+      <div class="file-actions">
+        <button type="button" class="btn btn-sm btn-info view-file-btn" 
+                onclick="adminOnlineCourses.viewFile('${fileUrl}')" 
+                title="View/Download file">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-warning replace-file-btn" 
+                onclick="adminOnlineCourses.replaceExistingFile('${uploadType}', '${fileUrl}', '${courseId}')"
+                title="Replace this file">
+          <i class="fas fa-exchange-alt"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-danger remove-existing-file-btn" 
+                onclick="adminOnlineCourses.deleteExistingFile('${uploadType}', '${fileUrl}', '${courseId}')"
+                title="Delete this file from Cloudinary">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
 
     // Add enhanced styling for better presentation
     fileItem.style.cssText = `
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    margin: 8px 0;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-  `;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      margin: 8px 0;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    `;
 
     container.appendChild(fileItem);
-    console.log(`✅ Added existing file preview: ${fileName} (${uploadType})`);
+    console.log(
+      `✅ Added existing Cloudinary file preview: ${fileName} (${uploadType})`
+    );
   }
 
   /**

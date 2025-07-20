@@ -16,6 +16,7 @@ const path = require("path");
 const emailService = require("../../utils/emailService");
 const fs = require("fs").promises;
 const courseNotificationController = require("./onlinecourseNotificationController");
+const cloudinary = require("cloudinary").v2;
 
 class OnlineLiveCoursesController {
   // ==========================================
@@ -581,6 +582,10 @@ class OnlineLiveCoursesController {
       );
 
       console.log("💾 Updating course with ID:", courseId);
+      if (updateData.schedule?.sessions)
+        updateData.schedule.sessions.forEach(
+          (s) => (s.instructorId = s.instructorId || null)
+        );
 
       // 6. Update the course
       const updatedCourse = await OnlineLiveTraining.findByIdAndUpdate(
@@ -605,6 +610,19 @@ class OnlineLiveCoursesController {
         course: updatedCourse,
         changes: changes,
       });
+      // Clean the sessions data before building update object
+      if (formData.schedule && formData.schedule.sessions) {
+        formData.schedule.sessions = this._cleanSessionData(
+          formData.schedule.sessions
+        );
+      }
+
+      // If using merged data approach, clean there too:
+      if (mergedFormData.schedule && mergedFormData.schedule.sessions) {
+        mergedFormData.schedule.sessions = this._cleanSessionData(
+          mergedFormData.schedule.sessions
+        );
+      }
     } catch (error) {
       console.error(`❌ Error in updateCourse for ID ${courseId}:`, error);
       return this._handleError(error, res);
@@ -613,6 +631,8 @@ class OnlineLiveCoursesController {
 
   //new : merge
   // NEW: Fixed instructor processing method
+  // In onlineLiveController.js, replace the existing _validateAndProcessInstructorsFromMergedData method with this fixed version:
+
   async _validateAndProcessInstructorsFromMergedData(formData) {
     console.log("🔍 Processing instructors from merged data...");
 
@@ -658,53 +678,62 @@ class OnlineLiveCoursesController {
       }
     }
 
-    // Process additional instructors from merged data
+    // FIXED: Process additional instructors from the correct location
+    // The merged data structure places additional instructors in formData.instructors.additional
+    let additionalInstructorsData = [];
+
+    // Check both possible locations for additional instructors
     if (
       formData.instructors?.additional &&
       Array.isArray(formData.instructors.additional)
     ) {
+      additionalInstructorsData = formData.instructors.additional;
       console.log(
-        `📝 Processing ${formData.instructors.additional.length} additional instructors`
+        `📝 Found ${additionalInstructorsData.length} additional instructors in formData.instructors.additional`
       );
+    } else {
+      console.log(
+        "📝 No additional instructors found in formData.instructors.additional"
+      );
+    }
 
-      for (const instData of formData.instructors.additional) {
-        if (
-          instData.instructorId &&
-          instData.instructorId !==
-            instructors.primary?.instructorId?.toString()
-        ) {
-          try {
-            const instructor = await Instructor.findById(instData.instructorId);
-            if (instructor) {
-              const additionalInstructor = {
-                instructorId: instructor._id,
-                name: `${instructor.firstName} ${instructor.lastName}`,
-                role: instData.role || "Co-Instructor",
-                sessions: Array.isArray(instData.sessions)
-                  ? instData.sessions
-                  : [],
-              };
+    // Process each additional instructor
+    for (const instData of additionalInstructorsData) {
+      if (
+        instData.instructorId &&
+        instData.instructorId !== instructors.primary?.instructorId?.toString()
+      ) {
+        try {
+          const instructor = await Instructor.findById(instData.instructorId);
+          if (instructor) {
+            const additionalInstructor = {
+              instructorId: instructor._id,
+              name: `${instructor.firstName} ${instructor.lastName}`,
+              role: instData.role || "Co-Instructor",
+              sessions: Array.isArray(instData.sessions)
+                ? instData.sessions
+                : [],
+            };
 
-              instructors.additional.push(additionalInstructor);
+            instructors.additional.push(additionalInstructor);
 
-              if (instructor.email) {
-                instructorEmails.push({
-                  email: instructor.email,
-                  name: additionalInstructor.name,
-                  role: additionalInstructor.role,
-                });
-              }
-
-              console.log(
-                `✅ Added additional instructor: ${additionalInstructor.name}`
-              );
+            if (instructor.email) {
+              instructorEmails.push({
+                email: instructor.email,
+                name: additionalInstructor.name,
+                role: additionalInstructor.role,
+              });
             }
-          } catch (error) {
-            console.error(
-              `❌ Error processing additional instructor ${instData.instructorId}:`,
-              error
+
+            console.log(
+              `✅ Added additional instructor: ${additionalInstructor.name}`
             );
           }
+        } catch (error) {
+          console.error(
+            `❌ Error processing additional instructor ${instData.instructorId}:`,
+            error
+          );
         }
       }
     }
@@ -808,17 +837,13 @@ class OnlineLiveCoursesController {
     }
   }
 
-  /**
-   * Deletes a specific file associated with a course.
-   * @route POST /admin-courses/onlinelive/api/:id/delete-file
-   */
-  async deleteFile(req, res) {
+  async deleteCloudinaryFile(req, res) {
     try {
       const courseId = req.params.id;
       const { fileType, fileUrl } = req.body;
 
       console.log(
-        `🗑️ Deleting file: Type=${fileType}, URL=${fileUrl} for Course ID=${courseId}`
+        `🗑️ Deleting Cloudinary file: Type=${fileType}, URL=${fileUrl} for Course ID=${courseId}`
       );
 
       const course = await OnlineLiveTraining.findById(courseId);
@@ -829,13 +854,53 @@ class OnlineLiveCoursesController {
         });
       }
 
+      // Extract Cloudinary public_id from URL
+      const publicId = this._extractCloudinaryPublicId(fileUrl);
+      if (!publicId) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Cloudinary URL format.",
+        });
+      }
+
+      // Remove file reference from course document
       const updated = await course.removeFile(fileType, fileUrl);
 
       if (updated) {
         await course.save();
-        await this._deletePhysicalFile(fileUrl);
 
-        console.log("✅ File reference removed and physical file deleted.");
+        // Delete from Cloudinary
+        try {
+          let deleteResult;
+          // Determine resource type based on file type
+          if (fileType === "documents") {
+            deleteResult = await cloudinary.uploader.destroy(publicId, {
+              resource_type: "raw",
+            });
+          } else if (fileType === "videos") {
+            deleteResult = await cloudinary.uploader.destroy(publicId, {
+              resource_type: "video",
+            });
+          } else {
+            // mainImage and images
+            deleteResult = await cloudinary.uploader.destroy(publicId, {
+              resource_type: "image",
+            });
+          }
+
+          console.log("🗑️ Cloudinary delete result:", deleteResult);
+
+          if (
+            deleteResult.result === "ok" ||
+            deleteResult.result === "not found"
+          ) {
+            console.log("✅ File deleted from Cloudinary successfully");
+          }
+        } catch (cloudinaryError) {
+          console.error("❌ Cloudinary deletion error:", cloudinaryError);
+          // Don't fail the request if Cloudinary deletion fails
+          // The file reference is already removed from the database
+        }
 
         res.json({
           success: true,
@@ -848,7 +913,7 @@ class OnlineLiveCoursesController {
         });
       }
     } catch (error) {
-      console.error("❌ Error deleting file:", error);
+      console.error("❌ Error deleting Cloudinary file:", error);
       res.status(500).json({
         success: false,
         message: "Error deleting file",
@@ -856,7 +921,6 @@ class OnlineLiveCoursesController {
       });
     }
   }
-
   /**
    * Cancels a course.
    * @route POST /admin-courses/onlinelive/api/:id/cancel
@@ -1423,6 +1487,105 @@ class OnlineLiveCoursesController {
         $in: ["Paid and Registered", "Registered (promo code)"],
       },
     });
+  }
+
+  //new
+  /**
+   * SINGLE standardized method to get instructor names from course
+   * Based on the actual model structure
+   */
+  _getStandardizedInstructorNames(course) {
+    const names = [];
+
+    // Primary instructor - use cached name first, fallback to populated object
+    if (course.instructors?.primary?.name) {
+      names.push(course.instructors.primary.name);
+    } else if (course.instructors?.primary?.instructorId?.fullName) {
+      names.push(course.instructors.primary.instructorId.fullName);
+    } else if (course.instructors?.primary?.instructorId?.firstName) {
+      const inst = course.instructors.primary.instructorId;
+      names.push(`${inst.firstName} ${inst.lastName}`.trim());
+    }
+
+    // Additional instructors - use cached name first, fallback to populated object
+    if (course.instructors?.additional?.length > 0) {
+      course.instructors.additional.forEach((inst) => {
+        if (inst.name) {
+          names.push(inst.name);
+        } else if (inst.instructorId?.fullName) {
+          names.push(inst.instructorId.fullName);
+        } else if (inst.instructorId?.firstName) {
+          names.push(
+            `${inst.instructorId.firstName} ${inst.instructorId.lastName}`.trim()
+          );
+        }
+      });
+    }
+
+    return names.length > 0 ? names.join(", ") : "TBD";
+  }
+
+  /**
+   * Get instructor emails for notifications (simplified)
+   */
+  async _getStandardizedInstructorEmails(course) {
+    const emails = [];
+
+    // Primary instructor
+    if (course.instructors?.primary?.instructorId) {
+      let email = null;
+
+      // If already populated
+      if (course.instructors.primary.instructorId.email) {
+        email = course.instructors.primary.instructorId.email;
+      }
+      // If just an ID, fetch it
+      else if (typeof course.instructors.primary.instructorId === "string") {
+        try {
+          const instructor = await Instructor.findById(
+            course.instructors.primary.instructorId
+          ).select("email firstName lastName");
+          email = instructor?.email;
+        } catch (error) {
+          console.error("Error fetching primary instructor email:", error);
+        }
+      }
+
+      if (email) {
+        emails.push(email);
+      }
+    }
+
+    // Additional instructors
+    if (course.instructors?.additional?.length > 0) {
+      for (const inst of course.instructors.additional) {
+        if (inst.instructorId) {
+          let email = null;
+
+          if (inst.instructorId.email) {
+            email = inst.instructorId.email;
+          } else if (typeof inst.instructorId === "string") {
+            try {
+              const instructor = await Instructor.findById(
+                inst.instructorId
+              ).select("email");
+              email = instructor?.email;
+            } catch (error) {
+              console.error(
+                "Error fetching additional instructor email:",
+                error
+              );
+            }
+          }
+
+          if (email && !emails.includes(email)) {
+            emails.push(email);
+          }
+        }
+      }
+    }
+
+    return emails;
   }
 
   /**
@@ -2293,6 +2456,131 @@ class OnlineLiveCoursesController {
     return mediaData;
   }
 
+  //new
+  // Add this method to your onlineLiveController.js
+
+  /**
+   * Delete file from Cloudinary instead of local filesystem
+   * @route POST /admin-courses/onlinelive/api/:id/delete-file
+   */
+  async deleteCloudinaryFile(req, res) {
+    try {
+      const courseId = req.params.id;
+      const { fileType, fileUrl } = req.body;
+
+      console.log(
+        `🗑️ Deleting Cloudinary file: Type=${fileType}, URL=${fileUrl} for Course ID=${courseId}`
+      );
+
+      const course = await OnlineLiveTraining.findById(courseId);
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found.",
+        });
+      }
+
+      // Extract Cloudinary public_id from URL
+      const publicId = this._extractCloudinaryPublicId(fileUrl);
+      if (!publicId) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Cloudinary URL format.",
+        });
+      }
+
+      // Remove file reference from course document
+      const updated = await course.removeFile(fileType, fileUrl);
+
+      if (updated) {
+        await course.save();
+
+        // Delete from Cloudinary
+        try {
+          let deleteResult;
+          // Determine resource type based on file type
+          if (fileType === "documents") {
+            deleteResult = await cloudinary.uploader.destroy(publicId, {
+              resource_type: "raw",
+            });
+          } else if (fileType === "videos") {
+            deleteResult = await cloudinary.uploader.destroy(publicId, {
+              resource_type: "video",
+            });
+          } else {
+            // mainImage and images
+            deleteResult = await cloudinary.uploader.destroy(publicId, {
+              resource_type: "image",
+            });
+          }
+
+          console.log("🗑️ Cloudinary delete result:", deleteResult);
+
+          if (
+            deleteResult.result === "ok" ||
+            deleteResult.result === "not found"
+          ) {
+            console.log("✅ File deleted from Cloudinary successfully");
+          }
+        } catch (cloudinaryError) {
+          console.error("❌ Cloudinary deletion error:", cloudinaryError);
+          // Don't fail the request if Cloudinary deletion fails
+          // The file reference is already removed from the database
+        }
+
+        res.json({
+          success: true,
+          message: "File deleted successfully.",
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "File not found in course or could not be removed.",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error deleting Cloudinary file:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error deleting file",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Extract Cloudinary public_id from URL
+   * @param {string} cloudinaryUrl - Full Cloudinary URL
+   * @returns {string|null} Public ID or null if invalid
+   */
+  _extractCloudinaryPublicId(cloudinaryUrl) {
+    try {
+      // Example URL: https://res.cloudinary.com/yourcloud/image/upload/v1234567890/iaai-platform/onlinelive/main-images/main-image-123456-abc.jpg
+      const urlParts = cloudinaryUrl.split("/");
+      const uploadIndex = urlParts.findIndex((part) => part === "upload");
+
+      if (uploadIndex === -1) return null;
+
+      // Get everything after 'upload/v{version}/' or 'upload/'
+      let pathAfterUpload = urlParts.slice(uploadIndex + 1);
+
+      // Remove version if present (starts with 'v' followed by numbers)
+      if (pathAfterUpload[0] && /^v\d+$/.test(pathAfterUpload[0])) {
+        pathAfterUpload = pathAfterUpload.slice(1);
+      }
+
+      // Join the remaining parts and remove file extension
+      const publicIdWithExtension = pathAfterUpload.join("/");
+      const publicId = publicIdWithExtension.replace(/\.[^/.]+$/, "");
+
+      console.log("📋 Extracted public_id:", publicId);
+      return publicId;
+    } catch (error) {
+      console.error("❌ Error extracting public_id:", error);
+      return null;
+    }
+  }
+
   /**
    * Process materials data
    */
@@ -2799,39 +3087,72 @@ class OnlineLiveCoursesController {
     }
   }
 
-  /**
-   * Clean up course files when deleting a course
-   */
   async _cleanupCourseFiles(course) {
     try {
-      const fileUrls = [];
+      const cloudinaryFiles = [];
 
-      // Collect all file URLs from the course
+      // Collect all Cloudinary URLs from the course
       if (course.media?.mainImage?.url) {
-        fileUrls.push(course.media.mainImage.url);
+        cloudinaryFiles.push({
+          url: course.media.mainImage.url,
+          type: "mainImage",
+        });
       }
       if (course.media?.documents) {
-        fileUrls.push(...course.media.documents);
+        course.media.documents.forEach((url) => {
+          cloudinaryFiles.push({ url, type: "documents" });
+        });
       }
       if (course.media?.images) {
-        fileUrls.push(...course.media.images);
+        course.media.images.forEach((url) => {
+          cloudinaryFiles.push({ url, type: "images" });
+        });
       }
       if (course.media?.videos) {
-        // Only include uploaded files, not external links
-        fileUrls.push(
-          ...course.media.videos.filter((url) => url.startsWith("/uploads/"))
-        );
+        // Only include Cloudinary files, not external links
+        course.media.videos.forEach((url) => {
+          if (url.includes("cloudinary.com")) {
+            cloudinaryFiles.push({ url, type: "videos" });
+          }
+        });
       }
 
-      // Delete each file
-      for (const fileUrl of fileUrls) {
-        await this._deletePhysicalFile(fileUrl);
+      // Delete each file from Cloudinary
+      for (const file of cloudinaryFiles) {
+        await this._deleteCloudinaryFile(file.url, file.type);
       }
 
-      console.log(`✅ Cleaned up ${fileUrls.length} course files`);
+      console.log(`✅ Cleaned up ${cloudinaryFiles.length} Cloudinary files`);
     } catch (error) {
-      console.error("❌ Error cleaning up course files:", error);
+      console.error("❌ Error cleaning up Cloudinary files:", error);
     }
+  }
+
+  /**
+   * Clean session data before saving to database
+   * Converts empty string instructorIds to null to prevent Mongoose casting errors
+   */
+  _cleanSessionData(sessions) {
+    if (!Array.isArray(sessions)) return sessions;
+
+    return sessions.map((session) => {
+      const cleanedSession = { ...session };
+
+      // Convert empty string instructorId to null
+      if (
+        cleanedSession.instructorId === "" ||
+        cleanedSession.instructorId === undefined
+      ) {
+        cleanedSession.instructorId = null;
+      }
+
+      // Ensure other required fields have proper types
+      if (cleanedSession.dayNumber) {
+        cleanedSession.dayNumber = parseInt(cleanedSession.dayNumber);
+      }
+
+      return cleanedSession;
+    });
   }
 
   /**
@@ -2839,28 +3160,95 @@ class OnlineLiveCoursesController {
    */
   async _deletePhysicalFile(fileUrl) {
     try {
-      if (!fileUrl || !fileUrl.startsWith("/uploads/")) {
-        console.log("⚠️ Not a valid upload file URL, skipping:", fileUrl);
+      // Check if it's a Cloudinary URL
+      if (!fileUrl || !fileUrl.includes("cloudinary.com")) {
+        console.log("⚠️ Not a Cloudinary URL, skipping:", fileUrl);
         return;
       }
 
-      // Convert URL to file path
-      const filePath = path.join(__dirname, "../../public", fileUrl);
+      // For Cloudinary URLs, we handle deletion through the API
+      console.log(`🗑️ Cloudinary file deletion handled via API: ${fileUrl}`);
+      // The actual deletion is handled by the deleteCloudinaryFile method
+    } catch (error) {
+      console.error(`❌ Error processing Cloudinary file ${fileUrl}:`, error);
+    }
+  }
 
-      // Check if file exists and delete it
-      try {
-        await fs.access(filePath);
-        await fs.unlink(filePath);
-        console.log(`🗑️ Deleted file: ${filePath}`);
-      } catch (error) {
-        if (error.code === "ENOENT") {
-          console.log(`⚠️ File not found (already deleted?): ${filePath}`);
-        } else {
-          throw error;
-        }
+  // 5. ADD THIS HELPER METHOD
+  // Add this helper method to extract public_id from Cloudinary URLs:
+
+  _extractCloudinaryPublicId(cloudinaryUrl) {
+    try {
+      // Example URL: https://res.cloudinary.com/yourcloud/image/upload/v1234567890/iaai-platform/onlinelive/main-images/main-image-123456-abc.jpg
+      const urlParts = cloudinaryUrl.split("/");
+      const uploadIndex = urlParts.findIndex((part) => part === "upload");
+
+      if (uploadIndex === -1) return null;
+
+      // Get everything after 'upload/v{version}/' or 'upload/'
+      let pathAfterUpload = urlParts.slice(uploadIndex + 1);
+
+      // Remove version if present (starts with 'v' followed by numbers)
+      if (pathAfterUpload[0] && /^v\d+$/.test(pathAfterUpload[0])) {
+        pathAfterUpload = pathAfterUpload.slice(1);
+      }
+
+      // Join the remaining parts and remove file extension
+      const publicIdWithExtension = pathAfterUpload.join("/");
+      const publicId = publicIdWithExtension.replace(/\.[^/.]+$/, "");
+
+      console.log("📋 Extracted public_id:", publicId);
+      return publicId;
+    } catch (error) {
+      console.error("❌ Error extracting public_id:", error);
+      return null;
+    }
+  }
+
+  // 6. ADD THIS HELPER METHOD FOR CLEANUP
+  // Add this helper method for internal cleanup operations:
+
+  async _deleteCloudinaryFile(fileUrl, fileType) {
+    try {
+      if (!fileUrl || !fileUrl.includes("cloudinary.com")) {
+        console.log("⚠️ Not a Cloudinary URL, skipping:", fileUrl);
+        return;
+      }
+
+      const publicId = this._extractCloudinaryPublicId(fileUrl);
+      if (!publicId) {
+        console.warn("⚠️ Could not extract public_id from URL:", fileUrl);
+        return;
+      }
+
+      let deleteResult;
+      if (fileType === "documents") {
+        deleteResult = await cloudinary.uploader.destroy(publicId, {
+          resource_type: "raw",
+        });
+      } else if (fileType === "videos") {
+        deleteResult = await cloudinary.uploader.destroy(publicId, {
+          resource_type: "video",
+        });
+      } else {
+        // mainImage and images
+        deleteResult = await cloudinary.uploader.destroy(publicId, {
+          resource_type: "image",
+        });
+      }
+
+      console.log(`🗑️ Cloudinary delete result for ${publicId}:`, deleteResult);
+
+      if (deleteResult.result === "ok") {
+        console.log(`✅ Successfully deleted ${publicId} from Cloudinary`);
+      } else if (deleteResult.result === "not found") {
+        console.log(
+          `⚠️ File ${publicId} not found in Cloudinary (may have been deleted already)`
+        );
       }
     } catch (error) {
-      console.error(`❌ Error deleting file ${fileUrl}:`, error);
+      console.error(`❌ Error deleting Cloudinary file ${fileUrl}:`, error);
+      // Don't throw - we don't want to fail the cleanup process
     }
   }
 
@@ -3708,6 +4096,22 @@ class OnlineLiveCoursesController {
       },
     };
 
+    // ADD THIS ONE LINE - Clean sessions instructorId
+    if (updateData.schedule?.sessions) {
+      updateData.schedule.sessions = updateData.schedule.sessions.map(
+        (session) => ({
+          ...session,
+          instructorId:
+            session.instructorId === "" ? null : session.instructorId,
+        })
+      );
+    }
+    // ADD THIS - Clean additional instructors instructorId
+    if (updateData.instructors?.additional) {
+      updateData.instructors.additional.forEach((inst) => {
+        inst.instructorId = inst.instructorId === "" ? null : inst.instructorId;
+      });
+    }
     console.log("✅ Update data object built successfully from merged data");
     return updateData;
   }
@@ -3727,7 +4131,8 @@ module.exports = {
   updateCourse: controller.updateCourse.bind(controller),
   deleteCourse: controller.deleteCourse.bind(controller),
   cloneCourse: controller.cloneCourse.bind(controller),
-  deleteFile: controller.deleteFile.bind(controller),
+
+  deleteCloudinaryFile: controller.deleteCloudinaryFile.bind(controller),
   exportData: controller.exportData.bind(controller),
 
   // Notification methods

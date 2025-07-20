@@ -1,93 +1,135 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const controller = require("../../controllers/admin/onlineLiveController");
 
 // ==========================================
-// MULTER CONFIGURATION
+// CLOUDINARY CONFIGURATION
 // ==========================================
 
-// Configure storage for all online live course file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    let uploadPath;
+// Configure cloudinary (make sure these environment variables are set)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-    // Determine the correct subfolder based on the route or fieldname
-    if (req.path.includes("/main-image") || file.fieldname === "mainImage") {
-      uploadPath = "public/uploads/onlinelivecourses/images";
-    } else if (
-      req.path.includes("/documents") ||
-      file.fieldname === "documents"
-    ) {
-      uploadPath = "public/uploads/onlinelivecourses/documents";
-    } else if (req.path.includes("/images") || file.fieldname === "images") {
-      uploadPath = "public/uploads/onlinelivecourses/gallery";
-    } else if (req.path.includes("/videos") || file.fieldname === "videos") {
-      uploadPath = "public/uploads/onlinelivecourses/videos";
-    } else {
-      // Default fallback for mixed file types if needed
-      if (file.mimetype.startsWith("image/")) {
-        uploadPath = "public/uploads/onlinelivecourses/images";
-      } else if (file.mimetype.startsWith("video/")) {
-        uploadPath = "public/uploads/onlinelivecourses/videos";
-      } else {
-        uploadPath = "public/uploads/onlinelivecourses/documents";
-      }
-    }
+// ==========================================
+// CLOUDINARY STORAGE CONFIGURATIONS
+// ==========================================
 
-    // Create the directory if it doesn't exist
-    fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    const baseName = path
-      .basename(file.originalname, ext)
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, "") // Sanitize filename
-      .substring(0, 50);
-    cb(null, `onlinelive-${baseName}-${uniqueSuffix}${ext}`);
+// Main Images Storage
+const mainImageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "iaai-platform/onlinelive/main-images",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [
+      { width: 1200, height: 800, crop: "limit" },
+      { quality: "auto" },
+    ],
+    public_id: (req, file) => {
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(7);
+      return `main-image-${timestamp}-${randomStr}`;
+    },
   },
 });
 
-// Define a consistent file filter
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/webp",
-    "application/pdf",
-    "application/vnd.ms-powerpoint",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-excel",
-    "video/mp4",
-    "video/webm",
-    "video/ogg",
-  ];
+// Course Documents Storage
+const documentsStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "iaai-platform/onlinelive/coursedocuments",
+    allowed_formats: ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx"],
+    resource_type: "raw", // Important for non-image files
+    public_id: (req, file) => {
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(7);
+      const originalName = file.originalname
+        .split(".")[0]
+        .replace(/[^a-zA-Z0-9]/g, "");
+      return `document-${originalName}-${timestamp}-${randomStr}`;
+    },
+  },
+});
 
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error(`Invalid file type: ${file.mimetype}.`), false);
-  }
-};
+// Gallery Images Storage
+const galleryStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "iaai-platform/onlinelive/gallery-images",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [
+      { width: 800, height: 600, crop: "limit" },
+      { quality: "auto" },
+    ],
+    public_id: (req, file) => {
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(7);
+      return `gallery-${timestamp}-${randomStr}`;
+    },
+  },
+});
 
-// Create the Multer instance with storage, filter, and limits
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+// Videos Storage
+const videosStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "iaai-platform/onlinelive/videos",
+    allowed_formats: ["mp4", "webm", "ogg", "mov", "avi"],
+    resource_type: "video",
+    public_id: (req, file) => {
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(7);
+      const originalName = file.originalname
+        .split(".")[0]
+        .replace(/[^a-zA-Z0-9]/g, "");
+      return `video-${originalName}-${timestamp}-${randomStr}`;
+    },
+  },
+});
+
+// ==========================================
+// MULTER CONFIGURATIONS
+// ==========================================
+
+const mainImageUpload = multer({
+  storage: mainImageStorage,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB per file
-    files: 50, // Max 50 files per request
+    fileSize: 5 * 1024 * 1024, // 5MB
+    files: 1,
   },
 });
+
+const documentsUpload = multer({
+  storage: documentsStorage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+    files: 10,
+  },
+});
+
+const galleryUpload = multer({
+  storage: galleryStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+    files: 20,
+  },
+});
+
+const videosUpload = multer({
+  storage: videosStorage,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB
+    files: 5,
+  },
+});
+
+// General upload for form submission (no files)
+const upload = multer();
 
 // ==========================================
 // VIEW ROUTE
@@ -96,60 +138,148 @@ const upload = multer({
 router.get("/", controller.renderAdminPage);
 
 // ==========================================
-// DEDICATED FILE UPLOAD API ROUTES
-// These routes handle the initial, separate file uploads from the frontend.
+// CLOUDINARY FILE UPLOAD API ROUTES
 // ==========================================
 
-router.post("/api/upload/main-image", upload.array("files", 1), (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No file uploaded." });
-  }
-  const fileUrl = `/uploads/onlinelivecourses/images/${req.files[0].filename}`;
-  res.json({ success: true, files: [fileUrl] });
-});
+router.post(
+  "/api/upload/main-image",
+  mainImageUpload.array("files", 1),
+  (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No file uploaded.",
+        });
+      }
 
-router.post("/api/upload/documents", upload.array("files", 10), (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No files uploaded." });
-  }
-  const fileUrls = req.files.map(
-    (file) => `/uploads/onlinelivecourses/documents/${file.filename}`
-  );
-  res.json({ success: true, files: fileUrls });
-});
+      const file = req.files[0];
+      const fileUrl = file.path; // Cloudinary URL
 
-router.post("/api/upload/images", upload.array("files", 20), (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No files uploaded." });
-  }
-  const fileUrls = req.files.map(
-    (file) => `/uploads/onlinelivecourses/gallery/${file.filename}`
-  );
-  res.json({ success: true, files: fileUrls });
-});
+      console.log("✅ Main image uploaded to Cloudinary:", fileUrl);
 
-router.post("/api/upload/videos", upload.array("files", 5), (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No files uploaded." });
+      res.json({
+        success: true,
+        files: [fileUrl],
+        cloudinary_id: file.filename,
+      });
+    } catch (error) {
+      console.error("❌ Main image upload error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Upload failed: " + error.message,
+      });
+    }
   }
-  const fileUrls = req.files.map(
-    (file) => `/uploads/onlinelivecourses/videos/${file.filename}`
-  );
-  res.json({ success: true, files: fileUrls });
-});
+);
+
+router.post(
+  "/api/upload/documents",
+  documentsUpload.array("files", 10),
+  (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No files uploaded.",
+        });
+      }
+
+      const fileUrls = req.files.map((file) => file.path);
+
+      console.log(
+        "✅ Documents uploaded to Cloudinary:",
+        fileUrls.length,
+        "files"
+      );
+
+      res.json({
+        success: true,
+        files: fileUrls,
+        cloudinary_ids: req.files.map((file) => file.filename),
+      });
+    } catch (error) {
+      console.error("❌ Documents upload error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Upload failed: " + error.message,
+      });
+    }
+  }
+);
+
+router.post(
+  "/api/upload/images",
+  galleryUpload.array("files", 20),
+  (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No files uploaded.",
+        });
+      }
+
+      const fileUrls = req.files.map((file) => file.path);
+
+      console.log(
+        "✅ Gallery images uploaded to Cloudinary:",
+        fileUrls.length,
+        "files"
+      );
+
+      res.json({
+        success: true,
+        files: fileUrls,
+        cloudinary_ids: req.files.map((file) => file.filename),
+      });
+    } catch (error) {
+      console.error("❌ Gallery images upload error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Upload failed: " + error.message,
+      });
+    }
+  }
+);
+
+router.post(
+  "/api/upload/videos",
+  videosUpload.array("files", 5),
+  (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No files uploaded.",
+        });
+      }
+
+      const fileUrls = req.files.map((file) => file.path);
+
+      console.log(
+        "✅ Videos uploaded to Cloudinary:",
+        fileUrls.length,
+        "files"
+      );
+
+      res.json({
+        success: true,
+        files: fileUrls,
+        cloudinary_ids: req.files.map((file) => file.filename),
+      });
+    } catch (error) {
+      console.error("❌ Videos upload error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Upload failed: " + error.message,
+      });
+    }
+  }
+);
 
 // ==========================================
 // CORE COURSE DATA API ROUTES
-// ✅ This is the critical fix. Using `upload.any()` ensures that the `multipart/form-data`
-// from the final form submission is parsed correctly, populating `req.body`.
 // ==========================================
 
 const debugMiddleware = (req, res, next) => {
@@ -160,14 +290,12 @@ const debugMiddleware = (req, res, next) => {
 };
 
 router.post("/api", upload.any(), debugMiddleware, controller.createCourse);
-
 router.put("/api/:id", upload.any(), debugMiddleware, controller.updateCourse);
 
 // ==========================================
 // OTHER API ENDPOINTS
 // ==========================================
 
-// GET requests do not need body parsers
 router.get("/api", controller.getAllCourses);
 router.get("/api/instructors", controller.getAllInstructors);
 router.get("/api/certification-bodies", controller.getAllCertificationBodies);
@@ -176,16 +304,18 @@ router.get("/api/export", controller.exportData);
 router.get("/api/notifications/status", controller.getNotificationStatus);
 router.get("/api/:id", controller.getCourseById);
 
-// DELETE request for a course
 router.delete("/api/:id", controller.deleteCourse);
 
-// POST requests with JSON payloads
 router.post(
   "/api/generate-course-code",
   express.json(),
   controller.generateCourseCode
 );
-router.post("/api/:id/delete-file", express.json(), controller.deleteFile);
+router.post(
+  "/api/:id/delete-file",
+  express.json(),
+  controller.deleteCloudinaryFile
+); // Updated method
 router.post("/api/:id/clone", express.json(), controller.cloneCourse);
 router.post("/api/:id/cancel", express.json(), controller.cancelCourse);
 router.post("/api/:id/postpone", express.json(), controller.postponeCourse);
@@ -201,25 +331,148 @@ router.post(
 );
 router.delete("/api/:id/notify-cancel", controller.cancelScheduledNotification);
 
+//test
+//test
+// Add this test route to verify the fix works
+//test
+// Add this test route to verify the fix works
+router.get("/api/test/instructor-fix/:id", async (req, res) => {
+  try {
+    const OnlineLiveTraining = require("../../models/onlineLiveTrainingModel");
+
+    const course = await OnlineLiveTraining.findById(req.params.id)
+      .populate(
+        "instructors.primary.instructorId",
+        "firstName lastName email fullName"
+      )
+      .populate(
+        "instructors.additional.instructorId",
+        "firstName lastName email fullName"
+      );
+
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+
+    // FIX: Create helper functions directly in the route
+    const getStandardizedInstructorNames = (course) => {
+      const names = [];
+
+      // Primary instructor
+      if (course.instructors?.primary?.name) {
+        names.push(course.instructors.primary.name);
+      } else if (course.instructors?.primary?.instructorId?.fullName) {
+        names.push(course.instructors.primary.instructorId.fullName);
+      } else if (course.instructors?.primary?.instructorId?.firstName) {
+        const inst = course.instructors.primary.instructorId;
+        names.push(`${inst.firstName} ${inst.lastName}`.trim());
+      }
+
+      // Additional instructors
+      if (course.instructors?.additional?.length > 0) {
+        course.instructors.additional.forEach((inst) => {
+          if (inst.name) {
+            names.push(inst.name);
+          } else if (inst.instructorId?.fullName) {
+            names.push(inst.instructorId.fullName);
+          } else if (inst.instructorId?.firstName) {
+            names.push(
+              `${inst.instructorId.firstName} ${inst.instructorId.lastName}`.trim()
+            );
+          }
+        });
+      }
+
+      return names.length > 0 ? names.join(", ") : "TBD";
+    };
+
+    const getStandardizedInstructorEmails = async (course) => {
+      const emails = [];
+      const Instructor = require("../../models/Instructor");
+
+      // Primary instructor
+      if (course.instructors?.primary?.instructorId) {
+        let email = null;
+
+        if (course.instructors.primary.instructorId.email) {
+          email = course.instructors.primary.instructorId.email;
+        } else if (
+          typeof course.instructors.primary.instructorId === "string"
+        ) {
+          try {
+            const instructor = await Instructor.findById(
+              course.instructors.primary.instructorId
+            ).select("email");
+            email = instructor?.email;
+          } catch (error) {
+            console.error("Error fetching primary instructor email:", error);
+          }
+        }
+
+        if (email) {
+          emails.push(email);
+        }
+      }
+
+      return emails;
+    };
+
+    // Test all methods
+    const instructorNames = getStandardizedInstructorNames(course);
+    const instructorEmails = await getStandardizedInstructorEmails(course);
+    const virtualNames = course.instructorNames; // Model's virtual field
+
+    res.json({
+      success: true,
+      courseTitle: course.basic?.title,
+      methods: {
+        standardized: instructorNames,
+        virtual: virtualNames,
+        emails: instructorEmails,
+      },
+      rawData: {
+        primary: course.instructors?.primary,
+        additional: course.instructors?.additional,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add monitoring route
+router.get("/api/notifications/tracking-status", (req, res) => {
+  const notificationController = require("../../controllers/admin/onlinecourseNotificationController");
+
+  res.json({
+    success: true,
+    memoryUsage: process.memoryUsage(),
+    uptime: process.uptime(),
+    trackingMaps: {
+      scheduledNotifications:
+        notificationController.scheduledNotifications.size,
+      courseCreationTimes: notificationController.courseCreationTimes.size,
+    },
+  });
+});
 // ==========================================
-// FINAL ERROR HANDLING MIDDLEWARE
+// ERROR HANDLING MIDDLEWARE
 // ==========================================
 
 router.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     console.error("Multer Error:", error);
-    return res
-      .status(400)
-      .json({ success: false, message: `File upload error: ${error.message}` });
+    return res.status(400).json({
+      success: false,
+      message: `File upload error: ${error.message}`,
+    });
   }
   if (error) {
     console.error("Route Error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: error.message || "An unexpected error occurred.",
-      });
+    return res.status(500).json({
+      success: false,
+      message: error.message || "An unexpected error occurred.",
+    });
   }
   next();
 });

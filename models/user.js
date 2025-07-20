@@ -1391,4 +1391,27 @@ userSchema.methods.cleanupOrphanedEnrollments = async function () {
   return this.save();
 };
 
+//new
+// Add this to your User model (user.js)
+userSchema.statics.getNotificationRecipients = function (
+  emailType = "course_announcement"
+) {
+  const filter = {
+    isConfirmed: true,
+    "accountStatus.isLocked": { $ne: true },
+    "notificationSettings.email": true,
+  };
+
+  // For commercial emails (new course announcements)
+  if (emailType === "course_announcement") {
+    filter["notificationSettings.courseUpdates"] = true;
+    // Could also check promotions: true for marketing emails
+  }
+
+  // For transactional emails (registration confirmations, etc.)
+  // No additional filters needed - these should go to all confirmed users
+
+  return this.find(filter).select("email firstName lastName");
+};
+
 module.exports = mongoose.models.User || mongoose.model("User", userSchema);

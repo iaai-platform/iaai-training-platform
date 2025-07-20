@@ -489,6 +489,29 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
+// 15.5 GRACEFUL SHUTDOWN HANDLERS (ADD THIS SECTION)
+// ============================================
+
+// Add graceful shutdown handling
+process.on("SIGINT", () => {
+  console.log("📧 Gracefully shutting down notification system...");
+
+  const notificationController = require("./controllers/admin/onlinecourseNotificationController");
+  notificationController.shutdown();
+
+  process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+  console.log("📧 Received SIGTERM, shutting down notification system...");
+
+  const notificationController = require("./controllers/admin/onlinecourseNotificationController");
+  notificationController.shutdown();
+
+  process.exit(0);
+});
+
+// ============================================
 // 16. SERVER STARTUP
 // ============================================
 const PORT = process.env.PORT || 3000;

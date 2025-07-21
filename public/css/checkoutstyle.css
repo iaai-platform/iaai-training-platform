@@ -1,7 +1,7 @@
 /* ============================================================
    🛒 CHECKOUT PAGE STYLING
    File: /css/checkoutstyle.css
-   Updated to match orders page styling
+   Updated to match orders page styling with Early Bird Pricing
 =========================================================== */
 
 /* Import Montserrat font */
@@ -16,6 +16,86 @@ body {
   background-color: #f9f9f9;
   margin: 0;
   padding: 0;
+}
+
+/* ============================================================
+   🆕 EARLY BIRD PRICING STYLES FOR CHECKOUT
+=========================================================== */
+
+/* Early Bird Savings Banner */
+.savings-banner {
+  background: linear-gradient(135deg, #d4f4dd 0%, #c8f2d0 100%);
+  border: 2px solid #2e7d3e;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  text-align: center;
+}
+
+.savings-banner i {
+  color: #2e7d3e;
+  font-size: 24px;
+}
+
+.savings-banner .savings-text {
+  color: #2e7d3e;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0;
+}
+
+.savings-banner .savings-amount {
+  color: #2e7d3e;
+  font-weight: 700;
+  font-size: 24px;
+  margin: 0;
+}
+
+/* Early Bird Badge in Checkout Table */
+.early-bird-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #d4f4dd 0%, #c8f2d0 100%);
+  color: #2e7d3e;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+  border: 1px solid #2e7d3e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Checkout Price Display */
+.checkout-price-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.checkout-price-display .original-price {
+  font-size: 14px;
+  color: #999;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.checkout-price-display .current-price {
+  font-size: 18px;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.checkout-price-display .savings-amount-item {
+  font-size: 12px;
+  color: #2e7d3e;
+  font-weight: 600;
+  font-style: italic;
 }
 
 /* ============================================================
@@ -101,6 +181,7 @@ body {
   font-size: 15px;
   color: #333;
   font-family: 'Montserrat', sans-serif;
+  vertical-align: top;
 }
 
 /* Course Title Cell */
@@ -168,7 +249,7 @@ body {
 }
 
 /* ============================================================
-   ✅ PRICE SUMMARY SECTION
+   🆕 ENHANCED PRICE SUMMARY SECTION WITH EARLY BIRD
 =========================================================== */
 .price-summary {
   background: #f8f9fa;
@@ -482,9 +563,10 @@ body {
 }
 
 /* ============================================================
-   ✅ SUCCESS MESSAGE
+   ✅ SUCCESS MESSAGE / SAVINGS MESSAGE
 =========================================================== */
-.success-message {
+.success-message,
+.savings-message {
   background-color: #d4edda;
   color: #155724;
   font-weight: bold;
@@ -494,6 +576,18 @@ body {
   margin-top: 20px;
   border: 2px solid #c3e6cb;
   font-family: 'Montserrat', sans-serif;
+}
+
+.savings-message {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.savings-message i {
+  color: #155724;
 }
 
 /* ============================================================
@@ -511,6 +605,15 @@ body {
   .checkout-table thead th,
   .checkout-table tbody td {
     padding: 15px;
+  }
+  
+  .savings-banner {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .checkout-price-display {
+    align-items: center;
   }
 }
 
@@ -564,6 +667,17 @@ body {
   .btn-apply-promo {
     width: 100%;
   }
+  
+  .savings-banner {
+    padding: 15px;
+    font-size: 14px;
+  }
+  
+  .early-bird-badge {
+    display: block;
+    margin: 8px 0 0 0;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -590,6 +704,14 @@ body {
   .price-row.total {
     font-size: 18px;
   }
+  
+  .checkout-price-display .current-price {
+    font-size: 16px;
+  }
+  
+  .checkout-price-display .original-price {
+    font-size: 13px;
+  }
 }
 
 /* ============================================================
@@ -615,8 +737,6 @@ body {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-
-
 
 /* ============================================================
    ✅ ADDITIONAL FEATURES STYLING
@@ -754,17 +874,6 @@ body {
   margin-left: auto;
 }
 
-/* Savings Message */
-.savings-message {
-  background: #d4edda;
-  color: #155724;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
-  margin-top: 10px;
-  font-weight: 600;
-}
-
 /* Security Badge */
 .security-badge {
   text-align: center;
@@ -830,217 +939,4 @@ body {
   font-size: 20px;
   color: #002147;
   margin-bottom: 10px;
-}
-
-
-<!-- Add this CSS to your checkoutstyle.css or include inline -->
-
-/* Policy Modal Styles */
-.policy-modal {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  animation: fadeIn 0.3s ease;
-}
-
-.policy-modal.show {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.modal-content {
-  background-color: white;
-  margin: 20px;
-  max-width: 800px;
-  width: 100%;
-  max-height: 90vh;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from { transform: translateY(-50px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.modal-header {
-  background: linear-gradient(135deg, #002147 0%, #003366 100%);
-  color: white;
-  padding: 25px 30px;
-  border-radius: 12px 12px 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.modal-header i {
-  color: #b8860b;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-
-.modal-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: rotate(90deg);
-}
-
-.modal-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 30px;
-}
-
-.policy-content {
-  font-family: 'Montserrat', sans-serif;
-  line-height: 1.8;
-  color: #333;
-}
-
-.policy-content h3 {
-  color: #002147;
-  margin-top: 30px;
-  margin-bottom: 15px;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.policy-content p {
-  margin-bottom: 15px;
-}
-
-.policy-content ul {
-  margin-left: 25px;
-  margin-bottom: 20px;
-}
-
-.policy-content li {
-  margin-bottom: 8px;
-}
-
-.last-updated {
-  background: #f8f9fa;
-  padding: 10px 15px;
-  border-radius: 5px;
-  font-style: italic;
-  color: #666;
-  margin-bottom: 25px;
-}
-
-/* Policy Table */
-.policy-table {
-  margin: 20px 0;
-  overflow-x: auto;
-}
-
-.policy-table table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #f8f9fa;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.policy-table th {
-  background: #002147;
-  color: white;
-  padding: 12px;
-  text-align: left;
-  font-weight: 600;
-}
-
-.policy-table td {
-  padding: 12px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.policy-table tr:last-child td {
-  border-bottom: none;
-}
-
-.modal-footer {
-  padding: 20px 30px;
-  border-top: 1px solid #dee2e6;
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-}
-
-
-* Responsive */
-@media (max-width: 768px) {
-  .modal-content {
-    margin: 10px;
-    max-height: 95vh;
-  }
-  
-  .modal-header h2 {
-    font-size: 20px;
-  }
-  
-  .modal-body {
-    padding: 20px;
-  }
-  
-  .policy-content {
-    font-size: 14px;
-  }
-  
-  .policy-table {
-    font-size: 13px;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .policy-modal {
-    position: static;
-    display: block !important;
-  }
-  
-  .modal-content {
-    box-shadow: none;
-    max-width: 100%;
-  }
-  
-  .modal-close,
-  .modal-footer {
-    display: none;
-  }
 }

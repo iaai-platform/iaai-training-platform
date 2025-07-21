@@ -605,11 +605,58 @@ class InPersonCoursesController {
           };
 
           // 3. UPDATE INSTRUCTOR RECORDS
-          for (const instructor of instructorsResult.instructors) {
+          // 3. UPDATE INSTRUCTOR RECORDS - FIXED VERSION
+          console.log("🔍 DEBUG: Processing instructors for course assignment");
+          console.log(
+            "   - instructorsResult.instructors:",
+            instructorsResult.instructors
+          );
+
+          const allInstructors = [];
+
+          // Add primary instructor
+          if (instructorsResult.instructors?.primary) {
+            allInstructors.push(instructorsResult.instructors.primary);
+            console.log(
+              "✅ Added primary instructor:",
+              instructorsResult.instructors.primary.name
+            );
+          }
+
+          // Add additional instructors
+          if (
+            instructorsResult.instructors?.additional &&
+            Array.isArray(instructorsResult.instructors.additional)
+          ) {
+            allInstructors.push(...instructorsResult.instructors.additional);
+            console.log(
+              "✅ Added additional instructors:",
+              instructorsResult.instructors.additional.length
+            );
+          }
+
+          console.log(
+            "📋 Total instructors to process:",
+            allInstructors.length
+          );
+
+          // Now process all instructors
+          for (const instructor of allInstructors) {
             try {
+              console.log(
+                `🔍 Processing instructor: ${instructor.name} (${instructor.instructorId})`
+              );
+
               const instructorDoc = await Instructor.findById(
                 instructor.instructorId
               );
+
+              console.log(`   - Found instructor doc: ${!!instructorDoc}`);
+              console.log(`   - Instructor email: ${instructorDoc?.email}`);
+              console.log(
+                `   - Has assignCourse method: ${!!instructorDoc?.assignCourse}`
+              );
+
               if (instructorDoc && instructorDoc.assignCourse) {
                 await instructorDoc.assignCourse({
                   courseId: savedCourse._id,
@@ -625,12 +672,18 @@ class InPersonCoursesController {
                   role: instructor.role || "Lead Instructor",
                 });
                 console.log(
-                  `✅ Course assigned to instructor ${instructor.instructorId}`
+                  `✅ SUCCESS: Course assigned to instructor ${instructor.instructorId} (${instructor.name})`
+                );
+              } else {
+                console.log(
+                  `❌ SKIPPED: Instructor ${
+                    instructor.instructorId
+                  } - Doc exists: ${!!instructorDoc}, Has method: ${!!instructorDoc?.assignCourse}`
                 );
               }
             } catch (assignError) {
               console.error(
-                "❌ Error assigning course to instructor:",
+                `❌ ERROR assigning course to instructor ${instructor.instructorId}:`,
                 assignError
               );
             }
@@ -771,6 +824,68 @@ class InPersonCoursesController {
       const changes = this._detectChanges(existingCourse, updateData);
       console.log("🔍 Detected changes:", changes);
 
+      // ADD STEP 4 CODE HERE - BEFORE THE UPDATE:
+      // ==========================================
+      // REMOVE COURSE ASSIGNMENTS FOR DELETED INSTRUCTORS
+      // ==========================================
+      if (changes.instructors) {
+        console.log("🗑️ Checking for removed instructors...");
+
+        // Get current instructor IDs
+        const currentInstructorIds = [];
+        if (instructorsData?.primary?.instructorId) {
+          currentInstructorIds.push(
+            instructorsData.primary.instructorId.toString()
+          );
+        }
+        if (instructorsData?.additional) {
+          instructorsData.additional.forEach((inst) => {
+            if (inst.instructorId) {
+              currentInstructorIds.push(inst.instructorId.toString());
+            }
+          });
+        }
+
+        console.log("📋 Current instructor IDs:", currentInstructorIds);
+
+        // Find instructors who had this course but are no longer assigned
+        const instructorsWithThisCourse = await Instructor.find({
+          "assignedCourses.courseId": courseId,
+        });
+
+        console.log(
+          "📋 Found instructors with this course:",
+          instructorsWithThisCourse.length
+        );
+
+        for (const instructorDoc of instructorsWithThisCourse) {
+          if (!currentInstructorIds.includes(instructorDoc._id.toString())) {
+            // Remove course assignment
+            const beforeCount = instructorDoc.assignedCourses.length;
+            instructorDoc.assignedCourses =
+              instructorDoc.assignedCourses.filter(
+                (course) => course.courseId.toString() !== courseId.toString()
+              );
+            const afterCount = instructorDoc.assignedCourses.length;
+
+            if (beforeCount > afterCount) {
+              await instructorDoc.save();
+              console.log(
+                `🗑️ SUCCESS: Removed course assignment from instructor ${instructorDoc._id} (${instructorDoc.firstName} ${instructorDoc.lastName})`
+              );
+            }
+          } else {
+            console.log(
+              `✅ KEPT: Instructor ${instructorDoc._id} (${instructorDoc.firstName} ${instructorDoc.lastName}) still assigned to course`
+            );
+          }
+        }
+      } else {
+        console.log(
+          "📋 No instructor changes detected, skipping removal check"
+        );
+      }
+
       // Update course
       const updatedCourse = await InPersonAestheticTraining.findByIdAndUpdate(
         courseId,
@@ -779,6 +894,108 @@ class InPersonCoursesController {
       );
 
       console.log("✅ Course updated successfully:", courseId);
+
+      // ADD THIS ENTIRE SECTION:
+      // ==========================================
+      // UPDATE INSTRUCTOR ASSIGNMENTS FOR COURSE UPDATE
+      // ==========================================
+      console.log(
+        "🔍 DEBUG: Processing instructors for course assignment (UPDATE)"
+      );
+      console.log("   - instructorsData:", instructorsData);
+
+      const allInstructors = [];
+
+      // Add primary instructor
+      if (instructorsData?.primary) {
+        allInstructors.push(instructorsData.primary);
+        console.log(
+          "✅ Added primary instructor:",
+          instructorsData.primary.name
+        );
+      }
+
+      // Add additional instructors
+      if (
+        instructorsData?.additional &&
+        Array.isArray(instructorsData.additional)
+      ) {
+        allInstructors.push(...instructorsData.additional);
+        console.log(
+          "✅ Added additional instructors:",
+          instructorsData.additional.length
+        );
+      }
+
+      console.log(
+        "📋 Total instructors to process for UPDATE:",
+        allInstructors.length
+      );
+
+      // Process all instructors for course assignment
+      for (const instructor of allInstructors) {
+        try {
+          console.log(
+            `🔍 Processing instructor for UPDATE: ${instructor.name} (${instructor.instructorId})`
+          );
+
+          const instructorDoc = await Instructor.findById(
+            instructor.instructorId
+          );
+
+          console.log(`   - Found instructor doc: ${!!instructorDoc}`);
+          console.log(`   - Instructor email: ${instructorDoc?.email}`);
+          console.log(
+            `   - Has assignCourse method: ${!!instructorDoc?.assignCourse}`
+          );
+
+          if (instructorDoc && instructorDoc.assignCourse) {
+            // Check if course is already assigned
+            const existingAssignment = instructorDoc.assignedCourses.find(
+              (course) => course.courseId.toString() === courseId.toString()
+            );
+
+            if (existingAssignment) {
+              // Update existing assignment
+              existingAssignment.courseTitle = updatedCourse.basic?.title;
+              existingAssignment.startDate = updatedCourse.schedule?.startDate;
+              existingAssignment.endDate = updatedCourse.schedule?.endDate;
+              existingAssignment.role = instructor.role || "Lead Instructor";
+
+              await instructorDoc.save();
+              console.log(
+                `✅ SUCCESS: Updated existing course assignment for instructor ${instructor.instructorId} (${instructor.name})`
+              );
+            } else {
+              // Add new assignment
+              await instructorDoc.assignCourse({
+                courseId: updatedCourse._id,
+                courseType: "InPersonAestheticTraining",
+                courseTitle: updatedCourse.basic?.title,
+                startDate: updatedCourse.schedule?.startDate,
+                endDate: updatedCourse.schedule?.endDate,
+                role: instructor.role || "Lead Instructor",
+              });
+              console.log(
+                `✅ SUCCESS: Added new course assignment for instructor ${instructor.instructorId} (${instructor.name})`
+              );
+            }
+          } else {
+            console.log(
+              `❌ SKIPPED: Instructor ${
+                instructor.instructorId
+              } - Doc exists: ${!!instructorDoc}, Has method: ${!!instructorDoc?.assignCourse}`
+            );
+          }
+        } catch (assignError) {
+          console.error(
+            `❌ ERROR updating course assignment for instructor ${instructor.instructorId}:`,
+            assignError
+          );
+        }
+      }
+
+      // CONTINUE WITH EXISTING CODE (notification handling, etc.)
 
       // NOTIFICATION INTEGRATION
       const notificationResult =
@@ -1784,6 +2001,11 @@ class InPersonCoursesController {
         instructorEmails: instructorEmails,
         deletedInstructorIds: deletedInstructorIds, // Return this for logging
       };
+      console.log("   - Primary instructor details:", {
+        id: primaryInstructor._id,
+        email: primaryInstructor.email,
+        name: `${primaryInstructor.firstName} ${primaryInstructor.lastName}`,
+      });
     } catch (error) {
       console.error("❌ Error processing instructors:", error);
       return {
@@ -1822,10 +2044,17 @@ class InPersonCoursesController {
     user,
     isEdit = false
   ) {
+    const enrollmentData = this._processEnrollmentData(body);
+
+    // ADD THIS DEBUG LINE:
+    console.log(
+      "💰 Final enrollment data for database:",
+      JSON.stringify(enrollmentData, null, 2)
+    );
     return {
       basic: this._processBasicData(body, isEdit),
       schedule: this._processScheduleData(body),
-      enrollment: this._processEnrollmentData(body),
+      enrollment: enrollmentData,
       instructors: instructors,
       venue: this._processVenueData(body),
       content: this._processContentData(body, savedDynamicItems),
@@ -2014,10 +2243,20 @@ class InPersonCoursesController {
   }
 
   _processEnrollmentData(body) {
+    console.log("💰 Processing enrollment data:", {
+      price: body.enrollment?.price,
+      earlyBirdPrice: body.enrollment?.earlyBirdPrice,
+      earlyBirdDays: body.enrollment?.earlyBirdDays, // Add this debug line
+    });
+
     return {
       price: parseFloat(body.enrollment?.price) || 0,
       earlyBirdPrice: body.enrollment?.earlyBirdPrice
         ? parseFloat(body.enrollment.earlyBirdPrice)
+        : null,
+      // ADD THIS LINE - Process early bird days
+      earlyBirdDays: body.enrollment?.earlyBirdDays
+        ? parseInt(body.enrollment.earlyBirdDays)
         : null,
       currency: body.enrollment?.currency || "USD",
       seatsAvailable: parseInt(body.enrollment?.seatsAvailable) || 10,

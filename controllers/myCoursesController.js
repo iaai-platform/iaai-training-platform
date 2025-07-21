@@ -1,10 +1,9 @@
-//myCoursesController.js
+// myCoursesController.js - SIMPLE FIX
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 
-// ✅ Controller to display My Courses page - Updated for new user model
 exports.getMyCourses = async (req, res) => {
   try {
     console.log("📚 Fetching user courses...");
@@ -23,7 +22,30 @@ exports.getMyCourses = async (req, res) => {
     const completedCourses = [];
     const inProgressCourses = [];
 
+    // ✅ SIMPLE: Get image URL or null
+    const getImageUrl = (imageData) => {
+      if (!imageData) return null;
+
+      // If it's already a full URL (Cloudinary), return as-is
+      if (typeof imageData === "string" && imageData.startsWith("http")) {
+        return imageData;
+      }
+
+      // If it's an object with url property (Cloudinary format)
+      if (imageData.url && imageData.url.startsWith("http")) {
+        return imageData.url;
+      }
+
+      return null; // No valid image, show icon instead
+    };
+
     // ✅ Process In-Person Courses
+    // ✅ Process In-Person Courses - SIMPLE FIX
+    // myCoursesController.js - DEBUG VERSION for In-Person courses
+
+    // Replace ONLY the In-Person courses section with this debug version:
+
+    // ✅ Process In-Person Courses - DEBUG VERSION
     const registeredInPersonCourses =
       user.myInPersonCourses?.filter((enrollment) =>
         ["paid", "registered", "completed"].includes(
@@ -31,12 +53,70 @@ exports.getMyCourses = async (req, res) => {
         )
       ) || [];
 
+    console.log(
+      `🔍 DEBUG: Found ${registeredInPersonCourses.length} registered in-person courses`
+    );
+
     for (const enrollment of registeredInPersonCourses) {
       try {
         const courseDetails = await InPersonAestheticTraining.findById(
           enrollment.courseId
         ).lean();
+
         if (courseDetails) {
+          console.log(`\n=== DEBUG IN-PERSON COURSE ===`);
+          console.log(`Course ID: ${courseDetails._id}`);
+          console.log(`Course Title: ${courseDetails.basic?.title}`);
+
+          // Debug the full media object
+          console.log(
+            `Full media object:`,
+            JSON.stringify(courseDetails.media, null, 2)
+          );
+
+          // Debug specific image paths
+          console.log(`media exists: ${!!courseDetails.media}`);
+          console.log(
+            `media.mainImage exists: ${!!courseDetails.media?.mainImage}`
+          );
+          console.log(
+            `media.mainImage.url exists: ${!!courseDetails.media?.mainImage
+              ?.url}`
+          );
+          console.log(
+            `media.mainImage.url value: "${courseDetails.media?.mainImage?.url}"`
+          );
+          console.log(
+            `media.mainImage.url type: ${typeof courseDetails.media?.mainImage
+              ?.url}`
+          );
+
+          // Check if it's a valid URL
+          if (courseDetails.media?.mainImage?.url) {
+            const url = courseDetails.media.mainImage.url;
+            console.log(`URL starts with http: ${url.startsWith("http")}`);
+            console.log(
+              `URL includes cloudinary: ${url.includes("cloudinary.com")}`
+            );
+            console.log(`URL length: ${url.length}`);
+            console.log(`URL trimmed: "${url.trim()}"`);
+          }
+
+          // 🔥 SIMPLE: Get the image URL
+          let mainImageUrl = null;
+
+          if (
+            courseDetails.media?.mainImage?.url &&
+            courseDetails.media.mainImage.url.startsWith("http")
+          ) {
+            mainImageUrl = courseDetails.media.mainImage.url;
+            console.log(`✅ FINAL mainImageUrl SET: "${mainImageUrl}"`);
+          } else {
+            console.log(`❌ FINAL mainImageUrl is NULL - no valid image found`);
+          }
+
+          console.log(`===============================\n`);
+
           const courseData = {
             enrollmentId: enrollment._id,
             courseId: courseDetails._id,
@@ -62,12 +142,20 @@ exports.getMyCourses = async (req, res) => {
             instructors:
               courseDetails.instructorNames ||
               courseDetails.instructors?.primary?.name,
-            mainImage: courseDetails.media?.mainImage?.url,
+            // 🔥 DEBUG: Use the extracted image URL or null
+            mainImage: mainImageUrl,
             enrollmentData: enrollment.enrollmentData,
             userProgress: enrollment.userProgress,
+            galleryImages: courseDetails.media?.gallery?.images || [],
+            documents: courseDetails.media?.documents || [],
           };
 
-          // Categorize based on dates and status
+          // Also debug what we're sending to the view
+          console.log(
+            `📤 SENDING TO VIEW - Course: ${courseData.title}, mainImage: "${courseData.mainImage}"`
+          );
+
+          // Rest of your categorization logic stays the same...
           const now = new Date();
           const startDate = new Date(courseDetails.schedule?.startDate);
 
@@ -83,6 +171,10 @@ exports.getMyCourses = async (req, res) => {
           }
 
           registeredCourses.push(courseData);
+        } else {
+          console.log(
+            `❌ No course details found for ID: ${enrollment.courseId}`
+          );
         }
       } catch (err) {
         console.warn(
@@ -91,6 +183,21 @@ exports.getMyCourses = async (req, res) => {
         );
       }
     }
+
+    // Add this debug log before rendering
+    console.log(`\n📊 FINAL SUMMARY:`);
+    console.log(`Total courses to render: ${registeredCourses.length}`);
+    registeredCourses.forEach((course, index) => {
+      console.log(
+        `  ${index + 1}. ${course.title} - Image: ${
+          course.mainImage ? "HAS IMAGE" : "NO IMAGE"
+        }`
+      );
+      if (course.mainImage) {
+        console.log(`     URL: ${course.mainImage.substring(0, 50)}...`);
+      }
+    });
+    console.log(`\n`);
 
     // ✅ Process Online Live Courses
     const registeredLiveCourses =
@@ -131,11 +238,14 @@ exports.getMyCourses = async (req, res) => {
             instructors:
               courseDetails.instructorNames ||
               courseDetails.instructors?.primary?.name,
-            mainImage: courseDetails.media?.mainImage?.url,
+            // 🔥 SIMPLE: Just get the image URL or null
+            mainImage: getImageUrl(courseDetails.media?.mainImage),
             enrollmentData: enrollment.enrollmentData,
             userProgress: enrollment.userProgress,
             recordingsAvailable:
               courseDetails.recording?.availability?.forStudents,
+            galleryImages: courseDetails.media?.gallery?.images || [],
+            documents: courseDetails.media?.documents || [],
           };
 
           // Categorize
@@ -178,19 +288,6 @@ exports.getMyCourses = async (req, res) => {
           enrollment.courseId
         ).lean();
         if (courseDetails) {
-          // In the self-paced courses section, add this before the courseData object:
-          console.log("=== DEBUGGING SELF-PACED COURSE ===");
-          console.log("Course ID:", courseDetails._id);
-          console.log("Course title:", courseDetails.basic?.title);
-          console.log(
-            "Full media object:",
-            JSON.stringify(courseDetails.media, null, 2)
-          );
-          console.log(
-            "thumbnailUrl specifically:",
-            courseDetails.media?.thumbnailUrl
-          );
-          console.log("===============================");
           const courseData = {
             enrollmentId: enrollment._id,
             courseId: courseDetails._id,
@@ -212,15 +309,17 @@ exports.getMyCourses = async (req, res) => {
             courseStatus: enrollment.courseProgress?.status || "not-started",
             certificateId: enrollment.certificateId,
             instructor: courseDetails.instructor?.name,
-            mainImage:
-              courseDetails.media?.thumbnailUrl?.trim() ||
-              "/images/default-course-thumbnail.jpg",
+            // 🔥 SIMPLE: Check for thumbnail in different locations
+            mainImage: getImageUrl(
+              courseDetails.media?.thumbnailUrl || courseDetails.thumbnailUrl
+            ),
             enrollmentData: enrollment.enrollmentData,
             courseProgress: enrollment.courseProgress,
             totalVideos: courseDetails.videos?.length || 0,
             completedVideos:
               enrollment.courseProgress?.completedVideos?.length || 0,
             lastAccessedAt: enrollment.courseProgress?.lastAccessedAt,
+            videos: courseDetails.videos || [],
           };
 
           // Categorize

@@ -96,6 +96,22 @@ const inPersonCourseSchema = new mongoose.Schema(
         type: Number,
         min: 0,
       },
+      earlyBirdDays: {
+        type: Number,
+        min: 1,
+        max: 365,
+        default: 30, // Default: early bird expires 30 days before course
+        validate: {
+          validator: function (value) {
+            // Only validate if earlyBirdPrice is set
+            if (this.earlyBirdPrice && this.earlyBirdPrice > 0) {
+              return value && value > 0;
+            }
+            return true;
+          },
+          message: "Early bird days is required when early bird price is set",
+        },
+      },
       currency: { type: String, default: "USD" },
       seatsAvailable: {
         type: Number,
@@ -677,6 +693,112 @@ inPersonCourseSchema.pre("save", function (next) {
 
   next();
 });
+
+// ========================================
+// VIRTUAL FIELDS - ADD THESE TO YOUR EXISTING VIRTUALS
+// ========================================
+
+/**
+ * Early bird deadline (calculated from start date and early bird days)
+ */
+inPersonCourseSchema.virtual("earlyBirdDeadline").get(function () {
+  if (this.schedule?.startDate && this.enrollment?.earlyBirdDays) {
+    const deadline = new Date(this.schedule.startDate);
+    deadline.setDate(deadline.getDate() - this.enrollment.earlyBirdDays);
+    return deadline;
+  }
+  return null;
+});
+
+/**
+ * Check if early bird pricing is currently active
+ */
+inPersonCourseSchema.virtual("isEarlyBirdActive").get(function () {
+  if (!this.enrollment?.earlyBirdPrice || this.enrollment.earlyBirdPrice <= 0) {
+    return false;
+  }
+
+  const deadline = this.earlyBirdDeadline;
+  if (!deadline) return false;
+
+  return new Date() <= deadline;
+});
+
+/**
+ * Days remaining for early bird pricing
+ */
+inPersonCourseSchema.virtual("earlyBirdDaysRemaining").get(function () {
+  const deadline = this.earlyBirdDeadline;
+  if (!deadline) return 0;
+
+  const now = new Date();
+  if (now > deadline) return 0;
+
+  const timeDiff = deadline.getTime() - now.getTime();
+  const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  return Math.max(0, daysDiff);
+});
+
+/**
+ * Current effective price (early bird or regular)
+ */
+inPersonCourseSchema.virtual("currentPrice").get(function () {
+  if (this.isEarlyBirdActive && this.enrollment?.earlyBirdPrice) {
+    return this.enrollment.earlyBirdPrice;
+  }
+  return this.enrollment?.price || 0;
+});
+
+// ========================================
+// INSTANCE METHODS - ADD THESE TO YOUR EXISTING METHODS
+// ========================================
+
+/**
+ * Get pricing information with early bird details
+ */
+inPersonCourseSchema.methods.getPricingInfo = function () {
+  const now = new Date();
+  const earlyBirdDeadline = this.earlyBirdDeadline;
+
+  return {
+    regularPrice: this.enrollment?.price || 0,
+    earlyBirdPrice: this.enrollment?.earlyBirdPrice || null,
+    earlyBirdDays: this.enrollment?.earlyBirdDays || null,
+    earlyBirdDeadline: earlyBirdDeadline,
+    isEarlyBirdActive: this.isEarlyBirdActive,
+    currentPrice: this.currentPrice,
+    daysRemaining: this.earlyBirdDaysRemaining,
+    savings:
+      this.isEarlyBirdActive && this.enrollment?.earlyBirdPrice
+        ? this.enrollment.price - this.enrollment.earlyBirdPrice
+        : 0,
+    currency: this.enrollment?.currency || "USD",
+  };
+};
+
+/**
+ * Check if a specific date qualifies for early bird pricing
+ */
+inPersonCourseSchema.methods.isEarlyBirdValidOnDate = function (date) {
+  if (!this.enrollment?.earlyBirdPrice || this.enrollment.earlyBirdPrice <= 0) {
+    return false;
+  }
+
+  const deadline = this.earlyBirdDeadline;
+  if (!deadline) return false;
+
+  return new Date(date) <= deadline;
+};
+
+/**
+ * Get price for a specific date
+ */
+inPersonCourseSchema.methods.getPriceOnDate = function (date) {
+  if (this.isEarlyBirdValidOnDate(date)) {
+    return this.enrollment?.earlyBirdPrice || this.enrollment?.price || 0;
+  }
+  return this.enrollment?.price || 0;
+};
 
 // ========================================
 // INSTANCE METHODS

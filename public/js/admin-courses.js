@@ -108,6 +108,26 @@ class AdminCoursesManager {
       }
     };
 
+    // ADD THESE EARLY BIRD EVENT LISTENERS
+    safeAddEventListener("price", "input", () => this.updateEarlyBirdPreview());
+    safeAddEventListener("earlyBirdPrice", "input", () =>
+      this.updateEarlyBirdPreview()
+    );
+    safeAddEventListener("earlyBirdDays", "input", () =>
+      this.updateEarlyBirdPreview()
+    );
+    safeAddEventListener("startDate", "change", () =>
+      this.updateEarlyBirdPreview()
+    );
+
+    // Validation for early bird price
+    safeAddEventListener("earlyBirdPrice", "blur", () =>
+      this.validateEarlyBirdPrice()
+    );
+    safeAddEventListener("earlyBirdDays", "blur", () =>
+      this.validateEarlyBirdDays()
+    );
+
     // Modal controls
     safeAddEventListener("addCourseBtn", "click", () => this.openCourseModal());
     safeAddEventListener("closeModal", "click", () => this.closeCourseModal());
@@ -2221,6 +2241,161 @@ class AdminCoursesManager {
     }
   }
 
+  // Add these methods to your AdminCoursesManager class
+
+  /**
+   * Update early bird pricing preview
+   */
+  updateEarlyBirdPreview() {
+    const priceInput = document.getElementById("price");
+    const earlyBirdPriceInput = document.getElementById("earlyBirdPrice");
+    const earlyBirdDaysInput = document.getElementById("earlyBirdDays");
+    const startDateInput = document.getElementById("startDate");
+    const previewSection = document.getElementById("earlyBirdPreview");
+
+    if (!priceInput || !earlyBirdPriceInput || !previewSection) return;
+
+    const regularPrice = parseFloat(priceInput.value) || 0;
+    const earlyBirdPrice = parseFloat(earlyBirdPriceInput.value) || 0;
+    const earlyBirdDays = parseInt(earlyBirdDaysInput?.value) || 30;
+    const startDate = startDateInput?.value;
+
+    // Show/hide preview based on whether early bird price is set
+    if (earlyBirdPrice > 0) {
+      previewSection.style.display = "block";
+
+      // Update preview values
+      const regularPricePreview = document.getElementById(
+        "regularPricePreview"
+      );
+      const earlyBirdPricePreview = document.getElementById(
+        "earlyBirdPricePreview"
+      );
+      const savingsPreview = document.getElementById("savingsPreview");
+      const earlyBirdDeadlinePreview = document.getElementById(
+        "earlyBirdDeadlinePreview"
+      );
+
+      if (regularPricePreview)
+        regularPricePreview.textContent = `$${regularPrice.toFixed(2)}`;
+      if (earlyBirdPricePreview)
+        earlyBirdPricePreview.textContent = `$${earlyBirdPrice.toFixed(2)}`;
+
+      const savings = regularPrice - earlyBirdPrice;
+      if (savingsPreview) {
+        savingsPreview.textContent = `$${savings.toFixed(2)}`;
+        savingsPreview.style.color = savings > 0 ? "#10b981" : "#ef4444";
+      }
+
+      // Calculate and display deadline
+      if (startDate && earlyBirdDeadlinePreview) {
+        const courseStart = new Date(startDate);
+        const deadline = new Date(courseStart);
+        deadline.setDate(deadline.getDate() - earlyBirdDays);
+
+        const deadlineStr = deadline.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+
+        earlyBirdDeadlinePreview.textContent = deadlineStr;
+
+        // Check if deadline is in the past
+        const now = new Date();
+        if (deadline < now) {
+          earlyBirdDeadlinePreview.style.color = "#ef4444";
+          earlyBirdDeadlinePreview.textContent += " (EXPIRED)";
+        } else {
+          earlyBirdDeadlinePreview.style.color = "#10b981";
+        }
+      } else if (earlyBirdDeadlinePreview) {
+        earlyBirdDeadlinePreview.textContent = "Set course start date";
+      }
+    } else {
+      previewSection.style.display = "none";
+    }
+  }
+
+  /**
+   * Validate early bird price
+   */
+  validateEarlyBirdPrice() {
+    const priceInput = document.getElementById("price");
+    const earlyBirdPriceInput = document.getElementById("earlyBirdPrice");
+
+    if (!priceInput || !earlyBirdPriceInput) return true;
+
+    const regularPrice = parseFloat(priceInput.value) || 0;
+    const earlyBirdPrice = parseFloat(earlyBirdPriceInput.value) || 0;
+
+    // Clear previous validation
+    earlyBirdPriceInput.style.borderColor = "";
+
+    // Only validate if early bird price is set
+    if (earlyBirdPrice > 0) {
+      if (earlyBirdPrice >= regularPrice) {
+        earlyBirdPriceInput.style.borderColor = "#ef4444";
+        this.showToast(
+          "warning",
+          "Validation Error",
+          "Early bird price must be less than regular price"
+        );
+        return false;
+      }
+
+      // Ensure early bird days is set when early bird price is set
+      const earlyBirdDaysInput = document.getElementById("earlyBirdDays");
+      if (earlyBirdDaysInput && !earlyBirdDaysInput.value) {
+        earlyBirdDaysInput.value = "30"; // Set default
+        this.showToast(
+          "info",
+          "Auto-filled",
+          "Early bird days set to 30 days (default)"
+        );
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Validate early bird days
+   */
+  validateEarlyBirdDays() {
+    const earlyBirdDaysInput = document.getElementById("earlyBirdDays");
+    const startDateInput = document.getElementById("startDate");
+
+    if (!earlyBirdDaysInput || !startDateInput) return true;
+
+    const earlyBirdDays = parseInt(earlyBirdDaysInput.value) || 0;
+    const startDate = startDateInput.value;
+
+    // Clear previous validation
+    earlyBirdDaysInput.style.borderColor = "";
+
+    if (earlyBirdDays > 0 && startDate) {
+      const courseStart = new Date(startDate);
+      const deadline = new Date(courseStart);
+      deadline.setDate(deadline.getDate() - earlyBirdDays);
+
+      const now = new Date();
+      if (deadline < now) {
+        earlyBirdDaysInput.style.borderColor = "#f59e0b"; // Warning color
+        this.showToast(
+          "warning",
+          "Early Bird Expired",
+          `Early bird deadline (${deadline.toLocaleDateString()}) is in the past. Consider adjusting the days or start date.`
+        );
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Enhanced course form validation to include early bird validation
+   */
   validateCurrentStep() {
     const currentStepElement = document.querySelector(
       `[data-step="${this.currentStep}"]`
@@ -2268,7 +2443,16 @@ class AdminCoursesManager {
     }
 
     const requiredFields = stepElement.querySelectorAll("[required]");
-    return this.validateFields(requiredFields);
+    const isBasicValid = this.validateFields(requiredFields);
+
+    // ADD THIS: Additional validation for pricing step (step 3)
+    if (this.currentStep === 3) {
+      const earlyBirdValid = this.validateEarlyBirdPrice();
+      this.validateEarlyBirdDays();
+      return isBasicValid && earlyBirdValid;
+    }
+
+    return isBasicValid;
   }
 
   // 5. Check for unsaved files
@@ -5065,6 +5249,11 @@ class AdminCoursesManager {
       "enrollment[earlyBirdPrice]",
       course.enrollment?.earlyBirdPrice
     );
+    this.setFormValue(
+      "enrollment[earlyBirdDays]",
+      course.enrollment?.earlyBirdDays
+    );
+    this.setFormValue("enrollment[currency]", course.enrollment?.currency);
     this.setFormValue("enrollment[currency]", course.enrollment?.currency);
     this.setFormValue(
       "enrollment[seatsAvailable]",
@@ -5785,6 +5974,9 @@ class AdminCoursesManager {
     console.log("✅ Form populated successfully with course data");
   }
 
+  /**
+   * Enhanced setFormValue to handle early bird fields
+   */
   setFormValue(name, value) {
     const element = document.querySelector(`[name="${name}"]`);
     if (element) {
@@ -5792,6 +5984,18 @@ class AdminCoursesManager {
         element.checked = value === true || value === "true";
       } else {
         element.value = value || "";
+      }
+
+      // ADD THIS: Trigger early bird preview update for pricing fields
+      if (
+        name.includes("enrollment[") &&
+        (name.includes("price") || name.includes("earlyBird"))
+      ) {
+        setTimeout(() => {
+          if (this.updateEarlyBirdPreview) {
+            this.updateEarlyBirdPreview();
+          }
+        }, 100);
       }
     }
   }

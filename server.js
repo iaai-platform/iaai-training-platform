@@ -404,6 +404,20 @@ app.use("/", checkoutRoutes);
 app.use("/", wishlistRoutes);
 
 // ============================================
+// 11.5 INSTRUCTOR PROFILE ROUTES (NEW)
+// (MOVED TO HERE)
+// ============================================
+const instructorProfileRoutes = require("./routes/instructor/instructorProfileRoutes");
+app.use("/", instructorProfileRoutes);
+console.log("👤 Instructor profile routes loaded.");
+
+// ============================================
+// 11.6 TRAINER APPLICATIONS ROUTES (MOVED HERE)
+// ============================================
+const trainerApplicationRoutes = require("./routes/trainerApplicationRoutes");
+app.use("/", trainerApplicationRoutes);
+
+// ============================================
 // 12. CERTIFICATION ROUTES
 // ============================================
 const certificateRoutes = require("./routes/certificates");
@@ -435,10 +449,6 @@ app.use("/", latestNewsRoutes);
 app.get("/about", (req, res) => {
   res.render("about", { title: "About Us" });
 });
-
-// Trainer applications
-const trainerApplicationRoutes = require("./routes/trainerApplicationRoutes");
-app.use("/", trainerApplicationRoutes);
 
 // ============================================
 // 15. ERROR HANDLING

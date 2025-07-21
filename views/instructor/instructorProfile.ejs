@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= instructor.fullName %>'s Profile - IAAI</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/instructorProfile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="instructor-profile-body">
+    <%- include('../partials/header') %> <nav class="breadcrumb">
+        <a href="/">Home</a> > <a href="/dashboard">Dashboard</a> > Instructor Profile
+    </nav>
+
+    <div class="profile-container">
+        <% if (success_message && success_message.length > 0) { %>
+            <div class="alert success"><%= success_message %></div>
+        <% } %>
+        <% if (error_message && error_message.length > 0) { %>
+            <div class="alert error"><%= error_message %></div>
+        <% } %>
+
+        <div class="profile-header-card">
+            <div class="profile-image-section">
+                <% if (instructor.profileImage) { %>
+                    <img src="<%= instructor.profileImage %>" alt="<%= instructor.fullName %> Profile Picture" class="profile-picture">
+                <% } else { %>
+                    <div class="profile-placeholder">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                <% } %>
+                <h1 class="instructor-name"><%= instructor.fullName %></h1>
+                <p class="instructor-designation"><%= instructor.designation %></p>
+                <div class="profile-actions">
+                    <a href="/instructor/me/edit" class="btn btn-primary"><i class="fas fa-edit"></i> Edit My Profile</a>
+                </div>
+            </div>
+
+            <div class="profile-bio-section">
+                <h2>About <%= instructor.firstName %></h2>
+                <p class="bio-text"><%= instructor.bio || 'Biography not provided yet.' %></p>
+                <div class="contact-info">
+                    <% if (instructor.email) { %><p><i class="fas fa-envelope"></i> <%= instructor.email %></p><% } %>
+                    <% if (instructor.phoneNumber) { %><p><i class="fas fa-phone"></i> <%= instructor.phoneNumber %></p><% } %>
+                    <% if (instructor.address && instructor.address.city && instructor.address.country) { %><p><i class="fas fa-map-marker-alt"></i> <%= instructor.address.city %>, <%= instructor.address.country %></p><% } %>
+                </div>
+                <div class="social-media">
+                    <% if (instructor.socialMedia && instructor.socialMedia.linkedin) { %><a href="<%= instructor.socialMedia.linkedin %>" target="_blank"><i class="fab fa-linkedin"></i></a><% } %>
+                    <% if (instructor.socialMedia && instructor.socialMedia.twitter) { %><a href="<%= instructor.socialMedia.twitter %>" target="_blank"><i class="fab fa-twitter-square"></i></a><% } %>
+                    <% if (instructor.socialMedia && instructor.socialMedia.website) { %><a href="<%= instructor.socialMedia.website %>" target="_blank"><i class="fas fa-globe"></i></a><% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-details-grid">
+            <div class="detail-card">
+                <h3><i class="fas fa-clipboard-list"></i> Professional Information</h3>
+                <ul>
+                    <li><strong>Experience:</strong> <%= instructor.experience %></li>
+                    <li><strong>Expertise:</strong> <%= instructor.expertise.join(', ') || 'N/A' %></li>
+                    <li><strong>Specializations:</strong> <%= instructor.specializations.join(', ') || 'N/A' %></li>
+                    <li><strong>Qualifications:</strong> <%= instructor.qualifications.join(', ') || 'N/A' %></li>
+                    <% if (instructor.certifications && instructor.certifications.length > 0) { %>
+                        <li><strong>Certifications:</strong>
+                            <ul>
+                                <% instructor.certifications.forEach(cert => { %>
+                                    <li><%= cert.name %> (<%= cert.issuingOrganization %>) - <%= cert.issueDate ? new Date(cert.issueDate).getFullYear() : 'N/A' %></li>
+                                <% }); %>
+                            </ul>
+                        </li>
+                    <% } %>
+                    <li><strong>Teaching Style:</strong> <%= instructor.teachingStyle || 'Not specified' %></li>
+                    <li><strong>Languages:</strong> <%= instructor.languages.join(', ') || 'Not specified' %></li>
+                </ul>
+            </div>
+
+            <div class="detail-card">
+                <h3><i class="fas fa-scroll"></i> Publications & Achievements</h3>
+                <% if (instructor.publications && instructor.publications.length > 0) { %>
+                    <h4>Publications:</h4>
+                    <ul>
+                        <% instructor.publications.forEach(pub => { %>
+                            <li><%= pub.title %> (<%= pub.type %>), Published in <%= pub.publishedIn %>, <%= pub.year %>
+                                <% if (pub.link) { %><a href="<%= pub.link %>" target="_blank"><i class="fas fa-external-link-alt"></i></a><% } %>
+                            </li>
+                        <% }); %>
+                    </ul>
+                <% } else { %>
+                    <p>No publications listed yet.</p>
+                <% } %>
+                <% if (instructor.achievements && instructor.achievements.length > 0) { %>
+                    <h4>Achievements:</h4>
+                    <ul>
+                        <% instructor.achievements.forEach(ach => { %>
+                            <li><%= ach %></li>
+                        <% }); %>
+                    </ul>
+                <% } else { %>
+                    <p>No achievements listed yet.</p>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="courses-section">
+            <h2><i class="fas fa-book-open"></i> My Assigned Courses</h2>
+            <% if (assignedCourses && assignedCourses.length > 0) { %>
+                <div class="course-list">
+                    <% assignedCourses.forEach(course => { %>
+                        <div class="course-card">
+                            <h4 class="course-title"><%= course.courseTitle %></h4>
+                            <p><strong>Type:</strong> <%= course.courseType.replace(/([A-Z])/g, ' $1').trim() %></p>
+                            <p><strong>Role:</strong> <%= course.role %></p>
+                            <p><strong>Dates:</strong> <%= new Date(course.startDate).toLocaleDateString() %> - <%= course.endDate ? new Date(course.endDate).toLocaleDateString() : 'N/A' %></p>
+                            <p><strong>Status:</strong> <span class="course-status status-<%= course.status.toLowerCase().replace(' ', '-') %>"><%= course.status %></span></p>
+                            <% if (course.courseUrl) { %>
+                                <a href="<%= course.courseUrl %>" class="btn btn-secondary">View Course</a>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p class="no-courses">No courses currently assigned.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %> </body>
+</html>

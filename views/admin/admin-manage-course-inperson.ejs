@@ -301,40 +301,71 @@
                     </div>
                 </div>
 
-                <div class="form-step hidden" data-step="3">
-                    <h3>Pricing & Enrollment</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="price">Price (USD) *</label>
-                            <input type="number" id="price" name="enrollment[price]" required min="0" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="earlyBirdPrice">Early Bird Price</label>
-                            <input type="number" id="earlyBirdPrice" name="enrollment[earlyBirdPrice]" min="0" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="currency">Currency</label>
-                            <select id="currency" name="enrollment[currency]">
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="TRY">TRY</option>
-                                <option value="GBP">GBP</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="seatsAvailable">Seats Available *</label>
-                            <input type="number" id="seatsAvailable" name="enrollment[seatsAvailable]" required min="1" value="10">
-                        </div>
-                        <div class="form-group">
-                            <label for="minEnrollment">Minimum Enrollment</label>
-                            <input type="number" id="minEnrollment" name="enrollment[minEnrollment]" min="1" value="5">
-                        </div>
-                        <div class="form-group">
-                            <label for="currentEnrollment">Current Enrollment</label>
-                            <input type="number" id="currentEnrollment" name="enrollment[currentEnrollment]" min="0" value="0" readonly>
-                        </div>
-                    </div>
-                </div>
+<!-- Add this to your Step 3: Pricing & Enrollment section in the HTML -->
+<div class="form-step hidden" data-step="3">
+    <h3>Pricing & Enrollment</h3>
+    <div class="form-grid">
+        <div class="form-group">
+            <label for="price">Price (USD) *</label>
+            <input type="number" id="price" name="enrollment[price]" required min="0" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="earlyBirdPrice">Early Bird Price</label>
+            <input type="number" id="earlyBirdPrice" name="enrollment[earlyBirdPrice]" min="0" step="0.01">
+        </div>
+        <!-- NEW: Early Bird Days Field -->
+        <div class="form-group">
+            <label for="earlyBirdDays">Early Bird Valid Until (Days Before Course)</label>
+            <input type="number" id="earlyBirdDays" name="enrollment[earlyBirdDays]" 
+                   min="1" max="365" value="30" placeholder="30">
+            <small class="help-text">Early bird price expires this many days before course starts (default: 30 days)</small>
+        </div>
+        <div class="form-group">
+            <label for="currency">Currency</label>
+            <select id="currency" name="enrollment[currency]">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="TRY">TRY</option>
+                <option value="GBP">GBP</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="seatsAvailable">Seats Available *</label>
+            <input type="number" id="seatsAvailable" name="enrollment[seatsAvailable]" required min="1" value="10">
+        </div>
+        <div class="form-group">
+            <label for="minEnrollment">Minimum Enrollment</label>
+            <input type="number" id="minEnrollment" name="enrollment[minEnrollment]" min="1" value="5">
+        </div>
+        <div class="form-group">
+            <label for="currentEnrollment">Current Enrollment</label>
+            <input type="number" id="currentEnrollment" name="enrollment[currentEnrollment]" min="0" value="0" readonly>
+        </div>
+    </div>
+    
+    <!-- NEW: Early Bird Preview Section -->
+    <div class="early-bird-preview" id="earlyBirdPreview" style="display: none;">
+        <h4>Early Bird Pricing Preview</h4>
+        <div class="pricing-summary">
+            <div class="price-item">
+                <span class="price-label">Regular Price:</span>
+                <span class="price-value" id="regularPricePreview">$0</span>
+            </div>
+            <div class="price-item early-bird">
+                <span class="price-label">Early Bird Price:</span>
+                <span class="price-value" id="earlyBirdPricePreview">$0</span>
+            </div>
+            <div class="price-item savings">
+                <span class="price-label">Savings:</span>
+                <span class="price-value" id="savingsPreview">$0</span>
+            </div>
+            <div class="deadline-info">
+                <span class="deadline-label">Early Bird Deadline:</span>
+                <span class="deadline-value" id="earlyBirdDeadlinePreview">-</span>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <div class="form-step hidden" data-step="4">
                     <h3>Instructors</h3>

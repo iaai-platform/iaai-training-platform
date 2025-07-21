@@ -627,44 +627,222 @@ const userSchema = new mongoose.Schema(
     // ========================================
     // PAYMENT TRANSACTIONS
     // ========================================
+    // ========================================
+    // ENHANCED PAYMENT TRANSACTIONS SYSTEM
+    // ========================================
     paymentTransactions: [
       {
-        transactionId: { type: String, required: true },
+        // Transaction Identification
+        transactionId: { type: String, required: true }, // Our internal transaction ID
+        orderNumber: { type: String, required: true, unique: true }, // Unique order number
         receiptNumber: { type: String, required: true },
-        transactionDate: { type: Date, default: Date.now },
 
-        // Payment details
-        paymentMethod: String,
-        paymentStatus: {
-          type: String,
-          enum: ["pending", "completed", "failed", "refunded"],
-          default: "completed",
+        // Timestamps
+        createdAt: { type: Date, default: Date.now },
+        transactionDate: { type: Date, default: Date.now },
+        completedAt: Date, // When payment was confirmed
+
+        // Payment Gateway Details (CCAvenue)
+        ccavenue: {
+          orderId: String, // CCAvenue order ID
+          trackingId: String, // CCAvenue tracking ID
+          bankRefNo: String, // Bank reference number
+          paymentMode: String, // "Net Banking", "Credit Card", etc.
+          cardName: String, // Card/Bank name
+          statusCode: String,
+          statusMessage: String,
+          failureMessage: String,
+          merchantParam1: String, // Additional merchant parameters
+          merchantParam2: String,
+          merchantParam3: String,
         },
 
-        // Amounts
-        subtotal: { type: Number, required: true },
-        discountAmount: { type: Number, default: 0 },
-        tax: { type: Number, default: 0 },
-        finalAmount: { type: Number, required: true },
-        currency: { type: String, default: "USD" },
+        // Payment Status & Method
+        paymentStatus: {
+          type: String,
+          enum: [
+            "pending",
+            "processing",
+            "completed",
+            "failed",
+            "cancelled",
+            "refunded",
+          ],
+          default: "pending",
+        },
+        paymentMethod: String, // "CCAvenue", "Promo Code", "Credit Card"
 
-        // Items purchased
+        // Financial Details
+        financial: {
+          subtotal: { type: Number, required: true }, // Original total before discounts
+          discountAmount: { type: Number, default: 0 }, // Total discount applied
+          earlyBirdSavings: { type: Number, default: 0 }, // Early bird discount
+          promoCodeDiscount: { type: Number, default: 0 }, // Promo code discount
+          tax: { type: Number, default: 0 },
+          processingFee: { type: Number, default: 0 },
+          finalAmount: { type: Number, required: true }, // Amount actually charged
+          currency: { type: String, default: "USD" },
+        },
+
+        // Discount Information
+        discounts: {
+          promoCode: {
+            code: String,
+            discountType: { type: String, enum: ["percentage", "fixed"] },
+            discountValue: Number,
+            discountAmount: Number,
+          },
+          earlyBird: {
+            applied: { type: Boolean, default: false },
+            totalSavings: { type: Number, default: 0 },
+            coursesWithEarlyBird: [String], // Course IDs that had early bird
+          },
+        },
+
+        // Course Items in This Transaction
         items: [
           {
-            courseId: mongoose.Schema.Types.ObjectId,
-            courseType: String,
-            originalPrice: Number,
-            paidPrice: Number,
+            courseId: { type: mongoose.Schema.Types.ObjectId, required: true },
+            courseType: {
+              type: String,
+              enum: [
+                "InPersonAestheticTraining",
+                "OnlineLiveTraining",
+                "SelfPacedOnlineTraining",
+              ],
+              required: true,
+            },
+            courseTitle: String,
+            courseCode: String,
+
+            // Pricing for this specific course
+            originalPrice: Number, // Original course price
+            earlyBirdPrice: Number, // Early bird price (if applicable)
+            finalPrice: Number, // Actual price paid for this course
+            isEarlyBird: { type: Boolean, default: false },
+            earlyBirdSavings: { type: Number, default: 0 },
+            earlyBirdDeadline: Date,
+
+            // Course Schedule Information
+            courseSchedule: {
+              startDate: Date,
+              endDate: Date,
+              duration: String,
+              location: String, // For in-person courses
+              platform: String, // For online courses
+              accessDays: Number, // For self-paced courses
+              expiryDate: Date, // For self-paced courses
+            },
+
+            // Instructor Information (cached for records)
+            instructor: {
+              name: String,
+              id: mongoose.Schema.Types.ObjectId,
+            },
           },
         ],
 
-        // Promo code
-        promoCode: String,
+        // Customer Information (snapshot at time of purchase)
+        customerInfo: {
+          userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
+          name: String,
+          email: String,
+          phone: String,
+          country: String,
+          billingAddress: {
+            name: String,
+            address: String,
+            city: String,
+            state: String,
+            country: String,
+            zip: String,
+          },
+        },
 
-        // Receipt
-        receiptUrl: String,
+        // Gift Information (if applicable)
+        gift: {
+          isGift: { type: Boolean, default: false },
+          recipientEmail: String,
+          recipientName: String,
+          giftMessage: String,
+          senderName: String,
+        },
+
+        // Additional Information
+        metadata: {
+          userAgent: String, // Browser/device info
+          ipAddress: String,
+          sessionId: String,
+          orderNotes: String,
+          source: { type: String, default: "website" }, // "website", "mobile", "api"
+        },
+
+        // Communication Records
+        communications: [
+          {
+            type: { type: String, enum: ["email", "sms", "notification"] },
+            template: String,
+            sentAt: Date,
+            status: {
+              type: String,
+              enum: ["sent", "delivered", "failed", "bounced"],
+            },
+            recipientEmail: String,
+            subject: String,
+          },
+        ],
+
+        // Refund Information (if applicable)
+        refund: {
+          isRefunded: { type: Boolean, default: false },
+          refundAmount: Number,
+          refundDate: Date,
+          refundReason: String,
+          refundTransactionId: String,
+          refundMethod: String,
+          processedBy: mongoose.Schema.Types.ObjectId,
+        },
+
+        // Receipt & Documentation
+        documentation: {
+          receiptUrl: String,
+          invoiceUrl: String,
+          contractUrl: String,
+          certificateEligible: { type: Boolean, default: true },
+        },
       },
     ],
+
+    // ========================================
+    // PAYMENT PREFERENCES & SETTINGS
+    // ========================================
+    paymentPreferences: {
+      preferredCurrency: { type: String, default: "USD" },
+      savedPaymentMethods: [
+        {
+          type: { type: String, enum: ["card", "bank", "wallet"] },
+          last4: String,
+          brand: String,
+          expiryMonth: Number,
+          expiryYear: Number,
+          isDefault: { type: Boolean, default: false },
+          addedAt: { type: Date, default: Date.now },
+        },
+      ],
+      billingAddress: {
+        name: String,
+        address: String,
+        city: String,
+        state: String,
+        country: String,
+        zip: String,
+        isDefault: { type: Boolean, default: true },
+      },
+    },
 
     // ========================================
     // USER PREFERENCES & SETTINGS
@@ -757,6 +935,25 @@ userSchema.index({
 // userSchema.index({ "myCertificates.certificateId": 1 });
 // userSchema.index({ "myCertificates.verificationCode": 1 });
 // userSchema.index({ "myCertificates.certificateData.verificationCode": 1 });
+
+// ========================================
+// ENHANCED INDEXES
+// ========================================
+userSchema.index(
+  { "paymentTransactions.orderNumber": 1 },
+  { unique: true, sparse: true }
+);
+userSchema.index({ "paymentTransactions.transactionId": 1 });
+userSchema.index(
+  { "paymentTransactions.ccavenue.orderId": 1 },
+  { sparse: true }
+);
+userSchema.index(
+  { "paymentTransactions.ccavenue.trackingId": 1 },
+  { sparse: true }
+);
+userSchema.index({ "paymentTransactions.paymentStatus": 1 });
+userSchema.index({ "paymentTransactions.createdAt": -1 });
 
 // ========================================
 // VIRTUAL FIELDS
@@ -1412,6 +1609,149 @@ userSchema.statics.getNotificationRecipients = function (
   // No additional filters needed - these should go to all confirmed users
 
   return this.find(filter).select("email firstName lastName");
+};
+
+// ========================================
+// INSTANCE METHODS FOR PAYMENT MANAGEMENT
+// ========================================
+
+/**
+ * Create a new payment transaction record
+ */
+userSchema.methods.createPaymentTransaction = function (transactionData) {
+  const transaction = {
+    transactionId:
+      transactionData.transactionId ||
+      `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    orderNumber:
+      transactionData.orderNumber ||
+      `ORD_${Date.now()}_${this._id.toString().slice(-6)}`,
+    receiptNumber:
+      transactionData.receiptNumber ||
+      `REC_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+
+    paymentStatus: transactionData.paymentStatus || "pending",
+    paymentMethod: transactionData.paymentMethod || "CCAvenue",
+
+    financial: transactionData.financial || {},
+    discounts: transactionData.discounts || {},
+    items: transactionData.items || [],
+
+    customerInfo: {
+      userId: this._id,
+      name: `${this.firstName} ${this.lastName}`,
+      email: this.email,
+      phone: this.phoneNumber,
+      country: this.country,
+    },
+
+    gift: transactionData.gift || { isGift: false },
+    metadata: transactionData.metadata || {},
+  };
+
+  this.paymentTransactions.push(transaction);
+  return transaction;
+};
+
+/**
+ * Update payment transaction with CCAvenue response
+ */
+userSchema.methods.updatePaymentTransaction = function (
+  transactionId,
+  ccavenueResponse
+) {
+  const transaction = this.paymentTransactions.find(
+    (t) => t.transactionId === transactionId
+  );
+
+  if (transaction) {
+    transaction.ccavenue = {
+      orderId: ccavenueResponse.order_id,
+      trackingId: ccavenueResponse.tracking_id,
+      bankRefNo: ccavenueResponse.bank_ref_no,
+      paymentMode: ccavenueResponse.payment_mode,
+      cardName: ccavenueResponse.card_name,
+      statusCode: ccavenueResponse.status_code,
+      statusMessage: ccavenueResponse.status_message,
+      failureMessage: ccavenueResponse.failure_message || "",
+    };
+
+    transaction.paymentStatus =
+      ccavenueResponse.order_status === "Success" ? "completed" : "failed";
+    transaction.completedAt = new Date();
+
+    return transaction;
+  }
+
+  return null;
+};
+
+/**
+ * Get payment transaction by various identifiers
+ */
+userSchema.methods.getPaymentTransaction = function (
+  identifier,
+  type = "transactionId"
+) {
+  return this.paymentTransactions.find((t) => t[type] === identifier);
+};
+
+/**
+ * Update course enrollment status after successful payment
+ */
+userSchema.methods.updateEnrollmentStatusAfterPayment = function (
+  transactionId
+) {
+  const transaction = this.getPaymentTransaction(transactionId);
+
+  if (transaction && transaction.paymentStatus === "completed") {
+    transaction.items.forEach((item) => {
+      // Update enrollment status based on course type
+      if (item.courseType === "InPersonAestheticTraining") {
+        const enrollment = this.myInPersonCourses.find(
+          (e) =>
+            e.courseId.toString() === item.courseId.toString() &&
+            e.enrollmentData.status === "cart"
+        );
+        if (enrollment) {
+          enrollment.enrollmentData.status = "paid";
+          enrollment.enrollmentData.paidAmount = item.finalPrice;
+          enrollment.enrollmentData.paymentTransactionId = transactionId;
+        }
+      } else if (item.courseType === "OnlineLiveTraining") {
+        const enrollment = this.myLiveCourses.find(
+          (e) =>
+            e.courseId.toString() === item.courseId.toString() &&
+            e.enrollmentData.status === "cart"
+        );
+        if (enrollment) {
+          enrollment.enrollmentData.status = "paid";
+          enrollment.enrollmentData.paidAmount = item.finalPrice;
+          enrollment.enrollmentData.paymentTransactionId = transactionId;
+        }
+      } else if (item.courseType === "SelfPacedOnlineTraining") {
+        const enrollment = this.mySelfPacedCourses.find(
+          (e) =>
+            e.courseId.toString() === item.courseId.toString() &&
+            e.enrollmentData.status === "cart"
+        );
+        if (enrollment) {
+          enrollment.enrollmentData.status = "paid";
+          enrollment.enrollmentData.paidAmount = item.finalPrice;
+          enrollment.enrollmentData.paymentTransactionId = transactionId;
+
+          // Set expiry date for self-paced courses
+          if (item.courseSchedule.accessDays) {
+            const expiryDate = new Date();
+            expiryDate.setDate(
+              expiryDate.getDate() + item.courseSchedule.accessDays
+            );
+            enrollment.enrollmentData.expiryDate = expiryDate;
+          }
+        }
+      }
+    });
+  }
 };
 
 module.exports = mongoose.models.User || mongoose.model("User", userSchema);

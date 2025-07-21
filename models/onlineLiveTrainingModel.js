@@ -137,6 +137,22 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         type: Number,
         min: 0,
       },
+      earlyBirdDays: {
+        type: Number,
+        min: 1,
+        max: 365,
+        default: 30, // Default: early bird expires 30 days before course
+        validate: {
+          validator: function (value) {
+            // Only validate if earlyBirdPrice is set
+            if (this.earlyBirdPrice && this.earlyBirdPrice > 0) {
+              return value && value > 0;
+            }
+            return true;
+          },
+          message: "Early bird days is required when early bird price is set",
+        },
+      },
       currency: { type: String, default: "USD" },
       seatsAvailable: {
         type: Number,

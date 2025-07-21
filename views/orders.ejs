@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders page</title>
-    <link rel="stylesheet" href="/css/orders.css"> <!-- Use the enhanced CSS I provided -->
+    <link rel="stylesheet" href="/css/orders.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -23,6 +23,17 @@
       <h1 class="cart-title">
         <i class="fas fa-shopping-cart"></i> Your Orders
       </h1>
+
+      <!-- 🆕 Early Bird Savings Banner (only show if there are savings) -->
+      <% if (hasEarlyBirdDiscounts) { %>
+        <div class="savings-banner">
+          <i class="fas fa-tag"></i>
+          <div>
+            <div class="savings-text">🎉 Early Bird Savings Applied!</div>
+            <div class="savings-amount">You're saving $<%= totalSavings %> total</div>
+          </div>
+        </div>
+      <% } %>
 
       <!-- ✅ Form to select courses to remove -->
       <form id="removeForm" action="/remove-from-cart" method="POST">
@@ -48,6 +59,12 @@
                   </td>
                   <td class="course-title">
                     <%= order.title || 'Untitled Course' %>
+                    <!-- 🆕 Early Bird Badge -->
+                    <% if (order.isEarlyBird) { %>
+                      <span class="early-bird-badge">
+                        <i class="fas fa-clock"></i> Early Bird
+                      </span>
+                    <% } %>
                     <% if (order.startDate) { %>
                       <br><small class="course-meta">Starts: <%= new Date(order.startDate).toLocaleDateString() %></small>
                     <% } %>
@@ -56,7 +73,20 @@
                     <% } %>
                   </td>
                   <td><%= order.courseCode || 'N/A' %></td>
-                  <td class="price-cell">$<%= order.price ? order.price.toFixed(2) : '0.00' %></td>
+                  <td class="price-cell">
+                    <!-- 🆕 Enhanced Price Display with Early Bird -->
+                    <div class="price-display">
+                      <% if (order.isEarlyBird) { %>
+                        <span class="original-price">$<%= order.originalPrice.toFixed(2) %></span>
+                      <% } %>
+                      <span class="current-price">$<%= order.price ? order.price.toFixed(2) : '0.00' %></span>
+                      <% if (order.isEarlyBird) { %>
+                        <span class="savings-amount-item">
+                          <i class="fas fa-tag"></i> Save $<%= order.earlyBirdSavings.toFixed(2) %>
+                        </span>
+                      <% } %>
+                    </div>
+                  </td>
                   <td>
                     <span class="course-type-badge <%= order.displayType.toLowerCase().replace(/\s+/g, '-') %>">
                       <%= order.displayType || 'Unknown' %>
@@ -87,12 +117,22 @@
             </tbody>
           </table>
 
-          <!-- ✅ Cart Summary with Total Price -->
+          <!-- 🆕 Enhanced Cart Summary with Early Bird Breakdown -->
           <div class="cart-summary">
-            <h3 class="total-price">
-              <span>Total Price:</span> 
-              <span class="price-amount">$<%= totalAmount %></span>
-            </h3>
+            <% if (parseFloat(totalSavings) > 0) { %>
+              <div class="total-row">
+                <span class="total-label">Subtotal (Original Price):</span>
+                <span class="total-amount">$<%= totalOriginalPrice %></span>
+              </div>
+              <div class="total-row">
+                <span class="total-label">Early Bird Discount:</span>
+                <span class="total-amount savings-highlight">-$<%= totalSavings %></span>
+              </div>
+            <% } %>
+            <div class="total-row final-total">
+              <span class="total-label">Total Amount:</span>
+              <span class="total-amount price-amount">$<%= totalAmount %></span>
+            </div>
           </div>
 
           <!-- ✅ Buttons: Remove Selected & Proceed to Checkout -->
@@ -165,11 +205,14 @@
         }, 5000);
       }
 
+      // ✅ FIXED: Form submission for removing courses
       document.getElementById('removeForm').addEventListener('submit', async (e) => {
-        e.preventDefault();  // Prevent default form submission
+        e.preventDefault();
 
         const courseIds = Array.from(document.querySelectorAll('input[name="courseIds[]"]:checked'))
                               .map(input => input.value);
+
+        console.log('Selected courseIds:', courseIds); // Debug log
 
         if (courseIds.length === 0) {
           showNotification('Please select at least one course to remove.', 'warning');
@@ -177,18 +220,24 @@
         }
 
         try {
+          // ✅ FIXED: Send as JSON to match controller expectations
           const response = await fetch('/remove-from-cart', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseIds })
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ courseIds: courseIds })
           });
 
+          console.log('Response status:', response.status);
           const result = await response.json();
+          console.log('Response result:', result);
+          
           if (result.success) {
             showNotification(result.message, 'success');
             setTimeout(() => location.reload(), 1500);
           } else {
-            showNotification('Error removing courses.', 'error');
+            showNotification('Error removing courses: ' + (result.message || 'Unknown error'), 'error');
           }
         } catch (err) {
           console.error('Error:', err);

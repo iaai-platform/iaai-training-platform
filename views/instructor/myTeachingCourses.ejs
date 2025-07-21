@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Teaching Courses - <%= user.firstName %>'s Dashboard</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/instructorProfile.css"> <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="instructor-profile-body">
+    <%- include('../partials/header') %>
+
+    <nav class="breadcrumb">
+        <a href="/">Home</a> > <a href="/dashboard">Dashboard</a> > My Teaching Courses
+    </nav>
+
+    <div class="profile-container">
+        <% if (success_message && success_message.length > 0) { %>
+            <div class="alert success"><%= success_message %></div>
+        <% } %>
+        <% if (error_message && error_message.length > 0) { %>
+            <div class="alert error"><%= error_message %></div>
+        <% } %>
+
+        <div class="courses-section">
+            <h2><i class="fas fa-chalkboard-teacher"></i> Courses I Am Teaching</h2>
+            <% if (teachingCourses && teachingCourses.length > 0) { %>
+                <div class="course-list">
+                    <% teachingCourses.forEach(course => { %>
+                        <div class="course-card">
+                            <h4 class="course-title"><%= course.courseTitle %></h4>
+                            <p><strong>Course Code:</strong> <%= course.courseCode %></p>
+                            <p><strong>Type:</strong> <%= course.courseType.replace(/([A-Z])/g, ' $1').trim() %></p>
+                            <p><strong>Role:</strong> <%= course.role %></p>
+                            <p><strong>Start Date:</strong> <%= new Date(course.startDate).toLocaleDateString() %></p>
+                            <p><strong>End Date:</strong> <%= course.endDate ? new Date(course.endDate).toLocaleDateString() : 'N/A' %></p>
+                            <p><strong>Status:</strong> <span class="course-status status-<%= course.status.toLowerCase().replace(' ', '-') %>"><%= course.status %></span></p>
+                            <% if (course.description) { %>
+                                <p class="course-description"><%= course.description.substring(0, 150) %>...</p>
+                            <% } %>
+                            <% if (course.courseUrl) { %>
+                                <a href="<%= course.courseUrl %>" class="btn btn-secondary">View Course Details</a>
+                            <% } %>
+                            <% if (course.isUpcoming) { %>
+                                <p class="upcoming-note"><i class="fas fa-clock"></i> Course starts soon!</p>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p class="no-courses">You are not currently assigned to teach any courses.</p>
+                <p class="no-courses-sub">Keep an eye on your applications or contact administration for new opportunities.</p>
+            <% } %>
+        </div>
+
+        <div class="profile-actions-bottom">
+             <a href="/instructor/me" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back to Instructor Profile</a>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

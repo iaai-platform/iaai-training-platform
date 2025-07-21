@@ -1,90 +1,551 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registration Successful - IAAI</title>
-  <link rel="stylesheet" href="/css/checkoutstyle.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    .success-container {
-      max-width: 600px;
-      margin: 50px auto;
-      text-align: center;
-      padding: 40px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .success-icon {
-      font-size: 4rem;
-      color: #28a745;
-      margin-bottom: 20px;
-    }
-    .reference-number {
-      background: #e9ecef;
-      padding: 15px;
-      border-radius: 5px;
-      margin: 20px 0;
-      font-family: monospace;
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-    .action-buttons {
-      margin-top: 30px;
-    }
-    .cta-btn {
-      display: inline-block;
-      padding: 12px 24px;
-      margin: 0 10px;
-      background: #007bff;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    .cta-btn:hover {
-      background: #0056b3;
-    }
-    .cta-btn.secondary {
-      background: #6c757d;
-    }
-    .cta-btn.secondary:hover {
-      background: #545b62;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Successful - IAAI Training Institute</title>
+    <link rel="stylesheet" href="/css/checkoutstyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .success-container {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .success-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #28a745, #20c997, #17a2b8);
+        }
+        
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+        }
+        
+        .success-icon i {
+            font-size: 60px;
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 36px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .order-details {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 5px solid #28a745;
+            text-align: left;
+        }
+        
+        .order-details h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .reference-number {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #2196f3;
+        }
+        
+        .reference-number h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .reference-code {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1565c0;
+            letter-spacing: 2px;
+        }
+        
+        .amount-display {
+            font-size: 28px;
+            color: #28a745;
+            font-weight: 700;
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #28a745;
+        }
+        
+        .next-steps {
+            background: #e3f2fd;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .next-steps h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .next-steps ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .next-steps li {
+            padding: 10px 0;
+            color: #333;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 15px;
+        }
+        
+        .next-steps li i {
+            color: #1976d2;
+            margin-top: 2px;
+            font-size: 16px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #545b62);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .security-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .payment-method {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+        
+        .status-badge {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        @media (max-width: 768px) {
+            .success-container { 
+                padding: 30px 20px; 
+                margin: 10px;
+            }
+            .detail-grid { 
+                grid-template-columns: 1fr; 
+            }
+            .buttons { 
+                flex-direction: column; 
+                align-items: center; 
+            }
+            .btn { 
+                width: 100%; 
+                max-width: 300px; 
+                justify-content: center; 
+            }
+            h1 {
+                font-size: 28px;
+            }
+            .reference-code {
+                font-size: 18px;
+                word-break: break-all;
+            }
+        }
+    </style>
 </head>
 <body>
-  <%- include('partials/header') %>
+    <%- include('partials/header') %>
 
-  <div class="success-container">
-    <div class="success-icon">
-      ✅
-    </div>
-    
-    <h1>Registration Successful!</h1>
-    
-    <p>Congratulations! Your course registration has been completed successfully.</p>
-    
-    <% if (referenceNumber) { %>
-      <div class="reference-number">
-        Reference Number: <%= referenceNumber %>
-      </div>
-      <p><em>Please save this reference number for your records.</em></p>
-    <% } %>
-    
-    <div class="action-buttons">
-      <a href="/my-courses" class="cta-btn">View My Courses</a>
-      <a href="/dashboard" class="cta-btn secondary">Go to Dashboard</a>
-      <a href="/training-programs" class="cta-btn secondary">Browse More Courses</a>
-    </div>
-    
-    <div style="margin-top: 30px; color: #6c757d;">
-      <p>📧 A confirmation email will be sent to your registered email address.</p>
-      <p>📚 You can access your courses from the "My Courses" section.</p>
-    </div>
-  </div>
+    <main>
+        <div class="success-container">
+            <div class="confetti" id="confetti"></div>
+            
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            
+            <h1>🎉 Registration Successful!</h1>
+            <p class="subtitle">
+                <% if (typeof order_id !== 'undefined' && order_id !== 'FREE') { %>
+                    Thank you for your payment! Your transaction has been processed successfully and you now have full access to your enrolled courses.
+                <% } else { %>
+                    Congratulations! Your course registration has been completed successfully using your promotional code.
+                <% } %>
+            </p>
+            
+            <div class="order-details">
+                <h3><i class="fas fa-receipt"></i> Registration Details</h3>
+                
+                <div class="detail-grid">
+                    <% if (typeof order_id !== 'undefined') { %>
+                    <div class="detail-item">
+                        <span class="detail-label">Order ID:</span>
+                        <span class="detail-value"><%= order_id %></span>
+                    </div>
+                    <% } %>
+                    
+                    <% if (referenceNumber) { %>
+                    <div class="detail-item">
+                        <span class="detail-label">Reference Number:</span>
+                        <span class="detail-value"><%= referenceNumber %></span>
+                    </div>
+                    <% } %>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Registration Date:</span>
+                        <span class="detail-value"><%= new Date().toLocaleDateString() %></span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">
+                            <span class="status-badge">
+                                <i class="fas fa-check-circle"></i> Completed
+                            </span>
+                        </span>
+                    </div>
+                    
+                    <% if (typeof amount !== 'undefined') { %>
+                    <div class="detail-item">
+                        <span class="detail-label">Payment Method:</span>
+                        <span class="detail-value">
+                            <% if (amount === '0.00' || order_id === 'FREE') { %>
+                                <span class="payment-method">
+                                    <i class="fas fa-gift"></i> Promotional Code
+                                </span>
+                            <% } else { %>
+                                <span class="payment-method">
+                                    <i class="fas fa-credit-card"></i> CCAvenue Payment Gateway
+                                </span>
+                            <% } %>
+                        </span>
+                    </div>
+                    <% } %>
+                </div>
+                
+                <% if (typeof amount !== 'undefined') { %>
+                <div class="amount-display">
+                    <% if (amount === '0.00' || order_id === 'FREE') { %>
+                        🎁 Registration Completed: FREE
+                    <% } else { %>
+                        Total Paid: $<%= amount %> USD
+                    <% } %>
+                </div>
+                <% } %>
+            </div>
+            
+            <% if (referenceNumber) { %>
+            <div class="reference-number">
+                <h4><i class="fas fa-bookmark"></i> Your Reference Number</h4>
+                <div class="reference-code"><%= referenceNumber %></div>
+                <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                    Please save this reference number for your records and future correspondence.
+                </p>
+            </div>
+            <% } %>
+            
+            <div class="next-steps">
+                <h3><i class="fas fa-rocket"></i> What's Next?</h3>
+                <ul>
+                    <li>
+                        <i class="fas fa-play-circle"></i>
+                        <span><strong>Access Your Courses:</strong> Login to your dashboard to start learning immediately</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-download"></i>
+                        <span><strong>Download Materials:</strong> All course resources and materials are now available in your account</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-calendar-alt"></i>
+                        <span><strong>Check Schedule:</strong> View your course schedules and upcoming sessions in "My Courses"</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-certificate"></i>
+                        <span><strong>Earn Certificates:</strong> Complete courses to receive your professional certificates</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-envelope"></i>
+                        <span><strong>Confirmation Email:</strong> A detailed confirmation has been sent to your registered email address</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-headset"></i>
+                        <span><strong>Need Help?</strong> Our support team is available if you have any questions</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="buttons">
+                <a href="/my-courses" class="btn btn-primary">
+                    <i class="fas fa-graduation-cap"></i> View My Courses
+                </a>
+                <a href="/dashboard" class="btn btn-success">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </a>
+                <a href="/training-programs" class="btn btn-secondary">
+                    <i class="fas fa-search"></i> Browse More Courses
+                </a>
+            </div>
+            
+            <div class="security-note">
+                <i class="fas fa-shield-alt"></i>
+                <span>
+                    <% if (typeof amount !== 'undefined' && amount !== '0.00' && order_id !== 'FREE') { %>
+                        Your payment was processed securely using industry-standard encryption. Keep this confirmation for your records.
+                    <% } else { %>
+                        Your registration was completed securely. Keep this confirmation for your records.
+                    <% } %>
+                </span>
+            </div>
+        </div>
+    </main>
 
-  <%- include('partials/footer') %>
+    <%- include('partials/footer') %>
+
+    <script>
+        // Confetti animation
+        function createConfetti() {
+            const confettiContainer = document.getElementById('confetti');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confettiPiece = document.createElement('div');
+                confettiPiece.style.position = 'absolute';
+                confettiPiece.style.width = Math.random() * 10 + 5 + 'px';
+                confettiPiece.style.height = confettiPiece.style.width;
+                confettiPiece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confettiPiece.style.left = Math.random() * 100 + '%';
+                confettiPiece.style.animationDuration = Math.random() * 3 + 2 + 's';
+                confettiPiece.style.animationDelay = Math.random() * 2 + 's';
+                confettiPiece.style.animation = 'fall linear infinite';
+                confettiPiece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                
+                confettiContainer.appendChild(confettiPiece);
+            }
+        }
+        
+        // Add confetti CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Start confetti animation
+        window.onload = function() {
+            createConfetti();
+            
+            // Optional: Auto-redirect to dashboard after 15 seconds
+            setTimeout(() => {
+                // Uncomment if you want auto-redirect
+                // window.location.href = '/dashboard';
+            }, 15000);
+        };
+
+        // Track conversion for analytics (if you have Google Analytics, Facebook Pixel, etc.)
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'purchase', {
+                'transaction_id': '<%= typeof order_id !== "undefined" ? order_id : "FREE" %>',
+                'value': <%= typeof amount !== 'undefined' ? amount : 0 %>,
+                'currency': 'USD',
+                'items': [{
+                    'item_name': 'Course Enrollment',
+                    'category': 'Education',
+                    'quantity': 1,
+                    'price': <%= typeof amount !== 'undefined' ? amount : 0 %>
+                }]
+            });
+        }
+
+        // Celebrate successful registration
+        console.log('🎉 Registration completed successfully!');
+        <% if (referenceNumber) { %>
+        console.log('📝 Reference Number:', '<%= referenceNumber %>');
+        <% } %>
+        <% if (typeof order_id !== 'undefined') { %>
+        console.log('🛒 Order ID:', '<%= order_id %>');
+        <% } %>
+    </script>
 </body>
 </html>

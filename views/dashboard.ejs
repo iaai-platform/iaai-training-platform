@@ -15,24 +15,19 @@
 <body class="dashboard-body">
   <%- include('partials/header') %>
   
-  <!-- Breadcrumb Navigation -->
   <nav class="breadcrumb">
     <a href="/">Home</a> > <a href="/training-programs">Our Training Programs</a> > Dashboard
   </nav>
 
-  <!-- Dashboard Main Container -->
   <div class="dashboard-container">
 
-    <!-- Welcome Section -->
     <div class="welcome-box">
       <h1>Welcome, <%= user ? user.firstName : 'Guest' %>!</h1>
       <p>Manage your courses, profile, and settings from here.</p>
     </div>
 
-    <!-- Dashboard Grid -->
     <div class="dashboard-grid">
 
-      <!-- My Courses -->
       <div class="dashboard-card">
         <div class="card-icon">
           <i class="fas fa-graduation-cap"></i>
@@ -42,7 +37,6 @@
         <a href="/my-courses" class="card-btn">Go to My Courses</a>
       </div>
 
-      <!-- My Certificates -->
       <div class="dashboard-card">
         <div class="card-icon certificate">
           <i class="fas fa-award"></i>
@@ -52,7 +46,6 @@
         <a href="/certificates" class="card-btn">View Certificates</a>
       </div>
 
-      <!-- Orders -->
       <div class="dashboard-card">
         <div class="card-icon">
           <i class="fas fa-shopping-cart"></i>
@@ -62,7 +55,6 @@
         <a href="/orders" class="card-btn">View Orders</a>
       </div>
 
-      <!-- Wishlist -->
       <div class="dashboard-card">
         <div class="card-icon">
           <i class="fas fa-heart"></i>
@@ -72,7 +64,6 @@
         <a href="/wishlist" class="card-btn">View Wishlist</a>
       </div>
 
-      <!-- Profile -->
       <div class="dashboard-card">
         <div class="card-icon">
           <i class="fas fa-user-edit"></i>
@@ -84,7 +75,6 @@
 
     </div>
 
-    <!-- Account Settings Section -->
     <div class="section-divider">
       <h2><i class="fas fa-cog"></i> Account Settings</h2>
       <p>Manage your account preferences, security, and privacy settings</p>
@@ -92,7 +82,6 @@
 
     <div class="dashboard-grid settings-grid">
 
-      <!-- Security Settings -->
       <div class="dashboard-card settings-card">
         <div class="card-icon security">
           <i class="fas fa-shield-alt"></i>
@@ -102,7 +91,6 @@
         <a href="/account/security" class="card-btn">Manage Security</a>
       </div>
 
-      <!-- Notification Settings -->
       <div class="dashboard-card settings-card">
         <div class="card-icon notifications">
           <i class="fas fa-bell"></i>
@@ -112,7 +100,6 @@
         <a href="/account/notifications" class="card-btn">Set Preferences</a>
       </div>
 
-      <!-- Privacy Settings -->
       <div class="dashboard-card settings-card">
         <div class="card-icon privacy">
           <i class="fas fa-user-secret"></i>
@@ -122,7 +109,6 @@
         <a href="/account/privacy" class="card-btn">Privacy Settings</a>
       </div>
 
-      <!-- Billing & Payments -->
       <div class="dashboard-card settings-card">
         <div class="card-icon billing">
           <i class="fas fa-credit-card"></i>
@@ -132,7 +118,6 @@
         <a href="/account/billing" class="card-btn">Manage Billing</a>
       </div>
 
-      <!-- Learning Preferences -->
       <div class="dashboard-card settings-card">
         <div class="card-icon learning">
           <i class="fas fa-sliders-h"></i>
@@ -142,7 +127,6 @@
         <a href="/account/preferences" class="card-btn">Set Preferences</a>
       </div>
 
-      <!-- Professional Profile -->
       <div class="dashboard-card settings-card">
         <div class="card-icon professional">
           <i class="fas fa-briefcase"></i>
@@ -154,7 +138,6 @@
 
     </div>
 
-    <!-- Customer Support Section -->
     <div class="section-divider">
       <h2><i class="fas fa-headset"></i> Customer Support</h2>
       <p>Get help, contact support, and access learning resources</p>
@@ -162,7 +145,6 @@
 
     <div class="dashboard-grid support-grid">
 
-      <!-- Help Center -->
       <div class="dashboard-card support-card">
         <div class="card-icon help">
           <i class="fas fa-question-circle"></i>
@@ -172,7 +154,6 @@
         <a href="/support/help" class="card-btn">Browse Help</a>
       </div>
 
-      <!-- Contact Support -->
       <div class="dashboard-card support-card">
         <div class="card-icon contact">
           <i class="fas fa-envelope"></i>
@@ -182,7 +163,6 @@
         <a href="/support/contact" class="card-btn">Contact Us</a>
       </div>
 
-      <!-- Support Tickets -->
       <div class="dashboard-card support-card">
         <div class="card-icon tickets">
           <i class="fas fa-ticket-alt"></i>
@@ -192,7 +172,6 @@
         <a href="/support/tickets" class="card-btn">View Tickets</a>
       </div>
 
-      <!-- Community -->
       <div class="dashboard-card support-card">
         <div class="card-icon community">
           <i class="fas fa-users"></i>
@@ -202,7 +181,6 @@
         <a href="/support/community" class="card-btn">Join Community</a>
       </div>
 
-      <!-- Feedback -->
       <div class="dashboard-card support-card">
         <div class="card-icon feedback">
           <i class="fas fa-star"></i>
@@ -212,7 +190,6 @@
         <a href="/support/feedback" class="card-btn">Give Feedback</a>
       </div>
 
-      <!-- Live Chat -->
       <div class="dashboard-card support-card">
         <div class="card-icon chat">
           <i class="fas fa-comments"></i>
@@ -224,7 +201,6 @@
 
     </div>
 
-    <!-- Admin Actions (Only Visible to Admins) -->
     <% if (user && user.role === 'admin') { %>
 
       <div class="section-divider admin-section">
@@ -233,9 +209,7 @@
       </div>
 
       <div class="dashboard-grid admin-grid">
-          <!-- inperson -->
-        <!-- In-Person Courses -->
-<div class="dashboard-card admin-card">
+          <div class="dashboard-card admin-card">
   <div class="card-icon admin">
     <i class="fas fa-chalkboard-teacher"></i>
   </div>
@@ -244,7 +218,6 @@
   <a href="/admin-courses/inperson" class="card-btn">Edit Courses</a>
 </div>
 
-<!-- Online Live Courses -->
 <div class="dashboard-card admin-card">
   <div class="card-icon admin">
     <i class="fas fa-video"></i>
@@ -254,7 +227,6 @@
   <a href="/admin-courses/onlinelive" class="card-btn">Edit Courses</a>
 </div>
 
-<!-- Self-Paced Courses -->
 <div class="dashboard-card admin-card">
   <div class="card-icon admin">
     <i class="fas fa-play-circle"></i>
@@ -264,8 +236,7 @@
   <a href="/admin-courses/selfpaced/manage" class="card-btn">Upload Videos</a>
 </div>
 
-              <!-- Manage home page -->
-        <div class="dashboard-card admin-card">
+              <div class="dashboard-card admin-card">
           <div class="card-icon admin">
             <i class="fas fa-home"></i>
           </div>
@@ -292,7 +263,6 @@
           <a href="/admin-users" class="card-btn">Go to User Info</a>
         </div>
 
-        <!-- manage instructors -->
         <div class="dashboard-card admin-card">
           <div class="card-icon admin">
             <i class="fas fa-users-cog"></i>
@@ -302,7 +272,6 @@
           <a href="/instructors/manage" class="card-btn">Go to Instructor Info</a>
         </div>
 
-        <!-- Payment Analytics Card -->
         <div class="dashboard-card admin-card">
           <div class="card-icon admin" style="color: #28a745;">
             <i class="fas fa-chart-line"></i>
@@ -312,7 +281,6 @@
           <a href="/admin/payment-analytics" class="card-btn">View Analytics</a>
         </div>
 
-<!-- Manage Certification Bodies Card (ADD THIS) -->
 <div class="dashboard-card admin-card">
   <div class="card-icon admin">
     <i class="fas fa-certificate"></i>
@@ -341,7 +309,6 @@
           <a href="/admin-user-approval" class="card-btn">User Approval</a>
         </div>
 
-        <!-- Recycle Bin Card -->
         <div class="dashboard-card admin-card recycle-bin-card">
           <div class="card-icon recycle-bin">
             <i class="fas fa-trash-restore"></i>
@@ -355,7 +322,6 @@
 
     <% } %>
 
-    <!-- Instructor Actions (Only Visible to Instructors) -->
     <% if (user && user.role === 'instructor') { %>
 
       <div class="section-divider instructor-section">
@@ -380,7 +346,24 @@
           </div>
           <h3>My Teaching Courses</h3>
           <p>See courses you've been assigned to teach.</p>
-          <a href="/instructor-courses" class="card-btn">My Courses</a>
+          <a href="/instructor/me/courses" class="card-btn">My Courses</a> </div>
+
+        <div class="dashboard-card instructor-card">
+          <div class="card-icon instructor" style="color: #FFD700;">
+            <i class="fas fa-id-card"></i>
+          </div>
+          <h3>My Profile Page</h3>
+          <p>View your complete instructor profile and course involvement.</p>
+          <a href="/instructor/me" class="card-btn">View Profile</a>
+        </div>
+
+        <div class="dashboard-card instructor-card">
+          <div class="card-icon instructor" style="color: #FFD700;">
+            <i class="fas fa-user-edit"></i>
+          </div>
+          <h3>Edit My Information</h3>
+          <p>Update your personal and professional details as an instructor.</p>
+          <a href="/instructor/me/edit" class="card-btn">Edit Details</a>
         </div>
 
       </div>
@@ -398,7 +381,6 @@
     }
   </script>
 
-  <!-- Enhanced styling for the new sections -->
   <style>
     .section-divider {
       margin: 50px 0 30px 0;

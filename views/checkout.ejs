@@ -35,6 +35,17 @@
             <span class="step-label">Confirmation</span>
           </div>
         </div>
+
+        <!-- 🆕 Early Bird Savings Banner (only show if there are savings) -->
+        <% if (hasEarlyBirdDiscounts) { %>
+          <div class="savings-banner">
+            <i class="fas fa-tag"></i>
+            <div>
+              <div class="savings-text">🎉 Early Bird Savings Applied!</div>
+              <div class="savings-amount">You're saving $<%= totalSavings %> total</div>
+            </div>
+          </div>
+        <% } %>
        
         <% if (coursesInCart && coursesInCart.length > 0) { %>
           <!-- Course Table -->
@@ -57,16 +68,22 @@
                     <td>
                       <div class="course-title-cell">
                         <%= course.title %>
-                        <% if (course.courseType === 'Self-Paced') { %>
+                        <!-- 🆕 Early Bird Badge -->
+                        <% if (course.isEarlyBird) { %>
+                          <span class="early-bird-badge">
+                            <i class="fas fa-clock"></i> Early Bird
+                          </span>
+                        <% } %>
+                        <% if (course.courseType === 'SelfPacedOnlineTraining' || course.displayType === 'Self-Paced') { %>
                           <span class="course-badge self-paced">Self-Paced</span>
-                        <% } else if (course.courseType === 'Online Live') { %>
+                        <% } else if (course.courseType === 'OnlineLiveTraining' || course.displayType === 'Online Live') { %>
                           <span class="course-badge online-live">Live Online</span>
                         <% } else { %>
                           <span class="course-badge in-person">In-Person</span>
                         <% } %>
                       </div>
                     </td>
-                    <td><%= course.courseType %></td>
+                    <td><%= course.displayType || course.courseType %></td>
                     <td>
                       <% if (course.startDate) { %>
                         <%= new Date(course.startDate).toLocaleDateString('en-US', { 
@@ -79,7 +96,18 @@
                       <% } %>
                     </td>
                     <td class="price-cell">
-                      <strong>$<%= course.price.toFixed(2) %></strong> USD
+                      <!-- 🆕 Enhanced Price Display with Early Bird -->
+                      <div class="checkout-price-display">
+                        <% if (course.isEarlyBird && course.originalPrice) { %>
+                          <span class="original-price">$<%= course.originalPrice.toFixed(2) %></span>
+                        <% } %>
+                        <strong class="current-price">$<%= course.price.toFixed(2) %></strong> USD
+                        <% if (course.isEarlyBird && course.earlyBirdSavings) { %>
+                          <div class="savings-amount-item">
+                            <i class="fas fa-tag"></i> Save $<%= course.earlyBirdSavings.toFixed(2) %>
+                          </div>
+                        <% } %>
+                      </div>
                     </td>
                     <td>
                       <div class="action-buttons">
@@ -101,15 +129,26 @@
             </table>
           </div>
 
-          <!-- Price Summary -->
+          <!-- 🆕 Enhanced Price Summary with Early Bird Breakdown -->
           <div class="price-summary">
-            <div class="price-row">
-              <span>Subtotal (<%= coursesInCart.length %> items):</span>
-              <span class="price-value">$<span id="originalPrice"><%= totalPrice.toFixed(2) %></span> USD</span>
-            </div>
+            <% if (parseFloat(totalSavings) > 0) { %>
+              <div class="price-row">
+                <span>Subtotal (Original Price):</span>
+                <span class="price-value">$<%= totalOriginalPrice %> USD</span>
+              </div>
+              <div class="price-row promo-applied">
+                <span>Early Bird Discount:</span>
+                <span class="price-value discount">-$<%= totalSavings %> USD</span>
+              </div>
+            <% } else { %>
+              <div class="price-row">
+                <span>Subtotal (<%= coursesInCart.length %> items):</span>
+                <span class="price-value">$<span id="originalPrice"><%= totalOriginalPrice || totalPrice.toFixed(2) %></span> USD</span>
+              </div>
+            <% } %>
             
             <div class="price-row promo-applied" id="discountRow" style="display: none;">
-              <span>Discount (<span id="discountPercent">0</span>%):</span>
+              <span>Promo Discount (<span id="discountPercent">0</span>%):</span>
               <span class="price-value discount">-$<span id="discountAmount">0.00</span> USD</span>
             </div>
             
@@ -123,7 +162,13 @@
               <span class="price-value total-price">$<span id="discountedPrice"><%= totalPrice.toFixed(2) %></span> USD</span>
             </div>
             
-            <!-- Savings Message -->
+            <!-- Enhanced Savings Message -->
+            <% if (parseFloat(totalSavings) > 0) { %>
+              <div class="savings-message" style="display: block;">
+                <i class="fas fa-piggy-bank"></i>
+                You're saving $<%= totalSavings %> with Early Bird pricing!
+              </div>
+            <% } %>
             <div id="savingsMessage" class="savings-message" style="display: none;">
               <i class="fas fa-piggy-bank"></i>
               You're saving $<span id="savingsAmount">0.00</span>!
@@ -247,14 +292,20 @@
     </div>
 
     <script>
-      let currentDiscountedPrice = <%= totalPrice.toFixed(2) %>;
-      let originalPrice = <%= totalPrice.toFixed(2) %>;
+      // 🔧 Initialize price variables from server data
+      let currentDiscountedPrice = <%= totalPrice.toFixed(2) %>;  // Final price after early bird
+      let originalPrice = <%= totalOriginalPrice || totalPrice.toFixed(2) %>;  // Original price before early bird
       let promoApplied = false;
       let promoDiscount = 0;
 
       // ✅ Initialize on page load
       document.addEventListener('DOMContentLoaded', function() {
         validateCheckout();
+        console.log('💰 Checkout initialized:', {
+          originalPrice: originalPrice,
+          currentPrice: currentDiscountedPrice,
+          cartItems: <%= coursesInCart ? coursesInCart.length : 0 %>
+        });
       });
 
       // ✅ Validate checkout button state
@@ -276,7 +327,7 @@
           const response = await fetch('/remove-from-cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseId, courseType })
+            body: JSON.stringify({ courseIds: [courseId] })
           });
 
           const result = await response.json();
@@ -284,10 +335,14 @@
           if (result.success) {
             // Animate row removal
             const row = document.querySelector(`tr[data-course-id="${courseId}"]`);
-            row.style.animation = 'fadeOut 0.5s';
-            setTimeout(() => {
+            if (row) {
+              row.style.animation = 'fadeOut 0.5s';
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
+            } else {
               window.location.reload();
-            }, 500);
+            }
           } else {
             showMessage(result.message || 'Error removing course from cart', 'error');
           }
@@ -318,7 +373,7 @@
             const removeResponse = await fetch('/remove-from-cart', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ courseId, courseType })
+              body: JSON.stringify({ courseIds: [courseId] })
             });
 
             const removeResult = await removeResponse.json();
@@ -465,7 +520,7 @@
         document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
       }
 
-      // ✅ Handle Checkout
+      // ✅ Handle Checkout with CCAvenue Integration
       async function handleCheckout() {
         const agreeTerms = document.getElementById('agreeTerms').checked;
         const proceedBtn = document.getElementById('proceedBtn');
@@ -483,9 +538,6 @@
           orderNotes: document.getElementById('notesText')?.value
         };
 
-        // Store in session for later use
-        sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
-
         // Disable button during processing
         proceedBtn.disabled = true;
         proceedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
@@ -493,7 +545,7 @@
 
         try {
           if (currentDiscountedPrice <= 0) {
-            // ✅ FREE registration
+            // ✅ FREE registration (100% discount)
             console.log('🎯 Processing free registration...');
             
             const response = await fetch('/complete-registration', {
@@ -505,16 +557,32 @@
             const result = await response.json();
             
             if (result.success) {
-              window.location.href = `/success?ref=${result.referenceNumber}`;
+              window.location.href = `/payment/success?order_id=FREE&amount=0.00&ref=${result.referenceNumber}`;
             } else {
               alert('❌ Error completing registration: ' + (result.message || 'Please try again.'));
               proceedBtn.disabled = false;
               proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
             }
           } else {
-            // ✅ Payment required
-            console.log('💳 Redirecting to payment...');
-            window.location.href = '/payment';
+            // ✅ CCAvenue Payment Processing
+            console.log('💳 Processing payment with CCAvenue...');
+            
+            // Create a form and submit to initiate payment
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/payment/initiate';
+            
+            // Add checkout data as hidden inputs
+            Object.keys(checkoutData).forEach(key => {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = checkoutData[key];
+              form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
           }
         } catch (error) {
           console.error('Error during checkout:', error);
@@ -536,9 +604,80 @@
         }
       });
 
+      // ✅ Add CSS animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeOut {
+          from { opacity: 1; transform: translateX(0); }
+          to { opacity: 0; transform: translateX(-100px); }
+        }
+        
+        .loading-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+        }
+        
+        .spinner {
+          text-align: center;
+          color: white;
+        }
+        
+        .spinner i {
+          font-size: 48px;
+          margin-bottom: 20px;
+        }
+        
+        .promo-message {
+          padding: 10px 15px;
+          border-radius: 5px;
+          margin: 10px 0;
+          display: none;
+          align-items: center;
+          gap: 10px;
+        }
+        
+        .promo-message.success {
+          background: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+        }
+        
+        .promo-message.error {
+          background: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+        }
+        
+        .promo-message.info {
+          background: #d1ecf1;
+          color: #0c5460;
+          border: 1px solid #bee5eb;
+        }
+        
+        .btn-success {
+          background: linear-gradient(135deg, #28a745, #20c997) !important;
+        }
+      `;
+      document.head.appendChild(style);
+
       // ✅ Debug information
-      console.log('💰 Initial total price:', <%= totalPrice.toFixed(2) %>);
-      console.log('🛒 Courses in cart:', <%= coursesInCart ? coursesInCart.length : 0 %>);
+      console.log('💰 Checkout Debug Info:', {
+        finalTotalPrice: <%= totalPrice.toFixed(2) %>,
+        originalTotalPrice: <%= totalOriginalPrice || totalPrice.toFixed(2) %>,
+        coursesInCart: <%= coursesInCart ? coursesInCart.length : 0 %>,
+        <% if (parseFloat(totalSavings) > 0) { %>
+        earlyBirdSavings: '<%= totalSavings %>',
+        <% } %>
+        hasEarlyBirdDiscounts: <%= hasEarlyBirdDiscounts ? 'true' : 'false' %>
+      });
     </script>
   </body>
 </html>

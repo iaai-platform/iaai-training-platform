@@ -1,9 +1,16 @@
-<!-- views/partials/course-card.ejs -->
+<!-- views/partials/course-card.ejs - UPDATED with Cloudinary support -->
 <div class="course-card" data-course-type="<%= course.courseType %>">
-    <div class="course-image">
-      <% if (course.mainImage) { %>
-        <img src="<%= course.mainImage %>" alt="<%= course.title %>">
-      <% } else { %>
+  <div class="course-image">
+    <% if (course.mainImage) { %>
+      <!-- 🔥 UPDATED: Better image handling with error fallback -->
+      <img 
+        src="<%= course.mainImage %>" 
+        alt="<%= course.title %>"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+        loading="lazy"
+      >
+      <!-- Fallback icon container (initially hidden) -->
+      <div class="fallback-icon" style="display: none;">
         <% if (course.courseType === 'In-Person') { %>
           <i class="fas fa-chalkboard-teacher"></i>
         <% } else if (course.courseType === 'Online-Live') { %>
@@ -11,135 +18,188 @@
         <% } else { %>
           <i class="fas fa-play-circle"></i>
         <% } %>
-      <% } %>
-      <span class="course-type-badge badge-<%= course.courseType.toLowerCase().replace('-', '-') %>">
-        <%= course.typeLabel %>
-      </span>
+      </div>
+    <% } else { %>
+      <!-- No image - show icon -->
+      <div class="fallback-icon">
+        <% if (course.courseType === 'In-Person') { %>
+          <i class="fas fa-chalkboard-teacher"></i>
+        <% } else if (course.courseType === 'Online-Live') { %>
+          <i class="fas fa-video"></i>
+        <% } else { %>
+          <i class="fas fa-play-circle"></i>
+        <% } %>
+      </div>
+    <% } %>
+    
+    <!-- Course Type Badge -->
+    <span class="course-type-badge badge-<%= course.courseType.toLowerCase().replace('-', '-') %>">
+      <%= course.typeLabel %>
+    </span>
+    
+    <!-- 🔥 NEW: Progress overlay for visual progress indication -->
+    <% if (course.progress !== undefined && course.progress > 0) { %>
+      <div class="progress-overlay">
+        <div class="progress-circle">
+          <span><%= Math.round(course.progress) %>%</span>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="course-content">
+    <div class="course-header">
+      <div class="course-code">
+        <%= course.courseCode || 'N/A' %>
+        <% if (course.certificateId) { %>
+          <i class="fas fa-certificate has-certificate" title="Certificate Earned" style="float: right;"></i>
+        <% } %>
+      </div>
+      <h3 class="course-title"><%= course.title %></h3>
     </div>
-  
-    <div class="course-content">
-      <div class="course-header">
-        <div class="course-code">
-          <%= course.courseCode || 'N/A' %>
-          <% if (course.certificateId) { %>
-            <i class="fas fa-certificate has-certificate" title="Certificate Earned" style="float: right;"></i>
-          <% } %>
-        </div>
-        <h3 class="course-title"><%= course.title %></h3>
-      </div>
-  
-      <div class="status-container">
-        <span class="status-badge status-<%= course.status.toLowerCase().replace(/\s+/g, '-') %>">
-          <% if (course.promoCodeUsed) { %>
-            <i class="fas fa-tag"></i>
-          <% } %>
-          <%= course.status === 'paid' ? 'Paid & Registered' : 
-              course.status === 'registered' ? 'Registered' : 
-              course.status %>
+
+    <div class="status-container">
+      <span class="status-badge status-<%= course.status.toLowerCase().replace(/\s+/g, '-') %>">
+        <% if (course.promoCodeUsed) { %>
+          <i class="fas fa-tag"></i>
+        <% } %>
+        <%= course.status === 'paid' ? 'Paid & Registered' : 
+            course.status === 'registered' ? 'Registered' : 
+            course.status %>
+      </span>
+      <% if (course.expiryDate) { %>
+        <span style="font-size: 0.8rem; color: #666;">
+          Expires: <%= new Date(course.expiryDate).toLocaleDateString() %>
         </span>
-        <% if (course.expiryDate) { %>
-          <span style="font-size: 0.8rem; color: #666;">
-            Expires: <%= new Date(course.expiryDate).toLocaleDateString() %>
-          </span>
-        <% } %>
-      </div>
-  
-      <div class="course-info">
-        <% if (course.startDate) { %>
-          <div class="info-item">
-            <i class="fas fa-calendar"></i>
-            <span>Starts: <%= new Date(course.startDate).toLocaleDateString() %></span>
-          </div>
-        <% } %>
-  
-        <% if (course.location) { %>
-          <div class="info-item">
-            <i class="fas fa-map-marker-alt"></i>
-            <span><%= course.location %></span>
-          </div>
-        <% } %>
-  
-        <% if (course.duration) { %>
-          <div class="info-item">
-            <i class="fas fa-clock"></i>
-            <span><%= course.duration %></span>
-          </div>
-        <% } %>
-  
-        <% if (course.instructors || course.instructor) { %>
-          <div class="info-item">
-            <i class="fas fa-user-tie"></i>
-            <span><%= course.instructors || course.instructor %></span>
-          </div>
-        <% } %>
-  
-        <% if (course.courseType === 'Self-Paced' && course.totalVideos) { %>
-          <div class="info-item">
-            <i class="fas fa-video"></i>
-            <span><%= course.completedVideos || 0 %> / <%= course.totalVideos %> videos completed</span>
-          </div>
-        <% } %>
-  
-        <% if (course.courseType === 'Online-Live' && course.platform) { %>
-          <div class="info-item">
-            <i class="fas fa-desktop"></i>
-            <span>Platform: <%= course.platform %></span>
-          </div>
-        <% } %>
-      </div>
-  
-      <% if (course.progress !== undefined && course.progress > 0) { %>
-        <div class="progress-container">
-          <div class="progress-label">
-            <span>Progress</span>
-            <span><%= course.progress %>%</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: <%= course.progress %>%"></div>
-          </div>
+      <% } %>
+    </div>
+
+    <div class="course-info">
+      <% if (course.startDate) { %>
+        <div class="info-item">
+          <i class="fas fa-calendar"></i>
+          <span>Starts: <%= new Date(course.startDate).toLocaleDateString() %></span>
         </div>
       <% } %>
-  
-      <div class="course-actions">
-        <% 
-          let detailsUrl = '#';
-          let libraryUrl = '#';
-          
-          if (course.courseType === 'In-Person') {
-            detailsUrl = '/in-person/courses/' + course.courseId;
-            libraryUrl = '/library/in-person';
-          } else if (course.courseType === 'Self-Paced') {
-            detailsUrl = '/self-paced-online-training/courses/' + course.courseId;
-            libraryUrl = '/library/self-paced';
-          } else if (course.courseType === 'Online-Live') {
-            detailsUrl = '/online-live-training/courses/' + course.courseId;
-            libraryUrl = '/library/live';
-          }
-        %>
+
+      <% if (course.location) { %>
+        <div class="info-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span><%= course.location %></span>
+        </div>
+      <% } %>
+
+      <% if (course.duration) { %>
+        <div class="info-item">
+          <i class="fas fa-clock"></i>
+          <span><%= course.duration %></span>
+        </div>
+      <% } %>
+
+      <% if (course.instructors || course.instructor) { %>
+        <div class="info-item">
+          <i class="fas fa-user-tie"></i>
+          <span><%= course.instructors || course.instructor %></span>
+        </div>
+      <% } %>
+
+      <% if (course.courseType === 'Self-Paced' && course.totalVideos) { %>
+        <div class="info-item">
+          <i class="fas fa-video"></i>
+          <span><%= course.completedVideos || 0 %> / <%= course.totalVideos %> videos completed</span>
+        </div>
+      <% } %>
+
+      <% if (course.courseType === 'Online-Live' && course.platform) { %>
+        <div class="info-item">
+          <i class="fas fa-desktop"></i>
+          <span>Platform: <%= course.platform %></span>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- 🔥 UPDATED: Better progress bar styling -->
+    <% if (course.progress !== undefined && course.progress > 0) { %>
+      <div class="progress-container">
+        <div class="progress-label">
+          <span>Progress</span>
+          <span><%= Math.round(course.progress) %>%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: <%= course.progress %>%"></div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- 🔥 NEW: Course Materials Section (if available) -->
+    <% if (course.documents && course.documents.length > 0) { %>
+      <div class="course-materials">
+        <div class="materials-header">
+          <i class="fas fa-paperclip"></i>
+          <span>Materials Available</span>
+        </div>
+        <div class="materials-count">
+          <%= course.documents.length %> document<%= course.documents.length > 1 ? 's' : '' %>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="course-actions">
+      <% 
+        let detailsUrl = '#';
+        let libraryUrl = '#';
         
-        <a href="<%= detailsUrl %>" class="btn btn-secondary" title="View course details">
-          <i class="fas fa-info-circle"></i> Details
-        </a>
-  
-        <% if (course.courseType === 'Self-Paced') { %>
+        if (course.courseType === 'In-Person') {
+          detailsUrl = '/in-person/courses/' + course.courseId;
+          libraryUrl = '/library/in-person';
+        } else if (course.courseType === 'Self-Paced') {
+          detailsUrl = '/self-paced-online-training/courses/' + course.courseId;
+          libraryUrl = '/library/self-paced';
+        } else if (course.courseType === 'Online-Live') {
+          detailsUrl = '/online-live-training/courses/' + course.courseId;
+          libraryUrl = '/library/live';
+        }
+      %>
+      
+      <a href="<%= detailsUrl %>" class="btn btn-secondary" title="View course details">
+        <i class="fas fa-info-circle"></i> Details
+      </a>
+
+      <% if (course.courseType === 'Self-Paced') { %>
+        <% if (course.courseStatus === 'completed') { %>
+          <a href="<%= libraryUrl %>" class="btn btn-success" title="Review course">
+            <i class="fas fa-check-circle"></i> Review
+          </a>
+        <% } else if (course.courseStatus === 'in-progress') { %>
           <a href="<%= libraryUrl %>" class="btn btn-success" title="Continue learning">
             <i class="fas fa-play"></i> Continue
           </a>
-        <% } else if (course.courseType === 'Online-Live') { %>
+        <% } else { %>
+          <a href="<%= libraryUrl %>" class="btn btn-success" title="Start course">
+            <i class="fas fa-play"></i> Start
+          </a>
+        <% } %>
+      <% } else if (course.courseType === 'Online-Live') { %>
+        <% if (course.recordingsAvailable && course.courseStatus === 'completed') { %>
+          <a href="<%= libraryUrl %>" class="btn btn-primary" title="View recordings">
+            <i class="fas fa-video"></i> Recordings
+          </a>
+        <% } else { %>
           <a href="<%= libraryUrl %>" class="btn btn-primary" title="Access course materials">
             <i class="fas fa-video"></i> Library
           </a>
-        <% } else if (course.courseType === 'In-Person') { %>
-          <a href="<%= libraryUrl %>" class="btn btn-primary" title="Access course materials">
-            <i class="fas fa-book"></i> Library
-          </a>
         <% } %>
-  
-        <% if (course.certificateId) { %>
-          <a href="/certificate/<%= course.certificateId %>" class="btn btn-secondary" title="Download certificate">
-            <i class="fas fa-certificate"></i>
-          </a>
-        <% } %>
-      </div>
+      <% } else if (course.courseType === 'In-Person') { %>
+        <a href="<%= libraryUrl %>" class="btn btn-primary" title="Access course materials">
+          <i class="fas fa-book"></i> Library
+        </a>
+      <% } %>
+
+      <% if (course.certificateId) { %>
+        <a href="/certificate/<%= course.certificateId %>" class="btn btn-secondary" title="Download certificate" target="_blank">
+          <i class="fas fa-certificate"></i>
+        </a>
+      <% } %>
     </div>
   </div>
+</div>

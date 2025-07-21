@@ -72,6 +72,123 @@ body {
 }
 
 /* ============================================================
+   🆕 MINIMAL EARLY BIRD PRICING STYLES
+=========================================================== */
+
+/* Early Bird Savings Banner */
+.savings-banner {
+  background: linear-gradient(135deg, #d4f4dd 0%, #c8f2d0 100%);
+  border: 2px solid #2e7d3e;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  text-align: center;
+}
+
+.savings-banner i {
+  color: #2e7d3e;
+  font-size: 24px;
+}
+
+.savings-banner .savings-text {
+  color: #2e7d3e;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0;
+}
+
+.savings-banner .savings-amount {
+  color: #2e7d3e;
+  font-weight: 700;
+  font-size: 24px;
+  margin: 0;
+}
+
+/* Early Bird Badge */
+.early-bird-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #d4f4dd 0%, #c8f2d0 100%);
+  color: #2e7d3e;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+  border: 1px solid #2e7d3e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Enhanced Price Display */
+.price-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.current-price {
+  font-size: 18px;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.original-price {
+  font-size: 14px;
+  color: #999;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.savings-amount-item {
+  display: block;
+  color: #2e7d3e;
+  font-size: 12px;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Total Row Styles */
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.total-row.final-total {
+  border-bottom: none;
+  border-top: 2px solid #002147;
+  margin-top: 15px;
+  padding-top: 20px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.total-label {
+  color: #666;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.total-amount {
+  font-weight: 600;
+  color: #002147;
+  font-size: 16px;
+}
+
+.savings-highlight {
+  color: #2e7d3e !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================
    ✅ MAIN TABLE STYLING
 =========================================================== */
 .order-table,
@@ -126,6 +243,7 @@ body {
   font-size: 15px;
   color: #333;
   font-family: 'Montserrat', sans-serif;
+  vertical-align: top;
 }
 
 /* Checkbox Styling */
@@ -457,6 +575,15 @@ input[type="checkbox"] {
     width: 100%;
     justify-content: center;
   }
+  
+  .savings-banner {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .price-display {
+    align-items: center;
+  }
 }
 
 @media (max-width: 768px) {
@@ -497,6 +624,17 @@ input[type="checkbox"] {
     width: 100%;
     max-width: 250px;
   }
+  
+  .savings-banner {
+    padding: 15px;
+    font-size: 14px;
+  }
+  
+  .early-bird-badge {
+    display: block;
+    margin: 8px 0 0 0;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -522,6 +660,14 @@ input[type="checkbox"] {
     left: 15px;
     max-width: none;
   }
+  
+  .current-price {
+    font-size: 16px;
+  }
+  
+  .original-price {
+    font-size: 13px;
+  }
 }
 
 /* ============================================================
@@ -533,7 +679,8 @@ input[type="checkbox"] {
   .notification,
   input[type="checkbox"],
   .cta-btn,
-  .view-details-btn {
+  .view-details-btn,
+  .savings-banner {
     display: none;
   }
   
@@ -546,5 +693,15 @@ input[type="checkbox"] {
   .cart-summary {
     border: 2px solid #002147;
     margin-top: 20px;
+  }
+  
+  .early-bird-badge,
+  .savings-amount-item {
+    display: none;
+  }
+  
+  .original-price {
+    text-decoration: none;
+    color: #666;
   }
 }

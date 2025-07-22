@@ -108,4 +108,21 @@
         </div>
     </header>
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('.search-bar input');
+        
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                    }
+                }
+            });
+        }
+    });
+    </script>
 </html>

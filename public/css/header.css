@@ -279,10 +279,11 @@ header {
   background: linear-gradient(135deg, #b8860b, #ffd700);
   color: #ffffff;
   border: none;
-  padding: 12px 20px;
+  padding: 8px 15px;
   border-radius: 25px;
   font-weight: 600;
   font-size: 14px;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Montserrat', sans-serif;
@@ -316,3 +317,4 @@ header {
       left: 0;
   }
 }
+

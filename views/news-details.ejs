@@ -710,7 +710,129 @@
             color: #002147;
             margin-bottom: 15px;
         }
-    </style>
+    
+/* ✅ NEW: Services Buttons Section for News Page */
+.services-buttons-section {
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    padding: 60px 0;
+    margin: 60px 0;
+    border-radius: 25px;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.services-buttons-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+}
+
+.services-buttons-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.services-buttons-section h2 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #002147;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.services-buttons-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #ffcc00, #b8860b);
+}
+
+.services-buttons-section p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.services-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.services-btn {
+    background: linear-gradient(135deg, #ffcc00, #e5b300);
+    padding: 15px 30px;
+    font-size: 16px;
+    text-transform: uppercase;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    color: #000;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.services-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(255, 204, 0, 0.5);
+    background: linear-gradient(135deg, #e5b300, #b8860b);
+}
+
+.services-btn.secondary {
+    background: linear-gradient(135deg, #002147, #003366);
+    color: #ffffff;
+    box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+}
+
+.services-btn.secondary:hover {
+    background: linear-gradient(135deg, #003366, #004080);
+    box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
+}
+
+/* ✅ Mobile responsive for buttons */
+@media (max-width: 768px) {
+    .services-buttons {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .services-btn {
+        min-width: 250px;
+        max-width: 300px;
+    }
+
+    .services-buttons-section h2 {
+        font-size: 28px;
+    }
+
+    .services-buttons-section p {
+        font-size: 16px;
+    }
+}
+</style>
+ 
 </head>
 
 <body>
@@ -980,6 +1102,23 @@
         </div>
     </section>
 
+    <section class="services-buttons-section fade-in">
+        <div class="services-buttons-container">
+            <h2>Explore Our Training Options</h2>
+            <p>Ready to advance your career in aesthetic medicine? Discover our comprehensive range of courses and training programs designed for medical professionals.</p>
+            
+            <div class="services-buttons">
+                <a href="/all-courses" class="services-btn secondary">
+                    <i class="fas fa-book-open"></i>
+                    All Courses
+                </a>
+                <a href="/training-programs" class="services-btn">
+                    <i class="fas fa-graduation-cap"></i>
+                    Our Training Programs
+                </a>
+            </div>
+        </div>
+    </section>
     <!-- Newsletter Section -->
     <section class="newsletter-section">
         <div class="newsletter-container">

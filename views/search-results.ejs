@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - IAAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .search-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .search-header {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-header h1 {
+            color: #002147;
+            margin-bottom: 10px;
+        }
+        
+        .search-info {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .search-result {
+            background: #ffffff;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .search-result:hover {
+            transform: translateY(-5px);
+        }
+        
+        .search-result h3 {
+            color: #002147;
+            margin-bottom: 10px;
+        }
+        
+        .search-result h3 a {
+            color: #002147;
+            text-decoration: none;
+        }
+        
+        .search-result h3 a:hover {
+            color: #ffcc00;
+        }
+        
+        .search-result p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .result-type {
+            background: #ffcc00;
+            color: #002147;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .no-results i {
+            font-size: 64px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+        
+        .suggestions {
+            margin-top: 40px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .suggestions h3 {
+            color: #002147;
+            margin-bottom: 20px;
+        }
+        
+        .suggestion-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .suggestion-links a {
+            background: #002147;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        
+        .suggestion-links a:hover {
+            background: #ffcc00;
+            color: #002147;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <div class="search-container">
+        <div class="search-header">
+            <h1>Search Results</h1>
+            <div class="search-info">
+                <% if (query) { %>
+                    Showing <%= resultCount %> result<%= resultCount !== 1 ? 's' : '' %> for "<strong><%= query %></strong>"
+                <% } else { %>
+                    Please enter a search term
+                <% } %>
+            </div>
+        </div>
+        
+        <% if (results && results.length > 0) { %>
+            <% results.forEach(result => { %>
+                <div class="search-result">
+                    <h3><a href="<%= result.url %>"><%= result.title %></a></h3>
+                    <p><%= result.description %></p>
+                    <span class="result-type"><%= result.type %></span>
+                </div>
+            <% }); %>
+        <% } else if (query) { %>
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <h3>No results found</h3>
+                <p>We couldn't find anything matching "<%= query %>"</p>
+                <p>Try different keywords or browse our suggestions below.</p>
+            </div>
+        <% } %>
+        
+        <div class="suggestions">
+            <h3>Popular Pages</h3>
+            <div class="suggestion-links">
+                <a href="/all-courses">All Courses</a>
+                <a href="/training-programs">Training Programs</a>
+                <a href="/in-person-aesthetic-training">In-Person Training</a>
+                <a href="/online-live-training">Online Live Training</a>
+                <a href="/our-instructors">Our Instructors</a>
+                <a href="/contact-us">Contact Us</a>
+            </div>
+        </div>
+    </div>
+    
+    <%- include('partials/footer') %>
+</body>
+</html>

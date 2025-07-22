@@ -521,6 +521,72 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
+//new
+// ============================================
+// SEARCH FUNCTIONALITY
+// ============================================
+app.get("/search", async (req, res) => {
+  const query = req.query.q || "";
+  const user = req.user || null;
+
+  try {
+    // Simple search implementation
+    let searchResults = [];
+
+    if (query.trim()) {
+      // You can expand this to search your actual course databases
+      // For now, this searches static content
+      searchResults = [
+        {
+          title: "In-Person Aesthetic Training",
+          description: "Hands-on training with expert instructors",
+          url: "/in-person-aesthetic-training",
+          type: "Training Program",
+        },
+        {
+          title: "Online Live Training",
+          description: "Interactive live sessions with real-time feedback",
+          url: "/online-live-training",
+          type: "Training Program",
+        },
+        {
+          title: "All Courses",
+          description: "Browse our complete course catalog",
+          url: "/all-courses",
+          type: "Course Catalog",
+        },
+        {
+          title: "Our Instructors",
+          description: "Meet our expert training team",
+          url: "/our-instructors",
+          type: "Instructors",
+        },
+      ].filter(
+        (item) =>
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.description.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    res.render("search-results", {
+      user: user,
+      query: query,
+      results: searchResults,
+      resultCount: searchResults.length,
+      title: `Search Results for "${query}"`,
+    });
+  } catch (error) {
+    console.error("Search error:", error);
+    res.render("search-results", {
+      user: user,
+      query: query,
+      results: [],
+      resultCount: 0,
+      title: "Search Results",
+      error: "An error occurred while searching",
+    });
+  }
+});
 // ============================================
 // 16. SERVER STARTUP
 // ============================================

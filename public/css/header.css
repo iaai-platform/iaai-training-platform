@@ -202,11 +202,11 @@ header {
   border: none;
   cursor: pointer;
   color: #333;
-  font-size: 16px; /* ✅ REDUCED from 22px to 16px */
-  padding: 8px; /* ✅ REDUCED padding from 10px to 8px */
+  font-size: 14px;        /* ✅ SMALLER: 16px → 14px */
+  padding: 6px;           /* ✅ SMALLER: 8px → 6px */
   display: flex;
   align-items: center;
-  gap: 6px; /* ✅ REDUCED gap from 8px to 6px */
+  gap: 4px;               /* ✅ SMALLER: 6px → 4px */
   transition: color 0.3s ease-in-out;
 }
 
@@ -214,7 +214,7 @@ header {
 .profile-picture {
   width: 32px; /* ✅ KEPT original 32px size */
   height: 32px; /* ✅ KEPT original 32px size */
-  border-radius: 50%;
+  border-radius: 80%;
   object-fit: cover;
   border: 2px solid #b8860b;
 }

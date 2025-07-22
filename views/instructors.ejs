@@ -310,14 +310,15 @@
         }
 
         .instructor-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
+    width: 100%;
+    height: 100%;
+    object-fit: contain;            /* ✅ SHOWS ENTIRE IMAGE */
+    object-position: center;
+    background-color: #f8f9fa;      /* ✅ Light background for empty space */
+    transition: transform 0.3s ease;
+}
         .instructor-card:hover .instructor-image img {
-            transform: scale(1.05);
+            transform: scale(0.95);
         }
 
         .instructor-status {
@@ -497,10 +498,13 @@
         }
 
         .list-instructor-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;        /* ✅ ADDED: Center the image */
+    transform: scale(0.9);          /* ✅ ADDED: Zoom out to 90% */
+    transition: transform 0.3s ease;
+}
 
         .list-instructor-content {
             flex: 1;

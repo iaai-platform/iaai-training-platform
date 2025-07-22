@@ -91,8 +91,11 @@
             height: 300px;
             border-radius: 25px;
             object-fit: cover;
+            object-position: center;        /* ✅ ADDED: Center the image */
+            transform: scale(0.9);          /* ✅ ADDED: Zoom out to 90% */
             border: 6px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
         }
 
         .status-badge {

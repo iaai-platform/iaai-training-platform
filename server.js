@@ -201,6 +201,92 @@ app.get("/training-programs", (req, res) => {
 });
 
 // ============================================
+// SEARCH FUNCTIONALITY
+// ============================================
+app.get("/search", async (req, res) => {
+  const query = req.query.q || "";
+  const user = req.user || null;
+
+  try {
+    console.log(`🔍 Search query: "${query}"`);
+
+    // Simple search implementation
+    let searchResults = [];
+
+    if (query.trim()) {
+      // Search through static content (you can expand this later)
+      const allContent = [
+        {
+          title: "In-Person Aesthetic Training",
+          description: "Hands-on training with expert instructors",
+          url: "/in-person-aesthetic-training",
+          type: "Training Program",
+        },
+        {
+          title: "Online Live Training",
+          description: "Interactive live sessions with real-time feedback",
+          url: "/online-live-training",
+          type: "Training Program",
+        },
+        {
+          title: "All Courses",
+          description: "Browse our complete course catalog",
+          url: "/all-courses",
+          type: "Course Catalog",
+        },
+        {
+          title: "Our Instructors",
+          description: "Meet our expert training team",
+          url: "/our-instructors",
+          type: "Instructors",
+        },
+        {
+          title: "Training Programs",
+          description: "Explore our comprehensive training programs",
+          url: "/training-programs",
+          type: "Programs",
+        },
+        {
+          title: "Contact Us",
+          description: "Get in touch with our team",
+          url: "/contact-us",
+          type: "Contact",
+        },
+      ];
+
+      // Filter results based on search query
+      searchResults = allContent.filter(
+        (item) =>
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.description.toLowerCase().includes(query.toLowerCase())
+      );
+
+      console.log(`✅ Found ${searchResults.length} results for "${query}"`);
+    }
+
+    res.render("search-results", {
+      user: user,
+      query: query,
+      results: searchResults,
+      resultCount: searchResults.length,
+      title: `Search Results for "${query}"`,
+    });
+  } catch (error) {
+    console.error("❌ Search error:", error);
+    res.render("search-results", {
+      user: user,
+      query: query,
+      results: [],
+      resultCount: 0,
+      title: "Search Results",
+      error: "An error occurred while searching",
+    });
+  }
+});
+
+console.log("🔍 Search route loaded");
+
+// ============================================
 // ADD THESE ROUTES TO YOUR SERVER.JS FILE
 // Insert after line 94 (after training-programs route)
 // ============================================
@@ -521,72 +607,6 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
-//new
-// ============================================
-// SEARCH FUNCTIONALITY
-// ============================================
-app.get("/search", async (req, res) => {
-  const query = req.query.q || "";
-  const user = req.user || null;
-
-  try {
-    // Simple search implementation
-    let searchResults = [];
-
-    if (query.trim()) {
-      // You can expand this to search your actual course databases
-      // For now, this searches static content
-      searchResults = [
-        {
-          title: "In-Person Aesthetic Training",
-          description: "Hands-on training with expert instructors",
-          url: "/in-person-aesthetic-training",
-          type: "Training Program",
-        },
-        {
-          title: "Online Live Training",
-          description: "Interactive live sessions with real-time feedback",
-          url: "/online-live-training",
-          type: "Training Program",
-        },
-        {
-          title: "All Courses",
-          description: "Browse our complete course catalog",
-          url: "/all-courses",
-          type: "Course Catalog",
-        },
-        {
-          title: "Our Instructors",
-          description: "Meet our expert training team",
-          url: "/our-instructors",
-          type: "Instructors",
-        },
-      ].filter(
-        (item) =>
-          item.title.toLowerCase().includes(query.toLowerCase()) ||
-          item.description.toLowerCase().includes(query.toLowerCase())
-      );
-    }
-
-    res.render("search-results", {
-      user: user,
-      query: query,
-      results: searchResults,
-      resultCount: searchResults.length,
-      title: `Search Results for "${query}"`,
-    });
-  } catch (error) {
-    console.error("Search error:", error);
-    res.render("search-results", {
-      user: user,
-      query: query,
-      results: [],
-      resultCount: 0,
-      title: "Search Results",
-      error: "An error occurred while searching",
-    });
-  }
-});
 // ============================================
 // 16. SERVER STARTUP
 // ============================================

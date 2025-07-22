@@ -1,6 +1,6 @@
 //controllers/newsDetailsController.js - Complete controller for news details with upcoming courses
 const HomepageUpdate = require("../models/homepageUpdate");
-const InPersonAestheticTraining = require("../models/inPersonAestheticTraining");
+const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 
 /* ======================================================

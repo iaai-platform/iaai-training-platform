@@ -2562,7 +2562,7 @@ class InPersonCoursesController {
 
     const media = {
       // Preserve existing main image or set to null
-      mainImage: existing?.mainImage ? existing.mainImage : null,
+      mainImage: existing?.mainImage || null,
       documents: [...(existing?.documents || [])],
       images: [...(existing?.images || [])],
       videos: [...(existing?.videos || [])],

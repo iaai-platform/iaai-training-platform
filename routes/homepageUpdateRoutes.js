@@ -1,4 +1,4 @@
-//routes/homepageUpdateRoutes.js - Using your existing uploadMiddleware
+//routes/homepageUpdateRoutes.js - Updated with Auto-Populate Route
 const express = require("express");
 const router = express.Router();
 const homepageUpdateController = require("../controllers/homepageUpdateController");
@@ -7,9 +7,9 @@ const isAdmin = require("../middlewares/isAdmin");
 const {
   uploadImages,
   handleMulterError,
-} = require("../middlewares/uploadMiddleware"); // Your existing middleware
+} = require("../middlewares/uploadMiddleware");
 
-console.log("🌐 Loading homepage routes with existing middleware...");
+console.log("🌐 Loading homepage routes with auto-populate feature...");
 
 // ✅ PUBLIC ROUTES
 router.get("/", homepageUpdateController.getHomepageContent);
@@ -34,16 +34,25 @@ router.get(
   homepageUpdateController.getHomepageById
 );
 
-// ✅ Using YOUR existing uploadImages middleware
+// ✅ NEW: Auto-Populate Route
+router.post(
+  "/auto-populate-homepage",
+  isAuthenticated,
+  isAdmin,
+  homepageUpdateController.autoPopulateHomepage
+);
+
+// ✅ Update/Create Homepage Content
 router.post(
   "/update-homepage",
   isAuthenticated,
   isAdmin,
-  uploadImages, // Your existing middleware handles the exact fields we need!
-  handleMulterError, // Your existing error handling
+  uploadImages,
+  handleMulterError,
   homepageUpdateController.updateHomepageContent
 );
 
+// ✅ Delete Homepage Content
 router.delete(
   "/delete-homepage/:id",
   isAuthenticated,
@@ -51,6 +60,6 @@ router.delete(
   homepageUpdateController.deleteHomepageContent
 );
 
-console.log("✅ Homepage routes loaded with existing middleware");
+console.log("✅ Homepage routes loaded with auto-populate feature");
 
 module.exports = router;

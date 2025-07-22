@@ -4,197 +4,755 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>International Aesthetic Academic Institution (IAAI)</title>
-  <link rel="stylesheet" href="/css/admin.css "> <!-- Link to the main CSS -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+  <title>Admin - Homepage Management - IAAI</title>
+  <link rel="stylesheet" href="/css/admin.css"> <!-- Link to the main CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- FontAwesome for icons -->
+  <style>
+    /* Enhanced Admin Styles */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .file-input-container {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input {
+      position: relative;
+      width: 100%;
+      padding: 12px;
+      border: 2px dashed #e1e5e9;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-input:hover {
+      border-color: #007bff;
+      background-color: #e3f2fd;
+    }
+
+    .file-preview {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .file-preview img {
+      max-width: 200px;
+      max-height: 150px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0056b3, #004085);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #c82333, #bd2130);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+      color: #212529;
+    }
+
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #e0a800, #d39e00);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    /* ✅ NEW: Auto-Populate Button Styles */
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #1e7e34);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #1e7e34, #155724);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .auto-populate-section {
+      background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+      border: 2px solid #28a745;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .auto-populate-section h3 {
+      color: #155724;
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+
+    .auto-populate-section p {
+      color: #155724;
+      margin-bottom: 20px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    table th,
+    table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #e1e5e9;
+    }
+
+    table th {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      font-weight: 600;
+      color: #495057;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 14px;
+    }
+
+    table tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-buttons button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #007bff;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .success-message,
+    .error-message {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-weight: 600;
+      display: none;
+    }
+
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .success-message.show,
+    .error-message.show {
+      display: block;
+    }
+
+    /* ✅ NEW: Auto-populate status info */
+    .populate-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .populate-info.show {
+      display: block;
+    }
+
+    .populate-info h4 {
+      margin: 0 0 10px 0;
+      color: #1976d2;
+    }
+
+    .populate-info ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #1976d2;
+    }
+  </style>
 </head>
 
-<%- include('partials/header') %>
-
-
-
 <body>
+  <%- include('partials/header') %>
 
-    <!-- ✅ Page Header -->
-    <header>
-      <h1>Admin Dashboard - User Management - Home page</h1>
-      <a href="/dashboard" class="cta-btn">Admin Home</a>
+  <!-- ✅ Page Header -->
+  <header style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 30px 20px; text-align: center; margin-bottom: 30px;">
+    <h1 style="margin: 0; font-size: 28px; font-weight: 700;">
+      <i class="fas fa-cog"></i> Admin Dashboard - Homepage Management
+    </h1>
+    <p style="margin: 10px 0 0 0; opacity: 0.9;">Manage homepage content, news, and latest updates</p>
+    <a href="/dashboard" class="btn btn-light" style="margin-top: 15px; background: white; color: #007bff; text-decoration: none; display: inline-block;">
+      <i class="fas fa-home"></i> Admin Home
+    </a>
   </header>
 
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <!-- Success/Error Messages -->
+    <div id="successMessage" class="success-message">
+      <i class="fas fa-check-circle"></i> <span id="successText"></span>
+    </div>
+    <div id="errorMessage" class="error-message">
+      <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
+    </div>
 
+    <!-- ✅ NEW: Auto-Populate Section -->
+    <section class="auto-populate-section">
+      <h3><i class="fas fa-magic"></i> Auto-Populate Homepage</h3>
+      <p>Automatically generate homepage content from your latest course data. This will find your most recently completed course for the news section and your three newest courses for the latest updates section.</p>
+      
+      <button id="autoPopulateBtn" class="btn btn-success" style="padding: 15px 40px; font-size: 18px; margin: 10px;">
+        <i class="fas fa-robot"></i> Auto-Generate Content
+      </button>
+      
+      <div id="autoPopulateLoading" class="loading">
+        <i class="fas fa-spinner fa-spin"></i> Analyzing courses and generating content...
+      </div>
 
+      <!-- ✅ NEW: Auto-populate results info -->
+      <div id="populateInfo" class="populate-info">
+        <h4><i class="fas fa-info-circle"></i> Content Sources:</h4>
+        <ul id="populateInfoList">
+        </ul>
+      </div>
+    </section>
 
-  <!-- ✅ Form to Update Homepage Content -->
-  <section>
-    <h2>Update Homepage Content</h2>
-    <form id="homepageForm" enctype="multipart/form-data">
-      <input type="hidden" id="contentId" name="id"> <!-- ✅ Hidden Field to Store ID -->
-  
-      <label>Latest News Title:</label>
-      <input type="text" id="latestNewsTitle" name="latestNewsTitle" required>
-  
-      <label>Latest News Description:</label>
-      <textarea id="latestNewsDes" name="latestNewsDes" required></textarea>
-  
-      <label>Latest News Details:</label>
-      <textarea id="latestNewsDetails" name="latestNewsDetails" required></textarea>
-  
-      <label>Upload News Image:</label>
-      <input type="file" id="latestNewsImage" name="latestNewsImage">
-  
-      <label>Latest 1 Title:</label>
-      <input type="text" id="latest1Title" name="latest1Title">
-  
-      <label>Latest 1 Detail:</label>
-      <textarea id="latest1Detail" name="latest1Detail"></textarea>
-  
-      <label>Upload Latest 1 Image:</label>
-      <input type="file" id="latest1Image" name="latest1Image">
-  
-      <label>Latest 2 Title:</label>
-      <input type="text" id="latest2Title" name="latest2Title">
-  
-      <label>Latest 2 Detail:</label>
-      <textarea id="latest2Detail" name="latest2Detail"></textarea>
-  
-      <label>Upload Latest 2 Image:</label>
-      <input type="file" id="latest2Image" name="latest2Image">
-  
-      <label>Latest 3 Title:</label>
-      <input type="text" id="latest3Title" name="latest3Title">
-  
-      <label>Latest 3 Detail:</label>
-      <textarea id="latest3Detail" name="latest3Detail"></textarea>
-  
-      <label>Upload Latest 3 Image:</label>
-      <input type="file" id="latest3Image" name="latest3Image">
-  
-      <button type="submit">Save</button>
-  </form>
-  </section>
+    <!-- ✅ Form to Update Homepage Content -->
+    <section style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 30px;">
+      <h2 style="margin-bottom: 30px; color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px;">
+        <i class="fas fa-edit"></i> Update Homepage Content
+      </h2>
+      
+      <form id="homepageForm" enctype="multipart/form-data">
+        <input type="hidden" id="contentId" name="id"> <!-- ✅ Hidden Field to Store ID -->
 
-  <!-- ✅ Real-Time Table -->
-  <section>
-    <h2>Homepage Records</h2>
-    <table id="homepageTable">
-      <thead>
-        <tr>
-          <th>Latest News</th>
-          <th>Latest 1</th>
-          <th>Latest 2</th>
-          <th>Latest 3</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% homepageRecords.forEach(record => { %>
-          <tr>
-            <td><%= record.latestNewsTitle %></td>
-            <td><%= record.latest1Title || '-' %></td>
-            <td><%= record.latest2Title || '-' %></td>
-            <td><%= record.latest3Title || '-' %></td>
-            <td>
-              <button onclick="editContent('<%= record._id %>')">✏️ Edit</button>
-              <button onclick="deleteContent('<%= record._id %>')">🗑️ Delete</button>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </section>
+        <!-- Latest News Section -->
+        <div style="border: 2px solid #e1e5e9; border-radius: 12px; padding: 25px; margin-bottom: 30px; background: #f8f9fa;">
+          <h3 style="color: #007bff; margin-bottom: 20px; display: flex; align-items: center;">
+            <i class="fas fa-newspaper"></i>&nbsp;&nbsp;Latest News Section
+          </h3>
+          
+          <div class="form-group">
+            <label for="latestNewsTitle"><i class="fas fa-heading"></i> News Title *</label>
+            <input type="text" id="latestNewsTitle" name="latestNewsTitle" required placeholder="Enter news title">
+          </div>
 
-  <!-- ✅ JavaScript to Handle Admin Actions -->
+          <div class="form-group">
+            <label for="latestNewsDes"><i class="fas fa-align-left"></i> News Description *</label>
+            <textarea id="latestNewsDes" name="latestNewsDes" required placeholder="Enter news description"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="latestNewsDetails"><i class="fas fa-file-alt"></i> News Details *</label>
+            <textarea id="latestNewsDetails" name="latestNewsDetails" required placeholder="Enter detailed news content" style="min-height: 120px;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="latestNewsImage"><i class="fas fa-image"></i> News Image</label>
+            <div class="file-input-container">
+              <input type="file" id="latestNewsImage" name="latestNewsImage" accept="image/*" class="file-input">
+              <div id="latestNewsImagePreview" class="file-preview"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest Updates Section -->
+        <div style="border: 2px solid #e1e5e9; border-radius: 12px; padding: 25px; margin-bottom: 30px; background: #f8f9fa;">
+          <h3 style="color: #28a745; margin-bottom: 20px; display: flex; align-items: center;">
+            <i class="fas fa-star"></i>&nbsp;&nbsp;Latest Updates Section
+          </h3>
+
+          <!-- Latest 1 -->
+          <div style="border-left: 4px solid #28a745; padding-left: 20px; margin-bottom: 25px;">
+            <h4 style="color: #28a745; margin-bottom: 15px;">Latest Update 1</h4>
+            <div class="form-group">
+              <label for="latest1Title">Title</label>
+              <input type="text" id="latest1Title" name="latest1Title" placeholder="Enter latest 1 title">
+            </div>
+            <div class="form-group">
+              <label for="latest1Detail">Details</label>
+              <textarea id="latest1Detail" name="latest1Detail" placeholder="Enter latest 1 details"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="latest1Image">Image</label>
+              <div class="file-input-container">
+                <input type="file" id="latest1Image" name="latest1Image" accept="image/*" class="file-input">
+                <div id="latest1ImagePreview" class="file-preview"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Latest 2 -->
+          <div style="border-left: 4px solid #ffc107; padding-left: 20px; margin-bottom: 25px;">
+            <h4 style="color: #ffc107; margin-bottom: 15px;">Latest Update 2</h4>
+            <div class="form-group">
+              <label for="latest2Title">Title</label>
+              <input type="text" id="latest2Title" name="latest2Title" placeholder="Enter latest 2 title">
+            </div>
+            <div class="form-group">
+              <label for="latest2Detail">Details</label>
+              <textarea id="latest2Detail" name="latest2Detail" placeholder="Enter latest 2 details"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="latest2Image">Image</label>
+              <div class="file-input-container">
+                <input type="file" id="latest2Image" name="latest2Image" accept="image/*" class="file-input">
+                <div id="latest2ImagePreview" class="file-preview"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Latest 3 -->
+          <div style="border-left: 4px solid #dc3545; padding-left: 20px; margin-bottom: 25px;">
+            <h4 style="color: #dc3545; margin-bottom: 15px;">Latest Update 3</h4>
+            <div class="form-group">
+              <label for="latest3Title">Title</label>
+              <input type="text" id="latest3Title" name="latest3Title" placeholder="Enter latest 3 title">
+            </div>
+            <div class="form-group">
+              <label for="latest3Detail">Details</label>
+              <textarea id="latest3Detail" name="latest3Detail" placeholder="Enter latest 3 details"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="latest3Image">Image</label>
+              <div class="file-input-container">
+                <input type="file" id="latest3Image" name="latest3Image" accept="image/*" class="file-input">
+                <div id="latest3ImagePreview" class="file-preview"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div style="text-align: center; margin-top: 30px;">
+          <button type="submit" class="btn btn-primary" style="padding: 15px 40px; font-size: 18px;">
+            <i class="fas fa-save"></i> Save Homepage Content
+          </button>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+          <i class="fas fa-spinner fa-spin"></i> Saving changes...
+        </div>
+      </form>
+    </section>
+
+    <!-- ✅ Homepage Records Table -->
+    <section style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+      <h2 style="margin-bottom: 30px; color: #333; border-bottom: 3px solid #28a745; padding-bottom: 10px;">
+        <i class="fas fa-table"></i> Homepage Records
+      </h2>
+      
+      <div class="table-container">
+        <table id="homepageTable">
+          <thead>
+            <tr>
+              <th><i class="fas fa-newspaper"></i> Latest News</th>
+              <th><i class="fas fa-star"></i> Latest 1</th>
+              <th><i class="fas fa-star"></i> Latest 2</th>
+              <th><i class="fas fa-star"></i> Latest 3</th>
+              <th><i class="fas fa-calendar"></i> Created</th>
+              <th><i class="fas fa-cogs"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if(homepageRecords && homepageRecords.length > 0) { %>
+              <% homepageRecords.forEach(record => { %>
+                <tr>
+                  <td>
+                    <strong><%= record.latestNewsTitle %></strong>
+                    <% if(record.latestNewsImage) { %>
+                      <br><small style="color: #28a745;"><i class="fas fa-image"></i> Image attached</small>
+                    <% } %>
+                  </td>
+                  <td><%= record.latest1Title || '-' %></td>
+                  <td><%= record.latest2Title || '-' %></td>
+                  <td><%= record.latest3Title || '-' %></td>
+                  <td><%= new Date(record.createdAt).toLocaleDateString() %></td>
+                  <td>
+                    <div class="action-buttons">
+                      <button onclick="editContent('<%= record._id %>')" class="btn btn-warning" title="Edit">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button onclick="deleteContent('<%= record._id %>')" class="btn btn-danger" title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" style="text-align: center; color: #666; padding: 40px;">
+                  <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; display: block; margin-bottom: 10px;"></i>
+                  No homepage records found. Create your first one above or use the auto-populate feature.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ✅ Enhanced JavaScript with Auto-Populate Feature -->
   <script>
-    document.getElementById("homepageForm").addEventListener("submit", async function(event) {
-      event.preventDefault();
+    // Show message helper
+    function showMessage(type, text) {
+      const successMsg = document.getElementById('successMessage');
+      const errorMsg = document.getElementById('errorMessage');
       
-      const formData = new FormData();
-      formData.append('id', document.getElementById("contentId").value);
-      formData.append('latestNewsTitle', document.getElementById("latestNewsTitle").value);
-      formData.append('latestNewsDes', document.getElementById("latestNewsDes").value);
-      formData.append('latestNewsDetails', document.getElementById("latestNewsDetails").value);
+      // Hide both messages first
+      successMsg.classList.remove('show');
+      errorMsg.classList.remove('show');
       
-      if (document.getElementById("latestNewsImage").files[0]) {
-        formData.append('latestNewsImage', document.getElementById("latestNewsImage").files[0]);
-      }
-
-      if (document.getElementById("latest1Title").value) {
-        formData.append('latest1Title', document.getElementById("latest1Title").value);
-        formData.append('latest1Detail', document.getElementById("latest1Detail").value);
-        if (document.getElementById("latest1Image").files[0]) {
-          formData.append('latest1Image', document.getElementById("latest1Image").files[0]);
-        }
-      }
-
-      if (document.getElementById("latest2Title").value) {
-        formData.append('latest2Title', document.getElementById("latest2Title").value);
-        formData.append('latest2Detail', document.getElementById("latest2Detail").value);
-        if (document.getElementById("latest2Image").files[0]) {
-          formData.append('latest2Image', document.getElementById("latest2Image").files[0]);
-        }
-      }
-
-      if (document.getElementById("latest3Title").value) {
-        formData.append('latest3Title', document.getElementById("latest3Title").value);
-        formData.append('latest3Detail', document.getElementById("latest3Detail").value);
-        if (document.getElementById("latest3Image").files[0]) {
-          formData.append('latest3Image', document.getElementById("latest3Image").files[0]);
-        }
-      }
-
-      const response = await fetch("/update-homepage", {
-        method: "POST",
-        body: formData
-      });
-
-      if (response.ok) {
-        alert("✅ Homepage updated successfully!");
-        window.location.reload();
+      if (type === 'success') {
+        document.getElementById('successText').textContent = text;
+        successMsg.classList.add('show');
+        setTimeout(() => successMsg.classList.remove('show'), 7000);
       } else {
-        alert("❌ Error updating homepage.");
-      }
-    });
-
-    async function deleteContent(id) {
-      if (confirm("Are you sure you want to delete?")) {
-        await fetch(`/delete-homepage/${id}`, { method: "DELETE" });
-        window.location.reload();
+        document.getElementById('errorText').textContent = text;
+        errorMsg.classList.add('show');
+        setTimeout(() => errorMsg.classList.remove('show'), 7000);
       }
     }
 
-    // ✅ Function to Edit Homepage Content
-// ✅ Function to Fetch Homepage Content & Auto-Fill Form
-async function editContent(id) {
-        try {
-            const response = await fetch(`/get-homepage-content/${id}`);
-            const data = await response.json();
-
-            if (response.ok) {
-                // ✅ Populate the form fields
-                document.getElementById("contentId").value = data._id || "";
-                document.getElementById("latestNewsTitle").value = data.latestNewsTitle || "";
-                document.getElementById("latestNewsDes").value = data.latestNewsDes || "";
-                document.getElementById("latestNewsDetails").value = data.latestNewsDetails || "";
-
-                document.getElementById("latest1Title").value = data.latest1Title || "";
-                document.getElementById("latest1Detail").value = data.latest1Detail || "";
-
-                document.getElementById("latest2Title").value = data.latest2Title || "";
-                document.getElementById("latest2Detail").value = data.latest2Detail || "";
-
-                document.getElementById("latest3Title").value = data.latest3Title || "";
-                document.getElementById("latest3Detail").value = data.latest3Detail || "";
-
-                alert("✅ Edit the fields and click 'Save' to update.");
-            } else {
-                alert("❌ Error fetching content for editing.");
-            }
-        } catch (error) {
-            console.error("❌ Error:", error);
+    // ✅ NEW: Auto-Populate Functionality
+    document.getElementById('autoPopulateBtn').addEventListener('click', async function() {
+      const button = this;
+      const loading = document.getElementById('autoPopulateLoading');
+      const populateInfo = document.getElementById('populateInfo');
+      const populateInfoList = document.getElementById('populateInfoList');
+      
+      // Show loading state
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+      loading.classList.add('show');
+      populateInfo.classList.remove('show');
+      
+      try {
+        const response = await fetch('/auto-populate-homepage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          showMessage('success', result.message);
+          
+          // Show populate info
+          populateInfoList.innerHTML = `
+            <li><strong>News:</strong> ${result.data.newsSource}</li>
+            <li><strong>Latest 1:</strong> ${result.data.latest1Source}</li>
+            <li><strong>Latest 2:</strong> ${result.data.latest2Source}</li>
+            <li><strong>Latest 3:</strong> ${result.data.latest3Source}</li>
+            <li><strong>Total courses analyzed:</strong> ${result.data.totalCoursesFound}</li>
+          `;
+          populateInfo.classList.add('show');
+          
+          // Reload the page to show new data
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+          
+        } else {
+          showMessage('error', result.message || 'Failed to auto-populate content.');
         }
+        
+      } catch (error) {
+        console.error('Auto-populate error:', error);
+        showMessage('error', 'Network error occurred. Please try again.');
+      } finally {
+        // Reset button state
+        loading.classList.remove('show');
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-robot"></i> Auto-Generate Content';
+      }
+    });
+
+    // File preview functionality
+    function setupFilePreview(inputId, previewId) {
+      document.getElementById(inputId).addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById(previewId);
+        
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            preview.innerHTML = `
+              <img src="${e.target.result}" alt="Preview" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+              <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">${file.name}</p>
+            `;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.innerHTML = '';
+        }
+      });
+    }
+
+    // Setup file previews for all file inputs
+    setupFilePreview('latestNewsImage', 'latestNewsImagePreview');
+    setupFilePreview('latest1Image', 'latest1ImagePreview');
+    setupFilePreview('latest2Image', 'latest2ImagePreview');
+    setupFilePreview('latest3Image', 'latest3ImagePreview');
+
+    // Form submission
+    document.getElementById("homepageForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      
+      const loading = document.getElementById('loading');
+      const submitButton = event.target.querySelector('button[type="submit"]');
+      
+      // Show loading state
+      loading.classList.add('show');
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      
+      try {
+        const formData = new FormData();
+        
+        // Add all form fields
+        formData.append('id', document.getElementById("contentId").value);
+        formData.append('latestNewsTitle', document.getElementById("latestNewsTitle").value);
+        formData.append('latestNewsDes', document.getElementById("latestNewsDes").value);
+        formData.append('latestNewsDetails', document.getElementById("latestNewsDetails").value);
+        
+        // Add file uploads
+        const fileInputs = ['latestNewsImage', 'latest1Image', 'latest2Image', 'latest3Image'];
+        fileInputs.forEach(inputId => {
+          const fileInput = document.getElementById(inputId);
+          if (fileInput.files[0]) {
+            formData.append(inputId, fileInput.files[0]);
+          }
+        });
+
+        // Add text fields for latest sections
+        const textFields = [
+          'latest1Title', 'latest1Detail',
+          'latest2Title', 'latest2Detail', 
+          'latest3Title', 'latest3Detail'
+        ];
+        
+        textFields.forEach(fieldId => {
+          const value = document.getElementById(fieldId).value;
+          if (value.trim()) {
+            formData.append(fieldId, value);
+          }
+        });
+
+        const response = await fetch("/update-homepage", {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          showMessage('success', result.message || 'Homepage updated successfully!');
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          showMessage('error', result.message || 'Error updating homepage.');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('error', 'Network error occurred. Please try again.');
+      } finally {
+        // Hide loading state
+        loading.classList.remove('show');
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-save"></i> Save Homepage Content';
+      }
+    });
+
+    // Delete content function
+    async function deleteContent(id) {
+      if (confirm("⚠️ Are you sure you want to delete this content? This will also delete all associated images. This action cannot be undone.")) {
+        try {
+          const response = await fetch(`/delete-homepage/${id}`, { 
+            method: "DELETE" 
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok && result.success) {
+            showMessage('success', result.message || 'Content deleted successfully!');
+            setTimeout(() => window.location.reload(), 2000);
+          } else {
+            showMessage('error', result.message || 'Error deleting content.');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showMessage('error', 'Network error occurred. Please try again.');
+        }
+      }
+    }
+
+    // Edit content function
+    async function editContent(id) {
+      try {
+        const response = await fetch(`/get-homepage-content/${id}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          // Populate the form fields
+          document.getElementById("contentId").value = data._id || "";
+          document.getElementById("latestNewsTitle").value = data.latestNewsTitle || "";
+          document.getElementById("latestNewsDes").value = data.latestNewsDes || "";
+          document.getElementById("latestNewsDetails").value = data.latestNewsDetails || "";
+
+          document.getElementById("latest1Title").value = data.latest1Title || "";
+          document.getElementById("latest1Detail").value = data.latest1Detail || "";
+
+          document.getElementById("latest2Title").value = data.latest2Title || "";
+          document.getElementById("latest2Detail").value = data.latest2Detail || "";
+
+          document.getElementById("latest3Title").value = data.latest3Title || "";
+          document.getElementById("latest3Detail").value = data.latest3Detail || "";
+
+          // Show existing images if available
+          if (data.latestNewsImage) {
+            document.getElementById('latestNewsImagePreview').innerHTML = `
+              <img src="${data.latestNewsImage}" alt="Current News Image" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+              <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">Current Image</p>
+            `;
+          }
+
+          if (data.latest1Image) {
+            document.getElementById('latest1ImagePreview').innerHTML = `
+              <img src="${data.latest1Image}" alt="Current Latest 1 Image" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+              <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">Current Image</p>
+            `;
+          }
+
+          if (data.latest2Image) {
+            document.getElementById('latest2ImagePreview').innerHTML = `
+              <img src="${data.latest2Image}" alt="Current Latest 2 Image" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+              <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">Current Image</p>
+            `;
+          }
+
+          if (data.latest3Image) {
+            document.getElementById('latest3ImagePreview').innerHTML = `
+              <img src="${data.latest3Image}" alt="Current Latest 3 Image" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+              <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">Current Image</p>
+            `;
+          }
+
+          showMessage('success', 'Content loaded for editing. Make your changes and click Save.');
+          
+          // Scroll to form
+          document.getElementById('homepageForm').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+
+        } else {
+          showMessage('error', 'Error fetching content for editing.');
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        showMessage('error', 'Network error occurred. Please try again.');
+      }
     }
   </script>
 </body>

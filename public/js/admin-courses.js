@@ -1437,6 +1437,7 @@ class AdminCoursesManager {
 
   //new
   // 3. Add method to save individual file
+  // 3. Add method to save individual file - FIXED VERSION
   async saveIndividualFile(uploadType, fileName) {
     console.log(`💾 Saving ${uploadType} file: ${fileName}`);
 
@@ -1444,21 +1445,42 @@ class AdminCoursesManager {
     const fileIndex = this.allSelectedFiles[uploadType]?.findIndex(
       (f) => f.name === fileName
     );
-    if (fileIndex === -1 || !this.uploadedFiles[uploadType]) {
-      this.showToast("error", "Error", "File not found in uploaded files");
+
+    // FIXED: Get the URL from uploadedFiles, not allSelectedFiles
+    if (
+      !this.uploadedFiles[uploadType] ||
+      this.uploadedFiles[uploadType].length === 0
+    ) {
+      this.showToast("error", "Error", "No uploaded files found");
       return;
     }
 
-    const fileUrl = this.uploadedFiles[uploadType][fileIndex];
+    const fileUrl = this.uploadedFiles[uploadType][0]; // For mainImage, take the first (and only) file
     if (!fileUrl) {
       this.showToast("error", "Error", "File URL not found");
       return;
     }
 
+    console.log(`📁 Moving file URL to savedUploadedFiles: ${fileUrl}`);
+
+    // FIXED: Initialize savedUploadedFiles if not exists
+    if (!this.savedUploadedFiles) {
+      this.savedUploadedFiles = {
+        mainImage: null,
+        documents: [],
+        images: [],
+        videos: [],
+      };
+    }
+
     // Save to savedUploadedFiles
     if (uploadType === "mainImage") {
       this.savedUploadedFiles.mainImage = fileUrl;
+      console.log(`✅ Main image saved to savedUploadedFiles: ${fileUrl}`);
     } else {
+      if (!Array.isArray(this.savedUploadedFiles[uploadType])) {
+        this.savedUploadedFiles[uploadType] = [];
+      }
       if (!this.savedUploadedFiles[uploadType].includes(fileUrl)) {
         this.savedUploadedFiles[uploadType].push(fileUrl);
       }
@@ -1495,6 +1517,7 @@ class AdminCoursesManager {
     });
 
     console.log("✅ File saved:", fileName);
+    console.log("🔍 Current savedUploadedFiles:", this.savedUploadedFiles);
     this.showToast("success", "Success", "File saved successfully");
   }
 

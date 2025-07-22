@@ -443,7 +443,7 @@
             background: #001a3a;
         }
 
-        /* Course Updates Section */
+        /* ✅ UPDATED: Course Updates Section - Only This Section Modified */
         .course-updates {
             background: linear-gradient(135deg, #002147, #003366);
             padding: 80px 0;
@@ -463,6 +463,7 @@
             margin-top: 50px;
         }
 
+        /* ✅ NEW: Enhanced update-card for real course data */
         .update-card {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
@@ -470,10 +471,19 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: transform 0.3s ease;
+            position: relative;
         }
 
         .update-card:hover {
             transform: translateY(-10px);
+        }
+
+        .update-card.in-person {
+            border-left: 4px solid #28a745;
+        }
+
+        .update-card.online-live {
+            border-left: 4px solid #007bff;
         }
 
         .update-icon {
@@ -482,11 +492,43 @@
             margin-bottom: 20px;
         }
 
+        .update-card.in-person .update-icon {
+            color: #28a745;
+        }
+
+        .update-card.online-live .update-icon {
+            color: #007bff;
+        }
+
+        .course-type-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .course-type-badge.in-person {
+            background: #28a745;
+            color: white;
+        }
+
+        .course-type-badge.online-live {
+            background: #007bff;
+            color: white;
+        }
+
         .update-card h4 {
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 15px;
             color: #ffffff;
+            line-height: 1.3;
+            padding-right: 80px; /* Space for badge */
         }
 
         .update-card p {
@@ -496,10 +538,84 @@
             margin-bottom: 20px;
         }
 
+        .course-details {
+            margin-bottom: 20px;
+        }
+
+        .course-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #d0d0d0;
+        }
+
+        .course-detail i {
+            width: 16px;
+            margin-right: 8px;
+            color: #ffcc00;
+        }
+
         .update-date {
             font-size: 12px;
             color: #ffcc00;
             font-weight: 600;
+            background: rgba(255, 204, 0, 0.1);
+            padding: 8px 12px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .urgency-indicator {
+            position: absolute;
+            top: 45px;
+            right: 15px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .urgency-urgent {
+            background: #dc3545;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .urgency-soon {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .urgency-normal {
+            background: rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .empty-courses {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            grid-column: 1 / -1;
+        }
+
+        .empty-courses i {
+            font-size: 64px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .empty-courses h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #ffffff;
         }
 
         /* Responsive Design */
@@ -549,6 +665,14 @@
 
             .section-title h2 {
                 font-size: 32px;
+            }
+
+            .update-card {
+                padding: 20px;
+            }
+
+            .update-card h4 {
+                padding-right: 60px;
             }
         }
 
@@ -756,38 +880,102 @@
         </section>
     </main>
 
-    <!-- Course Updates Section -->
+    <!-- ✅ UPDATED: Course Updates Section with Real Database Data -->
     <section class="course-updates">
         <div class="updates-container">
             <div class="section-title">
                 <h2 style="color: #ffffff;">Upcoming Course Schedules</h2>
-                <p style="color: #e0e0e0;">Stay updated with our latest course offerings and training schedules</p>
+                <p style="color: #e0e0e0;">
+                    <% if (upcomingCourses && upcomingCourses.length > 0) { %>
+                        Register now for our upcoming training programs starting soon
+                    <% } else { %>
+                        Stay updated with our latest course offerings and training schedules
+                    <% } %>
+                </p>
             </div>
             <div class="updates-grid">
-                <div class="update-card fade-in">
-                    <div class="update-icon"><i class="fas fa-syringe"></i></div>
-                    <h4>Full Face Harmonization</h4>
-                    <p>Comprehensive training with Dr. Giovanni Angiolini covering temple fillers, eye treatment, cheek enhancement, and more.</p>
-                    <div class="update-date">July 29-30, 2025 | Istanbul, Turkey</div>
-                </div>
-                <div class="update-card fade-in">
-                    <div class="update-icon"><i class="fas fa-female"></i></div>
-                    <h4>Cosmetic Gynecology Course</h4>
-                    <p>Surgical and non-surgical cosmetic gynecology procedures with hands-on hospital training.</p>
-                    <div class="update-date">December 20-22, 2025 | Istanbul, Turkey</div>
-                </div>
-                <div class="update-card fade-in">
-                    <div class="update-icon"><i class="fas fa-cut"></i></div>
-                    <h4>Hair Transplant Course</h4>
-                    <p>4-day comprehensive program covering FUE techniques, patient care, and post-operative management.</p>
-                    <div class="update-date">Contact for Dates | Istanbul, Turkey</div>
-                </div>
-                <div class="update-card fade-in">
-                    <div class="update-icon"><i class="fas fa-head-side-mask"></i></div>
-                    <h4>Rhinoplasty & Cadaver Dissection</h4>
-                    <p>Advanced rhinoplasty techniques with cadaver dissection training in European medical center.</p>
-                    <div class="update-date">December 12-13, 2025 | Verona, Italy</div>
-                </div>
+                <% if (upcomingCourses && upcomingCourses.length > 0) { %>
+                    <% upcomingCourses.forEach(course => { %>
+                        <div class="update-card fade-in <%= course.courseType === 'InPersonAestheticTraining' ? 'in-person' : 'online-live' %>">
+                            <!-- Course Type Badge -->
+                            <div class="course-type-badge <%= course.courseType === 'InPersonAestheticTraining' ? 'in-person' : 'online-live' %>">
+                                <%= course.courseType === 'InPersonAestheticTraining' ? 'In-Person' : 'Online Live' %>
+                            </div>
+
+                            <!-- Urgency Indicator -->
+                            <% if (course.daysUntilStart <= 14) { %>
+                                <div class="urgency-indicator urgency-<%= course.urgencyClass %>">
+                                    <% if (course.urgencyClass === 'urgent') { %>
+                                        Soon!
+                                    <% } else { %>
+                                        <%= course.daysUntilStart %>d
+                                    <% } %>
+                                </div>
+                            <% } %>
+
+                            <!-- Course Icon -->
+                            <div class="update-icon">
+                                <% if (course.courseType === 'InPersonAestheticTraining') { %>
+                                    <i class="fas fa-user-md"></i>
+                                <% } else { %>
+                                    <i class="fas fa-video"></i>
+                                <% } %>
+                            </div>
+
+                            <!-- Course Title -->
+                            <h4><%= course.title %></h4>
+
+                            <!-- Course Details -->
+                            <div class="course-details">
+                                <div class="course-detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span><%= course.location %></span>
+                                </div>
+                                <div class="course-detail">
+                                    <i class="fas fa-user-tie"></i>
+                                    <span><%= course.instructorName %></span>
+                                </div>
+                                <div class="course-detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span><%= course.duration %></span>
+                                </div>
+                                <% if (course.platform) { %>
+                                    <div class="course-detail">
+                                        <i class="fas fa-laptop"></i>
+                                        <span><%= course.platform %></span>
+                                    </div>
+                                <% } %>
+                                <% if (course.availableSeats > 0) { %>
+                                    <div class="course-detail">
+                                        <i class="fas fa-users"></i>
+                                        <span><%= course.availableSeats %> seats available</span>
+                                    </div>
+                                <% } else { %>
+                                    <div class="course-detail">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span>Course full - Waitlist available</span>
+                                    </div>
+                                <% } %>
+                            </div>
+
+                            <!-- Course Description -->
+                            <p><%= course.description.substring(0, 120) %>...</p>
+
+                            <!-- Course Date -->
+                            <div class="update-date">
+                                <%= course.formattedStartDate %> | 
+                                <%= course.formattedStartTime %> - <%= course.formattedEndTime %>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <!-- Empty State -->
+                    <div class="empty-courses">
+                        <i class="fas fa-calendar-plus"></i>
+                        <h3>No Upcoming Courses</h3>
+                        <p>New course schedules will be announced soon. Check back regularly for updates or subscribe to our newsletter for the latest announcements.</p>
+                    </div>
+                <% } %>
             </div>
         </div>
     </section>

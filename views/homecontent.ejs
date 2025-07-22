@@ -97,7 +97,7 @@
     }
 
     /* ============================================================
-       ✅ 3. Enhanced Services Section
+       ✅ 3. Enhanced Services Section with TWO BUTTONS
     ============================================================ */
     #services {
       max-width: 1200px;
@@ -153,6 +153,53 @@
       color: #555;
       line-height: 1.8;
       margin-bottom: 30px;
+    }
+
+    /* ✅ NEW: Button Container for Two Links */
+    .services-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .services-btn {
+      background: linear-gradient(135deg, #ffcc00, #e5b300);
+      padding: 15px 30px;
+      font-size: 16px;
+      text-transform: uppercase;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      color: #000;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      justify-content: center;
+      min-width: 180px;
+    }
+
+    .services-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(255, 204, 0, 0.5);
+      background: linear-gradient(135deg, #e5b300, #b8860b);
+    }
+
+    /* ✅ NEW: Secondary button styling for "All Courses" */
+    .services-btn.secondary {
+      background: linear-gradient(135deg, #002147, #003366);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+    }
+
+    .services-btn.secondary:hover {
+      background: linear-gradient(135deg, #003366, #004080);
+      box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
     }
 
     .services-image {
@@ -571,6 +618,15 @@
         margin: 40px auto;
       }
 
+      .services-buttons {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .services-btn {
+        min-width: 100%;
+      }
+
       .section-content {
         flex-direction: column;
         gap: 30px;
@@ -612,12 +668,23 @@
     </div>
   </section>
 
-  <!-- Enhanced Services Section -->
+  <!-- Enhanced Services Section with TWO BUTTONS -->
   <section id="services" class="fade-in">
     <div class="services-content">
       <h2>Our Services</h2>
       <p>Welcome to our exclusive training platform, where professional development meets cutting-edge aesthetic education. Access a wide range of courses designed for doctors, from in-person workshops to online live sessions, all tailored to elevate your expertise and career.</p>
-      <a href="/training-programs" class="cta-btn">Our Training Programs</a>
+      
+      <!-- ✅ NEW: Two Button Container -->
+      <div class="services-buttons">
+        <a href="/all-courses" class="services-btn secondary">
+          <i class="fas fa-book-open"></i>
+          All Courses
+        </a>
+        <a href="/training-programs" class="services-btn">
+          <i class="fas fa-graduation-cap"></i>
+          Our Training Programs
+        </a>
+      </div>
     </div>
     <div class="services-image">
       <img src="/images/image5.jpeg" alt="Aesthetic Training">
@@ -663,7 +730,7 @@
         <a href="/NewsDetails" class="cta-btn">Read More</a>
       </div>
       <div class="news-right">
-        <img src="/images/image8.jpeg" alt="Latest News Image">
+        <img src="<%= homepageContent.latestNewsImage || '/images/image8.jpeg' %>" alt="Latest News Image">
       </div>
     </div>
   </section> 
@@ -674,7 +741,7 @@
     <div class="latest-grid">
       <div class="latest-card">
         <div class="latest-card-image">
-          <img src="/images/image10.jpeg" alt="Latest 1">
+          <img src="<%= homepageContent.latest1Image || '/images/image10.jpeg' %>" alt="Latest 1">
         </div>
         <div class="latest-card-content">
           <h3><%= homepageContent.latest1Title || 'Latest 1' %></h3>
@@ -684,7 +751,7 @@
       </div>
       <div class="latest-card">
         <div class="latest-card-image">
-          <img src="/images/image11.jpeg" alt="Latest 2">
+          <img src="<%= homepageContent.latest2Image || '/images/image11.jpeg' %>" alt="Latest 2">
         </div>
         <div class="latest-card-content">
           <h3><%= homepageContent.latest2Title || 'Latest 2' %></h3>
@@ -694,7 +761,7 @@
       </div>
       <div class="latest-card">
         <div class="latest-card-image">
-          <img src="/images/image12.jpeg" alt="Latest 3">
+          <img src="<%= homepageContent.latest3Image || '/images/image12.jpeg' %>" alt="Latest 3">
         </div>
         <div class="latest-card-content">
           <h3><%= homepageContent.latest3Title || 'Latest 3' %></h3>
@@ -786,6 +853,17 @@
       // Add your newsletter subscription logic here
       alert('Thank you for subscribing to our newsletter!');
       this.reset();
+    });
+
+    // ✅ NEW: Button hover effects
+    document.querySelectorAll('.services-btn').forEach(btn => {
+      btn.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px) scale(1.02)';
+      });
+      
+      btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+      });
     });
   </script>
 

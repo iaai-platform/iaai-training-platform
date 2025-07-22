@@ -1,24 +1,56 @@
-//homepageUpdateRoutes.js
-const express = require('express');
+//routes/homepageUpdateRoutes.js - Using your existing uploadMiddleware
+const express = require("express");
 const router = express.Router();
-const homepageUpdateController = require('../controllers/homepageUpdateController');
-const isAuthenticated = require('../middlewares/isAuthenticated');
-const isAdmin = require('../middlewares/isAdmin');
-const { uploadImages } = require('../middlewares/uploadMiddleware'); // Import image upload middleware
+const homepageUpdateController = require("../controllers/homepageUpdateController");
+const isAuthenticated = require("../middlewares/isAuthenticated");
+const isAdmin = require("../middlewares/isAdmin");
+const {
+  uploadImages,
+  handleMulterError,
+} = require("../middlewares/uploadMiddleware"); // Your existing middleware
 
-// Fetch Homepage Content for User View
-router.get('/', homepageUpdateController.getHomepageContent);
+console.log("🌐 Loading homepage routes with existing middleware...");
 
-// Admin Panel to Manage Homepage Content
-router.get('/admin-homepage', isAuthenticated, isAdmin, homepageUpdateController.getHomepageRecords);
+// ✅ PUBLIC ROUTES
+router.get("/", homepageUpdateController.getHomepageContent);
+router.get("/all-courses", homepageUpdateController.getAllCoursesPage);
+router.get(
+  "/training-programs",
+  homepageUpdateController.getTrainingProgramsPage
+);
 
-// Fetch Specific Homepage Content for Editing
-router.get('/get-homepage-content/:id', isAuthenticated, isAdmin, homepageUpdateController.getHomepageById);
+// ✅ ADMIN ROUTES
+router.get(
+  "/admin-homepage",
+  isAuthenticated,
+  isAdmin,
+  homepageUpdateController.getHomepageRecords
+);
 
-// Update / Add Homepage Content with Images
-router.post('/update-homepage', isAuthenticated, isAdmin, uploadImages, homepageUpdateController.updateHomepageContent);
+router.get(
+  "/get-homepage-content/:id",
+  isAuthenticated,
+  isAdmin,
+  homepageUpdateController.getHomepageById
+);
 
-// Delete Homepage Content
-router.delete('/delete-homepage/:id', isAuthenticated, isAdmin, homepageUpdateController.deleteHomepageContent);
+// ✅ Using YOUR existing uploadImages middleware
+router.post(
+  "/update-homepage",
+  isAuthenticated,
+  isAdmin,
+  uploadImages, // Your existing middleware handles the exact fields we need!
+  handleMulterError, // Your existing error handling
+  homepageUpdateController.updateHomepageContent
+);
+
+router.delete(
+  "/delete-homepage/:id",
+  isAuthenticated,
+  isAdmin,
+  homepageUpdateController.deleteHomepageContent
+);
+
+console.log("✅ Homepage routes loaded with existing middleware");
 
 module.exports = router;

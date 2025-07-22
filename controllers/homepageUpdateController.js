@@ -1,10 +1,17 @@
-//controllers/homepageUpdateController.js - Fixed with Cloudinary Integration
+//controllers/homepageUpdateController.js - Simplified with Cloudinary
 const HomepageUpdate = require("../models/homepageUpdate");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
-const fs = require("fs");
-const path = require("path");
+
+// ✅ Cloudinary setup
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "dgzj5k8b6",
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 /* ======================================================
    ✅ 1. Fetch Homepage Content for User View
@@ -21,19 +28,19 @@ exports.getHomepageContent = async (req, res) => {
           latestNewsTitle: "Latest News",
           latestNewsDes: "No news available.",
           latestNewsDetails: "Details will be added soon.",
-          latestNewsImage: "/uploads/placeholder.jpg",
+          latestNewsImage: "/images/image8.jpeg",
 
           latest1Title: "Latest 1",
           latest1Detail: "Details for latest 1 are not available.",
-          latest1Image: "/uploads/placeholder.jpg",
+          latest1Image: "/images/image10.jpeg",
 
           latest2Title: "Latest 2",
           latest2Detail: "Details for latest 2 are not available.",
-          latest2Image: "/uploads/placeholder.jpg",
+          latest2Image: "/images/image11.jpeg",
 
           latest3Title: "Latest 3",
           latest3Detail: "Details for latest 3 are not available.",
-          latest3Image: "/uploads/placeholder.jpg",
+          latest3Image: "/images/image12.jpeg",
         },
       });
     }
@@ -84,390 +91,161 @@ exports.getHomepageById = async (req, res) => {
 };
 
 /* ======================================================
-   ✅ 4. AUTO-POPULATE FUNCTION - FIXED WITH CLOUDINARY
+   ✅ 4. SIMPLIFIED AUTO-POPULATE FUNCTION
 ====================================================== */
 exports.autoPopulateHomepage = async (req, res) => {
   try {
     console.log("🚀 Auto-populate homepage initiated...");
 
-    // ✅ FIXED: Helper function with Cloudinary preference
-    const getMainImageUrl = (course) => {
+    // ✅ SIMPLIFIED: Helper function to get course image
+    const getMainImageUrl = async (course, folder) => {
       let imageUrl = null;
 
-      // Priority order: mainImage -> images array -> documents -> fallback
+      // Get image from course
       if (course.media?.mainImage?.url) {
         imageUrl = course.media.mainImage.url;
       } else if (course.media?.images && course.media.images.length > 0) {
         imageUrl = course.media.images[0];
-      } else if (course.media?.documents && course.media.documents.length > 0) {
-        const imageDoc = course.media.documents.find(
-          (doc) =>
-            doc.toLowerCase().includes(".jpg") ||
-            doc.toLowerCase().includes(".jpeg") ||
-            doc.toLowerCase().includes(".png") ||
-            doc.toLowerCase().includes(".webp")
-        );
-        if (imageDoc) imageUrl = imageDoc;
       }
 
-      // ✅ FIXED: Handle different URL formats with Cloudinary preference
-      if (imageUrl) {
-        // If it's already a Cloudinary URL, use as is (BEST)
-        if (
-          imageUrl.includes("cloudinary.com") ||
-          imageUrl.includes("res.cloudinary.com")
-        ) {
-          console.log("📸 Using Cloudinary URL:", imageUrl);
-          return imageUrl;
-        }
-        // If it's another external URL, use as is
-        else if (imageUrl.startsWith("http")) {
-          console.log("📸 Using external URL:", imageUrl);
-          return imageUrl;
-        }
-        // If it's a local path, we'll use a fallback instead
-        else {
-          console.warn(
-            "⚠️ Found local path, using fallback instead:",
-            imageUrl
-          );
-          // Don't use local paths as they may not exist or be accessible
-          return "https://res.cloudinary.com/dgzj5k8b6/image/upload/v1753205271/iaai-platform/defaults/iaai-default-course.webp";
+      // If already Cloudinary URL, return as is
+      if (imageUrl && imageUrl.includes("cloudinary.com")) {
+        return {
+          url: imageUrl,
+          publicId: null,
+        };
+      }
+
+      // If external URL, upload to Cloudinary
+      if (imageUrl && imageUrl.startsWith("http")) {
+        try {
+          const result = await cloudinary.uploader.upload(imageUrl, {
+            folder: `iaai-platform/homepage/${folder}`,
+            use_filename: true,
+            unique_filename: true,
+          });
+          return {
+            url: result.secure_url,
+            publicId: result.public_id,
+          };
+        } catch (error) {
+          console.error("❌ Error uploading to Cloudinary:", error);
         }
       }
 
-      // ✅ Use a reliable Cloudinary fallback
-      console.log("📸 Using default Cloudinary image");
-      return "https://res.cloudinary.com/dgzj5k8b6/image/upload/v1753205271/iaai-platform/defaults/iaai-default-course.webp";
-    };
-
-    // Helper function to get course type display name
-    const getCourseTypeName = (courseType) => {
-      switch (courseType) {
-        case "InPersonAestheticTraining":
-          return "In-Person Training";
-        case "OnlineLiveTraining":
-          return "Online Live Training";
-        case "SelfPacedOnlineTraining":
-          return "Self-Paced Online Training";
-        default:
-          return "Training Course";
-      }
-    };
-
-    // Helper function to create course description
-    const createCourseDescription = (course, courseType) => {
-      let description =
-        course.basic?.description || "Course description not available.";
-
-      // Limit description to 150 characters
-      if (description.length > 150) {
-        description = description.substring(0, 150) + "...";
-      }
-
-      const typeName = getCourseTypeName(courseType);
-      const location =
-        courseType === "InPersonAestheticTraining" && course.venue?.city
-          ? ` in ${course.venue.city}`
-          : "";
-
-      return `${typeName}${location}: ${description}`;
+      // Default fallback
+      return {
+        url: "/images/image8.jpeg",
+        publicId: null,
+      };
     };
 
     // ===============================================
-    // STEP 1: Find the latest completed course for NEWS
+    // Find latest completed course for NEWS
     // ===============================================
     console.log("🔍 Searching for latest completed course...");
 
-    const completedCourses = [];
+    let latestCompleted = null;
 
     try {
-      // Search In-Person courses
-      const inPersonCompleted = await InPersonAestheticTraining.find({
+      const inPersonCompleted = await InPersonAestheticTraining.findOne({
         "basic.status": "completed",
         "schedule.endDate": { $exists: true },
-      })
-        .sort({ "schedule.endDate": -1 })
-        .limit(5);
+      }).sort({ "schedule.endDate": -1 });
 
-      inPersonCompleted.forEach((course) => {
-        completedCourses.push({
-          course,
-          type: "InPersonAestheticTraining",
-          completedDate: course.schedule.endDate || course.updatedAt,
-          title: course.basic?.title || "Untitled Course",
-          location: course.venue?.city || "Location TBD",
-        });
-      });
-
-      console.log(
-        `Found ${inPersonCompleted.length} completed in-person courses`
-      );
+      if (inPersonCompleted) {
+        latestCompleted = {
+          course: inPersonCompleted,
+          title: inPersonCompleted.basic?.title || "Training Course",
+          location: inPersonCompleted.venue?.city || "Location TBD",
+          type: "In-Person Training",
+          completedDate: inPersonCompleted.schedule.endDate,
+        };
+      }
     } catch (error) {
-      console.warn("⚠️ Error fetching in-person courses:", error.message);
+      console.warn("⚠️ Error fetching completed courses:", error.message);
     }
-
-    try {
-      // Search Online Live courses
-      const onlineLiveCompleted = await OnlineLiveTraining.find({
-        "basic.status": "completed",
-        "schedule.endDate": { $exists: true },
-      })
-        .sort({ "schedule.endDate": -1 })
-        .limit(5);
-
-      onlineLiveCompleted.forEach((course) => {
-        completedCourses.push({
-          course,
-          type: "OnlineLiveTraining",
-          completedDate: course.schedule.endDate || course.updatedAt,
-          title: course.basic?.title || "Untitled Course",
-          location: "Online",
-        });
-      });
-
-      console.log(
-        `Found ${onlineLiveCompleted.length} completed online live courses`
-      );
-    } catch (error) {
-      console.warn("⚠️ Error fetching online live courses:", error.message);
-    }
-
-    try {
-      // Self-paced courses - use recently published
-      const selfPacedRecent = await SelfPacedOnlineTraining.find({
-        "basic.status": "published",
-        "metadata.publishedDate": { $exists: true },
-      })
-        .sort({ "metadata.publishedDate": -1 })
-        .limit(3);
-
-      selfPacedRecent.forEach((course) => {
-        completedCourses.push({
-          course,
-          type: "SelfPacedOnlineTraining",
-          completedDate: course.metadata.publishedDate || course.updatedAt,
-          title: course.basic?.title || "Untitled Course",
-          location: "Self-Paced Online",
-        });
-      });
-
-      console.log(
-        `Found ${selfPacedRecent.length} published self-paced courses`
-      );
-    } catch (error) {
-      console.warn("⚠️ Error fetching self-paced courses:", error.message);
-    }
-
-    // Sort all completed courses by completion date
-    completedCourses.sort(
-      (a, b) => new Date(b.completedDate) - new Date(a.completedDate)
-    );
-
-    console.log(`📊 Found ${completedCourses.length} completed courses total`);
 
     // ===============================================
-    // STEP 2: Find three most recently created courses for LATEST sections
+    // Find 3 recent courses for LATEST section
     // ===============================================
-    console.log("🔍 Searching for recently created courses...");
+    console.log("🔍 Searching for recent courses...");
 
     const recentCourses = [];
 
     try {
-      const recentInPerson = await InPersonAestheticTraining.find()
+      const recent = await InPersonAestheticTraining.find()
         .sort({ createdAt: -1 })
-        .limit(5);
+        .limit(3);
 
-      recentInPerson.forEach((course) => {
+      recent.forEach((course) => {
         recentCourses.push({
           course,
-          type: "InPersonAestheticTraining",
-          createdDate: course.createdAt,
           title: course.basic?.title || "New Course",
-          status: course.basic?.status || "draft",
+          description:
+            course.basic?.description || "Course description not available.",
         });
       });
     } catch (error) {
-      console.warn(
-        "⚠️ Error fetching recent in-person courses:",
-        error.message
-      );
+      console.warn("⚠️ Error fetching recent courses:", error.message);
     }
-
-    try {
-      const recentOnlineLive = await OnlineLiveTraining.find()
-        .sort({ createdAt: -1 })
-        .limit(5);
-
-      recentOnlineLive.forEach((course) => {
-        recentCourses.push({
-          course,
-          type: "OnlineLiveTraining",
-          createdDate: course.createdAt,
-          title: course.basic?.title || "New Course",
-          status: course.basic?.status || "draft",
-        });
-      });
-    } catch (error) {
-      console.warn(
-        "⚠️ Error fetching recent online live courses:",
-        error.message
-      );
-    }
-
-    try {
-      const recentSelfPaced = await SelfPacedOnlineTraining.find()
-        .sort({ createdAt: -1 })
-        .limit(5);
-
-      recentSelfPaced.forEach((course) => {
-        recentCourses.push({
-          course,
-          type: "SelfPacedOnlineTraining",
-          createdDate: course.createdAt,
-          title: course.basic?.title || "New Course",
-          status: course.basic?.status || "draft",
-        });
-      });
-    } catch (error) {
-      console.warn(
-        "⚠️ Error fetching recent self-paced courses:",
-        error.message
-      );
-    }
-
-    // Sort by creation date and get top 3
-    recentCourses.sort(
-      (a, b) => new Date(b.createdDate) - new Date(a.createdDate)
-    );
-    const topThreeRecent = recentCourses.slice(0, 3);
-
-    console.log(
-      `📊 Found ${recentCourses.length} recent courses total, using top 3`
-    );
 
     // ===============================================
-    // STEP 3: Prepare data for homepage
+    // Prepare homepage data
     // ===============================================
-
     const homepageData = {};
 
-    // LATEST NEWS (from completed course)
-    if (completedCourses.length > 0) {
-      const latestCompleted = completedCourses[0];
-      const course = latestCompleted.course;
-
+    // LATEST NEWS
+    if (latestCompleted) {
       homepageData.latestNewsTitle = `${latestCompleted.title} Successfully Completed!`;
-      homepageData.latestNewsDes = `Our recent ${getCourseTypeName(
-        latestCompleted.type
-      )} in ${
-        latestCompleted.location
-      } has been successfully completed with excellent participant feedback.`;
-
-      // Create detailed news content
-      let newsDetails = `We are pleased to announce the successful completion of "${latestCompleted.title}" `;
-      newsDetails += `which concluded on ${new Date(
+      homepageData.latestNewsDes = `Our recent ${latestCompleted.type} in ${latestCompleted.location} has been successfully completed with excellent participant feedback.`;
+      homepageData.latestNewsDetails = `We are pleased to announce the successful completion of "${
+        latestCompleted.title
+      }" which concluded on ${new Date(
         latestCompleted.completedDate
-      ).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })}. `;
+      ).toLocaleDateString()}. This intensive training provided participants with practical experience and comprehensive education. All participants who met the requirements received their certification. Thank you to all attendees and instructors!`;
 
-      if (latestCompleted.type === "InPersonAestheticTraining") {
-        newsDetails += `This intensive hands-on training took place in ${
-          course.venue?.city || "our training facility"
-        } `;
-        newsDetails += `and covered ${
-          course.practical?.procedures?.length || "multiple"
-        } key procedures. `;
-        newsDetails += `Participants gained practical experience with ${
-          course.practical?.trainingType?.join(", ") || "advanced techniques"
-        }.`;
-      } else if (latestCompleted.type === "OnlineLiveTraining") {
-        newsDetails += `This comprehensive online training was delivered via ${
-          course.platform?.name || "our online platform"
-        } `;
-        newsDetails += `and included ${
-          course.content?.modules?.length || "multiple"
-        } learning modules. `;
-        newsDetails += `The interactive format allowed participants from around the world to engage with expert instructors.`;
-      } else {
-        newsDetails += `This self-paced online course provided flexible learning opportunities `;
-        newsDetails += `with ${
-          course.videos?.length || "multiple"
-        } video lessons. `;
-        newsDetails += `Participants could learn at their own pace while receiving comprehensive training materials.`;
-      }
-
-      newsDetails += ` All participants who met the requirements received their certification. `;
-      newsDetails += `Thank you to all attendees and instructors who made this training a success!`;
-
-      homepageData.latestNewsDetails = newsDetails;
-      homepageData.latestNewsImage = getMainImageUrl(course);
-
-      console.log("✅ Latest news populated from:", latestCompleted.title);
-      console.log("📸 Latest news image URL:", homepageData.latestNewsImage);
+      // ✅ Upload news image to iaai-platform/homepage/news
+      const newsImage = await getMainImageUrl(latestCompleted.course, "news");
+      homepageData.latestNewsImage = newsImage.url;
+      homepageData.latestNewsImagePublicId = newsImage.publicId;
     } else {
-      // Fallback if no completed courses found
       homepageData.latestNewsTitle = "IAAI Training Programs Update";
       homepageData.latestNewsDes =
         "Stay updated with our latest training programs and educational opportunities.";
       homepageData.latestNewsDetails =
-        "We continue to develop and deliver world-class aesthetic training programs. Our comprehensive curriculum covers the latest techniques and technologies in aesthetic medicine, ensuring our participants receive the highest quality education. Check back regularly for updates on new courses and training opportunities.";
-      homepageData.latestNewsImage =
-        "https://res.cloudinary.com/dgzj5k8b6/image/upload/v1753205271/iaai-platform/defaults/iaai-default-course.webp"; // ✅ Use Cloudinary default
-
-      console.log(
-        "ℹ️ Using fallback news content - no completed courses found"
-      );
+        "We continue to develop and deliver world-class aesthetic training programs.";
+      homepageData.latestNewsImage = "/images/image8.jpeg";
     }
 
-    // LATEST 1, 2, 3 (from recently created courses)
+    // LATEST 1, 2, 3
     for (let i = 0; i < 3; i++) {
       const fieldNum = i + 1;
 
-      if (topThreeRecent[i]) {
-        const recentCourse = topThreeRecent[i];
-        const course = recentCourse.course;
+      if (recentCourses[i]) {
+        const course = recentCourses[i];
+        homepageData[`latest${fieldNum}Title`] = `New: ${course.title}`;
+        homepageData[`latest${fieldNum}Detail`] =
+          course.description.length > 150
+            ? course.description.substring(0, 150) + "..."
+            : course.description;
 
-        homepageData[`latest${fieldNum}Title`] = `New: ${recentCourse.title}`;
-        homepageData[`latest${fieldNum}Detail`] = createCourseDescription(
-          course,
-          recentCourse.type
-        );
-        homepageData[`latest${fieldNum}Image`] = getMainImageUrl(course);
-
-        console.log(
-          `✅ Latest ${fieldNum} populated from:`,
-          recentCourse.title
-        );
-        console.log(
-          `📸 Latest ${fieldNum} image URL:`,
-          homepageData[`latest${fieldNum}Image`]
-        );
+        // ✅ Upload latest image to iaai-platform/homepage/latest
+        const latestImage = await getMainImageUrl(course.course, "latest");
+        homepageData[`latest${fieldNum}Image`] = latestImage.url;
+        homepageData[`latest${fieldNum}ImagePublicId`] = latestImage.publicId;
       } else {
-        // Fallback for missing courses
         homepageData[`latest${fieldNum}Title`] = `Latest Update ${fieldNum}`;
-        homepageData[
-          `latest${fieldNum}Detail`
-        ] = `Stay tuned for more updates on our training programs and educational opportunities.`;
-        homepageData[`latest${fieldNum}Image`] =
-          "https://res.cloudinary.com/dgzj5k8b6/image/upload/v1753205271/iaai-platform/defaults/iaai-default-course.webp"; // ✅ Use Cloudinary default
-
-        console.log(`ℹ️ Using fallback content for Latest ${fieldNum}`);
+        homepageData[`latest${fieldNum}Detail`] =
+          "Stay tuned for more updates on our training programs.";
+        homepageData[`latest${fieldNum}Image`] = `/images/image${
+          10 + fieldNum
+        }.jpeg`;
       }
     }
 
-    // ===============================================
-    // STEP 4: Save or update homepage content
-    // ===============================================
-
-    // Delete previous auto-generated content (if any exists)
+    // Save to database
     await HomepageUpdate.deleteMany({});
-    console.log("🗑️ Cleared previous homepage content");
-
-    // Create new homepage content
     const newHomepageContent = new HomepageUpdate(homepageData);
     await newHomepageContent.save();
 
@@ -477,15 +255,8 @@ exports.autoPopulateHomepage = async (req, res) => {
       success: true,
       message: "Homepage content auto-populated successfully!",
       data: {
-        newsSource:
-          completedCourses.length > 0
-            ? completedCourses[0].title
-            : "Default content",
-        latest1Source: topThreeRecent[0]?.title || "Default content",
-        latest2Source: topThreeRecent[1]?.title || "Default content",
-        latest3Source: topThreeRecent[2]?.title || "Default content",
-        totalCoursesFound: completedCourses.length + recentCourses.length,
-        // ✅ Include image URLs in response for debugging
+        newsSource: latestCompleted ? latestCompleted.title : "Default content",
+        totalCoursesFound: recentCourses.length,
         imageUrls: {
           latestNews: homepageData.latestNewsImage,
           latest1: homepageData.latest1Image,
@@ -505,7 +276,7 @@ exports.autoPopulateHomepage = async (req, res) => {
 };
 
 /* ======================================================
-   ✅ 5. Update/Create Homepage Content (Existing)
+   ✅ 5. SIMPLIFIED UPDATE/CREATE HOMEPAGE CONTENT
 ====================================================== */
 exports.updateHomepageContent = async (req, res) => {
   try {
@@ -513,13 +284,12 @@ exports.updateHomepageContent = async (req, res) => {
     const files = req.files;
 
     console.log("📝 Homepage update request received");
-    console.log("📁 Files:", files ? Object.keys(files) : "No files");
+    console.log("📁 Files uploaded:", files ? Object.keys(files) : "None");
 
     // Find existing content if updating
     let existingContent = null;
     if (data.id && data.id !== "") {
       existingContent = await HomepageUpdate.findById(data.id);
-      console.log("🔍 Existing content found:", existingContent ? "Yes" : "No");
     }
 
     const updateData = {
@@ -529,70 +299,102 @@ exports.updateHomepageContent = async (req, res) => {
       updatedAt: new Date(),
     };
 
-    // ✅ Note: The file upload handling here should go through Cloudinary middleware
-    // Your upload middleware should set files[].cloudinaryUrl instead of files[].filename
-
-    // Handle Latest News Image
+    // ✅ SIMPLIFIED: Handle Latest News Image (goes to iaai-platform/homepage/news)
     if (files && files.latestNewsImage && files.latestNewsImage[0]) {
-      console.log("📸 Processing news image...");
+      console.log("📸 News image uploaded to Cloudinary");
+      updateData.latestNewsImage = files.latestNewsImage[0].path; // Cloudinary URL
+      updateData.latestNewsImagePublicId = files.latestNewsImage[0].filename; // Cloudinary public_id
 
-      // ✅ Use Cloudinary URL if available (from upload middleware)
-      if (files.latestNewsImage[0].cloudinaryUrl) {
-        updateData.latestNewsImage = files.latestNewsImage[0].cloudinaryUrl;
-        updateData.latestNewsImagePublicId = files.latestNewsImage[0].publicId;
-      } else {
-        // Fallback to local path (not recommended)
-        updateData.latestNewsImage = `/uploads/${files.latestNewsImage[0].filename}`;
+      // Delete old image if exists
+      if (existingContent && existingContent.latestNewsImagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(
+            existingContent.latestNewsImagePublicId
+          );
+          console.log("🗑️ Deleted old news image from Cloudinary");
+        } catch (deleteError) {
+          console.warn(
+            "⚠️ Could not delete old news image:",
+            deleteError.message
+          );
+        }
       }
     }
 
-    // Handle Latest 1 Section
+    // ✅ SIMPLIFIED: Handle Latest 1 Image (goes to iaai-platform/homepage/latest)
     if (data.latest1Title) {
       updateData.latest1Title = data.latest1Title;
       updateData.latest1Detail = data.latest1Detail;
 
       if (files && files.latest1Image && files.latest1Image[0]) {
-        console.log("📸 Processing latest1 image...");
+        console.log("📸 Latest1 image uploaded to Cloudinary");
+        updateData.latest1Image = files.latest1Image[0].path;
+        updateData.latest1ImagePublicId = files.latest1Image[0].filename;
 
-        if (files.latest1Image[0].cloudinaryUrl) {
-          updateData.latest1Image = files.latest1Image[0].cloudinaryUrl;
-          updateData.latest1ImagePublicId = files.latest1Image[0].publicId;
-        } else {
-          updateData.latest1Image = `/uploads/${files.latest1Image[0].filename}`;
+        if (existingContent && existingContent.latest1ImagePublicId) {
+          try {
+            await cloudinary.uploader.destroy(
+              existingContent.latest1ImagePublicId
+            );
+            console.log("🗑️ Deleted old latest1 image from Cloudinary");
+          } catch (deleteError) {
+            console.warn(
+              "⚠️ Could not delete old latest1 image:",
+              deleteError.message
+            );
+          }
         }
       }
     }
 
-    // Handle Latest 2 Section
+    // ✅ SIMPLIFIED: Handle Latest 2 Image (goes to iaai-platform/homepage/latest)
     if (data.latest2Title) {
       updateData.latest2Title = data.latest2Title;
       updateData.latest2Detail = data.latest2Detail;
 
       if (files && files.latest2Image && files.latest2Image[0]) {
-        console.log("📸 Processing latest2 image...");
+        console.log("📸 Latest2 image uploaded to Cloudinary");
+        updateData.latest2Image = files.latest2Image[0].path;
+        updateData.latest2ImagePublicId = files.latest2Image[0].filename;
 
-        if (files.latest2Image[0].cloudinaryUrl) {
-          updateData.latest2Image = files.latest2Image[0].cloudinaryUrl;
-          updateData.latest2ImagePublicId = files.latest2Image[0].publicId;
-        } else {
-          updateData.latest2Image = `/uploads/${files.latest2Image[0].filename}`;
+        if (existingContent && existingContent.latest2ImagePublicId) {
+          try {
+            await cloudinary.uploader.destroy(
+              existingContent.latest2ImagePublicId
+            );
+            console.log("🗑️ Deleted old latest2 image from Cloudinary");
+          } catch (deleteError) {
+            console.warn(
+              "⚠️ Could not delete old latest2 image:",
+              deleteError.message
+            );
+          }
         }
       }
     }
 
-    // Handle Latest 3 Section
+    // ✅ SIMPLIFIED: Handle Latest 3 Image (goes to iaai-platform/homepage/latest)
     if (data.latest3Title) {
       updateData.latest3Title = data.latest3Title;
       updateData.latest3Detail = data.latest3Detail;
 
       if (files && files.latest3Image && files.latest3Image[0]) {
-        console.log("📸 Processing latest3 image...");
+        console.log("📸 Latest3 image uploaded to Cloudinary");
+        updateData.latest3Image = files.latest3Image[0].path;
+        updateData.latest3ImagePublicId = files.latest3Image[0].filename;
 
-        if (files.latest3Image[0].cloudinaryUrl) {
-          updateData.latest3Image = files.latest3Image[0].cloudinaryUrl;
-          updateData.latest3ImagePublicId = files.latest3Image[0].publicId;
-        } else {
-          updateData.latest3Image = `/uploads/${files.latest3Image[0].filename}`;
+        if (existingContent && existingContent.latest3ImagePublicId) {
+          try {
+            await cloudinary.uploader.destroy(
+              existingContent.latest3ImagePublicId
+            );
+            console.log("🗑️ Deleted old latest3 image from Cloudinary");
+          } catch (deleteError) {
+            console.warn(
+              "⚠️ Could not delete old latest3 image:",
+              deleteError.message
+            );
+          }
         }
       }
     }
@@ -627,7 +429,7 @@ exports.updateHomepageContent = async (req, res) => {
 };
 
 /* ======================================================
-   ✅ 6. Delete Homepage Content (Existing)
+   ✅ 6. SIMPLIFIED DELETE HOMEPAGE CONTENT
 ====================================================== */
 exports.deleteHomepageContent = async (req, res) => {
   try {
@@ -640,30 +442,23 @@ exports.deleteHomepageContent = async (req, res) => {
       });
     }
 
-    // ✅ Delete Cloudinary images if they exist
-    const cloudinary = require("cloudinary").v2; // Add this import at the top
-
+    // ✅ SIMPLIFIED: Delete Cloudinary images
     const imagesToDelete = [
-      {
-        url: content.latestNewsImage,
-        publicId: content.latestNewsImagePublicId,
-      },
-      { url: content.latest1Image, publicId: content.latest1ImagePublicId },
-      { url: content.latest2Image, publicId: content.latest2ImagePublicId },
-      { url: content.latest3Image, publicId: content.latest3ImagePublicId },
-    ].filter((img) => img.url && img.publicId);
+      content.latestNewsImagePublicId,
+      content.latest1ImagePublicId,
+      content.latest2ImagePublicId,
+      content.latest3ImagePublicId,
+    ].filter(Boolean);
 
     console.log(`🗑️ Deleting ${imagesToDelete.length} Cloudinary images...`);
 
-    for (const image of imagesToDelete) {
+    for (const publicId of imagesToDelete) {
       try {
-        if (image.publicId) {
-          await cloudinary.uploader.destroy(image.publicId);
-          console.log(`✅ Deleted Cloudinary image: ${image.publicId}`);
-        }
+        await cloudinary.uploader.destroy(publicId);
+        console.log(`✅ Deleted Cloudinary image: ${publicId}`);
       } catch (deleteError) {
         console.error(
-          `❌ Error deleting Cloudinary image ${image.publicId}:`,
+          `❌ Error deleting Cloudinary image ${publicId}:`,
           deleteError
         );
       }

@@ -432,11 +432,13 @@ class OnlineLiveCoursesController {
   // ==========================================
 
   /**
-   * Creates a new online course using JSON payload
+   * Creates a new online course using JSON payload - Solution 1: Model Middleware Only
    * @route POST /admin-courses/onlinelive/api
    */
   async createCourse(req, res) {
-    console.log("🚀 Creating new online course (JSON) - FIXED VERSION");
+    console.log(
+      "🚀 Creating new online course (JSON) - SOLUTION 1: MODEL MIDDLEWARE ONLY"
+    );
     console.log("📥 Request body keys:", Object.keys(req.body));
 
     try {
@@ -484,22 +486,66 @@ class OnlineLiveCoursesController {
       await this._checkDuplicateCourseCode(courseCode);
       console.log(`✅ Course code "${courseCode}" is unique.`);
 
-      // 5. Build the final course data object - FIXED VERSION
+      // 5. Build the final course data object - INCLUDES ALL COURSE ITEMS
       const courseData = await this._buildCourseDataFromMergedData(
         formData,
         uploadedFiles,
         instructorsResult.instructors,
         req.user
       );
-      console.log("✅ Final course data object built for database.");
+      console.log(
+        "✅ Final course data object built - includes ALL course components:"
+      );
+      console.log("   📋 Basic info, schedule, enrollment, platform");
+      console.log("   👥 Instructors (primary + additional)");
+      console.log("   📚 Content (objectives, modules, target audience)");
+      console.log("   🔧 Technical requirements, interaction settings");
+      console.log("   📹 Recording, media files, materials");
+      console.log("   📝 Assessment, certification settings");
+      console.log("   📊 Attendance, analytics, support info");
+      console.log("   🎯 Post-course, experience, notifications");
+      console.log("   📄 Metadata and all other course components");
 
-      // 6. Create and save the course
+      // 6. Create and save the course - MODEL MIDDLEWARE HANDLES INSTRUCTOR ASSIGNMENTS ONLY
       console.log("💾 Creating and saving new OnlineLiveTraining instance...");
       const newCourse = new OnlineLiveTraining(courseData);
-      const savedCourse = await newCourse.save();
-      console.log("✅ Course created successfully with ID:", savedCourse._id);
 
-      // 7. Handle post-creation logic
+      console.log("🔄 Calling course.save() - this will:");
+      console.log(
+        "   ✅ Save ALL course data (basic, schedule, content, media, etc.)"
+      );
+      console.log(
+        "   ✅ Trigger model middleware ONLY for instructor assignments"
+      );
+      console.log("   ✅ Leave all other course data completely untouched");
+
+      const savedCourse = await newCourse.save();
+
+      console.log("✅ Course created successfully with ID:", savedCourse._id);
+      console.log(
+        "✅ Model middleware automatically handled instructor assignments"
+      );
+      console.log("✅ ALL other course components saved successfully:");
+      console.log(`   📋 Basic: ${savedCourse.basic?.title}`);
+      console.log(`   📅 Schedule: ${savedCourse.schedule?.startDate}`);
+      console.log(`   💰 Enrollment: $${savedCourse.enrollment?.price}`);
+      console.log(`   🖥️ Platform: ${savedCourse.platform?.name}`);
+      console.log(
+        `   📚 Content modules: ${savedCourse.content?.modules?.length || 0}`
+      );
+      console.log(
+        `   📝 Objectives: ${savedCourse.content?.objectives?.length || 0}`
+      );
+      console.log(
+        `   📁 Media files: ${savedCourse.media ? "configured" : "none"}`
+      );
+      console.log(
+        `   🎓 Certification: ${
+          savedCourse.certification?.enabled ? "enabled" : "disabled"
+        }`
+      );
+
+      // 7. Handle post-creation logic - ALL UNCHANGED
       if (savedCourse.basic.status === "open") {
         console.log("📧 Course is 'open', handling creation notifications...");
         await courseNotificationController.handleCourseCreation(
@@ -508,14 +554,36 @@ class OnlineLiveCoursesController {
         );
       }
 
-      // 8. Send success response
+      // 8. Send success response - INCLUDES ALL COURSE DATA
       return res.status(201).json({
         success: true,
-        message: "Online course created successfully.",
+        message: "Online course created successfully with all components.",
         course: savedCourse,
+        components: {
+          basic: !!savedCourse.basic,
+          schedule: !!savedCourse.schedule,
+          enrollment: !!savedCourse.enrollment,
+          instructors: !!savedCourse.instructors,
+          platform: !!savedCourse.platform,
+          content: !!savedCourse.content,
+          technical: !!savedCourse.technical,
+          interaction: !!savedCourse.interaction,
+          recording: !!savedCourse.recording,
+          media: !!savedCourse.media,
+          materials: !!savedCourse.materials,
+          assessment: !!savedCourse.assessment,
+          certification: !!savedCourse.certification,
+          attendance: !!savedCourse.attendance,
+          analytics: !!savedCourse.analytics,
+          support: !!savedCourse.support,
+          postCourse: !!savedCourse.postCourse,
+          experience: !!savedCourse.experience,
+          notificationSettings: !!savedCourse.notificationSettings,
+          metadata: !!savedCourse.metadata,
+        },
       });
     } catch (error) {
-      console.error("❌ Error in createCourse (JSON):", error);
+      console.error("❌ Error in createCourse (Solution 1):", error);
       return this._handleError(error, res);
     }
   }
@@ -528,8 +596,15 @@ class OnlineLiveCoursesController {
    * Updates an existing online course using JSON payload
    * @route PUT /admin-courses/onlinelive/api/:id
    */
+
+  /**
+   * Updates an existing online course using JSON payload with instructor assignment
+   * @route PUT /admin-courses/onlinelive/api/:id
+   */
   async updateCourse(req, res) {
-    console.log("🚀 Updating online course (JSON) - FIXED VERSION");
+    console.log(
+      "🚀 Updating online course (JSON) - WITH INSTRUCTOR ASSIGNMENT"
+    );
     const courseId = req.params.id;
     console.log("📝 Course ID:", courseId);
 
@@ -542,6 +617,8 @@ class OnlineLiveCoursesController {
           message: "Course not found.",
         });
       }
+
+      console.log(`📋 Found existing course: ${existingCourse.basic?.title}`);
 
       // 2. Parse the JSON payload - SIMPLIFIED
       const { uploadedFiles, ...formData } = req.body;
@@ -562,6 +639,8 @@ class OnlineLiveCoursesController {
         });
       }
 
+      console.log("✅ Validation passed for course update.");
+
       // 4. Process instructors - FIXED
       const instructorsResult =
         await this._validateAndProcessInstructorsFromMergedData(formData);
@@ -570,6 +649,75 @@ class OnlineLiveCoursesController {
           success: false,
           message: instructorsResult.message,
         });
+      }
+
+      console.log("✅ Instructors processed for update.");
+
+      // *** SECTION 1: REMOVE COURSE ASSIGNMENTS FOR DELETED INSTRUCTORS (BEFORE course update) ***
+      console.log(
+        "🔍 Checking for instructor changes and removing old assignments..."
+      );
+
+      // Get current instructor IDs from the update request
+      const currentInstructorIds = [];
+      if (instructorsResult.instructors?.primary?.instructorId) {
+        currentInstructorIds.push(
+          instructorsResult.instructors.primary.instructorId.toString()
+        );
+        console.log(
+          `📝 Primary instructor in update: ${instructorsResult.instructors.primary.instructorId}`
+        );
+      }
+      if (
+        instructorsResult.instructors?.additional &&
+        Array.isArray(instructorsResult.instructors.additional)
+      ) {
+        instructorsResult.instructors.additional.forEach((inst) => {
+          if (inst.instructorId) {
+            currentInstructorIds.push(inst.instructorId.toString());
+            console.log(
+              `📝 Additional instructor in update: ${inst.instructorId}`
+            );
+          }
+        });
+      }
+
+      console.log(
+        `📊 Current instructor IDs from update: [${currentInstructorIds.join(
+          ", "
+        )}]`
+      );
+
+      // Find instructors who had this course but are no longer assigned
+      const instructorsWithThisCourse = await Instructor.find({
+        "assignedCourses.courseId": courseId,
+      });
+
+      console.log(
+        `🔍 Found ${instructorsWithThisCourse.length} instructors currently assigned to this course`
+      );
+
+      for (const instructorDoc of instructorsWithThisCourse) {
+        if (!currentInstructorIds.includes(instructorDoc._id.toString())) {
+          // Remove course assignment
+          const beforeCount = instructorDoc.assignedCourses.length;
+          instructorDoc.assignedCourses = instructorDoc.assignedCourses.filter(
+            (course) => course.courseId.toString() !== courseId.toString()
+          );
+          const afterCount = instructorDoc.assignedCourses.length;
+
+          await instructorDoc.save();
+          console.log(
+            `🗑️ Removed course assignment from instructor: ${instructorDoc.firstName} ${instructorDoc.lastName}`
+          );
+          console.log(
+            `   - Assignments before: ${beforeCount}, after: ${afterCount}`
+          );
+        } else {
+          console.log(
+            `✅ Instructor ${instructorDoc.firstName} ${instructorDoc.lastName} still assigned, keeping assignment`
+          );
+        }
       }
 
       // 5. Build the update data - FIXED VERSION
@@ -581,11 +729,34 @@ class OnlineLiveCoursesController {
         req.user
       );
 
-      console.log("💾 Updating course with ID:", courseId);
-      if (updateData.schedule?.sessions)
-        updateData.schedule.sessions.forEach(
-          (s) => (s.instructorId = s.instructorId || null)
+      console.log("✅ Update data object built successfully");
+
+      // Clean sessions data before updating
+      if (updateData.schedule?.sessions) {
+        updateData.schedule.sessions = updateData.schedule.sessions.map(
+          (session) => ({
+            ...session,
+            instructorId:
+              session.instructorId === "" ? null : session.instructorId,
+          })
         );
+        console.log(
+          `🧹 Cleaned ${updateData.schedule.sessions.length} sessions data`
+        );
+      }
+
+      // Clean additional instructors instructorId
+      if (updateData.instructors?.additional) {
+        updateData.instructors.additional.forEach((inst) => {
+          inst.instructorId =
+            inst.instructorId === "" ? null : inst.instructorId;
+        });
+        console.log(
+          `🧹 Cleaned ${updateData.instructors.additional.length} additional instructors data`
+        );
+      }
+
+      console.log("💾 Updating course with ID:", courseId);
 
       // 6. Update the course
       const updatedCourse = await OnlineLiveTraining.findByIdAndUpdate(
@@ -594,13 +765,121 @@ class OnlineLiveCoursesController {
         { new: true, runValidators: true }
       );
 
-      console.log("✅ Course updated successfully.");
+      if (!updatedCourse) {
+        throw new Error("Failed to update course in database");
+      }
+
+      console.log("✅ Course updated successfully in database");
+
+      // *** SECTION 2: ADD/UPDATE ASSIGNMENTS FOR CURRENT INSTRUCTORS (AFTER course update) ***
+      console.log("📝 Processing instructor assignments for updated course...");
+      const allInstructors = [];
+
+      // Add primary and additional instructors to array
+      if (instructorsResult.instructors?.primary) {
+        allInstructors.push(instructorsResult.instructors.primary);
+        console.log(
+          `📝 Added primary instructor: ${instructorsResult.instructors.primary.name}`
+        );
+      }
+      if (
+        instructorsResult.instructors?.additional &&
+        Array.isArray(instructorsResult.instructors.additional)
+      ) {
+        allInstructors.push(...instructorsResult.instructors.additional);
+        console.log(
+          `📝 Added ${instructorsResult.instructors.additional.length} additional instructors`
+        );
+      }
+
+      console.log(
+        `📊 Total instructors to process for assignments: ${allInstructors.length}`
+      );
+
+      // Process all instructors
+      for (const instructor of allInstructors) {
+        try {
+          console.log(
+            `🔍 Processing instructor assignment: ${instructor.name} (ID: ${instructor.instructorId})`
+          );
+
+          const instructorDoc = await Instructor.findById(
+            instructor.instructorId
+          );
+
+          if (instructorDoc) {
+            // Check if course is already assigned
+            const existingAssignmentIndex =
+              instructorDoc.assignedCourses.findIndex(
+                (course) => course.courseId.toString() === courseId.toString()
+              );
+
+            if (existingAssignmentIndex !== -1) {
+              // Update existing assignment
+              const existingAssignment =
+                instructorDoc.assignedCourses[existingAssignmentIndex];
+              const oldTitle = existingAssignment.courseTitle;
+              const oldRole = existingAssignment.role;
+
+              existingAssignment.courseTitle = updatedCourse.basic?.title;
+              existingAssignment.startDate = updatedCourse.schedule?.startDate;
+              existingAssignment.endDate = updatedCourse.schedule?.endDate;
+              existingAssignment.role = instructor.role || "Lead Instructor";
+
+              await instructorDoc.save();
+              console.log(
+                `✅ Updated existing assignment for instructor: ${instructor.name}`
+              );
+              console.log(
+                `   - Title: "${oldTitle}" → "${existingAssignment.courseTitle}"`
+              );
+              console.log(
+                `   - Role: "${oldRole}" → "${existingAssignment.role}"`
+              );
+              console.log(`   - Start Date: ${existingAssignment.startDate}`);
+            } else {
+              // Add new assignment
+              const newAssignment = {
+                courseId: updatedCourse._id,
+                courseType: "OnlineLiveTraining",
+                courseTitle: updatedCourse.basic?.title,
+                startDate: updatedCourse.schedule?.startDate,
+                endDate: updatedCourse.schedule?.endDate,
+                role: instructor.role || "Lead Instructor",
+                status: "Upcoming",
+              };
+
+              instructorDoc.assignedCourses.push(newAssignment);
+              await instructorDoc.save();
+              console.log(
+                `✅ Added new assignment for instructor: ${instructor.name}`
+              );
+              console.log(`   - Course: ${newAssignment.courseTitle}`);
+              console.log(`   - Role: ${newAssignment.role}`);
+              console.log(`   - Start Date: ${newAssignment.startDate}`);
+            }
+          } else {
+            console.warn(
+              `⚠️ WARNING: Instructor not found with ID: ${instructor.instructorId}`
+            );
+          }
+        } catch (assignError) {
+          console.error(
+            `❌ ERROR updating course assignment for ${instructor.name}:`,
+            assignError
+          );
+          // Don't fail the entire operation for individual assignment errors
+        }
+      }
+
+      console.log("✅ Instructor assignment processing completed");
 
       // 7. Handle update notifications
       const changes = this._detectChanges(existingCourse, updateData);
       if (changes.hasChanges) {
         console.log("📧 Changes detected, handling notifications...");
-        // Implement change notification logic here
+        console.log(`📋 Changes detected: ${changes.details.join(", ")}`);
+        // Implement change notification logic here if needed
       }
 
       // 8. Send success response
@@ -609,20 +888,8 @@ class OnlineLiveCoursesController {
         message: "Online course updated successfully.",
         course: updatedCourse,
         changes: changes,
+        instructorsProcessed: allInstructors.length,
       });
-      // Clean the sessions data before building update object
-      if (formData.schedule && formData.schedule.sessions) {
-        formData.schedule.sessions = this._cleanSessionData(
-          formData.schedule.sessions
-        );
-      }
-
-      // If using merged data approach, clean there too:
-      if (mergedFormData.schedule && mergedFormData.schedule.sessions) {
-        mergedFormData.schedule.sessions = this._cleanSessionData(
-          mergedFormData.schedule.sessions
-        );
-      }
     } catch (error) {
       console.error(`❌ Error in updateCourse for ID ${courseId}:`, error);
       return this._handleError(error, res);

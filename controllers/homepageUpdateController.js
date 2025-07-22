@@ -1,6 +1,6 @@
 //controllers/homepageUpdateController.js - Enhanced with Auto-Populate Feature
 const HomepageUpdate = require("../models/homepageUpdate");
-const InPersonAestheticTraining = require("../models/inPersonAestheticTraining");
+const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const fs = require("fs");

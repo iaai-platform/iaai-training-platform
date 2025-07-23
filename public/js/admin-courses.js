@@ -1798,25 +1798,36 @@ class AdminCoursesManager {
             <td>
                 <span class="status-badge status-${statusClass}">${status}</span>
             </td>
-            <td>
-                <div class="actions-cell">
-                    <button class="action-btn edit-btn" onclick="adminCourses.editCourse('${
-                      course._id
-                    }')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn clone-btn" onclick="adminCourses.cloneCourse('${
-                      course._id
-                    }')">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    <button class="action-btn delete-btn" onclick="adminCourses.deleteCourse('${
-                      course._id
-                    }')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </td>
+<td>
+    <div class="actions-cell">
+        <button class="action-btn edit-btn" onclick="adminCourses.editCourse('${
+          course._id
+        }')">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button class="action-btn clone-btn" onclick="adminCourses.cloneCourse('${
+          course._id
+        }')">
+            <i class="fas fa-copy"></i>
+        </button>
+        <!-- NEW: Linked Course buttons -->
+        <button class="btn btn-info btn-sm" onclick="linkedCourseManager.showAddModal('${
+          course._id
+        }')" title="Add Linked Course">
+            <i class="fas fa-link"></i>
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="linkedCourseManager.showEditModal('${
+          course._id
+        }')" title="Manage Linked Courses">
+            <i class="fas fa-cog"></i>
+        </button>
+        <button class="action-btn delete-btn" onclick="adminCourses.deleteCourse('${
+          course._id
+        }')">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</td>
         `;
     return row;
   }

@@ -1,19 +1,17 @@
-// controllers/ordersController.js -
+// controllers/ordersController.js - DISPLAY ORDERS PAGE ONLY (Enhanced for linked courses)
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 
 /**
- * Helper function to calculate early bird pricing for a course
- * IMPORTANT: Early bird pricing ONLY applies to InPerson and OnlineLive courses
- * Self-paced courses do NOT have early bird pricing
- *
- * @param {Object} course - The course object (InPerson, OnlineLive, or SelfPaced)
- * @param {Date} registrationDate - When the user registered/added to cart
- * @returns {Object} Pricing information with early bird details
+ * ⭐ ENHANCED: Helper function to calculate pricing with linked course support
  */
-function calculateCoursePricing(course, registrationDate = new Date()) {
+function calculateCoursePricing(
+  course,
+  registrationDate = new Date(),
+  isLinkedCourse = false
+) {
   const pricing = {
     regularPrice: 0,
     earlyBirdPrice: null,
@@ -21,14 +19,25 @@ function calculateCoursePricing(course, registrationDate = new Date()) {
     isEarlyBird: false,
     earlyBirdSavings: 0,
     currency: "USD",
+    isLinkedCourseFree: isLinkedCourse,
   };
+
+  // ⭐ NEW: If this is a linked course, set price to 0
+  if (isLinkedCourse) {
+    if (course.enrollment) {
+      pricing.regularPrice = course.enrollment.price || 0;
+      pricing.currency = course.enrollment.currency || "USD";
+    } else if (course.access) {
+      pricing.regularPrice = course.access.price || 0;
+      pricing.currency = course.access.currency || "USD";
+    }
+    pricing.currentPrice = 0; // Free for linked courses
+    return pricing;
+  }
 
   // ✅ FOR IN-PERSON & ONLINE LIVE COURSES (have early bird pricing)
   if (course.enrollment) {
-    // Main price from InPersonAestheticTraining.enrollment.price or OnlineLiveTraining.enrollment.price
     pricing.regularPrice = course.enrollment.price || 0;
-
-    // Early bird price (may be null if not set)
     pricing.earlyBirdPrice = course.enrollment.earlyBirdPrice || null;
     pricing.currency = course.enrollment.currency || "USD";
 
@@ -54,38 +63,38 @@ function calculateCoursePricing(course, registrationDate = new Date()) {
         pricing.currentPrice = pricing.regularPrice;
       }
     } else {
-      // No early bird pricing available or conditions not met
       pricing.currentPrice = pricing.regularPrice;
     }
   }
   // ✅ FOR SELF-PACED COURSES (NO early bird pricing)
   else if (course.access) {
-    // Main price from SelfPacedOnlineTraining.access.price
     pricing.regularPrice = course.access.price || 0;
     pricing.currentPrice = pricing.regularPrice;
     pricing.currency = course.access.currency || "USD";
-
-    // Self-paced courses NEVER have early bird pricing
-    pricing.earlyBirdPrice = null;
-    pricing.isEarlyBird = false;
-    pricing.earlyBirdSavings = 0;
   }
 
   return pricing;
 }
 
 /**
- * Display cart page with early bird pricing support
+ * ⭐ ENHANCED: Display orders page with linked course support
+ * THIS IS THE ONLY FUNCTION IN THIS CONTROLLER
  */
+// controllers/ordersController.js - FIXED getCartPage method
 exports.getCartPage = async (req, res) => {
   try {
-    console.log("🔍 Fetching user cart data with early bird pricing...");
+    console.log("🔍 Fetching user cart data with linked course support...");
 
-    // Populate course details for cart items
+    // ⭐ CRITICAL FIX: Use .exec() and proper field selection to ensure we get ALL enrollment data
+    // ✅ FIXED: This ensures we get ALL user data including enrollmentData
     const user = await User.findById(req.user._id)
       .populate({
         path: "myInPersonCourses.courseId",
-        select: "basic enrollment schedule venue",
+        select: "basic enrollment schedule venue linkedCourse",
+        populate: {
+          path: "linkedCourse.onlineCourseId",
+          select: "basic enrollment schedule",
+        },
       })
       .populate({
         path: "myLiveCourses.courseId",
@@ -95,17 +104,35 @@ exports.getCartPage = async (req, res) => {
         path: "mySelfPacedCourses.courseId",
         select: "basic access content",
       })
-      .lean();
+      .lean(); // ⭐ CHANGE: Use .lean() instead of .exec() to get raw data
+
+    // ⭐ CRITICAL: Add debug logging to see what we actually get
+    console.log("🔍 Raw user data for debugging:");
+    if (user.myLiveCourses) {
+      user.myLiveCourses.forEach((enrollment, index) => {
+        if (enrollment.enrollmentData?.status === "cart") {
+          console.log(`📦 Live Course ${index}:`);
+          console.log(`   - Course ID: ${enrollment.courseId}`);
+          console.log(`   - Status: ${enrollment.enrollmentData.status}`);
+          console.log(
+            `   - PaidAmount: ${enrollment.enrollmentData.paidAmount}`
+          );
+          console.log(
+            `   - isLinkedCourseFree: ${enrollment.enrollmentData.isLinkedCourseFree}`
+          );
+          console.log(`   - Full enrollmentData:`, enrollment.enrollmentData);
+        }
+      });
+    }
 
     if (!user) {
       console.error("❌ User not found");
       return res.status(404).send("User not found");
     }
 
-    // Initialize cart items array
     const cartItems = [];
 
-    // ✅ Process In-Person Courses with status = 'cart' (CAN have early bird)
+    // ✅ Process In-Person Courses
     if (user.myInPersonCourses && user.myInPersonCourses.length > 0) {
       user.myInPersonCourses.forEach((enrollment) => {
         if (
@@ -115,46 +142,48 @@ exports.getCartPage = async (req, res) => {
           const course = enrollment.courseId;
           const registrationDate = enrollment.enrollmentData.registrationDate;
 
-          // Calculate pricing with early bird logic
-          const pricing = calculateCoursePricing(course, registrationDate);
+          // ⭐ CRITICAL: Read the flag from the stored enrollment data
+          const isLinkedCourse =
+            enrollment.enrollmentData.isLinkedCourseFree === true;
 
-          // ✅ FIX: Use calculated current price, not stored paidAmount
-          const finalPrice = pricing.currentPrice;
+          console.log(`🔍 Processing in-person course: ${course.basic?.title}`);
+          console.log(`🔗 isLinkedCourseFree flag: ${isLinkedCourse}`);
+
+          const pricing = calculateCoursePricing(
+            course,
+            registrationDate,
+            isLinkedCourse
+          );
 
           cartItems.push({
             courseId: course._id.toString(),
             enrollmentId: enrollment._id.toString(),
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            price: finalPrice,
+            price: pricing.currentPrice,
             originalPrice: pricing.regularPrice,
             isEarlyBird: pricing.isEarlyBird,
             earlyBirdSavings: pricing.earlyBirdSavings,
+            isLinkedCourseFree: pricing.isLinkedCourseFree,
             currency: pricing.currency,
             courseType: "InPersonAestheticTraining",
             displayType: "In-Person",
-            status: "In Cart",
+            status: "cart",
             addedDate: registrationDate,
-            // Additional course info for display
             startDate: course.schedule?.startDate,
-            location: course.venue?.name || course.venue?.city,
-            // Early bird info for display
-            earlyBirdDeadline:
-              course.enrollment?.earlyBirdDays && course.schedule?.startDate
-                ? (() => {
-                    const deadline = new Date(course.schedule.startDate);
-                    deadline.setDate(
-                      deadline.getDate() - course.enrollment.earlyBirdDays
-                    );
-                    return deadline;
-                  })()
-                : null,
+            location: `${course.venue?.city || "TBD"}, ${
+              course.venue?.country || "TBD"
+            }`,
+            hasLinkedCourse: !!course.linkedCourse?.onlineCourseId,
+            linkedCourseTitle:
+              course.linkedCourse?.onlineCourseId?.basic?.title,
+            linkedCourseRequired: course.linkedCourse?.isRequired || false,
           });
         }
       });
     }
 
-    // ✅ Process Online Live Courses with status = 'cart' (CAN have early bird)
+    // ✅ FIXED: Process Online Live Courses with proper flag detection
     if (user.myLiveCourses && user.myLiveCourses.length > 0) {
       user.myLiveCourses.forEach((enrollment) => {
         if (
@@ -164,46 +193,58 @@ exports.getCartPage = async (req, res) => {
           const course = enrollment.courseId;
           const registrationDate = enrollment.enrollmentData.registrationDate;
 
-          // Calculate pricing with early bird logic
-          const pricing = calculateCoursePricing(course, registrationDate);
+          // ⭐ CRITICAL FIX: Properly read the flag from enrollment data
+          const isLinkedCourse =
+            enrollment.enrollmentData.isLinkedCourseFree === true;
 
-          // ✅ FIX: Use calculated current price, not stored paidAmount
-          const finalPrice = pricing.currentPrice;
+          console.log(`🔍 Processing online course: ${course.basic?.title}`);
+          console.log(
+            `🔗 isLinkedCourseFree flag from DB: ${enrollment.enrollmentData.isLinkedCourseFree}`
+          );
+          console.log(`🔗 isLinkedCourseFree processed: ${isLinkedCourse}`);
+          console.log(
+            `💰 Stored paidAmount: ${enrollment.enrollmentData.paidAmount}`
+          );
+
+          const pricing = calculateCoursePricing(
+            course,
+            registrationDate,
+            isLinkedCourse
+          );
+
+          console.log(`💰 Calculated pricing:`, {
+            originalPrice: pricing.regularPrice,
+            currentPrice: pricing.currentPrice,
+            isLinkedCourseFree: pricing.isLinkedCourseFree,
+          });
 
           cartItems.push({
             courseId: course._id.toString(),
             enrollmentId: enrollment._id.toString(),
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            price: finalPrice,
+            price: pricing.currentPrice, // ⭐ Should be 0 for linked courses
             originalPrice: pricing.regularPrice,
-            isEarlyBird: pricing.isEarlyBird,
-            earlyBirdSavings: pricing.earlyBirdSavings,
+            isEarlyBird: pricing.isEarlyBird && !isLinkedCourse,
+            earlyBirdSavings: isLinkedCourse ? 0 : pricing.earlyBirdSavings,
+            isLinkedCourseFree: pricing.isLinkedCourseFree, // ⭐ CRITICAL
             currency: pricing.currency,
             courseType: "OnlineLiveTraining",
-            displayType: "Online Live",
-            status: "In Cart",
+            displayType: isLinkedCourse
+              ? "Online Live (Included)"
+              : "Online Live",
+            status: "cart",
             addedDate: registrationDate,
-            // Additional course info
             startDate: course.schedule?.startDate,
-            platform: course.platform?.name,
-            // Early bird info for display
-            earlyBirdDeadline:
-              course.enrollment?.earlyBirdDays && course.schedule?.startDate
-                ? (() => {
-                    const deadline = new Date(course.schedule.startDate);
-                    deadline.setDate(
-                      deadline.getDate() - course.enrollment.earlyBirdDays
-                    );
-                    return deadline;
-                  })()
-                : null,
+            location: "Online",
+            isLinkedToInPerson: isLinkedCourse,
+            linkedCourseRelationship: isLinkedCourse ? "prerequisite" : null,
           });
         }
       });
     }
 
-    // ✅ Process Self-Paced Courses with status = 'cart' (NO early bird pricing)
+    // ✅ Process Self-Paced Courses (unchanged)
     if (user.mySelfPacedCourses && user.mySelfPacedCourses.length > 0) {
       user.mySelfPacedCourses.forEach((enrollment) => {
         if (
@@ -212,31 +253,27 @@ exports.getCartPage = async (req, res) => {
         ) {
           const course = enrollment.courseId;
           const registrationDate = enrollment.enrollmentData.registrationDate;
-
-          // Calculate pricing (no early bird for self-paced)
           const pricing = calculateCoursePricing(course, registrationDate);
-
-          // ✅ FIX: Use calculated current price, not stored paidAmount
-          const finalPrice = pricing.currentPrice;
 
           cartItems.push({
             courseId: course._id.toString(),
             enrollmentId: enrollment._id.toString(),
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            price: finalPrice,
+            price: pricing.currentPrice,
             originalPrice: pricing.regularPrice,
-            isEarlyBird: false, // Always false for self-paced
-            earlyBirdSavings: 0, // Always 0 for self-paced
+            isEarlyBird: false,
+            earlyBirdSavings: 0,
+            isLinkedCourseFree: false,
             currency: pricing.currency,
             courseType: "SelfPacedOnlineTraining",
             displayType: "Self-Paced",
-            status: "In Cart",
+            status: "cart",
             addedDate: registrationDate,
-            // Additional course info
+            startDate: null,
+            location: "Online - Self-Paced",
             accessDays: course.access?.accessDays,
             totalVideos: course.videos?.length || 0,
-            earlyBirdDeadline: null, // No early bird for self-paced
           });
         }
       });
@@ -249,32 +286,38 @@ exports.getCartPage = async (req, res) => {
       return dateB - dateA;
     });
 
-    console.log(`\n📍 Cart Summary: ${cartItems.length} items`);
-    cartItems.forEach((item, index) => {
-      const earlyBirdInfo = item.isEarlyBird
-        ? ` (Early Bird: $${item.earlyBirdSavings} savings)`
-        : "";
-      console.log(
-        `Item ${index + 1}: ${item.title} - $${item.price}${earlyBirdInfo}`
-      );
-    });
-
-    // ✅ Calculate total price and total savings
+    // Calculate totals
     const totalAmount = cartItems.reduce((total, item) => {
       return total + (parseFloat(item.price) || 0);
     }, 0);
 
     const totalSavings = cartItems.reduce((total, item) => {
-      return total + (parseFloat(item.earlyBirdSavings) || 0);
+      if (item.isLinkedCourseFree) {
+        return total + (parseFloat(item.originalPrice) || 0);
+      } else {
+        return total + (parseFloat(item.earlyBirdSavings) || 0);
+      }
     }, 0);
 
     const totalOriginalPrice = cartItems.reduce((total, item) => {
       return total + (parseFloat(item.originalPrice) || 0);
     }, 0);
 
-    console.log(`\n💰 Pricing Summary:`);
+    console.log(`\n📍 Enhanced Cart Summary: ${cartItems.length} items`);
+    cartItems.forEach((item, index) => {
+      const savingsInfo = item.isLinkedCourseFree
+        ? ` (Linked Course - FREE)`
+        : item.isEarlyBird
+        ? ` (Early Bird: $${item.earlyBirdSavings} savings)`
+        : "";
+      console.log(
+        `Item ${index + 1}: ${item.title} - $${item.price}${savingsInfo}`
+      );
+    });
+
+    console.log(`\n💰 Enhanced Pricing Summary:`);
     console.log(`   Original Total: $${totalOriginalPrice.toFixed(2)}`);
-    console.log(`   Early Bird Savings: $${totalSavings.toFixed(2)}`);
+    console.log(`   Total Savings: $${totalSavings.toFixed(2)}`);
     console.log(`   Final Total: $${totalAmount.toFixed(2)}`);
 
     res.render("orders", {
@@ -291,357 +334,5 @@ exports.getCartPage = async (req, res) => {
   }
 };
 
-/**
- * Display checkout page with early bird pricing
- */
-exports.checkout = async (req, res) => {
-  try {
-    console.log("🔍 Loading checkout page with early bird pricing...");
-    const user = await User.findById(req.user._id).lean();
-
-    if (!user) {
-      console.error("❌ User not found");
-      return res.status(404).send("User not found");
-    }
-
-    const coursesInCart = [];
-    let totalPrice = 0;
-    let totalSavings = 0;
-    let totalOriginalPrice = 0;
-
-    // Process In-Person Courses (CAN have early bird)
-    const inPersonCartItems =
-      user.myInPersonCourses?.filter(
-        (enrollment) => enrollment.enrollmentData.status === "cart"
-      ) || [];
-
-    for (const item of inPersonCartItems) {
-      const course = await InPersonAestheticTraining.findById(
-        item.courseId
-      ).lean();
-      if (course) {
-        const registrationDate = item.enrollmentData.registrationDate;
-        const pricing = calculateCoursePricing(course, registrationDate);
-
-        // ✅ FIX: Use calculated current price, not stored paidAmount
-        const finalPrice = pricing.currentPrice;
-
-        coursesInCart.push({
-          courseId: item.courseId,
-          enrollmentId: item._id,
-          title: course.basic?.title || "Untitled Course",
-          courseCode: course.basic?.courseCode || "N/A",
-          price: finalPrice,
-          originalPrice: pricing.regularPrice,
-          isEarlyBird: pricing.isEarlyBird,
-          earlyBirdSavings: pricing.earlyBirdSavings,
-          currency: pricing.currency,
-          courseType: "In-Person",
-          status: item.enrollmentData.status,
-          startDate: course.schedule?.startDate || null,
-          registrationDate: registrationDate,
-        });
-
-        totalPrice += finalPrice;
-        totalSavings += pricing.earlyBirdSavings;
-        totalOriginalPrice += pricing.regularPrice;
-      }
-    }
-
-    // Process Online Live Courses (CAN have early bird)
-    const liveCartItems =
-      user.myLiveCourses?.filter(
-        (enrollment) => enrollment.enrollmentData.status === "cart"
-      ) || [];
-
-    for (const item of liveCartItems) {
-      const course = await OnlineLiveTraining.findById(item.courseId).lean();
-      if (course) {
-        const registrationDate = item.enrollmentData.registrationDate;
-        const pricing = calculateCoursePricing(course, registrationDate);
-
-        // ✅ FIX: Use calculated current price, not stored paidAmount
-        const finalPrice = pricing.currentPrice;
-
-        coursesInCart.push({
-          courseId: item.courseId,
-          enrollmentId: item._id,
-          title: course.basic?.title || "Untitled Course",
-          courseCode: course.basic?.courseCode || "N/A",
-          price: finalPrice,
-          originalPrice: pricing.regularPrice,
-          isEarlyBird: pricing.isEarlyBird,
-          earlyBirdSavings: pricing.earlyBirdSavings,
-          currency: pricing.currency,
-          courseType: "Online Live",
-          status: item.enrollmentData.status,
-          startDate: course.schedule?.startDate || null,
-          registrationDate: registrationDate,
-        });
-
-        totalPrice += finalPrice;
-        totalSavings += pricing.earlyBirdSavings;
-        totalOriginalPrice += pricing.regularPrice;
-      }
-    }
-
-    // Process Self-Paced Courses (NO early bird pricing)
-    const selfPacedCartItems =
-      user.mySelfPacedCourses?.filter(
-        (enrollment) => enrollment.enrollmentData.status === "cart"
-      ) || [];
-
-    for (const item of selfPacedCartItems) {
-      const course = await SelfPacedOnlineTraining.findById(
-        item.courseId
-      ).lean();
-      if (course) {
-        const registrationDate = item.enrollmentData.registrationDate;
-        const pricing = calculateCoursePricing(course, registrationDate);
-
-        // ✅ FIX: Use calculated current price, not stored paidAmount
-        const finalPrice = pricing.currentPrice;
-
-        coursesInCart.push({
-          courseId: item.courseId,
-          enrollmentId: item._id,
-          title: course.basic?.title || "Untitled Course",
-          courseCode: course.basic?.courseCode || "N/A",
-          price: finalPrice,
-          originalPrice: pricing.regularPrice,
-          isEarlyBird: false, // Always false for self-paced
-          earlyBirdSavings: 0, // Always 0 for self-paced
-          currency: pricing.currency,
-          courseType: "Self-Paced",
-          status: item.enrollmentData.status,
-          startDate: null,
-          registrationDate: registrationDate,
-        });
-
-        totalPrice += finalPrice;
-        totalOriginalPrice += pricing.regularPrice;
-        // No savings added for self-paced courses
-      }
-    }
-
-    console.log(`📋 Checkout Summary: ${coursesInCart.length} items`);
-    console.log(`💰 Original Total: $${totalOriginalPrice.toFixed(2)}`);
-    console.log(`🎯 Early Bird Savings: $${totalSavings.toFixed(2)}`);
-    console.log(`💳 Final Total: $${totalPrice.toFixed(2)}`);
-
-    res.render("checkout", {
-      coursesInCart: coursesInCart,
-      totalPrice: totalPrice,
-      totalSavings: totalSavings.toFixed(2),
-      totalOriginalPrice: totalOriginalPrice.toFixed(2),
-      hasEarlyBirdDiscounts: totalSavings > 0,
-      user: user,
-      successMessage: "",
-    });
-  } catch (err) {
-    console.error("❌ Error loading checkout page:", err);
-    res.status(500).send("Error loading checkout page: " + err.message);
-  }
-};
-
-/**
- * ✅ IMPROVED: Remove courses using search approach - no course type needed
- * Searches through all three course folders to find and remove courses
- */
-exports.removeFromCart = async (req, res) => {
-  const { courseIds } = req.body;
-  const userId = req.user._id;
-
-  try {
-    console.log("🗑️ Course IDs to remove:", courseIds);
-
-    if (!courseIds || courseIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No courses selected to remove.",
-      });
-    }
-
-    // Ensure courseIds is an array
-    const courseIdArray = Array.isArray(courseIds) ? courseIds : [courseIds];
-
-    // Find the user
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    let removedCount = 0;
-    const removalResults = [];
-
-    // ✅ SEARCH AND REMOVE APPROACH
-    courseIdArray.forEach((courseIdToRemove) => {
-      let found = false;
-      let location = "";
-
-      // 1. Search in myInPersonCourses
-      if (!found) {
-        const index = user.myInPersonCourses.findIndex(
-          (enrollment) =>
-            enrollment.courseId.toString() === courseIdToRemove &&
-            enrollment.enrollmentData.status === "cart"
-        );
-
-        if (index !== -1) {
-          user.myInPersonCourses.splice(index, 1);
-          found = true;
-          location = "myInPersonCourses";
-          removedCount++;
-          console.log(
-            `✅ Found and removed course ${courseIdToRemove} from ${location} at index ${index}`
-          );
-        }
-      }
-
-      // 2. Search in myLiveCourses
-      if (!found) {
-        const index = user.myLiveCourses.findIndex(
-          (enrollment) =>
-            enrollment.courseId.toString() === courseIdToRemove &&
-            enrollment.enrollmentData.status === "cart"
-        );
-
-        if (index !== -1) {
-          user.myLiveCourses.splice(index, 1);
-          found = true;
-          location = "myLiveCourses";
-          removedCount++;
-          console.log(
-            `✅ Found and removed course ${courseIdToRemove} from ${location} at index ${index}`
-          );
-        }
-      }
-
-      // 3. Search in mySelfPacedCourses
-      if (!found) {
-        const index = user.mySelfPacedCourses.findIndex(
-          (enrollment) =>
-            enrollment.courseId.toString() === courseIdToRemove &&
-            enrollment.enrollmentData.status === "cart"
-        );
-
-        if (index !== -1) {
-          user.mySelfPacedCourses.splice(index, 1);
-          found = true;
-          location = "mySelfPacedCourses";
-          removedCount++;
-          console.log(
-            `✅ Found and removed course ${courseIdToRemove} from ${location} at index ${index}`
-          );
-        }
-      }
-
-      // Track results
-      removalResults.push({
-        courseId: courseIdToRemove,
-        found: found,
-        location: location || "not found",
-      });
-
-      if (!found) {
-        console.log(
-          `⚠️ Course ${courseIdToRemove} not found in any cart folder or not in cart status`
-        );
-      }
-    });
-
-    // Save the updated user
-    await user.save();
-
-    // Log detailed results
-    console.log(`✅ Removal Summary:`);
-    console.log(`   Total courses processed: ${courseIdArray.length}`);
-    console.log(`   Total courses removed: ${removedCount}`);
-    console.log(`   Detailed results:`, removalResults);
-
-    if (removedCount === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No matching courses found in cart to remove",
-        details: removalResults,
-      });
-    }
-
-    res.json({
-      success: true,
-      message: `${removedCount} course${
-        removedCount !== 1 ? "s" : ""
-      } removed from cart`,
-      removedCount: removedCount,
-      details: removalResults,
-    });
-  } catch (err) {
-    console.error("❌ Error removing courses from cart:", err);
-    res.status(500).json({
-      success: false,
-      message: "Error removing courses from cart",
-      error: err.message,
-    });
-  }
-};
-//......
-async function updateCartPricing(userId) {
-  try {
-    const user = await User.findById(userId);
-    if (!user) return;
-
-    let hasUpdates = false;
-
-    // Update In-Person course pricing (CAN have early bird)
-    for (let enrollment of user.myInPersonCourses) {
-      if (enrollment.enrollmentData.status === "cart") {
-        const course = await InPersonAestheticTraining.findById(
-          enrollment.courseId
-        );
-        if (course) {
-          const pricing = calculateCoursePricing(
-            course,
-            enrollment.enrollmentData.registrationDate
-          );
-          if (enrollment.enrollmentData.paidAmount !== pricing.currentPrice) {
-            enrollment.enrollmentData.paidAmount = pricing.currentPrice;
-            hasUpdates = true;
-          }
-        }
-      }
-    }
-
-    // Update Online Live course pricing (CAN have early bird)
-    for (let enrollment of user.myLiveCourses) {
-      if (enrollment.enrollmentData.status === "cart") {
-        const course = await OnlineLiveTraining.findById(enrollment.courseId);
-        if (course) {
-          const pricing = calculateCoursePricing(
-            course,
-            enrollment.enrollmentData.registrationDate
-          );
-          if (enrollment.enrollmentData.paidAmount !== pricing.currentPrice) {
-            enrollment.enrollmentData.paidAmount = pricing.currentPrice;
-            hasUpdates = true;
-          }
-        }
-      }
-    }
-
-    // Self-paced courses don't need price updates (no early bird pricing)
-
-    if (hasUpdates) {
-      await user.save();
-      console.log(`✅ Updated cart pricing for user ${userId}`);
-    }
-  } catch (error) {
-    console.error("❌ Error updating cart pricing:", error);
-  }
-}
-
-// Export the helper functions for use in other parts of the application
-exports.updateCartPricing = updateCartPricing;
+// ✅ Export only the helper function (for potential use by other controllers)
 exports.calculateCoursePricing = calculateCoursePricing;

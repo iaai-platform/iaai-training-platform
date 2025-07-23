@@ -433,6 +433,12 @@ app.use("/", promoCodeAdminRoutes);
 const certificationBodyRoutes = require("./routes/certificationBodyRoutes");
 app.use("/", certificationBodyRoutes); // Mount at root so /admin-certification-bodies works
 
+// ============================================
+// ADD THE LINKED COURSE ROUTES HERE (NEW)
+// ============================================
+const linkedCourseRoutes = require("./routes/linkedCourseRoutes");
+app.use("/api/admin", linkedCourseRoutes);
+console.log("🔗 Linked course routes loaded");
 // Self-paced course videos
 app.use(
   "/uploads/selfpaced/videos",

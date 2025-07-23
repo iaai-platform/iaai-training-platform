@@ -55,62 +55,151 @@
                 <tr>
                   <td>
                     <!-- ✅ Checkbox to select courses for removal -->
-                    <input type="checkbox" name="courseIds[]" value="<%= order.courseId %>">
+                    <!-- ⭐ Disable checkbox for linked free courses -->
+                    <% if (order.isLinkedCourseFree) { %>
+                      <input type="checkbox" disabled title="Linked courses cannot be removed independently">
+                      <small class="text-muted d-block" style="font-size: 10px;">Auto-included</small>
+                    <% } else { %>
+                      <input type="checkbox" name="courseIds[]" value="<%= order.courseId %>">
+                    <% } %>
                   </td>
                   <td class="course-title">
                     <%= order.title || 'Untitled Course' %>
+                    
+                    <!-- ⭐ NEW: Linked Course Badge -->
+                    <% if (order.isLinkedCourseFree) { %>
+                      <span class="linked-course-badge">
+                        <i class="fas fa-link"></i> INCLUDED FREE
+                      </span>
+                    <% } %>
+                    
                     <!-- 🆕 Early Bird Badge -->
-                    <% if (order.isEarlyBird) { %>
+                    <% if (order.isEarlyBird && !order.isLinkedCourseFree) { %>
                       <span class="early-bird-badge">
                         <i class="fas fa-clock"></i> Early Bird
                       </span>
                     <% } %>
+                    
+                    <!-- Course details -->
                     <% if (order.startDate) { %>
                       <br><small class="course-meta">Starts: <%= new Date(order.startDate).toLocaleDateString() %></small>
                     <% } %>
                     <% if (order.location) { %>
                       <br><small class="course-meta">Location: <%= order.location %></small>
                     <% } %>
+                    
+                    <!-- ⭐ NEW: Show linked course relationship -->
+                    <% if (order.isLinkedCourseFree) { %>
+                      <br><small class="course-meta linked-info">
+                        <i class="fas fa-info-circle"></i> Included with in-person course
+                      </small>
+                    <% } %>
                   </td>
                   <td><%= order.courseCode || 'N/A' %></td>
                   <td class="price-cell">
-                    <!-- 🆕 Enhanced Price Display with Early Bird -->
+                    <!-- 🆕 Enhanced Price Display with Linked Course Free -->
                     <div class="price-display">
-                      <% if (order.isEarlyBird) { %>
-                        <span class="original-price">$<%= order.originalPrice.toFixed(2) %></span>
-                      <% } %>
-                      <span class="current-price">$<%= order.price ? order.price.toFixed(2) : '0.00' %></span>
-                      <% if (order.isEarlyBird) { %>
+                      <% if (order.isLinkedCourseFree) { %>
+                        <!-- Free linked course display -->
+                        <span class="original-price">$<%= (order.originalPrice || 0).toFixed(2) %></span>
+                        <br>
+                        <strong class="free-price">FREE</strong>
+                        <br>
+                        <small class="savings-text">
+                          <i class="fas fa-gift"></i> Included
+                        </small>
+                      <% } else if (order.isEarlyBird) { %>
+                        <!-- Early bird pricing display -->
+                        <span class="original-price">$<%= (order.originalPrice || 0).toFixed(2) %></span>
+                        <br>
+                        <span class="current-price">$<%= (order.price || 0).toFixed(2) %></span>
+                        <br>
                         <span class="savings-amount-item">
-                          <i class="fas fa-tag"></i> Save $<%= order.earlyBirdSavings.toFixed(2) %>
+                          <i class="fas fa-tag"></i> Save $<%= ((order.originalPrice || 0) - (order.price || 0)).toFixed(2) %>
                         </span>
+                      <% } else { %>
+                        <!-- Regular pricing display -->
+                        <span class="current-price">$<%= (order.price || 0).toFixed(2) %></span>
                       <% } %>
                     </div>
                   </td>
                   <td>
-                    <span class="course-type-badge <%= order.displayType.toLowerCase().replace(/\s+/g, '-') %>">
-                      <%= order.displayType || 'Unknown' %>
-                    </span>
-                  </td>
-                  <td>
-                    <span class="status-badge status-cart">
-                      <%= order.status %>
-                    </span>
-                  </td>
-                  <td>
-                    <!-- ✅ View Details Button -->
-                    <% let detailsUrl;
-                       if (order.courseType === 'SelfPacedOnlineTraining') {
-                         detailsUrl = '/self-paced-online-training/courses/' + order.courseId;
-                       } else if (order.courseType === 'InPersonAestheticTraining') {
-                         detailsUrl = '/in-person-aesthetic-training/courses/' + order.courseId;
-                       } else if (order.courseType === 'OnlineLiveTraining') {
-                         detailsUrl = '/online-live-training/courses/' + order.courseId;
-                       }
+                    <!-- ⭐ Enhanced course type badge with linked course indication -->
+                    <% 
+                      let badgeClass = '';
+                      let displayText = order.displayType || 'Unknown';
+                      
+                      if (order.courseType === 'InPersonAestheticTraining') {
+                        badgeClass = 'in-person';
+                        displayText = 'In-Person';
+                      } else if (order.courseType === 'OnlineLiveTraining') {
+                        if (order.isLinkedCourseFree) {
+                          badgeClass = 'online-live-included';
+                          displayText = 'Online Live (Included)';
+                        } else {
+                          badgeClass = 'online-live';
+                          displayText = 'Online Live';
+                        }
+                      } else if (order.courseType === 'SelfPacedOnlineTraining') {
+                        badgeClass = 'self-paced';
+                        displayText = 'Self-Paced';
+                      }
                     %>
-                    <a href="<%= detailsUrl %>" class="view-details-btn">
-                      <i class="fas fa-eye"></i> View Details
-                    </a>
+                    <span class="course-type-badge <%= badgeClass %>">
+                      <%= displayText %>
+                    </span>
+                  </td>
+                  <td>
+                    <!-- ⭐ Enhanced status badge -->
+                    <% 
+                      let statusClass = 'status-' + (order.status || 'unknown').toLowerCase();
+                      let statusText = order.status || 'Unknown';
+                      
+                      if (order.isLinkedCourseFree && order.status === 'cart') {
+                        statusClass = 'status-included';
+                        statusText = 'Included';
+                      }
+                    %>
+                    <span class="status-badge <%= statusClass %>">
+                      <%= statusText %>
+                    </span>
+                  </td>
+                  <td>
+                    <!-- ⭐ Enhanced action buttons with linked course handling -->
+                    <div class="action-buttons">
+                      <% if (order.isLinkedCourseFree) { %>
+                        <!-- For linked free courses, show info instead of actions -->
+                        <span class="linked-course-info">
+                          <i class="fas fa-info-circle text-muted"></i>
+                          <small class="text-muted">Auto-included</small>
+                        </span>
+                      <% } else { %>
+                        <!-- Regular action buttons for non-linked courses -->
+                        <% 
+                          let detailsUrl;
+                          if (order.courseType === 'SelfPacedOnlineTraining') {
+                            detailsUrl = '/self-paced-online-training/courses/' + order.courseId;
+                          } else if (order.courseType === 'InPersonAestheticTraining') {
+                            detailsUrl = '/in-person-aesthetic-training/courses/' + order.courseId;
+                          } else if (order.courseType === 'OnlineLiveTraining') {
+                            detailsUrl = '/online-live-training/courses/' + order.courseId;
+                          } else {
+                            detailsUrl = '#';
+                          }
+                        %>
+                        
+                        <a href="<%= detailsUrl %>" class="view-details-btn" title="View Course Details">
+                          <i class="fas fa-eye"></i> View Details
+                        </a>
+                        
+                        <!-- ⭐ Optional: Add move to wishlist button -->
+                        <button class="btn-icon btn-wishlist" 
+                                onclick="moveToWishlist('<%= order.courseId %>', '<%= order.courseType %>')"
+                                title="Move to Wishlist">
+                          <i class="fas fa-heart"></i>
+                        </button>
+                      <% } %>
+                    </div>
                   </td>
                 </tr>
               <% }) %>

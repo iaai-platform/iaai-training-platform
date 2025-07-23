@@ -257,6 +257,26 @@ const inPersonCourseSchema = new mongoose.Schema(
       },
     },
 
+    //new
+    // Update the linkedCourse section in InPersonAestheticTraining model
+    linkedCourse: {
+      onlineCourseId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "OnlineLiveTraining",
+        default: null,
+      },
+      isRequired: { type: Boolean, default: false },
+      relationship: {
+        type: String,
+        enum: ["prerequisite", "supplementary", "follow-up"],
+        default: "prerequisite",
+      },
+      completionRequired: { type: Boolean, default: true },
+      // ⭐ NEW: Pricing override for linked course
+      isFree: { type: Boolean, default: true }, // Linked courses are free by default
+      customPrice: { type: Number, default: 0 }, // Allow custom pricing if needed
+    },
+
     // ========================================
     // ASSESSMENT & CERTIFICATION
     // ========================================

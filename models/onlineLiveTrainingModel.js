@@ -1,4 +1,4 @@
-// models/OnlineLiveTraining.js
+// models/onlineLiveTrainingModel.js
 /**
  * Updated Online Live Training Course Model
  *

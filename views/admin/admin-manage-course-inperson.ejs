@@ -9,6 +9,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <!-- NEW: Add the linked course script -->
+    <script src="/js/linkedCourse.js"></script>
 </head>
 <body>
 
@@ -134,7 +136,52 @@
                         </tr>
                     </thead>
                     <tbody id="coursesTableBody">
-                        </tbody>
+                        <!-- Course rows will be dynamically inserted here -->
+                        <!-- Sample row structure for reference: -->
+                        <!--
+                        <tr>
+                            <td><input type="checkbox" class="course-select" data-course-id="course-id"></td>
+                            <td>
+                                <div class="course-details">
+                                    <strong>Course Title</strong>
+                                    <small>Course Code</small>
+                                    <div class="linked-indicator">
+                                        <span class="badge badge-info"><i class="fas fa-link"></i> Linked</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Schedule info</td>
+                            <td>Venue info</td>
+                            <td>Instructor info</td>
+                            <td>Enrollment info</td>
+                            <td>Price info</td>
+                            <td>Status</td>
+                            <td class="actions-cell">
+                                <div class="btn-group">
+                                    <button class="btn btn-primary btn-sm" onclick="adminCourses.editCourse('course-id')" title="Edit Course">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="adminCourses.deleteCourse('course-id')" title="Delete Course">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    
+                                    NEW: Linked Course Buttons
+                                    <button class="btn btn-info btn-sm" onclick="linkedCourseManager.showAddModal('course-id')" title="Add Linked Course">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" onclick="linkedCourseManager.showEditModal('course-id')" title="Manage Linked Courses">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                    
+                                    <button class="btn btn-warning btn-sm" onclick="adminCourses.cloneCourse('course-id')" title="Clone Course">
+                                        <i class="fas fa-copy"></i>
+                                        
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        -->
+                    </tbody>
                 </table>
             </div>
 
@@ -1068,6 +1115,8 @@
         </div>
     </div>
 </div>
+
+<!-- All the JavaScript Templates for Dynamic Items -->
 <script type="text/template" id="additionalInstructorTemplate">
     <div class="additional-instructor-item dynamic-item">
         <div class="dynamic-item-header">
@@ -1379,6 +1428,7 @@
     </div>
 </script>
 
+<!-- Confirmation Modal -->
 <div class="modal-overlay" id="confirmModal">
     <div class="modal-container small">
         <div class="modal-header">
@@ -1397,15 +1447,21 @@
     </div>
 </div>
 
-    <div class="toast-container" id="toastContainer"></div>
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
 
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Processing...</p>
-        </div>
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Processing...</p>
     </div>
+</div>
 
-    <script src="/js/admin-courses.js"></script>
+
+
+<!-- Main Scripts -->
+<script src="/js/admin-courses.js"></script>
+
 </body>
 </html>

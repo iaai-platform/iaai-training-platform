@@ -62,69 +62,101 @@
                 </tr>
               </thead>
               <tbody>
-                <% coursesInCart.forEach((course, index) => { %>
-                  <tr data-course-id="<%= course.courseId %>" data-course-type="<%= course.courseType %>">
-                    <td><strong><%= course.courseCode %></strong></td>
-                    <td>
-                      <div class="course-title-cell">
-                        <%= course.title %>
-                        <!-- 🆕 Early Bird Badge -->
-                        <% if (course.isEarlyBird) { %>
-                          <span class="early-bird-badge">
-                            <i class="fas fa-clock"></i> Early Bird
-                          </span>
-                        <% } %>
-                        <% if (course.courseType === 'SelfPacedOnlineTraining' || course.displayType === 'Self-Paced') { %>
-                          <span class="course-badge self-paced">Self-Paced</span>
-                        <% } else if (course.courseType === 'OnlineLiveTraining' || course.displayType === 'Online Live') { %>
-                          <span class="course-badge online-live">Live Online</span>
-                        <% } else { %>
-                          <span class="course-badge in-person">In-Person</span>
-                        <% } %>
-                      </div>
-                    </td>
-                    <td><%= course.displayType || course.courseType %></td>
-                    <td>
-                      <% if (course.startDate) { %>
-                        <%= new Date(course.startDate).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        }) %>
-                      <% } else { %>
-                        <span class="text-muted">Anytime</span>
-                      <% } %>
-                    </td>
-                    <td class="price-cell">
-                      <!-- 🆕 Enhanced Price Display with Early Bird -->
-                      <div class="checkout-price-display">
-                        <% if (course.isEarlyBird && course.originalPrice) { %>
-                          <span class="original-price">$<%= course.originalPrice.toFixed(2) %></span>
-                        <% } %>
-                        <strong class="current-price">$<%= course.price.toFixed(2) %></strong> USD
-                        <% if (course.isEarlyBird && course.earlyBirdSavings) { %>
-                          <div class="savings-amount-item">
-                            <i class="fas fa-tag"></i> Save $<%= course.earlyBirdSavings.toFixed(2) %>
-                          </div>
-                        <% } %>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn-icon btn-wishlist" 
-                                onclick="moveToWishlist('<%= course.courseId %>', '<%= course.courseType %>')"
-                                title="Move to Wishlist">
-                          <i class="fas fa-heart"></i>
-                        </button>
-                        <button class="btn-icon btn-remove" 
-                                onclick="removeFromCart('<%= course.courseId %>', '<%= course.courseType %>')"
-                                title="Remove from Cart">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                <% }) %>
+ <!-- Update the table body section in checkout.ejs -->
+<tbody>
+  <% coursesInCart.forEach((course, index) => { %>
+    <tr data-course-id="<%= course.courseId %>" data-course-type="<%= course.courseType %>">
+      <td><strong><%= course.courseCode %></strong></td>
+      <td>
+        <div class="course-title-cell">
+          <%= course.title %>
+          
+          <!-- ⭐ NEW: Linked Course Badge -->
+          <% if (course.isLinkedCourseFree) { %>
+            <span class="course-badge linked-free">
+              <i class="fas fa-link"></i> Included Free
+            </span>
+          <% } %>
+          
+          <!-- 🆕 Early Bird Badge -->
+          <% if (course.isEarlyBird) { %>
+            <span class="early-bird-badge">
+              <i class="fas fa-clock"></i> Early Bird
+            </span>
+          <% } %>
+          
+          <!-- Course Type Badges -->
+          <% if (course.courseType === 'SelfPacedOnlineTraining' || course.displayType === 'Self-Paced') { %>
+            <span class="course-badge self-paced">Self-Paced</span>
+          <% } else if (course.courseType === 'OnlineLiveTraining' || course.displayType === 'Online Live') { %>
+            <span class="course-badge online-live">
+              <% if (course.isLinkedCourseFree) { %>
+                Live Online (Included)
+              <% } else { %>
+                Live Online
+              <% } %>
+            </span>
+          <% } else { %>
+            <span class="course-badge in-person">In-Person</span>
+          <% } %>
+        </div>
+      </td>
+      <td><%= course.displayType || course.courseType %></td>
+      <td>
+        <% if (course.startDate) { %>
+          <%= new Date(course.startDate).toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+          }) %>
+        <% } else { %>
+          <span class="text-muted">Anytime</span>
+        <% } %>
+      </td>
+      <td class="price-cell">
+        <!-- 🆕 Enhanced Price Display with Linked Course Free -->
+        <div class="checkout-price-display">
+          <% if (course.isLinkedCourseFree) { %>
+            <span class="original-price">$<%= course.originalPrice.toFixed(2) %></span>
+            <strong class="current-price free-price">FREE</strong>
+            <div class="savings-amount-item">
+              <i class="fas fa-gift"></i> Included with In-Person Course
+            </div>
+          <% } else if (course.isEarlyBird && course.originalPrice) { %>
+            <span class="original-price">$<%= course.originalPrice.toFixed(2) %></span>
+            <strong class="current-price">$<%= course.price.toFixed(2) %></strong> USD
+            <div class="savings-amount-item">
+              <i class="fas fa-tag"></i> Save $<%= course.earlyBirdSavings.toFixed(2) %>
+            </div>
+          <% } else { %>
+            <strong class="current-price">$<%= course.price.toFixed(2) %></strong> USD
+          <% } %>
+        </div>
+      </td>
+      <td>
+        <div class="action-buttons">
+          <!-- ⭐ Disable actions for linked free courses -->
+          <% if (!course.isLinkedCourseFree) { %>
+            <button class="btn-icon btn-wishlist" 
+                    onclick="moveToWishlist('<%= course.courseId %>', '<%= course.courseType %>')"
+                    title="Move to Wishlist">
+              <i class="fas fa-heart"></i>
+            </button>
+            <button class="btn-icon btn-remove" 
+                    onclick="removeFromCart('<%= course.courseId %>', '<%= course.courseType %>')"
+                    title="Remove from Cart">
+              <i class="fas fa-trash"></i>
+            </button>
+          <% } else { %>
+            <span class="text-muted small">
+              <i class="fas fa-info-circle"></i> Linked Course
+            </span>
+          <% } %>
+        </div>
+      </td>
+    </tr>
+  <% }) %>
+</tbody>
               </tbody>
             </table>
           </div>

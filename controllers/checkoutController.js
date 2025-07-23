@@ -1,6 +1,4 @@
-// checkoutController.js - FIXED VERSION
-// Remove any duplicate const CCavenueUtils declarations and keep only ONE at the top
-
+// controllers/checkoutController.js - FULLY ALIGNED WITH LINKED COURSES
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
@@ -9,14 +7,16 @@ const PromoCode = require("../models/promoCode");
 const sendEmail = require("../utils/sendEmail");
 const { v4: uuidv4 } = require("uuid");
 
-// ✅ SINGLE CCAvenue utility import - KEEP ONLY THIS ONE
+// ✅ CCAvenue utility import
 const CCavenueUtils = require("../utils/ccavenueUtils");
-
-// Initialize CCAvenue utility - KEEP ONLY THIS ONE
 const ccavUtil = new CCavenueUtils(process.env.CCAVENUE_WORKING_KEY);
 
-// Helper function to calculate course pricing with early bird
-function calculateCoursePricing(course, registrationDate = new Date()) {
+// ✅ ENHANCED: Helper function to calculate pricing with linked course support
+function calculateCoursePricing(
+  course,
+  registrationDate = new Date(),
+  isLinkedCourse = false
+) {
   const pricing = {
     regularPrice: 0,
     earlyBirdPrice: null,
@@ -24,8 +24,27 @@ function calculateCoursePricing(course, registrationDate = new Date()) {
     isEarlyBird: false,
     earlyBirdSavings: 0,
     currency: "USD",
+    isLinkedCourseFree: isLinkedCourse, // ⭐ CRITICAL: Track if this is a free linked course
   };
 
+  // ⭐ ENHANCED: If this is a linked course, set price to 0
+  if (isLinkedCourse) {
+    if (course.enrollment) {
+      pricing.regularPrice = course.enrollment.price || 0;
+      pricing.currency = course.enrollment.currency || "USD";
+    } else if (course.access) {
+      pricing.regularPrice = course.access.price || 0;
+      pricing.currency = course.access.currency || "USD";
+    }
+    pricing.currentPrice = 0; // Free for linked courses
+    console.log(
+      "🔗 Linked course pricing set to FREE, original:",
+      pricing.regularPrice
+    );
+    return pricing;
+  }
+
+  // Rest of the existing pricing logic for non-linked courses
   if (course.enrollment) {
     // For InPerson and OnlineLive courses
     pricing.regularPrice = course.enrollment.price || 0;
@@ -63,10 +82,10 @@ function calculateCoursePricing(course, registrationDate = new Date()) {
   return pricing;
 }
 
-// ✅ EXISTING METHOD: Display Checkout Page
+// ✅ ENHANCED: Display Checkout Page with linked course support
 exports.getCheckoutPage = async (req, res) => {
   try {
-    console.log("🔍 Loading checkout page...");
+    console.log("🔍 Loading checkout page with linked course support...");
     const user = await User.findById(req.user._id).lean();
 
     if (!user) {
@@ -78,8 +97,9 @@ exports.getCheckoutPage = async (req, res) => {
     let totalOriginalPrice = 0;
     let totalCurrentPrice = 0;
     let totalEarlyBirdSavings = 0;
+    let totalLinkedCourseSavings = 0;
 
-    // ✅ Process In-Person Courses
+    // ✅ ENHANCED: Process In-Person Courses with linked course detection
     const inPersonCartItems =
       user.myInPersonCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -90,9 +110,11 @@ exports.getCheckoutPage = async (req, res) => {
         item.courseId
       ).lean();
       if (course) {
+        const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
         const pricing = calculateCoursePricing(
           course,
-          item.enrollmentData.registrationDate
+          item.enrollmentData.registrationDate,
+          isLinkedCourse
         );
 
         coursesInCart.push({
@@ -103,6 +125,7 @@ exports.getCheckoutPage = async (req, res) => {
           originalPrice: pricing.regularPrice,
           isEarlyBird: pricing.isEarlyBird,
           earlyBirdSavings: pricing.earlyBirdSavings,
+          isLinkedCourseFree: pricing.isLinkedCourseFree, // ⭐ NEW
           courseType: "InPersonAestheticTraining",
           displayType: "In-Person",
           startDate: course.schedule?.startDate || null,
@@ -111,10 +134,13 @@ exports.getCheckoutPage = async (req, res) => {
         totalOriginalPrice += pricing.regularPrice;
         totalCurrentPrice += pricing.currentPrice;
         totalEarlyBirdSavings += pricing.earlyBirdSavings;
+        if (pricing.isLinkedCourseFree) {
+          totalLinkedCourseSavings += pricing.regularPrice;
+        }
       }
     }
 
-    // ✅ Process Online Live Courses
+    // ✅ ENHANCED: Process Online Live Courses with linked course detection
     const liveCartItems =
       user.myLiveCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -123,9 +149,11 @@ exports.getCheckoutPage = async (req, res) => {
     for (const item of liveCartItems) {
       const course = await OnlineLiveTraining.findById(item.courseId).lean();
       if (course) {
+        const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
         const pricing = calculateCoursePricing(
           course,
-          item.enrollmentData.registrationDate
+          item.enrollmentData.registrationDate,
+          isLinkedCourse
         );
 
         coursesInCart.push({
@@ -134,20 +162,28 @@ exports.getCheckoutPage = async (req, res) => {
           courseCode: course.basic?.courseCode || "N/A",
           price: pricing.currentPrice,
           originalPrice: pricing.regularPrice,
-          isEarlyBird: pricing.isEarlyBird,
-          earlyBirdSavings: pricing.earlyBirdSavings,
+          isEarlyBird: pricing.isEarlyBird && !isLinkedCourse, // ⭐ ENHANCED: Don't show early bird for linked
+          earlyBirdSavings: isLinkedCourse ? 0 : pricing.earlyBirdSavings, // ⭐ ENHANCED
+          isLinkedCourseFree: pricing.isLinkedCourseFree, // ⭐ NEW
           courseType: "OnlineLiveTraining",
-          displayType: "Online Live",
+          displayType: isLinkedCourse
+            ? "Online Live (Included)"
+            : "Online Live", // ⭐ ENHANCED
           startDate: course.schedule?.startDate || null,
         });
 
         totalOriginalPrice += pricing.regularPrice;
         totalCurrentPrice += pricing.currentPrice;
-        totalEarlyBirdSavings += pricing.earlyBirdSavings;
+        if (!isLinkedCourse) {
+          totalEarlyBirdSavings += pricing.earlyBirdSavings;
+        }
+        if (pricing.isLinkedCourseFree) {
+          totalLinkedCourseSavings += pricing.regularPrice;
+        }
       }
     }
 
-    // ✅ Process Self-Paced Courses
+    // ✅ Process Self-Paced Courses (no linked course logic needed)
     const selfPacedCartItems =
       user.mySelfPacedCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -171,6 +207,7 @@ exports.getCheckoutPage = async (req, res) => {
           originalPrice: pricing.regularPrice,
           isEarlyBird: false, // Self-paced courses don't have early bird
           earlyBirdSavings: 0,
+          isLinkedCourseFree: false, // ⭐ NEW
           courseType: "SelfPacedOnlineTraining",
           displayType: "Self-Paced",
           startDate: null,
@@ -181,25 +218,26 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    console.log("📌 Cart Courses Found:", {
+    // ✅ ENHANCED: Calculate total savings (early bird + linked courses)
+    const totalSavings = totalEarlyBirdSavings + totalLinkedCourseSavings;
+
+    console.log("📌 Enhanced Cart Summary:", {
       inPerson: inPersonCartItems.length,
       live: liveCartItems.length,
       selfPaced: selfPacedCartItems.length,
       totalOriginal: totalOriginalPrice,
       totalCurrent: totalCurrentPrice,
-      savings: totalEarlyBirdSavings,
+      earlyBirdSavings: totalEarlyBirdSavings,
+      linkedCourseSavings: totalLinkedCourseSavings,
+      totalSavings: totalSavings,
     });
-
-    console.log(
-      `✅ Checkout loaded with ${coursesInCart.length} courses, original: $${totalOriginalPrice}, current: $${totalCurrentPrice}, savings: $${totalEarlyBirdSavings}`
-    );
 
     res.render("checkout", {
       coursesInCart,
       totalPrice: totalCurrentPrice,
       totalOriginalPrice: totalOriginalPrice,
-      totalSavings: totalEarlyBirdSavings.toFixed(2),
-      hasEarlyBirdDiscounts: totalEarlyBirdSavings > 0,
+      totalSavings: totalSavings.toFixed(2),
+      hasEarlyBirdDiscounts: totalSavings > 0, // ⭐ ENHANCED: Include linked course savings
       user,
       successMessage: "",
     });
@@ -209,7 +247,7 @@ exports.getCheckoutPage = async (req, res) => {
   }
 };
 
-// ✅ EXISTING METHOD: Apply Promo Code
+// ✅ ENHANCED: Apply Promo Code with linked course support
 exports.applyPromoCode = async (req, res) => {
   try {
     const { promoCode } = req.body;
@@ -221,7 +259,7 @@ exports.applyPromoCode = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Calculate total price from cart courses using enhanced pricing
+    // ✅ ENHANCED: Calculate total price using enhanced pricing with linked course support
     let totalPrice = 0;
 
     // Get in-person cart courses
@@ -233,9 +271,11 @@ exports.applyPromoCode = async (req, res) => {
     for (const item of inPersonCartItems) {
       const course = await InPersonAestheticTraining.findById(item.courseId);
       if (course) {
+        const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
         const pricing = calculateCoursePricing(
           course,
-          item.enrollmentData.registrationDate
+          item.enrollmentData.registrationDate,
+          isLinkedCourse
         );
         totalPrice += pricing.currentPrice;
       }
@@ -250,9 +290,11 @@ exports.applyPromoCode = async (req, res) => {
     for (const item of liveCartItems) {
       const course = await OnlineLiveTraining.findById(item.courseId);
       if (course) {
+        const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
         const pricing = calculateCoursePricing(
           course,
-          item.enrollmentData.registrationDate
+          item.enrollmentData.registrationDate,
+          isLinkedCourse
         );
         totalPrice += pricing.currentPrice;
       }
@@ -324,7 +366,7 @@ exports.applyPromoCode = async (req, res) => {
   }
 };
 
-// ✅ EXISTING METHOD: Process Checkout
+// ✅ ENHANCED: Process Checkout with linked course support
 exports.processCheckout = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -341,9 +383,58 @@ exports.processCheckout = async (req, res) => {
         .json({ success: false, message: "No courses in cart." });
     }
 
-    // Calculate total price (you can reuse the logic from applyPromoCode)
+    // ✅ ENHANCED: Calculate total price with linked course support
     let totalPrice = 0;
-    // ... calculation logic ...
+
+    // Process all course types with enhanced pricing
+    for (const enrollment of user.myInPersonCourses?.filter(
+      (e) => e.enrollmentData.status === "cart"
+    ) || []) {
+      const course = await InPersonAestheticTraining.findById(
+        enrollment.courseId
+      );
+      if (course) {
+        const isLinkedCourse =
+          enrollment.enrollmentData.isLinkedCourseFree || false;
+        const pricing = calculateCoursePricing(
+          course,
+          enrollment.enrollmentData.registrationDate,
+          isLinkedCourse
+        );
+        totalPrice += pricing.currentPrice;
+      }
+    }
+
+    for (const enrollment of user.myLiveCourses?.filter(
+      (e) => e.enrollmentData.status === "cart"
+    ) || []) {
+      const course = await OnlineLiveTraining.findById(enrollment.courseId);
+      if (course) {
+        const isLinkedCourse =
+          enrollment.enrollmentData.isLinkedCourseFree || false;
+        const pricing = calculateCoursePricing(
+          course,
+          enrollment.enrollmentData.registrationDate,
+          isLinkedCourse
+        );
+        totalPrice += pricing.currentPrice;
+      }
+    }
+
+    for (const enrollment of user.mySelfPacedCourses?.filter(
+      (e) => e.enrollmentData.status === "cart"
+    ) || []) {
+      const course = await SelfPacedOnlineTraining.findById(
+        enrollment.courseId
+      );
+      if (course) {
+        const pricing = calculateCoursePricing(
+          course,
+          enrollment.enrollmentData.registrationDate
+        );
+        totalPrice += pricing.currentPrice;
+      }
+    }
 
     if (totalPrice === 0 || req.session.appliedPromoCode) {
       return res.redirect("/complete-registration");
@@ -356,15 +447,80 @@ exports.processCheckout = async (req, res) => {
   }
 };
 
-// ✅ EXISTING METHOD: Process Payment
+// ✅ ENHANCED: Process Payment with linked course support
 exports.processPayment = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     let totalPrice = 0;
     const cartCourses = [];
 
-    // Calculate totals using enhanced pricing
-    // ... existing logic but with enhanced pricing calculation ...
+    // ✅ ENHANCED: Calculate totals using enhanced pricing with linked course support
+    // Process in-person courses
+    for (const enrollment of user.myInPersonCourses?.filter(
+      (e) => e.enrollmentData.status === "cart"
+    ) || []) {
+      const course = await InPersonAestheticTraining.findById(
+        enrollment.courseId
+      );
+      if (course) {
+        const isLinkedCourse =
+          enrollment.enrollmentData.isLinkedCourseFree || false;
+        const pricing = calculateCoursePricing(
+          course,
+          enrollment.enrollmentData.registrationDate,
+          isLinkedCourse
+        );
+        totalPrice += pricing.currentPrice;
+        cartCourses.push({
+          title: course.basic?.title,
+          price: pricing.currentPrice,
+          isLinkedCourseFree: pricing.isLinkedCourseFree,
+        });
+      }
+    }
+
+    // Process online live courses
+    for (const enrollment of user.myLiveCourses?.filter(
+      (e) => e.enrollmentData.status === "cart"
+    ) || []) {
+      const course = await OnlineLiveTraining.findById(enrollment.courseId);
+      if (course) {
+        const isLinkedCourse =
+          enrollment.enrollmentData.isLinkedCourseFree || false;
+        const pricing = calculateCoursePricing(
+          course,
+          enrollment.enrollmentData.registrationDate,
+          isLinkedCourse
+        );
+        totalPrice += pricing.currentPrice;
+        cartCourses.push({
+          title: course.basic?.title,
+          price: pricing.currentPrice,
+          isLinkedCourseFree: pricing.isLinkedCourseFree,
+        });
+      }
+    }
+
+    // Process self-paced courses
+    for (const enrollment of user.mySelfPacedCourses?.filter(
+      (e) => e.enrollmentData.status === "cart"
+    ) || []) {
+      const course = await SelfPacedOnlineTraining.findById(
+        enrollment.courseId
+      );
+      if (course) {
+        const pricing = calculateCoursePricing(
+          course,
+          enrollment.enrollmentData.registrationDate
+        );
+        totalPrice += pricing.currentPrice;
+        cartCourses.push({
+          title: course.basic?.title,
+          price: pricing.currentPrice,
+          isLinkedCourseFree: false,
+        });
+      }
+    }
 
     if (totalPrice === 0) {
       return res.redirect("/complete-registration");
@@ -377,21 +533,20 @@ exports.processPayment = async (req, res) => {
   }
 };
 
-// ✅ EXISTING METHOD: Complete Registration
+// ✅ ENHANCED: Complete Registration with linked course support
 exports.completeRegistration = async (req, res) => {
   try {
-    console.log("🎯 Starting registration process...");
+    console.log(
+      "🎯 Starting registration process with linked course support..."
+    );
     const user = await User.findById(req.user._id);
 
     const registeredCourses = [];
     let coursesUpdated = 0;
     const referenceNumber = uuidv4();
     const transactionId = uuidv4();
-    const receiptNumber = `REC-${Date.now()}-${Math.floor(
-      Math.random() * 1000
-    )}`;
 
-    // Update in-person courses
+    // ✅ ENHANCED: Update in-person courses with linked course awareness
     for (let i = 0; i < user.myInPersonCourses.length; i++) {
       const enrollment = user.myInPersonCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
@@ -406,23 +561,29 @@ exports.completeRegistration = async (req, res) => {
             req.session.appliedPromoCode || "PROMO100";
 
           coursesUpdated++;
+          const isLinkedCourse =
+            enrollment.enrollmentData.isLinkedCourseFree || false;
           const pricing = calculateCoursePricing(
             course,
-            enrollment.enrollmentData.registrationDate
+            enrollment.enrollmentData.registrationDate,
+            isLinkedCourse
           );
+
           registeredCourses.push({
             courseId: enrollment.courseId,
             title: course.basic?.title,
             courseCode: course.basic?.courseCode,
             courseType: "In-Person",
             price: pricing.regularPrice,
+            finalPrice: pricing.currentPrice,
+            isLinkedCourseFree: pricing.isLinkedCourseFree,
             startDate: course.schedule?.startDate,
           });
         }
       }
     }
 
-    // Update online live courses
+    // ✅ ENHANCED: Update online live courses with linked course awareness
     for (let i = 0; i < user.myLiveCourses.length; i++) {
       const enrollment = user.myLiveCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
@@ -435,23 +596,31 @@ exports.completeRegistration = async (req, res) => {
             req.session.appliedPromoCode || "PROMO100";
 
           coursesUpdated++;
+          const isLinkedCourse =
+            enrollment.enrollmentData.isLinkedCourseFree || false;
           const pricing = calculateCoursePricing(
             course,
-            enrollment.enrollmentData.registrationDate
+            enrollment.enrollmentData.registrationDate,
+            isLinkedCourse
           );
+
           registeredCourses.push({
             courseId: enrollment.courseId,
             title: course.basic?.title,
             courseCode: course.basic?.courseCode,
-            courseType: "Online Live",
+            courseType: isLinkedCourse
+              ? "Online Live (Included)"
+              : "Online Live",
             price: pricing.regularPrice,
+            finalPrice: pricing.currentPrice,
+            isLinkedCourseFree: pricing.isLinkedCourseFree,
             startDate: course.schedule?.startDate,
           });
         }
       }
     }
 
-    // Update self-paced courses
+    // ✅ Update self-paced courses (no linked course logic needed)
     for (let i = 0; i < user.mySelfPacedCourses.length; i++) {
       const enrollment = user.mySelfPacedCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
@@ -477,12 +646,15 @@ exports.completeRegistration = async (req, res) => {
             course,
             enrollment.enrollmentData.registrationDate
           );
+
           registeredCourses.push({
             courseId: enrollment.courseId,
             title: course.basic?.title,
             courseCode: course.basic?.courseCode,
             courseType: "Self-Paced",
             price: pricing.regularPrice,
+            finalPrice: pricing.currentPrice,
+            isLinkedCourseFree: false,
             startDate: null,
           });
         }
@@ -496,19 +668,25 @@ exports.completeRegistration = async (req, res) => {
         .json({ success: false, message: "No courses in cart." });
     }
 
-    // Create payment transaction record
+    // ✅ ENHANCED: Create payment transaction record with linked course info
     const totalAmount = registeredCourses.reduce(
       (sum, course) => sum + course.price,
       0
     );
+    const finalAmount = registeredCourses.reduce(
+      (sum, course) => sum + course.finalPrice,
+      0
+    );
+    const totalSavings = totalAmount - finalAmount;
+
     const transaction = {
       transactionId: transactionId,
-      receiptNumber: receiptNumber,
+      receiptNumber: `REC-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       transactionDate: new Date(),
       paymentMethod: "Promo Code",
       paymentStatus: "completed",
       subtotal: totalAmount,
-      discountAmount: totalAmount, // 100% discount
+      discountAmount: totalSavings,
       tax: 0,
       finalAmount: 0,
       currency: "USD",
@@ -517,12 +695,12 @@ exports.completeRegistration = async (req, res) => {
         courseType: course.courseType,
         originalPrice: course.price,
         paidPrice: 0,
+        isLinkedCourseFree: course.isLinkedCourseFree || false, // ⭐ NEW
       })),
       promoCode: req.session.appliedPromoCode || "PROMO100",
     };
 
     user.paymentTransactions.push(transaction);
-
     await user.save({ validateBeforeSave: false });
 
     // Clear the applied promo code from session
@@ -541,7 +719,9 @@ exports.completeRegistration = async (req, res) => {
       console.error("❌ Error sending registration email:", emailError);
     }
 
-    console.log(`✅ Registration completed for ${coursesUpdated} courses`);
+    console.log(
+      `✅ Registration completed for ${coursesUpdated} courses (including linked courses)`
+    );
     console.log(`📋 Reference number: ${referenceNumber}`);
 
     // Handle both POST (AJAX) and GET requests
@@ -567,10 +747,12 @@ exports.completeRegistration = async (req, res) => {
   }
 };
 
-// ✅ NEW METHOD: Initiate CCAvenue Payment
+// ✅ ENHANCED: Initiate CCAvenue Payment with linked course support
 exports.proceedToPayment = async (req, res) => {
   try {
-    console.log("💳 Processing payment with CCAvenue...");
+    console.log(
+      "💳 Processing payment with CCAvenue (with linked course support)..."
+    );
     const userId = req.user._id;
     const user = await User.findById(userId)
       .populate("myInPersonCourses.courseId")
@@ -583,22 +765,26 @@ exports.proceedToPayment = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Collect cart items and calculate totals using enhanced pricing
+    // ✅ ENHANCED: Collect cart items and calculate totals using enhanced pricing with linked course support
     const cartItems = [];
     let totalOriginalPrice = 0;
     let totalCurrentPrice = 0;
     let totalEarlyBirdSavings = 0;
+    let totalLinkedCourseSavings = 0;
 
-    // Helper function to process cart items
+    // Helper function to process cart items with linked course support
     const processCartItems = (enrollments, courseType) => {
       enrollments
         .filter((e) => e.enrollmentData.status === "cart")
         .forEach((enrollment) => {
           const course = enrollment.courseId;
           if (course) {
+            const isLinkedCourse =
+              enrollment.enrollmentData.isLinkedCourseFree || false;
             const pricing = calculateCoursePricing(
               course,
-              enrollment.enrollmentData.registrationDate
+              enrollment.enrollmentData.registrationDate,
+              isLinkedCourse
             );
 
             cartItems.push({
@@ -611,6 +797,7 @@ exports.proceedToPayment = async (req, res) => {
               finalPrice: pricing.currentPrice,
               isEarlyBird: pricing.isEarlyBird,
               earlyBirdSavings: pricing.earlyBirdSavings,
+              isLinkedCourseFree: pricing.isLinkedCourseFree, // ⭐ NEW
               courseSchedule: {
                 startDate: course.schedule?.startDate,
                 endDate: course.schedule?.endDate,
@@ -631,6 +818,9 @@ exports.proceedToPayment = async (req, res) => {
             totalOriginalPrice += pricing.regularPrice;
             totalCurrentPrice += pricing.currentPrice;
             totalEarlyBirdSavings += pricing.earlyBirdSavings;
+            if (pricing.isLinkedCourseFree) {
+              totalLinkedCourseSavings += pricing.regularPrice;
+            }
           }
         });
     };
@@ -673,7 +863,7 @@ exports.proceedToPayment = async (req, res) => {
       return res.redirect("/complete-registration");
     }
 
-    // Create payment transaction record
+    // ✅ ENHANCED: Create payment transaction record with linked course info
     const transactionId = `TXN_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}`;
@@ -687,8 +877,10 @@ exports.proceedToPayment = async (req, res) => {
 
       financial: {
         subtotal: totalOriginalPrice,
-        discountAmount: totalEarlyBirdSavings + promoCodeDiscount,
+        discountAmount:
+          totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount, // ⭐ ENHANCED
         earlyBirdSavings: totalEarlyBirdSavings,
+        linkedCourseSavings: totalLinkedCourseSavings, // ⭐ NEW
         promoCodeDiscount: promoCodeDiscount,
         finalAmount: finalAmount,
         currency: "USD",
@@ -701,6 +893,14 @@ exports.proceedToPayment = async (req, res) => {
           totalSavings: totalEarlyBirdSavings,
           coursesWithEarlyBird: cartItems
             .filter((item) => item.isEarlyBird)
+            .map((item) => item.courseId.toString()),
+        },
+        linkedCourses: {
+          // ⭐ NEW
+          applied: totalLinkedCourseSavings > 0,
+          totalSavings: totalLinkedCourseSavings,
+          coursesIncluded: cartItems
+            .filter((item) => item.isLinkedCourseFree)
             .map((item) => item.courseId.toString()),
         },
       },
@@ -762,7 +962,7 @@ exports.proceedToPayment = async (req, res) => {
         ? process.env.CCAVENUE_PROD_URL
         : process.env.CCAVENUE_TEST_URL;
 
-    // Create auto-submit form
+    // ✅ ENHANCED: Create auto-submit form with linked course info
     const paymentForm = `
       <html>
         <head>
@@ -776,6 +976,7 @@ exports.proceedToPayment = async (req, res) => {
             .summary h4 { margin: 0 0 15px 0; color: #333; }
             .summary p { margin: 5px 0; color: #666; }
             .amount { font-size: 24px; font-weight: bold; color: #28a745; }
+            .savings { color: #28a745; font-weight: 600; }
           </style>
         </head>
         <body>
@@ -790,19 +991,26 @@ exports.proceedToPayment = async (req, res) => {
               <p><strong>Items:</strong> ${cartItems.length} course(s)</p>
               ${
                 totalEarlyBirdSavings > 0
-                  ? `<p><strong>Early Bird Savings:</strong> $${totalEarlyBirdSavings.toFixed(
+                  ? `<p class="savings"><strong>Early Bird Savings:</strong> ${totalEarlyBirdSavings.toFixed(
+                      2
+                    )}</p>`
+                  : ""
+              }
+              ${
+                totalLinkedCourseSavings > 0
+                  ? `<p class="savings"><strong>Included Course Savings:</strong> ${totalLinkedCourseSavings.toFixed(
                       2
                     )}</p>`
                   : ""
               }
               ${
                 promoCodeDiscount > 0
-                  ? `<p><strong>Promo Discount:</strong> $${promoCodeDiscount.toFixed(
+                  ? `<p class="savings"><strong>Promo Discount:</strong> ${promoCodeDiscount.toFixed(
                       2
                     )}</p>`
                   : ""
               }
-              <p class="amount">Total: $${finalAmount.toFixed(2)} USD</p>
+              <p class="amount">Total: ${finalAmount.toFixed(2)} USD</p>
             </div>
             
             <p><small>🔐 This is a secure SSL encrypted connection</small></p>
@@ -826,7 +1034,10 @@ exports.proceedToPayment = async (req, res) => {
     `;
 
     console.log(
-      `💳 Payment initiated: Order ${orderNumber}, Amount $${finalAmount}, Transaction ${transactionId}`
+      `💳 Enhanced Payment initiated: Order ${orderNumber}, Amount ${finalAmount}, Transaction ${transactionId}`
+    );
+    console.log(
+      `💰 Savings breakdown: Early Bird ${totalEarlyBirdSavings}, Linked Courses ${totalLinkedCourseSavings}, Promo ${promoCodeDiscount}`
     );
     res.send(paymentForm);
   } catch (error) {
@@ -837,7 +1048,7 @@ exports.proceedToPayment = async (req, res) => {
   }
 };
 
-// ✅ NEW METHOD: Handle CCAvenue Payment Response
+// ✅ ENHANCED: Handle CCAvenue Payment Response with linked course support
 exports.handlePaymentResponse = async (req, res) => {
   try {
     console.log("📥 Received payment response from CCAvenue");
@@ -894,7 +1105,7 @@ exports.handlePaymentResponse = async (req, res) => {
     }
 
     if (order_status === "Success") {
-      // Payment successful - update enrollment status
+      // ✅ ENHANCED: Payment successful - update enrollment status (including linked courses)
       user.updateEnrollmentStatusAfterPayment(transactionId);
 
       // Add communication record
@@ -958,13 +1169,13 @@ exports.handlePaymentResponse = async (req, res) => {
   }
 };
 
-// ✅ NEW METHOD: Handle Payment Cancellation
+// ✅ Handle Payment Cancellation (unchanged)
 exports.handlePaymentCancel = (req, res) => {
   console.log("❌ Payment cancelled by user");
   res.redirect("/payment/cancelled");
 };
 
-// ✅ HELPER FUNCTION: Send payment confirmation email
+// ✅ ENHANCED: Send payment confirmation email with linked course info
 async function sendPaymentConfirmationEmail(user, transaction) {
   const courseListHtml = transaction.items
     .map(
@@ -986,19 +1197,34 @@ async function sendPaymentConfirmationEmail(user, transaction) {
               ? '| <span style="color: #28a745;">Early Bird Applied!</span>'
               : ""
           }
+          ${
+            item.isLinkedCourseFree
+              ? '| <span style="color: #007bff;">Included Free!</span>'
+              : ""
+          }
         </span>
       </td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
         ${
-          item.isEarlyBird
-            ? `<span style="text-decoration: line-through; color: #999;">$${item.originalPrice}</span><br>`
-            : ""
-        }
-        <strong>$${item.finalPrice}</strong>
-        ${
-          item.isEarlyBird
-            ? `<br><small style="color: #28a745;">Saved $${item.earlyBirdSavings}</small>`
-            : ""
+          item.isLinkedCourseFree
+            ? `
+          <span style="text-decoration: line-through; color: #999;">${item.originalPrice}</span><br>
+          <strong style="color: #007bff;">FREE</strong><br>
+          <small style="color: #007bff;">Included with In-Person Course</small>
+        `
+            : `
+          ${
+            item.isEarlyBird
+              ? `<span style="text-decoration: line-through; color: #999;">${item.originalPrice}</span><br>`
+              : ""
+          }
+          <strong>${item.finalPrice}</strong>
+          ${
+            item.isEarlyBird
+              ? `<br><small style="color: #28a745;">Saved ${item.earlyBirdSavings}</small>`
+              : ""
+          }
+        `
         }
       </td>
     </tr>
@@ -1067,24 +1293,31 @@ async function sendPaymentConfirmationEmail(user, transaction) {
         
         <div class="financial-summary">
           <h3>💰 Payment Summary</h3>
-          <p><strong>Subtotal:</strong> $${transaction.financial.subtotal.toFixed(
+          <p><strong>Subtotal:</strong> ${transaction.financial.subtotal.toFixed(
             2
           )}</p>
           ${
             transaction.financial.earlyBirdSavings > 0
-              ? `<p><strong>Early Bird Savings:</strong> -$${transaction.financial.earlyBirdSavings.toFixed(
+              ? `<p><strong>Early Bird Savings:</strong> -${transaction.financial.earlyBirdSavings.toFixed(
+                  2
+                )}</p>`
+              : ""
+          }
+          ${
+            transaction.financial.linkedCourseSavings > 0
+              ? `<p><strong>Included Course Savings:</strong> -${transaction.financial.linkedCourseSavings.toFixed(
                   2
                 )}</p>`
               : ""
           }
           ${
             transaction.financial.promoCodeDiscount > 0
-              ? `<p><strong>Promo Code Discount:</strong> -$${transaction.financial.promoCodeDiscount.toFixed(
+              ? `<p><strong>Promo Code Discount:</strong> -${transaction.financial.promoCodeDiscount.toFixed(
                   2
                 )}</p>`
               : ""
           }
-          <p style="font-size: 18px; color: #28a745;"><strong>Total Paid: $${transaction.financial.finalAmount.toFixed(
+          <p style="font-size: 18px; color: #28a745;"><strong>Total Paid: ${transaction.financial.finalAmount.toFixed(
             2
           )} ${transaction.financial.currency}</strong></p>
         </div>
@@ -1126,7 +1359,7 @@ async function sendPaymentConfirmationEmail(user, transaction) {
   });
 }
 
-// ✅ EXISTING HELPER FUNCTION: Send course registration email
+// ✅ ENHANCED: Send course registration email with linked course info
 async function sendCourseRegistrationEmail(
   user,
   courses,
@@ -1146,13 +1379,20 @@ async function sendCourseRegistrationEmail(
               ? `| Starts: ${new Date(course.startDate).toLocaleDateString()}`
               : ""
           }
+          ${
+            course.isLinkedCourseFree
+              ? '| <span style="color: #007bff;">Included Free</span>'
+              : ""
+          }
         </span>
       </td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
         ${
-          isPromoCode
+          course.isLinkedCourseFree
+            ? '<span style="color: #007bff;">FREE (Included)</span>'
+            : isPromoCode
             ? '<span style="color: #28a745;">FREE</span>'
-            : `$${course.price}`
+            : `${course.price}`
         }
       </td>
     </tr>

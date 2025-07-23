@@ -255,6 +255,13 @@ const userSchema = new mongoose.Schema(
             ref: "PaymentTransaction",
           },
           promoCodeUsed: String,
+          courseName: { type: String },
+          courseCode: { type: String },
+          courseType: { type: String },
+          originalPrice: { type: Number, default: 0 },
+          currency: { type: String, default: "USD" },
+          isLinkedCourse: { type: Boolean, default: false },
+          isLinkedCourseFree: { type: Boolean, default: false },
         },
 
         // User's progress/interaction
@@ -324,6 +331,15 @@ const userSchema = new mongoose.Schema(
             ref: "PaymentTransaction",
           },
           promoCodeUsed: String,
+
+          // ⭐ ADD THESE FIELDS:
+          courseName: { type: String },
+          courseCode: { type: String },
+          courseType: { type: String },
+          originalPrice: { type: Number, default: 0 },
+          currency: { type: String, default: "USD" },
+          isLinkedCourse: { type: Boolean, default: false }, // ⭐ CRITICAL
+          isLinkedCourseFree: { type: Boolean, default: false }, // ⭐ CRITICAL
         },
 
         // User's progress/interaction
@@ -455,6 +471,14 @@ const userSchema = new mongoose.Schema(
             ref: "PaymentTransaction",
           },
           promoCodeUsed: String,
+          // ⭐ ADD THESE FIELDS:
+          courseName: { type: String },
+          courseCode: { type: String },
+          courseType: { type: String },
+          originalPrice: { type: Number, default: 0 },
+          currency: { type: String, default: "USD" },
+          isLinkedCourse: { type: Boolean, default: false },
+          isLinkedCourseFree: { type: Boolean, default: false },
         },
 
         // Video progress tracking

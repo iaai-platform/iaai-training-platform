@@ -1,4 +1,4 @@
-// routes/checkoutRoutes.js - Updated with CCAvenue Integration
+// routes/checkoutRoutes.js - Updated with CCAvenue Integration & Linked Course Support
 const express = require("express");
 const router = express.Router();
 const checkoutController = require("../controllers/checkoutController");
@@ -6,9 +6,10 @@ const isAuthenticated = require("../middlewares/isAuthenticated");
 
 // ========================================
 // EXISTING CHECKOUT ROUTES (Keep these)
+// ✅ These already handle linked courses through the controller
 // ========================================
 
-// ✅ Route to display the checkout page
+// ✅ Route to display the checkout page (handles linked courses automatically)
 router.get("/checkout", isAuthenticated, checkoutController.getCheckoutPage);
 
 // ✅ Route to apply promo codes and update the price
@@ -40,7 +41,7 @@ router.get(
 // NEW CCAVENUE ROUTES (Add these to existing file)
 // ========================================
 
-// ✅ NEW: Route to initiate CCAvenue payment
+// ✅ NEW: Route to initiate CCAvenue payment (handles linked courses automatically)
 router.post(
   "/payment/initiate",
   isAuthenticated,

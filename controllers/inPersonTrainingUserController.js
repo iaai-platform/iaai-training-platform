@@ -5,6 +5,26 @@ const User = require("../models/user");
 const Instructor = require("../models/Instructor");
 const CertificationBody = require("../models/CertificationBody");
 
+// Simple currency symbol function
+const getCurrencySymbol = (currency) => {
+  const symbols = {
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    JPY: "¥",
+    CAD: "C$",
+    AUD: "A$",
+    CHF: "CHF",
+    SEK: "kr",
+    NOK: "kr",
+    DKK: "kr",
+    TRY: "₺",
+    AED: "د.إ",
+    SAR: "ر.س",
+  };
+  return symbols[currency] || "€"; // Default to Euro if not found
+};
+
 // 1. Controller to display In-Person Aesthetic Training Courses
 exports.getInPersonAestheticTraining = async (req, res) => {
   try {
@@ -44,7 +64,7 @@ exports.getInPersonAestheticTraining = async (req, res) => {
       instructor: course.instructorNames || "Expert Instructors",
       price: course.enrollment?.price || 0,
       earlyBirdPrice: course.enrollment?.earlyBirdPrice || null,
-      currency: course.enrollment?.currency || "USD",
+      currency: course.enrollment?.currency || "EUR",
       seatsAvailable: course.enrollment?.seatsAvailable || 0,
       currentEnrollment: course.enrollment?.currentEnrollment || 0,
       maxEnrollment: course.enrollment?.seatsAvailable || 0,
@@ -67,6 +87,7 @@ exports.getInPersonAestheticTraining = async (req, res) => {
     res.render("in-person-aesthetic-training", {
       courses: transformedCourses,
       user: user,
+      getCurrencySymbol: getCurrencySymbol,
     });
   } catch (err) {
     console.error("❌ Error fetching courses:", err);
@@ -74,7 +95,7 @@ exports.getInPersonAestheticTraining = async (req, res) => {
   }
 };
 
-// Rest of your getCourseDetails function remains the same...
+// 2. Controller to get course details
 exports.getCourseDetails = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -303,6 +324,7 @@ exports.getCourseDetails = async (req, res) => {
     res.render("inpersoncourses", {
       course: courseWithFullDetails,
       user: req.user || null,
+      getCurrencySymbol: getCurrencySymbol,
     });
   } catch (err) {
     console.error("❌ Error fetching course details:", err);

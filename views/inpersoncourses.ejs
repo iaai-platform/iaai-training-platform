@@ -1196,12 +1196,12 @@
           <div class="pricing-header">
             <div class="price-tag">Course Investment</div>
             <div class="price-amount">
-              <span class="price-currency">$</span><%= course.enrollment?.price || 0 %>
+              <span class="price-currency"><%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %></span><%= course.enrollment?.price || 0 %>
             </div>
             <% if (course.enrollment?.earlyBirdPrice && course.schedule?.registrationDeadline && new Date() < new Date(course.schedule.registrationDeadline)) { %>
               <div class="early-bird-badge">
                 <i class="fas fa-tag"></i>
-                Early Bird: $<%= course.enrollment.earlyBirdPrice %>
+                Early Bird: <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment.earlyBirdPrice %>
               </div>
             <% } %>
           </div>
@@ -2264,7 +2264,7 @@
   <div class="mobile-action-bar">
     <div class="mobile-action-content">
       <div class="mobile-price">
-        $<%= course.enrollment?.price || 0 %>
+        <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment?.price || 0 %>
       </div>
       <div>
         <% if (user) { %>

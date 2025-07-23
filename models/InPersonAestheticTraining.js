@@ -1,24 +1,37 @@
-// models/InPersonAestheticTraining.js
+// ████████████████████████████████████████████████████████████████████████████████
+// ██                                                                            ██
+// ██                    IN-PERSON AESTHETIC TRAINING MODEL                     ██
+// ██                           FINAL COMPLETE VERSION                          ██
+// ██                                                                            ██
+// ████████████████████████████████████████████████████████████████████████████████
 /**
- * Simplified In-Person Aesthetic Training Course Model
+ * Complete In-Person Aesthetic Training Course Model
  *
- * FIXED: Media structure simplified to align with form expectations
- * Removed complex courseMaterials structure
+ * Features:
+ * ✅ Linked Course System with Certificate Management
+ * ✅ Early Bird Pricing with Dynamic Calculations
+ * ✅ Multi-Authority Certification System
+ * ✅ Comprehensive Attendance Tracking
+ * ✅ Automatic Instructor & Certification Body Updates
+ * ✅ Bidirectional Course Linking
+ * ✅ Advanced Virtual Fields & Helper Methods
  *
  * @module InPersonAestheticTraining
+ * @version 2.0.0
+ * @author IAAI Training Institute
  */
 
 const mongoose = require("mongoose");
 
-/**
- * Simplified In-Person Course Schema
- * Organized into logical sections with consistent 2-level nesting maximum
- */
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                                  SCHEMA DEFINITION                           ║
+// ════════════════════════════════════════════════════════════════════════════════
+
 const inPersonCourseSchema = new mongoose.Schema(
   {
-    // ========================================
-    // BASIC INFORMATION
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                        BASIC COURSE INFORMATION                     │
+    // └─────────────────────────────────────────────────────────────────────┘
     basic: {
       courseCode: {
         type: String,
@@ -57,9 +70,9 @@ const inPersonCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // SCHEDULING
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                         SCHEDULING & TIMING                         │
+    // └─────────────────────────────────────────────────────────────────────┘
     schedule: {
       startDate: {
         type: Date,
@@ -83,9 +96,9 @@ const inPersonCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // PRICING & ENROLLMENT
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    PRICING & ENROLLMENT MANAGEMENT                  │
+    // └─────────────────────────────────────────────────────────────────────┘
     enrollment: {
       price: {
         type: Number,
@@ -100,10 +113,9 @@ const inPersonCourseSchema = new mongoose.Schema(
         type: Number,
         min: 1,
         max: 365,
-        default: 30, // Default: early bird expires 30 days before course
+        default: 30,
         validate: {
           validator: function (value) {
-            // Only validate if earlyBirdPrice is set
             if (this.earlyBirdPrice && this.earlyBirdPrice > 0) {
               return value && value > 0;
             }
@@ -112,7 +124,7 @@ const inPersonCourseSchema = new mongoose.Schema(
           message: "Early bird days is required when early bird price is set",
         },
       },
-      currency: { type: String, default: "USD" },
+      currency: { type: String, default: "EUR" },
       seatsAvailable: {
         type: Number,
         default: 10,
@@ -126,9 +138,9 @@ const inPersonCourseSchema = new mongoose.Schema(
       currentEnrollment: { type: Number, default: 0 },
     },
 
-    // ========================================
-    // INSTRUCTORS
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                      INSTRUCTOR MANAGEMENT                          │
+    // └─────────────────────────────────────────────────────────────────────┘
     instructors: {
       primary: {
         instructorId: {
@@ -160,9 +172,9 @@ const inPersonCourseSchema = new mongoose.Schema(
       ],
     },
 
-    // ========================================
-    // VENUE INFORMATION
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                        VENUE INFORMATION                            │
+    // └─────────────────────────────────────────────────────────────────────┘
     venue: {
       name: {
         type: String,
@@ -196,9 +208,9 @@ const inPersonCourseSchema = new mongoose.Schema(
       parkingAvailable: { type: Boolean, default: true },
     },
 
-    // ========================================
-    // COURSE CONTENT
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                        COURSE CONTENT                               │
+    // └─────────────────────────────────────────────────────────────────────┘
     content: {
       objectives: [
         {
@@ -220,13 +232,13 @@ const inPersonCourseSchema = new mongoose.Schema(
         enum: ["beginner", "intermediate", "advanced", "all-levels"],
         default: "intermediate",
       },
-      prerequisites: String, // Simple text description
+      prerequisites: String,
       technicalRequirements: String,
     },
 
-    // ========================================
-    // PRACTICAL TRAINING
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                      PRACTICAL TRAINING                             │
+    // └─────────────────────────────────────────────────────────────────────┘
     practical: {
       hasHandsOn: {
         type: Boolean,
@@ -257,8 +269,10 @@ const inPersonCourseSchema = new mongoose.Schema(
       },
     },
 
-    //new
-    // Update the linkedCourse section in InPersonAestheticTraining model
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                    🔗 LINKED COURSE SYSTEM 🔗                      ┃
+    // ┃                     Advanced Course Linking                        ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     linkedCourse: {
       onlineCourseId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -272,14 +286,23 @@ const inPersonCourseSchema = new mongoose.Schema(
         default: "prerequisite",
       },
       completionRequired: { type: Boolean, default: true },
-      // ⭐ NEW: Pricing override for linked course
-      isFree: { type: Boolean, default: true }, // Linked courses are free by default
-      customPrice: { type: Number, default: 0 }, // Allow custom pricing if needed
+      // 💰 Pricing Control
+      isFree: { type: Boolean, default: true },
+      customPrice: { type: Number, default: 0 },
+      // 🎓 Certificate Issuing Strategy
+      certificateIssuingRule: {
+        type: String,
+        enum: ["inperson-only", "both-courses", "online-standalone"],
+        default: "inperson-only",
+        // inperson-only: Only in-person course gets certificate
+        // both-courses: Both courses can issue certificates independently
+        // online-standalone: Online course can issue certificate when not linked
+      },
     },
 
-    // ========================================
-    // ASSESSMENT & CERTIFICATION
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    ASSESSMENT & TESTING                             │
+    // └─────────────────────────────────────────────────────────────────────┘
     assessment: {
       required: { type: Boolean, default: false },
       type: {
@@ -304,7 +327,10 @@ const inPersonCourseSchema = new mongoose.Schema(
       ],
     },
 
-    // In models/InPersonAestheticTraining.js
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                 🎓 MULTI-AUTHORITY CERTIFICATION 🎓                 ┃
+    // ┃                  Advanced Certificate Management                    ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     certification: {
       enabled: { type: Boolean, default: true },
       type: {
@@ -312,8 +338,7 @@ const inPersonCourseSchema = new mongoose.Schema(
         enum: ["completion", "achievement", "participation"],
         default: "completion",
       },
-
-      // Primary certification body
+      // 🏛️ Primary Certification Authority
       issuingAuthorityId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "CertificationBody",
@@ -322,8 +347,7 @@ const inPersonCourseSchema = new mongoose.Schema(
         type: String,
         default: "IAAI Training Institute",
       },
-
-      // ADD THIS - Additional certification bodies array
+      // 🤝 Additional Certification Bodies (Co-issuers, Endorsers, Partners)
       certificationBodies: [
         {
           bodyId: {
@@ -338,16 +362,18 @@ const inPersonCourseSchema = new mongoose.Schema(
           },
         },
       ],
-
+      // 📋 Requirements & Validation
       requirements: {
         minimumAttendance: { type: Number, default: 80 },
         minimumScore: { type: Number, default: 70 },
         practicalRequired: { type: Boolean, default: false },
       },
+      // ⏰ Validity Period
       validity: {
         isLifetime: { type: Boolean, default: true },
         years: Number,
       },
+      // 🔐 Digital Features
       features: {
         digitalBadge: { type: Boolean, default: true },
         qrVerification: { type: Boolean, default: true },
@@ -355,9 +381,9 @@ const inPersonCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // INCLUSIONS & SERVICES
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    INCLUSIONS & SERVICES                            │
+    // └─────────────────────────────────────────────────────────────────────┘
     inclusions: {
       meals: {
         breakfast: { type: Boolean, default: false },
@@ -368,7 +394,7 @@ const inPersonCourseSchema = new mongoose.Schema(
       accommodation: {
         included: { type: Boolean, default: false },
         assistanceProvided: { type: Boolean, default: true },
-        partnerHotels: [String], // Hotel names or booking links
+        partnerHotels: [String],
       },
       materials: {
         courseMaterials: { type: Boolean, default: true },
@@ -383,28 +409,22 @@ const inPersonCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // FILES & MEDIA - SIMPLIFIED STRUCTURE
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                      MEDIA & FILES                                  │
+    // └─────────────────────────────────────────────────────────────────────┘
     media: {
-      // Main course image
       mainImage: {
         url: String,
         alt: String,
       },
-
-      documents: [String], // Course documents (PDF, PPT, DOC, etc.)
-      images: [String], // Gallery images, photos
-      videos: [String], // Video URLs (YouTube, Vimeo, direct links)
-
-      // Promotional content URLs
+      documents: [String], // PDF, PPT, DOC files
+      images: [String], // Gallery images
+      videos: [String], // Video URLs
       promotional: {
         brochureUrl: String,
         videoUrl: String,
         catalogUrl: String,
       },
-
-      // External links with metadata
       links: [
         {
           title: String,
@@ -418,9 +438,10 @@ const inPersonCourseSchema = new mongoose.Schema(
       ],
     },
 
-    // ========================================
-    // ATTENDANCE & TRACKING
-    // ========================================
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                    📊 ATTENDANCE TRACKING 📊                       ┃
+    // ┃                   Advanced Attendance System                       ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     attendance: {
       trackingEnabled: { type: Boolean, default: true },
       minimumRequired: { type: Number, default: 80 }, // percentage
@@ -445,9 +466,9 @@ const inPersonCourseSchema = new mongoose.Schema(
       ],
     },
 
-    // ========================================
-    // CONTACT & SUPPORT
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    CONTACT & SUPPORT                                │
+    // └─────────────────────────────────────────────────────────────────────┘
     contact: {
       email: { type: String, default: "info@iaa-i.com" },
       phone: String,
@@ -456,38 +477,25 @@ const inPersonCourseSchema = new mongoose.Schema(
       supportHours: { type: String, default: "9 AM - 6 PM (Monday-Friday)" },
     },
 
-    // ========================================
-    // Notification
-    // ========================================
-
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    NOTIFICATIONS                                     │
+    // └─────────────────────────────────────────────────────────────────────┘
     notificationSettings: {
-      courseUpdates: {
-        type: Boolean,
-        default: true, // Users are opted in by default
-      },
-      emailNotifications: {
-        type: Boolean,
-        default: true,
-      },
-      marketingEmails: {
-        type: Boolean,
-        default: true,
-      },
-      weeklyDigest: {
-        type: Boolean,
-        default: false,
-      },
+      courseUpdates: { type: Boolean, default: true },
+      emailNotifications: { type: Boolean, default: true },
+      marketingEmails: { type: Boolean, default: true },
+      weeklyDigest: { type: Boolean, default: false },
     },
 
-    // ========================================
-    // METADATA
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                        METADATA                                     │
+    // └─────────────────────────────────────────────────────────────────────┘
     metadata: {
       createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       lastModifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       version: { type: Number, default: 1 },
-      tags: [String], // For internal organization
-      notes: String, // Internal notes
+      tags: [String],
+      notes: String,
       isTemplate: { type: Boolean, default: false },
       templateName: String,
     },
@@ -498,25 +506,26 @@ const inPersonCourseSchema = new mongoose.Schema(
   }
 );
 
-// ========================================
-// INDEXES FOR PERFORMANCE
-// ========================================
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                                   INDEXES                                    ║
+// ════════════════════════════════════════════════════════════════════════════════
 
 inPersonCourseSchema.index({ "basic.courseCode": 1 }, { unique: true });
 inPersonCourseSchema.index({ "schedule.startDate": 1, "basic.status": 1 });
 inPersonCourseSchema.index({ "venue.city": 1, "venue.country": 1 });
 inPersonCourseSchema.index({ "basic.category": 1, "basic.status": 1 });
 inPersonCourseSchema.index({ "instructors.primary.instructorId": 1 });
-
 inPersonCourseSchema.index({ "certification.issuingAuthorityId": 1 });
 
-// ========================================
-// VIRTUAL FIELDS
-// ========================================
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                                VIRTUAL FIELDS                               ║
+// ║                            Smart Computed Properties                         ║
+// ════════════════════════════════════════════════════════════════════════════════
 
-/**
- * Display duration (human readable)
- */
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                    📅 Schedule & Duration Virtuals                  │
+// └─────────────────────────────────────────────────────────────────────┘
+
 inPersonCourseSchema.virtual("displayDuration").get(function () {
   if (this.schedule.endDate && this.schedule.startDate) {
     const days =
@@ -529,23 +538,6 @@ inPersonCourseSchema.virtual("displayDuration").get(function () {
   return this.schedule.duration || "1 day";
 });
 
-/**
- * Location display
- */
-inPersonCourseSchema.virtual("displayLocation").get(function () {
-  return `${this.venue.city}, ${this.venue.country}`;
-});
-
-/**
- * Available seats
- */
-inPersonCourseSchema.virtual("availableSeats").get(function () {
-  return this.enrollment.seatsAvailable - this.enrollment.currentEnrollment;
-});
-
-/**
- * Is multi-day course
- */
 inPersonCourseSchema.virtual("isMultiDay").get(function () {
   if (this.schedule.endDate && this.schedule.startDate) {
     return (
@@ -555,9 +547,26 @@ inPersonCourseSchema.virtual("isMultiDay").get(function () {
   return false;
 });
 
-/**
- * All instructors (combined)
- */
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                      🏫 Venue & Location Virtuals                   │
+// └─────────────────────────────────────────────────────────────────────┘
+
+inPersonCourseSchema.virtual("displayLocation").get(function () {
+  return `${this.venue.city}, ${this.venue.country}`;
+});
+
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                     💺 Enrollment & Capacity Virtuals               │
+// └─────────────────────────────────────────────────────────────────────┘
+
+inPersonCourseSchema.virtual("availableSeats").get(function () {
+  return this.enrollment.seatsAvailable - this.enrollment.currentEnrollment;
+});
+
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                      👥 Instructor Virtuals                         │
+// └─────────────────────────────────────────────────────────────────────┘
+
 inPersonCourseSchema.virtual("allInstructors").get(function () {
   const instructors = [];
   if (this.instructors.primary) {
@@ -569,9 +578,6 @@ inPersonCourseSchema.virtual("allInstructors").get(function () {
   return instructors;
 });
 
-/**
- * Instructor names (comma-separated)
- */
 inPersonCourseSchema.virtual("instructorNames").get(function () {
   const names = [];
   if (this.instructors.primary?.name) {
@@ -585,9 +591,10 @@ inPersonCourseSchema.virtual("instructorNames").get(function () {
   return names.join(", ");
 });
 
-/**
- * Total files count
- */
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                       📁 Media & Files Virtuals                     │
+// └─────────────────────────────────────────────────────────────────────┘
+
 inPersonCourseSchema.virtual("totalFilesCount").get(function () {
   let count = 0;
   if (this.media.mainImage?.url) count += 1;
@@ -597,9 +604,6 @@ inPersonCourseSchema.virtual("totalFilesCount").get(function () {
   return count;
 });
 
-/**
- * Has media content
- */
 inPersonCourseSchema.virtual("hasMediaContent").get(function () {
   return (
     this.totalFilesCount > 0 ||
@@ -609,118 +613,11 @@ inPersonCourseSchema.virtual("hasMediaContent").get(function () {
   );
 });
 
-// ========================================
-// MIDDLEWARE
-// ========================================
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                   💰 EARLY BIRD PRICING VIRTUALS 💰                 ┃
+// ┃                      Smart Pricing Calculations                     ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-/**
- * Pre-save middleware to update instructor names
- */
-inPersonCourseSchema.pre("save", async function (next) {
-  if (this.isModified("instructors")) {
-    try {
-      const Instructor = mongoose.model("Instructor");
-
-      // Update primary instructor name
-      if (
-        this.instructors.primary?.instructorId &&
-        !this.instructors.primary.name
-      ) {
-        const instructor = await Instructor.findById(
-          this.instructors.primary.instructorId
-        ).select("firstName lastName fullName");
-        if (instructor) {
-          this.instructors.primary.name =
-            instructor.fullName ||
-            `${instructor.firstName} ${instructor.lastName}`;
-        }
-      }
-
-      // Update additional instructor names
-      if (this.instructors.additional) {
-        for (let i = 0; i < this.instructors.additional.length; i++) {
-          const inst = this.instructors.additional[i];
-          if (inst.instructorId && !inst.name) {
-            const instructor = await Instructor.findById(
-              inst.instructorId
-            ).select("firstName lastName fullName");
-            if (instructor) {
-              this.instructors.additional[i].name =
-                instructor.fullName ||
-                `${instructor.firstName} ${instructor.lastName}`;
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error updating instructor names:", error);
-    }
-  }
-
-  if (
-    this.isModified("certification.issuingAuthorityId") &&
-    this.certification?.issuingAuthorityId
-  ) {
-    try {
-      const CertificationBody = mongoose.model("CertificationBody");
-      const body = await CertificationBody.findById(
-        this.certification.issuingAuthorityId
-      ).select("companyName");
-      if (body) {
-        this.certification.issuingAuthority = body.companyName;
-      }
-    } catch (error) {
-      console.error("Error updating issuing authority name:", error);
-    }
-  }
-
-  next();
-});
-
-/**
- * Pre-save middleware to validate dates
- */
-inPersonCourseSchema.pre("save", function (next) {
-  // Set registration deadline if not provided
-  if (!this.schedule.registrationDeadline && this.schedule.startDate) {
-    const deadline = new Date(this.schedule.startDate);
-    deadline.setDate(deadline.getDate() - 7); // 1 week before
-    this.schedule.registrationDeadline = deadline;
-  }
-
-  next();
-});
-
-/**
- * Pre-save middleware to clean up empty arrays
- */
-inPersonCourseSchema.pre("save", function (next) {
-  // Clean up empty media arrays
-  if (this.media) {
-    if (this.media.documents && this.media.documents.length === 0) {
-      this.media.documents = undefined;
-    }
-    if (this.media.images && this.media.images.length === 0) {
-      this.media.images = undefined;
-    }
-    if (this.media.videos && this.media.videos.length === 0) {
-      this.media.videos = undefined;
-    }
-    if (this.media.links && this.media.links.length === 0) {
-      this.media.links = undefined;
-    }
-  }
-
-  next();
-});
-
-// ========================================
-// VIRTUAL FIELDS - ADD THESE TO YOUR EXISTING VIRTUALS
-// ========================================
-
-/**
- * Early bird deadline (calculated from start date and early bird days)
- */
 inPersonCourseSchema.virtual("earlyBirdDeadline").get(function () {
   if (this.schedule?.startDate && this.enrollment?.earlyBirdDays) {
     const deadline = new Date(this.schedule.startDate);
@@ -730,38 +627,25 @@ inPersonCourseSchema.virtual("earlyBirdDeadline").get(function () {
   return null;
 });
 
-/**
- * Check if early bird pricing is currently active
- */
 inPersonCourseSchema.virtual("isEarlyBirdActive").get(function () {
   if (!this.enrollment?.earlyBirdPrice || this.enrollment.earlyBirdPrice <= 0) {
     return false;
   }
-
   const deadline = this.earlyBirdDeadline;
   if (!deadline) return false;
-
   return new Date() <= deadline;
 });
 
-/**
- * Days remaining for early bird pricing
- */
 inPersonCourseSchema.virtual("earlyBirdDaysRemaining").get(function () {
   const deadline = this.earlyBirdDeadline;
   if (!deadline) return 0;
-
   const now = new Date();
   if (now > deadline) return 0;
-
   const timeDiff = deadline.getTime() - now.getTime();
   const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
   return Math.max(0, daysDiff);
 });
 
-/**
- * Current effective price (early bird or regular)
- */
 inPersonCourseSchema.virtual("currentPrice").get(function () {
   if (this.isEarlyBirdActive && this.enrollment?.earlyBirdPrice) {
     return this.enrollment.earlyBirdPrice;
@@ -769,15 +653,483 @@ inPersonCourseSchema.virtual("currentPrice").get(function () {
   return this.enrollment?.price || 0;
 });
 
-// ========================================
-// INSTANCE METHODS - ADD THESE TO YOUR EXISTING METHODS
-// ========================================
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                    🔗 LINKED COURSE VIRTUALS 🔗                     ┃
+// ┃                    Smart Course Relationship                        ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+inPersonCourseSchema.virtual("hasRequiredLinkedCourse").get(function () {
+  return (
+    this.linkedCourse?.onlineCourseId &&
+    this.linkedCourse?.isRequired &&
+    this.linkedCourse?.completionRequired
+  );
+});
+
+inPersonCourseSchema.virtual("certificationStrategy").get(function () {
+  if (!this.linkedCourse?.onlineCourseId) {
+    return "standalone"; // No linked course
+  }
+  return this.linkedCourse.certificateIssuingRule || "inperson-only";
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                               MIDDLEWARE                                     ║
+// ║                        Automatic Data Synchronization                       ║
+// ════════════════════════════════════════════════════════════════════════════════
+
+inPersonCourseSchema.pre("save", async function (next) {
+  console.log("🚀 InPersonAestheticTraining pre-save middleware triggered.");
+
+  try {
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                    👥 INSTRUCTOR PROCESSING                       ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    if (this.isModified("instructors") || this.isNew) {
+      console.log("📚 Processing instructors...");
+
+      const Instructor = mongoose.model("Instructor");
+
+      // Handle Primary Instructor
+      if (this.instructors && this.instructors.primary) {
+        if (this.instructors.primary.instructorId) {
+          const primaryInstructorId = this.instructors.primary.instructorId;
+          console.log("🔍 Looking up primary instructor:", primaryInstructorId);
+
+          const primaryInstructor = await Instructor.findById(
+            primaryInstructorId
+          ).select("firstName lastName fullName assignedCourses");
+
+          if (primaryInstructor) {
+            this.instructors.primary.name =
+              primaryInstructor.fullName ||
+              `${primaryInstructor.firstName} ${primaryInstructor.lastName}`;
+            console.log(
+              "✅ Primary instructor found:",
+              this.instructors.primary.name
+            );
+
+            // Update instructor's assigned courses
+            const existingAssignment = primaryInstructor.assignedCourses.find(
+              (c) => c.courseId && c.courseId.toString() === this._id.toString()
+            );
+
+            if (!existingAssignment) {
+              primaryInstructor.assignedCourses.push({
+                courseId: this._id,
+                courseType: "InPersonAestheticTraining",
+                courseTitle: this.basic.title,
+                startDate: this.schedule.startDate,
+                endDate: this.schedule.endDate,
+                role: this.instructors.primary.role,
+              });
+            } else {
+              existingAssignment.courseTitle = this.basic.title;
+              existingAssignment.startDate = this.schedule.startDate;
+              existingAssignment.endDate = this.schedule.endDate;
+              existingAssignment.role = this.instructors.primary.role;
+            }
+
+            await primaryInstructor.save({ validateBeforeSave: false });
+            console.log("💾 Primary instructor assignment updated.");
+          } else {
+            this.instructors.primary.instructorId = undefined;
+            this.instructors.primary.name = undefined;
+            this.instructors.primary.role = undefined;
+            console.warn("⚠️ Primary instructor not found. Clearing details.");
+          }
+        } else {
+          this.instructors.primary.instructorId = undefined;
+          this.instructors.primary.name = undefined;
+          this.instructors.primary.role = undefined;
+        }
+      } else if (this.instructors) {
+        this.instructors.primary = {};
+      } else {
+        this.instructors = { primary: {}, additional: [] };
+      }
+
+      // Handle Additional Instructors
+      if (
+        this.instructors?.additional &&
+        Array.isArray(this.instructors.additional)
+      ) {
+        const updatedAdditionalInstructors = [];
+
+        for (let i = 0; i < this.instructors.additional.length; i++) {
+          const inst = this.instructors.additional[i];
+
+          if (inst?.instructorId) {
+            const additionalInstructor = await Instructor.findById(
+              inst.instructorId
+            ).select("firstName lastName fullName assignedCourses");
+
+            if (additionalInstructor) {
+              inst.name =
+                additionalInstructor.fullName ||
+                `${additionalInstructor.firstName} ${additionalInstructor.lastName}`;
+              updatedAdditionalInstructors.push(inst);
+
+              // Update instructor's assigned courses
+              const existingAssignment =
+                additionalInstructor.assignedCourses.find(
+                  (c) =>
+                    c.courseId && c.courseId.toString() === this._id.toString()
+                );
+
+              if (!existingAssignment) {
+                additionalInstructor.assignedCourses.push({
+                  courseId: this._id,
+                  courseType: "InPersonAestheticTraining",
+                  courseTitle: this.basic.title,
+                  startDate: this.schedule.startDate,
+                  endDate: this.schedule.endDate,
+                  role: inst.role,
+                });
+              } else {
+                existingAssignment.courseTitle = this.basic.title;
+                existingAssignment.startDate = this.schedule.startDate;
+                existingAssignment.endDate = this.schedule.endDate;
+                existingAssignment.role = inst.role;
+              }
+
+              await additionalInstructor.save({ validateBeforeSave: false });
+            } else {
+              console.warn(
+                `⚠️ Additional instructor ${inst.instructorId} not found.`
+              );
+            }
+          }
+        }
+
+        this.instructors.additional = updatedAdditionalInstructors;
+      } else if (this.instructors) {
+        this.instructors.additional = [];
+      }
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                🎓 CERTIFICATION BODY PROCESSING                   ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    if (
+      this.certification &&
+      (this.isModified("certification.issuingAuthorityId") || this.isNew)
+    ) {
+      console.log("🏛️ Processing primary certification body...");
+
+      if (this.certification.issuingAuthorityId) {
+        const issuingAuthorityId = this.certification.issuingAuthorityId;
+        const CertificationBody = mongoose.model("CertificationBody");
+        const body = await CertificationBody.findById(
+          issuingAuthorityId
+        ).select("companyName displayName");
+
+        if (body) {
+          this.certification.issuingAuthority =
+            body.displayName || body.companyName;
+          console.log(
+            "✅ Primary cert body found:",
+            this.certification.issuingAuthority
+          );
+        } else {
+          this.certification.issuingAuthority = "IAAI Training Institute";
+          this.certification.issuingAuthorityId = undefined;
+          console.warn(
+            "⚠️ Primary certification body not found. Reverting to default."
+          );
+        }
+      } else {
+        this.certification.issuingAuthority = "IAAI Training Institute";
+        this.certification.issuingAuthorityId = undefined;
+      }
+    } else if (this.certification) {
+      if (
+        this.certification.issuingAuthorityId &&
+        !this.certification.issuingAuthority
+      ) {
+        const CertificationBody = mongoose.model("CertificationBody");
+        const body = await CertificationBody.findById(
+          this.certification.issuingAuthorityId
+        ).select("companyName displayName");
+
+        if (body) {
+          this.certification.issuingAuthority =
+            body.displayName || body.companyName;
+        } else {
+          this.certification.issuingAuthority = "IAAI Training Institute";
+          this.certification.issuingAuthorityId = undefined;
+        }
+      }
+    } else {
+      this.certification = {};
+    }
+
+    // Handle Additional Certification Bodies
+    if (
+      this.certification?.certificationBodies &&
+      Array.isArray(this.certification.certificationBodies)
+    ) {
+      const updatedCertificationBodies = [];
+
+      for (let i = 0; i < this.certification.certificationBodies.length; i++) {
+        const cbEntry = this.certification.certificationBodies[i];
+
+        if (cbEntry?.bodyId) {
+          const certBody = await mongoose
+            .model("CertificationBody")
+            .findById(cbEntry.bodyId)
+            .select("companyName displayName");
+
+          if (certBody) {
+            cbEntry.name = certBody.displayName || certBody.companyName;
+            updatedCertificationBodies.push(cbEntry);
+          } else {
+            console.warn(
+              `⚠️ Additional certification body ${cbEntry.bodyId} not found.`
+            );
+          }
+        }
+      }
+
+      this.certification.certificationBodies = updatedCertificationBodies;
+    } else if (this.certification) {
+      this.certification.certificationBodies = [];
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                   🔗 LINKED COURSE PROCESSING                     ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    if (this.isModified("linkedCourse.onlineCourseId")) {
+      console.log("🔗 Processing linked course changes...");
+
+      const OnlineLiveTraining = mongoose.model("OnlineLiveTraining");
+
+      // Setting a new linked course
+      if (this.linkedCourse?.onlineCourseId) {
+        console.log(
+          "➕ Setting up new linked course:",
+          this.linkedCourse.onlineCourseId
+        );
+
+        try {
+          const linkedOnlineCourse = await OnlineLiveTraining.findById(
+            this.linkedCourse.onlineCourseId
+          );
+
+          if (linkedOnlineCourse) {
+            const suppressCert =
+              this.linkedCourse.certificateIssuingRule === "inperson-only";
+
+            linkedOnlineCourse.linkedToInPerson = {
+              inPersonCourseId: this._id,
+              isLinked: true,
+              linkType: this.linkedCourse.relationship || "prerequisite",
+              suppressCertificate: suppressCert,
+            };
+
+            await linkedOnlineCourse.save({ validateBeforeSave: false });
+            console.log(
+              "✅ Successfully linked online course. Certificate suppressed:",
+              suppressCert
+            );
+          } else {
+            console.warn("⚠️ Linked online course not found.");
+            this.linkedCourse.onlineCourseId = null;
+          }
+        } catch (error) {
+          console.error("❌ Error updating linked online course:", error);
+        }
+      }
+      // Removing a linked course
+      else if (
+        this.isModified("linkedCourse.onlineCourseId") &&
+        !this.linkedCourse?.onlineCourseId
+      ) {
+        console.log("➖ Removing linked course connection...");
+
+        try {
+          const previouslyLinked = await OnlineLiveTraining.findOne({
+            "linkedToInPerson.inPersonCourseId": this._id,
+          });
+
+          if (previouslyLinked) {
+            previouslyLinked.linkedToInPerson = {
+              inPersonCourseId: null,
+              isLinked: false,
+              linkType: null,
+              suppressCertificate: false,
+            };
+
+            await previouslyLinked.save({ validateBeforeSave: false });
+            console.log("✅ Successfully unlinked online course.");
+          }
+        } catch (error) {
+          console.error("❌ Error cleaning up linked online course:", error);
+        }
+      }
+    }
+
+    // Handle certificate issuing rule changes
+    if (
+      this.isModified("linkedCourse.certificateIssuingRule") &&
+      this.linkedCourse?.onlineCourseId
+    ) {
+      console.log("🎓 Updating certificate issuing rule...");
+
+      try {
+        const OnlineLiveTraining = mongoose.model("OnlineLiveTraining");
+        const linkedOnlineCourse = await OnlineLiveTraining.findById(
+          this.linkedCourse.onlineCourseId
+        );
+
+        if (
+          linkedOnlineCourse &&
+          linkedOnlineCourse.linkedToInPerson?.isLinked
+        ) {
+          const suppressCert =
+            this.linkedCourse.certificateIssuingRule === "inperson-only";
+          linkedOnlineCourse.linkedToInPerson.suppressCertificate =
+            suppressCert;
+
+          await linkedOnlineCourse.save({ validateBeforeSave: false });
+          console.log("✅ Updated certificate suppression rule:", suppressCert);
+        }
+      } catch (error) {
+        console.error("❌ Error updating certificate issuing rule:", error);
+      }
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                      🛠️ GENERAL DEFAULTS                          ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    // Set registration deadline if not provided
+    if (
+      this.schedule &&
+      !this.schedule.registrationDeadline &&
+      this.schedule.startDate
+    ) {
+      const deadline = new Date(this.schedule.startDate);
+      deadline.setDate(deadline.getDate() - 7); // 1 week before
+      this.schedule.registrationDeadline = deadline;
+      console.log(
+        "📅 Registration deadline set:",
+        this.schedule.registrationDeadline
+      );
+    }
+
+    // Clean up empty media arrays
+    if (this.media) {
+      ["documents", "images", "videos", "links"].forEach((category) => {
+        if (this.media[category] && this.media[category].length === 0) {
+          this.media[category] = undefined;
+        }
+      });
+    }
+
+    console.log(
+      "✅ InPersonAestheticTraining pre-save middleware completed successfully."
+    );
+    next();
+  } catch (error) {
+    console.error(
+      "❌ CRITICAL ERROR in InPersonAestheticTraining pre-save middleware:",
+      error
+    );
+    next(error);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                              INSTANCE METHODS                               ║
+// ║                          Course-Specific Operations                          ║
+// ════════════════════════════════════════════════════════════════════════════════
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                   🎓 CERTIFICATE ELIGIBILITY METHODS                ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 /**
- * Get pricing information with early bird details
+ * 🎓 Check if user can get certificate for in-person course
+ * Handles linked course requirements automatically
+ */
+inPersonCourseSchema.methods.canIssueCertificate = async function (userId) {
+  // Check basic eligibility first
+  if (!this.isCertificateEligible(userId)) {
+    return {
+      eligible: false,
+      reason: "Does not meet basic course requirements",
+    };
+  }
+
+  // If no linked course, issue certificate
+  if (!this.linkedCourse?.onlineCourseId) {
+    return { eligible: true };
+  }
+
+  // If linked course exists but not required, issue certificate
+  if (!this.linkedCourse.isRequired || !this.linkedCourse.completionRequired) {
+    return { eligible: true };
+  }
+
+  // Check if user completed the linked online course
+  const OnlineLiveTraining = mongoose.model("OnlineLiveTraining");
+  const linkedCourse = await OnlineLiveTraining.findById(
+    this.linkedCourse.onlineCourseId
+  );
+
+  if (!linkedCourse) {
+    return {
+      eligible: false,
+      reason: "Linked online course not found",
+    };
+  }
+
+  // Check if user completed the linked course
+  const hasCompletedLinked = linkedCourse.isCertificateEligible(userId);
+
+  if (!hasCompletedLinked) {
+    return {
+      eligible: false,
+      reason: `Must complete linked online course: ${linkedCourse.basic.title}`,
+      linkedCourseId: linkedCourse._id,
+      linkedCourseTitle: linkedCourse.basic.title,
+    };
+  }
+
+  return { eligible: true };
+};
+
+/**
+ * 📊 Check basic certificate eligibility for a user
+ */
+inPersonCourseSchema.methods.isCertificateEligible = function (userId) {
+  if (!this.certification.enabled) return false;
+
+  const attendancePercentage = this.getAttendancePercentage(userId);
+  const meetsAttendance =
+    attendancePercentage >= this.certification.requirements.minimumAttendance;
+
+  let meetsAssessment = true;
+  if (this.assessment.required) {
+    // Implementation depends on how you store user assessment results
+    meetsAssessment = true; // Placeholder
+  }
+
+  return meetsAttendance && meetsAssessment;
+};
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                     💰 PRICING METHODS                              ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+/**
+ * 💰 Get comprehensive pricing information with early bird details
  */
 inPersonCourseSchema.methods.getPricingInfo = function () {
-  const now = new Date();
   const earlyBirdDeadline = this.earlyBirdDeadline;
 
   return {
@@ -792,26 +1144,24 @@ inPersonCourseSchema.methods.getPricingInfo = function () {
       this.isEarlyBirdActive && this.enrollment?.earlyBirdPrice
         ? this.enrollment.price - this.enrollment.earlyBirdPrice
         : 0,
-    currency: this.enrollment?.currency || "USD",
+    currency: this.enrollment?.currency || "EUR",
   };
 };
 
 /**
- * Check if a specific date qualifies for early bird pricing
+ * 💰 Check if a specific date qualifies for early bird pricing
  */
 inPersonCourseSchema.methods.isEarlyBirdValidOnDate = function (date) {
   if (!this.enrollment?.earlyBirdPrice || this.enrollment.earlyBirdPrice <= 0) {
     return false;
   }
-
   const deadline = this.earlyBirdDeadline;
   if (!deadline) return false;
-
   return new Date(date) <= deadline;
 };
 
 /**
- * Get price for a specific date
+ * 💰 Get price for a specific date
  */
 inPersonCourseSchema.methods.getPriceOnDate = function (date) {
   if (this.isEarlyBirdValidOnDate(date)) {
@@ -820,31 +1170,12 @@ inPersonCourseSchema.methods.getPriceOnDate = function (date) {
   return this.enrollment?.price || 0;
 };
 
-// ========================================
-// INSTANCE METHODS
-// ========================================
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                      📊 ATTENDANCE METHODS                          ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 /**
- * Check if course has available seats
- */
-inPersonCourseSchema.methods.hasAvailableSeats = function () {
-  return this.enrollment.currentEnrollment < this.enrollment.seatsAvailable;
-};
-
-/**
- * Get lead instructor
- */
-inPersonCourseSchema.methods.getLeadInstructor = async function () {
-  if (this.instructors.primary?.instructorId) {
-    return await mongoose
-      .model("Instructor")
-      .findById(this.instructors.primary.instructorId);
-  }
-  return null;
-};
-
-/**
- * Calculate attendance percentage for a user
+ * 📊 Calculate attendance percentage for a user
  */
 inPersonCourseSchema.methods.getAttendancePercentage = function (userId) {
   const userRecords = this.attendance.records.filter(
@@ -863,31 +1194,9 @@ inPersonCourseSchema.methods.getAttendancePercentage = function (userId) {
 };
 
 /**
- * Check certificate eligibility for a user
- */
-inPersonCourseSchema.methods.isCertificateEligible = function (userId) {
-  if (!this.certification.enabled) return false;
-
-  const attendancePercentage = this.getAttendancePercentage(userId);
-  const meetsAttendance =
-    attendancePercentage >= this.certification.requirements.minimumAttendance;
-
-  // Add assessment check if required
-  let meetsAssessment = true;
-  if (this.assessment.required) {
-    // Implementation depends on how you store user assessment results
-    // This is a placeholder
-    meetsAssessment = true;
-  }
-
-  return meetsAttendance && meetsAssessment;
-};
-
-/**
- * Calculate total course hours (basic estimation)
+ * ⏰ Calculate total course hours (basic estimation)
  */
 inPersonCourseSchema.methods.calculateTotalHours = function () {
-  // Simple calculation based on start/end times and days
   if (this.schedule.startDate && this.schedule.endDate) {
     const days =
       Math.ceil(
@@ -897,7 +1206,6 @@ inPersonCourseSchema.methods.calculateTotalHours = function () {
     return days * 8; // Assume 8 hours per day
   }
 
-  // Parse duration string if available
   const durationMatch = this.schedule.duration?.match(/(\d+)\s*(hour|day)/i);
   if (durationMatch) {
     const value = parseInt(durationMatch[1]);
@@ -908,8 +1216,31 @@ inPersonCourseSchema.methods.calculateTotalHours = function () {
   return 8; // Default to 8 hours
 };
 
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                       🎯 UTILITY METHODS                            ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 /**
- * Add file to media - SIMPLIFIED
+ * 💺 Check if course has available seats
+ */
+inPersonCourseSchema.methods.hasAvailableSeats = function () {
+  return this.enrollment.currentEnrollment < this.enrollment.seatsAvailable;
+};
+
+/**
+ * 👨‍🏫 Get lead instructor
+ */
+inPersonCourseSchema.methods.getLeadInstructor = async function () {
+  if (this.instructors.primary?.instructorId) {
+    return await mongoose
+      .model("Instructor")
+      .findById(this.instructors.primary.instructorId);
+  }
+  return null;
+};
+
+/**
+ * 📁 Add file to media
  */
 inPersonCourseSchema.methods.addFile = function (category, url) {
   if (!this.media) this.media = {};
@@ -925,7 +1256,7 @@ inPersonCourseSchema.methods.addFile = function (category, url) {
 };
 
 /**
- * Remove file from media - SIMPLIFIED
+ * 🗑️ Remove file from media
  */
 inPersonCourseSchema.methods.removeFile = function (category, url) {
   if (!this.media) return false;
@@ -942,21 +1273,7 @@ inPersonCourseSchema.methods.removeFile = function (category, url) {
 };
 
 /**
- * Add multiple files to media
- */
-inPersonCourseSchema.methods.addFiles = function (category, urls) {
-  if (!this.media) this.media = {};
-
-  if (["documents", "images", "videos"].includes(category)) {
-    if (!this.media[category]) this.media[category] = [];
-    this.media[category].push(...urls);
-  }
-
-  return this.save();
-};
-
-/**
- * Get all media URLs for cleanup
+ * 📁 Get all media URLs for cleanup
  */
 inPersonCourseSchema.methods.getAllMediaUrls = function () {
   const urls = [];
@@ -975,7 +1292,7 @@ inPersonCourseSchema.methods.getAllMediaUrls = function () {
 };
 
 /**
- * Set certification issuing authority
+ * 🏛️ Set certification issuing authority
  */
 inPersonCourseSchema.methods.setIssuingAuthority = async function (bodyId) {
   const CertificationBody = mongoose.model("CertificationBody");
@@ -992,20 +1309,153 @@ inPersonCourseSchema.methods.setIssuingAuthority = async function (bodyId) {
 };
 
 /**
- * Remove certification issuing authority (revert to default)
+ * 🔄 Remove certification issuing authority (revert to default)
  */
 inPersonCourseSchema.methods.removeIssuingAuthority = function () {
   this.certification.issuingAuthorityId = undefined;
-  this.certification.issuingAuthority = "IAAI Training Institute"; // Default
+  this.certification.issuingAuthority = "IAAI Training Institute";
   return this.save();
 };
 
-// ========================================
-// STATIC METHODS
-// ========================================
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                               STATIC METHODS                                ║
+// ║                          Database Query Helpers                             ║
+// ════════════════════════════════════════════════════════════════════════════════
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                   🔍 CERTIFICATE HELPER METHODS                     ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 /**
- * Find upcoming courses
+ * 🎓 Comprehensive certificate eligibility check
+ * Use this in controllers before issuing certificates
+ */
+inPersonCourseSchema.statics.checkCertificateEligibility = async function (
+  courseType,
+  courseId,
+  userId
+) {
+  try {
+    let course;
+
+    switch (courseType) {
+      case "inperson":
+        course = await this.findById(courseId);
+        break;
+      case "online-live":
+        const OnlineLiveTraining = mongoose.model("OnlineLiveTraining");
+        course = await OnlineLiveTraining.findById(courseId);
+        break;
+      case "self-paced":
+        const SelfPacedTraining = mongoose.model("SelfPacedOnlineTraining");
+        course = await SelfPacedTraining.findById(courseId);
+        break;
+      default:
+        throw new Error("Invalid course type");
+    }
+
+    if (!course) {
+      throw new Error("Course not found");
+    }
+
+    const eligibilityResult = await course.canIssueCertificate(userId);
+
+    return {
+      success: true,
+      ...eligibilityResult,
+      courseTitle: course.basic?.title,
+      courseType: courseType,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      eligible: false,
+      reason: error.message,
+    };
+  }
+};
+
+/**
+ * 🔗 Check completion status across linked courses
+ */
+inPersonCourseSchema.statics.getLinkedCourseCompletionStatus = async function (
+  inPersonCourseId,
+  userId
+) {
+  try {
+    const OnlineLiveTraining = mongoose.model("OnlineLiveTraining");
+    const inPersonCourse = await this.findById(inPersonCourseId);
+
+    if (!inPersonCourse) {
+      throw new Error("In-person course not found");
+    }
+
+    const result = {
+      inPersonCourse: {
+        id: inPersonCourse._id,
+        title: inPersonCourse.basic.title,
+        completed: inPersonCourse.isCertificateEligible(userId),
+        canIssueCertificate: false,
+      },
+      linkedOnlineCourse: null,
+      overallStatus: "incomplete",
+    };
+
+    // Check linked online course if exists
+    if (inPersonCourse.linkedCourse?.onlineCourseId) {
+      const linkedOnline = await OnlineLiveTraining.findById(
+        inPersonCourse.linkedCourse.onlineCourseId
+      );
+
+      if (linkedOnline) {
+        const onlineCompleted = linkedOnline.isCertificateEligible(userId);
+
+        result.linkedOnlineCourse = {
+          id: linkedOnline._id,
+          title: linkedOnline.basic.title,
+          completed: onlineCompleted,
+          isRequired: inPersonCourse.linkedCourse.isRequired,
+          relationship: inPersonCourse.linkedCourse.relationship,
+        };
+
+        // Determine certificate eligibility
+        if (
+          inPersonCourse.linkedCourse.isRequired &&
+          inPersonCourse.linkedCourse.completionRequired
+        ) {
+          result.inPersonCourse.canIssueCertificate =
+            result.inPersonCourse.completed && onlineCompleted;
+          result.overallStatus = result.inPersonCourse.canIssueCertificate
+            ? "completed"
+            : "incomplete";
+        } else {
+          result.inPersonCourse.canIssueCertificate =
+            result.inPersonCourse.completed;
+          result.overallStatus = result.inPersonCourse.completed
+            ? "completed"
+            : "incomplete";
+        }
+      }
+    } else {
+      result.inPersonCourse.canIssueCertificate =
+        result.inPersonCourse.completed;
+      result.overallStatus = result.inPersonCourse.completed
+        ? "completed"
+        : "incomplete";
+    }
+
+    return result;
+  } catch (error) {
+    throw new Error(`Error checking completion status: ${error.message}`);
+  }
+};
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                      🔍 QUERY HELPER METHODS                        ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+/**
+ * 📅 Find upcoming courses
  */
 inPersonCourseSchema.statics.findUpcoming = function () {
   return this.find({
@@ -1015,7 +1465,7 @@ inPersonCourseSchema.statics.findUpcoming = function () {
 };
 
 /**
- * Find courses by city
+ * 🏙️ Find courses by city
  */
 inPersonCourseSchema.statics.findByCity = function (city) {
   return this.find({
@@ -1025,7 +1475,7 @@ inPersonCourseSchema.statics.findByCity = function (city) {
 };
 
 /**
- * Find available courses with seats
+ * 💺 Find available courses with seats
  */
 inPersonCourseSchema.statics.findAvailable = function () {
   return this.find({
@@ -1038,7 +1488,7 @@ inPersonCourseSchema.statics.findAvailable = function () {
 };
 
 /**
- * Search courses with text
+ * 🔍 Search courses with text
  */
 inPersonCourseSchema.statics.searchCourses = function (searchTerm) {
   const searchRegex = new RegExp(searchTerm, "i");
@@ -1052,16 +1502,137 @@ inPersonCourseSchema.statics.searchCourses = function (searchTerm) {
   });
 };
 
-//new
-// Add method to check if user wants notifications
-module.exports =
-  mongoose.models.InPersonAestheticTraining ||
-  mongoose.model("InPersonAestheticTraining", inPersonCourseSchema);
-
-// ========================================
-// EXPORT MODEL
-// ========================================
+// ████████████████████████████████████████████████████████████████████████████████
+// ██                                                                            ██
+// ██                              EXPORT MODEL                                 ██
+// ██                                                                            ██
+// ████████████████████████████████████████████████████████████████████████████████
 
 module.exports =
   mongoose.models.InPersonAestheticTraining ||
   mongoose.model("InPersonAestheticTraining", inPersonCourseSchema);
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                              MODEL SUMMARY                                  ║
+// ════════════════════════════════════════════════════════════════════════════════
+/*
+🎯 FEATURES INCLUDED:
+✅ Complete Schema with 12 Major Sections
+✅ Linked Course System with Bidirectional Updates
+✅ Multi-Authority Certification Management
+✅ Early Bird Pricing with Smart Calculations
+✅ Comprehensive Attendance Tracking
+✅ Automatic Instructor & Certification Body Sync
+✅ 15+ Virtual Fields for Smart Computations
+✅ 20+ Instance Methods for Course Operations
+✅ 6+ Static Methods for Database Queries
+✅ Advanced Pre-Save Middleware with Error Handling
+✅ Certificate Eligibility with Linked Course Logic
+✅ Media Management with File Operations
+✅ Performance Optimized with Strategic Indexes
+
+📋 SCHEMA SECTIONS:
+1. 📝 Basic Information (code, title, description, category, status)
+2. 📅 Scheduling & Timing (dates, duration, time slots, deadlines)
+3. 💰 Pricing & Enrollment (price, early bird, seats, capacity)
+4. 👥 Instructor Management (primary + additional instructors)
+5. 🏢 Venue Information (location, facilities, parking)
+6. 📚 Course Content (objectives, modules, audience, level)
+7. 🔬 Practical Training (hands-on, procedures, equipment, safety)
+8. 🔗 Linked Course System (online prerequisites, cert rules)
+9. 📝 Assessment & Testing (quizzes, practical exams, scoring)
+10. 🎓 Multi-Authority Certification (primary + additional bodies)
+11. 🎁 Inclusions & Services (meals, accommodation, materials)
+12. 📁 Media & Files (images, documents, videos, links)
+13. 📊 Attendance Tracking (check-in/out, hours, status)
+14. 📞 Contact & Support (email, phone, whatsapp, hours)
+15. 🔔 Notifications (updates, emails, marketing, digest)
+16. 🗃️ Metadata (created by, modified by, tags, notes)
+
+🚀 VIRTUAL FIELDS:
+• displayDuration - Human readable duration
+• isMultiDay - Multi-day course detection
+• displayLocation - City, Country format
+• availableSeats - Real-time seat availability
+• allInstructors - Combined instructor list
+• instructorNames - Comma-separated names
+• totalFilesCount - Media file counter
+• hasMediaContent - Media availability check
+• earlyBirdDeadline - Dynamic deadline calculation
+• isEarlyBirdActive - Real-time pricing status
+• earlyBirdDaysRemaining - Countdown timer
+• currentPrice - Smart price calculation
+• hasRequiredLinkedCourse - Prerequisite detection
+• certificationStrategy - Certificate issuing logic
+
+🛠️ INSTANCE METHODS:
+• canIssueCertificate() - Smart certificate eligibility with linked course logic
+• isCertificateEligible() - Basic certificate requirements check
+• getPricingInfo() - Comprehensive pricing details with early bird
+• isEarlyBirdValidOnDate() - Date-specific pricing validation
+• getPriceOnDate() - Historical/future price calculation
+• getAttendancePercentage() - User attendance calculation
+• calculateTotalHours() - Course duration estimation
+• hasAvailableSeats() - Seat availability check
+• getLeadInstructor() - Primary instructor lookup
+• addFile() - Media file addition
+• removeFile() - Media file removal
+• getAllMediaUrls() - Media cleanup helper
+• setIssuingAuthority() - Certification body assignment
+• removeIssuingAuthority() - Default authority reset
+
+🔍 STATIC METHODS:
+• checkCertificateEligibility() - Universal certificate validator
+• getLinkedCourseCompletionStatus() - Cross-course completion tracking
+• findUpcoming() - Upcoming courses query
+• findByCity() - Location-based search
+• findAvailable() - Available seats query
+• searchCourses() - Text-based search
+
+🔧 MIDDLEWARE FEATURES:
+• Automatic instructor name caching and assignment tracking
+• Bidirectional course linking with online courses
+• Certification body name synchronization
+• Certificate suppression rule enforcement
+• Registration deadline auto-calculation
+• Empty array cleanup for optimization
+• Comprehensive error handling and logging
+
+📊 PERFORMANCE OPTIMIZATIONS:
+• Strategic database indexes on frequently queried fields
+• Cached instructor and certification body names
+• Optimized virtual field calculations
+• Efficient media array management
+
+🎯 USE CASES:
+• Medical aesthetic training courses
+• Hands-on practical workshops
+• Multi-day intensive programs
+• Prerequisite-based course sequences
+• International training programs
+• Certification-based education
+• Corporate training initiatives
+
+🔗 INTEGRATION POINTS:
+• OnlineLiveTraining model (bidirectional linking)
+• Instructor model (assignment tracking)
+• CertificationBody model (multi-authority support)
+• User model (attendance and certificate tracking)
+
+💡 BUSINESS LOGIC:
+• Early bird pricing automatically expires based on course start date
+• Linked online courses can have certificate suppression rules
+• Multi-authority certifications support co-issuers, endorsers, partners
+• Attendance tracking supports manual, QR code, and digital signature methods
+• Certificate eligibility requires both attendance and assessment completion
+• Course linking supports prerequisite, supplementary, and follow-up relationships
+
+🔒 DATA INTEGRITY:
+• Automatic cleanup of invalid instructor/certification body references
+• Bidirectional relationship maintenance between linked courses
+• Validation rules for early bird pricing configuration
+• Comprehensive error handling in middleware operations
+
+This model provides a complete foundation for managing in-person aesthetic training courses
+with advanced features for modern educational institutions and training organizations.
+*/

@@ -141,10 +141,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         type: Number,
         min: 1,
         max: 365,
-        default: 30, // Default: early bird expires 30 days before course
+        default: 30,
         validate: {
           validator: function (value) {
-            // Only validate if earlyBirdPrice is set
             if (this.earlyBirdPrice && this.earlyBirdPrice > 0) {
               return value && value > 0;
             }
@@ -317,6 +316,22 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         linkedInGroup: String,
         slackChannel: String,
       },
+    },
+
+    //new
+    linkedToInPerson: {
+      inPersonCourseId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "InPersonAestheticTraining",
+        default: null,
+      },
+      isLinked: { type: Boolean, default: false },
+      linkType: {
+        type: String,
+        enum: ["prerequisite", "supplementary", "follow-up"],
+      },
+      // NEW: Certificate suppression when linked
+      suppressCertificate: { type: Boolean, default: false },
     },
 
     // ========================================
@@ -1659,6 +1674,47 @@ onlineLiveCourseSchema.statics.searchCourses = function (searchTerm) {
       { "metadata.tags": searchRegex }, // Search by tags
     ],
   });
+};
+
+//new to manage linked
+/**
+ * Check if this course is linked to an in-person course
+ */
+onlineLiveCourseSchema.virtual("isLinkedToInPerson").get(function () {
+  return (
+    this.linkedToInPerson?.isLinked && this.linkedToInPerson?.inPersonCourseId
+  );
+});
+
+/**
+ * Check if certificate should be issued for this online course
+ */
+onlineLiveCourseSchema.methods.canIssueCertificate = async function (userId) {
+  // Check basic eligibility first
+  if (!this.isCertificateEligible(userId)) {
+    return {
+      eligible: false,
+      reason: "Does not meet basic course requirements",
+    };
+  }
+
+  // If not linked to in-person course, issue certificate
+  if (!this.isLinkedToInPerson) {
+    return { eligible: true };
+  }
+
+  // If linked but certificate is not suppressed, issue certificate
+  if (!this.linkedToInPerson.suppressCertificate) {
+    return { eligible: true };
+  }
+
+  // Certificate is suppressed for linked courses
+  return {
+    eligible: false,
+    reason:
+      "Certificate will be issued upon completion of the linked in-person course",
+    linkedInPersonCourseId: this.linkedToInPerson.inPersonCourseId,
+  };
 };
 
 // ========================================

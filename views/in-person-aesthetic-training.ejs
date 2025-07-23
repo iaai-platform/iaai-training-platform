@@ -1071,9 +1071,9 @@
             </td>
             <td><%= course.schedule?.duration || 'TBD' %></td>
             <td class="price-badge">
-              $<%= course.enrollment?.price || 0 %>
+              <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment?.price || 0 %>
               <% if (course.enrollment?.earlyBirdPrice) { %>
-                <br><small style="color: #28a745;">Early: $<%= course.enrollment.earlyBirdPrice %></small>
+                <br><small style="color: #28a745;">Early: <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment.earlyBirdPrice %></small>
               <% } %>
             </td>
             <td>
@@ -1586,7 +1586,7 @@
     }
   
     // ========================================
-    // MODAL FUNCTIONALITY
+    // MODAL FUNCTIONALITY - FIXED VERSION
     // ========================================
     function showCourseModal(course) {
       const modal = document.getElementById('courseModal');
@@ -1596,8 +1596,32 @@
         modalTitle.textContent = course.basic?.title || course.title;
       }
       
+      // Currency symbol function for JavaScript
+      const getCurrencySymbolJS = (currency) => {
+        const symbols = {
+          'USD': '$',
+          'EUR': '€',
+          'GBP': '£',
+          'JPY': '¥',
+          'CAD': 'C$',
+          'AUD': 'A$',
+          'CHF': 'CHF',
+          'SEK': 'kr',
+          'NOK': 'kr',
+          'DKK': 'kr',
+          'TRY': '₺',
+          'AED': 'د.إ',
+          'SAR': 'ر.س'
+        };
+        return symbols[currency] || '€';
+      };
+      
       const courseInfo = document.getElementById('modalCourseInfo');
       if (courseInfo) {
+        const currency = course.enrollment?.currency || 'EUR';
+        const currencySymbol = getCurrencySymbolJS(currency);
+        const price = course.enrollment?.price || course.price || 0;
+        
         courseInfo.innerHTML = `
           <div class="modal-info-row">
             <div class="modal-label">Course Code</div>
@@ -1626,7 +1650,9 @@
           </div>
           <div class="modal-info-row">
             <div class="modal-label">Price</div>
-            <div style="font-weight: 700; color: #b8860b;">$${course.enrollment?.price || course.price || 0} USD</div>
+            <div style="font-weight: 700; color: #b8860b;">
+              ${currencySymbol}${price}
+            </div>
           </div>
           <div class="modal-info-row">
             <div class="modal-label">Seats Available</div>

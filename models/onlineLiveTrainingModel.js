@@ -1,24 +1,39 @@
-// models/onlineLiveTrainingModel.js
+// ████████████████████████████████████████████████████████████████████████████████
+// ██                                                                            ██
+// ██                      ONLINE LIVE TRAINING MODEL                          ██
+// ██                           FINAL COMPLETE VERSION                          ██
+// ██                                                                            ██
+// ████████████████████████████████████████████████████████████████████████████████
 /**
- * Updated Online Live Training Course Model
+ * Complete Online Live Training Course Model
  *
- * Simplified structure based on In-Person model design patterns
- * Maintains all online-specific functionality with cleaner organization
+ * Features:
+ * ✅ Bidirectional Linked Course System
+ * ✅ Early Bird Pricing with Dynamic Calculations
+ * ✅ Multi-Authority Certification System
+ * ✅ Advanced Session Management & Time Zones
+ * ✅ Comprehensive Attendance Tracking
+ * ✅ Certificate Suppression for Linked Courses
+ * ✅ Recording & Replay Management
+ * ✅ Interactive Engagement Tools
+ * ✅ Technical Requirements Management
  *
  * @module OnlineLiveTraining
+ * @version 2.0.0
+ * @author IAAI Training Institute
  */
 
 const mongoose = require("mongoose");
 
-/**
- * Simplified Online Live Training Schema
- * Maximum 2-level nesting for easier form integration
- */
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                                  SCHEMA DEFINITION                           ║
+// ════════════════════════════════════════════════════════════════════════════════
+
 const onlineLiveCourseSchema = new mongoose.Schema(
   {
-    // ========================================
-    // BASIC INFORMATION
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                        BASIC COURSE INFORMATION                     │
+    // └─────────────────────────────────────────────────────────────────────┘
     basic: {
       courseCode: {
         type: String,
@@ -66,9 +81,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // SCHEDULING & TIME ZONES
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                     SCHEDULING & TIME ZONES                         │
+    // └─────────────────────────────────────────────────────────────────────┘
     schedule: {
       startDate: {
         type: Date,
@@ -85,14 +100,14 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       registrationDeadline: {
         type: Date,
       },
-      // Time zone management
+      // 🌍 Time zone management
       primaryTimezone: {
         type: String,
         required: true,
         default: "UTC",
       },
       displayTimezones: [String], // ['EST', 'PST', 'GMT']
-      // Session pattern
+      // 📅 Session pattern
       pattern: {
         type: String,
         enum: ["single", "daily", "weekly", "biweekly", "monthly", "custom"],
@@ -103,7 +118,7 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         endTime: String, // "16:00"
         breakDuration: { type: Number, default: 10 }, // minutes
       },
-      // Detailed sessions for multi-day courses
+      // 🗓️ Detailed sessions for multi-day courses
       sessions: [
         {
           dayNumber: Number,
@@ -124,9 +139,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       ],
     },
 
-    // ========================================
-    // PRICING & ENROLLMENT
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    PRICING & ENROLLMENT MANAGEMENT                  │
+    // └─────────────────────────────────────────────────────────────────────┘
     enrollment: {
       price: {
         type: Number,
@@ -167,9 +182,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       registrationUrl: String,
     },
 
-    // ========================================
-    // INSTRUCTORS
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                      INSTRUCTOR MANAGEMENT                          │
+    // └─────────────────────────────────────────────────────────────────────┘
     instructors: {
       primary: {
         instructorId: {
@@ -196,9 +211,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       ],
     },
 
-    // ========================================
-    // PLATFORM & ACCESS
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                       PLATFORM & ACCESS                             │
+    // └─────────────────────────────────────────────────────────────────────┘
     platform: {
       name: {
         type: String,
@@ -230,9 +245,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // COURSE CONTENT
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                        COURSE CONTENT                               │
+    // └─────────────────────────────────────────────────────────────────────┘
     content: {
       objectives: [
         {
@@ -258,9 +273,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       detailedSyllabus: String,
     },
 
-    // ========================================
-    // TECHNICAL REQUIREMENTS
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    TECHNICAL REQUIREMENTS                           │
+    // └─────────────────────────────────────────────────────────────────────┘
     technical: {
       systemRequirements: {
         os: [String], // ["Windows 10+", "macOS 10.14+"]
@@ -272,7 +287,7 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         minimum: { type: String, default: "5 Mbps" },
         recommended: { type: String, default: "25 Mbps" },
       },
-      requiredSoftware: [String], // Simple list of software names
+      requiredSoftware: [String],
       equipment: {
         camera: {
           type: String,
@@ -295,9 +310,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       techCheckUrl: String,
     },
 
-    // ========================================
-    // INTERACTION & ENGAGEMENT
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    INTERACTION & ENGAGEMENT                         │
+    // └─────────────────────────────────────────────────────────────────────┘
     interaction: {
       participationRequired: { type: Boolean, default: true },
       cameraRequired: { type: Boolean, default: false },
@@ -318,7 +333,10 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
     },
 
-    //new
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                   🔗 LINKED TO IN-PERSON COURSE 🔗                  ┃
+    // ┃                      Bidirectional Course Linking                   ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     linkedToInPerson: {
       inPersonCourseId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -330,13 +348,13 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         type: String,
         enum: ["prerequisite", "supplementary", "follow-up"],
       },
-      // NEW: Certificate suppression when linked
+      // 🎓 Certificate suppression when linked to in-person course
       suppressCertificate: { type: Boolean, default: false },
     },
 
-    // ========================================
-    // RECORDING & REPLAY
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                      RECORDING & REPLAY                             │
+    // └─────────────────────────────────────────────────────────────────────┘
     recording: {
       enabled: { type: Boolean, default: true },
       type: {
@@ -363,36 +381,22 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       autoTranscription: { type: Boolean, default: false },
     },
 
-    // ========================================
-    // MEDIA & RESOURCES (Simplified)
-    // ========================================
-    // ========================================
-    // MEDIA & RESOURCES (Fixed)
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                      MEDIA & RESOURCES                              │
+    // └─────────────────────────────────────────────────────────────────────┘
     media: {
-      // Main course image - should be an object with url and alt
       mainImage: {
         url: String,
         alt: String,
       },
-
-      // Document files (PDFs, Word docs, etc.)
-      documents: [String], // Array of file URLs
-
-      // Gallery images
-      images: [String], // Array of image URLs
-
-      // Video files and external links
-      videos: [String], // Array of video URLs (both uploaded files and external links)
-
-      // Promotional materials
+      documents: [String], // PDF, Word docs, etc.
+      images: [String], // Gallery images
+      videos: [String], // Video URLs (uploaded + external)
       promotional: {
         brochureUrl: String,
         videoUrl: String,
         catalogUrl: String,
       },
-
-      // Additional links (articles, websites, etc.)
       links: [
         {
           title: String,
@@ -405,9 +409,10 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         },
       ],
     },
-    // ========================================
-    // DIGITAL MATERIALS
-    // ========================================
+
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                      DIGITAL MATERIALS                              │
+    // └─────────────────────────────────────────────────────────────────────┘
     materials: {
       handouts: [
         {
@@ -436,9 +441,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // ASSESSMENT & CERTIFICATION
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    ASSESSMENT & TESTING                             │
+    // └─────────────────────────────────────────────────────────────────────┘
     assessment: {
       required: { type: Boolean, default: false },
       type: {
@@ -469,6 +474,10 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       ],
     },
 
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                 🎓 MULTI-AUTHORITY CERTIFICATION 🎓                 ┃
+    // ┃                  Advanced Certificate Management                    ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     certification: {
       enabled: { type: Boolean, default: true },
       type: {
@@ -476,8 +485,7 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         enum: ["completion", "achievement", "participation"],
         default: "completion",
       },
-
-      // Primary certification body
+      // 🏛️ Primary Certification Authority
       issuingAuthorityId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "CertificationBody",
@@ -486,8 +494,7 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         type: String,
         default: "IAAI Training Institute",
       },
-
-      // Additional certification bodies array
+      // 🤝 Additional Certification Bodies
       certificationBodies: [
         {
           bodyId: {
@@ -502,17 +509,19 @@ const onlineLiveCourseSchema = new mongoose.Schema(
           },
         },
       ],
-
+      // 📋 Requirements & Validation
       requirements: {
         minimumAttendance: { type: Number, default: 80 },
         minimumScore: { type: Number, default: 70 },
         practicalRequired: { type: Boolean, default: false },
         projectRequired: { type: Boolean, default: false },
       },
+      // ⏰ Validity Period
       validity: {
         isLifetime: { type: Boolean, default: true },
         years: Number,
       },
+      // 🔐 Digital Features
       features: {
         digitalBadge: { type: Boolean, default: true },
         qrVerification: { type: Boolean, default: true },
@@ -522,9 +531,10 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       template: { type: String, default: "professional_v1" },
     },
 
-    // ========================================
-    // ATTENDANCE & TRACKING
-    // ========================================
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                    📊 ATTENDANCE TRACKING 📊                       ┃
+    // ┃                   Advanced Session Monitoring                      ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     attendance: {
       trackingEnabled: { type: Boolean, default: true },
       method: {
@@ -538,7 +548,6 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         minimumSessionTime: { type: Number, default: 80 }, // percentage
         breakAttendanceRequired: { type: Boolean, default: false },
       },
-      // Simplified attendance records
       records: [
         {
           userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -557,9 +566,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       ],
     },
 
-    // ========================================
-    // SUPPORT & CONTACT
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    SUPPORT & CONTACT                                │
+    // └─────────────────────────────────────────────────────────────────────┘
     support: {
       contact: {
         email: { type: String, default: "info@iaa-i.com" },
@@ -582,9 +591,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // POST-COURSE ACCESS
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    POST-COURSE ACCESS                               │
+    // └─────────────────────────────────────────────────────────────────────┘
     postCourse: {
       accessDuration: {
         recordings: { type: Number, default: 90 }, // days
@@ -604,9 +613,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // PARTICIPANT EXPERIENCE
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                  PARTICIPANT EXPERIENCE                             │
+    // └─────────────────────────────────────────────────────────────────────┘
     experience: {
       onboarding: {
         welcomeVideoUrl: String,
@@ -629,9 +638,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // ANALYTICS (Simplified)
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                        ANALYTICS                                    │
+    // └─────────────────────────────────────────────────────────────────────┘
     analytics: {
       engagement: {
         averageAttendance: Number,
@@ -650,9 +659,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
     },
 
-    // ========================================
-    // NOTIFICATIONS
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                      NOTIFICATIONS                                  │
+    // └─────────────────────────────────────────────────────────────────────┘
     notificationSettings: {
       courseUpdates: { type: Boolean, default: true },
       emailNotifications: { type: Boolean, default: true },
@@ -661,9 +670,9 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       weeklyDigest: { type: Boolean, default: false },
     },
 
-    // ========================================
-    // METADATA
-    // ========================================
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                        METADATA                                     │
+    // └─────────────────────────────────────────────────────────────────────┘
     metadata: {
       createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       lastModifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -674,7 +683,10 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       templateName: String,
       lastModified: { type: Date, default: Date.now },
     },
-    // Added for cloning feature, should not be directly part of general schema structure
+
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    ADDITIONAL FEATURES                              │
+    // └─────────────────────────────────────────────────────────────────────┘
     cloneInfo: {
       isClone: { type: Boolean, default: false },
       originalCourseId: {
@@ -683,50 +695,47 @@ const onlineLiveCourseSchema = new mongoose.Schema(
       },
       clonedAt: Date,
       clonedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      cloneOptions: Object, // Store the options used for cloning
+      cloneOptions: Object,
     },
-    postponementReason: String, // Added for postponement feature
-    postponementDate: Date, // Added for postponement feature
+    postponementReason: String,
+    postponementDate: Date,
   },
   {
     timestamps: true,
     collection: "onlinelivetrainings",
-    // Ensure virtuals are included when converting to JSON or object
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
 
-// ========================================
-// INDEXES
-// ========================================
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                                   INDEXES                                    ║
+// ════════════════════════════════════════════════════════════════════════════════
 
-// IMPORTANT: The courseCode field is nested under basic.courseCode, not at the root level
 onlineLiveCourseSchema.index({ "basic.courseCode": 1 }, { unique: true });
 onlineLiveCourseSchema.index({ "schedule.startDate": 1, "basic.status": 1 });
 onlineLiveCourseSchema.index({ "platform.name": 1 });
 onlineLiveCourseSchema.index({ "basic.category": 1, "basic.status": 1 });
 onlineLiveCourseSchema.index({ "instructors.primary.instructorId": 1 });
 onlineLiveCourseSchema.index({ "certification.issuingAuthorityId": 1 });
-
-// Additional useful indexes for queries
+onlineLiveCourseSchema.index({ "linkedToInPerson.inPersonCourseId": 1 }); // NEW: For linking queries
 onlineLiveCourseSchema.index({
   "basic.title": "text",
   "basic.description": "text",
 }); // Text search
-onlineLiveCourseSchema.index({ "schedule.startDate": 1 }); // Date-based queries
 onlineLiveCourseSchema.index({ "enrollment.price": 1 }); // Price-based queries
 onlineLiveCourseSchema.index({ "metadata.createdBy": 1 }); // Creator-based queries
 
-// ========================================
-// VIRTUAL FIELDS
-// ========================================
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                                VIRTUAL FIELDS                               ║
+// ║                            Smart Computed Properties                         ║
+// ════════════════════════════════════════════════════════════════════════════════
 
-/**
- * Display duration
- */
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                    📅 Schedule & Duration Virtuals                  │
+// └─────────────────────────────────────────────────────────────────────┘
+
 onlineLiveCourseSchema.virtual("displayDuration").get(function () {
-  // console.log('DEBUG VIRTUAL: displayDuration accessed.'); // ADD THIS
   if (this.schedule?.endDate && this.schedule?.startDate) {
     const days =
       Math.ceil(
@@ -738,13 +747,8 @@ onlineLiveCourseSchema.virtual("displayDuration").get(function () {
   return this.schedule?.duration || "1 session";
 });
 
-/**
- * Is multi-day course
- */
 onlineLiveCourseSchema.virtual("isMultiDay").get(function () {
-  // console.log('DEBUG VIRTUAL: isMultiDay accessed.'); // ADD THIS
   if (this.schedule?.endDate && this.schedule?.startDate) {
-    // Compare dates only, ignoring time, to determine if it spans multiple days
     const startOfDay = new Date(
       this.schedule.startDate.getFullYear(),
       this.schedule.startDate.getMonth(),
@@ -760,72 +764,74 @@ onlineLiveCourseSchema.virtual("isMultiDay").get(function () {
   return false;
 });
 
-/**
- * Available seats
- */
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                     💺 Enrollment & Capacity Virtuals               │
+// └─────────────────────────────────────────────────────────────────────┘
+
 onlineLiveCourseSchema.virtual("availableSeats").get(function () {
-  // console.log('DEBUG VIRTUAL: availableSeats accessed.'); // ADD THIS
-  // Ensure currentEnrollment and seatsAvailable are numbers, default to 0 if null/undefined
   const current = this.enrollment?.currentEnrollment || 0;
   const total = this.enrollment?.seatsAvailable || 0;
-  return Math.max(0, total - current); // Ensure it doesn't go below 0
+  return Math.max(0, total - current);
 });
 
-/**
- * Platform display name
- */
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                      🖥️ Platform & Technical Virtuals               │
+// └─────────────────────────────────────────────────────────────────────┘
+
 onlineLiveCourseSchema.virtual("displayPlatform").get(function () {
-  // console.log('DEBUG VIRTUAL: displayPlatform accessed.'); // ADD THIS
   return this.platform?.name || "Online Platform";
 });
 
-/**
- * All instructors combined (primary + additional)
- */
+onlineLiveCourseSchema.virtual("technicalDifficulty").get(function () {
+  const softwareCount = this.technical?.requiredSoftware?.length || 0;
+  const featuresCount = Object.values(this.platform?.features || {}).filter(
+    (f) => f
+  ).length;
+
+  if (softwareCount <= 1 && featuresCount <= 3) return "Basic";
+  if (softwareCount <= 3 && featuresCount <= 6) return "Intermediate";
+  return "Advanced";
+});
+
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                      👥 Instructor Virtuals                         │
+// └─────────────────────────────────────────────────────────────────────┘
+
 onlineLiveCourseSchema.virtual("allInstructors").get(function () {
-  // console.log('DEBUG VIRTUAL: allInstructors accessed.'); // ADD THIS
   const instructors = [];
   if (this.instructors?.primary) {
-    // Use optional chaining
     instructors.push(this.instructors.primary);
   }
   if (
     this.instructors?.additional &&
     Array.isArray(this.instructors.additional)
   ) {
-    // Use optional chaining
     instructors.push(...this.instructors.additional);
   }
   return instructors;
 });
 
-/**
- * Instructor names display (comma-separated string)
- */
 onlineLiveCourseSchema.virtual("instructorNames").get(function () {
-  // console.log('DEBUG VIRTUAL: instructorNames accessed.'); // ADD THIS
   const names = [];
   if (this.instructors?.primary?.name) {
-    // Use optional chaining
     names.push(this.instructors.primary.name);
   }
   if (
     this.instructors?.additional &&
     Array.isArray(this.instructors.additional)
   ) {
-    // Use optional chaining
     names.push(
       ...this.instructors.additional.map((i) => i?.name).filter(Boolean)
-    ); // Use optional chaining on 'i'
+    );
   }
   return names.join(", ");
 });
 
-/**
- * Session frequency display
- */
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                     📅 Session & Pattern Virtuals                   │
+// └─────────────────────────────────────────────────────────────────────┘
+
 onlineLiveCourseSchema.virtual("sessionFrequency").get(function () {
-  // console.log('DEBUG VIRTUAL: sessionFrequency accessed.'); // ADD THIS
   const patterns = {
     single: "Single Session",
     daily: "Daily",
@@ -834,50 +840,83 @@ onlineLiveCourseSchema.virtual("sessionFrequency").get(function () {
     monthly: "Monthly",
     custom: "Custom Schedule",
   };
-  return patterns[this.schedule?.pattern] || "Custom Schedule"; // Use optional chaining
+  return patterns[this.schedule?.pattern] || "Custom Schedule";
 });
 
-/**
- * Total files count in media section
- */
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                       📁 Media & Files Virtuals                     │
+// └─────────────────────────────────────────────────────────────────────┘
+
 onlineLiveCourseSchema.virtual("totalFilesCount").get(function () {
-  // console.log('DEBUG VIRTUAL: totalFilesCount accessed.'); // ADD THIS
   let count = 0;
-  if (this.media?.mainImage?.url) count += 1; // Use optional chaining
-  if (this.media?.documents) count += this.media.documents.length; // Use optional chaining
-  if (this.media?.images) count += this.media.images.length; // Use optional chaining
-  if (this.media?.videos) count += this.media.videos.length; // Use optional chaining
+  if (this.media?.mainImage?.url) count += 1;
+  if (this.media?.documents) count += this.media.documents.length;
+  if (this.media?.images) count += this.media.images.length;
+  if (this.media?.videos) count += this.media.videos.length;
   return count;
 });
 
-/**
- * Technical difficulty level based on requirements
- */
-onlineLiveCourseSchema.virtual("technicalDifficulty").get(function () {
-  // console.log('DEBUG VIRTUAL: technicalDifficulty accessed.'); // ADD THIS
-  const softwareCount = this.technical?.requiredSoftware?.length || 0; // Use optional chaining
-  const featuresCount = Object.values(this.platform?.features || {}).filter(
-    (f) => f
-  ).length; // Use optional chaining and default empty object
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                   💰 EARLY BIRD PRICING VIRTUALS 💰                 ┃
+// ┃                      Smart Pricing Calculations                     ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-  if (softwareCount <= 1 && featuresCount <= 3) return "Basic";
-  if (softwareCount <= 3 && featuresCount <= 6) return "Intermediate";
-  return "Advanced";
+onlineLiveCourseSchema.virtual("earlyBirdDeadline").get(function () {
+  if (this.schedule?.startDate && this.enrollment?.earlyBirdDays) {
+    const deadline = new Date(this.schedule.startDate);
+    deadline.setDate(deadline.getDate() - this.enrollment.earlyBirdDays);
+    return deadline;
+  }
+  return null;
 });
 
-// ========================================
-// MIDDLEWARE (Hooks)
-// ========================================
+onlineLiveCourseSchema.virtual("isEarlyBirdActive").get(function () {
+  if (!this.enrollment?.earlyBirdPrice || this.enrollment.earlyBirdPrice <= 0) {
+    return false;
+  }
+  const deadline = this.earlyBirdDeadline;
+  if (!deadline) return false;
+  return new Date() <= deadline;
+});
 
-/**
- * Pre-validate middleware to ensure instructor is set before course goes live (non-draft).
- * This runs before save() and applies schema validation.
- */
+onlineLiveCourseSchema.virtual("earlyBirdDaysRemaining").get(function () {
+  const deadline = this.earlyBirdDeadline;
+  if (!deadline) return 0;
+  const now = new Date();
+  if (now > deadline) return 0;
+  const timeDiff = deadline.getTime() - now.getTime();
+  const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  return Math.max(0, daysDiff);
+});
+
+onlineLiveCourseSchema.virtual("currentPrice").get(function () {
+  if (this.isEarlyBirdActive && this.enrollment?.earlyBirdPrice) {
+    return this.enrollment.earlyBirdPrice;
+  }
+  return this.enrollment?.price || 0;
+});
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                    🔗 LINKED COURSE VIRTUALS 🔗                     ┃
+// ┃                    Smart Course Relationship                        ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+onlineLiveCourseSchema.virtual("isLinkedToInPerson").get(function () {
+  return (
+    this.linkedToInPerson?.isLinked && this.linkedToInPerson?.inPersonCourseId
+  );
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                               MIDDLEWARE                                     ║
+// ║                        Automatic Data Synchronization                       ║
+// ════════════════════════════════════════════════════════════════════════════════
+
 onlineLiveCourseSchema.pre("validate", function (next) {
   console.log(
-    "DEBUG MODEL: Pre-validate hook triggered for status:",
+    "🔍 OnlineLiveTraining pre-validate hook triggered for status:",
     this.basic.status
-  ); // ADD THIS
+  );
   // Only require primary instructor for non-draft courses
   if (this.basic.status && this.basic.status !== "draft") {
     if (!this.instructors?.primary?.instructorId) {
@@ -887,40 +926,32 @@ onlineLiveCourseSchema.pre("validate", function (next) {
         this.instructors.primary?.instructorId
       );
       console.log(
-        "DEBUG MODEL: Validation error: Primary instructor missing for non-draft."
-      ); // ADD THIS
+        "❌ Validation error: Primary instructor missing for non-draft."
+      );
     }
   }
   next();
 });
 
-/**
- * Pre-save middleware to update instructor names and assigned courses in Instructor model.
- * Made more robust with null checks and error handling.
- */
 onlineLiveCourseSchema.pre("save", async function (next) {
-  console.log("DEBUG MODEL: Pre-save instructor hook triggered."); // ADD THIS
-  // UNCOMMENT THE LINE BELOW TO TEMPORARILY BYPASS THIS HOOK FOR TESTING
-  // return next();
+  console.log("🚀 OnlineLiveTraining pre-save middleware triggered.");
 
-  // Only execute if 'instructors' path or any sub-path within it is modified, or if it's a new document
-  if (this.isModified("instructors") || this.isNew) {
-    console.log(
-      "DEBUG MODEL: Instructors modified or new document. Processing instructors..."
-    ); // ADD THIS
-    try {
+  try {
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                    👥 INSTRUCTOR PROCESSING                       ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    if (this.isModified("instructors") || this.isNew) {
+      console.log("📚 Processing instructors...");
+
       const Instructor = mongoose.model("Instructor");
 
-      // --- Handle Primary Instructor ---
+      // Handle Primary Instructor
       if (this.instructors && this.instructors.primary) {
-        // Ensure primary exists as an object
-        console.log("DEBUG MODEL: Processing primary instructor."); // ADD THIS
         if (this.instructors.primary.instructorId) {
           const primaryInstructorId = this.instructors.primary.instructorId;
-          console.log(
-            "DEBUG MODEL: Looking up primary instructor ID:",
-            primaryInstructorId
-          ); // ADD THIS
+          console.log("🔍 Looking up primary instructor:", primaryInstructorId);
+
           const primaryInstructor = await Instructor.findById(
             primaryInstructorId
           ).select("firstName lastName fullName assignedCourses");
@@ -930,11 +961,11 @@ onlineLiveCourseSchema.pre("save", async function (next) {
               primaryInstructor.fullName ||
               `${primaryInstructor.firstName} ${primaryInstructor.lastName}`;
             console.log(
-              "DEBUG MODEL: Primary instructor found:",
+              "✅ Primary instructor found:",
               this.instructors.primary.name
-            ); // ADD THIS
+            );
 
-            // Add/Update assignment in Instructor's assignedCourses
+            // Update instructor's assigned courses
             const existingAssignment = primaryInstructor.assignedCourses.find(
               (c) => c.courseId && c.courseId.toString() === this._id.toString()
             );
@@ -954,55 +985,36 @@ onlineLiveCourseSchema.pre("save", async function (next) {
               existingAssignment.endDate = this.schedule.endDate;
               existingAssignment.role = this.instructors.primary.role;
             }
-            // Use lean() for read and validateBeforeSave: false for update to prevent recursive hooks/validation
+
             await primaryInstructor.save({ validateBeforeSave: false });
-            console.log(
-              "DEBUG MODEL: Primary instructor assignment saved/updated."
-            ); // ADD THIS
+            console.log("💾 Primary instructor assignment updated.");
           } else {
-            this.instructors.primary.instructorId = undefined; // Clear the invalid ID
-            this.instructors.primary.name = undefined; // Clear the name
-            this.instructors.primary.role = undefined; // Clear the role
-            console.warn(
-              `⚠️ Model: Primary instructor with ID ${primaryInstructorId} not found. Clearing primary instructor details.`
-            );
+            this.instructors.primary.instructorId = undefined;
+            this.instructors.primary.name = undefined;
+            this.instructors.primary.role = undefined;
+            console.warn("⚠️ Primary instructor not found. Clearing details.");
           }
         } else {
-          // If primary.instructorId is not provided or is empty
           this.instructors.primary.instructorId = undefined;
           this.instructors.primary.name = undefined;
           this.instructors.primary.role = undefined;
-          console.log(
-            "DEBUG MODEL: Primary instructor ID not provided. Clearing primary instructor details."
-          ); // ADD THIS
         }
       } else if (this.instructors) {
-        // If instructors.primary was not an object (e.g., null or undefined) but instructors parent exists
-        this.instructors.primary = {}; // Ensure it's an empty object if initially null/undefined
-        console.log(
-          "DEBUG MODEL: Instructors.primary was not an object, initialized to empty."
-        ); // ADD THIS
+        this.instructors.primary = {};
       } else {
-        // If the entire instructors object is missing, ensure it's initialized
         this.instructors = { primary: {}, additional: [] };
-        console.log(
-          "DEBUG MODEL: Entire instructors object was missing, initialized to default."
-        ); // ADD THIS
       }
 
-      // --- Handle Additional Instructors ---
-      console.log("DEBUG MODEL: Processing additional instructors..."); // ADD THIS
+      // Handle Additional Instructors
       if (
         this.instructors?.additional &&
         Array.isArray(this.instructors.additional)
       ) {
         const updatedAdditionalInstructors = [];
+
         for (let i = 0; i < this.instructors.additional.length; i++) {
           const inst = this.instructors.additional[i];
-          console.log(
-            `DEBUG MODEL: Checking additional instructor ${i}:`,
-            inst
-          ); // ADD THIS
+
           if (inst?.instructorId) {
             const additionalInstructor = await Instructor.findById(
               inst.instructorId
@@ -1013,12 +1025,8 @@ onlineLiveCourseSchema.pre("save", async function (next) {
                 additionalInstructor.fullName ||
                 `${additionalInstructor.firstName} ${additionalInstructor.lastName}`;
               updatedAdditionalInstructors.push(inst);
-              console.log(
-                "DEBUG MODEL: Additional instructor found:",
-                inst.name
-              ); // ADD THIS
 
-              // Add/Update assignment in Instructor's assignedCourses
+              // Update instructor's assigned courses
               const existingAssignment =
                 additionalInstructor.assignedCourses.find(
                   (c) =>
@@ -1040,162 +1048,90 @@ onlineLiveCourseSchema.pre("save", async function (next) {
                 existingAssignment.endDate = this.schedule.endDate;
                 existingAssignment.role = inst.role;
               }
+
               await additionalInstructor.save({ validateBeforeSave: false });
-              console.log(
-                `DEBUG MODEL: Additional instructor ${inst.name} assignment saved/updated.`
-              ); // ADD THIS
             } else {
               console.warn(
-                `⚠️ Model: Additional instructor with ID ${inst.instructorId} not found. Skipping this entry.`
+                `⚠️ Additional instructor ${inst.instructorId} not found.`
               );
             }
-          } else {
-            console.warn(
-              `⚠️ Model: Invalid additional instructor entry at index ${i} (missing ID). Skipping.`
-            );
           }
         }
+
         this.instructors.additional = updatedAdditionalInstructors;
       } else if (this.instructors) {
-        // If instructors.additional was not an array, or was explicitly null/undefined
-        this.instructors.additional = []; // Ensure it's an empty array
-        console.log(
-          "DEBUG MODEL: Instructors.additional was not an array, initialized to empty."
-        ); // ADD THIS
-      } else {
-        // If the entire instructors object was missing (already handled above, but for completeness)
-        this.instructors = { primary: {}, additional: [] };
-        console.log(
-          "DEBUG MODEL: Entire instructors object was missing, initialized to default (second check)."
-        ); // ADD THIS
+        this.instructors.additional = [];
       }
-    } catch (error) {
-      console.error(
-        "❌ Model Error: during instructor processing in pre-save:",
-        error
-      );
-      // Re-throw or next(error) if this error should block the save
     }
-  }
-  next();
-});
 
-/**
- * Pre-save middleware to update certification body name.
- * Handles cases where the ID might be invalid or not found.
- */
-onlineLiveCourseSchema.pre("save", async function (next) {
-  console.log("DEBUG MODEL: Pre-save certification body hook triggered."); // ADD THIS
-  // UNCOMMENT THE LINE BELOW TO TEMPORARILY BYPASS THIS HOOK FOR TESTING
-  // return next();
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                🎓 CERTIFICATION BODY PROCESSING                   ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-  // Check if certification sub-document exists, and if issuingAuthorityId is modified or it's a new document
-  if (
-    this.certification &&
-    (this.isModified("certification.issuingAuthorityId") || this.isNew)
-  ) {
-    console.log(
-      "DEBUG MODEL: Primary certification body modified or new document. Processing..."
-    ); // ADD THIS
-    if (this.certification.issuingAuthorityId) {
-      // Only try to look up if an ID is provided
-      const issuingAuthorityId = this.certification.issuingAuthorityId;
-      console.log(
-        "DEBUG MODEL: Looking up primary certification body ID:",
-        issuingAuthorityId
-      ); // ADD THIS
-      try {
+    if (
+      this.certification &&
+      (this.isModified("certification.issuingAuthorityId") || this.isNew)
+    ) {
+      console.log("🏛️ Processing primary certification body...");
+
+      if (this.certification.issuingAuthorityId) {
+        const issuingAuthorityId = this.certification.issuingAuthorityId;
         const CertificationBody = mongoose.model("CertificationBody");
         const body = await CertificationBody.findById(
           issuingAuthorityId
-        ).select("companyName displayName"); // Fetch both names
+        ).select("companyName displayName");
 
         if (body) {
           this.certification.issuingAuthority =
             body.displayName || body.companyName;
           console.log(
-            `DEBUG MODEL: Primary cert body found: ${this.certification.issuingAuthority}`
-          ); // ADD THIS
+            "✅ Primary cert body found:",
+            this.certification.issuingAuthority
+          );
         } else {
-          // If CertificationBody not found for the given ID
-          this.certification.issuingAuthority = "IAAI Training Institute"; // Revert to default name
-          this.certification.issuingAuthorityId = undefined; // Clear the invalid ID
+          this.certification.issuingAuthority = "IAAI Training Institute";
+          this.certification.issuingAuthorityId = undefined;
           console.warn(
-            `⚠️ Model: Primary CertificationBody with ID ${issuingAuthorityId} not found. Reverting to default 'IAAI Training Institute'.`
+            "⚠️ Primary certification body not found. Reverting to default."
           );
         }
-      } catch (error) {
-        // Handle potential cast errors (e.g., invalid ObjectId string) or database errors during lookup
-        console.error(
-          "❌ Model Error: retrieving primary certification body for name update:",
-          error
-        );
-        this.certification.issuingAuthority = "IAAI Training Institute"; // Default name on error
-        this.certification.issuingAuthorityId = undefined; // Clear the ID as it might be malformed
+      } else {
+        this.certification.issuingAuthority = "IAAI Training Institute";
+        this.certification.issuingAuthorityId = undefined;
       }
-    } else {
-      // If issuingAuthorityId is explicitly null, undefined, or empty string from frontend
-      this.certification.issuingAuthority = "IAAI Training Institute"; // Default name
-      this.certification.issuingAuthorityId = undefined; // Ensure ID is truly undefined in DB
-      console.log(
-        "DEBUG MODEL: Primary cert body ID not provided. Reverting to default."
-      ); // ADD THIS
-    }
-  } else if (this.certification) {
-    // If certification.issuingAuthorityId was not modified and not new, but certification exists
-    // Ensure the name is still set if an ID exists, in case the original name was missing
-    if (
-      this.certification.issuingAuthorityId &&
-      !this.certification.issuingAuthority
-    ) {
-      console.log(
-        "DEBUG MODEL: Re-validating existing primary issuing authority name."
-      ); // ADD THIS
-      try {
+    } else if (this.certification) {
+      if (
+        this.certification.issuingAuthorityId &&
+        !this.certification.issuingAuthority
+      ) {
         const CertificationBody = mongoose.model("CertificationBody");
         const body = await CertificationBody.findById(
           this.certification.issuingAuthorityId
         ).select("companyName displayName");
+
         if (body) {
           this.certification.issuingAuthority =
             body.displayName || body.companyName;
         } else {
           this.certification.issuingAuthority = "IAAI Training Institute";
           this.certification.issuingAuthorityId = undefined;
-          console.warn(
-            `⚠️ Model: Existing Primary CertificationBody ID ${this.certification.issuingAuthorityId} no longer found. Reverting to default.`
-          );
         }
-      } catch (err) {
-        console.error(
-          "❌ Model Error: re-validating existing primary issuing authority name:",
-          err
-        );
-        this.certification.issuingAuthority = "IAAI Training Institute";
-        this.certification.issuingAuthorityId = undefined;
       }
+    } else {
+      this.certification = {};
     }
-  } else {
-    // If the entire certification object is missing
-    this.certification = {}; // Initialize to empty object if null/undefined
-    console.log(
-      "DEBUG MODEL: Entire certification object was missing, initialized to empty."
-    ); // ADD THIS
-  }
 
-  // --- Handle Additional Certification Bodies ---
-  console.log("DEBUG MODEL: Processing additional certification bodies..."); // ADD THIS
-  if (
-    this.certification?.certificationBodies &&
-    Array.isArray(this.certification.certificationBodies)
-  ) {
-    const updatedCertificationBodies = [];
-    for (let i = 0; i < this.certification.certificationBodies.length; i++) {
-      const cbEntry = this.certification.certificationBodies[i];
-      console.log(`DEBUG MODEL: Checking additional cert body ${i}:`, cbEntry); // ADD THIS
-      if (cbEntry?.bodyId) {
-        // Ensure entry exists and has a bodyId
-        try {
+    // Handle Additional Certification Bodies
+    if (
+      this.certification?.certificationBodies &&
+      Array.isArray(this.certification.certificationBodies)
+    ) {
+      const updatedCertificationBodies = [];
+
+      for (let i = 0; i < this.certification.certificationBodies.length; i++) {
+        const cbEntry = this.certification.certificationBodies[i];
+
+        if (cbEntry?.bodyId) {
           const certBody = await mongoose
             .model("CertificationBody")
             .findById(cbEntry.bodyId)
@@ -1203,106 +1139,185 @@ onlineLiveCourseSchema.pre("save", async function (next) {
 
           if (certBody) {
             cbEntry.name = certBody.displayName || certBody.companyName;
-            updatedCertificationBodies.push(cbEntry); // Keep this valid entry
-            console.log(
-              "DEBUG MODEL: Additional cert body found:",
-              cbEntry.name
-            ); // ADD THIS
+            updatedCertificationBodies.push(cbEntry);
           } else {
             console.warn(
-              `⚠️ Model: Additional CertificationBody with ID ${cbEntry.bodyId} not found. Skipping this entry.`
+              `⚠️ Additional certification body ${cbEntry.bodyId} not found.`
             );
           }
-        } catch (error) {
-          console.error(
-            `❌ Model Error: retrieving additional certification body for ID ${cbEntry.bodyId}:`,
-            error
-          );
         }
-      } else {
-        console.warn(
-          `⚠️ Model: Invalid additional certification body entry at index ${i} (missing ID). Skipping.`
-        );
       }
+
+      this.certification.certificationBodies = updatedCertificationBodies;
+    } else if (this.certification) {
+      this.certification.certificationBodies = [];
     }
-    this.certification.certificationBodies = updatedCertificationBodies; // Replace with cleaned list
-    console.log(
-      `DEBUG MODEL: Finished processing additional cert bodies. Count: ${this.certification.certificationBodies.length}`
-    ); // ADD THIS
-  } else if (this.certification) {
-    // If certification.certificationBodies was not an array, or was explicitly null/undefined
-    this.certification.certificationBodies = []; // Ensure it's an empty array
-    console.log(
-      "DEBUG MODEL: Certification.certificationBodies was not an array, initialized to empty."
-    ); // ADD THIS
-  } else {
-    // If the entire certification object was missing (already handled above, but for completeness)
-    this.certification = {};
-    this.certification.certificationBodies = [];
-    console.log(
-      "DEBUG MODEL: Entire certification object was missing, initialized to default (second check)."
-    ); // ADD THIS
-  }
 
-  next();
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃                      🛠️ GENERAL DEFAULTS                          ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    // Set registration deadline if not provided
+    if (
+      this.schedule &&
+      !this.schedule.registrationDeadline &&
+      this.schedule.startDate
+    ) {
+      const deadline = new Date(this.schedule.startDate);
+      deadline.setDate(deadline.getDate() - 7); // 1 week before
+      this.schedule.registrationDeadline = deadline;
+      console.log(
+        "📅 Registration deadline set:",
+        this.schedule.registrationDeadline
+      );
+    }
+
+    // Update lastModified
+    this.metadata.lastModified = new Date();
+
+    console.log(
+      "✅ OnlineLiveTraining pre-save middleware completed successfully."
+    );
+    next();
+  } catch (error) {
+    console.error(
+      "❌ CRITICAL ERROR in OnlineLiveTraining pre-save middleware:",
+      error
+    );
+    next(error);
+  }
 });
 
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                              INSTANCE METHODS                               ║
+// ║                          Course-Specific Operations                          ║
+// ════════════════════════════════════════════════════════════════════════════════
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                   🎓 CERTIFICATE ELIGIBILITY METHODS                ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 /**
- * Pre-save middleware to set registration deadline if not provided.
- * Also updates the lastModified timestamp.
+ * 🎓 Check if certificate should be issued for this online course
+ * Handles linked course certificate suppression
  */
-onlineLiveCourseSchema.pre("save", function (next) {
-  console.log("DEBUG MODEL: Pre-save general defaults hook triggered."); // ADD THIS
-  // Set registration deadline if not provided
-  if (
-    this.schedule &&
-    !this.schedule.registrationDeadline &&
-    this.schedule.startDate
-  ) {
-    const deadline = new Date(this.schedule.startDate);
-    deadline.setDate(deadline.getDate() - 7); // 1 week before
-    this.schedule.registrationDeadline = deadline;
-    console.log(
-      "DEBUG MODEL: Registration deadline set:",
-      this.schedule.registrationDeadline
-    ); // ADD THIS
+onlineLiveCourseSchema.methods.canIssueCertificate = async function (userId) {
+  // Check basic eligibility first
+  if (!this.isCertificateEligible(userId)) {
+    return {
+      eligible: false,
+      reason: "Does not meet basic course requirements",
+    };
   }
 
-  // Update lastModified
-  this.metadata.lastModified = new Date();
-  console.log("DEBUG MODEL: Metadata lastModified updated."); // ADD THIS
+  // If not linked to in-person course, issue certificate
+  if (!this.isLinkedToInPerson) {
+    return { eligible: true };
+  }
 
-  next();
-});
+  // If linked but certificate is not suppressed, issue certificate
+  if (!this.linkedToInPerson.suppressCertificate) {
+    return { eligible: true };
+  }
 
-// ========================================
-// INSTANCE METHODS
-// ========================================
-
-/**
- * Check if course has available seats
- */
-onlineLiveCourseSchema.methods.hasAvailableSeats = function () {
-  // console.log('DEBUG INSTANCE METHOD: hasAvailableSeats accessed.'); // ADD THIS
-  return this.availableSeats > 0;
+  // Certificate is suppressed for linked courses
+  return {
+    eligible: false,
+    reason:
+      "Certificate will be issued upon completion of the linked in-person course",
+    linkedInPersonCourseId: this.linkedToInPerson.inPersonCourseId,
+  };
 };
 
 /**
- * Calculate attendance percentage for a user
+ * 📊 Check basic certificate eligibility for a user
+ */
+onlineLiveCourseSchema.methods.isCertificateEligible = function (userId) {
+  if (!this.certification?.enabled) return false;
+
+  const attendancePercentage = this.getAttendancePercentage(userId);
+  const meetsAttendance =
+    attendancePercentage >=
+    (this.certification?.requirements?.minimumAttendance || 0);
+
+  let meetsAssessment = true;
+  if (this.assessment?.required) {
+    meetsAssessment = true; // Placeholder for actual assessment implementation
+  }
+
+  const meetsPractical =
+    !this.certification?.requirements?.practicalRequired || true;
+  const meetsProject =
+    !this.certification?.requirements?.projectRequired || true;
+
+  return meetsAttendance && meetsAssessment && meetsPractical && meetsProject;
+};
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                     💰 PRICING METHODS                              ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+/**
+ * 💰 Get comprehensive pricing information with early bird details
+ */
+onlineLiveCourseSchema.methods.getPricingInfo = function () {
+  const earlyBirdDeadline = this.earlyBirdDeadline;
+
+  return {
+    regularPrice: this.enrollment?.price || 0,
+    earlyBirdPrice: this.enrollment?.earlyBirdPrice || null,
+    earlyBirdDays: this.enrollment?.earlyBirdDays || null,
+    earlyBirdDeadline: earlyBirdDeadline,
+    isEarlyBirdActive: this.isEarlyBirdActive,
+    currentPrice: this.currentPrice,
+    daysRemaining: this.earlyBirdDaysRemaining,
+    savings:
+      this.isEarlyBirdActive && this.enrollment?.earlyBirdPrice
+        ? this.enrollment.price - this.enrollment.earlyBirdPrice
+        : 0,
+    currency: this.enrollment?.currency || "USD",
+  };
+};
+
+/**
+ * 💰 Check if a specific date qualifies for early bird pricing
+ */
+onlineLiveCourseSchema.methods.isEarlyBirdValidOnDate = function (date) {
+  if (!this.enrollment?.earlyBirdPrice || this.enrollment.earlyBirdPrice <= 0) {
+    return false;
+  }
+  const deadline = this.earlyBirdDeadline;
+  if (!deadline) return false;
+  return new Date(date) <= deadline;
+};
+
+/**
+ * 💰 Get price for a specific date
+ */
+onlineLiveCourseSchema.methods.getPriceOnDate = function (date) {
+  if (this.isEarlyBirdValidOnDate(date)) {
+    return this.enrollment?.earlyBirdPrice || this.enrollment?.price || 0;
+  }
+  return this.enrollment?.price || 0;
+};
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                      📊 ATTENDANCE METHODS                          ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+/**
+ * 📊 Calculate attendance percentage for a user
  */
 onlineLiveCourseSchema.methods.getAttendancePercentage = function (userId) {
-  // console.log('DEBUG INSTANCE METHOD: getAttendancePercentage accessed.'); // ADD THIS
   const userRecords =
     this.attendance?.records?.filter(
-      // Use optional chaining
       (record) =>
         record.userId && record.userId.toString() === userId.toString()
     ) || [];
 
   if (userRecords.length === 0) return 0;
 
-  const totalSessions = this.schedule?.sessions?.length || 1; // Use optional chaining
-  // Ensure rules and minimumSessionTime exist before using them
+  const totalSessions = this.schedule?.sessions?.length || 1;
   const minSessionTimeThreshold =
     this.attendance?.rules?.minimumSessionTime || 0;
   const attendedSessions = userRecords.filter(
@@ -1314,65 +1329,12 @@ onlineLiveCourseSchema.methods.getAttendancePercentage = function (userId) {
 };
 
 /**
- * Check certificate eligibility
- */
-onlineLiveCourseSchema.methods.isCertificateEligible = function (userId) {
-  // console.log('DEBUG INSTANCE METHOD: isCertificateEligible accessed.'); // ADD THIS
-  if (!this.certification?.enabled) return false;
-
-  const attendancePercentage = this.getAttendancePercentage(userId);
-  const meetsAttendance =
-    attendancePercentage >=
-    (this.certification?.requirements?.minimumAttendance || 0);
-
-  // Add assessment check if required
-  let meetsAssessment = true;
-  if (this.assessment?.required) {
-    // Placeholder: You'd implement actual assessment score checking here
-    meetsAssessment = true; // For now, assumes true if assessment required but not implemented
-  }
-
-  // Corrected: Ensure these lines are syntactically correct (removed trailing comments)
-  const meetsPractical =
-    !this.certification?.requirements?.practicalRequired || true;
-  const meetsProject =
-    !this.certification?.requirements?.projectRequired || true;
-
-  return meetsAttendance && meetsAssessment && meetsPractical && meetsProject;
-};
-
-/**
- * Get accessible recordings for a user
- */
-onlineLiveCourseSchema.methods.getAccessibleRecordings = function (userId) {
-  // console.log('DEBUG INSTANCE METHOD: getAccessibleRecordings accessed.'); // ADD THIS
-  if (!this.recording?.availability?.forStudents) {
-    // Use optional chaining
-    return [];
-  }
-
-  const now = new Date();
-  const accessDays = this.recording.availability.duration;
-
-  // Filter based on session date and access duration
-  return (this.recording?.sessions || []).filter((session) => {
-    if (!session.date) return false; // Skip sessions without a date
-    const daysSinceRecording = Math.floor(
-      (now - new Date(session.date)) / (1000 * 60 * 60 * 24)
-    );
-    return daysSinceRecording <= accessDays;
-  });
-};
-
-/**
- * Calculate total course hours
+ * ⏰ Calculate total course hours
  */
 onlineLiveCourseSchema.methods.calculateTotalHours = function () {
-  // console.log('DEBUG INSTANCE METHOD: calculateTotalHours accessed.'); // ADD THIS
   let totalHours = 0;
 
   if (this.schedule?.sessions && this.schedule.sessions.length > 0) {
-    // Use optional chaining
     this.schedule.sessions.forEach((session) => {
       if (session.startTime && session.endTime) {
         const start = new Date(`2000-01-01T${session.startTime}`);
@@ -1382,7 +1344,6 @@ onlineLiveCourseSchema.methods.calculateTotalHours = function () {
       }
     });
   } else if (this.schedule?.sessionTime) {
-    // Use optional chaining
     if (
       this.schedule.sessionTime.startTime &&
       this.schedule.sessionTime.endTime
@@ -1405,51 +1366,74 @@ onlineLiveCourseSchema.methods.calculateTotalHours = function () {
   return totalHours;
 };
 
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                       🎯 UTILITY METHODS                            ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 /**
- * Generate technical requirements summary
+ * 💺 Check if course has available seats
+ */
+onlineLiveCourseSchema.methods.hasAvailableSeats = function () {
+  return this.availableSeats > 0;
+};
+
+/**
+ * 🎬 Get accessible recordings for a user
+ */
+onlineLiveCourseSchema.methods.getAccessibleRecordings = function (userId) {
+  if (!this.recording?.availability?.forStudents) {
+    return [];
+  }
+
+  const now = new Date();
+  const accessDays = this.recording.availability.duration;
+
+  return (this.recording?.sessions || []).filter((session) => {
+    if (!session.date) return false;
+    const daysSinceRecording = Math.floor(
+      (now - new Date(session.date)) / (1000 * 60 * 60 * 24)
+    );
+    return daysSinceRecording <= accessDays;
+  });
+};
+
+/**
+ * 🔧 Generate technical requirements summary
  */
 onlineLiveCourseSchema.methods.getTechnicalRequirementsSummary = function () {
-  // console.log('DEBUG INSTANCE METHOD: getTechnicalRequirementsSummary accessed.'); // ADD THIS
   return {
-    platform: this.platform?.name, // Use optional chaining
-    accessUrl: this.platform?.accessUrl, // Use optional chaining
-    systemRequirements: this.technical?.systemRequirements, // Use optional chaining
-    internetSpeed: this.technical?.internetSpeed, // Use optional chaining
-    equipment: this.technical?.equipment, // Use optional chaining
-    techCheckRequired: this.technical?.techCheckRequired, // Use optional chaining
-    techCheckDate: this.technical?.techCheckDate, // Use optional chaining
+    platform: this.platform?.name,
+    accessUrl: this.platform?.accessUrl,
+    systemRequirements: this.technical?.systemRequirements,
+    internetSpeed: this.technical?.internetSpeed,
+    equipment: this.technical?.equipment,
+    techCheckRequired: this.technical?.techCheckRequired,
+    techCheckDate: this.technical?.techCheckDate,
   };
 };
 
 /**
- * Calculate engagement score (simplified logic)
+ * 📈 Calculate engagement score (simplified logic)
  */
 onlineLiveCourseSchema.methods.calculateEngagementScore = function (userId) {
-  // console.log('DEBUG INSTANCE METHOD: calculateEngagementScore accessed.'); // ADD THIS
   const attendancePercentage = this.getAttendancePercentage(userId);
-  // Default to 0 if participation object is missing
   const participationScore =
-    (this.analytics?.participation?.totalQuestions || 0) > 0 ? 80 : 60; // Use optional chaining
+    (this.analytics?.participation?.totalQuestions || 0) > 0 ? 80 : 60;
 
   return Math.round(attendancePercentage * 0.7 + participationScore * 0.3);
 };
 
 /**
- * Add file to media sub-document
- * @param {string} category - 'mainImage', 'documents', 'images', 'videos'
- * @param {string} url - The URL of the file
- * @returns {Promise<Document>} The saved course document
+ * 📁 Add file to media
  */
 onlineLiveCourseSchema.methods.addFile = function (category, url) {
-  // console.log('DEBUG INSTANCE METHOD: addFile accessed.'); // ADD THIS
-  if (!this.media) this.media = {}; // Ensure media object exists
+  if (!this.media) this.media = {};
 
   if (category === "mainImage") {
-    this.media.mainImage = { url, alt: this.basic?.title + " main image" }; // Add alt text
+    this.media.mainImage = { url, alt: this.basic?.title + " main image" };
   } else if (["documents", "images", "videos"].includes(category)) {
-    if (!this.media[category]) this.media[category] = []; // Ensure array exists
+    if (!this.media[category]) this.media[category] = [];
     if (!this.media[category].includes(url)) {
-      // Prevent duplicates
       this.media[category].push(url);
     }
   } else {
@@ -1460,19 +1444,15 @@ onlineLiveCourseSchema.methods.addFile = function (category, url) {
 };
 
 /**
- * Remove file from media sub-document
- * @param {string} category - 'mainImage', 'documents', 'images', 'videos'
- * @param {string} url - The URL of the file to remove
- * @returns {Promise<boolean>} True if removed, false if not found
+ * 🗑️ Remove file from media
  */
 onlineLiveCourseSchema.methods.removeFile = async function (category, url) {
-  // console.log('DEBUG INSTANCE METHOD: removeFile accessed.'); // ADD THIS
   if (!this.media) return false;
 
   let modified = false;
   if (category === "mainImage") {
     if (this.media.mainImage?.url === url) {
-      this.media.mainImage = undefined; // Set to undefined to remove the sub-document
+      this.media.mainImage = undefined;
       modified = true;
     }
   } else if (this.media[category] && Array.isArray(this.media[category])) {
@@ -1491,36 +1471,32 @@ onlineLiveCourseSchema.methods.removeFile = async function (category, url) {
   }
 
   if (modified) {
-    await this.save(); // Save after modification
+    await this.save();
     return true;
   }
   return false;
 };
 
 /**
- * Get all media URLs from the course document
- * @returns {string[]} Array of all file URLs
+ * 📁 Get all media URLs for cleanup
  */
 onlineLiveCourseSchema.methods.getAllMediaUrls = function () {
-  // console.log('DEBUG INSTANCE METHOD: getAllMediaUrls accessed.'); // ADD THIS
   const urls = [];
 
   if (this.media?.mainImage?.url) {
     urls.push(this.media.mainImage.url);
   }
 
-  // Use optional chaining for arrays
   if (this.media?.documents) {
     urls.push(...this.media.documents);
   }
   if (this.media?.images) {
     urls.push(...this.media.images);
   }
-  // This will include both uploaded video files and external video links
   if (this.media?.videos) {
     urls.push(
       ...this.media.videos.filter((url) => url.startsWith("/uploads/"))
-    ); // Only include actual uploaded files
+    );
   }
 
   if (this.media?.promotional) {
@@ -1536,12 +1512,9 @@ onlineLiveCourseSchema.methods.getAllMediaUrls = function () {
 };
 
 /**
- * Set certification issuing authority (for primary authority)
- * @param {ObjectId} bodyId - The ID of the CertificationBody
- * @returns {Promise<Document>} The updated course document
+ * 🏛️ Set certification issuing authority
  */
 onlineLiveCourseSchema.methods.setIssuingAuthority = async function (bodyId) {
-  // console.log('DEBUG INSTANCE METHOD: setIssuingAuthority accessed.'); // ADD THIS
   const CertificationBody = mongoose.model("CertificationBody");
   const body = await CertificationBody.findById(bodyId).select(
     "companyName displayName"
@@ -1558,24 +1531,20 @@ onlineLiveCourseSchema.methods.setIssuingAuthority = async function (bodyId) {
 };
 
 /**
- * Remove certification issuing authority (revert to default)
- * @returns {Promise<Document>} The updated course document
+ * 🔄 Remove certification issuing authority (revert to default)
  */
 onlineLiveCourseSchema.methods.removeIssuingAuthority = function () {
-  // console.log('DEBUG INSTANCE METHOD: removeIssuingAuthority accessed.'); // ADD THIS
   if (this.certification) {
     this.certification.issuingAuthorityId = undefined;
-    this.certification.issuingAuthority = "IAAI Training Institute"; // Default value
+    this.certification.issuingAuthority = "IAAI Training Institute";
   }
   return this.save();
 };
 
 /**
- * Custom validation method for publishing a course (more strict than schema validation).
- * This is meant to be called manually in the controller before setting status to 'open'.
+ * ✅ Custom validation method for publishing a course
  */
 onlineLiveCourseSchema.methods.validateForPublication = function () {
-  // console.log('DEBUG INSTANCE METHOD: validateForPublication accessed.'); // ADD THIS
   const errors = [];
 
   // Basic info checks
@@ -1610,7 +1579,6 @@ onlineLiveCourseSchema.methods.validateForPublication = function () {
   ) {
     errors.push("Primary timezone is required before publishing.");
   }
-  // Optional: check if sessions array is empty if pattern is 'custom' or multi-session
   if (
     this.schedule.pattern === "custom" &&
     (!this.schedule.sessions || this.schedule.sessions.length === 0)
@@ -1632,7 +1600,7 @@ onlineLiveCourseSchema.methods.validateForPublication = function () {
     );
   }
 
-  // Instructor checks (primary must exist)
+  // Instructor checks
   if (!this.instructors?.primary?.instructorId) {
     errors.push("A primary instructor must be assigned before publishing.");
   }
@@ -1645,7 +1613,7 @@ onlineLiveCourseSchema.methods.validateForPublication = function () {
     errors.push("Platform access URL is required before publishing.");
   }
 
-  // Minimal content checks
+  // Content checks
   if (!this.content?.objectives || this.content.objectives.length === 0) {
     errors.push(
       "At least one learning objective is recommended before publishing."
@@ -1658,68 +1626,269 @@ onlineLiveCourseSchema.methods.validateForPublication = function () {
   };
 };
 
+// ════════════════════════════════════════════════════════════════════════════════
+// ║                               STATIC METHODS                                ║
+// ║                          Database Query Helpers                             ║
+// ════════════════════════════════════════════════════════════════════════════════
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                      🔍 QUERY HELPER METHODS                        ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 /**
- * Search courses by a given term across various fields.
+ * 📅 Find upcoming courses
+ */
+onlineLiveCourseSchema.statics.findUpcoming = function () {
+  return this.find({
+    "schedule.startDate": { $gte: new Date() },
+    "basic.status": "open",
+  }).sort({ "schedule.startDate": 1 });
+};
+
+/**
+ * 🖥️ Find courses by platform
+ */
+onlineLiveCourseSchema.statics.findByPlatform = function (platform) {
+  return this.find({
+    "platform.name": new RegExp(platform, "i"),
+    "basic.status": { $in: ["open", "full"] },
+  }).sort({ "schedule.startDate": 1 });
+};
+
+/**
+ * 💺 Find available courses with seats
+ */
+onlineLiveCourseSchema.statics.findAvailable = function () {
+  return this.find({
+    "basic.status": "open",
+    "schedule.startDate": { $gte: new Date() },
+    $expr: {
+      $lt: ["$enrollment.currentEnrollment", "$enrollment.seatsAvailable"],
+    },
+  });
+};
+
+/**
+ * 🕐 Find courses by timezone
+ */
+onlineLiveCourseSchema.statics.findByTimezone = function (timezone) {
+  return this.find({
+    $or: [
+      { "schedule.primaryTimezone": timezone },
+      { "schedule.displayTimezones": timezone },
+    ],
+    "basic.status": { $in: ["open", "full"] },
+  }).sort({ "schedule.startDate": 1 });
+};
+
+/**
+ * 🔗 Find courses linked to specific in-person course
+ */
+onlineLiveCourseSchema.statics.findLinkedToInPerson = function (
+  inPersonCourseId
+) {
+  return this.find({
+    "linkedToInPerson.inPersonCourseId": inPersonCourseId,
+    "linkedToInPerson.isLinked": true,
+  });
+};
+
+/**
+ * 🎬 Find courses with recordings available
+ */
+onlineLiveCourseSchema.statics.findWithRecordings = function () {
+  return this.find({
+    "recording.enabled": true,
+    "recording.availability.forStudents": true,
+    "basic.status": { $in: ["completed", "in-progress"] },
+  });
+};
+
+/**
+ * 🔍 Search courses with text
  */
 onlineLiveCourseSchema.statics.searchCourses = function (searchTerm) {
-  // console.log('DEBUG STATIC METHOD: searchCourses accessed.'); // ADD THIS
   const searchRegex = new RegExp(searchTerm, "i");
   return this.find({
     $or: [
       { "basic.title": searchRegex },
       { "basic.description": searchRegex },
       { "platform.name": searchRegex },
-      { "instructors.primary.name": searchRegex }, // Search by primary instructor's cached name
+      { "instructors.primary.name": searchRegex },
       { "basic.courseCode": searchRegex },
-      { "metadata.tags": searchRegex }, // Search by tags
+      { "metadata.tags": searchRegex },
     ],
   });
 };
 
-//new to manage linked
 /**
- * Check if this course is linked to an in-person course
+ * 📊 Get course analytics
  */
-onlineLiveCourseSchema.virtual("isLinkedToInPerson").get(function () {
-  return (
-    this.linkedToInPerson?.isLinked && this.linkedToInPerson?.inPersonCourseId
-  );
-});
+onlineLiveCourseSchema.statics.getCourseAnalytics = function (filters = {}) {
+  const pipeline = [
+    { $match: { "basic.status": { $ne: "draft" }, ...filters } },
+    {
+      $group: {
+        _id: null,
+        totalCourses: { $sum: 1 },
+        totalEnrollments: { $sum: "$enrollment.currentEnrollment" },
+        averagePrice: { $avg: "$enrollment.price" },
+        platformBreakdown: { $push: "$platform.name" },
+        categoryBreakdown: { $push: "$basic.category" },
+      },
+    },
+  ];
 
-/**
- * Check if certificate should be issued for this online course
- */
-onlineLiveCourseSchema.methods.canIssueCertificate = async function (userId) {
-  // Check basic eligibility first
-  if (!this.isCertificateEligible(userId)) {
-    return {
-      eligible: false,
-      reason: "Does not meet basic course requirements",
-    };
-  }
-
-  // If not linked to in-person course, issue certificate
-  if (!this.isLinkedToInPerson) {
-    return { eligible: true };
-  }
-
-  // If linked but certificate is not suppressed, issue certificate
-  if (!this.linkedToInPerson.suppressCertificate) {
-    return { eligible: true };
-  }
-
-  // Certificate is suppressed for linked courses
-  return {
-    eligible: false,
-    reason:
-      "Certificate will be issued upon completion of the linked in-person course",
-    linkedInPersonCourseId: this.linkedToInPerson.inPersonCourseId,
-  };
+  return this.aggregate(pipeline);
 };
 
-// ========================================
-// EXPORT MODEL
-// ========================================
+/**
+ * 💰 Find courses with early bird pricing active
+ */
+onlineLiveCourseSchema.statics.findEarlyBirdActive = function () {
+  const now = new Date();
+  return this.find({
+    "enrollment.earlyBirdPrice": { $gt: 0 },
+    "basic.status": "open",
+    $expr: {
+      $lte: [
+        now,
+        {
+          $dateSubtract: {
+            startDate: "$schedule.startDate",
+            unit: "day",
+            amount: "$enrollment.earlyBirdDays",
+          },
+        },
+      ],
+    },
+  });
+};
+
+/**
+ * 📋 Find courses by category with advanced filtering
+ */
+onlineLiveCourseSchema.statics.findByCategory = function (
+  category,
+  options = {}
+) {
+  const query = {
+    "basic.category": category,
+    "basic.status": {
+      $in: options.statuses || ["open", "full", "in-progress"],
+    },
+  };
+
+  if (options.startDate) {
+    query["schedule.startDate"] = { $gte: options.startDate };
+  }
+
+  if (options.maxPrice) {
+    query["enrollment.price"] = { $lte: options.maxPrice };
+  }
+
+  if (options.platform) {
+    query["platform.name"] = new RegExp(options.platform, "i");
+  }
+
+  return this.find(query).sort({ "schedule.startDate": 1 });
+};
+
+/**
+ * 🎯 Find courses by experience level
+ */
+onlineLiveCourseSchema.statics.findByExperienceLevel = function (level) {
+  return this.find({
+    "content.experienceLevel": level,
+    "basic.status": { $in: ["open", "full"] },
+  }).sort({ "schedule.startDate": 1 });
+};
+
+/**
+ * 📈 Get enrollment statistics
+ */
+onlineLiveCourseSchema.statics.getEnrollmentStats = function (dateRange = {}) {
+  const matchStage = {
+    "basic.status": { $ne: "draft" },
+  };
+
+  if (dateRange.start || dateRange.end) {
+    matchStage["schedule.startDate"] = {};
+    if (dateRange.start)
+      matchStage["schedule.startDate"].$gte = new Date(dateRange.start);
+    if (dateRange.end)
+      matchStage["schedule.startDate"].$lte = new Date(dateRange.end);
+  }
+
+  const pipeline = [
+    { $match: matchStage },
+    {
+      $group: {
+        _id: "$basic.category",
+        totalCourses: { $sum: 1 },
+        totalCapacity: { $sum: "$enrollment.seatsAvailable" },
+        totalEnrolled: { $sum: "$enrollment.currentEnrollment" },
+        averagePrice: { $avg: "$enrollment.price" },
+        averageOccupancy: {
+          $avg: {
+            $multiply: [
+              {
+                $divide: [
+                  "$enrollment.currentEnrollment",
+                  "$enrollment.seatsAvailable",
+                ],
+              },
+              100,
+            ],
+          },
+        },
+      },
+    },
+    { $sort: { totalEnrolled: -1 } },
+  ];
+
+  return this.aggregate(pipeline);
+};
+
+/**
+ * 🔧 Find courses needing technical setup
+ */
+onlineLiveCourseSchema.statics.findRequiringTechCheck = function () {
+  return this.find({
+    "technical.techCheckRequired": true,
+    "basic.status": { $in: ["open", "full"] },
+    "schedule.startDate": { $gte: new Date() },
+  }).sort({ "schedule.startDate": 1 });
+};
+
+/**
+ * 👥 Find courses by instructor
+ */
+onlineLiveCourseSchema.statics.findByInstructor = function (instructorId) {
+  return this.find({
+    $or: [
+      { "instructors.primary.instructorId": instructorId },
+      { "instructors.additional.instructorId": instructorId },
+    ],
+    "basic.status": { $ne: "cancelled" },
+  }).sort({ "schedule.startDate": 1 });
+};
+
+/**
+ * 🎓 Find courses eligible for certificates
+ */
+onlineLiveCourseSchema.statics.findCertificateEligible = function () {
+  return this.find({
+    "certification.enabled": true,
+    "basic.status": { $in: ["completed", "in-progress"] },
+  });
+};
+
+// ████████████████████████████████████████████████████████████████████████████████
+// ██                                                                            ██
+// ██                              EXPORT MODEL                                 ██
+// ██                                                                            ██
+// ████████████████████████████████████████████████████████████████████████████████
 
 module.exports =
   mongoose.models.OnlineLiveTraining ||

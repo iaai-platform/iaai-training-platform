@@ -929,12 +929,11 @@
               </span>
             </td>
             <td class="price-badge">
-              $<%= course.price || 0 %>
+              <%= course.currency || 'USD' %><%= course.price || 0 %>
               <% if (course.hasEarlyBird && course.earlyBirdPrice) { %>
-                <br><small style="color: #28a745;">Early: $<%= course.earlyBirdPrice %></small>
+                <br><small style="color: #28a745;">Early: <%= course.currency || 'USD' %><%= course.earlyBirdPrice %></small>
               <% } %>
             </td>
-            <td>
               <span class="seats-count <%= course.availableSeats > 5 ? 'seats-good' : course.availableSeats > 0 ? 'seats-warning' : 'seats-danger' %>">
                 <%= course.availableSeats || 0 %>/<%= course.seatsAvailable || 20 %>
               </span>
@@ -1064,7 +1063,7 @@
           
           <div class="course-card-footer">
             <div class="course-card-price">
-              $<%= course.price || 0 %>
+              <%= course.currency || 'USD' %><%= course.price || 0 %>
             </div>
             <div class="course-card-actions">
               <button class="btn-icon btn-details tooltip" data-tooltip="View Details" 

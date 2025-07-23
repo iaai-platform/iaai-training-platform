@@ -40,6 +40,12 @@
         <div class="stat-number"><%= completedCourses %></div>
         <div class="stat-label">Certificates</div>
       </div>
+      <% if (linkedCourses > 0) { %>
+        <div class="stat-item">
+          <div class="stat-number"><%= linkedCourses %></div>
+          <div class="stat-label">Linked Programs</div>
+        </div>
+      <% } %>
     </div>
   </section>
 
@@ -67,9 +73,10 @@
 
     <% if (myCourses && myCourses.length > 0) { %>
       <div class="course-list">
-        <% myCourses.forEach(course => { %>
-          <div class="course-card">
-            <!-- Course Header -->
+        <% myCourses.forEach((course, index) => { %>
+          <div class="course-card" style="--card-index: <%= index %>">
+            
+            <!-- Enhanced Course Header with Status and Linked Course Badge -->
             <div class="course-header">
               <div class="course-status <%= course.canViewCertificate ? 'status-completed' : (course.attendanceConfirmed ? 'status-progress' : (new Date(course.startDate) < new Date() ? 'status-needs-action' : 'status-upcoming')) %>">
                 <% if (course.canViewCertificate) { %>
@@ -83,374 +90,226 @@
                 <% } %>
               </div>
               
+              <!-- NEW: Linked Course Badge for ONLINE LIVE courses -->
+              <% if (course.linkedCourse && course.linkedCourse.isLinked) { %>
+                <div class="linked-course-badge">
+                  <i class="fas fa-link"></i>
+                  <span class="linked-course-text">Linked to In-Person</span>
+                </div>
+              <% } %>
+              
               <h3 class="course-title"><%= course.title %></h3>
-              <div class="course-meta">
-                <i class="fas fa-calendar"></i> <%= new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
-                <br>
-                <i class="fas fa-laptop"></i> Platform: <%= course.platform %>
-                <br>
-                <i class="fas fa-user-tie"></i> Instructor: <%= course.instructor || 'IAAI Team' %>
-                <br>
-                <i class="fas fa-code"></i> Code: <%= course.courseCode %>
-              </div>
+              <p class="course-code">Course Code: <%= course.courseCode %></p>
             </div>
 
-            <!-- Course Body -->
             <div class="course-body">
+              <!-- Course Description -->
               <p class="course-description"><%= course.description %></p>
 
-              <!-- Course Details Section -->
-              <div class="course-info-section" style="margin: 20px 0;">
-                <div style="background: #d4edda; padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
-                  <h5 style="color: #155724; margin: 0 0 15px 0; font-size: 1.2rem;">
-                    <i class="fas fa-info-circle"></i> Session Information
-                  </h5>
-                  
-                  <div style="display: grid; gap: 10px;">
-                    <% if (course.schedule) { %>
-                      <div><i class="fas fa-clock" style="color: #28a745; width: 20px;"></i> <strong>Schedule:</strong> <%= course.schedule %></div>
-                    <% } %>
-                    <% if (course.courseUrl && new Date(course.startDate) >= new Date()) { %>
-                      <div>
-                        <i class="fas fa-link" style="color: #28a745; width: 20px;"></i> 
-                        <strong>Join Link:</strong> 
-                        <a href="<%= course.courseUrl %>" target="_blank" style="color: #155724; text-decoration: underline;">
-                          Click here to join
-                        </a>
-                      </div>
-                    <% } %>
-                    <div><i class="fas fa-calendar-check" style="color: #28a745; width: 20px;"></i> <strong>Registered:</strong> <%= new Date(course.dateOfRegistration).toLocaleDateString() %></div>
+              <!-- Course Information Grid -->
+              <div class="course-info-grid">
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-chalkboard-teacher"></i> Instructor
+                  </div>
+                  <div class="info-value"><%= course.instructor %></div>
+                </div>
+                
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-calendar"></i> Start Date
+                  </div>
+                  <div class="info-value">
+                    <%= new Date(course.startDate).toLocaleDateString() %>
                   </div>
                 </div>
-              </div>
-
-              <!-- ✅ UPDATED: Certificate Section for Completed Courses -->
-              <% if (course.canViewCertificate && course.hasCertificate) { %>
-                <div class="course-info-section certificate-ready" style="margin: 20px 0;">
-                  <div style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); padding: 25px; border-radius: 15px; border: 3px solid #ffc107; text-align: center;">
-                    <h5 style="color: #333; margin: 0 0 15px 0; font-size: 1.4rem;">
-                      <i class="fas fa-trophy"></i> Certificate Available!
-                    </h5>
-                    <p style="color: #333; margin: 0 0 20px 0; font-size: 1.1rem;">
-                      🎉 Congratulations! You've successfully completed this course and your certificate is ready.
-                    </p>
-                    <div style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 10px; margin: 15px 0;">
-                      <div style="color: #333; font-weight: 600;">
-                        <i class="fas fa-check-circle" style="color: #28a745;"></i> Course Completed<br>
-                        <i class="fas fa-user-check" style="color: #28a745;"></i> Attendance Confirmed<br>
-                        <% if (course.assessmentRequired) { %>
-                          <i class="fas fa-clipboard-check" style="color: #28a745;"></i> Assessment Passed (<%= course.assessmentScore %>%)
-                        <% } %>
-                      </div>
+                
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-clock"></i> Duration
+                  </div>
+                  <div class="info-value"><%= course.schedule %></div>
+                </div>
+                
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-video"></i> Platform
+                  </div>
+                  <div class="info-value"><%= course.platform %></div>
+                </div>
+                
+                <% if (course.courseEnded) { %>
+                  <div class="course-info-item">
+                    <div class="info-label">
+                      <i class="fas fa-calendar-check"></i> End Date
                     </div>
-                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
-                      <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn" 
-                         style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; font-weight: 700; border: none;">
-                        <i class="fas fa-certificate"></i> View Certificate
-                      </a>
-                      <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn"
-                              style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; font-weight: 600; border: none;">
-                        <i class="fas fa-download"></i> Download PDF
-                      </button>
-                      <button onclick="shareCertificate('<%= course.certificateId %>', '<%= course.title %>')" class="cta-btn"
-                              style="background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%); color: white; font-weight: 600; border: none;">
-                        <i class="fas fa-share"></i> Share Achievement
-                      </button>
+                    <div class="info-value">
+                      <%= new Date(course.endDate || course.startDate).toLocaleDateString() %>
                     </div>
                   </div>
-                </div>
-              <% } else if (course.canViewCertificate && !course.hasCertificate) { %>
-                <!-- ✅ NEW: Certificate Generation Section -->
-                <div class="course-info-section certificate-generate" style="margin: 20px 0;">
-                  <div style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f9f0 100%); padding: 25px; border-radius: 15px; border: 3px solid #28a745; text-align: center;">
-                    <h5 style="color: #155724; margin: 0 0 15px 0; font-size: 1.4rem;">
-                      <i class="fas fa-award"></i> Ready for Certificate!
-                    </h5>
-                    <p style="color: #155724; margin: 0 0 20px 0; font-size: 1.1rem;">
-                      🎓 You've completed all requirements. Generate your professional certificate now!
-                    </p>
-                    <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin: 15px 0;">
-                      <div style="color: #155724; font-weight: 600;">
-                        <i class="fas fa-check-circle" style="color: #28a745;"></i> Course Completed<br>
-                        <i class="fas fa-user-check" style="color: #28a745;"></i> Attendance Confirmed<br>
-                        <% if (course.assessmentRequired) { %>
-                          <i class="fas fa-clipboard-check" style="color: #28a745;"></i> Assessment Passed (<%= course.assessmentScore %>%)
-                        <% } %>
-                      </div>
-                    </div>
-                    <button class="cta-btn btn-generate-certificate" 
-                            data-course-id="<%= course.courseId %>" 
-                            data-course-type="OnlineLiveTraining"
-                            data-course-title="<%= course.title %>"
-                            style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; font-weight: 700; padding: 15px 30px; font-size: 1.1rem; border: none; animation: pulse-certificate 2s infinite;">
-                      <i class="fas fa-trophy"></i> Generate My Certificate
-                    </button>
-                  </div>
-                </div>
-              <% } %>
-
-              <!-- Assessment and Attendance Flow -->
-
-<!-- Assessment and Attendance Flow - CORRECTED ORDER -->
-<% if (course.courseEnded && !course.canViewCertificate) { %>
-  <div class="course-info-section" style="margin: 20px 0;">
-    
-    <!-- Step 1: Attendance Confirmation (FIRST) -->
-    <% if (!course.attendanceConfirmed) { %>
-      <div style="background: #f8d7da; padding: 20px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
-        <h5 style="color: #721c24; margin: 0 0 10px 0;">
-          <i class="fas fa-user-check"></i> Step 1: Confirm Your Attendance
-        </h5>
-        <p style="margin: 0 0 15px 0; color: #721c24;">
-          Please confirm that you attended this live course to proceed.
-        </p>
-        <button class="cta-btn btn-primary btn-confirm-attendance" 
-                data-course-id="<%= course.courseId %>"
-                data-course-type="<%= course.courseType %>"
-                style="margin: 0;">
-          <i class="fas fa-check"></i> Confirm Attendance
-        </button>
-      </div>
-    <% } else { %>
-      <div style="background: #d4f4dd; padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
-        <h5 style="color: #155724; margin: 0 0 5px 0;">
-          <i class="fas fa-check-circle"></i> Step 1: Attendance Confirmed ✅
-        </h5>
-        <p style="margin: 0; color: #155724; font-size: 0.9rem;">
-          <% if (course.attendanceDate) { %>
-            Confirmed on <%= new Date(course.attendanceDate).toLocaleDateString() %>
-          <% } else { %>
-            Attendance confirmed
-          <% } %>
-        </p>
-      </div>
-    <% } %>
-
-    <!-- Step 2: Assessment (SECOND) -->
-<!-- Step 2: Assessment (SECOND) -->
-<% if (course.assessmentRequired) { %>
-  <div style="background: #e8f4f8; padding: 20px; border-radius: 12px; border: 2px solid #17a2b8;">
-    <h5 style="color: #17a2b8; margin: 0 0 15px 0;">
-      <i class="fas fa-clipboard-check"></i> Step 2: Complete Assessment
-      <% if (course.assessmentCompleted && course.assessmentPassed) { %>
-        <span style="color: #28a745; font-size: 0.9rem; margin-left: 10px;">✅ COMPLETED</span>
-      <% } %>
-    </h5>
-    <div style="display: grid; gap: 10px; margin-bottom: 15px;">
-      <div><i class="fas fa-target" style="color: #17a2b8; width: 20px;"></i> <strong>Passing Score:</strong> <%= course.passingScore %>%</div>
-      <div><i class="fas fa-question-circle" style="color: #17a2b8; width: 20px;"></i> <strong>Assessment Type:</strong> <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %></div>
-    </div>
-    
-    <% if (course.assessmentCompleted && course.assessmentPassed) { %>
-      <!-- ✅ COMPLETED STATE -->
-      <div style="background: #d4f4dd; padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
-        <h6 style="color: #155724; margin: 0 0 10px 0;">
-          <i class="fas fa-trophy"></i> Assessment Completed Successfully!
-        </h6>
-        <div style="color: #155724;">
-          <i class="fas fa-check-circle"></i> <strong>Score:</strong> <%= course.assessmentScore %>% - <span style="color: #28a745; font-weight: 700;">PASSED</span><br>
-          <i class="fas fa-calendar-check"></i> <strong>Completed:</strong> <%= course.lastAssessmentDate ? new Date(course.lastAssessmentDate).toLocaleDateString() : 'Recently' %><br>
-          <i class="fas fa-redo"></i> <strong>Attempts Used:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
-        </div>
-      </div>
-      
-      <!-- Show certificate generation or view -->
-      <% if (course.canViewCertificate && course.hasCertificate) { %>
-        <a href="/certificates/view/<%= course.certificateId %>" 
-           class="cta-btn" 
-           style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #333; font-weight: 700; margin: 5px 0;">
-          <i class="fas fa-certificate"></i> View Certificate
-        </a>
-      <% } else if (course.canViewCertificate && !course.hasCertificate) { %>
-        <button class="cta-btn btn-generate-certificate" 
-                data-course-id="<%= course.courseId %>" 
-                data-course-type="OnlineLiveTraining"
-                data-course-title="<%= course.title %>"
-                style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; font-weight: 700; margin: 5px 0;">
-          <i class="fas fa-trophy"></i> Generate Certificate
-        </button>
-      <% } %>
-      
-    <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
-      <!-- ✅ FAILED STATE -->
-      <div style="background: #f8d7da; padding: 15px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
-        <h6 style="color: #721c24; margin: 0 0 10px 0;">
-          <i class="fas fa-times-circle"></i> Assessment Not Passed
-        </h6>
-        <div style="color: #721c24;">
-          <i class="fas fa-chart-line"></i> <strong>Your Score:</strong> <%= course.assessmentScore %>%<br>
-          <i class="fas fa-target"></i> <strong>Required:</strong> <%= course.passingScore %>%<br>
-          <i class="fas fa-redo"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
-          <% if (course.currentAttempts < course.maxAttempts) { %>
-            <br><span style="color: #ffc107;"><i class="fas fa-info-circle"></i> You can retake the assessment</span>
-          <% } %>
-        </div>
-      </div>
-      
-      <% if (course.currentAttempts < course.maxAttempts) { %>
-        <a href="/library/online-live/assessment/<%= course.courseId %>" 
-           class="cta-btn btn-warning" style="margin: 0;">
-          <i class="fas fa-redo"></i> Retake Assessment
-        </a>
-      <% } %>
-      
-    <% } else { %>
-      <!-- ✅ NOT STARTED STATE -->
-      <p style="margin: 0 0 15px 0; color: #17a2b8;">
-        <% if (!course.attendanceConfirmed) { %>
-          <i class="fas fa-lock"></i> Complete Step 1 (Attendance) first to unlock assessment.
-        <% } else { %>
-          <i class="fas fa-play-circle"></i> Ready to take assessment after confirming attendance.
-        <% } %>
-      </p>
-      
-      <% if (course.attendanceConfirmed) { %>
-        <a href="/library/online-live/assessment/<%= course.courseId %>" 
-           class="cta-btn btn-primary" style="margin: 0;">
-          <i class="fas fa-clipboard-check"></i> Take Assessment
-        </a>
-      <% } else { %>
-        <button class="cta-btn" 
-                style="background: #6c757d; color: white; cursor: not-allowed; margin: 0;" 
-                disabled>
-          <i class="fas fa-lock"></i> Assessment Locked
-        </button>
-      <% } %>
-    <% } %>
-  </div>
-<% } %>
-
-  </div>
-<% } %>
-
-<!-- Materials Section - ENHANCED -->
-<!-- ✅ SIMPLIFIED MATERIALS SECTION -->
-<% if (course.materials || course.media) { %>
-  <div class="video-section">
-    <h4><i class="fas fa-folder-open"></i> Course Materials</h4>
-    <div class="video-list">
-      
-      <!-- Documents/Presentations -->
-      <% if (course.media && course.media.documents && course.media.documents.length > 0) { %>
-        <% course.media.documents.forEach((docUrl, index) => { %>
-          <div class="video-item">
-            <div class="video-number" style="background: linear-gradient(135deg, #17a2b8, #20c997);">
-              <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="video-info">
-              <div class="video-title">Course Material <%= index + 1 %></div>
-              <div class="video-meta">
-                <i class="fas fa-file"></i> Document
-              </div>
-            </div>
-            <div class="video-actions">
-              <a href="<%= docUrl %>" target="_blank" class="video-action action-watch">
-                <i class="fas fa-download"></i> Download
-              </a>
-            </div>
-          </div>
-        <% }) %>
-      <% } %>
-
-      <!-- Handouts from materials -->
-      <% if (course.materials && course.materials.handouts && course.materials.handouts.length > 0) { %>
-        <% course.materials.handouts.forEach((handout, index) => { %>
-          <div class="video-item">
-            <div class="video-number" style="background: linear-gradient(135deg, #28a745, #20c997);">
-              <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="video-info">
-              <div class="video-title"><%= handout.title || `Handout ${index + 1}` %></div>
-              <div class="video-meta">
-                <i class="fas fa-file-pdf"></i> PDF Handout
-              </div>
-            </div>
-            <div class="video-actions">
-              <a href="<%= handout.url %>" target="_blank" class="video-action action-watch">
-                <i class="fas fa-download"></i> Download
-              </a>
-            </div>
-          </div>
-        <% }) %>
-      <% } %>
-
-      <!-- Recording Sessions -->
-      <% if (course.recording && course.recording.sessions && course.recording.sessions.length > 0) { %>
-        <% course.recording.sessions.forEach((recording, index) => { %>
-          <div class="video-item">
-            <div class="video-number" style="background: linear-gradient(135deg, #dc3545, #c82333);">
-              <i class="fas fa-play"></i>
-            </div>
-            <div class="video-info">
-              <div class="video-title"><%= recording.title || `Session Recording ${index + 1}` %></div>
-              <div class="video-meta">
-                <i class="fas fa-video"></i> Recording
-                <% if (recording.date) { %>
-                  • <%= new Date(recording.date).toLocaleDateString() %>
                 <% } %>
+                
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-users"></i> Attendance
+                  </div>
+                  <div class="info-value">
+                    <% if (course.attendanceConfirmed) { %>
+                      <span style="color: #28a745; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Confirmed
+                      </span>
+                    <% } else { %>
+                      <span style="color: #dc3545;">
+                        <i class="fas fa-times-circle"></i> Not Confirmed
+                      </span>
+                    <% } %>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="video-actions">
-              <% if (recording.url) { %>
-                <a href="<%= recording.url %>" target="_blank" class="video-action action-watch">
-                  <i class="fas fa-play"></i> Watch
-                </a>
-              <% } else { %>
-                <span class="video-action" style="background: #6c757d;">
-                  <i class="fas fa-clock"></i> Coming Soon
-                </span>
+
+              <!-- Session Information (if available) -->
+              <% if (course.totalSessions > 1) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-list"></i> Session Attendance
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>Sessions Attended:</span>
+                      <strong><%= course.attendedSessions %> / <%= course.totalSessions %></strong>
+                    </div>
+                    <div style="margin-top: 10px;">
+                      <div style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: <%= course.attendancePercentage >= 80 ? '#28a745' : course.attendancePercentage >= 60 ? '#ffc107' : '#dc3545' %>; height: 100%; width: <%= course.attendancePercentage %>%; transition: width 0.3s ease;"></div>
+                      </div>
+                      <small style="color: #666; margin-top: 5px; display: block;">
+                        <%= course.attendancePercentage %>% attendance
+                        <% if (course.attendancePercentage < 80) { %>
+                          (Minimum 80% required)
+                        <% } %>
+                      </small>
+                    </div>
+                  </div>
+                </div>
               <% } %>
-            </div>
-          </div>
-        <% }) %>
-      <% } %>
 
-    </div>
-  </div>
-<% } %>
+              <!-- Assessment Information (if required) -->
+              <% if (course.assessmentRequired) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-clipboard-check"></i> Assessment Status
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <% if (course.assessmentCompleted && course.assessmentPassed) { %>
+                      <div style="color: #28a745; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Assessment Passed
+                        <span style="float: right; font-weight: normal;">
+                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore %>%)
+                        </span>
+                      </div>
+                    <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
+                      <div style="color: #dc3545; font-weight: 600;">
+                        <i class="fas fa-times-circle"></i> Assessment Not Passed
+                        <span style="float: right; font-weight: normal;">
+                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore %>%)
+                        </span>
+                      </div>
+                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        Attempts: <%= course.currentAttempts %> / <%= course.maxAttempts %>
+                      </div>
+                    <% } else { %>
+                      <div style="color: #ffc107; font-weight: 600;">
+                        <i class="fas fa-clock"></i> Assessment Pending
+                        <span style="float: right; font-weight: normal;">
+                          Required: <%= course.passingScore %>%
+                        </span>
+                      </div>
+                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        Attempts available: <%= course.maxAttempts %>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
 
-<!-- ✅ ADDITIONAL LINKS -->
-<% if (course.media && course.media.links && course.media.links.length > 0) { %>
-  <div class="course-info-section" style="margin: 20px 0;">
-    <div style="background: #e8f4f8; padding: 15px; border-radius: 8px;">
-      <h5 style="color: #17a2b8; margin-bottom: 10px;">
-        <i class="fas fa-link"></i> Additional Resources
-      </h5>
-      <% course.media.links.forEach(link => { %>
-        <div style="margin-bottom: 8px;">
-          <a href="<%= link.url %>" target="_blank" style="color: #17a2b8;">
-            <i class="fas fa-external-link-alt"></i> <%= link.title %>
-          </a>
-        </div>
-      <% }) %>
-    </div>
-  </div>
-<% } %>
+              <!-- Course Materials and Resources -->
+              <% if (course.materials && (course.materials.preReadings || course.materials.downloads || course.resources.length > 0)) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-folder-open"></i> Course Materials
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <% if (course.materials.preReadings && course.materials.preReadings.length > 0) { %>
+                      <div style="margin-bottom: 15px;">
+                        <strong style="color: #495057;">Pre-Course Readings:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #666;">
+                          <% course.materials.preReadings.forEach(reading => { %>
+                            <li><%= reading %></li>
+                          <% }) %>
+                        </ul>
+                      </div>
+                    <% } %>
+                    
+                    <% if (course.materials.downloads && course.materials.downloads.length > 0) { %>
+                      <div style="margin-bottom: 15px;">
+                        <strong style="color: #495057;">Downloads Available:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #666;">
+                          <% course.materials.downloads.forEach(download => { %>
+                            <li>
+                              <a href="<%= download.url %>" target="_blank" style="color: #007bff; text-decoration: none;">
+                                <i class="fas fa-download"></i> <%= download.title %>
+                              </a>
+                            </li>
+                          <% }) %>
+                        </ul>
+                      </div>
+                    <% } %>
+                    
+                    <% if (course.resources && course.resources.length > 0) { %>
+                      <div>
+                        <strong style="color: #495057;">Additional Resources:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #666;">
+                          <% course.resources.forEach(resource => { %>
+                            <li>
+                              <a href="<%= resource.url %>" target="_blank" style="color: #007bff; text-decoration: none;">
+                                <i class="fas fa-external-link-alt"></i> <%= resource.title %>
+                              </a>
+                            </li>
+                          <% }) %>
+                        </ul>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
 
-
-              <!-- Recordings Section -->
-              <% if (course.recordings && course.recordings.length > 0) { %>
-                <div class="video-section">
-                  <h4><i class="fas fa-video"></i> Session Recordings</h4>
-                  <div class="video-list">
+              <!-- Recording Information (if available) -->
+              <% if (course.recordingAvailable && course.recordings && course.recordings.length > 0) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-play-circle"></i> Course Recordings
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <p style="color: #666; margin-bottom: 15px; font-size: 0.9rem;">
+                      <i class="fas fa-info-circle"></i> 
+                      Recordings are available for <%= course.recordingDuration %> days after the course
+                    </p>
                     <% course.recordings.forEach((recording, index) => { %>
-                      <div class="video-item">
-                        <div class="video-number completed">
-                          <i class="fas fa-play"></i>
-                        </div>
-                        <div class="video-info">
-                          <div class="video-title"><%= recording.title || `Session ${index + 1}` %></div>
-                          <div class="video-meta">
-                            <i class="fas fa-video"></i> Recording
-                            <% if (recording.date) { %>
-                              • <%= new Date(recording.date).toLocaleDateString() %>
+                      <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px; border-left: 4px solid #007bff;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <div>
+                            <strong style="color: #333;">Session <%= index + 1 %></strong>
+                            <% if (recording.title) { %>
+                              <br><span style="color: #666; font-size: 0.9rem;"><%= recording.title %></span>
                             <% } %>
                           </div>
-                        </div>
-                        <div class="video-actions">
-                          <a href="<%= recording.url %>" target="_blank" class="video-action action-watch">
-                            <i class="fas fa-play"></i> Watch
-                          </a>
+                          <% if (recording.url) { %>
+                            <a href="<%= recording.url %>" target="_blank" class="cta-btn btn-sm btn-primary">
+                              <i class="fas fa-play"></i> Watch
+                            </a>
+                          <% } else { %>
+                            <span style="color: #666; font-size: 0.9rem;">Processing...</span>
+                          <% } %>
                         </div>
                       </div>
                     <% }) %>
@@ -458,100 +317,231 @@
                 </div>
               <% } %>
 
-              <!-- Resources Section -->
-              <% if (course.resources && course.resources.length > 0) { %>
+              <!-- Technical Information -->
+              <% if (course.technical && (course.technical.requirements || course.techCheckRequired)) { %>
                 <div class="course-info-section" style="margin: 20px 0;">
-                  <div style="background: #e8f4f8; padding: 20px; border-radius: 12px; border: 2px solid #17a2b8;">
-                    <h5 style="color: #17a2b8; margin: 0 0 15px 0;">
-                      <i class="fas fa-link"></i> Additional Resources
-                    </h5>
-                    <ul style="margin: 0; padding-left: 20px;">
-                      <% course.resources.forEach(resource => { %>
-                        <li style="margin-bottom: 8px;">
-                          <a href="<%= resource.url %>" target="_blank" style="color: #17a2b8; text-decoration: underline;">
-                            <%= resource.title %>
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-cog"></i> Technical Information
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <% if (course.technical.requirements) { %>
+                      <div style="margin-bottom: 15px;">
+                        <strong style="color: #495057;">System Requirements:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #666;">
+                          <% course.technical.requirements.forEach(req => { %>
+                            <li><%= req %></li>
+                          <% }) %>
+                        </ul>
+                      </div>
+                    <% } %>
+                    
+                    <% if (course.techCheckRequired) { %>
+                      <div>
+                        <strong style="color: #495057;">Tech Check:</strong>
+                        <p style="color: #666; margin: 5px 0;">
+                          Please complete a technical check before the course starts
+                        </p>
+                        <% if (course.techCheckUrl) { %>
+                          <a href="<%= course.techCheckUrl %>" target="_blank" class="cta-btn btn-sm btn-secondary">
+                            <i class="fas fa-laptop"></i> Tech Check
                           </a>
-                        </li>
-                      <% }) %>
-                    </ul>
+                        <% } %>
+                      </div>
+                    <% } %>
                   </div>
                 </div>
               <% } %>
 
-              <!-- Action Buttons -->
-              <div class="course-actions">
-                <% if (course.canViewCertificate && course.hasCertificate) { %>
-                  <!-- Certificate is available -->
-                  <a href="/certificates/view/<%= course.certificateId %>" 
-                     class="cta-btn btn-certificate">
-                    <i class="fas fa-certificate"></i> View Certificate
-                  </a>
-                <% } else if (course.canViewCertificate && !course.hasCertificate) { %>
-                  <!-- Certificate can be generated -->
-                  <button class="cta-btn btn-generate-certificate" 
-                          data-course-id="<%= course.courseId %>" 
-                          data-course-type="OnlineLiveTraining"
-                          data-course-title="<%= course.title %>">
-                    <i class="fas fa-trophy"></i> Generate Certificate
-                  </button>
-                <% } else if (course.courseEnded && course.attendanceConfirmed) { %>
-                  <!-- Course ended, attendance confirmed - can get certificate -->
-                  <% if (course.assessmentRequired && !course.assessmentCompleted) { %>
-                    <a href="/library/online-live/assessment/<%= course.courseId %>" 
-                       class="cta-btn btn-warning">
-                      <i class="fas fa-clipboard-check"></i> Take Assessment
-                    </a>
-                  <% } else if (course.assessmentRequired && course.assessmentCompleted && !course.assessmentPassed) { %>
-                    <a href="/library/online-live/assessment/<%= course.courseId %>" 
-                       class="cta-btn btn-danger">
-                      <i class="fas fa-redo"></i> Retake Assessment
-                    </a>
-                  <% } else { %>
-                    <!-- All requirements met - can generate certificate -->
-                    <button class="cta-btn btn-generate-certificate" 
-                            data-course-id="<%= course.courseId %>" 
-                            data-course-type="OnlineLiveTraining"
-                            data-course-title="<%= course.title %>">
-                      <i class="fas fa-trophy"></i> Generate Certificate
-                    </button>
-                  <% } %>
-                <% } else if (course.courseEnded && !course.attendanceConfirmed) { %>
-                  <!-- Course ended but attendance not confirmed -->
-                  <% if (course.assessmentRequired && (!course.assessmentCompleted || !course.assessmentPassed)) { %>
-                    <a href="/library/online-live/assessment/<%= course.courseId %>" 
-                       class="cta-btn btn-warning">
-                      <i class="fas fa-clipboard-check"></i> Complete Assessment First
-                    </a>
-                  <% } else { %>
-                    <button class="cta-btn btn-confirm-attendance" 
-                            data-course-id="<%= course.courseId %>" 
-                            data-course-type="OnlineLiveTraining">
-                      <i class="fas fa-check"></i> Confirm Attendance
-                    </button>
-                  <% } %>
-                <% } else { %>
-                  <!-- Course not ended yet -->
-                  <% if (course.courseUrl && new Date(course.startDate) <= new Date()) { %>
-                    <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-primary">
-                      <i class="fas fa-video"></i> Join Session
-                    </a>
-                  <% } else { %>
-                    <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
-                      <i class="fas fa-clock"></i> Starting <%= new Date(course.startDate).toLocaleDateString() %>
+              <!-- NEW: Linked Course Information for ONLINE LIVE -->
+              <% if (course.linkedCourse && course.linkedCourse.isLinked) { %>
+                <div class="linked-course-info" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%); padding: 20px; border-radius: 12px; border: 2px solid #17a2b8;">
+                    <h5 style="color: #17a2b8; margin: 0 0 15px 0; font-size: 1.2rem;">
+                      <i class="fas fa-link"></i> Comprehensive Training Program
+                    </h5>
+                    
+                    <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                      <div style="color: #17a2b8; font-weight: 600;">
+                        <i class="fas fa-info-circle"></i> <strong>This online course is part of a comprehensive training program:</strong>
+                      </div>
+                      <div style="margin-top: 10px; color: #0c5460;">
+                        <i class="fas fa-laptop" style="color: #17a2b8; width: 20px;"></i> <strong>Online Component:</strong> <%= course.title %><br>
+                        <i class="fas fa-users" style="color: #17a2b8; width: 20px;"></i> <strong>In-Person Component:</strong> <%= course.linkedCourse.linkedCourseTitle || 'Hands-on Training' %>
+                        <% if (course.linkedCourse.linkedCourseVenue) { %>
+                          <br><i class="fas fa-map-marker-alt" style="color: #17a2b8; width: 20px;"></i> <strong>Location:</strong> <%= course.linkedCourse.linkedCourseVenue %>
+                        <% } %>
+                        <% if (course.linkedCourse.linkedCourseCode) { %>
+                          <br><i class="fas fa-code" style="color: #17a2b8; width: 20px;"></i> <strong>In-Person Course Code:</strong> <%= course.linkedCourse.linkedCourseCode %>
+                        <% } %>
+                      </div>
                     </div>
-                  <% } %>
+
+                    <% if (course.linkedCourse.linkType) { %>
+                      <div style="background: rgba(23, 162, 184, 0.1); padding: 12px; border-radius: 8px;">
+                        <div style="color: #0c5460; font-size: 0.9rem;">
+                          <% if (course.linkedCourse.linkType === "prerequisite") { %>
+                            <i class="fas fa-arrow-right"></i> <strong>Prerequisite Training:</strong> Complete this online course before attending the in-person component.
+                          <% } else if (course.linkedCourse.linkType === "supplementary") { %>
+                            <i class="fas fa-plus-circle"></i> <strong>Supplementary Training:</strong> This online course enhances your in-person learning experience.
+                          <% } else { %>
+                            <i class="fas fa-link"></i> <strong>Linked Training:</strong> Part of a comprehensive learning program.
+                          <% } %>
+                        </div>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- UPDATED: Certificate Section with Suppression Logic -->
+              <% if (course.certificateMessage) { %>
+                <!-- Certificate Suppression Message for Linked Courses -->
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
+                    <h5 style="color: #856404; margin: 0 0 15px 0;">
+                      <i class="fas fa-info-circle"></i> Certificate Information
+                    </h5>
+                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                      <p style="color: #856404; margin: 0; font-weight: 600;">
+                        <i class="fas fa-certificate"></i> <%= course.certificateMessage %>
+                      </p>
+                      
+                      <% if (course.linkedCourse && course.linkedCourse.isLinked && course.linkedCourse.linkedCourseTitle) { %>
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(133, 100, 4, 0.3);">
+                          <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+                            <i class="fas fa-arrow-right"></i> 
+                            <strong>Complete the in-person component:</strong> <%= course.linkedCourse.linkedCourseTitle %>
+                            <% if (course.linkedCourse.linkedCourseCode) { %>
+                              (<%= course.linkedCourse.linkedCourseCode %>)
+                            <% } %>
+                          </p>
+                          <% if (course.linkedCourse.linkedCourseStartDate) { %>
+                            <p style="color: #856404; margin: 5px 0 0 0; font-size: 0.9rem;">
+                              <i class="fas fa-calendar"></i> 
+                              <strong>Scheduled:</strong> <%= new Date(course.linkedCourse.linkedCourseStartDate).toLocaleDateString() %>
+                            </p>
+                          <% } %>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% } else if (course.canViewCertificate && course.hasCertificate) { %>
+                <!-- Certificate Available Section -->
+                <div class="course-info-section certificate-ready" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffd700;">
+                    <h5 style="color: #856404; margin: 0 0 15px 0;">
+                      <i class="fas fa-medal"></i> Certificate Available
+                    </h5>
+                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                      <p style="color: #856404; margin: 0 0 15px 0; font-weight: 600;">
+                        🎉 Congratulations! Your certificate is ready for download.
+                      </p>
+                      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
+                          <i class="fas fa-eye"></i> View Certificate
+                        </a>
+                        <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
+                          <i class="fas fa-download"></i> Download PDF
+                        </button>
+                        <button onclick="shareCertificate('<%= course.certificateId %>', '<%= course.title %>')" class="cta-btn btn-outline-primary">
+                          <i class="fas fa-share-alt"></i> Share
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
+                <!-- Certificate Generation Section -->
+                <div class="course-info-section certificate-generate" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
+                    <h5 style="color: #155724; margin: 0 0 15px 0;">
+                      <i class="fas fa-trophy"></i> Ready for Certificate
+                    </h5>
+                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                      <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
+                        🎯 All requirements completed! Generate your certificate now.
+                      </p>
+                      <button class="cta-btn btn-generate-certificate" 
+                              data-course-id="<%= course.courseId %>" 
+                              data-course-type="<%= course.courseType %>"
+                              data-course-title="<%= course.title %>">
+                        <i class="fas fa-certificate"></i> Generate Certificate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Platform Information and Access -->
+              <% if (!course.courseEnded && course.courseUrl) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-laptop"></i> Course Access
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                      <div>
+                        <strong style="color: #495057;">Platform:</strong>
+                        <p style="color: #666; margin: 5px 0;"><%= course.platform %></p>
+                      </div>
+                      <% if (course.meetingId) { %>
+                        <div>
+                          <strong style="color: #495057;">Meeting ID:</strong>
+                          <p style="color: #666; margin: 5px 0; font-family: monospace;"><%= course.meetingId %></p>
+                        </div>
+                      <% } %>
+                      <% if (course.passcode) { %>
+                        <div>
+                          <strong style="color: #495057;">Passcode:</strong>
+                          <p style="color: #666; margin: 5px 0; font-family: monospace;"><%= course.passcode %></p>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- ORIGINAL + UPDATED: Action Buttons with Linked Course Links -->
+              <div class="course-actions">
+                <!-- Course Access Button -->
+                <% if (new Date(course.startDate) <= new Date() && !course.courseEnded && course.courseUrl) { %>
+                  <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-primary">
+                    <i class="fas fa-video"></i> Join Live Session
+                  </a>
+                <% } else if (new Date(course.startDate) > new Date()) { %>
+                  <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
+                    <i class="fas fa-clock"></i> Starts <%= new Date(course.startDate).toLocaleDateString() %>
+                  </div>
                 <% } %>
-                
-                <!-- Course details link -->
+
+                <!-- Attendance Confirmation Button -->
+                <% if (course.courseEnded && !course.attendanceConfirmed) { %>
+                  <button class="cta-btn btn-confirm-attendance" 
+                          data-course-id="<%= course.courseId %>" 
+                          data-course-type="<%= course.courseType %>">
+                    <i class="fas fa-check"></i> Confirm Attendance
+                  </button>
+                <% } %>
+
+                <!-- Assessment Button -->
+                <% if (course.assessmentRequired && course.attendanceConfirmed && !course.assessmentPassed) { %>
+                  <a href="/library/online-live/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+                    <i class="fas fa-clipboard-check"></i> 
+                    <%= course.assessmentCompleted ? 'Retake Assessment' : 'Take Assessment' %>
+                  </a>
+                <% } %>
+
+                <!-- Course Details Button -->
                 <a href="/online-live-training/courses/<%= course.courseId %>" class="cta-btn btn-secondary">
                   <i class="fas fa-info-circle"></i> Course Details
                 </a>
                 
-                <!-- Materials link if available -->
-                <% if (course.materials && (course.materials.presentations?.length > 0 || course.materials.notes?.length > 0)) { %>
-                  <button class="cta-btn btn-outline-info" onclick="toggleMaterials('<%= course.courseId %>')">
-                    <i class="fas fa-download"></i> Materials
-                  </button>
+                <!-- NEW: Link to In-Person Component -->
+                <% if (course.linkedCourse && course.linkedCourse.isLinked && course.linkedCourse.linkedCourseId) { %>
+                  <a href="/in-person/courses/<%= course.linkedCourse.linkedCourseId %>" class="cta-btn btn-outline-info">
+                    <i class="fas fa-users"></i> View In-Person Component
+                  </a>
                 <% } %>
               </div>
             </div>
@@ -559,6 +549,7 @@
         <% }) %>
       </div>
     <% } else { %>
+      <!-- Empty State -->
       <div class="empty-state">
         <i class="fas fa-video"></i>
         <h3>No live online courses in your library yet</h3>
@@ -572,12 +563,12 @@
     <% } %>
   </section>
 
+  <!-- Enhanced JavaScript with all functionality -->
   <script>
-    // Enhanced Certificate and Attendance Management
     document.addEventListener('DOMContentLoaded', function() {
       
       // ========================================
-      // CERTIFICATE GENERATION
+      // CERTIFICATE GENERATION WITH LINKED COURSE AWARENESS
       // ========================================
       
       document.querySelectorAll('.btn-generate-certificate').forEach(button => {
@@ -586,23 +577,41 @@
           const courseType = this.dataset.courseType;
           const courseTitle = this.dataset.courseTitle;
           
-          // Show confirmation dialog
-          const result = await Swal.fire({
-            title: 'Generate Certificate',
-            html: `
-              <div style="text-align: center;">
-                <i class="fas fa-certificate" style="font-size: 3rem; color: #ffd700; margin-bottom: 15px;"></i>
-                <p>Are you ready to generate your certificate for:</p>
-                <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
-                <p style="color: #666; font-size: 0.9rem;">This will create your official completion certificate.</p>
-                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                  <div style="color: #155724; font-weight: 600;">
-                    <i class="fas fa-check-circle" style="color: #28a745;"></i> All requirements completed<br>
-                    <i class="fas fa-award" style="color: #28a745;"></i> Ready for certification
+          // Check if this is a linked course
+          const courseCard = this.closest('.course-card');
+          const linkedCourseInfo = courseCard.querySelector('.linked-course-info');
+          const isLinkedCourse = !!linkedCourseInfo;
+          
+          // Enhanced confirmation dialog for linked courses
+          const confirmationHtml = `
+            <div style="text-align: center;">
+              <i class="fas fa-certificate" style="font-size: 3rem; color: #ffd700; margin-bottom: 15px;"></i>
+              <p>Are you ready to generate your certificate for:</p>
+              <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
+              ${isLinkedCourse ? `
+                <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <div style="color: #17a2b8; font-weight: 600;">
+                    <i class="fas fa-link"></i> <strong>Comprehensive Training Certificate</strong><br>
+                    <span style="font-size: 0.9rem; opacity: 0.8;">
+                      This certificate recognizes completion of your comprehensive training program.
+                    </span>
                   </div>
                 </div>
+              ` : `
+                <p style="color: #666; font-size: 0.9rem;">This will create your official completion certificate.</p>
+              `}
+              <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <div style="color: #155724; font-weight: 600;">
+                  <i class="fas fa-check-circle" style="color: #28a745;"></i> All requirements completed<br>
+                  <i class="fas fa-award" style="color: #28a745;"></i> Ready for certification
+                </div>
               </div>
-            `,
+            </div>
+          `;
+          
+          const result = await Swal.fire({
+            title: isLinkedCourse ? 'Generate Comprehensive Certificate' : 'Generate Certificate',
+            html: confirmationHtml,
             icon: null,
             showCancelButton: true,
             confirmButtonColor: '#28a745',
@@ -617,6 +626,7 @@
           const originalText = this.innerHTML;
           this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Certificate...';
           this.disabled = true;
+          this.classList.add('loading');
           
           try {
             const response = await fetch('/certificates/api/issue', {
@@ -633,21 +643,29 @@
             const data = await response.json();
             
             if (data.success) {
-              // Success - show celebration
+              // Enhanced success message for linked courses
+              const successHtml = `
+                <div style="text-align: center;">
+                  <i class="fas fa-medal" style="font-size: 4rem; color: #ffd700; margin-bottom: 20px;"></i>
+                  <h3 style="color: #28a745;">Congratulations!</h3>
+                  <p>Your ${isLinkedCourse ? 'comprehensive training' : ''} certificate has been successfully generated.</p>
+                  ${data.linkedCourseInfo && data.linkedCourseInfo.hasLinkedCourse ? `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                      <strong>Certificate Information:</strong><br>
+                      ${data.linkedCourseInfo.description || 'Comprehensive training program completed successfully.'}
+                    </div>
+                  ` : ''}
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <strong>Certificate ID:</strong> ${data.certificate.certificateId}<br>
+                    <strong>Verification Code:</strong> ${data.certificate.verificationCode}
+                  </div>
+                  <p style="color: #666; font-size: 0.9rem;">You can now view, download, and share your certificate.</p>
+                </div>
+              `;
+              
               await Swal.fire({
                 title: 'Certificate Generated! 🎉',
-                html: `
-                  <div style="text-align: center;">
-                    <i class="fas fa-medal" style="font-size: 4rem; color: #ffd700; margin-bottom: 20px;"></i>
-                    <h3 style="color: #28a745;">Congratulations!</h3>
-                    <p>Your certificate has been successfully generated.</p>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                      <strong>Certificate ID:</strong> ${data.certificate.certificateId}<br>
-                      <strong>Verification Code:</strong> ${data.certificate.verificationCode}
-                    </div>
-                    <p style="color: #666; font-size: 0.9rem;">You can now view, download, and share your certificate.</p>
-                  </div>
-                `,
+                html: successHtml,
                 icon: null,
                 confirmButtonColor: '#007bff',
                 confirmButtonText: '<i class="fas fa-eye"></i> View Certificate'
@@ -663,23 +681,30 @@
           } catch (error) {
             console.error('Error generating certificate:', error);
             
-            // Show error message
+            // Enhanced error handling for linked courses
+            let errorMessage = error.message || 'Failed to generate certificate. Please try again or contact support.';
+            
+            if (error.message && error.message.includes('linked')) {
+              errorMessage = 'Certificate generation is pending completion of your linked course component. Please complete all required training before requesting your certificate.';
+            }
+            
             Swal.fire({
               icon: 'error',
               title: 'Certificate Generation Failed',
-              text: error.message || 'Failed to generate certificate. Please try again or contact support.',
+              text: errorMessage,
               confirmButtonColor: '#dc3545'
             });
             
             // Restore button
             this.innerHTML = originalText;
             this.disabled = false;
+            this.classList.remove('loading');
           }
         });
       });
       
       // ========================================
-      // ATTENDANCE CONFIRMATION
+      // ATTENDANCE CONFIRMATION WITH LINKED COURSE CONTEXT
       // ========================================
       
       document.querySelectorAll('.btn-confirm-attendance').forEach(button => {
@@ -688,20 +713,37 @@
           const courseType = this.dataset.courseType;
           const courseTitle = this.closest('.course-card').querySelector('.course-title').textContent;
           
-          // Show confirmation dialog
+          // Check if this is a linked course
+          const courseCard = this.closest('.course-card');
+          const linkedCourseInfo = courseCard.querySelector('.linked-course-info');
+          const isLinkedCourse = !!linkedCourseInfo;
+          
+          // Enhanced confirmation dialog for linked courses
+          const confirmationHtml = `
+            <div style="text-align: center;">
+              <i class="fas fa-user-check" style="font-size: 3rem; color: #28a745; margin-bottom: 15px;"></i>
+              <p>Please confirm that you attended:</p>
+              <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
+              ${isLinkedCourse ? `
+                <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <div style="color: #17a2b8; font-weight: 600;">
+                    <i class="fas fa-link"></i> <strong>Part of Comprehensive Training</strong><br>
+                    <span style="font-size: 0.9rem; opacity: 0.8;">
+                      This course is part of your comprehensive training program.
+                    </span>
+                  </div>
+                </div>
+              ` : ''}
+              <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; color: #856404;">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Important:</strong> Only confirm if you actually attended this course.
+              </div>
+            </div>
+          `;
+          
           const result = await Swal.fire({
             title: 'Confirm Attendance',
-            html: `
-              <div style="text-align: center;">
-                <i class="fas fa-user-check" style="font-size: 3rem; color: #28a745; margin-bottom: 15px;"></i>
-                <p>Please confirm that you attended:</p>
-                <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
-                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; color: #856404;">
-                  <i class="fas fa-info-circle"></i> 
-                  <strong>Important:</strong> Only confirm if you actually attended this course.
-                </div>
-              </div>
-            `,
+            html: confirmationHtml,
             icon: null,
             showCancelButton: true,
             confirmButtonColor: '#28a745',
@@ -716,6 +758,7 @@
           const originalText = this.innerHTML;
           this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
           this.disabled = true;
+          this.classList.add('loading');
           
           try {
             const response = await fetch(`/library/confirm-attendance/${courseId}`, {
@@ -731,11 +774,17 @@
             const data = await response.json();
             
             if (data.success) {
-              // Success
+              // Enhanced success message with linked course context
+              let successMessage = data.message;
+              
+              if (data.linkedCourseInfo && data.linkedCourseInfo.isLinked) {
+                successMessage += `\n\n${data.linkedCourseInfo.message}`;
+              }
+              
               await Swal.fire({
                 icon: 'success',
                 title: 'Attendance Confirmed! ✅',
-                text: data.message,
+                text: successMessage,
                 confirmButtonColor: '#28a745'
               });
               
@@ -743,30 +792,7 @@
               window.location.reload();
               
             } else {
-              // Handle different error cases
-              if (data.requiresAssessment) {
-                const assessmentResult = await Swal.fire({
-                  icon: 'info',
-                  title: 'Assessment Required',
-                  html: `
-                    <div style="text-align: center;">
-                      <i class="fas fa-clipboard-check" style="font-size: 3rem; color: #ffc107; margin-bottom: 15px;"></i>
-                      <p>${data.message}</p>
-                      ${data.canRetake ? `<p style="color: #666;">Attempts remaining: ${data.attemptsRemaining}</p>` : ''}
-                    </div>
-                  `,
-                  showCancelButton: true,
-                  confirmButtonColor: '#ffc107',
-                  confirmButtonText: '<i class="fas fa-clipboard-check"></i> Take Assessment',
-                  cancelButtonText: 'Later'
-                });
-                
-                if (assessmentResult.isConfirmed && data.assessmentUrl) {
-                  window.location.href = data.assessmentUrl;
-                }
-              } else {
-                throw new Error(data.message);
-              }
+              throw new Error(data.message);
             }
             
           } catch (error) {
@@ -782,15 +808,15 @@
             // Restore button
             this.innerHTML = originalText;
             this.disabled = false;
+            this.classList.remove('loading');
           }
         });
       });
       
       // ========================================
-      // CERTIFICATE ACTIONS
+      // CERTIFICATE ACTIONS (Download & Share)
       // ========================================
       
-      // Certificate download function
       window.downloadCertificate = async function(certificateId) {
         try {
           const response = await fetch(`/certificates/download/${certificateId}`);
@@ -798,13 +824,11 @@
           
           if (data.success) {
             if (data.downloadUrl) {
-              // If actual download URL is available
               const link = document.createElement('a');
               link.href = data.downloadUrl;
               link.download = `certificate-${certificateId}.pdf`;
               link.click();
             } else {
-              // PDF generation coming soon message
               Swal.fire({
                 icon: 'info',
                 title: 'PDF Generation Coming Soon',
@@ -824,7 +848,6 @@
         }
       };
 
-      // Certificate share function
       window.shareCertificate = async function(certificateId, courseTitle) {
         Swal.fire({
           title: 'Share Your Achievement! 🎉',
@@ -858,22 +881,12 @@
             popup: 'share-modal'
           },
           didOpen: () => {
-            // Add custom styles for the modal
             const style = document.createElement('style');
             style.textContent = `
-              .share-modal {
-                width: 90% !important;
-                max-width: 500px !important;
-              }
+              .share-modal { width: 90% !important; max-width: 500px !important; }
               .swal-btn {
-                padding: 8px 16px;
-                border: none;
-                border-radius: 6px;
-                color: white;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                font-size: 0.9rem;
+                padding: 8px 16px; border: none; border-radius: 6px; color: white;
+                font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;
               }
               .swal-btn-primary { background: #3182ce; }
               .swal-btn-linkedin { background: #0077b5; }
@@ -915,63 +928,6 @@
           });
         });
       };
-      
-      // ========================================
-      // CERTIFICATE BUTTON STYLING
-      // ========================================
-      
-      // Add special styling for certificate buttons
-      const style = document.createElement('style');
-      style.textContent = `
-        .btn-certificate {
-          background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%) !important;
-          color: #333 !important;
-          font-weight: 700 !important;
-          box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3) !important;
-          border: 2px solid #ffd700 !important;
-        }
-        
-        .btn-certificate:hover {
-          background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%) !important;
-          color: #333 !important;
-          transform: translateY(-2px) !important;
-          box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4) !important;
-        }
-        
-        .btn-generate-certificate {
-          background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
-          animation: pulse-certificate 2s infinite;
-        }
-        
-        @keyframes pulse-certificate {
-          0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-          70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-        }
-        
-        .btn-confirm-attendance {
-          background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
-        }
-        
-        .certificate-ready {
-          animation: certificateGlow 3s ease-in-out infinite alternate;
-        }
-        
-        @keyframes certificateGlow {
-          from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-          to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
-        }
-        
-        .certificate-generate {
-          animation: certificateReady 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes certificateReady {
-          from { box-shadow: 0 0 15px rgba(40, 167, 69, 0.5); }
-          to { box-shadow: 0 0 25px rgba(40, 167, 69, 0.8); }
-        }
-      `;
-      document.head.appendChild(style);
     });
   </script>
 

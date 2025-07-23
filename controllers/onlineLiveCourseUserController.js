@@ -56,6 +56,7 @@ exports.getOnlineLiveTraining = async (req, res) => {
         // Pricing fields
         price: course.enrollment?.price || 0,
         earlyBirdPrice: course.enrollment?.earlyBirdPrice,
+        currency: course.enrollment?.currency || "EUR", // ADD THIS LINE
         seatsAvailable: course.enrollment?.seatsAvailable || 50,
 
         // Platform fields

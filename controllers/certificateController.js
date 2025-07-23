@@ -1,4 +1,4 @@
-// controllers/certificateController.js - COMPLETE FIXED VERSION
+// controllers/certificateController.js - UPDATED FOR LINKED COURSES
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
@@ -8,14 +8,444 @@ const Instructor = require("../models/Instructor");
 
 class CertificateController {
   /**
-   * ✅ COMPLETELY FIXED Certificate View
+   * ✅ UPDATED: Enhanced certificate issuance with linked course support
+   */
+  async issueCertificate(req, res) {
+    try {
+      const { courseId, courseType } = req.body;
+      const userId = req.user._id;
+
+      console.log(
+        `🏆 Enhanced certificate issuance with linked course support - User: ${userId}, Course: ${courseId}, Type: ${courseType}`
+      );
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
+      }
+
+      let enrollment = null;
+      let course = null;
+
+      // ============================================
+      // ✅ STEP 1: Get course with populated data
+      // ============================================
+      switch (courseType) {
+        case "SelfPacedOnlineTraining":
+          enrollment = user.mySelfPacedCourses.find(
+            (c) => c.courseId && c.courseId.toString() === courseId
+          );
+          if (enrollment) {
+            course = await SelfPacedOnlineTraining.findById(courseId).populate([
+              {
+                path: "instructor.instructorId",
+                select:
+                  "firstName lastName fullName title bio profileImage credentials",
+              },
+              {
+                path: "certification.issuingAuthorityId",
+                select: "companyName displayName logo website",
+              },
+              {
+                path: "certification.certificationBodies.bodyId",
+                select: "companyName displayName logo website",
+              },
+            ]);
+          }
+          break;
+
+        case "OnlineLiveTraining":
+          enrollment = user.myLiveCourses.find(
+            (c) => c.courseId && c.courseId.toString() === courseId
+          );
+          if (enrollment) {
+            course = await OnlineLiveTraining.findById(courseId).populate([
+              "instructors.primary.instructorId",
+              "instructors.additional.instructorId",
+              "certification.issuingAuthorityId",
+              "certification.certificationBodies.bodyId",
+              // ✅ NEW: Populate linked course data
+              {
+                path: "linkedToInPerson.inPersonCourseId",
+                select: "basic schedule venue certification",
+                populate: {
+                  path: "certification.issuingAuthorityId",
+                  select: "companyName displayName",
+                },
+              },
+            ]);
+          }
+          break;
+
+        case "InPersonAestheticTraining":
+          enrollment = user.myInPersonCourses.find(
+            (c) => c.courseId && c.courseId.toString() === courseId
+          );
+          if (enrollment) {
+            course = await InPersonAestheticTraining.findById(
+              courseId
+            ).populate([
+              "instructors.primary.instructorId",
+              "instructors.additional.instructorId",
+              "certification.issuingAuthorityId",
+              "certification.certificationBodies.bodyId",
+              // ✅ NEW: Populate linked course data
+              {
+                path: "linkedToOnline.onlineCourseId",
+                select: "basic schedule platform certification",
+                populate: {
+                  path: "certification.issuingAuthorityId",
+                  select: "companyName displayName",
+                },
+              },
+            ]);
+          }
+          break;
+
+        default:
+          return res.status(400).json({
+            success: false,
+            message: "Invalid course type",
+          });
+      }
+
+      if (!enrollment || !course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course enrollment not found",
+        });
+      }
+
+      // ============================================
+      // ✅ STEP 2: Use course model's certificate eligibility method
+      // ============================================
+      let certificateEligibility;
+
+      try {
+        if (courseType === "SelfPacedOnlineTraining") {
+          // Self-paced courses don't have linked course logic yet
+          certificateEligibility = {
+            eligible: course.isCertificateEligible
+              ? course.isCertificateEligible(userId)
+              : true,
+          };
+        } else {
+          // Use the new canIssueCertificate method for live and in-person courses
+          certificateEligibility = await course.canIssueCertificate(userId);
+        }
+      } catch (methodError) {
+        console.warn(
+          "⚠️ Course method not available, falling back to basic check:",
+          methodError.message
+        );
+        certificateEligibility = { eligible: true };
+      }
+
+      // ============================================
+      // ✅ STEP 3: Check certificate eligibility with linked course logic
+      // ============================================
+      if (!certificateEligibility.eligible) {
+        return res.status(400).json({
+          success: false,
+          message:
+            certificateEligibility.reason || "Certificate requirements not met",
+          linkedCourse: certificateEligibility.linkedInPersonCourseId
+            ? {
+                courseId: certificateEligibility.linkedInPersonCourseId,
+                message:
+                  "Complete the linked in-person course to receive your certificate",
+              }
+            : null,
+          eligibilityDetails: certificateEligibility,
+        });
+      }
+
+      // ============================================
+      // ✅ STEP 4: Additional enrollment-specific checks
+      // ============================================
+      let isCompleted = false;
+      let eligibilityErrors = [];
+
+      if (courseType === "SelfPacedOnlineTraining") {
+        isCompleted = enrollment.courseProgress?.status === "completed";
+        if (!isCompleted) {
+          eligibilityErrors.push(
+            "All course videos and exams must be completed"
+          );
+        }
+      } else if (courseType === "OnlineLiveTraining") {
+        // Use the enhanced eligibility checking
+        const courseEnded =
+          new Date(course.schedule.endDate || course.schedule.startDate) <
+          new Date();
+        if (!courseEnded) {
+          eligibilityErrors.push(
+            "Course must be completed before certificate can be issued"
+          );
+        }
+
+        const attendanceConfirmed =
+          enrollment.userProgress?.sessionsAttended?.length > 0 ||
+          enrollment.userProgress?.courseStatus === "completed";
+        if (!attendanceConfirmed) {
+          eligibilityErrors.push("Attendance must be confirmed");
+        }
+
+        // Assessment checks
+        if (course.assessment?.required && course.assessment?.type !== "none") {
+          const assessmentCompleted = enrollment.assessmentCompleted || false;
+          const assessmentScore =
+            enrollment.assessmentScore || enrollment.bestAssessmentScore || 0;
+          const passingScore = course.assessment?.passingScore || 70;
+          const assessmentPassed = assessmentScore >= passingScore;
+
+          if (!assessmentCompleted) {
+            eligibilityErrors.push("Assessment must be completed");
+          } else if (!assessmentPassed) {
+            eligibilityErrors.push(
+              `Assessment score must be ${passingScore}% or higher (current: ${assessmentScore}%)`
+            );
+          }
+        }
+
+        isCompleted =
+          courseEnded &&
+          attendanceConfirmed &&
+          (!course.assessment?.required ||
+            (enrollment.assessmentCompleted &&
+              (enrollment.assessmentScore ||
+                enrollment.bestAssessmentScore ||
+                0) >= (course.assessment?.passingScore || 70)));
+      } else if (courseType === "InPersonAestheticTraining") {
+        const courseEnded =
+          new Date(course.schedule.endDate || course.schedule.startDate) <
+          new Date();
+        if (!courseEnded) {
+          eligibilityErrors.push(
+            "Course must be completed before certificate can be issued"
+          );
+        }
+
+        const attendanceConfirmed =
+          enrollment.userProgress?.attendanceRecords?.length > 0 ||
+          enrollment.userProgress?.courseStatus === "completed";
+        if (!attendanceConfirmed) {
+          eligibilityErrors.push("Attendance must be confirmed");
+        }
+
+        // Assessment checks for in-person
+        if (course.assessment?.required && course.assessment?.type !== "none") {
+          const assessmentCompleted =
+            enrollment.userProgress?.assessmentCompleted || false;
+          const assessmentScore = enrollment.userProgress?.assessmentScore || 0;
+          const passingScore = course.assessment?.passingScore || 70;
+          const assessmentPassed = assessmentScore >= passingScore;
+
+          if (!assessmentCompleted) {
+            eligibilityErrors.push("Assessment must be completed");
+          } else if (!assessmentPassed) {
+            eligibilityErrors.push(
+              `Assessment score must be ${passingScore}% or higher (current: ${assessmentScore}%)`
+            );
+          }
+        }
+
+        isCompleted =
+          courseEnded &&
+          attendanceConfirmed &&
+          (!course.assessment?.required ||
+            (enrollment.userProgress?.assessmentCompleted &&
+              (enrollment.userProgress?.assessmentScore || 0) >=
+                (course.assessment?.passingScore || 70)));
+      }
+
+      if (!isCompleted || eligibilityErrors.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Certificate eligibility requirements not met",
+          errors: eligibilityErrors,
+        });
+      }
+
+      // ============================================
+      // ✅ STEP 5: Check if certificate already exists
+      // ============================================
+      const existingCertificate = user.myCertificates?.find(
+        (cert) =>
+          cert.courseId.toString() === courseId &&
+          cert.courseType === courseType
+      );
+
+      if (existingCertificate) {
+        return res.status(200).json({
+          success: true,
+          message: "Certificate already exists",
+          certificate: {
+            certificateId: existingCertificate.certificateId,
+            verificationCode:
+              existingCertificate.certificateData.verificationCode,
+          },
+        });
+      }
+
+      // ============================================
+      // ✅ STEP 6: Generate certificate with linked course awareness
+      // ============================================
+      const verificationCode = this.generateVerificationCode();
+      const certificateId = this.generateCertificateId();
+
+      const instructorsForCert = await this.buildInstructorsDataForCertificate(
+        course,
+        courseType
+      );
+      const certificationBodiesForCert =
+        await this.buildCertificationBodiesForCertificate(course.certification);
+
+      // ✅ NEW: Enhanced certificate data with linked course info
+      const certificateData = {
+        certificateId: certificateId,
+        courseId: courseId,
+        courseType: courseType,
+        certificateData: {
+          recipientName: `${user.firstName} ${user.lastName}`,
+          courseTitle: course.basic?.title || "Professional Course",
+          courseCode: course.basic?.courseCode || "N/A",
+          instructors: instructorsForCert,
+          primaryInstructorName:
+            instructorsForCert.find((i) => i.isPrimary)?.name ||
+            "IAAI Training Team",
+          certificationBodies: certificationBodiesForCert,
+          primaryIssuingAuthority:
+            certificationBodiesForCert.find((cb) => cb.isPrimary)?.name ||
+            "IAAI Training Institute",
+          completionDate:
+            enrollment.courseProgress?.completionDate ||
+            enrollment.userProgress?.completionDate ||
+            new Date(),
+          issueDate: new Date(),
+          expiryDate: null,
+          achievement: this.buildEnhancedAchievementData(
+            enrollment,
+            course,
+            courseType
+          ),
+          deliveryMethod: this.getDeliveryMethodDisplay(courseType, course),
+          verificationCode: verificationCode,
+
+          // ✅ NEW: Linked course information in certificate
+          linkedCourseInfo: this.buildLinkedCourseInfo(course, courseType),
+
+          digitalSignature: "",
+          qrCodeUrl: `/qr/certificate/${verificationCode}`,
+          pdfUrl: `/certificates/${userId}/${certificateId}.pdf`,
+          imageUrl: `/certificates/${userId}/${certificateId}.png`,
+        },
+        downloadCount: 0,
+        lastDownloaded: null,
+        isPublic: false,
+        shareUrl: `${
+          process.env.BASE_URL || "http://localhost:3000"
+        }/certificates/verify/${verificationCode}`,
+      };
+
+      certificateData.certificateData.digitalSignature =
+        this.generateDigitalSignature(certificateData.certificateData);
+
+      if (!user.myCertificates) user.myCertificates = [];
+      user.myCertificates.push(certificateData);
+
+      enrollment.certificateId = certificateId;
+      this.updateUserAchievementSummary(user);
+
+      await user.save();
+
+      console.log(
+        `✅ Enhanced certificate issued with linked course support: ${certificateId}`
+      );
+
+      res.json({
+        success: true,
+        message: "Certificate issued successfully!",
+        certificate: {
+          certificateId: certificateData.certificateId,
+          verificationCode: certificateData.certificateData.verificationCode,
+          downloadUrl: certificateData.certificateData.pdfUrl,
+          shareableUrl: certificateData.shareUrl,
+          viewUrl: `/certificates/view/${certificateData.certificateId}`,
+        },
+        linkedCourseInfo: certificateData.certificateData.linkedCourseInfo,
+      });
+    } catch (error) {
+      console.error("❌ Error in enhanced certificate issuance:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error issuing certificate",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
+    }
+  }
+
+  /**
+   * ✅ NEW: Build linked course information for certificate
+   */
+  buildLinkedCourseInfo(course, courseType) {
+    const linkedInfo = {
+      hasLinkedCourse: false,
+      linkedCourseType: null,
+      linkedCourseTitle: null,
+      linkedCourseCode: null,
+      combinedTraining: false,
+    };
+
+    try {
+      if (
+        courseType === "OnlineLiveTraining" &&
+        course.linkedToInPerson?.isLinked
+      ) {
+        const linkedCourse = course.linkedToInPerson.inPersonCourseId;
+        linkedInfo.hasLinkedCourse = true;
+        linkedInfo.linkedCourseType = "In-Person Training";
+        linkedInfo.linkedCourseTitle =
+          linkedCourse?.basic?.title || "In-Person Component";
+        linkedInfo.linkedCourseCode = linkedCourse?.basic?.courseCode || "N/A";
+        linkedInfo.combinedTraining = true;
+        linkedInfo.description =
+          "This certificate represents completion of the online component of a comprehensive training program.";
+      } else if (
+        courseType === "InPersonAestheticTraining" &&
+        course.linkedToOnline?.isLinked
+      ) {
+        const linkedCourse = course.linkedToOnline.onlineCourseId;
+        linkedInfo.hasLinkedCourse = true;
+        linkedInfo.linkedCourseType = "Online Training";
+        linkedInfo.linkedCourseTitle =
+          linkedCourse?.basic?.title || "Online Component";
+        linkedInfo.linkedCourseCode = linkedCourse?.basic?.courseCode || "N/A";
+        linkedInfo.combinedTraining = true;
+        linkedInfo.description =
+          "This certificate represents completion of both online and in-person components of a comprehensive training program.";
+      }
+    } catch (error) {
+      console.warn("⚠️ Error building linked course info:", error.message);
+    }
+
+    return linkedInfo;
+  }
+
+  /**
+   * ✅ UPDATED: Enhanced certificate view with linked course information
    */
   async viewCertificate(req, res) {
     try {
       const { certificateId } = req.params;
       const userId = req.user._id;
 
-      console.log(`🔍 FIXED: Enhanced certificate view for: ${certificateId}`);
+      console.log(
+        `🔍 Enhanced certificate view with linked course support: ${certificateId}`
+      );
 
       const user = await User.findById(userId).select(
         "myCertificates firstName lastName email"
@@ -45,13 +475,14 @@ class CertificateController {
         });
       }
 
-      console.log(`📋 FIXED: Certificate found:`, {
+      console.log(`📋 Certificate found with linked course support:`, {
         certificateId: certificate.certificateId,
         courseId: certificate.courseId,
         courseType: certificate.courseType,
+        hasLinkedInfo: !!certificate.certificateData?.linkedCourseInfo,
       });
 
-      // ✅ COMPLETELY FIXED: Fetch course data with ALL populates
+      // ✅ Fetch course data with linked course information
       let enhancedCourseData = {};
       const courseId = certificate.courseId;
       const courseType = certificate.courseType;
@@ -101,6 +532,11 @@ class CertificateController {
               .populate({
                 path: "certification.certificationBodies.bodyId",
                 select: "companyName displayName logo website contactInfo",
+              })
+              // ✅ NEW: Populate linked course for display
+              .populate({
+                path: "linkedToInPerson.inPersonCourseId",
+                select: "basic schedule venue",
               });
             break;
 
@@ -125,6 +561,11 @@ class CertificateController {
               .populate({
                 path: "certification.certificationBodies.bodyId",
                 select: "companyName displayName logo website contactInfo",
+              })
+              // ✅ NEW: Populate linked course for display
+              .populate({
+                path: "linkedToOnline.onlineCourseId",
+                select: "basic schedule platform",
               });
             break;
 
@@ -133,54 +574,13 @@ class CertificateController {
         }
 
         if (course) {
-          console.log(`✅ FIXED: Course found with populate:`, {
+          console.log(`✅ Course found with linked course data:`, {
             title: course.basic?.title,
-            hasInstructor: !!(
-              course.instructor?.instructorId ||
-              course.instructors?.primary?.instructorId
+            hasLinkedCourse: !!(
+              course.linkedToInPerson?.inPersonCourseId ||
+              course.linkedToOnline?.onlineCourseId
             ),
-            hasCertification: !!course.certification,
-            hasIssuingAuthority: !!course.certification?.issuingAuthorityId,
-            certificationBodiesCount:
-              course.certification?.certificationBodies?.length || 0,
           });
-
-          // Log populated instructor data
-          if (
-            courseType === "SelfPacedOnlineTraining" &&
-            course.instructor?.instructorId
-          ) {
-            console.log(`👨‍🏫 FIXED: Self-paced instructor:`, {
-              name:
-                course.instructor.instructorId.fullName ||
-                course.instructor.instructorId.firstName,
-              title: course.instructor.instructorId.title,
-              isPopulated: typeof course.instructor.instructorId === "object",
-            });
-          }
-
-          // Log populated certification data
-          if (course.certification) {
-            console.log(`🏆 FIXED: Certification data:`, {
-              primaryAuthority: course.certification.issuingAuthorityId
-                ? {
-                    name:
-                      course.certification.issuingAuthorityId.companyName ||
-                      course.certification.issuingAuthorityId.displayName,
-                    isPopulated:
-                      typeof course.certification.issuingAuthorityId ===
-                      "object",
-                  }
-                : null,
-              additionalBodies:
-                course.certification.certificationBodies?.map((cb, i) => ({
-                  index: i,
-                  name: cb.bodyId?.companyName || cb.bodyId?.displayName,
-                  role: cb.role,
-                  isPopulated: typeof cb.bodyId === "object",
-                })) || [],
-            });
-          }
 
           enhancedCourseData = {
             basic: course.basic,
@@ -189,15 +589,17 @@ class CertificateController {
             venue: course.venue,
             platform: course.platform,
             schedule: course.schedule,
+            // ✅ NEW: Include linked course data
+            linkedCourse:
+              course.linkedToInPerson?.inPersonCourseId ||
+              course.linkedToOnline?.onlineCourseId,
           };
-        } else {
-          console.warn(`⚠️ FIXED: Course not found: ${courseId}`);
         }
       } catch (courseError) {
-        console.error(`❌ FIXED: Error fetching course data:`, courseError);
+        console.error(`❌ Error fetching course data:`, courseError);
       }
 
-      // ✅ Build certification bodies and instructors data
+      // Build certification bodies and instructors data
       const certificationBodies = await this.buildCertificationBodiesData(
         enhancedCourseData.certification
       );
@@ -205,13 +607,6 @@ class CertificateController {
         enhancedCourseData.instructors,
         courseType
       );
-
-      console.log(`📊 FIXED: Final data summary:`, {
-        certificationBodiesCount: certificationBodies.length,
-        certificationBodiesNames: certificationBodies.map((cb) => cb.name),
-        instructorsCount: instructors.length,
-        instructorsNames: instructors.map((i) => i.name),
-      });
 
       // Build comprehensive certificate data
       const enhancedCertificate = {
@@ -238,9 +633,7 @@ class CertificateController {
         console.log("⚠️ Could not update view count:", saveError.message);
       }
 
-      console.log(
-        `✅ FIXED: Rendering certificate with ${certificationBodies.length} cert bodies and ${instructors.length} instructors`
-      );
+      console.log(`✅ Rendering certificate with linked course support`);
 
       res.render("certificate-view", {
         user: req.user,
@@ -248,7 +641,7 @@ class CertificateController {
         title: `Professional Certificate - ${certificate.certificateData?.courseTitle}`,
       });
     } catch (error) {
-      console.error("❌ FIXED: Error in certificate view:", error);
+      console.error("❌ Error in enhanced certificate view:", error);
       res.status(500).render("error", {
         message: "Error loading certificate. Please try again later.",
         user: req.user,
@@ -256,14 +649,15 @@ class CertificateController {
     }
   }
 
-  /**
-   * ✅ COMPLETELY FIXED: Build certification bodies data
-   */
+  // ========================================
+  // Keep all existing methods unchanged
+  // ========================================
+
   async buildCertificationBodiesData(certification) {
     const certificationBodies = [];
 
     try {
-      console.log("🏆 FIXED: Building certification bodies from:", {
+      console.log("🏆 Building certification bodies from:", {
         hasCertification: !!certification,
         hasIssuingAuthority: !!certification?.issuingAuthorityId,
         additionalBodiesCount: certification?.certificationBodies?.length || 0,
@@ -277,14 +671,8 @@ class CertificateController {
           typeof certification.issuingAuthorityId === "object" &&
           certification.issuingAuthorityId.companyName
         ) {
-          // Already populated
           primaryBody = certification.issuingAuthorityId;
-          console.log(
-            "✅ FIXED: Primary body already populated:",
-            primaryBody.companyName
-          );
         } else {
-          // Need to fetch manually
           const bodyId =
             typeof certification.issuingAuthorityId === "object"
               ? certification.issuingAuthorityId._id
@@ -292,10 +680,6 @@ class CertificateController {
 
           primaryBody = await CertificationBody.findById(bodyId).select(
             "companyName displayName logo website contactInfo"
-          );
-          console.log(
-            "🔍 FIXED: Fetched primary body:",
-            primaryBody?.companyName || "Not found"
           );
         }
 
@@ -308,10 +692,6 @@ class CertificateController {
             contactInfo: primaryBody.contactInfo,
             isPrimary: true,
           });
-          console.log(
-            "✅ FIXED: Added primary certification body:",
-            primaryBody.displayName || primaryBody.companyName
-          );
         }
       }
 
@@ -320,10 +700,6 @@ class CertificateController {
         certification?.certificationBodies &&
         Array.isArray(certification.certificationBodies)
       ) {
-        console.log(
-          `🔍 FIXED: Processing ${certification.certificationBodies.length} additional bodies`
-        );
-
         for (const [
           index,
           bodyRef,
@@ -335,14 +711,8 @@ class CertificateController {
               typeof bodyRef.bodyId === "object" &&
               bodyRef.bodyId.companyName
             ) {
-              // Already populated
               body = bodyRef.bodyId;
-              console.log(
-                `✅ FIXED: Additional body ${index} already populated:`,
-                body.companyName
-              );
             } else {
-              // Need to fetch manually
               const bodyId =
                 typeof bodyRef.bodyId === "object"
                   ? bodyRef.bodyId._id
@@ -350,10 +720,6 @@ class CertificateController {
 
               body = await CertificationBody.findById(bodyId).select(
                 "companyName displayName logo website contactInfo"
-              );
-              console.log(
-                `🔍 FIXED: Fetched additional body ${index}:`,
-                body?.companyName || "Not found"
               );
             }
 
@@ -366,10 +732,6 @@ class CertificateController {
                 contactInfo: body.contactInfo,
                 isPrimary: false,
               });
-              console.log(
-                `✅ FIXED: Added additional body ${index}:`,
-                body.displayName || body.companyName
-              );
             }
           }
         }
@@ -377,9 +739,6 @@ class CertificateController {
 
       // Fallback only if no bodies found
       if (certificationBodies.length === 0) {
-        console.log(
-          "⚠️ FIXED: No certification bodies found, using IAAI default"
-        );
         certificationBodies.push({
           name: "IAAI Training Institute",
           role: "Primary Issuer",
@@ -388,13 +747,8 @@ class CertificateController {
           isPrimary: true,
         });
       }
-
-      console.log(
-        `✅ FIXED: Final certification bodies (${certificationBodies.length}):`,
-        certificationBodies.map((cb) => `${cb.name} (${cb.role})`)
-      );
     } catch (error) {
-      console.error("❌ FIXED: Error building certification bodies:", error);
+      console.error("❌ Error building certification bodies:", error);
       return [
         {
           name: "IAAI Training Institute",
@@ -409,22 +763,11 @@ class CertificateController {
     return certificationBodies;
   }
 
-  /**
-   * ✅ COMPLETELY FIXED: Build instructors data
-   */
   async buildInstructorsData(instructors, courseType) {
     const instructorsList = [];
 
     try {
-      console.log("👨‍🏫 FIXED: Building instructors for courseType:", courseType);
-      console.log("👨‍🏫 FIXED: Instructors input:", {
-        hasInstructors: !!instructors,
-        courseType,
-        instructorStructure: instructors ? Object.keys(instructors) : [],
-      });
-
       if (courseType === "SelfPacedOnlineTraining") {
-        // Self-paced has single instructor structure
         if (instructors?.instructorId) {
           let instructor;
 
@@ -432,14 +775,8 @@ class CertificateController {
             typeof instructors.instructorId === "object" &&
             instructors.instructorId.firstName
           ) {
-            // Already populated
             instructor = instructors.instructorId;
-            console.log(
-              "✅ FIXED: Self-paced instructor already populated:",
-              instructor.fullName || instructor.firstName
-            );
           } else {
-            // Need to fetch manually
             const instructorId =
               typeof instructors.instructorId === "object"
                 ? instructors.instructorId._id
@@ -447,10 +784,6 @@ class CertificateController {
 
             instructor = await Instructor.findById(instructorId).select(
               "firstName lastName fullName title bio profileImage credentials"
-            );
-            console.log(
-              "🔍 FIXED: Fetched self-paced instructor:",
-              instructor?.fullName || instructor?.firstName || "Not found"
             );
           }
 
@@ -467,17 +800,9 @@ class CertificateController {
               credentials: instructor.credentials,
               isPrimary: true,
             });
-            console.log(
-              "✅ FIXED: Added self-paced instructor:",
-              instructor.fullName || instructor.firstName
-            );
           }
-        } else {
-          console.log("⚠️ FIXED: No instructor found for self-paced course");
         }
       } else {
-        // Live and In-Person have primary + additional structure
-
         // Primary instructor
         if (instructors?.primary?.instructorId) {
           let primaryInstructor;
@@ -486,14 +811,8 @@ class CertificateController {
             typeof instructors.primary.instructorId === "object" &&
             instructors.primary.instructorId.firstName
           ) {
-            // Already populated
             primaryInstructor = instructors.primary.instructorId;
-            console.log(
-              "✅ FIXED: Primary instructor already populated:",
-              primaryInstructor.fullName || primaryInstructor.firstName
-            );
           } else {
-            // Need to fetch manually
             const instructorId =
               typeof instructors.primary.instructorId === "object"
                 ? instructors.primary.instructorId._id
@@ -501,12 +820,6 @@ class CertificateController {
 
             primaryInstructor = await Instructor.findById(instructorId).select(
               "firstName lastName fullName title bio profileImage credentials"
-            );
-            console.log(
-              "🔍 FIXED: Fetched primary instructor:",
-              primaryInstructor?.fullName ||
-                primaryInstructor?.firstName ||
-                "Not found"
             );
           }
 
@@ -522,10 +835,6 @@ class CertificateController {
               credentials: primaryInstructor.credentials,
               isPrimary: true,
             });
-            console.log(
-              "✅ FIXED: Added primary instructor:",
-              primaryInstructor.fullName || primaryInstructor.firstName
-            );
           }
         }
 
@@ -542,14 +851,8 @@ class CertificateController {
                 typeof additionalInstr.instructorId === "object" &&
                 additionalInstr.instructorId.firstName
               ) {
-                // Already populated
                 instructor = additionalInstr.instructorId;
-                console.log(
-                  `✅ FIXED: Additional instructor ${index} already populated:`,
-                  instructor.fullName || instructor.firstName
-                );
               } else {
-                // Need to fetch manually
                 const instructorId =
                   typeof additionalInstr.instructorId === "object"
                     ? additionalInstr.instructorId._id
@@ -557,10 +860,6 @@ class CertificateController {
 
                 instructor = await Instructor.findById(instructorId).select(
                   "firstName lastName fullName title bio profileImage credentials"
-                );
-                console.log(
-                  `🔍 FIXED: Fetched additional instructor ${index}:`,
-                  instructor?.fullName || instructor?.firstName || "Not found"
                 );
               }
 
@@ -576,10 +875,6 @@ class CertificateController {
                   credentials: instructor.credentials,
                   isPrimary: false,
                 });
-                console.log(
-                  `✅ FIXED: Added additional instructor ${index}:`,
-                  instructor.fullName || instructor.firstName
-                );
               }
             }
           }
@@ -588,7 +883,6 @@ class CertificateController {
 
       // Fallback only if no instructors found
       if (instructorsList.length === 0) {
-        console.log("⚠️ FIXED: No instructors found, using IAAI default");
         instructorsList.push({
           name: "IAAI Training Team",
           title: "Professional Instructor",
@@ -596,13 +890,8 @@ class CertificateController {
           isPrimary: true,
         });
       }
-
-      console.log(
-        `✅ FIXED: Final instructors (${instructorsList.length}):`,
-        instructorsList.map((i) => `${i.name} (${i.role})`)
-      );
     } catch (error) {
-      console.error("❌ FIXED: Error building instructors data:", error);
+      console.error("❌ Error building instructors data:", error);
       return [
         {
           name: "IAAI Training Team",
@@ -616,9 +905,6 @@ class CertificateController {
     return instructorsList;
   }
 
-  /**
-   * Get delivery method display text
-   */
   getDeliveryMethodDisplay(courseType, courseData) {
     switch (courseType) {
       case "OnlineLiveTraining":
@@ -639,9 +925,6 @@ class CertificateController {
     }
   }
 
-  /**
-   * Format certification role for display
-   */
   formatCertificationRole(role) {
     const roleMap = {
       "co-issuer": "Co-Issuer",
@@ -652,18 +935,11 @@ class CertificateController {
     return roleMap[role] || "Supporting Organization";
   }
 
-  // ============================================
-  // REST OF THE METHODS REMAIN THE SAME
-  // ============================================
-
-  async issueCertificate(req, res) {
+  // Keep all other existing methods...
+  async downloadCertificate(req, res) {
     try {
-      const { courseId, courseType } = req.body;
+      const { certificateId } = req.params;
       const userId = req.user._id;
-
-      console.log(
-        `🏆 Enhanced certificate issuance - User: ${userId}, Course: ${courseId}, Type: ${courseType}`
-      );
 
       const user = await User.findById(userId);
       if (!user) {
@@ -672,302 +948,157 @@ class CertificateController {
           .json({ success: false, message: "User not found" });
       }
 
-      let enrollment = null;
-      let course = null;
-
-      switch (courseType) {
-        case "SelfPacedOnlineTraining":
-          enrollment = user.mySelfPacedCourses.find(
-            (c) => c.courseId && c.courseId.toString() === courseId
-          );
-          if (enrollment) {
-            course = await SelfPacedOnlineTraining.findById(courseId).populate([
-              {
-                path: "instructor.instructorId",
-                select:
-                  "firstName lastName fullName title bio profileImage credentials",
-              },
-              {
-                path: "certification.issuingAuthorityId",
-                select: "companyName displayName logo website",
-              },
-              {
-                path: "certification.certificationBodies.bodyId",
-                select: "companyName displayName logo website",
-              },
-            ]);
-          }
-          break;
-
-        case "OnlineLiveTraining":
-          enrollment = user.myLiveCourses.find(
-            (c) => c.courseId && c.courseId.toString() === courseId
-          );
-          if (enrollment) {
-            course = await OnlineLiveTraining.findById(courseId).populate([
-              "instructors.primary.instructorId",
-              "instructors.additional.instructorId",
-              "certification.issuingAuthorityId",
-              "certification.certificationBodies.bodyId",
-            ]);
-          }
-          break;
-
-        case "InPersonAestheticTraining":
-          enrollment = user.myInPersonCourses.find(
-            (c) => c.courseId && c.courseId.toString() === courseId
-          );
-          if (enrollment) {
-            course = await InPersonAestheticTraining.findById(
-              courseId
-            ).populate([
-              "instructors.primary.instructorId",
-              "instructors.additional.instructorId",
-              "certification.issuingAuthorityId",
-              "certification.certificationBodies.bodyId",
-            ]);
-          }
-          break;
-
-        default:
-          return res.status(400).json({
-            success: false,
-            message: "Invalid course type",
-          });
-      }
-
-      if (!enrollment || !course) {
-        return res.status(404).json({
-          success: false,
-          message: "Course enrollment not found",
-        });
-      }
-
-      // Verify completion eligibility
-      let isCompleted = false;
-      let eligibilityErrors = [];
-
-      if (courseType === "SelfPacedOnlineTraining") {
-        isCompleted = enrollment.courseProgress?.status === "completed";
-        if (!isCompleted) {
-          eligibilityErrors.push(
-            "All course videos and exams must be completed"
-          );
-        }
-      } else if (courseType === "OnlineLiveTraining") {
-        const courseEnded =
-          new Date(course.schedule.endDate || course.schedule.startDate) <
-          new Date();
-        if (!courseEnded) {
-          eligibilityErrors.push(
-            "Course must be completed before certificate can be issued"
-          );
-        }
-
-        const attendanceConfirmed =
-          enrollment.userProgress?.sessionsAttended?.length > 0 ||
-          enrollment.userProgress?.courseStatus === "completed";
-        if (!attendanceConfirmed) {
-          eligibilityErrors.push("Attendance must be confirmed");
-        }
-
-        const totalSessions = course.schedule.sessions?.length || 1;
-        const attendedSessions =
-          enrollment.userProgress?.sessionsAttended?.length || 0;
-        const attendancePercentage =
-          totalSessions > 0
-            ? Math.round((attendedSessions / totalSessions) * 100)
-            : 0;
-        const meetsAttendanceRequirement =
-          attendancePercentage >= (course.attendance?.minimumRequired || 80);
-
-        if (!meetsAttendanceRequirement) {
-          eligibilityErrors.push(
-            `Minimum ${
-              course.attendance?.minimumRequired || 80
-            }% attendance required (current: ${attendancePercentage}%)`
-          );
-        }
-
-        if (course.assessment?.required && course.assessment?.type !== "none") {
-          const assessmentCompleted = enrollment.assessmentCompleted || false;
-          const assessmentScore =
-            enrollment.assessmentScore || enrollment.bestAssessmentScore || 0;
-          const passingScore = course.assessment?.passingScore || 70;
-          const assessmentPassed = assessmentScore >= passingScore;
-
-          if (!assessmentCompleted) {
-            eligibilityErrors.push("Assessment must be completed");
-          } else if (!assessmentPassed) {
-            eligibilityErrors.push(
-              `Assessment score must be ${passingScore}% or higher (current: ${assessmentScore}%)`
-            );
-          }
-        }
-
-        isCompleted =
-          courseEnded &&
-          attendanceConfirmed &&
-          meetsAttendanceRequirement &&
-          (!course.assessment?.required ||
-            (enrollment.assessmentCompleted &&
-              (enrollment.assessmentScore ||
-                enrollment.bestAssessmentScore ||
-                0) >= (course.assessment?.passingScore || 70)));
-      } else if (courseType === "InPersonAestheticTraining") {
-        const courseEnded =
-          new Date(course.schedule.endDate || course.schedule.startDate) <
-          new Date();
-        if (!courseEnded) {
-          eligibilityErrors.push(
-            "Course must be completed before certificate can be issued"
-          );
-        }
-
-        const attendanceConfirmed =
-          enrollment.userProgress?.attendanceRecords?.length > 0 ||
-          enrollment.userProgress?.courseStatus === "completed";
-        if (!attendanceConfirmed) {
-          eligibilityErrors.push("Attendance must be confirmed");
-        }
-
-        if (course.assessment?.required && course.assessment?.type !== "none") {
-          const assessmentCompleted =
-            enrollment.userProgress?.assessmentCompleted || false;
-          const assessmentScore = enrollment.userProgress?.assessmentScore || 0;
-          const passingScore = course.assessment?.passingScore || 70;
-          const assessmentPassed = assessmentScore >= passingScore;
-
-          if (!assessmentCompleted) {
-            eligibilityErrors.push("Assessment must be completed");
-          } else if (!assessmentPassed) {
-            eligibilityErrors.push(
-              `Assessment score must be ${passingScore}% or higher (current: ${assessmentScore}%)`
-            );
-          }
-        }
-
-        isCompleted =
-          courseEnded &&
-          attendanceConfirmed &&
-          (!course.assessment?.required ||
-            (enrollment.userProgress?.assessmentCompleted &&
-              (enrollment.userProgress?.assessmentScore || 0) >=
-                (course.assessment?.passingScore || 70)));
-      }
-
-      if (!isCompleted || eligibilityErrors.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Certificate eligibility requirements not met",
-          errors: eligibilityErrors,
-        });
-      }
-
-      // Check if certificate already exists
-      const existingCertificate = user.myCertificates?.find(
-        (cert) =>
-          cert.courseId.toString() === courseId &&
-          cert.courseType === courseType
+      const certificate = user.myCertificates?.find(
+        (cert) => cert.certificateId === certificateId
       );
 
-      if (existingCertificate) {
-        return res.status(200).json({
-          success: true,
-          message: "Certificate already exists",
-          certificate: {
-            certificateId: existingCertificate.certificateId,
-            verificationCode:
-              existingCertificate.certificateData.verificationCode,
-          },
-        });
+      if (!certificate) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Certificate not found" });
       }
 
-      // Generate certificate
-      const verificationCode = this.generateVerificationCode();
-      const certificateId = this.generateCertificateId();
-
-      const instructorsForCert = await this.buildInstructorsDataForCertificate(
-        course,
-        courseType
-      );
-      const certificationBodiesForCert =
-        await this.buildCertificationBodiesForCertificate(course.certification);
-
-      const certificateData = {
-        certificateId: certificateId,
-        courseId: courseId,
-        courseType: courseType,
-        certificateData: {
-          recipientName: `${user.firstName} ${user.lastName}`,
-          courseTitle: course.basic?.title || "Professional Course",
-          courseCode: course.basic?.courseCode || "N/A",
-          instructors: instructorsForCert,
-          primaryInstructorName:
-            instructorsForCert.find((i) => i.isPrimary)?.name ||
-            "IAAI Training Team",
-          certificationBodies: certificationBodiesForCert,
-          primaryIssuingAuthority:
-            certificationBodiesForCert.find((cb) => cb.isPrimary)?.name ||
-            "IAAI Training Institute",
-          completionDate:
-            enrollment.courseProgress?.completionDate ||
-            enrollment.userProgress?.completionDate ||
-            new Date(),
-          issueDate: new Date(),
-          expiryDate: null,
-          achievement: this.buildEnhancedAchievementData(
-            enrollment,
-            course,
-            courseType
-          ),
-          deliveryMethod: this.getDeliveryMethodDisplay(courseType, course),
-          verificationCode: verificationCode,
-          digitalSignature: "",
-          qrCodeUrl: `/qr/certificate/${verificationCode}`,
-          pdfUrl: `/certificates/${userId}/${certificateId}.pdf`,
-          imageUrl: `/certificates/${userId}/${certificateId}.png`,
-        },
-        downloadCount: 0,
-        lastDownloaded: null,
-        isPublic: false,
-        shareUrl: `${
-          process.env.BASE_URL || "http://localhost:3000"
-        }/certificates/verify/${verificationCode}`,
-      };
-
-      certificateData.certificateData.digitalSignature =
-        this.generateDigitalSignature(certificateData.certificateData);
-
-      if (!user.myCertificates) user.myCertificates = [];
-      user.myCertificates.push(certificateData);
-
-      enrollment.certificateId = certificateId;
-      this.updateUserAchievementSummary(user);
-
+      certificate.downloadCount += 1;
+      certificate.lastDownloaded = new Date();
       await user.save();
-
-      console.log(`✅ Enhanced certificate issued: ${certificateId}`);
 
       res.json({
         success: true,
-        message: "Certificate issued successfully!",
-        certificate: {
-          certificateId: certificateData.certificateId,
-          verificationCode: certificateData.certificateData.verificationCode,
-          downloadUrl: certificateData.certificateData.pdfUrl,
-          shareableUrl: certificateData.shareUrl,
-          viewUrl: `/certificates/view/${certificateData.certificateId}`,
+        message: "PDF generation coming soon! Certificate data saved.",
+        certificate: certificate,
+      });
+    } catch (error) {
+      console.error("❌ Error downloading certificate:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Error downloading certificate" });
+    }
+  }
+
+  async getUserCertificates(req, res) {
+    try {
+      const userId = req.user._id;
+
+      const user = await User.findById(userId).select(
+        "myCertificates achievementSummary firstName lastName"
+      );
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
+      }
+
+      const certificates = user.myCertificates || [];
+
+      res.json({
+        success: true,
+        certificates: certificates.map((cert) => ({
+          certificateId: cert.certificateId,
+          courseTitle: cert.certificateData.courseTitle,
+          courseCode: cert.certificateData.courseCode,
+          courseType: cert.courseType,
+          completionDate: cert.certificateData.completionDate,
+          issueDate: cert.certificateData.issueDate,
+          downloadUrl: cert.certificateData.pdfUrl,
+          shareableUrl: cert.shareUrl,
+          downloadCount: cert.downloadCount,
+          achievement: cert.certificateData.achievement,
+          // ✅ NEW: Include linked course info
+          linkedCourseInfo: cert.certificateData.linkedCourseInfo || null,
+        })),
+        achievementSummary: user.achievementSummary || {
+          totalCertificates: 0,
+          activeCertificates: 0,
+          achievementLevel: "Beginner",
         },
       });
     } catch (error) {
-      console.error("❌ Error in enhanced certificate issuance:", error);
-      res.status(500).json({
-        success: false,
-        message: "Error issuing certificate",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
+      console.error("❌ Error getting user certificates:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Error retrieving certificates" });
+    }
+  }
+
+  async getCertificatesPage(req, res) {
+    try {
+      const userId = req.user._id;
+
+      const user = await User.findById(userId).select(
+        "myCertificates achievementSummary firstName lastName"
+      );
+      if (!user) {
+        return res.status(404).render("error", { message: "User not found" });
+      }
+
+      const certificates = user.myCertificates || [];
+      const achievementSummary = user.achievementSummary || {
+        totalCertificates: 0,
+        activeCertificates: 0,
+        achievementLevel: "Beginner",
+        totalLearningHours: 0,
+        specializations: [],
+      };
+
+      res.render("myCertificates", {
+        user: req.user,
+        certificates,
+        achievementSummary,
+        title: "My Certificates - Professional Achievements",
       });
+    } catch (error) {
+      console.error("❌ Error loading certificates page:", error);
+      res
+        .status(500)
+        .render("error", { message: "Error loading certificates" });
+    }
+  }
+
+  async shareCertificate(req, res) {
+    try {
+      const { certificateId } = req.params;
+      const { platform } = req.body;
+      const userId = req.user._id;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
+      }
+
+      const certificate = user.myCertificates?.find(
+        (cert) => cert.certificateId === certificateId
+      );
+
+      if (!certificate) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Certificate not found" });
+      }
+
+      const shareData = {
+        title: `I just completed ${certificate.certificateData.courseTitle}!`,
+        description: `Proud to have earned my certificate in ${certificate.certificateData.courseTitle} from IAAI Training Institute.`,
+        url: certificate.shareUrl,
+        hashtags: [
+          "IAAI",
+          "AestheticTraining",
+          "ProfessionalDevelopment",
+          "Certificate",
+        ],
+      };
+
+      res.json({
+        success: true,
+        shareData,
+        message: "Certificate sharing data prepared",
+      });
+    } catch (error) {
+      console.error("❌ Error sharing certificate:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Error sharing certificate" });
     }
   }
 
@@ -1198,170 +1329,6 @@ class CertificateController {
         deliveryMethod: this.getDeliveryMethodDisplay(courseType, course),
       },
     };
-  }
-
-  async downloadCertificate(req, res) {
-    try {
-      const { certificateId } = req.params;
-      const userId = req.user._id;
-
-      const user = await User.findById(userId);
-      if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-      }
-
-      const certificate = user.myCertificates?.find(
-        (cert) => cert.certificateId === certificateId
-      );
-
-      if (!certificate) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Certificate not found" });
-      }
-
-      certificate.downloadCount += 1;
-      certificate.lastDownloaded = new Date();
-      await user.save();
-
-      res.json({
-        success: true,
-        message: "PDF generation coming soon! Certificate data saved.",
-        certificate: certificate,
-      });
-    } catch (error) {
-      console.error("❌ Error downloading certificate:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Error downloading certificate" });
-    }
-  }
-
-  async getUserCertificates(req, res) {
-    try {
-      const userId = req.user._id;
-
-      const user = await User.findById(userId).select(
-        "myCertificates achievementSummary firstName lastName"
-      );
-      if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-      }
-
-      const certificates = user.myCertificates || [];
-
-      res.json({
-        success: true,
-        certificates: certificates.map((cert) => ({
-          certificateId: cert.certificateId,
-          courseTitle: cert.certificateData.courseTitle,
-          courseCode: cert.certificateData.courseCode,
-          courseType: cert.courseType,
-          completionDate: cert.certificateData.completionDate,
-          issueDate: cert.certificateData.issueDate,
-          downloadUrl: cert.certificateData.pdfUrl,
-          shareableUrl: cert.shareUrl,
-          downloadCount: cert.downloadCount,
-          achievement: cert.certificateData.achievement,
-        })),
-        achievementSummary: user.achievementSummary || {
-          totalCertificates: 0,
-          activeCertificates: 0,
-          achievementLevel: "Beginner",
-        },
-      });
-    } catch (error) {
-      console.error("❌ Error getting user certificates:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Error retrieving certificates" });
-    }
-  }
-
-  async getCertificatesPage(req, res) {
-    try {
-      const userId = req.user._id;
-
-      const user = await User.findById(userId).select(
-        "myCertificates achievementSummary firstName lastName"
-      );
-      if (!user) {
-        return res.status(404).render("error", { message: "User not found" });
-      }
-
-      const certificates = user.myCertificates || [];
-      const achievementSummary = user.achievementSummary || {
-        totalCertificates: 0,
-        activeCertificates: 0,
-        achievementLevel: "Beginner",
-        totalLearningHours: 0,
-        specializations: [],
-      };
-
-      res.render("myCertificates", {
-        user: req.user,
-        certificates,
-        achievementSummary,
-        title: "My Certificates - Professional Achievements",
-      });
-    } catch (error) {
-      console.error("❌ Error loading certificates page:", error);
-      res
-        .status(500)
-        .render("error", { message: "Error loading certificates" });
-    }
-  }
-
-  async shareCertificate(req, res) {
-    try {
-      const { certificateId } = req.params;
-      const { platform } = req.body;
-      const userId = req.user._id;
-
-      const user = await User.findById(userId);
-      if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-      }
-
-      const certificate = user.myCertificates?.find(
-        (cert) => cert.certificateId === certificateId
-      );
-
-      if (!certificate) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Certificate not found" });
-      }
-
-      const shareData = {
-        title: `I just completed ${certificate.certificateData.courseTitle}!`,
-        description: `Proud to have earned my certificate in ${certificate.certificateData.courseTitle} from IAAI Training Institute.`,
-        url: certificate.shareUrl,
-        hashtags: [
-          "IAAI",
-          "AestheticTraining",
-          "ProfessionalDevelopment",
-          "Certificate",
-        ],
-      };
-
-      res.json({
-        success: true,
-        shareData,
-        message: "Certificate sharing data prepared",
-      });
-    } catch (error) {
-      console.error("❌ Error sharing certificate:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Error sharing certificate" });
-    }
   }
 
   calculateGrade(score) {

@@ -1923,7 +1923,7 @@
           <div class="price-display">
             <span class="price-label">Investment</span>
             <div class="price-amount">
-              <span class="price-currency">$</span><%= course.price || 0 %>
+              <span class="price-currency"><%= course.currency || 'USD' %></span><%= course.price || 0 %>
             </div>
             <% if (course.earlyBirdPrice && course.earlyBirdPrice < course.price) { %>
               <span class="early-bird-tag">
@@ -2916,7 +2916,7 @@
   <div class="mobile-action-bar">
     <div class="mobile-action-content">
       <div class="mobile-price">
-        $<%= course.price || 0 %>
+        <%= course.currency || 'USD' %><%= course.price || 0 %>
       </div>
       <div class="mobile-buttons">
         <% if (typeof showJoinButton !== 'undefined' && showJoinButton && userRegistrationStatus?.isRegistered) { %>

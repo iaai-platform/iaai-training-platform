@@ -1224,9 +1224,25 @@
   <div id="notificationContainer"></div>
 
   <script>
-    // Enhanced notification system
+    // ========================================
+    // GLOBAL VARIABLES (DECLARE ONCE)
+    // ========================================
+    const courses = <%- JSON.stringify(courses) %>;
+    let currentDate = new Date();
+    let currentView = 'month';
+  
+    // ========================================
+    // ENHANCED NOTIFICATION SYSTEM
+    // ========================================
     function showNotification(title, message, type = 'success') {
+      console.log(`📢 Notification: ${type.toUpperCase()} - ${title}: ${message}`);
+      
       const container = document.getElementById('notificationContainer');
+      if (!container) {
+        console.error('❌ Notification container not found');
+        return;
+      }
+      
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
       
@@ -1248,123 +1264,67 @@
       
       container.appendChild(notification);
       
-      // Show notification
+      // Show notification with animation
       setTimeout(() => notification.classList.add('show'), 10);
       
-      // Auto remove
+      // Auto remove after 5 seconds
       setTimeout(() => {
         notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 500);
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, 500);
       }, 5000);
     }
-
-    // Login required handler
+  
+    // ========================================
+    // LOGIN REQUIRED HANDLER
+    // ========================================
     function showLoginRequired() {
+      console.log('🔐 Login required - redirecting to login page');
       showNotification('Authentication Required', 'Please log in to continue', 'warning');
-      setTimeout(() => window.location.href = '/login', 2000);
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
     }
-
-    // Enhanced button loading state
+  
+    // ========================================
+    // BUTTON LOADING STATE MANAGEMENT
+    // ========================================
     function setButtonLoading(button, loading) {
       if (loading) {
         button.classList.add('btn-loading');
+        button.disabled = true;
+        
         const icon = button.querySelector('i');
         if (icon) {
-          icon.className = 'fas fa-spinner';
+          button.setAttribute('data-original-icon', icon.className);
+          icon.className = 'fas fa-spinner fa-spin';
         }
       } else {
         button.classList.remove('btn-loading');
+        button.disabled = false;
+        
         const icon = button.querySelector('i');
-        if (icon) {
-          icon.className = button.classList.contains('btn-wishlist') ? 'fas fa-heart' : 'fas fa-shopping-cart';
+        const originalIcon = button.getAttribute('data-original-icon');
+        if (icon && originalIcon) {
+          icon.className = originalIcon;
         }
       }
     }
-
-    // This same code works on all three course pages
-// (in-person-aesthetic-training.ejs, online-live-training.ejs, self-paced-online-training.ejs)
-
-// Add to Cart
-document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-  button.addEventListener('click', async function(e) {
-    e.preventDefault();
-    
-    const courseId = this.getAttribute('data-course-id');
-    const courseType = this.getAttribute('data-course-type');
-    const courseTitle = this.getAttribute('data-course-title');
-    
-    try {
-      const response = await fetch('/add-to-cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId, courseType })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
-      } else {
-        showNotification('Error', result.message, 'error');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      showNotification('Error', 'Failed to add to cart', 'error');
-    }
-  });
-});
-
-// Add to Wishlist
-document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
-  button.addEventListener('click', async function(e) {
-    e.preventDefault();
-    
-    const courseId = this.getAttribute('data-course-id');
-    const courseType = this.getAttribute('data-course-type');
-    const courseTitle = this.getAttribute('data-course-title');
-    
-    try {
-      const response = await fetch('/add-to-wishlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId, courseType })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
-        
-        // Optional: Update button appearance
-        this.style.color = '#e74c3c';
-        this.querySelector('i').classList.add('fas');
-        this.querySelector('i').classList.remove('far');
-      } else {
-        showNotification('Error', result.message, 'error');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      showNotification('Error', 'Failed to add to wishlist', 'error');
-    }
-  });
-});
-
-
-
-
-    // Search functionality
-    const searchInput = document.getElementById('courseSearch');
-    searchInput.addEventListener('input', filterCourses);
-
-    // Filter functionality
-    document.getElementById('statusFilter').addEventListener('change', filterCourses);
-    document.getElementById('dateFilter').addEventListener('change', filterCourses);
-    document.getElementById('sortBy').addEventListener('change', sortCourses);
-
+  
+    // ========================================
+    // SEARCH AND FILTER FUNCTIONALITY
+    // ========================================
     function filterCourses() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const statusFilter = document.getElementById('statusFilter').value;
-      const dateFilter = document.getElementById('dateFilter').value;
+      const searchInput = document.getElementById('courseSearch');
+      const statusFilter = document.getElementById('statusFilter');
+      const dateFilter = document.getElementById('dateFilter');
+      
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      const statusFilterValue = statusFilter ? statusFilter.value : '';
+      const dateFilterValue = dateFilter ? dateFilter.value : '';
       const rows = document.querySelectorAll('#coursesTable tbody tr');
       
       rows.forEach(row => {
@@ -1380,29 +1340,28 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
           showRow = false;
         }
         
-        // Status filter - updated to match the model structure
-        if (statusFilter) {
-          if (statusFilter === 'Open to Register' && status !== 'open') {
+        // Status filter
+        if (statusFilterValue) {
+          if (statusFilterValue === 'Open to Register' && status !== 'open') {
             showRow = false;
-          } else if (statusFilter === 'Limited Seats') {
-            // Check if row has limited seats badge
+          } else if (statusFilterValue === 'Limited Seats') {
             const statusBadge = row.querySelector('.status-badge');
             if (!statusBadge || !statusBadge.textContent.includes('Limited')) {
               showRow = false;
             }
-          } else if (statusFilter === 'Closed' && (status !== 'full' && status !== 'closed' && status !== 'cancelled')) {
+          } else if (statusFilterValue === 'Closed' && (status !== 'full' && status !== 'closed' && status !== 'cancelled')) {
             showRow = false;
           }
         }
         
         // Date filter
-        if (dateFilter && !isNaN(courseDate)) {
+        if (dateFilterValue && !isNaN(courseDate)) {
           const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
           const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
           const nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
           const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
           
-          switch(dateFilter) {
+          switch(dateFilterValue) {
             case 'upcoming':
               if (courseDate < today) showRow = false;
               break;
@@ -1418,14 +1377,17 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
         row.style.display = showRow ? '' : 'none';
       });
     }
-
+  
     function sortCourses() {
-      const sortBy = document.getElementById('sortBy').value;
+      const sortBy = document.getElementById('sortBy');
+      const sortByValue = sortBy ? sortBy.value : '';
       const tbody = document.querySelector('#coursesTable tbody');
+      if (!tbody) return;
+      
       const rows = Array.from(tbody.querySelectorAll('tr'));
       
       rows.sort((a, b) => {
-        switch(sortBy) {
+        switch(sortByValue) {
           case 'date-asc':
             return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
           case 'date-desc':
@@ -1444,80 +1406,16 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
       
       // Update row numbers
       rows.forEach((row, index) => {
-        row.querySelector('td:first-child').textContent = index + 1;
+        const firstCell = row.querySelector('td:first-child');
+        if (firstCell) {
+          firstCell.textContent = index + 1;
+        }
       });
     }
-
-    // Initialize page
-    console.log('📊 Page loaded with <%= courses.length %> courses');
-    console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
-
-    // Calendar functionality
-    const courses = <%- JSON.stringify(courses) %>;
-    let currentDate = new Date();
-    let currentView = 'month';
-    
-    // View toggle functionality
-    document.getElementById('tableViewBtn').addEventListener('click', function() {
-      document.getElementById('tableView').style.display = 'block';
-      document.getElementById('calendarView').style.display = 'none';
-      document.getElementById('tableViewBtn').classList.add('active');
-      document.getElementById('calendarViewBtn').classList.remove('active');
-    });
-    
-    document.getElementById('calendarViewBtn').addEventListener('click', function() {
-      document.getElementById('tableView').style.display = 'none';
-      document.getElementById('calendarView').style.display = 'block';
-      document.getElementById('calendarViewBtn').classList.add('active');
-      document.getElementById('tableViewBtn').classList.remove('active');
-      if (currentView === 'month') {
-        renderMonthView();
-      } else {
-        renderYearView();
-      }
-    });
-    
-    // Calendar view toggle
-    document.getElementById('monthViewBtn').addEventListener('click', function() {
-      currentView = 'month';
-      document.getElementById('monthViewBtn').classList.add('active');
-      document.getElementById('yearViewBtn').classList.remove('active');
-      document.getElementById('monthView').style.display = 'block';
-      document.getElementById('yearView').style.display = 'none';
-      renderMonthView();
-    });
-    
-    document.getElementById('yearViewBtn').addEventListener('click', function() {
-      currentView = 'year';
-      document.getElementById('yearViewBtn').classList.add('active');
-      document.getElementById('monthViewBtn').classList.remove('active');
-      document.getElementById('monthView').style.display = 'none';
-      document.getElementById('yearView').style.display = 'grid';
-      renderYearView();
-    });
-    
-    // Navigation buttons
-    document.getElementById('prevBtn').addEventListener('click', function() {
-      if (currentView === 'month') {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderMonthView();
-      } else {
-        currentDate.setFullYear(currentDate.getFullYear() - 1);
-        renderYearView();
-      }
-    });
-    
-    document.getElementById('nextBtn').addEventListener('click', function() {
-      if (currentView === 'month') {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderMonthView();
-      } else {
-        currentDate.setFullYear(currentDate.getFullYear() + 1);
-        renderYearView();
-      }
-    });
-    
-    // Render month view
+  
+    // ========================================
+    // CALENDAR FUNCTIONALITY
+    // ========================================
     function renderMonthView() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -1528,10 +1426,15 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
       // Update header
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                          'July', 'August', 'September', 'October', 'November', 'December'];
-      document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+      const currentMonthEl = document.getElementById('currentMonth');
+      if (currentMonthEl) {
+        currentMonthEl.textContent = `${monthNames[month]} ${year}`;
+      }
       
       // Clear calendar
       const calendarDays = document.getElementById('calendarDays');
+      if (!calendarDays) return;
+      
       calendarDays.innerHTML = '';
       
       // Previous month days
@@ -1553,8 +1456,7 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
         calendarDays.appendChild(dayDiv);
       }
     }
-    
-    // Create day element
+  
     function createDayElement(day, isOtherMonth, date) {
       const dayDiv = document.createElement('div');
       dayDiv.className = 'calendar-day';
@@ -1602,13 +1504,17 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
       dayDiv.appendChild(dayCoursesDiv);
       return dayDiv;
     }
-    
-    // Render year view
+  
     function renderYearView() {
       const year = currentDate.getFullYear();
-      document.getElementById('currentMonth').textContent = year;
+      const currentMonthEl = document.getElementById('currentMonth');
+      if (currentMonthEl) {
+        currentMonthEl.textContent = year;
+      }
       
       const yearViewGrid = document.getElementById('yearView');
+      if (!yearViewGrid) return;
+      
       yearViewGrid.innerHTML = '';
       
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -1666,7 +1572,8 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
             dayDiv.onclick = () => {
               currentDate = new Date(year, month, day);
               currentView = 'month';
-              document.getElementById('monthViewBtn').click();
+              const monthViewBtn = document.getElementById('monthViewBtn');
+              if (monthViewBtn) monthViewBtn.click();
             };
           }
           
@@ -1677,53 +1584,64 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
         yearViewGrid.appendChild(monthDiv);
       }
     }
-    
-    // Show course modal
+  
+    // ========================================
+    // MODAL FUNCTIONALITY
+    // ========================================
     function showCourseModal(course) {
       const modal = document.getElementById('courseModal');
-      document.getElementById('modalCourseTitle').textContent = course.title;
+      const modalTitle = document.getElementById('modalCourseTitle');
+      
+      if (modalTitle) {
+        modalTitle.textContent = course.basic?.title || course.title;
+      }
       
       const courseInfo = document.getElementById('modalCourseInfo');
-      courseInfo.innerHTML = `
-        <div class="modal-info-row">
-          <div class="modal-label">Course Code</div>
-          <div>${course.courseCode}</div>
-        </div>
-        <div class="modal-info-row">
-          <div class="modal-label">Date</div>
-          <div>${new Date(course.startDate).toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}</div>
-        </div>
-        <div class="modal-info-row">
-          <div class="modal-label">Duration</div>
-          <div>${course.duration || 'TBD'}</div>
-        </div>
-        <div class="modal-info-row">
-          <div class="modal-label">Location</div>
-          <div>${course.location}</div>
-        </div>
-        <div class="modal-info-row">
-          <div class="modal-label">Instructor</div>
-          <div>${course.instructor}</div>
-        </div>
-        <div class="modal-info-row">
-          <div class="modal-label">Price</div>
-          <div style="font-weight: 700; color: #b8860b;">${course.price} USD</div>
-        </div>
-        <div class="modal-info-row">
-          <div class="modal-label">Seats Available</div>
-          <div>${course.seatsAvailable} / ${course.maxEnrollment || 20}</div>
-        </div>
-      `;
+      if (courseInfo) {
+        courseInfo.innerHTML = `
+          <div class="modal-info-row">
+            <div class="modal-label">Course Code</div>
+            <div>${course.basic?.courseCode || course.courseCode}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Date</div>
+            <div>${new Date(course.schedule?.startDate || course.startDate).toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Duration</div>
+            <div>${course.schedule?.duration || course.duration || 'TBD'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Location</div>
+            <div>${course.venue?.name || course.location || 'TBD'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Instructor</div>
+            <div>${course.instructorNames || course.instructor || 'Expert Instructors'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Price</div>
+            <div style="font-weight: 700; color: #b8860b;">$${course.enrollment?.price || course.price || 0} USD</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Seats Available</div>
+            <div>${course.enrollment?.seatsAvailable || course.seatsAvailable || 0} / ${course.enrollment?.maxEnrollment || course.maxEnrollment || 20}</div>
+          </div>
+        `;
+      }
       
       // Update modal buttons
-      document.getElementById('modalViewDetails').onclick = () => {
-        window.location.href = `/in-person/courses/${course._id}`;
-      };
+      const modalViewDetails = document.getElementById('modalViewDetails');
+      if (modalViewDetails) {
+        modalViewDetails.onclick = () => {
+          window.location.href = `/in-person/courses/${course._id}`;
+        };
+      }
       
       <% if (user) { %>
       const modalAddToCart = document.getElementById('modalAddToCart');
@@ -1732,9 +1650,11 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
           const courseData = {
             courseId: course._id,
             courseType: 'InPersonAestheticTraining',
-            price: course.price,
-            courseCode: course.courseCode
+            price: course.enrollment?.price || course.price || 0,
+            courseCode: course.basic?.courseCode || course.courseCode
           };
+          
+          setButtonLoading(modalAddToCart, true);
           
           try {
             const response = await fetch('/add-to-cart', {
@@ -1746,7 +1666,7 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
             const result = await response.json();
             
             if (result.success) {
-              showNotification('Added to Cart', `"${course.title}" has been added to your cart`, 'success');
+              showNotification('Added to Cart', `"${course.basic?.title || course.title}" has been added to your cart`, 'success');
               closeModal();
             } else {
               showNotification('Unable to Add', result.message, 'warning');
@@ -1754,29 +1674,279 @@ document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
           } catch (err) {
             console.error('Cart error:', err);
             showNotification('Error', 'Failed to add course to cart', 'error');
+          } finally {
+            setButtonLoading(modalAddToCart, false);
           }
         };
       }
       <% } %>
       
-      modal.classList.add('show');
-    }
-    
-    // Close modal
-    function closeModal() {
-      document.getElementById('courseModal').classList.remove('show');
-    }
-    
-    // Click outside modal to close
-    document.getElementById('courseModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeModal();
+      if (modal) {
+        modal.classList.add('show');
       }
+    }
+  
+    function closeModal() {
+      const modal = document.getElementById('courseModal');
+      if (modal) {
+        modal.classList.remove('show');
+      }
+    }
+  
+    // ========================================
+    // CART AND WISHLIST FUNCTIONALITY
+    // ========================================
+    function initializeCartWishlist() {
+      // Add to Cart functionality
+      document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', async function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          if (this.disabled) {
+            console.log('⚠️ Button is disabled, ignoring click');
+            return;
+          }
+          
+          const courseId = this.getAttribute('data-course-id');
+          const courseType = this.getAttribute('data-course-type');
+          const courseTitle = this.getAttribute('data-course-title');
+          const price = this.getAttribute('data-price');
+          const courseCode = this.getAttribute('data-course-code');
+          
+          console.log('🛒 Adding to cart:', { courseId, courseType, courseTitle });
+          
+          if (!courseId || !courseType) {
+            console.error('❌ Missing course data');
+            showNotification('Error', 'Missing course information', 'error');
+            return;
+          }
+          
+          setButtonLoading(this, true);
+          
+          try {
+            const response = await fetch('/add-to-cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                courseId, 
+                courseType, 
+                price: parseFloat(price) || 0,
+                courseCode 
+              })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+              
+              // Update button temporarily
+              this.style.background = '#28a745';
+              this.querySelector('i').className = 'fas fa-check';
+              
+              setTimeout(() => {
+                this.style.background = '';
+                this.querySelector('i').className = 'fas fa-shopping-cart';
+              }, 3000);
+            } else {
+              showNotification('Error', result.message, 'error');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            showNotification('Error', 'Failed to add to cart', 'error');
+          } finally {
+            setButtonLoading(this, false);
+          }
+        });
+      });
+  
+      // Add to Wishlist functionality
+      document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
+        button.addEventListener('click', async function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const courseId = this.getAttribute('data-course-id');
+          const courseType = this.getAttribute('data-course-type');
+          const courseTitle = this.getAttribute('data-course-title');
+          const price = this.getAttribute('data-price');
+          const courseCode = this.getAttribute('data-course-code');
+          
+          console.log('❤️ Adding to wishlist:', { courseId, courseType, courseTitle });
+          
+          if (!courseId || !courseType) {
+            console.error('❌ Missing course data');
+            showNotification('Error', 'Missing course information', 'error');
+            return;
+          }
+          
+          setButtonLoading(this, true);
+          
+          try {
+            const response = await fetch('/add-to-wishlist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                courseId, 
+                courseType, 
+                price: parseFloat(price) || 0,
+                courseCode 
+              })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
+              
+              // Update button permanently
+              this.style.color = '#e74c3c';
+              this.style.borderColor = '#e74c3c';
+              this.querySelector('i').className = 'fas fa-heart';
+              this.disabled = true;
+            } else {
+              showNotification('Error', result.message, 'error');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            showNotification('Error', 'Failed to add to wishlist', 'error');
+          } finally {
+            if (!this.disabled) {
+              setButtonLoading(this, false);
+            }
+          }
+        });
+      });
+    }
+  
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Initializing page...');
+      
+      // Initialize cart and wishlist
+      initializeCartWishlist();
+      
+      // Initialize search and filter event listeners
+      const searchInput = document.getElementById('courseSearch');
+      const statusFilter = document.getElementById('statusFilter');
+      const dateFilter = document.getElementById('dateFilter');
+      const sortBy = document.getElementById('sortBy');
+      
+      if (searchInput) searchInput.addEventListener('input', filterCourses);
+      if (statusFilter) statusFilter.addEventListener('change', filterCourses);
+      if (dateFilter) dateFilter.addEventListener('change', filterCourses);
+      if (sortBy) sortBy.addEventListener('change', sortCourses);
+      
+      // Initialize view toggle functionality
+      const tableViewBtn = document.getElementById('tableViewBtn');
+      const calendarViewBtn = document.getElementById('calendarViewBtn');
+      const tableView = document.getElementById('tableView');
+      const calendarView = document.getElementById('calendarView');
+      
+      if (tableViewBtn) {
+        tableViewBtn.addEventListener('click', function() {
+          if (tableView) tableView.style.display = 'block';
+          if (calendarView) calendarView.style.display = 'none';
+          this.classList.add('active');
+          if (calendarViewBtn) calendarViewBtn.classList.remove('active');
+        });
+      }
+      
+      if (calendarViewBtn) {
+        calendarViewBtn.addEventListener('click', function() {
+          if (tableView) tableView.style.display = 'none';
+          if (calendarView) calendarView.style.display = 'block';
+          this.classList.add('active');
+          if (tableViewBtn) tableViewBtn.classList.remove('active');
+          if (currentView === 'month') {
+            renderMonthView();
+          } else {
+            renderYearView();
+          }
+        });
+      }
+      
+      // Initialize calendar view toggle
+      const monthViewBtn = document.getElementById('monthViewBtn');
+      const yearViewBtn = document.getElementById('yearViewBtn');
+      const monthView = document.getElementById('monthView');
+      const yearView = document.getElementById('yearView');
+      
+      if (monthViewBtn) {
+        monthViewBtn.addEventListener('click', function() {
+          currentView = 'month';
+          this.classList.add('active');
+          if (yearViewBtn) yearViewBtn.classList.remove('active');
+          if (monthView) monthView.style.display = 'block';
+          if (yearView) yearView.style.display = 'none';
+          renderMonthView();
+        });
+      }
+      
+      if (yearViewBtn) {
+        yearViewBtn.addEventListener('click', function() {
+          currentView = 'year';
+          this.classList.add('active');
+          if (monthViewBtn) monthViewBtn.classList.remove('active');
+          if (monthView) monthView.style.display = 'none';
+          if (yearView) yearView.style.display = 'grid';
+          renderYearView();
+        });
+      }
+      
+      // Initialize navigation buttons
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+          if (currentView === 'month') {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderMonthView();
+          } else {
+            currentDate.setFullYear(currentDate.getFullYear() - 1);
+            renderYearView();
+          }
+        });
+      }
+      
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+          if (currentView === 'month') {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderMonthView();
+          } else {
+            currentDate.setFullYear(currentDate.getFullYear() + 1);
+            renderYearView();
+          }
+        });
+      }
+      
+      // Initialize modal close functionality
+      const courseModal = document.getElementById('courseModal');
+      if (courseModal) {
+        courseModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeModal();
+          }
+        });
+      }
+      
+      // Initialize calendar month view
+      if (monthView) {
+        monthView.style.display = 'block';
+        renderMonthView();
+      }
+      
+      // Debug information
+      console.log('📊 Page loaded with', courses.length, 'courses');
+      console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
+      console.log('🛒 Cart buttons found:', document.querySelectorAll('.add-to-cart-btn').length);
+      console.log('❤️ Wishlist buttons found:', document.querySelectorAll('.add-to-wishlist-btn').length);
     });
-    
-    // Initialize month view
-    document.getElementById('monthView').style.display = 'block';
-    renderMonthView();
   </script>
 
   <%- include('partials/footer') %>

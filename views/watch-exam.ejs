@@ -10,522 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
-  <!-- Enhanced Styles for New Features -->
-  <style>
-    /* No Video Container */
-    .no-video-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 70vh;
-      text-align: center;
-      padding: 40px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    }
-
-    .no-video-content {
-      max-width: 500px;
-      padding: 40px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-
-    .no-video-content i {
-      font-size: 4rem;
-      color: #dc3545;
-      margin-bottom: 20px;
-      opacity: 0.8;
-    }
-
-    /* Enhanced Video Action Buttons */
-    .video-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .video-btn {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .btn-watch-again { 
-      background: linear-gradient(135deg, #17a2b8, #138496); 
-      color: white; 
-      border: 1px solid #17a2b8;
-    }
-    .btn-continue { 
-      background: linear-gradient(135deg, #ffc107, #e0a800); 
-      color: #212529; 
-      border: 1px solid #ffc107;
-    }
-    .btn-start { 
-      background: linear-gradient(135deg, #28a745, #20c997); 
-      color: white; 
-      border: 1px solid #28a745;
-    }
-    .btn-exam { 
-      background: linear-gradient(135deg, #007bff, #0056b3); 
-      color: white; 
-      border: 1px solid #007bff;
-    }
-    .btn-exam-completed { 
-      background: linear-gradient(135deg, #6c757d, #545b62); 
-      color: white; 
-      border: 1px solid #6c757d;
-    }
-
-    .video-btn:hover { 
-      transform: translateY(-2px); 
-      text-decoration: none; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .video-btn:active {
-      transform: translateY(0);
-    }
-
-    /* Watch Status Indicators */
-    .watch-status {
-      padding: 6px 12px;
-      border-radius: 15px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      margin-right: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .watch-status.completed { 
-      background: #d4edda; 
-      color: #155724; 
-      border: 1px solid #c3e6cb;
-    }
-    .watch-status.in-progress { 
-      background: #fff3cd; 
-      color: #856404; 
-      border: 1px solid #ffeaa7;
-    }
-
-    /* Video Placeholder */
-    .no-video-placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 400px;
-      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-      border-radius: 12px;
-      color: #6c757d;
-      border: 2px dashed #dee2e6;
-    }
-
-    .no-video-placeholder i { 
-      font-size: 3rem; 
-      margin-bottom: 15px; 
-      opacity: 0.7;
-    }
-
-    /* Sidebar Enhancements */
-    .no-videos-message {
-      text-align: center;
-      padding: 40px 20px;
-      color: #6c757d;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
-
-    .no-videos-message i { 
-      font-size: 2rem; 
-      margin-bottom: 10px; 
-      opacity: 0.7;
-    }
-
-    .sidebar-footer {
-      padding: 15px;
-      border-top: 1px solid #e9ecef;
-      margin-top: auto;
-      background: #f8f9fa;
-    }
-
-    .completion-badge {
-      text-align: center;
-      padding: 20px;
-      background: linear-gradient(135deg, #28a745, #20c997);
-      color: white;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
-
-    .completion-badge i {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    /* Enhanced Exam Styles */
-    .exam-completed-notice, .exam-pending-notice {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 25px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .exam-completed-notice {
-      border-left: 5px solid #28a745;
-      background: linear-gradient(135deg, #d4edda, #c3e6cb);
-    }
-
-    .exam-pending-notice {
-      border-left: 5px solid #17a2b8;
-      background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-    }
-
-    .exam-actions-header {
-      margin-top: 15px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .exam-actions-header .btn {
-      padding: 8px 16px;
-      font-size: 0.9rem;
-    }
-
-    /* Exam Review Styles */
-    .exam-review {
-      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-      border-radius: 12px;
-      padding: 25px;
-      margin-top: 20px;
-      border: 1px solid #dee2e6;
-    }
-
-    .review-header {
-      text-align: center;
-      margin-bottom: 25px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #dee2e6;
-    }
-
-    .review-stats {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      margin-bottom: 25px;
-      padding: 20px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .stat-item {
-      text-align: center;
-    }
-
-    .stat-number {
-      display: block;
-      font-size: 2rem;
-      font-weight: 700;
-      color: #007bff;
-    }
-
-    .stat-label {
-      font-size: 0.9rem;
-      color: #6c757d;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .review-question {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-left: 5px solid #dee2e6;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .review-question.correct {
-      border-left-color: #28a745;
-      background: linear-gradient(135deg, #ffffff, #f8fff9);
-    }
-
-    .review-question.incorrect {
-      border-left-color: #dc3545;
-      background: linear-gradient(135deg, #ffffff, #fff8f8);
-    }
-
-    .review-question-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .question-number {
-      background: #007bff;
-      color: white;
-      padding: 5px 12px;
-      border-radius: 15px;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .question-status {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: 600;
-    }
-
-    .question-status.correct {
-      color: #28a745;
-    }
-
-    .question-status.incorrect {
-      color: #dc3545;
-    }
-
-    .question-text-review {
-      font-size: 1.1rem;
-      font-weight: 500;
-      margin-bottom: 12px;
-      color: #495057;
-    }
-
-    .user-answer, .correct-answer {
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 6px;
-    }
-
-    .user-answer {
-      background: #e3f2fd;
-      border-left: 3px solid #2196f3;
-    }
-
-    .correct-answer {
-      background: #e8f5e8;
-      border-left: 3px solid #4caf50;
-    }
-
-    /* Failed Review Styles */
-    .failed-review-header {
-      text-align: center;
-      margin-bottom: 25px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #dc3545;
-    }
-
-    .failed-review-header i {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
-
-    .failed-question-review {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-left: 5px solid #dc3545;
-      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.1);
-    }
-
-    .wrong-answer {
-      color: #dc3545;
-      background: #f8d7da;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border-left: 3px solid #dc3545;
-    }
-
-    .correct-answer {
-      color: #28a745;
-      background: #d4edda;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border-left: 3px solid #28a745;
-    }
-
-    .explanation {
-      background: #e2e3e5;
-      padding: 12px;
-      border-radius: 6px;
-      margin-top: 10px;
-      font-style: italic;
-      border-left: 3px solid #6c757d;
-    }
-
-    /* Action Buttons */
-    .review-actions {
-      text-align: center;
-      margin-top: 25px;
-      padding-top: 20px;
-      border-top: 1px solid #dee2e6;
-    }
-
-    .review-actions .btn {
-      margin: 0 8px;
-    }
-
-    /* Enhanced Results */
-    .exam-result-header {
-      text-align: center;
-      padding: 30px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-    }
-
-    .exam-result-header.passed {
-      background: linear-gradient(135deg, #d4edda, #c3e6cb);
-      border: 2px solid #28a745;
-    }
-
-    .exam-result-header.failed {
-      background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-      border: 2px solid #dc3545;
-    }
-
-    .result-icon {
-      font-size: 4rem;
-      margin-bottom: 15px;
-    }
-
-    .exam-result-header.passed .result-icon {
-      color: #28a745;
-    }
-
-    .exam-result-header.failed .result-icon {
-      color: #dc3545;
-    }
-
-    .pass-message {
-      color: #155724;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-
-    .fail-message {
-      color: #721c24;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-
-    .result-actions {
-      text-align: center;
-      margin-top: 25px;
-    }
-
-    .result-actions .btn {
-      margin: 0 8px 8px 8px;
-    }
-
-    /* Utility Classes */
-    .text-danger { color: #dc3545 !important; }
-    .text-success { color: #28a745 !important; }
-    .text-info { color: #17a2b8 !important; }
-    .text-warning { color: #ffc107 !important; }
-
-    /* Mobile Responsiveness */
-    @media (max-width: 768px) {
-      .video-actions {
-        flex-direction: column;
-      }
-      
-      .video-btn {
-        width: 100%;
-        justify-content: center;
-      }
-      
-      .review-stats {
-        flex-direction: column;
-        gap: 15px;
-      }
-      
-      .review-actions .btn {
-        margin: 5px;
-        width: 100%;
-      }
-    }
-
-    /* Loading States */
-    .btn-loading {
-      position: relative;
-      pointer-events: none;
-      opacity: 0.8;
-    }
-
-    .btn-loading::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 16px;
-      height: 16px;
-      border: 2px solid transparent;
-      border-top: 2px solid currentColor;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    /* Enhanced Tab Content */
-    .exam-info-content {
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      margin-top: 15px;
-    }
-
-    .exam-completed-info, .exam-pending-info {
-      text-align: center;
-      padding: 25px;
-      border-radius: 10px;
-    }
-
-    .exam-completed-info {
-      background: linear-gradient(135deg, #d4edda, #c3e6cb);
-      border: 2px solid #28a745;
-    }
-
-    .exam-pending-info {
-      background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-      border: 2px solid #ffc107;
-    }
-
-    .exam-completed-info i, .exam-pending-info i { 
-      font-size: 2.5rem; 
-      margin-bottom: 15px; 
-    }
-
-    .exam-completed-info i { color: #28a745; }
-    .exam-pending-info i { color: #ffc107; }
-  </style>
 </head>
 
 <body>
@@ -702,8 +186,10 @@
               data-video-id="<%= currentVideo._id %>"
               data-course-id="<%= course._id %>"
               onloadedmetadata="initializeVideo()"
-              ontimeupdate="updateProgress()"
-              onended="onVideoEnded()"
+              ontimeupdate="handleVideoTimeUpdate()"
+              onended="handleVideoEnded()"
+              onplay="handleVideoPlay()"
+              onpause="handleVideoPause()"
               poster="<%= currentVideo.thumbnailUrl || '' %>">
               <source src="<%= currentVideo.videoUrl %>" type="video/mp4">
               Your browser does not support the video tag.
@@ -768,6 +254,9 @@
                 <i class="fas fa-clipboard-question"></i> Quiz Info
               </button>
             <% } %>
+            <button class="tab-btn" onclick="showTab('debug', this)">
+              <i class="fas fa-bug"></i> Debug Info
+            </button>
           </div>
 
           <!-- Tab Content -->
@@ -854,6 +343,26 @@
                 </div>
               </div>
             <% } %>
+
+            <!-- Debug Tab -->
+            <div id="debug" class="tab-content">
+              <div class="content-card">
+                <h3>Debug Information</h3>
+                <div id="debugInfo" style="font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 5px; white-space: pre-wrap;"></div>
+                <div style="margin-top: 15px;">
+                  <button class="btn btn-secondary" onclick="updateDebugInfo()">
+                    <i class="fas fa-refresh"></i> Refresh Debug Info
+                  </button>
+                  <button class="btn btn-info" onclick="testProgressSave()">
+                    <i class="fas fa-test-tube"></i> Test Progress Save
+                  </button>
+                  <button class="btn btn-warning" onclick="clearDebugLog()">
+                    <i class="fas fa-trash"></i> Clear Log
+                  </button>
+                </div>
+                <div id="debugLog" style="max-height: 300px; overflow-y: auto; background: #000; color: #0f0; padding: 10px; margin-top: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1040,13 +549,17 @@
 
   <%- include('partials/footer') %>
 
-  <!-- Complete Enhanced JavaScript -->
+  <!-- Complete Enhanced JavaScript with Full Debugging -->
   <script>
-    // Global variables
+    // ========================================
+    // GLOBAL VARIABLES & INITIALIZATION
+    // ========================================
     let currentVideoId = '<%= currentVideo ? currentVideo._id : "" %>';
     let currentCourseId = '<%= course._id %>';
     let videoPlayer = null;
     let progressUpdateInterval = null;
+    let lastSavedTime = 0;
+    let debugLog = [];
 
     // Global quiz state
     let quizState = {
@@ -1056,165 +569,251 @@
       originalAnswers: {}
     };
 
+    // Debug logging function
+    function addDebugLog(message, type = 'info', data = null) {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = {
+        timestamp: timestamp,
+        type: type,
+        message: message,
+        data: data
+      };
+      
+      debugLog.push(logEntry);
+      
+      // Keep only last 100 entries
+      if (debugLog.length > 100) {
+        debugLog.shift();
+      }
+      
+      // Update debug display if tab is active
+      updateDebugDisplay();
+      
+      // Console logging with colors
+      const colors = {
+        info: 'color: #007bff',
+        success: 'color: #28a745',
+        warning: 'color: #ffc107',
+        error: 'color: #dc3545',
+        debug: 'color: #6c757d'
+      };
+      
+      console.log(`%c[${timestamp}] ${message}`, colors[type] || colors.info, data || '');
+    }
+
+    function updateDebugDisplay() {
+      const debugLogElement = document.getElementById('debugLog');
+      if (debugLogElement) {
+        const logHtml = debugLog.slice(-50).map(entry => {
+          const color = {
+            info: '#0ff',
+            success: '#0f0',
+            warning: '#ff0',
+            error: '#f00',
+            debug: '#888'
+          }[entry.type] || '#0ff';
+          
+          return `<div style="color: ${color};">[${entry.timestamp}] ${entry.message}${entry.data ? ' | Data: ' + JSON.stringify(entry.data, null, 2) : ''}</div>`;
+        }).join('');
+        
+        debugLogElement.innerHTML = logHtml;
+        debugLogElement.scrollTop = debugLogElement.scrollHeight;
+      }
+    }
+
+    function clearDebugLog() {
+      debugLog = [];
+      updateDebugDisplay();
+      addDebugLog('Debug log cleared', 'info');
+    }
+
+    function updateDebugInfo() {
+      const debugInfo = {
+        // Video Player State
+        videoPlayer: {
+          exists: !!videoPlayer,
+          currentTime: videoPlayer ? videoPlayer.currentTime : null,
+          duration: videoPlayer ? videoPlayer.duration : null,
+          paused: videoPlayer ? videoPlayer.paused : null,
+          ended: videoPlayer ? videoPlayer.ended : null,
+          readyState: videoPlayer ? videoPlayer.readyState : null
+        },
+        
+        // Course Data
+        courseData: {
+          currentCourseId: currentCourseId,
+          currentVideoId: currentVideoId,
+          courseTitle: '<%= course.title %>',
+          videoTitle: '<%= currentVideo ? currentVideo.title : "None" %>'
+        },
+        
+        // Progress Tracking
+        progressTracking: {
+          intervalActive: !!progressUpdateInterval,
+          lastSavedTime: lastSavedTime,
+          saveFrequency: '10 seconds'
+        },
+        
+        // User Progress Data
+        userProgress: {
+          videoCompleted: <%= currentVideo && currentVideo.userProgress ? currentVideo.userProgress.isCompleted : false %>,
+          examCompleted: <%= currentVideo && currentVideo.userProgress ? currentVideo.userProgress.examCompleted : false %>,
+          progressPercentage: <%= currentVideo && currentVideo.userProgress ? currentVideo.userProgress.progressPercentage : 0 %>
+        },
+        
+        // Network State
+        networkState: {
+          online: navigator.onLine,
+          userAgent: navigator.userAgent.substring(0, 50) + '...'
+        },
+        
+        // Debug Log Stats
+        debugStats: {
+          totalLogEntries: debugLog.length,
+          lastLogTime: debugLog.length > 0 ? debugLog[debugLog.length - 1].timestamp : null
+        }
+      };
+      
+      const debugInfoElement = document.getElementById('debugInfo');
+      if (debugInfoElement) {
+        debugInfoElement.textContent = JSON.stringify(debugInfo, null, 2);
+      }
+      
+      addDebugLog('Debug info updated', 'debug', debugInfo);
+    }
+
     // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
+      addDebugLog('🚀 Page loaded, initializing...', 'info');
+      
       videoPlayer = document.getElementById('videoPlayer');
       if (videoPlayer) {
+        addDebugLog('✅ Video player found', 'success');
         initializePlayer();
+      } else {
+        addDebugLog('❌ Video player not found', 'error');
       }
       
       <% if (examMode) { %>
+        addDebugLog('📝 Exam mode active', 'info');
         showExamSection();
       <% } else if (courseCompleted) { %>
+        addDebugLog('🏆 Course completed, showing completion section', 'success');
         showCompletionSection();
       <% } else { %>
+        addDebugLog('🎬 Video mode active', 'info');
         showVideoSection();
       <% } %>
 
       // Initialize quiz event listeners
       initializeQuizListeners();
+      
+      // Initial debug info update
+      setTimeout(updateDebugInfo, 1000);
+      
+      addDebugLog('✅ Initialization complete', 'success');
     });
 
-    // ===========================================
-    // NAVIGATION FUNCTIONS (Enhanced)
-    // ===========================================
+    // ========================================
+    // VIDEO PLAYER FUNCTIONS (Enhanced with Debugging)
+    // ========================================
 
-    // Navigate to video
-    function navigateToVideo(courseId, videoId) {
-      console.log('📍 Navigating to video:', courseId, videoId);
-      
-      try {
-        // Save current progress
-        if (videoPlayer && currentVideoId !== videoId) {
-          saveVideoProgress();
-          videoPlayer.pause();
-        }
-        
-        // Navigate to video
-        window.location.href = `/watch-exam/${courseId}/${videoId}`;
-        
-      } catch (error) {
-        console.error('❌ Error navigating to video:', error);
-        window.location.href = `/watch-exam/${courseId}/${videoId}`;
-      }
-    }
-
-    // Navigate to exam
-    function navigateToExam(courseId, videoId) {
-      console.log('📝 Navigating to exam:', courseId, videoId);
-      window.location.href = `/watch-exam/${courseId}/${videoId}?exam=true`;
-    }
-
-    // Retake exam from tab
-    function retakeExamFromTab() {
-      console.log('🔄 Starting retake from tab...');
-      window.location.href = `/watch-exam/${currentCourseId}/${currentVideoId}?exam=true`;
-    }
-
-    // ===========================================
-    // VIDEO PLAYER FUNCTIONS (Enhanced)
-    // ===========================================
-
-    // Initialize video player
     function initializePlayer() {
-      if (!videoPlayer) return;
+      if (!videoPlayer) {
+        addDebugLog('❌ Cannot initialize player - video element not found', 'error');
+        return;
+      }
+      
+      addDebugLog('🎬 Initializing video player...', 'info');
       
       // Load saved progress
       const savedTime = <%= currentVideo && currentVideo.userProgress ? currentVideo.userProgress.currentTime : 0 %>;
       if (savedTime > 0) {
         videoPlayer.currentTime = savedTime;
+        addDebugLog(`⏰ Resuming from saved time: ${savedTime}s`, 'info');
       }
 
-      // Set up event listeners
-      videoPlayer.addEventListener('timeupdate', updateProgress);
-      videoPlayer.addEventListener('ended', onVideoEnded);
-      videoPlayer.addEventListener('play', onVideoPlay);
-      videoPlayer.addEventListener('pause', onVideoPause);
+      // Set up event listeners with debugging
       videoPlayer.addEventListener('loadedmetadata', function() {
-        console.log('✅ Video loaded successfully');
+        addDebugLog(`📊 Video metadata loaded - Duration: ${videoPlayer.duration}s`, 'success');
+        updateDebugInfo();
       });
+
       videoPlayer.addEventListener('error', function(e) {
-        console.error('❌ Video error:', e);
+        addDebugLog('❌ Video error occurred', 'error', {
+          error: e.target.error,
+          code: e.target.error ? e.target.error.code : 'unknown'
+        });
         showVideoError();
       });
+
+      addDebugLog('✅ Video player initialized with event listeners', 'success');
     }
 
-    // Enhanced video control functions
-    function playVideo() {
-      if (videoPlayer) {
-        videoPlayer.play().catch(error => {
-          console.error('Error playing video:', error);
-          showVideoError();
-        });
-        const overlay = document.getElementById('videoOverlay');
-        if (overlay) overlay.style.display = 'none';
-      }
-    }
-
-    function restartVideo() {
-      if (videoPlayer) {
-        videoPlayer.currentTime = 0;
-        videoPlayer.play();
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 2000,
-          icon: 'info',
-          title: 'Video restarted'
-        });
-      }
-    }
-
-    function showVideoError() {
-      Swal.fire({
-        icon: 'error',
-        title: 'Video Error',
-        text: 'There was an error loading or playing the video. Please try refreshing the page.',
-        confirmButtonColor: '#dc3545'
-      });
-    }
-
-    function onVideoPlay() {
+    function handleVideoPlay() {
+      addDebugLog('▶️ Video play event triggered', 'info');
       const overlay = document.getElementById('videoOverlay');
       if (overlay) overlay.style.display = 'none';
+      
       startProgressTracking();
+      addDebugLog('✅ Progress tracking started', 'success');
     }
 
-    function onVideoPause() {
-      saveVideoProgress();
+    function handleVideoPause() {
+      addDebugLog('⏸️ Video pause event triggered', 'info');
+      saveVideoProgressNow();
     }
 
-    function onVideoEnded() {
+    function handleVideoEnded() {
+      addDebugLog('🏁 Video ended event triggered', 'info');
       markVideoCompleted();
     }
 
-    function updateProgress() {
-      if (!videoPlayer) return;
-      
-      const currentTime = videoPlayer.currentTime;
-      const duration = videoPlayer.duration;
-      
-      if (duration > 0) {
-        const progressPercent = (currentTime / duration) * 100;
+    function handleVideoTimeUpdate() {
+      // Only log every 30 seconds to avoid spam
+      if (videoPlayer && Math.floor(videoPlayer.currentTime) % 30 === 0 && videoPlayer.currentTime !== lastSavedTime) {
+        addDebugLog(`⏰ Video time update: ${Math.floor(videoPlayer.currentTime)}s / ${Math.floor(videoPlayer.duration)}s (${Math.round((videoPlayer.currentTime / videoPlayer.duration) * 100)}%)`, 'debug');
       }
     }
 
     function startProgressTracking() {
+      addDebugLog('🚀 Starting progress tracking interval...', 'info');
+      
       if (progressUpdateInterval) {
         clearInterval(progressUpdateInterval);
+        addDebugLog('🔄 Cleared existing progress interval', 'debug');
       }
       
       progressUpdateInterval = setInterval(() => {
-        saveVideoProgress();
-      }, 10000);
+        saveVideoProgressNow();
+      }, 10000); // Save every 10 seconds
+      
+      addDebugLog('✅ Progress tracking interval set to 10 seconds', 'success');
     }
 
-    function saveVideoProgress() {
-      if (!videoPlayer) return;
+    function saveVideoProgressNow() {
+      if (!videoPlayer) {
+        addDebugLog('❌ Cannot save progress - no video player', 'error');
+        return;
+      }
       
       const currentTime = videoPlayer.currentTime;
       const duration = videoPlayer.duration;
+      
+      if (!duration || duration <= 0) {
+        addDebugLog('⚠️ Cannot save progress - invalid duration', 'warning', { duration });
+        return;
+      }
+      
+      const percentage = Math.round((currentTime / duration) * 100);
+      
+      addDebugLog(`💾 Saving video progress...`, 'info', {
+        courseId: currentCourseId,
+        videoId: currentVideoId,
+        currentTime: Math.round(currentTime),
+        duration: Math.round(duration),
+        percentage: percentage
+      });
       
       fetch('/update-video-progress', {
         method: 'POST',
@@ -1225,13 +824,40 @@
           currentTime: currentTime,
           duration: duration
         })
-      }).catch(error => {
-        console.error('Error saving progress:', error);
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          lastSavedTime = currentTime;
+          addDebugLog(`✅ Progress saved successfully`, 'success', data);
+        } else {
+          throw new Error(data.message || 'Unknown error');
+        }
+      })
+      .catch(error => {
+        addDebugLog(`❌ Error saving progress: ${error.message}`, 'error', error);
       });
+    }
+
+    function testProgressSave() {
+      addDebugLog('🧪 Testing progress save manually...', 'info');
+      saveVideoProgressNow();
     }
 
     // Mark video as completed
     async function markVideoCompleted() {
+      if (!videoPlayer) {
+        addDebugLog('❌ Cannot mark video completed - no video player', 'error');
+        return;
+      }
+      
+      addDebugLog('🏁 Marking video as completed...', 'info');
+      
       try {
         const response = await fetch('/mark-video-completed', {
           method: 'POST',
@@ -1239,12 +865,18 @@
           body: JSON.stringify({
             courseId: currentCourseId,
             videoId: currentVideoId,
-            currentTime: videoPlayer ? videoPlayer.currentTime : 0
+            currentTime: videoPlayer.currentTime
           })
         });
 
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
         const data = await response.json();
+        
         if (data.success) {
+          addDebugLog('✅ Video marked as completed successfully', 'success', data);
           updateVideoCompletionUI();
           
           // Show completion message
@@ -1258,21 +890,61 @@
           });
           
           if (data.courseCompleted) {
+            addDebugLog('🎉 Course completed! Showing completion section...', 'success');
             setTimeout(() => {
               showCompletionSection();
             }, 2000);
           }
+          
+          if (data.certificateIssued) {
+            addDebugLog('🏆 Certificate issued!', 'success', data.certificate);
+          }
+        } else {
+          throw new Error(data.message || 'Unknown error');
         }
       } catch (error) {
-        console.error('Error marking video completed:', error);
+        addDebugLog(`❌ Error marking video completed: ${error.message}`, 'error', error);
       }
     }
 
-    // ===========================================
+    // ========================================
+    // NAVIGATION FUNCTIONS
+    // ========================================
+
+    function navigateToVideo(courseId, videoId) {
+      addDebugLog('📍 Navigating to video...', 'info', { courseId, videoId });
+      
+      try {
+        // Save current progress
+        if (videoPlayer && currentVideoId !== videoId) {
+          saveVideoProgressNow();
+          videoPlayer.pause();
+        }
+        
+        window.location.href = `/watch-exam/${courseId}/${videoId}`;
+        
+      } catch (error) {
+        addDebugLog('❌ Error navigating to video', 'error', error);
+        window.location.href = `/watch-exam/${courseId}/${videoId}`;
+      }
+    }
+
+    function navigateToExam(courseId, videoId) {
+      addDebugLog('📝 Navigating to exam...', 'info', { courseId, videoId });
+      window.location.href = `/watch-exam/${courseId}/${videoId}?exam=true`;
+    }
+
+    function retakeExamFromTab() {
+      addDebugLog('🔄 Starting retake from tab...', 'info');
+      window.location.href = `/watch-exam/${currentCourseId}/${currentVideoId}?exam=true`;
+    }
+
+    // ========================================
     // SECTION SWITCHING
-    // ===========================================
+    // ========================================
 
     function showVideoSection() {
+      addDebugLog('🎬 Switching to video section', 'info');
       const videoSection = document.getElementById('videoSection');
       const examSection = document.getElementById('examSection');
       const completionSection = document.getElementById('completionSection');
@@ -1283,6 +955,7 @@
     }
 
     function showExamSection() {
+      addDebugLog('📝 Switching to exam section', 'info');
       const videoSection = document.getElementById('videoSection');
       const examSection = document.getElementById('examSection');
       const completionSection = document.getElementById('completionSection');
@@ -1297,6 +970,7 @@
     }
 
     function showCompletionSection() {
+      addDebugLog('🏆 Switching to completion section', 'info');
       const videoSection = document.getElementById('videoSection');
       const examSection = document.getElementById('examSection');
       const completionSection = document.getElementById('completionSection');
@@ -1306,11 +980,13 @@
       if (completionSection) completionSection.classList.remove('hidden');
     }
 
-    // ===========================================
+    // ========================================
     // TAB FUNCTIONS
-    // ===========================================
+    // ========================================
 
     function showTab(tabName, button) {
+      addDebugLog(`📑 Switching to tab: ${tabName}`, 'debug');
+      
       document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
       });
@@ -1322,19 +998,28 @@
       const targetTab = document.getElementById(tabName);
       if (targetTab) targetTab.classList.add('active');
       if (button) button.classList.add('active');
+      
+      // Update debug info when debug tab is shown
+      if (tabName === 'debug') {
+        updateDebugInfo();
+      }
     }
 
-    // ===========================================
-    // NOTES FUNCTIONS (Enhanced)
-    // ===========================================
+    // ========================================
+    // NOTES FUNCTIONS (Enhanced with Debugging)
+    // ========================================
 
     async function saveNotes() {
       const notesTextarea = document.getElementById('userNotes');
       const statusElement = document.getElementById('saveStatus');
       
-      if (!notesTextarea || !statusElement) return;
+      if (!notesTextarea || !statusElement) {
+        addDebugLog('❌ Notes elements not found', 'error');
+        return;
+      }
       
       const notes = notesTextarea.value;
+      addDebugLog(`💾 Saving notes (${notes.length} characters)...`, 'info');
       
       try {
         statusElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
@@ -1355,12 +1040,14 @@
         if (data.success) {
           statusElement.innerHTML = '<i class="fas fa-check"></i> Saved!';
           statusElement.className = 'save-status success';
+          addDebugLog('✅ Notes saved successfully', 'success');
         } else {
           throw new Error(data.message);
         }
       } catch (error) {
         statusElement.innerHTML = '<i class="fas fa-times"></i> Error saving';
         statusElement.className = 'save-status error';
+        addDebugLog(`❌ Error saving notes: ${error.message}`, 'error');
       }
       
       setTimeout(() => {
@@ -1383,20 +1070,21 @@
         }).then((result) => {
           if (result.isConfirmed) {
             notesTextarea.value = '';
-            saveNotes(); // Auto-save the empty state
+            saveNotes();
+            addDebugLog('🗑️ Notes cleared by user', 'info');
           }
         });
       }
     }
 
-    // ===========================================
-    // ENHANCED EXAM FUNCTIONS
-    // ===========================================
+    // ========================================
+    // EXAM FUNCTIONS (Enhanced with Debugging)
+    // ========================================
 
-    // Initialize quiz listeners
     function initializeQuizListeners() {
       const examForm = document.getElementById('examForm');
       if (examForm) {
+        addDebugLog('📝 Initializing quiz listeners', 'debug');
         document.querySelectorAll('#examForm input[type="radio"]').forEach(input => {
           input.addEventListener('change', function() {
             const questionCard = this.closest('.question-card');
@@ -1409,196 +1097,18 @@
       }
     }
 
-    // Show exam review (previous answers)
-    async function showExamReview() {
-      console.log('👁️ Showing exam review...');
-      
-      try {
-        const response = await fetch(`/exam-results/${currentCourseId}/${currentVideoId}`);
-        const data = await response.json();
-        
-        if (data.success && data.examProgress) {
-          displayExamReview(data.examProgress);
-        } else {
-          throw new Error('No exam history found');
-        }
-      } catch (error) {
-        console.error('Error loading exam review:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Review Not Available',
-          text: 'Unable to load your previous answers.',
-          confirmButtonColor: '#dc3545'
-        });
-      }
+    function updateQuizProgress() {
+      const totalQuestions = document.querySelectorAll('.question-card').length;
+      const answeredQuestions = document.querySelectorAll('.question-card.answered').length;
+      addDebugLog(`📊 Quiz progress: ${answeredQuestions}/${totalQuestions} questions answered`, 'debug');
     }
 
-    // Display exam review content
-    function displayExamReview(examProgress) {
-      const reviewSection = document.getElementById('examReview');
-      const examForm = document.getElementById('examForm');
-      const examResults = document.getElementById('examResults');
-      
-      if (!reviewSection) return;
-      
-      // Hide other sections
-      if (examForm) examForm.style.display = 'none';
-      if (examResults) examResults.classList.add('hidden');
-      
-      // Show review section
-      reviewSection.classList.remove('hidden');
-      
-      // Get the last attempt
-      const lastAttempt = examProgress.attempts[examProgress.attempts.length - 1];
-      
-      let reviewHTML = `
-        <div class="review-stats">
-          <div class="stat-item">
-            <span class="stat-number">${lastAttempt.score}%</span>
-            <span class="stat-label">Your Score</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">${examProgress.attempts.length}</span>
-            <span class="stat-label">Attempts</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">${examProgress.bestScore}%</span>
-            <span class="stat-label">Best Score</span>
-          </div>
-        </div>
-        
-        <div class="review-questions">
-          <h4>Your Previous Answers:</h4>
-      `;
-      
-      // Display each question and user's answer
-      if (lastAttempt.answers) {
-        lastAttempt.answers.forEach((answer, index) => {
-          const status = answer.isCorrect ? 'correct' : 'incorrect';
-          reviewHTML += `
-            <div class="review-question ${status}">
-              <div class="review-question-header">
-                <span class="question-number">Question ${index + 1}</span>
-                <span class="question-status ${status}">
-                  <i class="fas fa-${answer.isCorrect ? 'check-circle' : 'times-circle'}"></i>
-                  ${answer.isCorrect ? 'Correct' : 'Incorrect'}
-                </span>
-              </div>
-              <p class="question-text-review"><strong>Question:</strong> ${answer.questionText || 'Question text not available'}</p>
-              <div class="user-answer">
-                <strong>Your Answer:</strong> ${answer.userAnswer || 'No answer'}
-              </div>
-              ${!answer.isCorrect ? `
-                <div class="correct-answer">
-                  <strong>Correct Answer:</strong> ${answer.correctAnswer || 'Not available'}
-                </div>
-              ` : ''}
-            </div>
-          `;
-        });
-      }
-      
-      reviewHTML += `</div>`;
-      
-      const reviewContent = document.getElementById('reviewContent');
-      if (reviewContent) {
-        reviewContent.innerHTML = reviewHTML;
-      }
-    }
-
-    // Hide exam review
-    function hideExamReview() {
-      const reviewSection = document.getElementById('examReview');
-      const examForm = document.getElementById('examForm');
-      
-      if (reviewSection) reviewSection.classList.add('hidden');
-      if (examForm) examForm.style.display = 'block';
-    }
-
-    // Retake exam fresh
-    function retakeExamFresh() {
-      console.log('🔄 Starting fresh retake...');
-      
-      Swal.fire({
-        title: 'Retake Quiz?',
-        text: 'This will clear all your current answers and let you start fresh.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ffc107',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, Start Fresh!',
-        cancelButtonText: 'Cancel'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // Clear all selections
-          document.querySelectorAll('#examForm input[type="radio"]').forEach(input => {
-            input.checked = false;
-          });
-          
-          // Hide review and results
-          const reviewSection = document.getElementById('examReview');
-          const resultsSection = document.getElementById('examResults');
-          const examForm = document.getElementById('examForm');
-          
-          if (reviewSection) reviewSection.classList.add('hidden');
-          if (resultsSection) resultsSection.classList.add('hidden');
-          if (examForm) {
-            examForm.style.display = 'block';
-            // Update submit button
-            const submitBtn = examForm.querySelector('.btn-primary, .btn-warning');
-            if (submitBtn) {
-              submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Quiz';
-              submitBtn.className = 'btn btn-primary';
-              submitBtn.onclick = submitExam;
-            }
-          }
-          
-          // Reset quiz state
-          quizState.hasSubmitted = false;
-          quizState.showingAnswers = false;
-          quizState.originalAnswers = {};
-          
-          // Remove answered classes
-          document.querySelectorAll('.question-card.answered').forEach(card => {
-            card.classList.remove('answered');
-          });
-          
-          Swal.fire({
-            icon: 'success',
-            title: 'Quiz Reset!',
-            text: 'You can now start the quiz fresh.',
-            timer: 2000,
-            timerProgressBar: true
-          });
-        }
-      });
-    }
-
-    // Submit exam retake
-    async function submitExamRetake() {
-      const result = await Swal.fire({
-        title: 'Submit Retake?',
-        text: 'Are you sure you want to submit your retake attempt?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#ffc107',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, Submit!',
-        cancelButtonText: 'Cancel'
-      });
-
-      if (result.isConfirmed) {
-        await submitExam();
-      }
-    }
-
-    // Enhanced submit exam
     async function submitExam() {
-      console.log('🚀 Starting exam submission...');
+      addDebugLog('🚀 Starting exam submission...', 'info');
       
       const examForm = document.getElementById('examForm');
       if (!examForm) {
-        console.error('❌ Exam form not found');
+        addDebugLog('❌ Exam form not found', 'error');
         return;
       }
       
@@ -1610,11 +1120,14 @@
         answers[key] = value;
       }
       
+      addDebugLog('📝 Collected exam answers', 'info', answers);
+      
       // Check if all questions are answered
       const totalQuestions = document.querySelectorAll('.question-card').length;
       const answeredQuestions = Object.keys(answers).length;
       
       if (answeredQuestions < totalQuestions) {
+        addDebugLog(`⚠️ Incomplete exam: ${answeredQuestions}/${totalQuestions} answered`, 'warning');
         Swal.fire({
           icon: 'warning',
           title: 'Incomplete Quiz',
@@ -1624,9 +1137,6 @@
         return;
       }
 
-      // Store original answers
-      quizState.originalAnswers = { ...answers };
-
       try {
         // Show loading state
         const submitButton = document.querySelector('.exam-actions .btn-primary, .exam-actions .btn-warning');
@@ -1635,6 +1145,8 @@
           submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
           submitButton.disabled = true;
         }
+        
+        addDebugLog('📤 Sending exam submission to server...', 'info');
         
         const response = await fetch('/submit-exam', {
           method: 'POST',
@@ -1661,6 +1173,7 @@
         }
         
         if (data.success) {
+          addDebugLog('✅ Exam submitted successfully', 'success', data);
           quizState.hasSubmitted = true;
           quizState.currentResults = data;
           
@@ -1673,7 +1186,7 @@
           throw new Error(data.message || 'Unknown error');
         }
       } catch (error) {
-        console.error('❌ Error submitting exam:', error);
+        addDebugLog(`❌ Error submitting exam: ${error.message}`, 'error');
         
         Swal.fire({
           icon: 'error',
@@ -1684,8 +1197,9 @@
       }
     }
 
-    // Enhanced exam results display
     function showExamResults(results) {
+      addDebugLog('📊 Displaying exam results', 'info', results);
+      
       const resultsContainer = document.getElementById('examResults');
       if (!resultsContainer) return;
       
@@ -1742,86 +1256,79 @@
 
       // Check if course is completed
       if (results.courseCompleted) {
+        addDebugLog('🎉 Course completed after exam!', 'success');
         setTimeout(() => {
           showCompletionSection();
         }, 3000);
       }
     }
 
-    // Show failed answer review
-    function showFailedAnswerReview() {
-      if (!quizState.currentResults || !quizState.currentResults.reviewAnswers) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Review Not Available',
-          text: 'Unable to load answer review.',
-          confirmButtonColor: '#dc3545'
-        });
-        return;
-      }
-
-      let reviewHTML = `
-        <div class="failed-review-header">
-          <i class="fas fa-times-circle text-danger"></i>
-          <h4>Incorrect Answers Review</h4>
-          <p>Here are the questions you got wrong and the correct answers:</p>
-        </div>
-      `;
-
-      quizState.currentResults.reviewAnswers.forEach((review, index) => {
-        reviewHTML += `
-          <div class="failed-question-review">
-            <h5><strong>Question:</strong> ${review.question}</h5>
-            <div class="wrong-answer">
-              <strong>Your Answer:</strong> <span class="text-danger">${review.userAnswer}</span>
-            </div>
-            <div class="correct-answer">
-              <strong>Correct Answer:</strong> <span class="text-success">${review.correctAnswer}</span>
-            </div>
-            ${review.explanation ? `
-              <div class="explanation">
-                <strong>Explanation:</strong> ${review.explanation}
-              </div>
-            ` : ''}
-          </div>
-        `;
+    function retakeExamFresh() {
+      addDebugLog('🔄 Starting fresh retake...', 'info');
+      
+      Swal.fire({
+        title: 'Retake Quiz?',
+        text: 'This will clear all your current answers and let you start fresh.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Start Fresh!',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Clear all selections
+          document.querySelectorAll('#examForm input[type="radio"]').forEach(input => {
+            input.checked = false;
+          });
+          
+          // Hide review and results
+          const reviewSection = document.getElementById('examReview');
+          const resultsSection = document.getElementById('examResults');
+          const examForm = document.getElementById('examForm');
+          
+          if (reviewSection) reviewSection.classList.add('hidden');
+          if (resultsSection) resultsSection.classList.add('hidden');
+          if (examForm) {
+            examForm.style.display = 'block';
+            // Update submit button
+            const submitBtn = examForm.querySelector('.btn-primary, .btn-warning');
+            if (submitBtn) {
+              submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Quiz';
+              submitBtn.className = 'btn btn-primary';
+              submitBtn.onclick = submitExam;
+            }
+          }
+          
+          // Reset quiz state
+          quizState.hasSubmitted = false;
+          quizState.showingAnswers = false;
+          quizState.originalAnswers = {};
+          
+          // Remove answered classes
+          document.querySelectorAll('.question-card.answered').forEach(card => {
+            card.classList.remove('answered');
+          });
+          
+          addDebugLog('✅ Quiz reset for fresh attempt', 'success');
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Quiz Reset!',
+            text: 'You can now start the quiz fresh.',
+            timer: 2000,
+            timerProgressBar: true
+          });
+        }
       });
-
-      reviewHTML += `
-        <div class="review-actions">
-          <button class="btn btn-secondary" onclick="hideFailedReview()">
-            <i class="fas fa-eye-slash"></i> Hide Review
-          </button>
-          <button class="btn btn-warning" onclick="retakeExamFresh()">
-            <i class="fas fa-redo"></i> Try Again
-          </button>
-        </div>
-      `;
-
-      const resultsContainer = document.getElementById('examResults');
-      if (resultsContainer) {
-        resultsContainer.innerHTML = reviewHTML;
-      }
     }
 
-    function hideFailedReview() {
-      // Go back to normal results
-      if (quizState.currentResults) {
-        showExamResults(quizState.currentResults);
-      }
-    }
-
-    // ===========================================
+    // ========================================
     // UTILITY FUNCTIONS
-    // ===========================================
-
-    function updateQuizProgress() {
-      const totalQuestions = document.querySelectorAll('.question-card').length;
-      const answeredQuestions = document.querySelectorAll('.question-card.answered').length;
-      console.log(`Quiz Progress: ${answeredQuestions}/${totalQuestions} questions answered`);
-    }
+    // ========================================
 
     function updateVideoCompletionUI() {
+      addDebugLog('🎨 Updating video completion UI', 'debug');
       const videoItems = document.querySelectorAll('.video-item');
       videoItems.forEach(item => {
         if (item.querySelector(`[onclick*="${currentVideoId}"]`)) {
@@ -1835,6 +1342,7 @@
     }
 
     function updateExamCompletionUI() {
+      addDebugLog('🎨 Updating exam completion UI', 'debug');
       const videoItems = document.querySelectorAll('.video-item');
       videoItems.forEach(item => {
         if (item.querySelector(`[onclick*="${currentVideoId}"]`)) {
@@ -1847,10 +1355,37 @@
       });
     }
 
+    function playVideo() {
+      if (videoPlayer) {
+        videoPlayer.play().catch(error => {
+          addDebugLog(`❌ Error playing video: ${error.message}`, 'error');
+          showVideoError();
+        });
+        const overlay = document.getElementById('videoOverlay');
+        if (overlay) overlay.style.display = 'none';
+      }
+    }
+
+    function restartVideo() {
+      if (videoPlayer) {
+        videoPlayer.currentTime = 0;
+        videoPlayer.play();
+        addDebugLog('🔄 Video restarted', 'info');
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 2000,
+          icon: 'info',
+          title: 'Video restarted'
+        });
+      }
+    }
+
     function toggleFullscreen() {
       if (!document.fullscreenElement && videoPlayer) {
         videoPlayer.requestFullscreen().catch(err => {
-          console.error('Error attempting to enable fullscreen:', err);
+          addDebugLog(`❌ Error enabling fullscreen: ${err.message}`, 'error');
         });
       } else {
         document.exitFullscreen();
@@ -1866,67 +1401,59 @@
       });
     }
 
-    // ===========================================
-    // TESTING FUNCTIONS (Remove in production)
-    // ===========================================
-
-    function testWatchAgain() {
-      console.log('🧪 Test function called - JavaScript is working!');
+    function showVideoError() {
       Swal.fire({
-        icon: 'success',
-        title: 'JavaScript Test',
-        text: 'JavaScript is working correctly! Watch Again functionality should work.',
-        timer: 2000,
-        timerProgressBar: true
+        icon: 'error',
+        title: 'Video Error',
+        text: 'There was an error loading or playing the video. Please try refreshing the page.',
+        confirmButtonColor: '#dc3545'
       });
     }
 
-    // ===========================================
+    // ========================================
     // EVENT LISTENERS & CLEANUP
-    // ===========================================
-
-    // Handle button loading states
-    function setButtonLoading(button, loading = true) {
-      if (!button) return;
-      
-      if (loading) {
-        button.disabled = true;
-        button.classList.add('btn-loading');
-        button.dataset.originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-      } else {
-        button.disabled = false;
-        button.classList.remove('btn-loading');
-        if (button.dataset.originalText) {
-          button.innerHTML = button.dataset.originalText;
-        }
-      }
-    }
-
-    // Enhanced error handling
-    window.addEventListener('error', function(event) {
-      console.error('Global error caught:', event.error);
-    });
-
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', function() {
-      if (progressUpdateInterval) {
-        clearInterval(progressUpdateInterval);
-      }
-      if (videoPlayer && !videoPlayer.paused) {
-        saveVideoProgress();
-      }
-    });
+    // ========================================
 
     // Handle visibility change (when user switches tabs)
     document.addEventListener('visibilitychange', function() {
       if (document.hidden) {
-        // Page is hidden, pause video if playing
+        addDebugLog('👁️ Page hidden, saving progress...', 'debug');
         if (videoPlayer && !videoPlayer.paused) {
-          saveVideoProgress();
+          saveVideoProgressNow();
         }
+      } else {
+        addDebugLog('👁️ Page visible again', 'debug');
       }
     });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+      addDebugLog('🚪 Page unloading, final cleanup...', 'info');
+      if (progressUpdateInterval) {
+        clearInterval(progressUpdateInterval);
+      }
+      if (videoPlayer && !videoPlayer.paused) {
+        saveVideoProgressNow();
+      }
+    });
+
+    // Enhanced error handling
+    window.addEventListener('error', function(event) {
+      addDebugLog(`💥 Global error caught: ${event.error.message}`, 'error', event.error);
+    });
+
+    // Auto-save notes periodically
+    let notesSaveTimeout;
+    const notesTextarea = document.getElementById('userNotes');
+    if (notesTextarea) {
+      notesTextarea.addEventListener('input', function() {
+        clearTimeout(notesSaveTimeout);
+        notesSaveTimeout = setTimeout(() => {
+          addDebugLog('💾 Auto-saving notes...', 'debug');
+          saveNotes();
+        }, 2000); // Auto-save after 2 seconds of inactivity
+      });
+    }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', function(event) {
@@ -1970,89 +1497,33 @@
           event.preventDefault();
           restartVideo();
           break;
+        
+        case 'd': // D for debug (show debug tab)
+          event.preventDefault();
+          showTab('debug', document.querySelector('[onclick*="debug"]'));
+          break;
       }
     });
 
-    // Handle mobile touch events
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    document.addEventListener('touchstart', function(event) {
-      touchStartX = event.touches[0].clientX;
-      touchStartY = event.touches[0].clientY;
-    });
-
-    document.addEventListener('touchend', function(event) {
-      if (!touchStartX || !touchStartY) return;
-
-      const touchEndX = event.changedTouches[0].clientX;
-      const touchEndY = event.changedTouches[0].clientY;
-
-      const diffX = touchStartX - touchEndX;
-      const diffY = touchStartY - touchEndY;
-
-      // Only handle horizontal swipes on video container
-      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-        const videoContainer = document.querySelector('.video-container');
-        if (videoContainer && videoContainer.contains(event.target)) {
-          if (diffX > 0) {
-            // Swipe left - next video
-            const nextBtn = document.querySelector('.nav-next');
-            if (nextBtn) nextBtn.click();
-          } else {
-            // Swipe right - previous video
-            const prevBtn = document.querySelector('.nav-prev');
-            if (prevBtn) prevBtn.click();
-          }
+    // Performance monitoring
+    setInterval(() => {
+      if (videoPlayer && !videoPlayer.paused) {
+        const memoryInfo = performance.memory ? {
+          used: Math.round(performance.memory.usedJSHeapSize / 1048576),
+          total: Math.round(performance.memory.totalJSHeapSize / 1048576),
+          limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576)
+        } : null;
+        
+        if (memoryInfo && memoryInfo.used > 100) { // Log if using more than 100MB
+          addDebugLog(`📊 Memory usage: ${memoryInfo.used}MB / ${memoryInfo.total}MB`, 'debug', memoryInfo);
         }
       }
+    }, 60000); // Check every minute
 
-      touchStartX = 0;
-      touchStartY = 0;
-    });
-
-    // Auto-save notes periodically
-    let notesSaveTimeout;
-    const notesTextarea = document.getElementById('userNotes');
-    if (notesTextarea) {
-      notesTextarea.addEventListener('input', function() {
-        clearTimeout(notesSaveTimeout);
-        notesSaveTimeout = setTimeout(() => {
-          saveNotes();
-        }, 2000); // Auto-save after 2 seconds of inactivity
-      });
-    }
-
-    // Show keyboard shortcuts help
-    function showKeyboardShortcuts() {
-      Swal.fire({
-        title: 'Keyboard Shortcuts',
-        html: `
-          <div style="text-align: left;">
-            <p><strong>Spacebar:</strong> Play/Pause video</p>
-            <p><strong>← →:</strong> Rewind/Forward 10 seconds</p>
-            <p><strong>F:</strong> Toggle fullscreen</p>
-            <p><strong>R:</strong> Restart video</p>
-            <p><strong>Swipe left/right:</strong> Next/Previous video (mobile)</p>
-          </div>
-        `,
-        icon: 'info',
-        confirmButtonColor: '#6f42c1'
-      });
-    }
-
-    // Add help button for shortcuts (optional)
-    document.addEventListener('keydown', function(event) {
-      if (event.key === '?' || event.key === 'h') {
-        event.preventDefault();
-        showKeyboardShortcuts();
-      }
-    });
-
-    console.log('✅ Enhanced Watch-Exam page loaded successfully');
-    console.log('🎯 Current video:', currentVideoId);
-    console.log('📚 Current course:', currentCourseId);
-    console.log('⌨️ Press "?" for keyboard shortcuts');
+    addDebugLog('✅ Complete watch-exam page loaded successfully', 'success');
+    addDebugLog('🎯 Current video: ' + currentVideoId, 'info');
+    addDebugLog('📚 Current course: ' + currentCourseId, 'info');
+    addDebugLog('⌨️ Press "d" for debug tab, "?" for keyboard shortcuts', 'info');
   </script>
 </body>
 </html>

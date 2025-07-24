@@ -360,6 +360,65 @@
       to { transform: translate(-50%, -50%) rotate(360deg); }
     }
     
+    /* FAQ Styles */
+    .faq-accordion {
+      max-width: 100%;
+    }
+    
+    .faq-item {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    
+    .faq-question {
+      padding: 20px;
+      background: #f8f9fa;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+    
+    .faq-question:hover {
+      background: #e9ecef;
+    }
+    
+    .faq-question h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .faq-icon {
+      transition: transform 0.3s ease;
+      color: #666;
+    }
+    
+    .faq-item.active .faq-icon {
+      transform: rotate(180deg);
+    }
+    
+    .faq-answer {
+      display: none;
+      padding: 20px;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+    }
+    
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+    
+    .faq-answer p {
+      margin: 0;
+      color: #555;
+      line-height: 1.6;
+    }
+    
     /* Responsive Design */
     @media (max-width: 768px) {
       .preview-videos-grid {
@@ -474,7 +533,7 @@
           </div>
           
           <div class="action-buttons">
-            <% if (user) { %>
+            <% if (typeof user !== 'undefined' && user) { %>
               <% if (hasAccess) { %>
                 <!-- User already has access -->
                 <a href="/library" class="btn-primary">
@@ -503,11 +562,11 @@
                 </button>
               <% } %>
             <% } else { %>
-              <button class="btn-primary" onclick="showLoginRequired()">
+              <button class="btn-primary" id="login-required-btn">
                 <i class="fas fa-shopping-cart"></i> 
                 <%= ((course.access?.price || 0) === 0) ? 'Enroll for Free' : 'Add to Cart' %>
               </button>
-              <button class="btn-secondary" onclick="showLoginRequired()">
+              <button class="btn-secondary" id="login-required-wishlist-btn">
                 <i class="fas fa-heart"></i> Save to Wishlist
               </button>
             <% } %>
@@ -614,68 +673,7 @@
       <% } %>
     </div>
 
-    <!-- Course Overview -->
-    <% if (course.basic?.description || course.basic?.aboutThisCourse) { %>
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-info-circle"></i>
-        </div>
-        <h2 class="section-title">Course Overview</h2>
-      </div>
-      
-      <div class="overview-content">
-        <% if (course.basic?.description) { %>
-          <p><%= course.basic.description %></p>
-        <% } %>
-        <% if (course.basic?.aboutThisCourse) { %>
-          <p><strong>About This Course:</strong> <%= course.basic.aboutThisCourse %></p>
-        <% } %>
-      </div>
-    </div>
-    <% } %>
-
-    <!-- Target Audience -->
-    <% if (course.content?.targetAudience && course.content.targetAudience.length > 0) { %>
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-users"></i>
-        </div>
-        <h2 class="section-title">Target Audience</h2>
-      </div>
-      
-      <div class="audience-tags">
-        <% course.content.targetAudience.forEach(audience => { %>
-          <span class="audience-tag"><%= audience %></span>
-        <% }) %>
-      </div>
-    </div>
-    <% } %>
-
-    <!-- Learning Objectives -->
-    <% if ((course.content?.objectives && course.content.objectives.length > 0) || (course.objectives && course.objectives.length > 0)) { %>
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-bullseye"></i>
-        </div>
-        <h2 class="section-title">Learning Objectives</h2>
-      </div>
-      
-      <div class="objectives-grid">
-        <% const objectives = course.content?.objectives || course.objectives || []; %>
-        <% objectives.forEach((objective, index) => { %>
-        <div class="objective-item">
-          <div class="objective-number"><%= index + 1 %></div>
-          <div class="objective-text"><%= objective %></div>
-        </div>
-        <% }) %>
-      </div>
-    </div>
-    <% } %>
-
-    <!-- ⭐ FIXED: Course Content/Videos with Proper Preview Functionality -->
+    <!-- Course Content/Videos with Proper Preview Functionality -->
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
@@ -714,7 +712,7 @@
       <% } %>
       
       <% if (hasAccess) { %>
-        <!-- ✅ Show full content for enrolled users -->
+        <!-- Show full content for enrolled users -->
         <div class="video-curriculum">
           <% if (course.videos && course.videos.length > 0) { %>
             <% course.videos.forEach((video, index) => { %>
@@ -749,7 +747,7 @@
                 </span>
                 <% } %>
                 <% if (video.transcript) { %>
-                <button class="btn-secondary" onclick="toggleTranscript('<%= index %>')" style="padding: 8px 16px; font-size: 12px;">
+                <button class="btn-secondary transcript-toggle" data-video-index="<%= index %>" style="padding: 8px 16px; font-size: 12px;">
                   <i class="fas fa-file-text"></i> Transcript
                 </button>
                 <div id="transcript-<%= index %>" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 14px; line-height: 1.6;">
@@ -778,7 +776,7 @@
           <% } %>
         </div>
       <% } else { %>
-        <!-- ⭐ FIXED: Enhanced Preview Section with Working Inline Video Player -->
+        <!-- Enhanced Preview Section with Working Inline Video Player -->
         <% 
         const previewVideos = course.videos ? course.videos.filter(v => v.isPreview) : [];
         %>
@@ -803,6 +801,10 @@
                 <div class="preview-duration">
                   <i class="fas fa-clock"></i> <%= video.duration %> min
                 </div>
+                <% } else { %>
+                <div class="preview-duration">
+                  <i class="fas fa-clock"></i> Preview
+                </div>
                 <% } %>
                 <div class="preview-badge">FREE PREVIEW</div>
               </div>
@@ -811,7 +813,7 @@
                 <h4 class="preview-title"><%= video.title || 'Preview Video' %></h4>
                 <p class="preview-description"><%= video.description || 'Get a taste of what this course offers' %></p>
                 
-                <!-- ⭐ FIXED: Watch/Hide Video Button with Data Attributes -->
+                <!-- Watch/Hide Video Button with Data Attributes -->
                 <button class="preview-watch-btn" 
                         data-video-url="<%= video.videoUrl || video.url || '' %>" 
                         data-video-title="<%= (video.title || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;') %>" 
@@ -820,9 +822,9 @@
                   <span class="video-toggle-text" id="toggleText-preview-<%= index %>">Watch Preview Video</span>
                 </button>
                 
-                <!-- ⭐ FIXED: Inline Video Container -->
+                <!-- Inline Video Container -->
                 <div id="inlineVideoContainer-preview-<%= index %>" class="inline-video-container">
-                  <button class="video-close-inline" onclick="closeInlineVideo('preview-<%= index %>')">&times;</button>
+                  <button class="video-close-inline" data-container-id="preview-<%= index %>">&times;</button>
                   <video id="inlineVideo-preview-<%= index %>" class="inline-video-player" controls preload="metadata">
                     <source src="" type="video/mp4">
                     Your browser does not support the video tag.
@@ -837,19 +839,19 @@
             <p>
               <strong>This is just the beginning!</strong> Unlock <%= course.videos.length - previewVideos.length %> more videos with full course access.
             </p>
-            <button class="btn-primary" onclick="scrollToEnrollment()">
+            <button class="btn-primary" id="scroll-to-enrollment">
               <i class="fas fa-unlock"></i> Unlock Full Course
             </button>
           </div>
         </div>
         <% } else { %>
-        <!-- ✅ No preview videos available -->
+        <!-- No preview videos available -->
         <div class="preview-section" style="margin-bottom: 30px;">
           <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 15px; border: 2px dashed #dee2e6;">
             <div style="font-size: 48px; margin-bottom: 20px; color: #6c757d;">🎥</div>
             <h3 style="color: #495057; margin-bottom: 15px;">Course Content Available After Enrollment</h3>
             <p style="color: #6c757d; margin-bottom: 25px;">This course contains <%= course.videos?.length || 0 %> video lessons with comprehensive training materials.</p>
-            <button class="btn-primary" onclick="scrollToEnrollment()">
+            <button class="btn-primary" id="scroll-to-enrollment-alt">
               <i class="fas fa-unlock"></i> Enroll to Access Content
             </button>
           </div>
@@ -857,440 +859,6 @@
         <% } %>
       <% } %>
     </div>
-
-    <!-- Enhanced Course Features -->
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-star"></i>
-        </div>
-        <h2 class="section-title">Course Features</h2>
-      </div>
-      
-      <div class="certification-features">
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-infinity"></i>
-          </div>
-          <h4 class="cert-title">
-            <%= course.access?.accessDays === 0 || !course.access?.accessDays ? 'Lifetime Access' : course.access.accessDays + ' Days Access' %>
-          </h4>
-          <p class="cert-description">Learn at your own pace with unlimited access to all course materials</p>
-        </div>
-        
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-mobile-alt"></i>
-          </div>
-          <h4 class="cert-title">Mobile Learning</h4>
-          <p class="cert-description">Access your courses on any device - desktop, tablet, or mobile</p>
-        </div>
-        
-        <% if (course.certification?.enabled) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-certificate"></i>
-          </div>
-          <h4 class="cert-title">Certificate of 
-            <%= course.certification?.type === 'achievement' ? 'Achievement' : 
-                course.certification?.type === 'participation' ? 'Participation' : 
-                'Completion' %>
-          </h4>
-          <p class="cert-description">Earn a professional certificate upon successful course completion</p>
-        </div>
-        <% } %>
-        
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-headset"></i>
-          </div>
-          <h4 class="cert-title">Expert Support</h4>
-          <p class="cert-description">
-            Get help when you need it - 
-            <%= course.support?.responseTime || 'within 48 hours' %> response time
-          </p>
-        </div>
-        
-        <% if (courseMetrics?.hasQuizzes) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-question-circle"></i>
-          </div>
-          <h4 class="cert-title">Interactive Assessments</h4>
-          <p class="cert-description">Test your knowledge with <%= courseMetrics.totalQuizQuestions %> quiz questions</p>
-        </div>
-        <% } %>
-        
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-clock"></i>
-          </div>
-          <h4 class="cert-title">Self-Paced Learning</h4>
-          <p class="cert-description">Study at your own speed and schedule that works for you</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Enhanced Instructor Information -->
-    <% if (course.instructor?.name || course.instructor) { %>
-      <div class="content-section">
-        <div class="section-header">
-          <div class="section-icon">
-            <i class="fas fa-user-md"></i>
-          </div>
-          <h2 class="section-title">Meet Your Expert Instructor</h2>
-        </div>
-        
-        <div class="instructor-preview-card">
-          <%
-            // Get instructor data with enhanced fallbacks
-            let instructorData = course.instructor?.instructorData;
-            let instructorPhoto = instructorData?.profileImage;
-            let instructorName = course.instructor?.name || 'Expert Instructor';
-            let instructorTitle = course.instructor?.title || instructorData?.title || instructorData?.designation || 'Professional Instructor';
-            let instructorBio = instructorData?.bio || 'Experienced professional with extensive expertise in aesthetic medicine and training.';
-            let instructorExperience = instructorData?.experience || '10+';
-            let instructorSpecializations = instructorData?.specializations || instructorData?.expertise || [];
-            let instructorId = instructorData?._id || course.instructor?.instructorId;
-          %>
-          
-          <div class="instructor-preview-layout">
-            <!-- Instructor Photo -->
-            <div class="instructor-photo-container">
-              <% if (instructorPhoto) { %>
-                <img src="<%= instructorPhoto %>" 
-                     alt="<%= instructorName %>"
-                     class="instructor-photo"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <% } %>
-              
-              <!-- Fallback placeholder -->
-              <div class="instructor-photo-placeholder" style="<%= instructorPhoto ? 'display: none;' : '' %>">
-                <span class="instructor-initials">
-                  <%= instructorName.toString().split(' ').map(n => n.charAt(0)).join('').substring(0,2).toUpperCase() %>
-                </span>
-              </div>
-              
-              <!-- Verification Badge -->
-              <% if (instructorData?.certifications && instructorData.certifications.length > 0) { %>
-              <div class="instructor-verification-badge" title="Certified Professional">
-                <i class="fas fa-check"></i>
-              </div>
-              <% } %>
-            </div>
-            
-            <!-- Instructor Info -->
-            <div class="instructor-info-content">
-              <div class="instructor-header-info">
-                <h3 class="instructor-name"><%= instructorName %></h3>
-                <p class="instructor-title"><%= instructorTitle %></p>
-                
-                <!-- Key Credentials -->
-                <div class="instructor-credentials-compact">
-                  <% if (instructorExperience) { %>
-                    <span class="credential-chip">
-                      <i class="fas fa-clock"></i> <%= instructorExperience %> Years
-                    </span>
-                  <% } %>
-                  <% if (instructorData?.certifications && instructorData.certifications.length > 0) { %>
-                    <span class="credential-chip">
-                      <i class="fas fa-certificate"></i> Certified
-                    </span>
-                  <% } %>
-                  <% if (instructorData?.ratings?.overall) { %>
-                    <span class="credential-chip">
-                      <i class="fas fa-star"></i> <%= instructorData.ratings.overall %> Rating
-                    </span>
-                  <% } %>
-                  <% if (instructorData?.totalCourses && instructorData.totalCourses > 0) { %>
-                    <span class="credential-chip">
-                      <i class="fas fa-chalkboard-teacher"></i> <%= instructorData.totalCourses %> Courses
-                    </span>
-                  <% } %>
-                </div>
-              </div>
-              
-              <!-- Brief Bio -->
-              <div class="instructor-bio-preview">
-                <p><%= instructorBio.substring(0, 200) %><%= instructorBio.length > 200 ? '...' : '' %></p>
-              </div>
-              
-              <!-- Key Specializations -->
-              <% if (instructorSpecializations.length > 0) { %>
-              <div class="instructor-specializations-preview">
-                <h4><i class="fas fa-star"></i> Specializes in:</h4>
-                <div class="specialization-tags-compact">
-                  <% instructorSpecializations.slice(0, 4).forEach(spec => { %>
-                    <span class="specialization-tag"><%= spec %></span>
-                  <% }) %>
-                  <% if (instructorSpecializations.length > 4) { %>
-                    <span class="specialization-tag more">+<%= instructorSpecializations.length - 4 %> more</span>
-                  <% } %>
-                </div>
-              </div>
-              <% } %>
-              
-              <!-- Action Buttons -->
-              <div class="instructor-actions-compact">
-                <% if (instructorId) { %>
-                  <a href="/our-instructors/<%= instructorId %>" class="btn-view-profile">
-                    <i class="fas fa-user"></i> View Full Profile
-                  </a>
-                <% } %>
-                <% if (course.support?.email || instructorData?.email) { %>
-                  <a href="mailto:<%= course.support?.email || instructorData?.email %>" class="btn-contact-instructor">
-                    <i class="fas fa-envelope"></i> Contact
-                  </a>
-                <% } %>
-              </div>
-            </div>
-            
-            <!-- Trust Indicators -->
-            <div class="instructor-trust-indicators">
-              <div class="trust-badges">
-                <% if (instructorData?.status === 'Active') { %>
-                <div class="trust-badge">
-                  <i class="fas fa-circle text-success"></i>
-                  <span>Active Instructor</span>
-                </div>
-                <% } %>
-                <% if (instructorData?.certifications && instructorData.certifications.length > 0) { %>
-                <div class="trust-badge">
-                  <i class="fas fa-shield-alt text-primary"></i>
-                  <span>Certified Professional</span>
-                </div>
-                <% } %>
-                <% if (instructorData?.experience && parseInt(instructorData.experience) >= 5) { %>
-                <div class="trust-badge">
-                  <i class="fas fa-award text-warning"></i>
-                  <span>Experienced</span>
-                </div>
-                <% } %>
-                <% if (instructorData?.ratings?.totalRatings > 10) { %>
-                <div class="trust-badge">
-                  <i class="fas fa-thumbs-up text-success"></i>
-                  <span>Highly Rated</span>
-                </div>
-                <% } %>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    <% } %>
-
-    <!-- Enhanced Requirements & System Specs -->
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-clipboard-list"></i>
-        </div>
-        <h2 class="section-title">Requirements</h2>
-      </div>
-      
-      <div class="requirements-grid">
-        <div class="requirement-card">
-          <h4><i class="fas fa-check-circle"></i> Prerequisites</h4>
-          <p><%= course.content?.prerequisites || 'No prior experience required. Basic understanding of medical or aesthetic concepts is helpful but not mandatory.' %></p>
-        </div>
-        
-        <div class="requirement-card">
-          <h4><i class="fas fa-laptop"></i> Technical Requirements</h4>
-          <ul class="requirement-list">
-            <li>Reliable internet connection</li>
-            <li>Modern web browser (Chrome, Firefox, Safari, Edge)</li>
-            <li>Device with video playback capability</li>
-            <li>Speakers or headphones for audio</li>
-          </ul>
-        </div>
-        
-        <div class="requirement-card">
-          <h4><i class="fas fa-tools"></i> What You'll Need</h4>
-          <ul class="requirement-list">
-            <li>Notebook for taking notes</li>
-            <li>Quiet learning environment</li>
-            <li>Commitment to complete the course</li>
-            <li>Willingness to practice learned concepts</li>
-          </ul>
-        </div>
-        
-        <div class="requirement-card">
-          <h4><i class="fas fa-gift"></i> What's Included</h4>
-          <ul class="requirement-list">
-            <li>All video lessons and materials</li>
-            <li>Downloadable resources</li>
-            <% if (course.certification?.enabled) { %>
-            <li>Course completion certificate</li>
-            <% } %>
-            <li>
-              <%= course.access?.accessDays === 0 || !course.access?.accessDays ? 'Lifetime' : course.access.accessDays + ' days' %> 
-              access to updates
-            </li>
-            <% if (course.support?.email) { %>
-            <li>Direct instructor support</li>
-            <% } %>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Enhanced Certification Information -->
-    <% if (course.certification?.enabled) { %>
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-certificate"></i>
-        </div>
-        <h2 class="section-title">Certification</h2>
-      </div>
-      
-      <div class="certification-features">
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-award"></i>
-          </div>
-          <h4 class="cert-title">Certificate Type</h4>
-          <p class="cert-description">
-            <%= course.certification?.type === 'achievement' ? 'Certificate of Achievement' : 
-                course.certification?.type === 'participation' ? 'Certificate of Participation' : 
-                'Certificate of Completion' %>
-          </p>
-        </div>
-        
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-tasks"></i>
-          </div>
-          <h4 class="cert-title">Requirements</h4>
-          <p class="cert-description">
-            <%= course.certification?.requirements?.requireAllVideos ? 'Complete all video lessons' : 'Complete course requirements' %>
-            <%= course.certification?.requirements?.minimumScore ? ` and achieve ${course.certification.requirements.minimumScore}% on assessments` : '' %>
-            <% if (course.certification?.requirements?.practicalRequired) { %>
-              <br>Practical assessment required
-            <% } %>
-          </p>
-        </div>
-        
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <h4 class="cert-title">Verification</h4>
-          <p class="cert-description">
-            Digital certificate with 
-            <%= course.certification?.features?.qrVerification ? 'QR code and ' : '' %>
-            unique verification code
-            <%= course.certification?.features?.blockchain ? ' on blockchain' : '' %>
-          </p>
-        </div>
-        
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-building"></i>
-          </div>
-          <h4 class="cert-title">Issuing Authority</h4>
-          <p class="cert-description">
-            <%= course.certification?.issuingAuthority || 'IAAI Training Institute' %>
-            <% if (course.certification?.certificationBodies && course.certification.certificationBodies.length > 0) { %>
-              <br><small style="color: #666; margin-top: 5px; display: block;">
-                <strong>Partners:</strong>
-                <% course.certification.certificationBodies.forEach((body, index) => { %>
-                  <%= body.name %><%= index < course.certification.certificationBodies.length - 1 ? ', ' : '' %>
-                <% }) %>
-              </small>
-            <% } %>
-          </p>
-        </div>
-        
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-calendar-alt"></i>
-          </div>
-          <h4 class="cert-title">Certificate Validity</h4>
-          <p class="cert-description">
-            <%= course.certification?.validity?.isLifetime ? 'Lifetime validity' : 
-                course.certification?.validity?.years ? `Valid for ${course.certification.validity.years} years` : 
-                'Lifetime validity' %>
-          </p>
-        </div>
-        
-        <% if (course.certification?.features?.digitalBadge) { %>
-        <div class="cert-feature">
-          <div class="cert-icon">
-            <i class="fas fa-badge"></i>
-          </div>
-          <h4 class="cert-title">Digital Badge</h4>
-          <p class="cert-description">Shareable digital badge for professional networks</p>
-        </div>
-        <% } %>
-      </div>
-    </div>
-    <% } %>
-
-    <!-- Support Information -->
-    <% if (course.support?.email || course.support?.responseTime) { %>
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-headset"></i>
-        </div>
-        <h2 class="section-title">Support & Help</h2>
-      </div>
-      
-      <div class="requirements-grid">
-        <div class="requirement-card">
-          <h4><i class="fas fa-envelope"></i> Contact Support</h4>
-          <p>Email: <a href="mailto:<%= course.support?.email || 'support@iaa-i.com' %>"><%= course.support?.email || 'support@iaa-i.com' %></a></p>
-          <p>Response Time: <%= course.support?.responseTime || '48 hours' %></p>
-        </div>
-        
-        <div class="requirement-card">
-          <h4><i class="fas fa-question-circle"></i> Getting Help</h4>
-          <ul class="requirement-list">
-            <li>Technical issues with video playback</li>
-            <li>Course content questions</li>
-            <li>Certificate and completion queries</li>
-            <li>Account and access problems</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <% } %>
-
-    <!-- Course Metadata -->
-    <% if (courseMetrics?.publishedDate || course.metadata?.tags) { %>
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-info"></i>
-        </div>
-        <h2 class="section-title">Course Information</h2>
-      </div>
-      
-      <div style="text-align: center; padding: 20px;">
-        <% if (courseMetrics?.publishedDate) { %>
-          <p style="color: #666; font-size: 14px;">
-            <i class="fas fa-calendar"></i> Published: <%= courseMetrics.publishedDate %>
-          </p>
-        <% } %>
-        <% if (courseMetrics?.enrollmentCount > 0) { %>
-          <p style="color: #666; font-size: 14px;">
-            <i class="fas fa-users"></i> <%= courseMetrics.enrollmentCount %> students enrolled
-          </p>
-        <% } %>
-        <% if (course.metadata?.tags && course.metadata.tags.length > 0) { %>
-          <div style="margin-top: 15px;">
-            <strong style="color: #002147;">Tags:</strong>
-            <% course.metadata.tags.forEach((tag, index) => { %>
-              <span style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 12px; border-radius: 15px; font-size: 12px; margin: 3px;">
-                <%= tag %>
-              </span>
-            <% }) %>
-          </div>
-        <% } %>
-      </div>
-    </div>
-    <% } %>
 
     <!-- FAQ Section -->
     <div class="content-section">
@@ -1303,7 +871,7 @@
       
       <div class="faq-accordion">
         <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaq(this)">
+          <div class="faq-question">
             <h4>How long do I have access to the course?</h4>
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
@@ -1315,7 +883,7 @@
         </div>
         
         <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaq(this)">
+          <div class="faq-question">
             <h4>Can I download the videos for offline viewing?</h4>
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
@@ -1325,7 +893,7 @@
         </div>
         
         <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaq(this)">
+          <div class="faq-question">
             <h4>Is there a certificate provided upon completion?</h4>
             <i class="fas fa-chevron-down faq-icon"></i>
           </div>
@@ -1333,50 +901,6 @@
             <p>Yes! Upon successful completion of all course requirements, you'll receive a digital Certificate of Completion that you can download and share on professional networks.</p>
           </div>
         </div>
-        
-        <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaq(this)">
-            <h4>What if I need help or have questions during the course?</h4>
-            <i class="fas fa-chevron-down faq-icon"></i>
-          </div>
-          <div class="faq-answer">
-            <p>Our support team is available to help with technical issues, and you can reach out to instructors for course-related questions. We typically respond within 24-48 hours.</p>
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaq(this)">
-            <h4>Can I get a refund if I'm not satisfied?</h4>
-            <i class="fas fa-chevron-down faq-icon"></i>
-          </div>
-          <div class="faq-answer">
-            <p>We offer a 30-day money-back guarantee. If you're not completely satisfied with the course, contact us within 30 days of purchase for a full refund.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Contact Section -->
-    <div class="content-section">
-      <div class="section-header">
-        <div class="section-icon">
-          <i class="fas fa-envelope"></i>
-        </div>
-        <h2 class="section-title">Need More Information?</h2>
-      </div>
-      
-      <div style="text-align: center; padding: 20px;">
-        <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
-          Have questions about this course? Our learning advisors are here to help you make the right decision for your professional development.
-        </p>
-        <a href="/contact" class="btn-primary" style="display: inline-block; text-decoration: none;">
-          <i class="fas fa-phone"></i> Contact Learning Advisor
-        </a>
-        <% if (course.support?.email) { %>
-          <a href="mailto:<%= course.support.email %>" class="btn-secondary" style="display: inline-block; text-decoration: none; margin-left: 15px;">
-            <i class="fas fa-envelope"></i> Email Support
-          </a>
-        <% } %>
       </div>
     </div>
   </div>
@@ -1392,7 +916,7 @@
         <% } %>
       </div>
       <div class="mobile-buttons">
-        <% if (user) { %>
+        <% if (typeof user !== 'undefined' && user) { %>
           <% if (hasAccess) { %>
             <a href="/library" class="btn-primary" style="padding: 12px 20px; font-size: 14px; text-decoration: none;">
               <i class="fas fa-book"></i> Go to Library
@@ -1410,7 +934,7 @@
             </button>
           <% } %>
         <% } else { %>
-          <button class="btn-primary" onclick="showLoginRequired()" style="padding: 12px 20px; font-size: 14px;">
+          <button class="btn-primary" id="mobile-login-required" style="padding: 12px 20px; font-size: 14px;">
             <i class="fas fa-shopping-cart"></i> 
             <%= ((course.access?.price || 0) === 0) ? 'Enroll Free' : 'Add to Cart' %>
           </button>
@@ -1422,16 +946,32 @@
   <!-- Notification Container -->
   <div id="notificationContainer"></div>
 
-  <!-- ⭐ FIXED: Complete JavaScript with Working Video Preview -->
-  <script>
-    console.log('🎬 Enhanced self-paced course details page loaded');
-    console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
-    console.log('🎥 Course ID:', '<%= course._id %>');
-    console.log('💰 Course price:', <%= course.access?.price || 0 %>);
-    console.log('📹 Videos available:', <%= course.videos?.length || 0 %>);
-    console.log('🔗 User has access:', <%= hasAccess ? 'true' : 'false' %>);
+  <!-- JavaScript with Working Video Preview -->
+<!-- Only the JavaScript section needs changes - replace the entire script section with this: -->
+<!-- Replace the entire <script> section in your course details page with this: -->
 
-    // ⭐ FIXED: Enhanced notification system
+  <script>
+    // ✅ FIXED: Proper data passing from EJS to JavaScript
+    const courseData = {
+        id: '<%= course._id %>',
+        title: <%- JSON.stringify(course.basic?.title || course.title || 'Course') %>,
+        price: <%= course.access?.price || 0 %>,
+        videosCount: <%= course.videos?.length || 0 %>,
+        previewVideosCount: <%= course.videos ? course.videos.filter(v => v.isPreview).length : 0 %>
+    };
+    
+    const userLoggedIn = <%= (typeof user !== 'undefined' && user) ? 'true' : 'false' %>;
+    const hasAccess = <%= hasAccess ? 'true' : 'false' %>;
+    const courseMetrics = <%- JSON.stringify(courseMetrics || {}) %>;
+
+    console.log('🎬 Enhanced self-paced course details page loaded');
+    console.log('👤 User logged in:', userLoggedIn);
+    console.log('🎥 Course ID:', courseData.id);
+    console.log('💰 Course price:', courseData.price);
+    console.log('📹 Videos available:', courseData.videosCount);
+    console.log('🔗 User has access:', hasAccess);
+
+    // Enhanced notification system
     function showNotification(title, message, type = 'success') {
       const container = document.getElementById('notificationContainer');
       const notification = document.createElement('div');
@@ -1465,15 +1005,13 @@
       }, 5000);
     }
 
-    // ⭐ FIXED: Show login required message
+    // Login required handler
     function showLoginRequired() {
       showNotification('Authentication Required', 'Please log in to continue', 'warning');
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
+      setTimeout(() => window.location.href = '/login', 2000);
     }
 
-    // ⭐ FIXED: Set button loading state
+    // Enhanced button loading state
     function setButtonLoading(button, loading) {
       if (loading) {
         button.classList.add('btn-loading');
@@ -1491,20 +1029,8 @@
       }
     }
 
-    // ⭐ FIXED: Toggle transcript function
-    function toggleTranscript(index) {
-      const transcript = document.getElementById(`transcript-${index}`);
-      if (transcript) {
-        if (transcript.style.display === 'none' || transcript.style.display === '') {
-          transcript.style.display = 'block';
-        } else {
-          transcript.style.display = 'none';
-        }
-      }
-    }
-
-    // ⭐ FIXED: Video Preview Functions with 30-Second Limit
-    let videoTimers = {}; // Store timers for each video
+    // Video Preview Functions (keep existing video preview code)
+    let videoTimers = {};
     
     function toggleInlineVideo(videoUrl, videoTitle, containerId) {
       console.log('🎬 toggleInlineVideo called:', { videoUrl, videoTitle, containerId });
@@ -1519,7 +1045,6 @@
       }
       
       if (container.style.display === 'none' || container.style.display === '') {
-        // ✅ Show video
         const source = video.querySelector('source');
         if (source) {
           source.src = videoUrl;
@@ -1529,13 +1054,9 @@
         container.style.display = 'block';
         toggleText.textContent = 'Hide Preview Video';
         
-        // Add time limit overlay
         addTimeOverlay(container, containerId);
-        
-        // Set up 30-second timer
         setupVideoTimer(video, containerId, videoTitle);
         
-        // Scroll to video smoothly
         setTimeout(() => {
           container.scrollIntoView({ 
             behavior: 'smooth', 
@@ -1545,19 +1066,16 @@
         
         console.log('✅ Video opened with 30-second limit:', videoTitle);
       } else {
-        // ✅ Hide video
         closeInlineVideo(containerId);
       }
     }
 
     function addTimeOverlay(container, containerId) {
-      // Remove existing overlay if any
       const existingOverlay = container.querySelector('.time-remaining-overlay');
       if (existingOverlay) {
         existingOverlay.remove();
       }
       
-      // Create time remaining overlay
       const timeOverlay = document.createElement('div');
       timeOverlay.className = 'time-remaining-overlay';
       timeOverlay.id = `timeOverlay-${containerId}`;
@@ -1577,12 +1095,10 @@
       let timeLeft = 30;
       const timeLeftSpan = document.getElementById(`timeLeft-${containerId}`);
       
-      // Clear any existing timer
       if (videoTimers[containerId]) {
         clearInterval(videoTimers[containerId]);
       }
       
-      // Start timer when video plays
       video.addEventListener('play', function startTimer() {
         if (!videoTimers[containerId]) {
           videoTimers[containerId] = setInterval(() => {
@@ -1596,18 +1112,15 @@
             }
           }, 1000);
         }
-        // Remove this event listener after first use
         video.removeEventListener('play', startTimer);
       });
       
-      // Monitor video time
       video.addEventListener('timeupdate', function() {
         if (video.currentTime >= 30) {
           endPreview(containerId, videoTitle);
         }
       });
       
-      // Prevent seeking beyond 30 seconds
       video.addEventListener('seeked', function() {
         if (video.currentTime > 30) {
           video.currentTime = 30;
@@ -1626,13 +1139,11 @@
         video.pause();
       }
       
-      // Clear timer
       if (videoTimers[containerId]) {
         clearInterval(videoTimers[containerId]);
         delete videoTimers[containerId];
       }
       
-      // Show preview ended message
       if (container) {
         container.innerHTML = `
           <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 40px 20px; text-align: center; border-radius: 12px;">
@@ -1640,14 +1151,20 @@
             <h3 style="margin: 0 0 15px 0; font-size: 24px;">Preview Complete!</h3>
             <p style="margin: 0 0 10px 0; font-size: 16px;">You've seen the first 30 seconds of this lesson.</p>
             <p style="margin: 0 0 25px 0; font-size: 18px; font-weight: bold;">Ready to see the rest?</p>
-            <button onclick="scrollToEnrollment(); closeInlineVideo('${containerId}');" 
-                    style="background: white; color: #dc3545; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.3s ease;"
-                    onmouseover="this.style.transform='scale(1.05)'"
-                    onmouseout="this.style.transform='scale(1)'">
+            <button class="unlock-course-btn" data-container-id="${containerId}"
+                    style="background: white; color: #dc3545; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
               🔓 Unlock Full Course Now!
             </button>
           </div>
         `;
+        
+        const unlockBtn = container.querySelector('.unlock-course-btn');
+        if (unlockBtn) {
+          unlockBtn.addEventListener('click', function() {
+            scrollToEnrollment();
+            closeInlineVideo(this.getAttribute('data-container-id'));
+          });
+        }
       }
     }
 
@@ -1657,7 +1174,6 @@
       const container = document.getElementById(`inlineVideoContainer-${containerId}`);
       const toggleText = document.getElementById(`toggleText-${containerId}`);
       
-      // Clear any active timer
       if (videoTimers[containerId]) {
         clearInterval(videoTimers[containerId]);
         delete videoTimers[containerId];
@@ -1667,17 +1183,22 @@
         container.style.display = 'none';
         toggleText.textContent = 'Watch Preview Video';
         
-        // Reset container content for next use
         setTimeout(() => {
           if (container.style.display === 'none') {
-            const containerId_clean = containerId;
             container.innerHTML = `
-              <button class="video-close-inline" onclick="closeInlineVideo('${containerId_clean}')">&times;</button>
-              <video id="inlineVideo-${containerId_clean}" class="inline-video-player" controls preload="metadata">
+              <button class="video-close-inline" data-container-id="${containerId}">&times;</button>
+              <video id="inlineVideo-${containerId}" class="inline-video-player" controls preload="metadata">
                 <source src="" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
             `;
+            
+            const closeBtn = container.querySelector('.video-close-inline');
+            if (closeBtn) {
+              closeBtn.addEventListener('click', function() {
+                closeInlineVideo(this.getAttribute('data-container-id'));
+              });
+            }
           }
         }, 500);
         
@@ -1685,11 +1206,9 @@
       }
     }
 
-    // ⭐ FIXED: Scroll to enrollment section
     function scrollToEnrollment() {
       console.log('🎯 scrollToEnrollment called');
       
-      // Scroll to the top where the purchase options are
       const heroActions = document.querySelector('.hero-actions');
       if (heroActions) {
         heroActions.scrollIntoView({ 
@@ -1697,7 +1216,6 @@
           block: 'center' 
         });
         
-        // Add a subtle highlight effect
         const originalBackground = heroActions.style.background;
         heroActions.style.background = 'rgba(184, 134, 11, 0.1)';
         heroActions.style.transition = 'background 0.5s ease';
@@ -1708,12 +1226,32 @@
       }
     }
 
-    // ⭐ FIXED: Event Listeners for Preview Videos (No more inline onclick)
+    // DOM Content Loaded Event Listeners
     document.addEventListener('DOMContentLoaded', function() {
       console.log('📋 DOM loaded, setting up event listeners...');
       
-      // ✅ Preview thumbnail click listeners
-      document.querySelectorAll('.preview-thumbnail').forEach(thumbnail => {
+      // Login required buttons
+      const loginButtons = ['#login-required-btn', '#login-required-wishlist-btn', '#mobile-login-required'];
+      loginButtons.forEach(selector => {
+        const btn = document.querySelector(selector);
+        if (btn) {
+          btn.addEventListener('click', showLoginRequired);
+          console.log('✅ Login button listener added:', selector);
+        }
+      });
+      
+      // Scroll to enrollment buttons
+      const scrollButtons = ['#scroll-to-enrollment', '#scroll-to-enrollment-alt'];
+      scrollButtons.forEach(selector => {
+        const btn = document.querySelector(selector);
+        if (btn) {
+          btn.addEventListener('click', scrollToEnrollment);
+          console.log('✅ Scroll button listener added:', selector);
+        }
+      });
+      
+      // Preview video event listeners
+      document.querySelectorAll('.preview-thumbnail').forEach((thumbnail, index) => {
         thumbnail.addEventListener('click', function() {
           const videoUrl = this.getAttribute('data-video-url');
           const videoTitle = this.getAttribute('data-video-title');
@@ -1727,10 +1265,10 @@
             console.error('❌ Missing video data attributes');
           }
         });
+        console.log('✅ Thumbnail listener added:', index);
       });
       
-      // ✅ Preview watch button click listeners
-      document.querySelectorAll('.preview-watch-btn').forEach(button => {
+      document.querySelectorAll('.preview-watch-btn').forEach((button, index) => {
         button.addEventListener('click', function() {
           const videoUrl = this.getAttribute('data-video-url');
           const videoTitle = this.getAttribute('data-video-title');
@@ -1744,152 +1282,141 @@
             console.error('❌ Missing video data attributes');
           }
         });
+        console.log('✅ Watch button listener added:', index);
       });
       
-      console.log('✅ Preview video event listeners set up successfully');
-    });
-
-    // ⭐ FIXED: Add to Cart functionality
-    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-      button.addEventListener('click', async function(e) {
-        e.preventDefault();
-        
-        const courseId = this.getAttribute('data-course-id');
-        const courseType = this.getAttribute('data-course-type');
-        const courseTitle = this.getAttribute('data-course-title');
-        
-        console.log('🛒 Add to cart clicked:', { courseId, courseType, courseTitle });
-        
-        setButtonLoading(this, true);
-        
-        try {
-          const response = await fetch('/add-to-cart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseId, courseType })
-          });
-          
-          const result = await response.json();
-          
-          if (result.success) {
-            showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
-            
-            // If it was a linked course addition, show special message
-            if (result.linkedCourseAdded) {
-              setTimeout(() => {
-                showNotification('Bonus!', 'A linked course was also added to your cart for free!', 'success');
-              }, 1500);
-            }
-          } else {
-            showNotification('Error', result.message, 'error');
-          }
-        } catch (error) {
-          console.error('❌ Add to cart error:', error);
-          showNotification('Error', 'Failed to add to cart. Please try again.', 'error');
-        } finally {
-          setButtonLoading(this, false);
-        }
-      });
-    });
-
-    // ⭐ FIXED: Add to Wishlist functionality
-    document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
-      button.addEventListener('click', async function(e) {
-        e.preventDefault();
-        
-        const courseId = this.getAttribute('data-course-id');
-        const courseType = this.getAttribute('data-course-type');
-        const courseTitle = this.getAttribute('data-course-title');
-        
-        console.log('❤️ Add to wishlist clicked:', { courseId, courseType, courseTitle });
-        
-        setButtonLoading(this, true);
-        
-        try {
-          const response = await fetch('/add-to-wishlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseId, courseType })
-          });
-          
-          const result = await response.json();
-          
-          if (result.success) {
-            showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
-            
-            // Update button appearance
-            this.style.background = '#e74c3c';
-            const icon = this.querySelector('i');
-            if (icon) {
-              icon.classList.remove('far');
-              icon.classList.add('fas');
-            }
-          } else {
-            showNotification('Error', result.message, 'error');
-          }
-        } catch (error) {
-          console.error('❌ Add to wishlist error:', error);
-          showNotification('Error', 'Failed to add to wishlist. Please try again.', 'error');
-        } finally {
-          setButtonLoading(this, false);
-        }
-      });
-    });
-
-    // ⭐ FIXED: FAQ Toggle functionality
-    function toggleFaq(element) {
-      console.log('❓ FAQ clicked');
-      const faqItem = element.parentElement;
-      const wasActive = faqItem.classList.contains('active');
-      
-      // Close all FAQ items
-      document.querySelectorAll('.faq-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      
-      // Open clicked item if it wasn't active
-      if (!wasActive) {
-        faqItem.classList.add('active');
-        console.log('✅ FAQ opened');
-      }
-    }
-
-    // ⭐ Test FAQ functionality on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('❓ FAQ section loaded');
-      const faqItems = document.querySelectorAll('.faq-item');
-      console.log('📋 Found', faqItems.length, 'FAQ items');
-      
-      // Test that FAQ elements exist
-      faqItems.forEach((item, index) => {
-        const question = item.querySelector('.faq-question');
-        const answer = item.querySelector('.faq-answer');
-        console.log(`FAQ ${index + 1}:`, {
-          hasQuestion: !!question,
-          hasAnswer: !!answer,
-          questionText: question ? question.textContent.substring(0, 50) + '...' : 'N/A'
+      document.querySelectorAll('.video-close-inline').forEach((button, index) => {
+        button.addEventListener('click', function() {
+          const containerId = this.getAttribute('data-container-id');
+          closeInlineVideo(containerId);
         });
+        console.log('✅ Close button listener added:', index);
       });
-    });
-
-    // ⭐ Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
+      
+      document.querySelectorAll('.transcript-toggle').forEach((button, index) => {
+        button.addEventListener('click', function() {
+          const index = this.getAttribute('data-video-index');
+          const transcript = document.getElementById(`transcript-${index}`);
+          if (transcript) {
+            if (transcript.style.display === 'none' || transcript.style.display === '') {
+              transcript.style.display = 'block';
+            } else {
+              transcript.style.display = 'none';
+            }
+          }
+        });
+        console.log('✅ Transcript button listener added:', index);
+      });
+      
+      document.querySelectorAll('.faq-question').forEach((question, index) => {
+        question.addEventListener('click', function() {
+          const faqItem = this.parentElement;
+          const wasActive = faqItem.classList.contains('active');
+          
+          document.querySelectorAll('.faq-item').forEach(item => {
+            item.classList.remove('active');
           });
-        }
+          
+          if (!wasActive) {
+            faqItem.classList.add('active');
+          }
+        });
+        console.log('✅ FAQ listener added:', index);
       });
+
+      // ✅ CART/WISHLIST EVENT LISTENERS - FIXED SYNTAX
+      document.querySelectorAll('.add-to-cart-btn').forEach((button, index) => {
+        button.addEventListener('click', async function(e) {
+          e.preventDefault();
+          
+          const courseId = this.getAttribute('data-course-id');
+          const courseType = this.getAttribute('data-course-type');
+          const courseTitle = this.getAttribute('data-course-title');
+          
+          console.log('🛒 Add to cart clicked:', { courseId, courseType, courseTitle });
+          
+          setButtonLoading(this, true);
+          
+          try {
+            const response = await fetch('/add-to-cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ courseId, courseType })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+              
+              if (result.linkedCourseAdded) {
+                setTimeout(() => {
+                  showNotification('Bonus!', 'A linked course was also added to your cart for free!', 'success');
+                }, 1500);
+              }
+            } else {
+              showNotification('Error', result.message, 'error');
+            }
+          } catch (error) {
+            console.error('❌ Add to cart error:', error);
+            showNotification('Error', 'Failed to add to cart. Please try again.', 'error');
+          } finally {
+            setButtonLoading(this, false);
+          }
+        });
+        console.log('✅ Cart button listener added:', index);
+      });
+
+      document.querySelectorAll('.add-to-wishlist-btn').forEach((button, index) => {
+        button.addEventListener('click', async function(e) {
+          e.preventDefault();
+          
+          const courseId = this.getAttribute('data-course-id');
+          const courseType = this.getAttribute('data-course-type');
+          const courseTitle = this.getAttribute('data-course-title');
+          
+          console.log('❤️ Add to wishlist clicked:', { courseId, courseType, courseTitle });
+          
+          setButtonLoading(this, true);
+          
+          try {
+            const response = await fetch('/add-to-wishlist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ courseId, courseType })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
+              
+              this.style.background = '#e74c3c';
+              const icon = this.querySelector('i');
+              if (icon) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+              }
+            } else {
+              showNotification('Error', result.message, 'error');
+            }
+          } catch (error) {
+            console.error('❌ Add to wishlist error:', error);
+            showNotification('Error', 'Failed to add to wishlist. Please try again.', 'error');
+          } finally {
+            setButtonLoading(this, false);
+          }
+        });
+        console.log('✅ Wishlist button listener added:', index);
+      });
+      
+      console.log('✅ All event listeners set up successfully');
     });
 
-    // ⭐ Final initialization
-    console.log('🚀 All event listeners and functions initialized successfully!');
-    console.log('📊 Course metrics available:', <%= JSON.stringify(courseMetrics || {}) %>);
-    console.log('🎬 Preview videos:', <%= course.videos ? course.videos.filter(v => v.isPreview).length : 0 %>);
+    // Final initialization
+    console.log('🚀 All functions defined successfully!');
+    console.log('📊 Course metrics available:', courseMetrics);
+    console.log('🎬 Preview videos:', courseData.previewVideosCount);
   </script>
 
   <%- include('partials/footer') %>

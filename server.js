@@ -489,11 +489,11 @@ app.use("/", accountSettingsRoutes);
 // E-commerce features
 const ordersRoutes = require("./routes/ordersRoutes");
 const checkoutRoutes = require("./routes/checkoutRoutes");
-const wishlistRoutes = require("./routes/wishlistRoutes");
+//const wishlistRoutes = require("./routes/wishlistRoutes");
 
 app.use("/", ordersRoutes);
 app.use("/", checkoutRoutes);
-app.use("/", wishlistRoutes);
+//app.use("/", wishlistRoutes);
 
 // ============================================
 // 11.5 INSTRUCTOR PROFILE ROUTES (NEW)

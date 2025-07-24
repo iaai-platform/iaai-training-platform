@@ -466,7 +466,7 @@
     .main-image img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
     }
 
     .image-placeholder {
@@ -1141,6 +1141,45 @@
         margin-bottom: 1rem !important;
       }
     }
+  
+  /* Additional Instructors - Similar to Main Instructor */
+.additional-instructors-container .instructor-profile {
+  margin-bottom: 1.5rem;
+}
+
+.additional-instructors-container .instructor-profile:last-child {
+  margin-bottom: 0;
+}
+
+.additional-instructors-container .instructor-avatar {
+  width: 100px;
+  height: 100px;
+}
+
+.additional-instructors-container .instructor-info h3 {
+  font-size: 1.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.additional-instructors-container .instructor-title {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.additional-instructors-container .instructor-bio {
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.additional-instructors-container .credentials-list {
+  margin-bottom: 0.75rem;
+}
+
+.additional-instructors-container .credential-badge {
+  font-size: 13px;
+  padding: 6px 14px;
+}
   </style>
 </head>
 
@@ -1587,44 +1626,65 @@
       <% } %>
       
       <!-- Additional Instructors -->
-      <% if (course.instructorDetails.additional && course.instructorDetails.additional.length > 0) { %>
-      <h3 style="margin: 2rem 0 1rem; color: var(--primary-color);">Supporting Instructors</h3>
-      <div class="schedule-grid">
-        <% course.instructorDetails.additional.forEach(instructor => { %>
-        <div class="schedule-card" style="text-align: left; padding: 2rem;">
-          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-              <% if (instructor.profileImage) { %>
-              <img src="<%= instructor.profileImage %>" alt="<%= instructor.fullName %>" style="width: 100%; height: 100%; object-fit: cover;">
-              <% } else { %>
-              <i class="fas fa-user" style="color: var(--text-light); font-size: 1.5rem;"></i>
-              <% } %>
-            </div>
-            <div>
-              <h4 style="margin: 0; color: var(--primary-color);"><%= instructor.fullName || `${instructor.firstName} ${instructor.lastName}` %></h4>
-              <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;"><%= instructor.title || '' %> <%= instructor.designation || instructor.role || 'Co-Instructor' %></p>
-            </div>
-          </div>
-          <% if (instructor.bio) { %>
-          <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1rem;"><%= instructor.bio %></p>
-          <% } %>
-          <% if (instructor.specializations && instructor.specializations.length > 0) { %>
-          <div style="margin-bottom: 1rem;">
-            <% instructor.specializations.slice(0, 3).forEach(spec => { %>
-            <span class="topic-tag" style="margin-right: 0.5rem; margin-bottom: 0.5rem;">
-              <%= spec %>
-            </span>
-            <% }) %>
-          </div>
-          <% } %>
-          <a href="/our-instructors/<%= instructor._id %>" class="instructor-link">
-            <i class="fas fa-arrow-right"></i>
-            View Profile
-          </a>
+<!-- Additional Instructors -->
+<% if (course.instructorDetails.additional && course.instructorDetails.additional.length > 0) { %>
+  <h3 style="margin: 2rem 0 1rem; color: #002147;">Supporting Instructors</h3>
+  <div class="additional-instructors-container">
+    <% course.instructorDetails.additional.forEach(instructor => { %>
+    <div class="instructor-profile">
+      <div class="instructor-avatar">
+        <% if (instructor.profileImage) { %>
+        <img src="<%= instructor.profileImage %>" alt="<%= instructor.fullName %>">
+        <% } else { %>
+        <div class="avatar-placeholder">
+          <i class="fas fa-user"></i>
         </div>
-        <% }) %>
+        <% } %>
       </div>
-      <% } %>
+      
+      <div class="instructor-info">
+        <h3><%= instructor.fullName || `${instructor.firstName} ${instructor.lastName}` %></h3>
+        <p class="instructor-title"><%= instructor.title || '' %> <%= instructor.designation || instructor.role || 'Co-Instructor' %></p>
+        
+        <% if (instructor.bio) { %>
+        <p class="instructor-bio"><%= instructor.bio %></p>
+        <% } %>
+        
+        <% if (instructor.qualifications && instructor.qualifications.length > 0) { %>
+        <div class="credentials-list">
+          <% instructor.qualifications.forEach(qualification => { %>
+          <span class="credential-badge">
+            <i class="fas fa-award"></i> <%= qualification %>
+          </span>
+          <% }) %>
+        </div>
+        <% } %>
+        
+        <% if (instructor.specializations && instructor.specializations.length > 0) { %>
+        <div class="credentials-list">
+          <% instructor.specializations.forEach(specialization => { %>
+          <span class="credential-badge" style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);">
+            <i class="fas fa-star"></i> <%= specialization %>
+          </span>
+          <% }) %>
+        </div>
+        <% } %>
+        
+        <% if (instructor.experience) { %>
+        <p style="color: #666; margin-top: 1rem;">
+          <i class="fas fa-briefcase"></i> <%= instructor.experience %> of experience
+        </p>
+        <% } %>
+        
+        <a href="/our-instructors/<%= instructor._id %>" class="instructor-link">
+          <i class="fas fa-user-circle"></i>
+          View Full Profile
+        </a>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
     </div>
     <% } %>
 

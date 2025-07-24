@@ -4,18 +4,393 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= course.basic?.title || course.title || 'Course' %> - Self-Paced Online Training</title>
-  <meta name="description" content="<%= course.basic.description %>">
+  <meta name="description" content="<%= course.basic?.description || '' %>">
   <link rel="stylesheet" href="/css/course-details.css">
+  
   <!-- Social Media Preview Tags -->
-  <meta property="og:title" content="<%= course.basic.title %>">
-  <meta property="og:description" content="<%= course.basic.description %>">
-  <meta property="og:image" content="<%= course.media && course.media.thumbnailUrl ? course.media.thumbnailUrl : '/images/IAAI-Logo.jpg' %>">
-  <meta property="og:url" content="http://localhost:3000/self-paced-online-training/courses/<%= course._id %>">
+  <meta property="og:title" content="<%= course.basic?.title || '' %>">
+  <meta property="og:description" content="<%= course.basic?.description || '' %>">
+  <meta property="og:image" content="<%= course.media?.thumbnailUrl || '/images/IAAI-Logo.jpg' %>">
+  <meta property="og:url" content="<%= seoData?.url || '' %>">
   
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
- 
+  <style>
+    /* Enhanced Preview Video Styles */
+    .preview-videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    
+    .preview-video-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    
+    .preview-video-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      border-color: #b8860b;
+    }
+    
+    .preview-thumbnail {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .preview-thumbnail::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(184, 134, 11, 0.1) 0%, rgba(0, 33, 71, 0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .preview-thumbnail:hover::before {
+      opacity: 1;
+    }
+    
+    .preview-play-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      height: 70px;
+      background: rgba(184, 134, 11, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 28px;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+    
+    .preview-thumbnail:hover .preview-play-overlay {
+      background: #b8860b;
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow: 0 8px 20px rgba(184, 134, 11, 0.4);
+    }
+    
+    .preview-duration {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 5;
+    }
+    
+    .preview-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 5;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .preview-content {
+      padding: 25px;
+    }
+    
+    .preview-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #002147;
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+    }
+    
+    .preview-description {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 20px 0;
+    }
+    
+    .preview-watch-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #b8860b 0%, #d4a017 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .preview-watch-btn:hover {
+      background: linear-gradient(135deg, #d4a017 0%, #b8860b 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(184, 134, 11, 0.3);
+    }
+    
+    .preview-watch-btn:active {
+      transform: translateY(0);
+    }
+    
+    /* Inline Video Player Styles */
+    .inline-video-container {
+      display: none;
+      position: relative;
+      margin-top: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .video-close-inline {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(220, 53, 69, 0.9);
+      color: white;
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .video-close-inline:hover {
+      background: #dc3545;
+      transform: scale(1.1);
+    }
+    
+    .inline-video-player {
+      width: 100%;
+      height: 300px;
+      background: #000;
+      border: none;
+      outline: none;
+    }
+    
+    .time-remaining-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 15;
+    }
+    
+    /* Preview CTA Styles */
+    .preview-cta {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border: 2px dashed #b8860b;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      margin-top: 25px;
+    }
+    
+    .preview-cta p {
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+    
+    .preview-cta .btn-primary {
+      background: linear-gradient(135deg, #b8860b 0%, #d4a017 100%);
+      color: white;
+      padding: 15px 35px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .preview-cta .btn-primary:hover {
+      background: linear-gradient(135deg, #d4a017 0%, #b8860b 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(184, 134, 11, 0.3);
+    }
+    
+    /* Enhanced Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: -400px;
+      max-width: 400px;
+      padding: 20px 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+      border-left: 5px solid #28a745;
+    }
+    
+    .notification.show {
+      right: 20px;
+    }
+    
+    .notification.error {
+      border-left-color: #dc3545;
+    }
+    
+    .notification.warning {
+      border-left-color: #ffc107;
+    }
+    
+    .notification-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+    
+    .notification.success .notification-icon {
+      background: #d4f4dd;
+      color: #2e7d3e;
+    }
+    
+    .notification.error .notification-icon {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .notification.warning .notification-icon {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .notification-content h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .notification-content p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.4;
+    }
+    
+    /* Loading State */
+    .btn-loading {
+      pointer-events: none;
+      opacity: 0.7;
+      position: relative;
+    }
+    
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .preview-videos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .preview-video-card {
+        margin: 0 10px;
+      }
+      
+      .preview-thumbnail {
+        height: 180px;
+      }
+      
+      .preview-content {
+        padding: 20px;
+      }
+      
+      .notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        transform: translateX(0);
+      }
+      
+      .notification.show {
+        right: 10px;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -55,23 +430,27 @@
           <div class="hero-meta">
             <div class="meta-item">
               <i class="fas fa-user-md"></i>
-              <span><%= course.instructor?.name || course.instructor || 'Expert Instructors' %></span>
+              <span><%= course.instructor?.name || 'Expert Instructors' %></span>
             </div>
             <div class="meta-item">
               <i class="fas fa-play-circle"></i>
-              <span><%= course.videos?.length || course.content?.totalVideos || 0 %> Video Lessons</span>
+              <span><%= course.videos?.length || 0 %> Video Lessons</span>
             </div>
             <div class="meta-item">
               <i class="fas fa-clock"></i>
               <span>
-                <%= courseMetrics?.totalDuration ? Math.round(courseMetrics.totalDuration / 60 * 10) / 10 + ' hours' : 
-                    course.content?.estimatedMinutes ? Math.round(course.content.estimatedMinutes / 60 * 10) / 10 + ' hours' : 
-                    course.totalHours ? course.totalHours + ' hours' : 'Self-paced' %>
+                <% if (courseMetrics?.totalDuration) { %>
+                  <%= Math.round(courseMetrics.totalDuration / 60 * 10) / 10 %> hours
+                <% } else if (course.content?.estimatedMinutes) { %>
+                  <%= Math.round(course.content.estimatedMinutes / 60 * 10) / 10 %> hours
+                <% } else { %>
+                  Self-paced
+                <% } %>
               </span>
             </div>
             <div class="meta-item">
               <i class="fas fa-graduation-cap"></i>
-              <span><%= course.content?.experienceLevel || course.level || 'All Levels' %></span>
+              <span><%= course.content?.experienceLevel || 'All Levels' %></span>
             </div>
             <% if (courseMetrics?.enrollmentCount > 0) { %>
             <div class="meta-item">
@@ -85,24 +464,19 @@
         <div class="hero-actions">
           <div class="price-display">
             <span class="price-label">Course Price</span>
-            <% if ((course.access?.price || course.price || 0) === 0) { %>
+            <% if ((course.access?.price || 0) === 0) { %>
               <div class="free-badge">FREE</div>
             <% } else { %>
               <div class="price-amount">
-                <span class="price-currency">$</span><%= course.access?.price || course.price || 0 %>
+                <span class="price-currency">$</span><%= course.access?.price || 0 %>
               </div>
-              <% if (course.earlyBirdPrice) { %>
-                <span class="early-bird-tag">
-                  <i class="fas fa-tag"></i> Special Offer: $<%= course.earlyBirdPrice %>
-                </span>
-              <% } %>
             <% } %>
           </div>
           
           <div class="action-buttons">
             <% if (user) { %>
-              <% if (user.mySelfPacedCourses && user.mySelfPacedCourses.some(c => c.courseId.toString() === course._id.toString() && (c.status === 'Paid and Registered' || c.status === 'Registered (promo code)'))) { %>
-                <!-- User already registered -->
+              <% if (hasAccess) { %>
+                <!-- User already has access -->
                 <a href="/library" class="btn-primary">
                   <i class="fas fa-book"></i> Go to My Library
                 </a>
@@ -111,27 +485,27 @@
                 <button class="btn-primary add-to-cart-btn" 
                         data-course-id="<%= course._id %>" 
                         data-course-type="SelfPacedOnlineTraining"
-                        data-price="<%= course.access?.price || course.price || 0 %>"
-                        data-course-code="<%= course.basic?.courseCode || course.courseCode || 'N/A' %>"
-                        data-course-title="<%= course.basic?.title || course.title || 'Untitled Course' %>"
-                        <%= (course.basic?.status !== 'published' && course.status !== 'published') ? 'disabled' : '' %>>
+                        data-price="<%= course.access?.price || 0 %>"
+                        data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                        data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
+                        <%= (course.basic?.status !== 'published') ? 'disabled' : '' %>>
                   <i class="fas fa-shopping-cart"></i> 
-                  <%= ((course.access?.price || course.price || 0) === 0) ? 'Enroll for Free' : 'Add to Cart' %>
+                  <%= ((course.access?.price || 0) === 0) ? 'Enroll for Free' : 'Add to Cart' %>
                 </button>
                 
                 <button class="btn-secondary add-to-wishlist-btn" 
                         data-course-id="<%= course._id %>" 
                         data-course-type="SelfPacedOnlineTraining"
-                        data-price="<%= course.access?.price || course.price || 0 %>"
-                        data-course-code="<%= course.basic?.courseCode || course.courseCode || 'N/A' %>"
-                        data-course-title="<%= course.basic?.title || course.title || 'Untitled Course' %>">
+                        data-price="<%= course.access?.price || 0 %>"
+                        data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                        data-course-title="<%= course.basic?.title || 'Untitled Course' %>">
                   <i class="fas fa-heart"></i> Save to Wishlist
                 </button>
               <% } %>
             <% } else { %>
               <button class="btn-primary" onclick="showLoginRequired()">
                 <i class="fas fa-shopping-cart"></i> 
-                <%= ((course.access?.price || course.price || 0) === 0) ? 'Enroll for Free' : 'Add to Cart' %>
+                <%= ((course.access?.price || 0) === 0) ? 'Enroll for Free' : 'Add to Cart' %>
               </button>
               <button class="btn-secondary" onclick="showLoginRequired()">
                 <i class="fas fa-heart"></i> Save to Wishlist
@@ -166,7 +540,7 @@
           <i class="fas fa-play-circle"></i>
         </div>
         <div class="info-label">Video Lessons</div>
-        <div class="info-value"><%= course.videos?.length || course.content?.totalVideos || 0 %></div>
+        <div class="info-value"><%= course.videos?.length || 0 %></div>
       </div>
       
       <div class="info-item">
@@ -175,9 +549,13 @@
         </div>
         <div class="info-label">Duration</div>
         <div class="info-value">
-          <%= courseMetrics?.totalDuration ? Math.round(courseMetrics.totalDuration / 60 * 10) / 10 + 'h' : 
-              course.content?.estimatedMinutes ? Math.round(course.content.estimatedMinutes / 60 * 10) / 10 + 'h' : 
-              course.totalHours ? course.totalHours + 'h' : 'Self-paced' %>
+          <% if (courseMetrics?.totalDuration) { %>
+            <%= Math.round(courseMetrics.totalDuration / 60 * 10) / 10 %>h
+          <% } else if (course.content?.estimatedMinutes) { %>
+            <%= Math.round(course.content.estimatedMinutes / 60 * 10) / 10 %>h
+          <% } else { %>
+            Self-paced
+          <% } %>
         </div>
       </div>
       
@@ -186,7 +564,7 @@
           <i class="fas fa-question-circle"></i>
         </div>
         <div class="info-label">Quiz Questions</div>
-        <div class="info-value"><%= courseMetrics?.totalQuizQuestions || course.content?.totalQuestions || 0 %></div>
+        <div class="info-value"><%= courseMetrics?.totalQuizQuestions || 0 %></div>
       </div>
       
       <div class="info-item">
@@ -203,7 +581,7 @@
         </div>
         <div class="info-label">Level</div>
         <div class="info-value">
-          <%= course.content?.experienceLevel || course.level || 'All Levels' %>
+          <%= course.content?.experienceLevel || 'All Levels' %>
         </div>
       </div>
       
@@ -297,7 +675,7 @@
     </div>
     <% } %>
 
-    <!-- Course Content/Videos -->
+    <!-- ⭐ FIXED: Course Content/Videos with Proper Preview Functionality -->
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
@@ -335,8 +713,8 @@
       </div>
       <% } %>
       
-      <% if (user && user.mySelfPacedCourses && user.mySelfPacedCourses.some(c => c.courseId.toString() === course._id.toString() && (c.status === 'Paid and Registered' || c.status === 'Registered (promo code)'))) { %>
-        <!-- Show full content for enrolled users -->
+      <% if (hasAccess) { %>
+        <!-- ✅ Show full content for enrolled users -->
         <div class="video-curriculum">
           <% if (course.videos && course.videos.length > 0) { %>
             <% course.videos.forEach((video, index) => { %>
@@ -400,10 +778,11 @@
           <% } %>
         </div>
       <% } else { %>
-        <!-- Show preview for non-enrolled users -->
-        
-        <!-- Preview Videos Section with Inline Video Player -->
-        <% if (course.videos && course.videos.some(v => v.isPreview)) { %>
+        <!-- ⭐ FIXED: Enhanced Preview Section with Working Inline Video Player -->
+        <% 
+        const previewVideos = course.videos ? course.videos.filter(v => v.isPreview) : [];
+        %>
+        <% if (previewVideos.length > 0) { %>
         <div class="preview-section" style="margin-bottom: 30px;">
           <h3 style="color: #002147; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-eye" style="color: #b8860b;"></i>
@@ -411,31 +790,37 @@
           </h3>
           
           <div class="preview-videos-grid">
-            <% course.videos.filter(v => v.isPreview).forEach((video, index) => { %>
+            <% previewVideos.forEach((video, index) => { %>
             <div class="preview-video-card">
-              <div class="preview-thumbnail" onclick="toggleInlineVideo('<%= video.videoUrl %>', '<%= video.title %>', 'preview-<%= index %>')">
+              <div class="preview-thumbnail" 
+                   data-video-url="<%= video.videoUrl || video.url || '' %>" 
+                   data-video-title="<%= (video.title || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;') %>" 
+                   data-container-id="preview-<%= index %>">
                 <div class="preview-play-overlay">
                   <i class="fas fa-play"></i>
                 </div>
+                <% if (video.duration) { %>
                 <div class="preview-duration">
-                  <% if (video.duration) { %>
-                    <i class="fas fa-clock"></i> <%= video.duration %> min
-                  <% } %>
+                  <i class="fas fa-clock"></i> <%= video.duration %> min
                 </div>
+                <% } %>
                 <div class="preview-badge">FREE PREVIEW</div>
               </div>
               
               <div class="preview-content">
-                <h4 class="preview-title"><%= video.title %></h4>
+                <h4 class="preview-title"><%= video.title || 'Preview Video' %></h4>
                 <p class="preview-description"><%= video.description || 'Get a taste of what this course offers' %></p>
                 
-                <!-- Watch/Hide Video Button -->
-                <button class="preview-watch-btn" onclick="toggleInlineVideo('<%= video.videoUrl %>', '<%= video.title %>', 'preview-<%= index %>')">
+                <!-- ⭐ FIXED: Watch/Hide Video Button with Data Attributes -->
+                <button class="preview-watch-btn" 
+                        data-video-url="<%= video.videoUrl || video.url || '' %>" 
+                        data-video-title="<%= (video.title || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;') %>" 
+                        data-container-id="preview-<%= index %>">
                   <i class="fas fa-play"></i>
                   <span class="video-toggle-text" id="toggleText-preview-<%= index %>">Watch Preview Video</span>
                 </button>
                 
-                <!-- Inline Video Container -->
+                <!-- ⭐ FIXED: Inline Video Container -->
                 <div id="inlineVideoContainer-preview-<%= index %>" class="inline-video-container">
                   <button class="video-close-inline" onclick="closeInlineVideo('preview-<%= index %>')">&times;</button>
                   <video id="inlineVideo-preview-<%= index %>" class="inline-video-player" controls preload="metadata">
@@ -448,17 +833,28 @@
             <% }) %>
           </div>
           
-          <div class="preview-cta" style="text-align: center; margin-top: 25px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px;">
-            <p style="color: #666; margin-bottom: 15px;">
-              <strong>This is just the beginning!</strong> Unlock <%= course.videos.length - course.videos.filter(v => v.isPreview).length %> more videos with full course access.
+          <div class="preview-cta">
+            <p>
+              <strong>This is just the beginning!</strong> Unlock <%= course.videos.length - previewVideos.length %> more videos with full course access.
             </p>
-            <button class="btn-primary" onclick="scrollToEnrollment()" style="display: inline-block; padding: 12px 30px; text-decoration: none;">
+            <button class="btn-primary" onclick="scrollToEnrollment()">
               <i class="fas fa-unlock"></i> Unlock Full Course
             </button>
           </div>
         </div>
+        <% } else { %>
+        <!-- ✅ No preview videos available -->
+        <div class="preview-section" style="margin-bottom: 30px;">
+          <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 15px; border: 2px dashed #dee2e6;">
+            <div style="font-size: 48px; margin-bottom: 20px; color: #6c757d;">🎥</div>
+            <h3 style="color: #495057; margin-bottom: 15px;">Course Content Available After Enrollment</h3>
+            <p style="color: #6c757d; margin-bottom: 25px;">This course contains <%= course.videos?.length || 0 %> video lessons with comprehensive training materials.</p>
+            <button class="btn-primary" onclick="scrollToEnrollment()">
+              <i class="fas fa-unlock"></i> Enroll to Access Content
+            </button>
+          </div>
+        </div>
         <% } %>
-       
       <% } %>
     </div>
 
@@ -548,9 +944,9 @@
         <div class="instructor-preview-card">
           <%
             // Get instructor data with enhanced fallbacks
-            let instructorData = course.instructor?.instructorId || course.instructor?.instructorData;
+            let instructorData = course.instructor?.instructorData;
             let instructorPhoto = instructorData?.profileImage;
-            let instructorName = course.instructor?.name || course.instructor || 'Expert Instructor';
+            let instructorName = course.instructor?.name || 'Expert Instructor';
             let instructorTitle = course.instructor?.title || instructorData?.title || instructorData?.designation || 'Professional Instructor';
             let instructorBio = instructorData?.bio || 'Experienced professional with extensive expertise in aesthetic medicine and training.';
             let instructorExperience = instructorData?.experience || '10+';
@@ -606,9 +1002,9 @@
                       <i class="fas fa-star"></i> <%= instructorData.ratings.overall %> Rating
                     </span>
                   <% } %>
-                  <% if (instructorData?.assignedCourses && instructorData.assignedCourses.length > 0) { %>
+                  <% if (instructorData?.totalCourses && instructorData.totalCourses > 0) { %>
                     <span class="credential-chip">
-                      <i class="fas fa-chalkboard-teacher"></i> <%= instructorData.assignedCourses.length %> Courses
+                      <i class="fas fa-chalkboard-teacher"></i> <%= instructorData.totalCourses %> Courses
                     </span>
                   <% } %>
                 </div>
@@ -695,7 +1091,7 @@
       <div class="requirements-grid">
         <div class="requirement-card">
           <h4><i class="fas fa-check-circle"></i> Prerequisites</h4>
-          <p><%= course.content?.prerequisites || course.prerequisites || 'No prior experience required. Basic understanding of medical or aesthetic concepts is helpful but not mandatory.' %></p>
+          <p><%= course.content?.prerequisites || 'No prior experience required. Basic understanding of medical or aesthetic concepts is helpful but not mandatory.' %></p>
         </div>
         
         <div class="requirement-card">
@@ -897,7 +1293,6 @@
     <% } %>
 
     <!-- FAQ Section -->
-    !-- Fixed FAQ Section -->
     <div class="content-section">
       <div class="section-header">
         <div class="section-icon">
@@ -961,7 +1356,6 @@
       </div>
     </div>
     
-
     <!-- Contact Section -->
     <div class="content-section">
       <div class="section-header">
@@ -991,15 +1385,15 @@
   <div class="mobile-action-bar">
     <div class="mobile-action-content">
       <div class="mobile-price">
-        <% if ((course.access?.price || course.price || 0) === 0) { %>
+        <% if ((course.access?.price || 0) === 0) { %>
           FREE
         <% } else { %>
-          $<%= course.access?.price || course.price || 0 %>
+          $<%= course.access?.price || 0 %>
         <% } %>
       </div>
       <div class="mobile-buttons">
         <% if (user) { %>
-          <% if (user.mySelfPacedCourses && user.mySelfPacedCourses.some(c => c.courseId.toString() === course._id.toString() && (c.status === 'Paid and Registered' || c.status === 'Registered (promo code)'))) { %>
+          <% if (hasAccess) { %>
             <a href="/library" class="btn-primary" style="padding: 12px 20px; font-size: 14px; text-decoration: none;">
               <i class="fas fa-book"></i> Go to Library
             </a>
@@ -1007,18 +1401,18 @@
             <button class="btn-primary add-to-cart-btn" 
                     data-course-id="<%= course._id %>" 
                     data-course-type="SelfPacedOnlineTraining"
-                    data-price="<%= course.access?.price || course.price || 0 %>"
-                    data-course-code="<%= course.basic?.courseCode || course.courseCode || 'N/A' %>"
-                    data-course-title="<%= course.basic?.title || course.title || 'Untitled Course' %>"
+                    data-price="<%= course.access?.price || 0 %>"
+                    data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                    data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
                     style="padding: 12px 20px; font-size: 14px;">
               <i class="fas fa-shopping-cart"></i> 
-              <%= ((course.access?.price || course.price || 0) === 0) ? 'Enroll Free' : 'Add to Cart' %>
+              <%= ((course.access?.price || 0) === 0) ? 'Enroll Free' : 'Add to Cart' %>
             </button>
           <% } %>
         <% } else { %>
           <button class="btn-primary" onclick="showLoginRequired()" style="padding: 12px 20px; font-size: 14px;">
             <i class="fas fa-shopping-cart"></i> 
-            <%= ((course.access?.price || course.price || 0) === 0) ? 'Enroll Free' : 'Add to Cart' %>
+            <%= ((course.access?.price || 0) === 0) ? 'Enroll Free' : 'Add to Cart' %>
           </button>
         <% } %>
       </div>
@@ -1028,8 +1422,16 @@
   <!-- Notification Container -->
   <div id="notificationContainer"></div>
 
+  <!-- ⭐ FIXED: Complete JavaScript with Working Video Preview -->
   <script>
-    // Show notification function
+    console.log('🎬 Enhanced self-paced course details page loaded');
+    console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
+    console.log('🎥 Course ID:', '<%= course._id %>');
+    console.log('💰 Course price:', <%= course.access?.price || 0 %>);
+    console.log('📹 Videos available:', <%= course.videos?.length || 0 %>);
+    console.log('🔗 User has access:', <%= hasAccess ? 'true' : 'false' %>);
+
+    // ⭐ FIXED: Enhanced notification system
     function showNotification(title, message, type = 'success') {
       const container = document.getElementById('notificationContainer');
       const notification = document.createElement('div');
@@ -1063,7 +1465,7 @@
       }, 5000);
     }
 
-    // Show login required message
+    // ⭐ FIXED: Show login required message
     function showLoginRequired() {
       showNotification('Authentication Required', 'Please log in to continue', 'warning');
       setTimeout(() => {
@@ -1071,60 +1473,59 @@
       }, 2000);
     }
 
-    // Set button loading state
+    // ⭐ FIXED: Set button loading state
     function setButtonLoading(button, loading) {
       if (loading) {
         button.classList.add('btn-loading');
         button.disabled = true;
-        const icon = button.querySelector('i');
-        if (icon) {
-          const originalClass = icon.className;
-          icon.setAttribute('data-original-class', originalClass);
-          icon.className = 'fas fa-spinner fa-spin';
-        }
+        const originalText = button.innerHTML;
+        button.setAttribute('data-original-text', originalText);
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
       } else {
         button.classList.remove('btn-loading');
         button.disabled = false;
-        const icon = button.querySelector('i');
-        if (icon) {
-          const originalClass = icon.getAttribute('data-original-class');
-          if (originalClass) {
-            icon.className = originalClass;
-          }
+        const originalText = button.getAttribute('data-original-text');
+        if (originalText) {
+          button.innerHTML = originalText;
         }
       }
     }
 
-    // Toggle transcript
+    // ⭐ FIXED: Toggle transcript function
     function toggleTranscript(index) {
       const transcript = document.getElementById(`transcript-${index}`);
-      if (transcript.style.display === 'none') {
-        transcript.style.display = 'block';
-      } else {
-        transcript.style.display = 'none';
+      if (transcript) {
+        if (transcript.style.display === 'none' || transcript.style.display === '') {
+          transcript.style.display = 'block';
+        } else {
+          transcript.style.display = 'none';
+        }
       }
     }
 
-    // INLINE VIDEO FUNCTIONS WITH 30-SECOND LIMIT
+    // ⭐ FIXED: Video Preview Functions with 30-Second Limit
     let videoTimers = {}; // Store timers for each video
     
     function toggleInlineVideo(videoUrl, videoTitle, containerId) {
-      console.log('toggleInlineVideo called:', videoUrl, videoTitle, containerId);
+      console.log('🎬 toggleInlineVideo called:', { videoUrl, videoTitle, containerId });
       
       const container = document.getElementById(`inlineVideoContainer-${containerId}`);
       const video = document.getElementById(`inlineVideo-${containerId}`);
-      const source = video.querySelector('source');
       const toggleText = document.getElementById(`toggleText-${containerId}`);
       
-      if (!container || !video || !source || !toggleText) {
-        console.error('Video elements not found:', containerId);
+      if (!container || !video || !toggleText) {
+        console.error('❌ Video elements not found for:', containerId);
         return;
       }
       
       if (container.style.display === 'none' || container.style.display === '') {
-        // Show video
-        source.src = videoUrl;
-        video.load();
+        // ✅ Show video
+        const source = video.querySelector('source');
+        if (source) {
+          source.src = videoUrl;
+          video.load();
+        }
+        
         container.style.display = 'block';
         toggleText.textContent = 'Hide Preview Video';
         
@@ -1142,9 +1543,9 @@
           });
         }, 100);
         
-        console.log('Video opened with 30-second limit:', videoTitle);
+        console.log('✅ Video opened with 30-second limit:', videoTitle);
       } else {
-        // Hide video
+        // ✅ Hide video
         closeInlineVideo(containerId);
       }
     }
@@ -1216,7 +1617,7 @@
     }
 
     function endPreview(containerId, videoTitle) {
-      console.log('Preview ended for:', videoTitle);
+      console.log('⏰ Preview ended for:', videoTitle);
       
       const container = document.getElementById(`inlineVideoContainer-${containerId}`);
       const video = document.getElementById(`inlineVideo-${containerId}`);
@@ -1251,10 +1652,9 @@
     }
 
     function closeInlineVideo(containerId) {
-      console.log('closeInlineVideo called:', containerId);
+      console.log('🔒 closeInlineVideo called:', containerId);
       
       const container = document.getElementById(`inlineVideoContainer-${containerId}`);
-      const video = document.getElementById(`inlineVideo-${containerId}`);
       const toggleText = document.getElementById(`toggleText-${containerId}`);
       
       // Clear any active timer
@@ -1270,9 +1670,10 @@
         // Reset container content for next use
         setTimeout(() => {
           if (container.style.display === 'none') {
+            const containerId_clean = containerId;
             container.innerHTML = `
-              <button class="video-close-inline" onclick="closeInlineVideo('${containerId}')">&times;</button>
-              <video id="inlineVideo-${containerId}" class="inline-video-player" controls preload="metadata">
+              <button class="video-close-inline" onclick="closeInlineVideo('${containerId_clean}')">&times;</button>
+              <video id="inlineVideo-${containerId_clean}" class="inline-video-player" controls preload="metadata">
                 <source src="" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
@@ -1280,13 +1681,13 @@
           }
         }, 500);
         
-        console.log('Video closed:', containerId);
+        console.log('✅ Video closed:', containerId);
       }
     }
 
-    // Scroll to enrollment section
+    // ⭐ FIXED: Scroll to enrollment section
     function scrollToEnrollment() {
-      console.log('scrollToEnrollment called');
+      console.log('🎯 scrollToEnrollment called');
       
       // Scroll to the top where the purchase options are
       const heroActions = document.querySelector('.hero-actions');
@@ -1297,25 +1698,58 @@
         });
         
         // Add a subtle highlight effect
-        heroActions.style.animation = 'highlight-pulse 2s ease-in-out';
+        const originalBackground = heroActions.style.background;
+        heroActions.style.background = 'rgba(184, 134, 11, 0.1)';
+        heroActions.style.transition = 'background 0.5s ease';
+        
         setTimeout(() => {
-          heroActions.style.animation = '';
+          heroActions.style.background = originalBackground;
         }, 2000);
       }
     }
 
-    // Add highlight animation CSS
-    const highlightStyle = document.createElement('style');
-    highlightStyle.textContent = `
-      @keyframes highlight-pulse {
-        0% { box-shadow: 0 0 0 0 rgba(184, 134, 11, 0.7); }
-        50% { box-shadow: 0 0 0 20px rgba(184, 134, 11, 0.2); }
-        100% { box-shadow: 0 0 0 0 rgba(184, 134, 11, 0); }
-      }
-    `;
-    document.head.appendChild(highlightStyle);
+    // ⭐ FIXED: Event Listeners for Preview Videos (No more inline onclick)
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('📋 DOM loaded, setting up event listeners...');
+      
+      // ✅ Preview thumbnail click listeners
+      document.querySelectorAll('.preview-thumbnail').forEach(thumbnail => {
+        thumbnail.addEventListener('click', function() {
+          const videoUrl = this.getAttribute('data-video-url');
+          const videoTitle = this.getAttribute('data-video-title');
+          const containerId = this.getAttribute('data-container-id');
+          
+          console.log('📸 Thumbnail clicked:', { videoUrl, videoTitle, containerId });
+          
+          if (videoUrl && videoTitle && containerId) {
+            toggleInlineVideo(videoUrl, videoTitle, containerId);
+          } else {
+            console.error('❌ Missing video data attributes');
+          }
+        });
+      });
+      
+      // ✅ Preview watch button click listeners
+      document.querySelectorAll('.preview-watch-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const videoUrl = this.getAttribute('data-video-url');
+          const videoTitle = this.getAttribute('data-video-title');
+          const containerId = this.getAttribute('data-container-id');
+          
+          console.log('▶️ Watch button clicked:', { videoUrl, videoTitle, containerId });
+          
+          if (videoUrl && videoTitle && containerId) {
+            toggleInlineVideo(videoUrl, videoTitle, containerId);
+          } else {
+            console.error('❌ Missing video data attributes');
+          }
+        });
+      });
+      
+      console.log('✅ Preview video event listeners set up successfully');
+    });
 
-    // Add to Cart
+    // ⭐ FIXED: Add to Cart functionality
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
       button.addEventListener('click', async function(e) {
         e.preventDefault();
@@ -1323,6 +1757,8 @@
         const courseId = this.getAttribute('data-course-id');
         const courseType = this.getAttribute('data-course-type');
         const courseTitle = this.getAttribute('data-course-title');
+        
+        console.log('🛒 Add to cart clicked:', { courseId, courseType, courseTitle });
         
         setButtonLoading(this, true);
         
@@ -1337,19 +1773,26 @@
           
           if (result.success) {
             showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+            
+            // If it was a linked course addition, show special message
+            if (result.linkedCourseAdded) {
+              setTimeout(() => {
+                showNotification('Bonus!', 'A linked course was also added to your cart for free!', 'success');
+              }, 1500);
+            }
           } else {
             showNotification('Error', result.message, 'error');
           }
         } catch (error) {
-          console.error('Error:', error);
-          showNotification('Error', 'Failed to add to cart', 'error');
+          console.error('❌ Add to cart error:', error);
+          showNotification('Error', 'Failed to add to cart. Please try again.', 'error');
         } finally {
           setButtonLoading(this, false);
         }
       });
     });
 
-    // Add to Wishlist
+    // ⭐ FIXED: Add to Wishlist functionality
     document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
       button.addEventListener('click', async function(e) {
         e.preventDefault();
@@ -1357,6 +1800,8 @@
         const courseId = this.getAttribute('data-course-id');
         const courseType = this.getAttribute('data-course-type');
         const courseTitle = this.getAttribute('data-course-title');
+        
+        console.log('❤️ Add to wishlist clicked:', { courseId, courseType, courseTitle });
         
         setButtonLoading(this, true);
         
@@ -1372,24 +1817,28 @@
           if (result.success) {
             showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
             
-            // Optional: Update button appearance
-            this.style.color = '#e74c3c';
-            this.querySelector('i').classList.add('fas');
-            this.querySelector('i').classList.remove('far');
+            // Update button appearance
+            this.style.background = '#e74c3c';
+            const icon = this.querySelector('i');
+            if (icon) {
+              icon.classList.remove('far');
+              icon.classList.add('fas');
+            }
           } else {
             showNotification('Error', result.message, 'error');
           }
         } catch (error) {
-          console.error('Error:', error);
-          showNotification('Error', 'Failed to add to wishlist', 'error');
+          console.error('❌ Add to wishlist error:', error);
+          showNotification('Error', 'Failed to add to wishlist. Please try again.', 'error');
         } finally {
           setButtonLoading(this, false);
         }
       });
     });
 
-    // FAQ Toggle
+    // ⭐ FIXED: FAQ Toggle functionality
     function toggleFaq(element) {
+      console.log('❓ FAQ clicked');
       const faqItem = element.parentElement;
       const wasActive = faqItem.classList.contains('active');
       
@@ -1401,10 +1850,29 @@
       // Open clicked item if it wasn't active
       if (!wasActive) {
         faqItem.classList.add('active');
+        console.log('✅ FAQ opened');
       }
     }
 
-    // Smooth scroll for anchor links
+    // ⭐ Test FAQ functionality on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('❓ FAQ section loaded');
+      const faqItems = document.querySelectorAll('.faq-item');
+      console.log('📋 Found', faqItems.length, 'FAQ items');
+      
+      // Test that FAQ elements exist
+      faqItems.forEach((item, index) => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        console.log(`FAQ ${index + 1}:`, {
+          hasQuestion: !!question,
+          hasAnswer: !!answer,
+          questionText: question ? question.textContent.substring(0, 50) + '...' : 'N/A'
+        });
+      });
+    });
+
+    // ⭐ Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -1418,46 +1886,11 @@
       });
     });
 
-    // Initialize and test
-    console.log('📚 Enhanced self-paced course details page loaded');
-    console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
-    console.log('🎥 Course ID:', '<%= course._id %>');
-    console.log('💰 Course price:', <%= course.access?.price || course.price || 0 %>);
-    console.log('📹 Videos available:', <%= course.videos?.length || 0 %>);
-    console.log('🏷️ Course category:', '<%= course.basic?.category || "N/A" %>');
-    console.log('🎯 Target audience:', <%= JSON.stringify(course.content?.targetAudience || []) %>);
-    console.log('📜 Certificate enabled:', <%= course.certification?.enabled || false %>);
-    console.log('📊 Course metrics:', <%= JSON.stringify(courseMetrics || {}) %>);
-</script>
-<script>
-  // FAQ Toggle Function
-  function toggleFaq(element) {
-    console.log('FAQ clicked'); // Debug log
-    const faqItem = element.parentElement;
-    const wasActive = faqItem.classList.contains('active');
-    
-    console.log('Was active:', wasActive); // Debug log
-    
-    // Close all FAQ items
-    document.querySelectorAll('.faq-item').forEach(item => {
-      item.classList.remove('active');
-    });
-    
-    // Open clicked item if it wasn't active
-    if (!wasActive) {
-      faqItem.classList.add('active');
-      console.log('Added active class'); // Debug log
-    }
-  }
-  
-  // Test that FAQ is working
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('FAQ section loaded');
-    const faqItems = document.querySelectorAll('.faq-item');
-    console.log('Found', faqItems.length, 'FAQ items');
-  });
+    // ⭐ Final initialization
+    console.log('🚀 All event listeners and functions initialized successfully!');
+    console.log('📊 Course metrics available:', <%= JSON.stringify(courseMetrics || {}) %>);
+    console.log('🎬 Preview videos:', <%= course.videos ? course.videos.filter(v => v.isPreview).length : 0 %>);
   </script>
-  
 
   <%- include('partials/footer') %>
 </body>

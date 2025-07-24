@@ -459,19 +459,18 @@ const userSchema = new mongoose.Schema(
         // User-specific enrollment data
         enrollmentData: {
           status: {
-            type: String,
-            enum: ["wishlist", "cart", "paid", "registered", "expired"],
-            default: "cart",
+            /* existing */
           },
-          registrationDate: { type: Date, default: Date.now },
-          expiryDate: Date, // Calculated based on course.access.accessDays
+          registrationDate: {
+            /* existing */
+          },
           paidAmount: Number,
           paymentTransactionId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "PaymentTransaction",
+            /* existing */
           },
           promoCodeUsed: String,
-          // ⭐ ADD THESE FIELDS:
+
+          // ⭐ ADD THESE TO ALL ENROLLMENT SCHEMAS:
           courseName: { type: String },
           courseCode: { type: String },
           courseType: { type: String },

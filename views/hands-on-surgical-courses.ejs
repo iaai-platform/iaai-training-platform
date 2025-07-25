@@ -98,7 +98,7 @@
             padding: 0 20px;
         }
 
-        /* Course Cards */
+        /* Course Cards - UPDATED */
         .courses-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -125,19 +125,23 @@
             background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
         }
 
+        /* UPDATED: Removed scale effect */
         .course-card:hover {
             transform: translateY(-15px);
             box-shadow: 0 35px 100px rgba(0, 0, 0, 0.15);
         }
 
+        /* UPDATED: Fixed course image for full display without zoom */
         .course-image {
             height: 280px;
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             position: relative;
             overflow: hidden;
         }
 
+        /* UPDATED: Overlay effect - maintains image size */
         .course-image::before {
             content: '';
             position: absolute;
@@ -148,6 +152,7 @@
             background: linear-gradient(45deg, rgba(0, 33, 71, 0.7), rgba(255, 204, 0, 0.3));
             opacity: 0;
             transition: opacity 0.3s ease;
+            z-index: 1;
         }
 
         .course-card:hover .course-image::before {
@@ -736,14 +741,14 @@
 
         // Enhanced hover effects
         document.querySelectorAll('.course-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-15px) scale(1.02)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-15px)'; // Removed scale(1.02)
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
     </script>
 </body>
 </html>

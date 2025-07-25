@@ -205,12 +205,13 @@
         }
 
         .category-image {
-            height: 200px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            overflow: hidden;
-        }
+    height: 200px;                /* Keep your current height */
+    background-size: cover;       /* This ensures full coverage */
+    background-position: center;  /* Centers the image */
+    background-repeat: no-repeat; /* Prevents image repetition */
+    position: relative;
+    overflow: hidden;
+}
 
         .category-image::before {
             content: '';

@@ -1797,7 +1797,11 @@ exports.rejectUser = async (req, res) => {
                                 </ul>
                                 
                                 <p><strong>Need Assistance?</strong><br>
-                                If you have questions or would like to discuss this decision, please contact us at <a href="mailto:${supportEmail}">${supportEmail}</a></p>
+                                If you have questions or would like to discuss this decision, please contact us at <a href="mailto:${
+                                  process.env.EMAIL_FROM || "info@iaa-i.com"
+                                }">${
+          process.env.EMAIL_FROM || "info@iaa-i.com"
+        }</a>
                                 
                                 <p>We appreciate your understanding and wish you the best in your professional journey.</p>
                                 

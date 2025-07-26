@@ -1,4 +1,4 @@
-// utils/sendEmail.js - FIXED VERSION
+// utils/sendEmail.js - FIXED FOR SENDGRID FORMAT
 const sgMail = require("@sendgrid/mail");
 
 async function sendEmail(options) {
@@ -54,23 +54,63 @@ async function sendEmail(options) {
       };
     }
 
-    // Use SendGrid
+    // Use SendGrid - FIXED FORMAT
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    // Extract sender info - handle both object and string formats
+    let fromEmail, fromName;
+    if (typeof options.from === "object" && options.from.address) {
+      fromEmail = options.from.address;
+      fromName = options.from.name;
+    } else if (typeof options.from === "string") {
+      fromEmail = options.from;
+      fromName = process.env.EMAIL_FROM_NAME || "IAAI Training Platform";
+    } else {
+      fromEmail = process.env.EMAIL_FROM || "info@iaa-i.com";
+      fromName = process.env.EMAIL_FROM_NAME || "IAAI Training Platform";
+    }
+
+    // Ensure content exists and is properly formatted
+    const htmlContent = options.html || options.text || "";
+    const textContent =
+      options.text || options.html?.replace(/<[^>]*>/g, "") || "";
+
+    if (!htmlContent && !textContent) {
+      throw new Error(
+        "Email content is empty - both HTML and text content are missing"
+      );
+    }
 
     const msg = {
       to: options.to,
       from: {
-        email: process.env.EMAIL_FROM || "info@iaa-i.com",
-        name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+        email: fromEmail,
+        name: fromName,
       },
       subject: options.subject,
-      html: options.html || options.text || "",
-      text: options.text || "",
+      content: [
+        {
+          type: "text/html",
+          value: htmlContent,
+        },
+      ],
     };
 
+    // Add text content if available
+    if (textContent && textContent !== htmlContent) {
+      msg.content.unshift({
+        type: "text/plain",
+        value: textContent,
+      });
+    }
+
     console.log("📧 Sending email via SendGrid to:", options.to);
-    console.log("📧 From:", msg.from.email);
+    console.log("📧 From:", fromEmail);
     console.log("📧 Subject:", options.subject);
+    console.log(
+      "📧 Content types:",
+      msg.content.map((c) => c.type)
+    );
 
     const result = await sgMail.send(msg);
 
@@ -88,6 +128,15 @@ async function sendEmail(options) {
     // Handle SendGrid specific errors
     if (error.response && error.response.body) {
       console.error("❌ SendGrid response:", error.response.body);
+
+      // Log specific SendGrid error details
+      if (error.response.body.errors) {
+        error.response.body.errors.forEach((err) => {
+          console.error(
+            `❌ SendGrid Error: ${err.message} (Field: ${err.field})`
+          );
+        });
+      }
     }
 
     // Handle SMTP specific errors

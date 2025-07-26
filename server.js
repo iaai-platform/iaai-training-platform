@@ -61,6 +61,9 @@ mongoose
     console.error("MongoDB connection error:", error);
   });
 
+// Add this line with your other route imports
+const emailTestRoutes = require("./routes/emailTest");
+app.use("/", emailTestRoutes);
 // ============================================
 // 5. MIDDLEWARE CONFIGURATION
 // ============================================

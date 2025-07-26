@@ -1,4 +1,4 @@
-// adminUserController.js
+// adminUserController.js - COMPLETE UPDATED VERSION FOR SENDGRID
 const User = require("../models/user");
 const DeletedUser = require("../models/deletedUser");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
@@ -614,6 +614,7 @@ exports.getPaymentAnalytics = async (req, res) => {
     res.redirect("/dashboard");
   }
 };
+
 // ✅ Export Financial Report
 // Enhanced exportFinancialReport function for adminUserController.js
 // First, install required packages:
@@ -1570,7 +1571,7 @@ exports.getUserDetails = async (req, res) => {
   }
 };
 
-// ✅ Approve User (with email notification)
+// ✅ Approve User (with email notification) - UPDATED FOR SENDGRID
 exports.approveUser = async (req, res) => {
   try {
     const {
@@ -1713,7 +1714,7 @@ exports.approveUser = async (req, res) => {
   }
 };
 
-// ✅ Reject User (Move to Recycle Bin with Email Notification)
+// ✅ Reject User (Move to Recycle Bin with Email Notification) - UPDATED FOR SENDGRID
 exports.rejectUser = async (req, res) => {
   try {
     const { userId, reason } = req.body;
@@ -1741,10 +1742,9 @@ exports.rejectUser = async (req, res) => {
 
     await deletedUserRecord.save();
 
-    // ✅ Send rejection email before deleting user
+    // ✅ Send rejection email before deleting user - UPDATED FOR SENDGRID
     try {
-      const supportEmail =
-        process.env.SUPPORT_EMAIL || "support@iaai-training.com";
+      const supportEmail = process.env.EMAIL_FROM || "info@iaa-i.com";
 
       await sendEmail({
         from: {
@@ -1812,25 +1812,6 @@ exports.rejectUser = async (req, res) => {
                         </div>
                     </body>
                     </html>
-                `,
-        text: `
-                    Account Application Update
-                    
-                    Hello ${user.firstName} ${user.lastName},
-                    
-                    Thank you for your interest in IAAI Training Institute. After careful review, we regret to inform you that we are unable to approve your account at this time.
-                    
-                    ${reason ? `Reason: ${reason}` : ""}
-                    
-                    What you can do:
-                    - Review the reason provided
-                    - Contact our support team if you believe this is an error
-                    - You may reapply after addressing the concerns mentioned
-                    
-                    If you have questions, please contact us at ${supportEmail}
-                    
-                    Best regards,
-                    IAAI Training Institute Team
                 `,
       });
 
@@ -1996,7 +1977,7 @@ exports.updateUserRole = async (req, res) => {
   }
 };
 
-// ✅ Reset User Password
+// ✅ Reset User Password - UPDATED FOR SENDGRID
 exports.resetUserPassword = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -2023,15 +2004,16 @@ exports.resetUserPassword = async (req, res) => {
       "host"
     )}/reset-password/${resetToken}`;
 
-    // Send email
-    await sendEmail({
-      from: {
-        email: process.env.EMAIL_FROM || "info@iaa-i.com",
-        name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform"
-      },
-      to: user.email,
-      subject: "Password Reset Request - IAAI Training",
-      html: `
+    // Send email - UPDATED FOR SENDGRID
+    try {
+      await sendEmail({
+        from: {
+          email: process.env.EMAIL_FROM || "info@iaa-i.com",
+          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+        },
+        to: user.email,
+        subject: "Password Reset Request - IAAI Training",
+        html: `
                     <!DOCTYPE html>
                     <html>
                     <head>
@@ -2086,23 +2068,6 @@ exports.resetUserPassword = async (req, res) => {
                     </body>
                     </html>
                 `,
-        text: `
-                    Password Reset Request
-                    
-                    Hello ${user.firstName} ${user.lastName},
-                    
-                    We received a request to reset your password for your IAAI Training account.
-                    
-                    Click the following link to reset your password:
-                    ${resetUrl}
-                    
-                    This link will expire in 1 hour.
-                    
-                    If you did not request this password reset, please ignore this email.
-                    
-                    Best regards,
-                    IAAI Training Security Team
-                `,
       });
 
       console.log(`✅ Password reset email sent to ${user.email}`);
@@ -2132,8 +2097,6 @@ exports.resetUserPassword = async (req, res) => {
     });
   }
 };
-
-// Add these functions to your adminUserController.js file
 
 // ✅ Export User Data (CSV/JSON)
 exports.exportUserData = async (req, res) => {
@@ -2393,480 +2356,3 @@ exports.getFilteredAnalytics = async (req, res) => {
     res.status(500).json({ error: "Error fetching analytics" });
   }
 };
-
-// ✅ Generate PDF Report (placeholder - implement with PDF library like puppeteer or pdfkit)
-// Fixed generatePDFReport function with better error handling
-// This replaces the generatePDFReport function in your controller
-
-async function generatePDFReport(res, transactions, data) {
-  try {
-    console.log("📄 Starting PDF generation...");
-
-    // Create HTML template for PDF
-    const htmlTemplate = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                * {
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
-                }
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 20px;
-                    color: #333;
-                    font-size: 14px;
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 30px;
-                    padding: 20px;
-                    background: #28a745;
-                    color: white;
-                    border-radius: 10px;
-                }
-                .header h1 {
-                    margin: 0;
-                    font-size: 24px;
-                }
-                .header p {
-                    margin: 5px 0;
-                    font-size: 12px;
-                }
-                .summary {
-                    background: #f8f9fa;
-                    padding: 20px;
-                    border-radius: 10px;
-                    margin-bottom: 30px;
-                }
-                .summary h2 {
-                    color: #28a745;
-                    margin-bottom: 15px;
-                    font-size: 18px;
-                }
-                .summary-grid {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 15px;
-                }
-                .summary-item {
-                    flex: 1;
-                    min-width: 200px;
-                    padding: 15px;
-                    background: white;
-                    border-radius: 8px;
-                    text-align: center;
-                }
-                .summary-label {
-                    font-size: 12px;
-                    color: #666;
-                    margin-bottom: 5px;
-                }
-                .summary-value {
-                    font-size: 20px;
-                    font-weight: bold;
-                    color: #333;
-                }
-                .section {
-                    margin-bottom: 30px;
-                }
-                .section h2 {
-                    color: #333;
-                    border-bottom: 2px solid #28a745;
-                    padding-bottom: 10px;
-                    margin-bottom: 20px;
-                    font-size: 16px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 20px;
-                    font-size: 12px;
-                }
-                th {
-                    background: #28a745;
-                    color: white;
-                    padding: 10px;
-                    text-align: left;
-                    font-weight: bold;
-                }
-                td {
-                    padding: 8px;
-                    border-bottom: 1px solid #e9ecef;
-                }
-                tr:nth-child(even) {
-                    background: #f8f9fa;
-                }
-                .footer {
-                    text-align: center;
-                    margin-top: 50px;
-                    padding-top: 20px;
-                    border-top: 2px solid #e9ecef;
-                    color: #666;
-                    font-size: 10px;
-                }
-                .page-break {
-                    page-break-after: always;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>IAAI Financial Report</h1>
-                <p>Generated on: ${new Date().toLocaleString()}</p>
-                <p>Period: ${data.startDate || "All Time"} to ${
-      data.endDate || "Present"
-    }</p>
-            </div>
-            
-            <div class="summary">
-                <h2>Executive Summary</h2>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="summary-label">Total Revenue</div>
-                        <div class="summary-value">$${data.totalRevenue.toFixed(
-                          2
-                        )}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Total Transactions</div>
-                        <div class="summary-value">${
-                          data.totalTransactions
-                        }</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Total Discounts</div>
-                        <div class="summary-value">$${data.totalDiscounts.toFixed(
-                          2
-                        )}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Average Transaction</div>
-                        <div class="summary-value">$${
-                          data.totalTransactions > 0
-                            ? (
-                                data.totalRevenue / data.totalTransactions
-                              ).toFixed(2)
-                            : "0.00"
-                        }</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2>Revenue by Course Type</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Course Type</th>
-                            <th>Revenue</th>
-                            <th>Enrollments</th>
-                            <th>Average Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${Object.entries(data.courseTypeAnalytics || {})
-                          .map(
-                            ([type, stats]) => `
-                            <tr>
-                                <td>${type}</td>
-                                <td>$${(stats.revenue || 0).toFixed(2)}</td>
-                                <td>${stats.count || 0}</td>
-                                <td>$${
-                                  stats.count > 0
-                                    ? (stats.revenue / stats.count).toFixed(2)
-                                    : "0.00"
-                                }</td>
-                            </tr>
-                        `
-                          )
-                          .join("")}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="section">
-                <h2>Payment Method Distribution</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Payment Method</th>
-                            <th>Revenue</th>
-                            <th>Transaction Count</th>
-                            <th>Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${Object.entries(data.paymentMethodAnalytics || {})
-                          .map(
-                            ([method, stats]) => `
-                            <tr>
-                                <td>${method}</td>
-                                <td>$${(stats.revenue || 0).toFixed(2)}</td>
-                                <td>${stats.count || 0}</td>
-                                <td>${
-                                  data.totalRevenue > 0
-                                    ? (
-                                        (stats.revenue / data.totalRevenue) *
-                                        100
-                                      ).toFixed(1)
-                                    : "0"
-                                }%</td>
-                            </tr>
-                        `
-                          )
-                          .join("")}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="footer">
-                <p>This report is confidential and proprietary to IAAI Training Institute</p>
-                <p>© ${new Date().getFullYear()} International Aesthetic Academic Institution. All rights reserved.</p>
-            </div>
-        </body>
-        </html>
-        `;
-
-    console.log("📄 HTML template created, launching puppeteer...");
-
-    // Launch puppeteer with specific options for better compatibility
-    const browser = await puppeteer.launch({
-      headless: "new", // Use new headless mode
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage", // Overcome limited resource problems
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process", // <- this one doesn't work in Windows
-        "--disable-gpu",
-      ],
-    });
-
-    console.log("📄 Browser launched, creating page...");
-
-    const page = await browser.newPage();
-
-    // Set viewport
-    await page.setViewport({
-      width: 1200,
-      height: 800,
-    });
-
-    console.log("📄 Setting content...");
-
-    await page.setContent(htmlTemplate, {
-      waitUntil: ["load", "domcontentloaded"],
-    });
-
-    // Wait a bit for any rendering
-    await page.waitForTimeout(1000);
-
-    console.log("📄 Generating PDF...");
-
-    // Generate PDF
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "20px",
-        right: "20px",
-        bottom: "20px",
-        left: "20px",
-      },
-    });
-
-    console.log("📄 Closing browser...");
-    await browser.close();
-
-    console.log("📄 Sending PDF response...");
-
-    // Send PDF
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      'attachment; filename="financial-report.pdf"'
-    );
-    res.setHeader("Content-Length", pdf.length);
-    res.send(pdf);
-
-    console.log("✅ PDF sent successfully");
-  } catch (err) {
-    console.error("❌ Error generating PDF:", err);
-    console.error("Error stack:", err.stack);
-
-    // Send a proper error response
-    res.status(500).json({
-      error: "PDF generation failed",
-      message: err.message,
-      suggestion: "Please try Excel or CSV format instead",
-    });
-  }
-}
-
-// Alternative: Simple PDF generation without Puppeteer using PDFKit
-// If Puppeteer continues to cause issues, use this simpler approach:
-
-const PDFDocument = require("pdfkit");
-
-async function generatePDFReportSimple(res, transactions, data) {
-  try {
-    console.log("📄 Generating PDF with PDFKit...");
-
-    // Create a document
-    const doc = new PDFDocument({
-      margin: 50,
-      size: "A4",
-    });
-
-    // Set response headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      'attachment; filename="financial-report.pdf"'
-    );
-
-    // Pipe the PDF to the response
-    doc.pipe(res);
-
-    // Add content
-    doc
-      .fontSize(24)
-      .fillColor("#28a745")
-      .text("IAAI Financial Report", { align: "center" });
-
-    doc.moveDown();
-
-    doc
-      .fontSize(12)
-      .fillColor("#333")
-      .text(`Generated on: ${new Date().toLocaleString()}`, { align: "center" })
-      .text(
-        `Period: ${data.startDate || "All Time"} to ${
-          data.endDate || "Present"
-        }`,
-        { align: "center" }
-      );
-
-    doc.moveDown(2);
-
-    // Executive Summary
-    doc
-      .fontSize(18)
-      .fillColor("#28a745")
-      .text("Executive Summary", { underline: true });
-
-    doc.moveDown();
-
-    doc
-      .fontSize(12)
-      .fillColor("#333")
-      .text(`Total Revenue: $${data.totalRevenue.toFixed(2)}`)
-      .text(`Total Transactions: ${data.totalTransactions}`)
-      .text(`Total Discounts: $${data.totalDiscounts.toFixed(2)}`)
-      .text(
-        `Average Transaction: $${
-          data.totalTransactions > 0
-            ? (data.totalRevenue / data.totalTransactions).toFixed(2)
-            : "0.00"
-        }`
-      );
-
-    doc.moveDown(2);
-
-    // Revenue by Course Type
-    doc
-      .fontSize(16)
-      .fillColor("#28a745")
-      .text("Revenue by Course Type", { underline: true });
-
-    doc.moveDown();
-    doc.fontSize(11).fillColor("#333");
-
-    Object.entries(data.courseTypeAnalytics || {}).forEach(([type, stats]) => {
-      doc.text(
-        `${type}: $${(stats.revenue || 0).toFixed(2)} (${
-          stats.count || 0
-        } enrollments)`
-      );
-    });
-
-    doc.moveDown(2);
-
-    // Payment Methods
-    doc
-      .fontSize(16)
-      .fillColor("#28a745")
-      .text("Payment Method Distribution", { underline: true });
-
-    doc.moveDown();
-    doc.fontSize(11).fillColor("#333");
-
-    Object.entries(data.paymentMethodAnalytics || {}).forEach(
-      ([method, stats]) => {
-        const percentage =
-          data.totalRevenue > 0
-            ? ((stats.revenue / data.totalRevenue) * 100).toFixed(1)
-            : "0";
-        doc.text(
-          `${method}: $${(stats.revenue || 0).toFixed(2)} (${
-            stats.count || 0
-          } transactions) - ${percentage}%`
-        );
-      }
-    );
-
-    // Add new page for transactions
-    doc.addPage();
-
-    doc
-      .fontSize(16)
-      .fillColor("#28a745")
-      .text("Recent Transactions (Top 10)", { underline: true });
-
-    doc.moveDown();
-    doc.fontSize(10).fillColor("#333");
-
-    transactions.slice(0, 10).forEach((t, index) => {
-      if (index > 0) doc.moveDown(0.5);
-      doc.text(
-        `${new Date(t.transactionDate).toLocaleDateString()} - ${
-          t.receiptNumber
-        } - ${t.userName} - $${t.finalAmount.toFixed(2)}`
-      );
-    });
-
-    // Footer
-    doc.moveDown(3);
-    doc
-      .fontSize(9)
-      .fillColor("#666")
-      .text(
-        "This report is confidential and proprietary to IAAI Training Institute",
-        { align: "center" }
-      )
-      .text(
-        `© ${new Date().getFullYear()} International Aesthetic Academic Institution. All rights reserved.`,
-        { align: "center" }
-      );
-
-    // Finalize PDF file
-    doc.end();
-
-    console.log("✅ PDF generated successfully with PDFKit");
-  } catch (err) {
-    console.error("❌ Error generating PDF with PDFKit:", err);
-
-    res.status(500).json({
-      error: "PDF generation failed",
-      message: err.message,
-      suggestion: "Please try Excel or CSV format instead",
-    });
-  }
-}

@@ -9,21 +9,17 @@ const axios = require("axios");
 // EMAIL CONFIGURATION HELPER
 // ============================================
 function createEmailTransporter() {
-  return nodemailer.createTransport({
-    host: "mail.iaa-i.com",
-    port: 587,
-    secure: false, // false for port 587
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+  // Return a mock transporter that uses SendGrid
+  return {
+    verify: async () => {
+      console.log("✅ Using SendGrid - no verification needed");
+      return true;
     },
-    tls: {
-      rejectUnauthorized: false,
+    sendMail: async (options) => {
+      const sendEmail = require("../utils/sendEmail");
+      return await sendEmail(options);
     },
-    connectionTimeout: 60000,
-    greetingTimeout: 30000,
-    socketTimeout: 60000,
-  });
+  };
 }
 
 // ============================================

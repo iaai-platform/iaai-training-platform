@@ -150,7 +150,7 @@ exports.registerUser = async (req, res) => {
           name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
           address: process.env.EMAIL_USER,
         },
-        to: process.env.ADMIN_EMAIL,
+        to: process.env.CONFIRM_EMAIL,
         subject: `New User Registration - ${
           role === "instructor" ? "Instructor" : "Student"
         } Application`,
@@ -259,7 +259,7 @@ exports.registerUser = async (req, res) => {
       await transporter.sendMail(mailOptions);
       console.log(
         "📧 Admin notification email sent successfully to:",
-        process.env.ADMIN_EMAIL
+        process.env.CONFIRM_EMAIL
       );
     } catch (emailError) {
       console.error("📧 Error sending admin notification email:", emailError);

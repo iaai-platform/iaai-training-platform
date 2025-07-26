@@ -156,18 +156,21 @@ const onlineLiveCourseSchema = new mongoose.Schema(
         type: Number,
         min: 1,
         max: 365,
-        default: 30,
+        // Remove default: 30 - we don't want a default when early bird isn't used
         validate: {
           validator: function (value) {
-            if (this.earlyBirdPrice && this.earlyBirdPrice > 0) {
+            // If earlyBirdPrice exists and is greater than 0, then earlyBirdDays is required
+            if (this.earlyBirdPrice !== undefined && this.earlyBirdPrice >= 0) {
               return value && value > 0;
             }
+            // If no earlyBirdPrice, then earlyBirdDays is optional
             return true;
           },
-          message: "Early bird days is required when early bird price is set",
+          message:
+            "Early bird days is required and must be greater than 0 when early bird price is set",
         },
       },
-      currency: { type: String, default: "USD" },
+      currency: { type: String, default: "EUR" },
       seatsAvailable: {
         type: Number,
         default: 50,

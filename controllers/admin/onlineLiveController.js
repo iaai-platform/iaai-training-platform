@@ -2004,23 +2004,37 @@ class OnlineLiveCoursesController {
     }
 
     // Price validations
+    // Price validations
     if (
       formData.enrollment?.price !== undefined &&
-      formData.enrollment?.price !== null
+      formData.enrollment?.price !== null &&
+      formData.enrollment?.price !== ""
     ) {
       const priceValue = parseFloat(formData.enrollment.price);
       if (isNaN(priceValue) || priceValue < 0) {
         errors.push({
           field: "enrollment.price",
-          message: "Valid price is required.",
+          message: "Price must be 0 or greater (0 for free courses).",
         });
-      } else if (formData.enrollment?.earlyBirdPrice) {
+      } else if (
+        formData.enrollment?.earlyBirdPrice !== undefined &&
+        formData.enrollment?.earlyBirdPrice !== null &&
+        formData.enrollment?.earlyBirdPrice !== ""
+      ) {
         const earlyBirdPrice = parseFloat(formData.enrollment.earlyBirdPrice);
-        if (!isNaN(earlyBirdPrice) && earlyBirdPrice >= priceValue) {
-          errors.push({
-            field: "enrollment.earlyBirdPrice",
-            message: "Early bird price must be less than regular price.",
-          });
+        if (!isNaN(earlyBirdPrice)) {
+          if (earlyBirdPrice < 0) {
+            errors.push({
+              field: "enrollment.earlyBirdPrice",
+              message: "Early bird price must be 0 or greater.",
+            });
+          } else if (earlyBirdPrice > priceValue) {
+            errors.push({
+              field: "enrollment.earlyBirdPrice",
+              message:
+                "Early bird price must be less than or equal to regular price.",
+            });
+          }
         }
       }
     }
@@ -2428,12 +2442,33 @@ class OnlineLiveCoursesController {
    */
   _processEnrollmentData(formData) {
     const enrollmentData = formData.enrollment || {};
+
+    // Handle price - allow 0 for free courses
+    let price = 0;
+    if (
+      enrollmentData.price !== undefined &&
+      enrollmentData.price !== null &&
+      enrollmentData.price !== ""
+    ) {
+      price = parseFloat(enrollmentData.price);
+      if (isNaN(price)) price = 0;
+    }
+
+    // Handle early bird price - allow 0
+    let earlyBirdPrice = undefined;
+    if (
+      enrollmentData.earlyBirdPrice !== undefined &&
+      enrollmentData.earlyBirdPrice !== null &&
+      enrollmentData.earlyBirdPrice !== ""
+    ) {
+      earlyBirdPrice = parseFloat(enrollmentData.earlyBirdPrice);
+      if (isNaN(earlyBirdPrice)) earlyBirdPrice = undefined;
+    }
+
     return {
-      price: parseFloat(enrollmentData.price) || 0,
-      earlyBirdPrice: enrollmentData.earlyBirdPrice
-        ? parseFloat(enrollmentData.earlyBirdPrice)
-        : undefined,
-      currency: enrollmentData.currency?.trim() || "USD",
+      price: price,
+      earlyBirdPrice: earlyBirdPrice,
+      currency: enrollmentData.currency?.trim() || "EUR",
       seatsAvailable: parseInt(enrollmentData.seatsAvailable) || 50,
       minEnrollment: parseInt(enrollmentData.minEnrollment) || 10,
       waitlistEnabled:
@@ -3556,7 +3591,7 @@ class OnlineLiveCoursesController {
       enrollment: {
         price: originalCourse.enrollment?.price || 0,
         earlyBirdPrice: originalCourse.enrollment?.earlyBirdPrice,
-        currency: originalCourse.enrollment?.currency || "USD",
+        currency: originalCourse.enrollment?.currency || "EUR",
         seatsAvailable: originalCourse.enrollment?.seatsAvailable || 50,
         minEnrollment: originalCourse.enrollment?.minEnrollment || 10,
         currentEnrollment: cloneOptions.options?.resetEnrollment

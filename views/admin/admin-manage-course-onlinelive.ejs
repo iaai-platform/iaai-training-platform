@@ -139,12 +139,12 @@
                         </tr>
                     </thead>
                     <tbody id="coursesTableBody">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
 
             <div class="grid-container hidden" id="gridView">
-                </div>
+            </div>
 
             <div class="calendar-container hidden" id="calendarView">
                 <div id="courseCalendar"></div>
@@ -259,12 +259,12 @@
                             <div class="form-group full-width">
                                 <label for="description">Description *</label>
                                 <textarea id="description" name="basic[description]" required 
-                                               placeholder="Detailed course description..." maxlength="2000"></textarea>
+                                          placeholder="Detailed course description..." maxlength="2000"></textarea>
                             </div>
                             <div class="form-group full-width">
                                 <label for="aboutThisCourse">About This Course</label>
                                 <textarea id="aboutThisCourse" name="basic[aboutThisCourse]" 
-                                               placeholder="Brief course overview..." maxlength="500"></textarea>
+                                          placeholder="Brief course overview..." maxlength="500"></textarea>
                             </div>
                             <div class="form-group">
                                 <label for="category">Category *</label>
@@ -363,7 +363,7 @@
                         <div class="sessions-section" id="sessionsSection">
                             <h4>Session Schedule</h4>
                             <div id="sessionsContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addSession">
                                 <i class="fas fa-plus"></i> Add Session
                             </button>
@@ -374,18 +374,36 @@
                         <h3>Pricing & Enrollment</h3>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="price">Price (USD) *</label>
-                                <input type="number" id="price" name="enrollment[price]" required min="0" step="0.01">
+                                <label for="price">Price (EUR) *</label>
+                                <input type="number" id="price" name="enrollment[price]" required min="0" step="0.01" value="0">
+                                <small class="help-text">Enter 0 for free courses</small>
                             </div>
                             <div class="form-group">
                                 <label for="earlyBirdPrice">Early Bird Price</label>
-                                <input type="number" id="earlyBirdPrice" name="enrollment[earlyBirdPrice]" min="0" step="0.01">
+                                <input type="number" 
+                                       id="earlyBirdPrice" 
+                                       name="enrollment[earlyBirdPrice]" 
+                                       min="0" 
+                                       step="0.01" 
+                                       value="0"
+                                       placeholder="0 for free early access">
+                                <small class="help-text">Must be less than or equal to regular price. 0 for free early access.</small>
                             </div>
+                            <div class="form-group" id="earlyBirdDaysGroup" style="display: none;">
+                                <label for="earlyBirdDays">Early Bird Days</label>
+                                <input type="number" 
+                                       id="earlyBirdDays" 
+                                       name="enrollment[earlyBirdDays]" 
+                                       min="1" 
+                                       max="365" 
+                                       placeholder="Number of days (e.g., 7)">
+                                <small class="help-text">How many days before course start the early bird price applies</small>
+                            </div>                            
                             <div class="form-group">
                                 <label for="currency">Currency</label>
                                 <select id="currency" name="enrollment[currency]">
-                                    <option value="USD">USD</option>
                                     <option value="EUR">EUR</option>
+                                    <option value="USD">USD</option>
                                     <option value="TRY">TRY</option>
                                     <option value="GBP">GBP</option>
                                 </select>
@@ -427,7 +445,7 @@
                                     <label for="primaryInstructorId">Primary Instructor *</label>
                                     <select id="primaryInstructorId" name="instructors[primary][instructorId]" required>
                                         <option value="">Select Primary Instructor</option>
-                                        </select>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="primaryInstructorName">Instructor Name</label>
@@ -444,7 +462,7 @@
                         <div class="additional-instructors-section">
                             <h4>Additional Instructors</h4>
                             <div id="additionalInstructorsContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addInstructor">
                                 <i class="fas fa-plus"></i> Add Additional Instructor
                             </button>
@@ -512,7 +530,7 @@
                         <div class="objectives-section">
                             <h4>Learning Objectives</h4>
                             <div id="objectivesContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addObjective">
                                 <i class="fas fa-plus"></i> Add Objective
                             </button>
@@ -521,7 +539,7 @@
                         <div class="modules-section">
                             <h4>Course Modules</h4>
                             <div id="modulesContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addModule">
                                 <i class="fas fa-plus"></i> Add Module
                             </button>
@@ -541,7 +559,7 @@
                                 </div>
                             </div>
                             <div id="targetAudienceContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addTargetAudience">
                                 <i class="fas fa-plus"></i> Add Target Audience
                             </button>
@@ -550,12 +568,12 @@
                         <div class="form-group full-width">
                             <label for="prerequisites">Prerequisites</label>
                             <textarea id="prerequisites" name="content[prerequisites]" 
-                                           placeholder="Course prerequisites and requirements..."></textarea>
+                                      placeholder="Course prerequisites and requirements..."></textarea>
                         </div>
                         <div class="form-group full-width">
                             <label for="detailedSyllabus">Detailed Syllabus</label>
                             <textarea id="detailedSyllabus" name="content[detailedSyllabus]" 
-                                           placeholder="Detailed course syllabus..."></textarea>
+                                      placeholder="Detailed course syllabus..."></textarea>
                         </div>
                     </div>
 
@@ -607,7 +625,7 @@
                         <div class="required-software-section">
                             <h4>Required Software</h4>
                             <div id="requiredSoftwareContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addRequiredSoftware">
                                 <i class="fas fa-plus"></i> Add Software
                             </button>
@@ -704,7 +722,7 @@
                         <div class="engagement-tools-section">
                             <h4>Engagement Tools</h4>
                             <div id="engagementToolsContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addEngagementTool">
                                 <i class="fas fa-plus"></i> Add Tool
                             </button>
@@ -824,7 +842,6 @@
                                 </div>
                             </div>
                         </div>
-                        
 
                         <div class="course-documents-section">
                             <h4>Course Documents</h4>
@@ -837,41 +854,36 @@
                             </div>
                         </div>
 
+                        <div class="gallery-section">
+                            <h4>Gallery Images</h4>
+                            <div class="form-group file-upload-section">
+                                <label for="galleryImagesInput">Upload Gallery Images</label>
+                                <input type="file" id="galleryImagesInput" name="images" multiple 
+                                       accept=".jpg,.jpeg,.png,.webp">
+                                <small class="help-text">Multiple files allowed. JPG, PNG, WebP (max 5MB each)</small>
+                                <div class="file-preview-container" id="galleryImagesPreview"></div>
+                            </div>
+                        </div>
 
-                  <!-- Enhanced Gallery Images Section -->
-<div class="gallery-section">
-    <h4>Gallery Images</h4>
-    <div class="form-group file-upload-section">
-        <label for="galleryImagesInput">Upload Gallery Images</label>
-        <input type="file" id="galleryImagesInput" name="images" multiple 
-               accept=".jpg,.jpeg,.png,.webp">
-        <small class="help-text">Multiple files allowed. JPG, PNG, WebP (max 5MB each)</small>
-        <div class="file-preview-container" id="galleryImagesPreview"></div>
-    </div>
-</div>
+                        <div class="uploaded-videos-section">
+                            <h4>Upload Video Files</h4>
+                            <div class="form-group file-upload-section">
+                                <label for="uploadedVideosInput">Upload Video Files</label>
+                                <input type="file" id="uploadedVideosInput" name="videos" multiple 
+                                       accept=".mp4,.webm,.ogg">
+                                <small class="help-text">Multiple files allowed. MP4, WebM, OGG (max 100MB each)</small>
+                                <div class="file-preview-container" id="uploadedVideosPreview"></div>
+                            </div>
+                        </div>
 
-<!-- Enhanced Course Videos Section (for uploaded video files, not external links) -->
-<div class="uploaded-videos-section">
-    <h4>Upload Video Files</h4>
-    <div class="form-group file-upload-section">
-        <label for="uploadedVideosInput">Upload Video Files</label>
-        <input type="file" id="uploadedVideosInput" name="videos" multiple 
-               accept=".mp4,.webm,.ogg">
-        <small class="help-text">Multiple files allowed. MP4, WebM, OGG (max 100MB each)</small>
-        <div class="file-preview-container" id="uploadedVideosPreview"></div>
-    </div>
-</div>
-
-<!-- External Video Links Section (separate from uploaded videos) -->
-<div class="videos-section">
-    <h4>External Video Links</h4>
-    <div id="videoLinksContainer">
-        <!-- Dynamic video links will be added here -->
-    </div>
-    <button type="button" class="btn btn-secondary" id="addVideoLink">
-        <i class="fas fa-plus"></i> Add Video Link
-    </button>
-</div>
+                        <div class="videos-section">
+                            <h4>External Video Links</h4>
+                            <div id="videoLinksContainer">
+                            </div>
+                            <button type="button" class="btn btn-secondary" id="addVideoLink">
+                                <i class="fas fa-plus"></i> Add Video Link
+                            </button>
+                        </div>
 
                         <div class="promotional-section">
                             <h4>Promotional Content</h4>
@@ -897,7 +909,7 @@
                         <div class="links-section">
                             <h4>External Links</h4>
                             <div id="linksContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addLink">
                                 <i class="fas fa-plus"></i> Add Link
                             </button>
@@ -910,7 +922,7 @@
                         <div class="handouts-section">
                             <h4>Course Handouts</h4>
                             <div id="handoutsContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addHandout">
                                 <i class="fas fa-plus"></i> Add Handout
                             </button>
@@ -919,7 +931,7 @@
                         <div class="virtual-labs-section">
                             <h4>Virtual Labs</h4>
                             <div id="virtualLabsContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addVirtualLab">
                                 <i class="fas fa-plus"></i> Add Virtual Lab
                             </button>
@@ -1017,7 +1029,7 @@
                             <div class="quiz-section" id="quizSection" style="display: none;">
                                 <h4>Quiz Questions</h4>
                                 <div id="questionsContainer">
-                                    </div>
+                                </div>
                                 <button type="button" class="btn btn-secondary" id="addQuestion">
                                     <i class="fas fa-plus"></i> Add Question
                                 </button>
@@ -1048,13 +1060,13 @@
                                     <label for="issuingAuthorityId">Primary Certification Body</label>
                                     <select id="issuingAuthorityId" name="certification[issuingAuthorityId]">
                                         <option value="">Select Certification Body</option>
-                                        </select>
+                                    </select>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="issuingAuthority">Issuing Authority Name</label>
                                     <input type="text" id="issuingAuthority" name="certification[issuingAuthority]" 
-                                               value="IAAI Training Institute" readonly>
+                                           value="IAAI Training Institute" readonly>
                                     <small class="help-text">This field updates automatically based on your selection above</small>
                                 </div>
                             </div>
@@ -1064,12 +1076,12 @@
                                 <div class="form-group">
                                     <label for="minimumAttendance">Minimum Attendance (%)</label>
                                     <input type="number" id="minimumAttendance" name="certification[requirements][minimumAttendance]" 
-                                               min="0" max="100" value="80">
+                                           min="0" max="100" value="80">
                                 </div>
                                 <div class="form-group">
                                     <label for="minimumScore">Minimum Score (%)</label>
                                     <input type="number" id="minimumScore" name="certification[requirements][minimumScore]" 
-                                               min="0" max="100" value="70">
+                                           min="0" max="100" value="70">
                                 </div>
                                 <div class="form-group">
                                     <label for="practicalRequired">Practical Required</label>
@@ -1099,7 +1111,7 @@
                                 <div class="form-group">
                                     <label for="validityYears">Validity Years</label>
                                     <input type="number" id="validityYears" name="certification[validity][years]" 
-                                               min="1" max="10" placeholder="Years if not lifetime">
+                                           min="1" max="10" placeholder="Years if not lifetime">
                                 </div>
                             </div>
                             
@@ -1124,7 +1136,7 @@
                         <div class="certification-bodies-section">
                             <h4>Additional Certification Bodies</h4>
                             <div id="certificationBodiesContainer">
-                                </div>
+                            </div>
                             <button type="button" class="btn btn-secondary" id="addCertificationBody">
                                 <i class="fas fa-plus"></i> Add Certification Body
                             </button>
@@ -1161,12 +1173,12 @@
                                 <div class="form-group">
                                     <label for="minimumAttendanceRequired">Minimum Required (%)</label>
                                     <input type="number" id="minimumAttendanceRequired" name="attendance[minimumRequired]" 
-                                               min="0" max="100" value="80">
+                                           min="0" max="100" value="80">
                                 </div>
                                 <div class="form-group">
                                     <label for="lateJoinWindow">Late Join Window (minutes)</label>
                                     <input type="number" id="lateJoinWindow" name="attendance[lateJoinWindow]" 
-                                               min="0" max="60" value="15">
+                                           min="0" max="60" value="15">
                                 </div>
                             </div>
                         </div>
@@ -1177,7 +1189,7 @@
                                 <div class="form-group">
                                     <label for="minimumSessionTime">Minimum Session Time (%)</label>
                                     <input type="number" id="minimumSessionTime" name="attendance[rules][minimumSessionTime]" 
-                                               min="0" max="100" value="80">
+                                           min="0" max="100" value="80">
                                     <small class="help-text">Percentage of session duration required for attendance</small>
                                 </div>
                                 <div class="form-group">
@@ -1220,7 +1232,7 @@
                                 <div class="form-group">
                                     <label for="contactEmail">Contact Email</label>
                                     <input type="email" id="contactEmail" name="support[contact][email]" 
-                                               value="info@iaa-i.com">
+                                           value="info@iaa-i.com">
                                 </div>
                                 <div class="form-group">
                                     <label for="contactPhone">Contact Phone</label>
@@ -1229,7 +1241,7 @@
                                 <div class="form-group">
                                     <label for="contactWhatsapp">WhatsApp</label>
                                     <input type="tel" id="contactWhatsapp" name="support[contact][whatsapp]" 
-                                               value="+90 536 745 86 66">
+                                           value="+90 536 745 86 66">
                                 </div>
                             </div>
                         </div>
@@ -1247,12 +1259,12 @@
                                 <div class="form-group">
                                     <label for="supportSchedule">Support Schedule</label>
                                     <input type="text" id="supportSchedule" name="support[hours][schedule]" 
-                                               value="9 AM - 6 PM (Monday-Friday)">
+                                           value="9 AM - 6 PM (Monday-Friday)">
                                 </div>
                                 <div class="form-group">
                                     <label for="supportTimezone">Support Time Zone</label>
                                     <input type="text" id="supportTimezone" name="support[hours][timezone]" 
-                                               placeholder="e.g., EST, PST">
+                                           placeholder="e.g., EST, PST">
                                 </div>
                             </div>
                         </div>
@@ -1272,12 +1284,12 @@
                                 <div class="form-group full-width">
                                     <label for="platformFailure">Platform Failure Procedure</label>
                                     <textarea id="platformFailure" name="support[emergencyProcedures][platformFailure]" 
-                                                   placeholder="Steps to follow if the platform fails..."></textarea>
+                                              placeholder="Steps to follow if the platform fails..."></textarea>
                                 </div>
                                 <div class="form-group full-width">
                                     <label for="instructorDisconnection">Instructor Disconnection Procedure</label>
                                     <textarea id="instructorDisconnection" name="support[emergencyProcedures][instructorDisconnection]" 
-                                                   placeholder="Steps to follow if instructor disconnects..."></textarea>
+                                              placeholder="Steps to follow if instructor disconnects..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1292,17 +1304,17 @@
                                 <div class="form-group">
                                     <label for="recordingsAccess">Recordings Access (days)</label>
                                     <input type="number" id="recordingsAccess" name="postCourse[accessDuration][recordings]" 
-                                               min="1" max="365" value="90">
+                                           min="1" max="365" value="90">
                                 </div>
                                 <div class="form-group">
                                     <label for="materialsAccess">Materials Access (days)</label>
                                     <input type="number" id="materialsAccess" name="postCourse[accessDuration][materials]" 
-                                               min="1" max="365" value="180">
+                                           min="1" max="365" value="180">
                                 </div>
                                 <div class="form-group">
                                     <label for="forumAccess">Forum Access (days)</label>
                                     <input type="number" id="forumAccess" name="postCourse[accessDuration][forum]" 
-                                               min="1" max="365" value="365">
+                                           min="1" max="365" value="365">
                                 </div>
                             </div>
                         </div>
@@ -1334,7 +1346,7 @@
                                 <div class="form-group">
                                     <label for="futureDiscount">Future Course Discount (%)</label>
                                     <input type="number" id="futureDiscount" name="postCourse[alumni][futureDiscount]" 
-                                               min="0" max="100" placeholder="Discount percentage">
+                                           min="0" max="100" placeholder="Discount percentage">
                                 </div>
                             </div>
                         </div>
@@ -1361,7 +1373,7 @@
                             <div class="advanced-courses-section">
                                 <h5>Advanced Course Pathway</h5>
                                 <div id="advancedCoursesContainer">
-                                    </div>
+                                </div>
                                 <button type="button" class="btn btn-secondary" id="addAdvancedCourse">
                                     <i class="fas fa-plus"></i> Add Advanced Course
                                 </button>
@@ -1378,17 +1390,17 @@
                                 <div class="form-group">
                                     <label for="welcomeVideoUrl">Welcome Video URL</label>
                                     <input type="url" id="welcomeVideoUrl" name="experience[onboarding][welcomeVideoUrl]" 
-                                               placeholder="Welcome video link">
+                                           placeholder="Welcome video link">
                                 </div>
                                 <div class="form-group">
                                     <label for="platformGuideUrl">Platform Guide URL</label>
                                     <input type="url" id="platformGuideUrl" name="experience[onboarding][platformGuideUrl]" 
-                                               placeholder="Platform tutorial link">
+                                           placeholder="Platform tutorial link">
                                 </div>
                                 <div class="form-group">
                                     <label for="checklistUrl">Pre-Course Checklist URL</label>
                                     <input type="url" id="checklistUrl" name="experience[onboarding][checklistUrl]" 
-                                               placeholder="Checklist document link">
+                                           placeholder="Checklist document link">
                                 </div>
                                 <div class="form-group">
                                     <label for="orientationDate">Orientation Session Date</label>
@@ -1452,7 +1464,7 @@
                                 <div class="form-group">
                                     <label for="reminderSchedule">Reminder Schedule (days before)</label>
                                     <input type="text" id="reminderSchedule" name="notificationSettings[reminderSchedule]" 
-                                               value="7,3,1" placeholder="e.g., 7,3,1">
+                                           value="7,3,1" placeholder="e.g., 7,3,1">
                                 </div>
                                 <div class="form-group">
                                     <label for="marketingEmails">Marketing Emails</label>
@@ -1488,17 +1500,17 @@
                                 <div class="form-group">
                                     <label for="templateName">Template Name</label>
                                     <input type="text" id="templateName" name="metadata[templateName]" 
-                                               placeholder="Template name (if saving as template)">
+                                           placeholder="Template name (if saving as template)">
                                 </div>
                                 <div class="form-group full-width">
                                     <label for="tags">Tags</label>
                                     <input type="text" id="tags" name="metadata[tags]" 
-                                               placeholder="Comma-separated tags for organization">
+                                           placeholder="Comma-separated tags for organization">
                                 </div>
                                 <div class="form-group full-width">
                                     <label for="internalNotes">Internal Notes</label>
                                     <textarea id="internalNotes" name="metadata[internalNotes]" 
-                                                   placeholder="Internal notes and comments..."></textarea>
+                                              placeholder="Internal notes and comments..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1536,15 +1548,15 @@
                     <div class="form-group">
                         <label for="cloneTitle">New Course Title *</label>
                         <input type="text" id="cloneTitle" name="title" required
-                                       placeholder="Enter new course title" maxlength="200">
+                               placeholder="Enter new course title" maxlength="200">
                         <small class="help-text">The title for the cloned course</small>
                     </div>
 
                     <div class="form-group">
                         <label for="cloneCourseCode">New Course Code *</label>
                         <input type="text" id="cloneCourseCode" name="courseCode" required
-                                       placeholder="Enter unique course code" maxlength="50"
-                                       style="text-transform: uppercase;">
+                               placeholder="Enter unique course code" maxlength="50"
+                               style="text-transform: uppercase;">
                         <small class="help-text">Must be unique across all courses</small>
                     </div>
 
@@ -1644,7 +1656,7 @@
                     <div class="form-group">
                         <label for="cloneNotes">Clone Notes (Optional)</label>
                         <textarea id="cloneNotes" name="notes"
-                                       placeholder="Add any notes about this clone..."></textarea>
+                                  placeholder="Add any notes about this clone..."></textarea>
                     </div>
                 </form>
 
@@ -1659,6 +1671,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal-overlay" id="createFromInPersonModal">
         <div class="modal-container large">
             <div class="modal-header">
@@ -1677,6 +1690,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Templates -->
     <script type="text/template" id="sessionTemplate">
         <div class="session-item dynamic-item" data-index="{{index}}">
             <div class="dynamic-item-header">
@@ -1725,7 +1740,7 @@
                     <label>Instructor</label>
                     <select name="schedule[sessions][{{index}}][instructorId]">
                         <option value="">Select Instructor</option>
-                        </select>
+                    </select>
                 </div>
             </div>
         </div>
@@ -1749,7 +1764,7 @@
                     <label>Additional Instructor</label>
                     <select name="instructors[additional][{{index}}][instructorId]" required onchange="adminOnlineCourses.updateInstructorName(this)">
                         <option value="">Select Instructor</option>
-                        </select>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Name</label>
@@ -2096,7 +2111,7 @@
                     <label>Certification Body</label>
                     <select name="certification[certificationBodies][{{index}}][bodyId]" required onchange="adminOnlineCourses.updateCertificationBodyInfo(this)">
                         <option value="">Select Certification Body</option>
-                        </select>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Body Name</label>
@@ -2113,6 +2128,8 @@
             </div>
         </div>
     </script>
+
+    <!-- Modals -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-container small">
             <div class="modal-header">
@@ -2139,6 +2156,64 @@
             <p>Processing...</p>
         </div>
     </div>
+
+    <!-- Hidden input for clone course ID -->
+    <input type="hidden" id="cloneCourseId">
+
+    <!-- JavaScript for Early Bird Price Validation -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const priceField = document.getElementById('price');
+        const earlyBirdPriceField = document.getElementById('earlyBirdPrice');
+        const earlyBirdDaysGroup = document.getElementById('earlyBirdDaysGroup');
+        const earlyBirdDaysField = document.getElementById('earlyBirdDays');
+        
+        function validatePrices() {
+            const regularPrice = parseFloat(priceField.value) || 0;
+            const earlyBirdPrice = parseFloat(earlyBirdPriceField.value) || 0;
+            
+            // Early bird price cannot be greater than regular price
+            if (earlyBirdPrice > regularPrice) {
+                earlyBirdPriceField.value = regularPrice;
+            }
+        }
+        
+        function toggleEarlyBirdDays() {
+            const earlyBirdPrice = parseFloat(earlyBirdPriceField.value) || 0;
+            
+            if (earlyBirdPrice > 0) {
+                // Show the days field
+                earlyBirdDaysGroup.style.display = 'block';
+                earlyBirdDaysField.required = true;
+                
+                // Set default value if empty
+                if (!earlyBirdDaysField.value) {
+                    earlyBirdDaysField.value = '7';
+                }
+            } else {
+                // Hide the days field
+                earlyBirdDaysGroup.style.display = 'none';
+                earlyBirdDaysField.required = false;
+                earlyBirdDaysField.value = ''; // Clear the value
+            }
+        }
+        
+        // Listen for changes to both price fields
+        priceField.addEventListener('input', validatePrices);
+        priceField.addEventListener('change', validatePrices);
+        earlyBirdPriceField.addEventListener('input', function() {
+            validatePrices();
+            toggleEarlyBirdDays();
+        });
+        earlyBirdPriceField.addEventListener('change', function() {
+            validatePrices();
+            toggleEarlyBirdDays();
+        });
+        
+        // Check initial state
+        toggleEarlyBirdDays();
+    });
+    </script>
 
     <script src="/js/admin-online-courses.js"></script>
 </body>

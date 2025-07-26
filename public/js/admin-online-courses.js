@@ -1786,11 +1786,14 @@ class AdminOnlineCoursesManager {
       // NEW: Create the final payload with merged data
       const payload = {
         ...mergedFormData,
-        uploadedFiles: this.savedUploadedFiles, // File URLs from successful uploads
-        // PRESERVED: Keep savedDynamicItems for backward compatibility if needed
+        uploadedFiles: this.savedUploadedFiles,
         savedDynamicItemsBackup: savedItemsJson,
       };
 
+      // ADD THIS LINE RIGHT AFTER CREATING THE PAYLOAD:
+      const cleanedPayload = this._cleanEnrollmentData(payload);
+
+      console.log("📤 Final Enhanced Payload:", cleanedPayload);
       console.log("📤 Final Enhanced Payload:", payload);
 
       // PRESERVED: Enhanced debugging with field counting (from original)
@@ -1850,7 +1853,7 @@ class AdminOnlineCoursesManager {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(cleanedPayload),
       });
 
       console.log("📊 Response status:", response.status);
@@ -6997,6 +7000,74 @@ class AdminOnlineCoursesManager {
     } else {
       console.warn(`⚠️ Form element with name "${name}" not found.`);
     }
+  }
+
+  //new
+  // Add this method to your AdminOnlineCoursesManager class in admin-online-courses.js
+  // Place it near other helper methods (around line 3000+)
+
+  /**
+   * Clean enrollment data before submission to handle early bird pricing logic
+   */
+  _cleanEnrollmentData(payload) {
+    if (payload.enrollment) {
+      const enrollment = payload.enrollment;
+
+      console.log("🧹 Cleaning enrollment data before submission...");
+      console.log("📊 Original enrollment data:", enrollment);
+
+      // Convert prices to numbers
+      if (
+        enrollment.price !== undefined &&
+        enrollment.price !== null &&
+        enrollment.price !== ""
+      ) {
+        enrollment.price = parseFloat(enrollment.price) || 0;
+      }
+
+      // Handle early bird pricing logic
+      if (
+        enrollment.earlyBirdPrice !== undefined &&
+        enrollment.earlyBirdPrice !== null &&
+        enrollment.earlyBirdPrice !== ""
+      ) {
+        enrollment.earlyBirdPrice = parseFloat(enrollment.earlyBirdPrice) || 0;
+
+        // Only include earlyBirdDays if earlyBirdPrice > 0
+        if (enrollment.earlyBirdPrice >= 0) {
+          enrollment.earlyBirdDays = parseInt(enrollment.earlyBirdDays) || 7;
+          console.log(
+            "✅ Early bird pricing enabled: price=" +
+              enrollment.earlyBirdPrice +
+              ", days=" +
+              enrollment.earlyBirdDays
+          );
+        } else {
+          // Remove earlyBirdDays if earlyBirdPrice is 0
+          delete enrollment.earlyBirdDays;
+          console.log("🚫 Early bird price is 0, removing earlyBirdDays");
+        }
+      } else {
+        // Remove both fields if no early bird price provided
+        delete enrollment.earlyBirdPrice;
+        delete enrollment.earlyBirdDays;
+        console.log(
+          "🚫 No early bird price provided, removing both earlyBirdPrice and earlyBirdDays"
+        );
+      }
+
+      // Clean other enrollment fields
+      if (enrollment.seatsAvailable !== undefined) {
+        enrollment.seatsAvailable = parseInt(enrollment.seatsAvailable) || 50;
+      }
+      if (enrollment.minEnrollment !== undefined) {
+        enrollment.minEnrollment = parseInt(enrollment.minEnrollment) || 10;
+      }
+
+      console.log("✅ Cleaned enrollment data:", enrollment);
+    }
+
+    return payload;
   }
 
   /**

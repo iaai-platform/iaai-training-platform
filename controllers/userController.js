@@ -126,14 +126,14 @@ exports.registerUser = async (req, res) => {
     try {
       console.log("📧 Sending admin notification email...");
 
-      // Create email transporter with company email settings
+      // Create email transporter with SendGrid
       const transporter = createEmailTransporter();
 
       // Email content for admin notification
       const mailOptions = {
         from: {
           name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
-          address: process.env.EMAIL_USER,
+          address: process.env.EMAIL_FROM || "info@iaa-i.com",
         },
         to: process.env.CONFIRM_EMAIL,
         subject: `New User Registration - ${
@@ -216,12 +216,12 @@ exports.registerUser = async (req, res) => {
                 
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="${
-                    process.env.SITE_URL || "http://localhost:3000"
+                    process.env.SITE_URL || "https://iaa-i.com"
                   }/confirm-user/${email}" class="action-button">
                     ✅ Approve Account
                   </a>
                   <a href="${
-                    process.env.SITE_URL || "http://localhost:3000"
+                    process.env.SITE_URL || "https://iaa-i.com"
                   }/admin/users" class="action-button" style="background-color: #6c757d;">
                     👥 Manage Users
                   </a>
@@ -327,7 +327,7 @@ exports.confirmUser = async (req, res) => {
       const mailOptions = {
         from: {
           name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
-          address: process.env.EMAIL_USER,
+          address: process.env.EMAIL_FROM || "info@iaa-i.com",
         },
         to: email,
         subject: "🎉 Welcome to IAAI Training - Account Confirmed!",
@@ -384,7 +384,7 @@ exports.confirmUser = async (req, res) => {
                 
                 <div style="text-align: center;">
                   <a href="${
-                    process.env.SITE_URL || "http://localhost:3000"
+                    process.env.SITE_URL || "https://iaa-i.com"
                   }/login" class="login-button">
                     🔐 Login to Your Account
                   </a>

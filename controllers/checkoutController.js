@@ -367,6 +367,7 @@ exports.applyPromoCode = async (req, res) => {
 };
 
 // ✅ ENHANCED: Process Checkout with linked course support
+// ✅ ENHANCED: Process Checkout with improved $0 price handling
 exports.processCheckout = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -436,9 +437,34 @@ exports.processCheckout = async (req, res) => {
       }
     }
 
-    if (totalPrice === 0 || req.session.appliedPromoCode) {
+    console.log(`💰 Calculated total price: $${totalPrice}`);
+
+    // ✅ NEW: Enhanced logic for $0 total (including promo codes)
+    const appliedPromo = req.session.appliedPromoCode;
+    let finalPrice = totalPrice;
+
+    // Apply promo code discount if exists
+    if (appliedPromo) {
+      const promo = await PromoCode.findOne({
+        code: appliedPromo,
+        isActive: true,
+      });
+
+      if (promo && (!promo.expiryDate || new Date() <= promo.expiryDate)) {
+        const discountAmount = totalPrice * (promo.discountPercentage / 100);
+        finalPrice = totalPrice - discountAmount;
+        console.log(
+          `🏷️ Promo applied: ${appliedPromo}, Final price: $${finalPrice}`
+        );
+      }
+    }
+
+    // ✅ ENHANCED: More explicit $0 handling
+    if (finalPrice <= 0) {
+      console.log("🎯 Total is $0 - redirecting to complete registration");
       return res.redirect("/complete-registration");
     } else {
+      console.log("💳 Payment required - redirecting to payment");
       return res.redirect("/payment");
     }
   } catch (err) {
@@ -446,7 +472,6 @@ exports.processCheckout = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 // ✅ ENHANCED: Process Payment with linked course support
 exports.processPayment = async (req, res) => {
   try {
@@ -534,6 +559,7 @@ exports.processPayment = async (req, res) => {
 };
 
 // ✅ ENHANCED: Complete Registration with linked course support
+// ✅ ENHANCED: Complete Registration with better success handling
 exports.completeRegistration = async (req, res) => {
   try {
     console.log(
@@ -558,7 +584,7 @@ exports.completeRegistration = async (req, res) => {
           user.myInPersonCourses[i].enrollmentData.status = "registered";
           user.myInPersonCourses[i].enrollmentData.paidAmount = 0;
           user.myInPersonCourses[i].enrollmentData.promoCodeUsed =
-            req.session.appliedPromoCode || "PROMO100";
+            req.session.appliedPromoCode || "FREE";
 
           coursesUpdated++;
           const isLinkedCourse =
@@ -593,7 +619,7 @@ exports.completeRegistration = async (req, res) => {
           user.myLiveCourses[i].enrollmentData.status = "registered";
           user.myLiveCourses[i].enrollmentData.paidAmount = 0;
           user.myLiveCourses[i].enrollmentData.promoCodeUsed =
-            req.session.appliedPromoCode || "PROMO100";
+            req.session.appliedPromoCode || "FREE";
 
           coursesUpdated++;
           const isLinkedCourse =
@@ -632,7 +658,7 @@ exports.completeRegistration = async (req, res) => {
           user.mySelfPacedCourses[i].enrollmentData.status = "registered";
           user.mySelfPacedCourses[i].enrollmentData.paidAmount = 0;
           user.mySelfPacedCourses[i].enrollmentData.promoCodeUsed =
-            req.session.appliedPromoCode || "PROMO100";
+            req.session.appliedPromoCode || "FREE";
 
           // Set expiry date based on course access days
           if (course.access?.accessDays) {
@@ -683,7 +709,9 @@ exports.completeRegistration = async (req, res) => {
       transactionId: transactionId,
       receiptNumber: `REC-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       transactionDate: new Date(),
-      paymentMethod: "Promo Code",
+      paymentMethod: req.session.appliedPromoCode
+        ? "Promo Code"
+        : "Free Course",
       paymentStatus: "completed",
       subtotal: totalAmount,
       discountAmount: totalSavings,
@@ -695,9 +723,9 @@ exports.completeRegistration = async (req, res) => {
         courseType: course.courseType,
         originalPrice: course.price,
         paidPrice: 0,
-        isLinkedCourseFree: course.isLinkedCourseFree || false, // ⭐ NEW
+        isLinkedCourseFree: course.isLinkedCourseFree || false,
       })),
-      promoCode: req.session.appliedPromoCode || "PROMO100",
+      promoCode: req.session.appliedPromoCode || "FREE",
     };
 
     user.paymentTransactions.push(transaction);
@@ -724,15 +752,19 @@ exports.completeRegistration = async (req, res) => {
     );
     console.log(`📋 Reference number: ${referenceNumber}`);
 
-    // Handle both POST (AJAX) and GET requests
+    // ✅ ENHANCED: Always handle both POST and GET, with better response
     if (req.method === "POST") {
       res.json({
         success: true,
         message: "Registration completed successfully!",
         referenceNumber: referenceNumber,
+        redirect: `/payment/success?order_id=FREE&amount=0.00&ref=${referenceNumber}`,
       });
     } else {
-      res.redirect(`/success?ref=${referenceNumber}`);
+      // GET request - redirect to success page
+      res.redirect(
+        `/payment/success?order_id=FREE&amount=0.00&ref=${referenceNumber}`
+      );
     }
   } catch (err) {
     console.error("❌ Error completing registration:", err);

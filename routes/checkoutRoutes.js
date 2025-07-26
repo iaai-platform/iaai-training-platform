@@ -56,10 +56,10 @@ router.get("/payment/cancel", checkoutController.handlePaymentCancel);
 router.post("/payment/cancel", checkoutController.handlePaymentCancel); // Some gateways use POST
 
 // ========================================
-// PAYMENT RESULT PAGES (Add these)
+// PAYMENT RESULT PAGES (Updated)
 // ========================================
 
-// Payment success page
+// ✅ UPDATED: Payment success page for PAID transactions
 router.get("/payment/success", isAuthenticated, (req, res) => {
   const { order_id, amount, ref } = req.query;
 
@@ -73,6 +73,22 @@ router.get("/payment/success", isAuthenticated, (req, res) => {
     referenceNumber: ref,
     user: req.user,
     title: "Payment Successful - IAAI Training",
+  });
+});
+
+// ✅ UPDATED: Success page for FREE registrations (promo codes, linked courses, etc.)
+router.get("/success", isAuthenticated, (req, res) => {
+  const { order_id, amount, ref } = req.query;
+  console.log(
+    `🎉 Free registration success page accessed with reference: ${ref}`
+  );
+
+  res.render("success", {
+    order_id: order_id || "FREE",
+    amount: amount || "0.00",
+    referenceNumber: ref,
+    user: req.user,
+    title: "Registration Successful - IAAI Training",
   });
 });
 
@@ -110,17 +126,6 @@ router.get("/payment/cancelled", (req, res) => {
   res.render("payment/cancelled", {
     user: req.user || null,
     title: "Payment Cancelled - IAAI Training",
-  });
-});
-
-// ✅ Route to display success page after successful registration (EXISTING)
-router.get("/success", isAuthenticated, (req, res) => {
-  const referenceNumber = req.query.ref;
-  console.log(`🎉 Success page accessed with reference: ${referenceNumber}`);
-  res.render("success", {
-    referenceNumber: referenceNumber,
-    user: req.user || null,
-    title: "Registration Successful",
   });
 });
 

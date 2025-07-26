@@ -553,81 +553,102 @@
       }
 
       // ✅ Handle Checkout with CCAvenue Integration
-      async function handleCheckout() {
-        const agreeTerms = document.getElementById('agreeTerms').checked;
-        const proceedBtn = document.getElementById('proceedBtn');
-        
-        if (!agreeTerms) {
-          alert('⚠️ Please agree to the Terms and Conditions to proceed.');
-          return;
-        }
+     // ✅ Enhanced handleCheckout function with better $0 handling
+async function handleCheckout() {
+  const agreeTerms = document.getElementById('agreeTerms').checked;
+  const proceedBtn = document.getElementById('proceedBtn');
+  
+  if (!agreeTerms) {
+    alert('⚠️ Please agree to the Terms and Conditions to proceed.');
+    return;
+  }
 
-        // Collect additional data
-        const checkoutData = {
-          isGift: document.getElementById('giftOption').checked,
-          giftRecipientEmail: document.getElementById('giftRecipientEmail')?.value,
-          giftMessage: document.getElementById('giftMessage')?.value,
-          orderNotes: document.getElementById('notesText')?.value
-        };
+  // Collect additional data
+  const checkoutData = {
+    isGift: document.getElementById('giftOption').checked,
+    giftRecipientEmail: document.getElementById('giftRecipientEmail')?.value,
+    giftMessage: document.getElementById('giftMessage')?.value,
+    orderNotes: document.getElementById('notesText')?.value
+  };
 
-        // Disable button during processing
-        proceedBtn.disabled = true;
-        proceedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        showLoading(true);
+  // Disable button during processing
+  proceedBtn.disabled = true;
+  proceedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+  showLoading(true);
 
-        try {
-          if (currentDiscountedPrice <= 0) {
-            // ✅ FREE registration (100% discount)
-            console.log('🎯 Processing free registration...');
-            
-            const response = await fetch('/complete-registration', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(checkoutData)
-            });
+  try {
+    console.log(`💰 Current price check: $${currentDiscountedPrice}`);
+    
+    // ✅ ENHANCED: More explicit $0 handling
+    if (currentDiscountedPrice <= 0 || currentDiscountedPrice === 0) {
+      // ✅ FREE registration (100% discount or $0 courses)
+      console.log('🎯 Processing free registration - price is $0');
+      
+      const response = await fetch('/complete-registration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkoutData)
+      });
 
-            const result = await response.json();
-            
-            if (result.success) {
-              window.location.href = `/payment/success?order_id=FREE&amount=0.00&ref=${result.referenceNumber}`;
-            } else {
-              alert('❌ Error completing registration: ' + (result.message || 'Please try again.'));
-              proceedBtn.disabled = false;
-              proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
-            }
-          } else {
-            // ✅ CCAvenue Payment Processing
-            console.log('💳 Processing payment with CCAvenue...');
-            
-            // Create a form and submit to initiate payment
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/payment/initiate';
-            
-            // Add checkout data as hidden inputs
-            Object.keys(checkoutData).forEach(key => {
-              const input = document.createElement('input');
-              input.type = 'hidden';
-              input.name = key;
-              input.value = checkoutData[key];
-              form.appendChild(input);
-            });
-            
-            document.body.appendChild(form);
-            form.submit();
-          }
-        } catch (error) {
-          console.error('Error during checkout:', error);
-          alert('❌ Error processing checkout. Please try again.');
-          proceedBtn.disabled = false;
-          proceedBtn.innerHTML = currentDiscountedPrice <= 0 ? 
-            '<i class="fas fa-check-circle"></i> Complete Registration (FREE)' : 
-            '<i class="fas fa-credit-card"></i> Proceed to Payment';
-        } finally {
-          showLoading(false);
-        }
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ Free registration successful, redirecting to success page');
+        window.location.href = `/payment/success?order_id=FREE&amount=0.00&ref=${result.referenceNumber}`;
+      } else {
+        alert('❌ Error completing registration: ' + (result.message || 'Please try again.'));
+        proceedBtn.disabled = false;
+        proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
+      }
+    } else {
+      // ✅ ENHANCED: First check server-side if total is actually $0
+      console.log('💳 Checking final price on server before payment...');
+      
+      const checkResponse = await fetch('/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkoutData)
+      });
+
+      // If redirected to complete-registration, it means server calculated $0
+      if (checkResponse.redirected && checkResponse.url.includes('/complete-registration')) {
+        console.log('🎯 Server determined price is $0, processing free registration');
+        window.location.href = '/complete-registration';
+        return;
       }
 
+      // Otherwise proceed with CCAvenue payment
+      console.log('💳 Processing payment with CCAvenue...');
+      
+      // Create a form and submit to initiate payment
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/payment/initiate';
+      
+      // Add checkout data as hidden inputs
+      Object.keys(checkoutData).forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = checkoutData[key];
+        form.appendChild(input);
+      });
+      
+      document.body.appendChild(form);
+      form.submit();
+    }
+  } catch (error) {
+    console.error('Error during checkout:', error);
+    alert('❌ Error processing checkout. Please try again.');
+    proceedBtn.disabled = false;
+    proceedBtn.innerHTML = currentDiscountedPrice <= 0 ? 
+      '<i class="fas fa-check-circle"></i> Complete Registration (FREE)' : 
+      '<i class="fas fa-credit-card"></i> Proceed to Payment';
+  } finally {
+    showLoading(false);
+  }
+}
+      //.......
       // ✅ Prevent accidental navigation
       window.addEventListener('beforeunload', function (e) {
         if (document.querySelectorAll('.checkout-table tbody tr').length > 0) {

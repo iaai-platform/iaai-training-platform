@@ -1670,6 +1670,10 @@ exports.approveUser = async (req, res) => {
                     </html>`;
 
         await sendEmail({
+          from: {
+            email: process.env.EMAIL_FROM || "info@iaa-i.com",
+            name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          },
           to: user.email,
           subject: subject,
           html: htmlContent,
@@ -1743,6 +1747,10 @@ exports.rejectUser = async (req, res) => {
         process.env.SUPPORT_EMAIL || "support@iaai-training.com";
 
       await sendEmail({
+        from: {
+          email: process.env.EMAIL_FROM || "info@iaa-i.com",
+          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+        },
         to: user.email,
         subject: "IAAI Training - Account Application Update",
         html: `
@@ -2016,11 +2024,14 @@ exports.resetUserPassword = async (req, res) => {
     )}/reset-password/${resetToken}`;
 
     // Send email
-    try {
-      await sendEmail({
-        to: user.email,
-        subject: "Password Reset Request - IAAI Training",
-        html: `
+    await sendEmail({
+      from: {
+        email: process.env.EMAIL_FROM || "info@iaa-i.com",
+        name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform"
+      },
+      to: user.email,
+      subject: "Password Reset Request - IAAI Training",
+      html: `
                     <!DOCTYPE html>
                     <html>
                     <head>

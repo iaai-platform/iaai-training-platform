@@ -1910,6 +1910,12 @@
               <i class="fas fa-clock"></i>
               <span><%= course.duration || '2 hours' %></span>
             </div>
+            <% if (course.startTime) { %>
+              <div class="meta-item">
+                <i class="fas fa-clock"></i>
+                <span>Session: <%= course.startTime %></span>
+              </div>
+              <% } %>
             <% if (course.primaryTimezone) { %>
             <div class="meta-item">
               <i class="fas fa-globe"></i>

@@ -206,6 +206,19 @@ exports.getCourseDetails = async (req, res) => {
     }
 
     console.log("✅ Course found:", course.basic?.title);
+    // ADD THESE DEBUG LOGS:
+    console.log(
+      "🔍 DEBUG - Raw course.schedule object:",
+      JSON.stringify(course.schedule, null, 2)
+    );
+    console.log(
+      "🔍 DEBUG - course.schedule?.startTime:",
+      course.schedule?.startTime
+    );
+    console.log(
+      "🔍 DEBUG - typeof startTime:",
+      typeof course.schedule?.startTime
+    );
 
     const currentDate = new Date();
     const courseStartDate = new Date(course.schedule?.startDate);
@@ -232,7 +245,19 @@ exports.getCourseDetails = async (req, res) => {
       registrationDeadline: course.schedule?.registrationDeadline,
       primaryTimezone: course.schedule?.primaryTimezone || "UTC",
       displayTimezones: course.schedule?.displayTimezones || [],
-
+      // Replace the single startTime line with this block:
+      startTime:
+        course.schedule?.sessions?.length > 0
+          ? course.schedule.sessions[0].startTime
+          : null,
+      endTime:
+        course.schedule?.sessions?.length > 0
+          ? course.schedule.sessions[0].endTime
+          : null,
+      sessionTime:
+        course.schedule?.sessions?.length > 0
+          ? `${course.schedule.sessions[0].startTime} - ${course.schedule.sessions[0].endTime}`
+          : null,
       // Session details for multi-day courses
       isMultiDay: course.schedule?.sessions?.length > 1,
       courseDays:

@@ -9,26 +9,20 @@ const axios = require("axios");
 // EMAIL CONFIGURATION HELPER
 // ============================================
 function createEmailTransporter() {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error("❌ Missing required email configuration:");
-    console.error("Required: EMAIL_USER, EMAIL_PASS");
-    throw new Error("Email configuration incomplete");
-  }
-
   return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || "mail.iaa-i.com",
-    port: parseInt(process.env.EMAIL_PORT) || 465,
-    secure: process.env.EMAIL_SECURE === "true", // true for port 465
+    host: "mail.iaa-i.com",
+    port: 587,
+    secure: false, // false for port 587
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
     tls: {
-      rejectUnauthorized: false, // For self-signed certificates
+      rejectUnauthorized: false,
     },
-    connectionTimeout: 60000, // 60 seconds
-    greetingTimeout: 30000, // 30 seconds
-    socketTimeout: 60000, // 60 seconds
+    connectionTimeout: 60000,
+    greetingTimeout: 30000,
+    socketTimeout: 60000,
   });
 }
 

@@ -1,13 +1,10 @@
-//routes/emailTest.js
-
 // routes/emailTest.js
-
 const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
 
 // ============================================
-// EMAIL TEST ROUTE - ADD THIS TO DEBUG
+// EMAIL TEST ROUTE - FIXED VERSION
 // ============================================
 router.get("/test-email", async (req, res) => {
   console.log("🧪 Testing email configuration...");
@@ -23,21 +20,21 @@ router.get("/test-email", async (req, res) => {
   });
 
   try {
-    // Create transporter with detailed logging
+    // Create transporter with detailed logging - FIXED: createTransport (not createTransporter)
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT || 587,
+      port: parseInt(process.env.EMAIL_PORT) || 587,
       secure: process.env.EMAIL_SECURE === "true",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
       tls: {
-        rejectUnauthorized: process.env.NODE_ENV === "production",
+        rejectUnauthorized: false, // For your mail server
       },
-      connectionTimeout: 10000, // 10 seconds
-      greetingTimeout: 5000, // 5 seconds
-      socketTimeout: 10000, // 10 seconds
+      connectionTimeout: 60000, // 60 seconds
+      greetingTimeout: 30000, // 30 seconds
+      socketTimeout: 60000, // 60 seconds
       debug: true, // Enable debug logging
       logger: true, // Enable logging
     });

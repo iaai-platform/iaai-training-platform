@@ -61,9 +61,6 @@ mongoose
     console.error("MongoDB connection error:", error);
   });
 
-// Add this line with your other route imports
-const emailTestRoutes = require("./routes/emailTest");
-app.use("/", emailTestRoutes);
 // ============================================
 // 5. MIDDLEWARE CONFIGURATION
 // ============================================
@@ -139,10 +136,12 @@ console.log(
 const loginRoutes = require("./routes/loginRoutes");
 const signupRoutes = require("./routes/signupRoutes");
 const authRoutes = require("./routes/authRoutes");
+const emailTestRoutes = require("./routes/emailTest"); // ADD THIS LINE
 
 app.use("/", loginRoutes);
 app.use("/", signupRoutes);
 app.use("/", authRoutes);
+app.use("/", emailTestRoutes);
 
 // Logout route
 app.get("/logout", (req, res) => {

@@ -1,14 +1,60 @@
-// 1. UPDATE utils/sendEmail.js - Replace entire file with this:
-
+// utils/sendEmail.js - FIXED VERSION
 const sgMail = require("@sendgrid/mail");
 
 async function sendEmail(options) {
   try {
     // Check if SendGrid is configured
     if (!process.env.SENDGRID_API_KEY) {
-      throw new Error("SENDGRID_API_KEY not configured");
+      console.error(
+        "❌ SENDGRID_API_KEY not configured, falling back to nodemailer"
+      );
+
+      // Fallback to nodemailer if SendGrid not configured
+      const nodemailer = require("nodemailer");
+
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST || "mail.iaa-i.com",
+        port: parseInt(process.env.EMAIL_PORT) || 587,
+        secure: process.env.EMAIL_SECURE === "true",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+        connectionTimeout: 60000,
+        greetingTimeout: 30000,
+        socketTimeout: 60000,
+      });
+
+      // Verify connection
+      await transporter.verify();
+      console.log("✅ SMTP connection verified");
+
+      // Send email via SMTP
+      const mailOptions = {
+        from: `"${process.env.EMAIL_FROM_NAME || "IAAI Training"}" <${
+          process.env.EMAIL_USER
+        }>`,
+        to: options.to,
+        subject: options.subject,
+        text: options.text || "",
+        html: options.html || options.text || "",
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+
+      console.log("✅ Email sent via SMTP:", info.messageId);
+
+      return {
+        success: true,
+        messageId: info.messageId,
+        response: info.response,
+      };
     }
 
+    // Use SendGrid
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     const msg = {
@@ -37,11 +83,20 @@ async function sendEmail(options) {
       response: "Email sent via SendGrid",
     };
   } catch (error) {
-    console.error("❌ SendGrid error:", error);
+    console.error("❌ Email sending failed:", error);
 
     // Handle SendGrid specific errors
-    if (error.response) {
+    if (error.response && error.response.body) {
       console.error("❌ SendGrid response:", error.response.body);
+    }
+
+    // Handle SMTP specific errors
+    if (error.code === "EAUTH") {
+      console.error("Authentication failed. Check your email credentials.");
+    } else if (error.code === "ECONNECTION") {
+      console.error(
+        "Connection failed. Check your internet/firewall settings."
+      );
     }
 
     throw error;
@@ -49,84 +104,3 @@ async function sendEmail(options) {
 }
 
 module.exports = sendEmail;
-
-// 2. UPDATE userController.js - Replace createEmailTransporter function:
-
-function createEmailTransporter() {
-  // Return a mock transporter object that works with SendGrid
-  return {
-    // Mock verify method for compatibility
-    verify: async () => {
-      if (!process.env.SENDGRID_API_KEY) {
-        throw new Error("SENDGRID_API_KEY not configured");
-      }
-      console.log("✅ SendGrid API key is configured");
-      return true;
-    },
-
-    // Mock sendMail method that uses SendGrid
-    sendMail: async (options) => {
-      const sendEmail = require("../utils/sendEmail");
-      return await sendEmail(options);
-    },
-  };
-}
-
-// 3. UPDATE routes/emailTest.js - Replace the transporter creation:
-
-// In your emailTest.js, replace the transporter creation part with:
-
-try {
-  console.log("🔍 Testing SendGrid connection...");
-
-  // Test SendGrid configuration
-  if (!process.env.SENDGRID_API_KEY) {
-    throw new Error("SENDGRID_API_KEY not configured");
-  }
-
-  console.log("✅ SendGrid API key found");
-
-  // Use the sendEmail utility directly
-  const sendEmail = require("../utils/sendEmail");
-
-  const testEmail = {
-    to: process.env.CONFIRM_EMAIL || process.env.EMAIL_FROM,
-    subject: "🧪 SendGrid Test - " + new Date().toLocaleString(),
-    html: `
-      <h2>✅ SendGrid Test Successful!</h2>
-      <p>If you receive this email, your SendGrid configuration is working perfectly.</p>
-      <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
-      <p><strong>From:</strong> ${process.env.EMAIL_FROM}</p>
-      <p><strong>API Key:</strong> Configured ✅</p>
-      <p><strong>Service:</strong> SendGrid</p>
-    `,
-  };
-
-  console.log("📧 Sending test email via SendGrid...");
-  const result = await sendEmail(testEmail);
-
-  console.log("✅ Test email sent successfully:", result.messageId);
-
-  res.json({
-    success: true,
-    message: "SendGrid email test successful!",
-    messageId: result.messageId,
-    service: "SendGrid",
-    timestamp: new Date().toISOString(),
-  });
-} catch (error) {
-  console.error("❌ SendGrid test failed:", error);
-
-  res.status(500).json({
-    success: false,
-    error: error.message,
-    service: "SendGrid",
-    timestamp: new Date().toISOString(),
-    troubleshooting: {
-      API_KEY_MISSING: "Add SENDGRID_API_KEY to environment variables",
-      DOMAIN_NOT_VERIFIED: "Verify your domain in SendGrid dashboard",
-      RATE_LIMIT: "Check SendGrid usage limits",
-      INVALID_FROM: "Verify EMAIL_FROM address in SendGrid",
-    },
-  });
-}

@@ -1,4 +1,4 @@
-// controllers/userController.js
+// controllers/userController.js - Complete Updated Version for Render
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const passport = require("passport");
@@ -133,9 +133,12 @@ exports.registerUser = async (req, res) => {
       const mailOptions = {
         from: {
           name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
-          address: process.env.EMAIL_FROM || "info@iaa-i.com",
+          address:
+            process.env.ADMIN_EMAIL ||
+            process.env.EMAIL_FROM ||
+            "info@iaa-i.com",
         },
-        to: process.env.CONFIRM_EMAIL,
+        to: process.env.CONFIRM_EMAIL || "info@iaa-i.com",
         subject: `New User Registration - ${
           role === "instructor" ? "Instructor" : "Student"
         } Application`,
@@ -216,12 +219,14 @@ exports.registerUser = async (req, res) => {
                 
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="${
-                    process.env.SITE_URL || "https://iaa-i.com"
-                  }/confirm-user/${email}" class="action-button">
+                    process.env.BASE_URL || "https://www.iaa-i.com"
+                  }/confirm-user/${encodeURIComponent(
+          email
+        )}" class="action-button">
                     ✅ Approve Account
                   </a>
                   <a href="${
-                    process.env.SITE_URL || "https://iaa-i.com"
+                    process.env.BASE_URL || "https://www.iaa-i.com"
                   }/admin/users" class="action-button" style="background-color: #6c757d;">
                     👥 Manage Users
                   </a>
@@ -244,7 +249,7 @@ exports.registerUser = async (req, res) => {
       await transporter.sendMail(mailOptions);
       console.log(
         "📧 Admin notification email sent successfully to:",
-        process.env.CONFIRM_EMAIL
+        process.env.CONFIRM_EMAIL || "info@iaa-i.com"
       );
     } catch (emailError) {
       console.error("📧 Error sending admin notification email:", emailError);
@@ -301,12 +306,54 @@ exports.confirmUser = async (req, res) => {
 
     if (!user) {
       console.log("❌ User not found for confirmation");
-      return res.status(404).send("User not found");
+      return res.status(404).send(`
+        <html>
+          <head>
+            <title>User Not Found</title>
+            <style>
+              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa; }
+              .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              .error { color: #dc3545; }
+              .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h2 class="error">❌ User Not Found</h2>
+              <p>The user with email <strong>${email}</strong> was not found in our system.</p>
+              <a href="${
+                process.env.BASE_URL || "https://www.iaa-i.com"
+              }/admin/users" class="btn">👥 Back to User Management</a>
+            </div>
+          </body>
+        </html>
+      `);
     }
 
     if (user.isConfirmed) {
       console.log("⚠️ Account already confirmed");
-      return res.send("Account already confirmed");
+      return res.send(`
+        <html>
+          <head>
+            <title>Already Confirmed</title>
+            <style>
+              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa; }
+              .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              .warning { color: #ffc107; }
+              .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h2 class="warning">⚠️ Account Already Confirmed</h2>
+              <p>The account for <strong>${email}</strong> has already been confirmed and is active.</p>
+              <a href="${
+                process.env.BASE_URL || "https://www.iaa-i.com"
+              }/admin/users" class="btn">👥 Back to User Management</a>
+            </div>
+          </body>
+        </html>
+      `);
     }
 
     // Confirm the user account
@@ -327,7 +374,10 @@ exports.confirmUser = async (req, res) => {
       const mailOptions = {
         from: {
           name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
-          address: process.env.EMAIL_FROM || "info@iaa-i.com",
+          address:
+            process.env.ADMIN_EMAIL ||
+            process.env.EMAIL_FROM ||
+            "info@iaa-i.com",
         },
         to: email,
         subject: "🎉 Welcome to IAAI Training - Account Confirmed!",
@@ -338,8 +388,8 @@ exports.confirmUser = async (req, res) => {
             <style>
               body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; text-align: center; }
-              .content { padding: 30px 20px; }
+              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+              .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
               .welcome-box { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
               .login-button {
                 display: inline-block;
@@ -384,7 +434,7 @@ exports.confirmUser = async (req, res) => {
                 
                 <div style="text-align: center;">
                   <a href="${
-                    process.env.SITE_URL || "https://iaa-i.com"
+                    process.env.BASE_URL || "https://www.iaa-i.com"
                   }/login" class="login-button">
                     🔐 Login to Your Account
                   </a>
@@ -409,6 +459,14 @@ exports.confirmUser = async (req, res) => {
       console.log("📧 User confirmation email sent successfully to:", email);
     } catch (emailError) {
       console.error("📧 Error sending user confirmation email:", emailError);
+      // Log specific error details for debugging
+      if (emailError.code) {
+        console.error("📧 Email error code:", emailError.code);
+      }
+      if (emailError.response) {
+        console.error("📧 Email server response:", emailError.response);
+      }
+      // Continue with confirmation even if email fails
     }
 
     // Send response to admin
@@ -428,15 +486,40 @@ exports.confirmUser = async (req, res) => {
             <h2 class="success">✅ Account Confirmed Successfully!</h2>
             <p>The user <strong>${email}</strong> has been approved and can now access the platform.</p>
             <p>A welcome email has been sent to the user automatically.</p>
-            <a href="/admin/users" class="btn">👥 Back to User Management</a>
-            <a href="/dashboard" class="btn">📊 Go to Dashboard</a>
+            <a href="${
+              process.env.BASE_URL || "https://www.iaa-i.com"
+            }/admin/users" class="btn">👥 Back to User Management</a>
+            <a href="${
+              process.env.BASE_URL || "https://www.iaa-i.com"
+            }/dashboard" class="btn">📊 Go to Dashboard</a>
           </div>
         </body>
       </html>
     `);
   } catch (err) {
     console.error("💥 Error confirming user:", err);
-    res.status(500).send("Error confirming account");
+    res.status(500).send(`
+      <html>
+        <head>
+          <title>Error</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa; }
+            .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .error { color: #dc3545; }
+            .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2 class="error">❌ Error Confirming Account</h2>
+            <p>There was an error confirming the account. Please try again or contact support.</p>
+            <a href="${
+              process.env.BASE_URL || "https://www.iaa-i.com"
+            }/admin/users" class="btn">👥 Back to User Management</a>
+          </div>
+        </body>
+      </html>
+    `);
   }
 };
 
@@ -535,6 +618,285 @@ exports.updateUserProfile = async (req, res) => {
     console.error("Error updating user profile:", err);
     req.flash("error_message", "Error updating profile.");
     res.redirect("/profile");
+  }
+};
+
+// ============================================
+// PASSWORD RESET REQUEST
+// ============================================
+exports.requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      req.flash("error_message", "No account found with that email address.");
+      return res.redirect("/forgot-password");
+    }
+
+    // Generate reset token
+    const resetToken = require("crypto").randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Send password reset email
+    try {
+      console.log("📧 Sending password reset email...");
+
+      const transporter = createEmailTransporter();
+
+      const mailOptions = {
+        from: {
+          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          address:
+            process.env.ADMIN_EMAIL ||
+            process.env.EMAIL_FROM ||
+            "info@iaa-i.com",
+        },
+        to: email,
+        subject: "🔐 Password Reset Request - IAAI Training",
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: #dc3545; color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+              .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+              .reset-button {
+                display: inline-block;
+                padding: 15px 30px;
+                background: #dc3545;
+                color: white;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: bold;
+                margin: 20px 0;
+              }
+              .footer { color: #666; font-size: 14px; text-align: center; margin-top: 30px; }
+              .warning { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin: 15px 0; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>🔐 Password Reset Request</h1>
+              </div>
+              
+              <div class="content">
+                <p>Hi <strong>${user.firstName}</strong>,</p>
+                
+                <p>We received a request to reset your password for your IAAI Training account.</p>
+                
+                <div class="warning">
+                  <p><strong>⚠️ Important:</strong> This link will expire in 1 hour for security reasons.</p>
+                </div>
+                
+                <div style="text-align: center;">
+                  <a href="${
+                    process.env.BASE_URL || "https://www.iaa-i.com"
+                  }/reset-password/${resetToken}" class="reset-button">
+                    🔑 Reset My Password
+                  </a>
+                </div>
+                
+                <p>Or copy and paste this link into your browser:</p>
+                <p style="word-break: break-all; background: #f1f1f1; padding: 10px; border-radius: 5px;">
+                  ${
+                    process.env.BASE_URL || "https://www.iaa-i.com"
+                  }/reset-password/${resetToken}
+                </p>
+                
+                <p><strong>If you didn't request this password reset:</strong></p>
+                <ul>
+                  <li>Please ignore this email</li>
+                  <li>Your password will remain unchanged</li>
+                  <li>Consider changing your password if you suspect unauthorized access</li>
+                </ul>
+                
+                <p>Best regards,<br>
+                <strong>The IAAI Training Team</strong></p>
+              </div>
+              
+              <div class="footer">
+                <p>This email was sent to ${email}. If you did not request a password reset, please ignore this email.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log("📧 Password reset email sent successfully to:", email);
+
+      req.flash(
+        "success_message",
+        "Password reset instructions have been sent to your email address."
+      );
+      res.redirect("/forgot-password");
+    } catch (emailError) {
+      console.error("📧 Error sending password reset email:", emailError);
+      req.flash(
+        "error_message",
+        "Error sending password reset email. Please try again."
+      );
+      res.redirect("/forgot-password");
+    }
+  } catch (err) {
+    console.error("💥 Error in password reset request:", err);
+    req.flash("error_message", "Something went wrong. Please try again.");
+    res.redirect("/forgot-password");
+  }
+};
+
+// ============================================
+// PASSWORD RESET COMPLETION
+// ============================================
+exports.resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password, confirmPassword } = req.body;
+
+  try {
+    // Find user with valid reset token
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      req.flash(
+        "error_message",
+        "Password reset token is invalid or has expired."
+      );
+      return res.redirect("/forgot-password");
+    }
+
+    // Validate passwords
+    if (password !== confirmPassword) {
+      req.flash("error_message", "Passwords do not match.");
+      return res.redirect(`/reset-password/${token}`);
+    }
+
+    // Update password
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    // Send confirmation email
+    try {
+      console.log("📧 Sending password change confirmation email...");
+
+      const transporter = createEmailTransporter();
+
+      const mailOptions = {
+        from: {
+          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          address:
+            process.env.ADMIN_EMAIL ||
+            process.env.EMAIL_FROM ||
+            "info@iaa-i.com",
+        },
+        to: user.email,
+        subject: "✅ Password Successfully Changed - IAAI Training",
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: #28a745; color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+              .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+              .login-button {
+                display: inline-block;
+                padding: 15px 30px;
+                background: #28a745;
+                color: white;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: bold;
+                margin: 20px 0;
+              }
+              .footer { color: #666; font-size: 14px; text-align: center; margin-top: 30px; }
+              .security-info { background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>✅ Password Successfully Changed</h1>
+              </div>
+              
+              <div class="content">
+                <p>Hi <strong>${user.firstName}</strong>,</p>
+                
+                <p>Your password has been successfully changed for your IAAI Training account.</p>
+                
+                <div class="security-info">
+                  <p><strong>🔒 Security Information:</strong></p>
+                  <ul>
+                    <li>Change completed on: ${new Date().toLocaleString()}</li>
+                    <li>Your account is now secure with your new password</li>
+                    <li>You can now log in using your new password</li>
+                  </ul>
+                </div>
+                
+                <div style="text-align: center;">
+                  <a href="${
+                    process.env.BASE_URL || "https://www.iaa-i.com"
+                  }/login" class="login-button">
+                    🔐 Login to Your Account
+                  </a>
+                </div>
+                
+                <p><strong>If you didn't make this change:</strong></p>
+                <ul>
+                  <li>Contact our support team immediately</li>
+                  <li>Your account security may be compromised</li>
+                  <li>We recommend reviewing your account activity</li>
+                </ul>
+                
+                <p>Best regards,<br>
+                <strong>The IAAI Training Team</strong></p>
+              </div>
+              
+              <div class="footer">
+                <p>This email was sent to ${
+                  user.email
+                } to confirm your password change.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(
+        "📧 Password change confirmation email sent successfully to:",
+        user.email
+      );
+    } catch (emailError) {
+      console.error(
+        "📧 Error sending password change confirmation email:",
+        emailError
+      );
+      // Continue even if email fails
+    }
+
+    req.flash(
+      "success_message",
+      "Your password has been successfully reset. You can now log in."
+    );
+    res.redirect("/login");
+  } catch (err) {
+    console.error("💥 Error resetting password:", err);
+    req.flash("error_message", "Something went wrong. Please try again.");
+    res.redirect("/forgot-password");
   }
 };
 

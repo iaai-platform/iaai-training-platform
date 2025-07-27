@@ -1,4 +1,4 @@
-// adminUserController.js - COMPLETE UPDATED VERSION FOR SENDGRID
+// adminUserController.js - COMPLETE UPDATED VERSION WITH EMAIL_FROM FIX
 const User = require("../models/user");
 const DeletedUser = require("../models/deletedUser");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
@@ -8,7 +8,6 @@ const crypto = require("crypto");
 const Instructor = require("../models/Instructor");
 const CoursePool = require("../models/CoursePool");
 const sendEmail = require("../utils/sendEmail");
-//const emailService = require('../utils/emailService');
 
 // Helper function to get course model
 const getCourseModel = (courseType) => {
@@ -202,9 +201,6 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // ✅ NEW: Get Payment Analytics
-// Enhanced getPaymentAnalytics function for adminUserController.js
-// Replace the existing getPaymentAnalytics function with this enhanced version
-
 exports.getPaymentAnalytics = async (req, res) => {
   try {
     const users = await User.find()
@@ -616,16 +612,11 @@ exports.getPaymentAnalytics = async (req, res) => {
 };
 
 // ✅ Export Financial Report
-// Enhanced exportFinancialReport function for adminUserController.js
-// First, install required packages:
-// npm install exceljs puppeteer ejs
-
 const ExcelJS = require("exceljs");
 const puppeteer = require("puppeteer");
 const ejs = require("ejs");
 const path = require("path");
 
-// Replace the existing exportFinancialReport function with this enhanced version
 exports.exportFinancialReport = async (req, res) => {
   try {
     const { startDate, endDate, format = "csv" } = req.query;
@@ -1330,8 +1321,7 @@ async function generatePDFReport(res, transactions, data) {
   }
 }
 
-// ✅ Get User Details (for viewing specific user)
-// ✅ Enhanced Get User Details (for viewing specific user with ALL information)
+// ✅ Get User Details (for viewing specific user with ALL information)
 exports.getUserDetails = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -1571,7 +1561,7 @@ exports.getUserDetails = async (req, res) => {
   }
 };
 
-// ✅ Approve User (with email notification) - UPDATED FOR SENDGRID
+// ✅ Approve User - FIXED EMAIL_FROM
 exports.approveUser = async (req, res) => {
   try {
     const {
@@ -1581,7 +1571,6 @@ exports.approveUser = async (req, res) => {
       emailContent,
     } = req.body;
 
-    // Find and update user
     const user = await User.findByIdAndUpdate(
       userId,
       { isConfirmed: true },
@@ -1597,84 +1586,76 @@ exports.approveUser = async (req, res) => {
 
     console.log(`✅ User ${user.email} approved successfully`);
 
-    // Send approval email if requested
     if (shouldSendEmail !== false) {
-      // Default to sending email
       try {
-        // Use custom email content if provided, otherwise use default
         const subject =
           emailSubject || "Welcome to IAAI Training - Account Approved! 🎉";
+
         const htmlContent = emailContent
           ? `<!DOCTYPE html>
-                    <html>
-                    <head>
-                        <style>
-                            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                            .container { max-width: 600px; margin: 0 auto; }
-                            .header { background: #1a365d; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                            .content { background: white; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <div class="header">
-                                <h1>IAAI Training Institute</h1>
-                            </div>
-                            <div class="content">
-                                <h2>${subject}</h2>
-                                <div style="white-space: pre-wrap;">${emailContent.replace(
-                                  /\n/g,
-                                  "<br>"
-                                )}</div>
-                            </div>
-                        </div>
-                    </body>
-                    </html>`
+            <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; }
+                .header { background: #1a365d; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: white; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>IAAI Training Institute</h1>
+                </div>
+                <div class="content">
+                  <h2>${subject}</h2>
+                  <div style="white-space: pre-wrap;">${emailContent.replace(
+                    /\n/g,
+                    "<br>"
+                  )}</div>
+                </div>
+              </div>
+            </body>
+            </html>`
           : `<!DOCTYPE html>
-                    <html>
-                    <head>
-                        <style>
-                            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                            .container { max-width: 600px; margin: 0 auto; }
-                            .header { background: #1a365d; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                            .content { background: white; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
-                            .button { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <div class="header">
-                                <h1>Welcome to IAAI Training Institute!</h1>
-                            </div>
-                            <div class="content">
-                                <h2>Hello ${user.firstName} ${
-              user.lastName
-            }!</h2>
-                                <p>Great news! Your account has been successfully approved.</p>
-                                <p>You can now access all features of the IAAI Training platform:</p>
-                                <ul>
-                                    <li>Browse and enroll in courses</li>
-                                    <li>Access training materials</li>
-                                    <li>Track your progress</li>
-                                    <li>Earn certificates</li>
-                                </ul>
-                                <center>
-                                    <a href="${req.protocol}://${req.get(
+            <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; }
+                .header { background: #1a365d; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: white; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
+                .button { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Welcome to IAAI Training Institute!</h1>
+                </div>
+                <div class="content">
+                  <h2>Hello ${user.firstName} ${user.lastName}!</h2>
+                  <p>Great news! Your account has been successfully approved.</p>
+                  <p>You can now access all features of the IAAI Training platform:</p>
+                  <ul>
+                    <li>Browse and enroll in courses</li>
+                    <li>Access training materials</li>
+                    <li>Track your progress</li>
+                    <li>Earn certificates</li>
+                  </ul>
+                  <center>
+                    <a href="${req.protocol}://${req.get(
               "host"
             )}/login" class="button">Login to Your Account</a>
-                                </center>
-                                <p>If you have any questions, please contact our support team.</p>
-                                <p>Best regards,<br>IAAI Training Team</p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>`;
+                  </center>
+                  <p>If you have any questions, please contact our support team.</p>
+                  <p>Best regards,<br>IAAI Training Team</p>
+                </div>
+              </div>
+            </body>
+            </html>`;
 
         await sendEmail({
-          from: {
-            email: process.env.EMAIL_FROM || "info@iaa-i.com",
-            name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
-          },
           to: user.email,
           subject: subject,
           html: htmlContent,
@@ -1687,8 +1668,6 @@ exports.approveUser = async (req, res) => {
         });
       } catch (emailError) {
         console.error("❌ Error sending approval email:", emailError);
-
-        // User is already approved, just note the email failure
         return res.json({
           success: true,
           message:
@@ -1714,12 +1693,11 @@ exports.approveUser = async (req, res) => {
   }
 };
 
-// ✅ Reject User (Move to Recycle Bin with Email Notification) - UPDATED FOR SENDGRID
+// ✅ Reject User - FIXED EMAIL_FROM
 exports.rejectUser = async (req, res) => {
   try {
     const { userId, reason } = req.body;
 
-    // Find the user first
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -1728,10 +1706,9 @@ exports.rejectUser = async (req, res) => {
       });
     }
 
-    // Create a deleted user record (recycle bin)
     const deletedUserRecord = new DeletedUser({
       originalUserId: user._id,
-      userData: user.toObject(), // Store complete user data
+      userData: user.toObject(),
       deletedBy: {
         userId: req.user._id,
         email: req.user.email,
@@ -1742,90 +1719,71 @@ exports.rejectUser = async (req, res) => {
 
     await deletedUserRecord.save();
 
-    // ✅ Send rejection email before deleting user - UPDATED FOR SENDGRID
     try {
-      const supportEmail = process.env.EMAIL_FROM || "info@iaa-i.com";
-
       await sendEmail({
-        from: {
-          email: process.env.EMAIL_FROM || "info@iaa-i.com",
-          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
-        },
         to: user.email,
         subject: "IAAI Training - Account Application Update",
         html: `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <style>
-                            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                            .header { background-color: #dc3545; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                            .content { background-color: #ffffff; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
-                            .reason-box { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #dc3545; }
-                            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #666; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <div class="header">
-                                <h1>Account Application Update</h1>
-                            </div>
-                            <div class="content">
-                                <h2>Hello ${user.firstName} ${
-          user.lastName
-        },</h2>
-                                
-                                <p>Thank you for your interest in IAAI Training Institute. After careful review, we regret to inform you that we are unable to approve your account at this time.</p>
-                                
-                                ${
-                                  reason
-                                    ? `
-                                <div class="reason-box">
-                                    <h3 style="margin-top: 0; color: #dc3545;">Reason:</h3>
-                                    <p style="margin: 0;">${reason}</p>
-                                </div>
-                                `
-                                    : ""
-                                }
-                                
-                                <h3>What You Can Do:</h3>
-                                <ul>
-                                    <li>Review the reason provided above</li>
-                                    <li>If you believe this is an error, please contact our support team</li>
-                                    <li>You may reapply after addressing the concerns mentioned</li>
-                                </ul>
-                                
-                                <p><strong>Need Assistance?</strong><br>
-                                If you have questions or would like to discuss this decision, please contact us at <a href="mailto:${
-                                  process.env.EMAIL_FROM || "info@iaa-i.com"
-                                }">${
-          process.env.EMAIL_FROM || "info@iaa-i.com"
-        }</a>
-                                
-                                <p>We appreciate your understanding and wish you the best in your professional journey.</p>
-                                
-                                <div class="footer">
-                                    <p>Best regards,<br>IAAI Training Institute Team</p>
-                                    <p style="font-size: 12px;">
-                                        This is an automated message. Please do not reply to this email.<br>
-                                        © ${new Date().getFullYear()} IAAI Training Institute. All rights reserved.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-                `,
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #dc3545; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .content { background-color: #ffffff; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
+              .reason-box { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #dc3545; }
+              .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Account Application Update</h1>
+              </div>
+              <div class="content">
+                <h2>Hello ${user.firstName} ${user.lastName},</h2>
+                <p>Thank you for your interest in IAAI Training Institute. After careful review, we regret to inform you that we are unable to approve your account at this time.</p>
+                ${
+                  reason
+                    ? `
+                  <div class="reason-box">
+                    <h3 style="margin-top: 0; color: #dc3545;">Reason:</h3>
+                    <p style="margin: 0;">${reason}</p>
+                  </div>
+                `
+                    : ""
+                }
+                <h3>What You Can Do:</h3>
+                <ul>
+                  <li>Review the reason provided above</li>
+                  <li>If you believe this is an error, please contact our support team</li>
+                  <li>You may reapply after addressing the concerns mentioned</li>
+                </ul>
+                <p><strong>Need Assistance?</strong><br>
+                If you have questions or would like to discuss this decision, please contact us at <a href="mailto:${
+                  process.env.EMAIL_FROM
+                }">${process.env.EMAIL_FROM}</a></p>
+                <p>We appreciate your understanding and wish you the best in your professional journey.</p>
+                <div class="footer">
+                  <p>Best regards,<br>IAAI Training Institute Team</p>
+                  <p style="font-size: 12px;">
+                    This is an automated message. Please do not reply to this email.<br>
+                    © ${new Date().getFullYear()} IAAI Training Institute. All rights reserved.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
       });
 
       console.log(`✅ Rejection email sent to ${user.email}`);
     } catch (emailError) {
       console.error("❌ Error sending rejection email:", emailError);
-      // Continue with deletion even if email fails
     }
 
-    // Delete the user from main collection
     await User.findByIdAndDelete(userId);
 
     console.log(`✅ User ${user.email} moved to recycle bin`);
@@ -1867,7 +1825,6 @@ exports.recoverUser = async (req, res) => {
   try {
     const { deletedUserId } = req.params;
 
-    // Find the deleted user record
     const deletedUserRecord = await DeletedUser.findById(deletedUserId);
     if (!deletedUserRecord) {
       return res.status(404).json({
@@ -1876,7 +1833,6 @@ exports.recoverUser = async (req, res) => {
       });
     }
 
-    // Check if already recovered
     if (deletedUserRecord.isRecovered) {
       return res.status(400).json({
         success: false,
@@ -1884,14 +1840,12 @@ exports.recoverUser = async (req, res) => {
       });
     }
 
-    // Restore the user
     const userData = deletedUserRecord.userData;
-    delete userData._id; // Remove old ID to create new one
+    delete userData._id;
 
     const restoredUser = new User(userData);
     await restoredUser.save();
 
-    // Update deleted record
     deletedUserRecord.isRecovered = true;
     deletedUserRecord.recoveredBy = {
       userId: req.user._id,
@@ -1920,7 +1874,6 @@ exports.permanentlyDeleteUser = async (req, res) => {
   try {
     const { deletedUserId } = req.params;
 
-    // Delete from recycle bin
     const result = await DeletedUser.findByIdAndDelete(deletedUserId);
 
     if (!result) {
@@ -1950,7 +1903,6 @@ exports.updateUserRole = async (req, res) => {
     const { userId } = req.params;
     const { role } = req.body;
 
-    // Validate role
     if (!["user", "admin", "instructor"].includes(role)) {
       return res.status(400).json({
         success: false,
@@ -1981,7 +1933,7 @@ exports.updateUserRole = async (req, res) => {
   }
 };
 
-// ✅ Reset User Password - UPDATED FOR SENDGRID
+// ✅ Reset User Password - FIXED EMAIL_FROM
 exports.resetUserPassword = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -1994,84 +1946,68 @@ exports.resetUserPassword = async (req, res) => {
       });
     }
 
-    // Generate reset token
     const resetToken = crypto.randomBytes(20).toString("hex");
     const resetTokenExpiry = Date.now() + 3600000; // 1 hour
 
-    // Save reset token to user
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = resetTokenExpiry;
     await user.save();
 
-    // Create reset URL
     const resetUrl = `${req.protocol}://${req.get(
       "host"
     )}/reset-password/${resetToken}`;
 
-    // Send email - UPDATED FOR SENDGRID
     try {
       await sendEmail({
-        from: {
-          email: process.env.EMAIL_FROM || "info@iaa-i.com",
-          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
-        },
         to: user.email,
         subject: "Password Reset Request - IAAI Training",
         html: `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <style>
-                            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                            .header { background-color: #1a365d; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                            .content { background-color: #ffffff; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
-                            .button { display: inline-block; padding: 14px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
-                            .warning { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107; }
-                            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #666; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <div class="header">
-                                <h1>Password Reset Request</h1>
-                            </div>
-                            <div class="content">
-                                <h2>Hello ${user.firstName} ${
-          user.lastName
-        },</h2>
-                                
-                                <p>We received a request to reset your password for your IAAI Training account.</p>
-                                
-                                <div style="text-align: center;">
-                                    <a href="${resetUrl}" class="button">Reset Your Password</a>
-                                </div>
-                                
-                                <div class="warning">
-                                    <p style="margin: 0;"><strong>Important:</strong> This link will expire in 1 hour for security reasons.</p>
-                                </div>
-                                
-                                <p>If you did not request this password reset, please ignore this email. Your password will remain unchanged.</p>
-                                
-                                <p>For security reasons, we recommend that you:</p>
-                                <ul>
-                                    <li>Use a strong, unique password</li>
-                                    <li>Never share your password with anyone</li>
-                                    <li>Enable two-factor authentication if available</li>
-                                </ul>
-                                
-                                <div class="footer">
-                                    <p>Best regards,<br>IAAI Training Security Team</p>
-                                    <p style="font-size: 12px;">
-                                        This is an automated security message. Please do not reply to this email.<br>
-                                        © ${new Date().getFullYear()} IAAI Training Institute. All rights reserved.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-                `,
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #1a365d; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .content { background-color: #ffffff; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
+              .button { display: inline-block; padding: 14px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
+              .warning { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107; }
+              .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Password Reset Request</h1>
+              </div>
+              <div class="content">
+                <h2>Hello ${user.firstName} ${user.lastName},</h2>
+                <p>We received a request to reset your password for your IAAI Training account.</p>
+                <div style="text-align: center;">
+                  <a href="${resetUrl}" class="button">Reset Your Password</a>
+                </div>
+                <div class="warning">
+                  <p style="margin: 0;"><strong>Important:</strong> This link will expire in 1 hour for security reasons.</p>
+                </div>
+                <p>If you did not request this password reset, please ignore this email. Your password will remain unchanged.</p>
+                <p>For security reasons, we recommend that you:</p>
+                <ul>
+                  <li>Use a strong, unique password</li>
+                  <li>Never share your password with anyone</li>
+                  <li>Enable two-factor authentication if available</li>
+                </ul>
+                <div class="footer">
+                  <p>Best regards,<br>IAAI Training Security Team</p>
+                  <p style="font-size: 12px;">
+                    This is an automated security message. Please do not reply to this email.<br>
+                    © ${new Date().getFullYear()} IAAI Training Institute. All rights reserved.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
       });
 
       console.log(`✅ Password reset email sent to ${user.email}`);
@@ -2081,7 +2017,6 @@ exports.resetUserPassword = async (req, res) => {
         message: "Password reset email sent successfully!",
       });
     } catch (emailError) {
-      // Revert token if email fails
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
       await user.save();
@@ -2107,23 +2042,19 @@ exports.exportUserData = async (req, res) => {
   try {
     const { format = "csv" } = req.query;
 
-    // Fetch all users with payment data
     const users = await User.find()
       .populate("myInPersonCourses.courseId", "title courseCode")
       .populate("myLiveCourses.courseId", "title courseCode")
       .populate("mySelfPacedCourses.courseId", "title courseCode")
       .lean();
 
-    // Process users data
     const processedUsers = users.map((user) => {
-      // Calculate total spent
       const totalSpent = user.paymentTransactions
         ? user.paymentTransactions
             .filter((t) => t.paymentStatus === "completed")
             .reduce((sum, t) => sum + (t.finalAmount || 0), 0)
         : 0;
 
-      // Count courses
       const totalCourses =
         (user.myInPersonCourses?.length || 0) +
         (user.myLiveCourses?.length || 0) +
@@ -2147,7 +2078,6 @@ exports.exportUserData = async (req, res) => {
     });
 
     if (format === "csv") {
-      // Generate CSV
       const csvHeader =
         "First Name,Last Name,Email,Phone,Country,Profession,Role,Confirmed,Total Courses,Total Spent,Registration Date,Last Login,Payment Count\n";
 
@@ -2175,7 +2105,6 @@ exports.exportUserData = async (req, res) => {
       );
       res.send(csvHeader + csvData);
     } else {
-      // Generate JSON
       res.json({
         exportDate: new Date(),
         totalUsers: processedUsers.length,
@@ -2203,7 +2132,6 @@ exports.getRecentTransactions = async (req, res) => {
       .select("firstName lastName email paymentTransactions")
       .lean();
 
-    // Flatten all transactions
     const allTransactions = [];
 
     users.forEach((user) => {
@@ -2219,12 +2147,10 @@ exports.getRecentTransactions = async (req, res) => {
       }
     });
 
-    // Sort by date (newest first)
     allTransactions.sort(
       (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
     );
 
-    // Apply pagination
     const paginatedTransactions = allTransactions.slice(
       parseInt(offset),
       parseInt(offset) + parseInt(limit)
@@ -2272,7 +2198,6 @@ exports.getFilteredAnalytics = async (req, res) => {
   try {
     const { startDate, endDate, courseType, paymentType } = req.query;
 
-    // Build query filters
     const filters = {};
 
     if (startDate || endDate) {
@@ -2293,7 +2218,6 @@ exports.getFilteredAnalytics = async (req, res) => {
       .populate("mySelfPacedCourses.courseId")
       .lean();
 
-    // Process analytics based on filters
     let filteredRevenue = 0;
     let filteredTransactions = [];
     const courseTypeBreakdown = {
@@ -2306,12 +2230,10 @@ exports.getFilteredAnalytics = async (req, res) => {
       if (user.paymentTransactions) {
         user.paymentTransactions.forEach((transaction) => {
           if (transaction.paymentStatus === "completed") {
-            // Apply date filter
             const transDate = new Date(transaction.transactionDate);
             if (startDate && transDate < new Date(startDate)) return;
             if (endDate && transDate > new Date(endDate)) return;
 
-            // Apply payment type filter
             if (paymentType !== "all") {
               if (paymentType === "early-bird" && !transaction.earlyBird)
                 return;
@@ -2330,7 +2252,6 @@ exports.getFilteredAnalytics = async (req, res) => {
               userEmail: user.email,
             });
 
-            // Process course types
             if (transaction.coursesRegistered) {
               transaction.coursesRegistered.forEach((course) => {
                 if (courseType === "all" || course.courseType === courseType) {

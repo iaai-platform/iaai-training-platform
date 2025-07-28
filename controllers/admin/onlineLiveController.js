@@ -3553,6 +3553,18 @@ class OnlineLiveCoursesController {
    * @param {string} timezone - Timezone to interpret the date in
    * @returns {Date} - UTC Date object
    */
+  /**
+   * Parse a date string as if it were in the specified timezone - FIXED VERSION
+   * @param {string} dateString - Date string from form input
+   * @param {string} timezone - Timezone to interpret the date in
+   * @returns {Date} - UTC Date object
+   */
+  /**
+   * Parse a date string - SIMPLE FIX
+   * @param {string} dateString - Date string from form input
+   * @param {string} timezone - Timezone (ignored for now)
+   * @returns {Date} - Date object
+   */
   _parseTimezoneAwareDate(dateString, timezone = "UTC") {
     if (!dateString) return undefined;
 
@@ -3561,78 +3573,36 @@ class OnlineLiveCoursesController {
         `🔍 Parsing date: "${dateString}" in timezone: "${timezone}"`
       );
 
-      // If the dateString doesn't include time, add default time
-      if (!dateString.includes("T")) {
-        dateString += "T00:00:00";
+      // SIMPLE FIX: Replace space with T if needed
+      let cleanedDateString = dateString.trim();
+
+      // Handle "2025-07-31 12:00" format by replacing space with T
+      if (cleanedDateString.includes(" ") && !cleanedDateString.includes("T")) {
+        cleanedDateString = cleanedDateString.replace(" ", "T");
       }
 
-      // For UTC, just parse normally
-      if (timezone === "UTC") {
-        const result = new Date(dateString);
-        console.log(`✅ UTC date result: ${result}`);
-        return result;
+      // If no time specified, add default time
+      if (
+        !cleanedDateString.includes("T") &&
+        !cleanedDateString.includes(" ")
+      ) {
+        cleanedDateString += "T00:00:00";
       }
 
-      // For other timezones, we need to interpret the date as being in that timezone
-      // and convert it to UTC
+      // Parse the date
+      const result = new Date(cleanedDateString);
 
-      // Create a date object from the string (this will be interpreted as local time)
-      const inputDate = new Date(dateString);
-
-      if (isNaN(inputDate.getTime())) {
+      if (isNaN(result.getTime())) {
         console.error(`❌ Invalid date format: ${dateString}`);
         return undefined;
       }
 
-      // Get what this date/time would be if it were UTC
-      const year = inputDate.getFullYear();
-      const month = inputDate.getMonth();
-      const day = inputDate.getDate();
-      const hours = inputDate.getHours();
-      const minutes = inputDate.getMinutes();
-      const seconds = inputDate.getSeconds();
-
-      // Create a date string that represents this exact time in the target timezone
-      const isoString = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-        day
-      ).padStart(2, "0")}T${String(hours).padStart(2, "0")}:${String(
-        minutes
-      ).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-
-      // Now we need to find what UTC time would show as this local time in the target timezone
-      // We'll use a different approach: create the date and adjust for timezone offset
-
-      // Get the timezone offset for the target timezone at this date
-      const tempDate = new Date(isoString + "Z"); // UTC version
-      const utcTime = tempDate.getTime();
-
-      // Get what time it would be in the target timezone
-      const targetTimezoneDate = new Date(
-        tempDate.toLocaleString("en-US", { timeZone: timezone })
-      );
-      const localTime = targetTimezoneDate.getTime();
-
-      // The difference between these is the offset we need
-      const offset = utcTime - localTime;
-
-      // Apply this offset to get the correct UTC time
-      const correctedUTC = new Date(inputDate.getTime() + offset);
-
-      console.log(
-        `✅ Converted "${dateString}" (${timezone}) to UTC: ${correctedUTC}`
-      );
-      return correctedUTC;
+      console.log(`✅ Parsed date result: ${result}`);
+      return result;
     } catch (error) {
-      console.error("❌ Error parsing timezone-aware date:", error);
-      console.error(`   Input: "${dateString}", Timezone: "${timezone}"`);
-      // Fallback to regular date parsing
-      const fallback = new Date(dateString);
-      if (isNaN(fallback.getTime())) {
-        console.error("❌ Fallback also failed, returning undefined");
-        return undefined;
-      }
-      console.log(`⚠️ Using fallback date: ${fallback}`);
-      return fallback;
+      console.error("❌ Error parsing date:", error);
+      console.error(`   Input: "${dateString}"`);
+      return undefined;
     }
   }
 

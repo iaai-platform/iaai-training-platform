@@ -1,4 +1,4 @@
-// utils/sendEmail.js - Updated for Gmail SMTP
+// utils/sendEmail.js - FIXED Gmail SMTP (Corrected typo)
 const nodemailer = require("nodemailer");
 
 async function sendEmail(options) {
@@ -12,8 +12,8 @@ async function sendEmail(options) {
       );
     }
 
-    // Create Gmail SMTP transporter
-    const transporter = nodemailer.createTransporter({
+    // Create Gmail SMTP transporter - FIXED: createTransport (not createTransporter)
+    const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || "smtp.gmail.com",
       port: parseInt(process.env.EMAIL_PORT) || 587,
       secure: process.env.EMAIL_SECURE === "true" || false, // true for 465, false for other ports
@@ -97,6 +97,12 @@ async function sendEmail(options) {
       console.error(
         "❌ Gmail Authentication failed. Check your EMAIL_USER and EMAIL_PASS (App Password)."
       );
+      console.error(
+        "💡 Make sure to use Gmail App Password, not regular password!"
+      );
+      console.error(
+        "💡 Enable 2-Factor Authentication and generate App Password from Google Account settings."
+      );
     } else if (error.code === "ECONNECTION") {
       console.error(
         "❌ Connection failed. Check your internet connection and Gmail SMTP settings."
@@ -105,14 +111,19 @@ async function sendEmail(options) {
       console.error(
         "❌ Message error. Check email content and recipient addresses."
       );
+    } else if (error.code === "EENVELOPE") {
+      console.error(
+        "❌ Envelope error. Check sender and recipient email addresses."
+      );
     }
 
     // Enhanced error logging
-    console.error("Error details:", {
+    console.error("📧 Gmail Error Details:", {
       code: error.code,
       command: error.command,
       response: error.response,
       responseCode: error.responseCode,
+      message: error.message,
     });
 
     throw error;

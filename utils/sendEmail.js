@@ -1,61 +1,38 @@
-// utils/sendEmail.js - FIXED FOR SENDGRID FORMAT
-const sgMail = require("@sendgrid/mail");
+// utils/sendEmail.js - Updated for Gmail SMTP
+const nodemailer = require("nodemailer");
 
 async function sendEmail(options) {
   try {
-    // Check if SendGrid is configured
-    if (!process.env.SENDGRID_API_KEY) {
-      console.error(
-        "❌ SENDGRID_API_KEY not configured, falling back to nodemailer"
+    console.log("📧 Attempting to send email via Gmail SMTP...");
+
+    // Check if Gmail SMTP is configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      throw new Error(
+        "Gmail SMTP not configured. Set EMAIL_USER and EMAIL_PASS environment variables."
       );
-
-      // Fallback to nodemailer if SendGrid not configured
-      const nodemailer = require("nodemailer");
-
-      const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || "mail.iaa-i.com",
-        port: parseInt(process.env.EMAIL_PORT) || 587,
-        secure: process.env.EMAIL_SECURE === "true",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-        connectionTimeout: 60000,
-        greetingTimeout: 30000,
-        socketTimeout: 60000,
-      });
-
-      // Verify connection
-      await transporter.verify();
-      console.log("✅ SMTP connection verified");
-
-      // Send email via SMTP
-      const mailOptions = {
-        from: `"${process.env.EMAIL_FROM_NAME || "IAAI Training"}" <${
-          process.env.EMAIL_USER
-        }>`,
-        to: options.to,
-        subject: options.subject,
-        text: options.text || "",
-        html: options.html || options.text || "",
-      };
-
-      const info = await transporter.sendMail(mailOptions);
-
-      console.log("✅ Email sent via SMTP:", info.messageId);
-
-      return {
-        success: true,
-        messageId: info.messageId,
-        response: info.response,
-      };
     }
 
-    // Use SendGrid - FIXED FORMAT
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    // Create Gmail SMTP transporter
+    const transporter = nodemailer.createTransporter({
+      host: process.env.EMAIL_HOST || "smtp.gmail.com",
+      port: parseInt(process.env.EMAIL_PORT) || 587,
+      secure: process.env.EMAIL_SECURE === "true" || false, // true for 465, false for other ports
+      auth: {
+        user: process.env.EMAIL_USER, // Your Gmail address
+        pass: process.env.EMAIL_PASS, // Your Gmail App Password
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
+    });
+
+    // Verify SMTP connection
+    console.log("🔐 Verifying Gmail SMTP connection...");
+    await transporter.verify();
+    console.log("✅ Gmail SMTP connection verified successfully");
 
     // Extract sender info - handle both object and string formats
     let fromEmail, fromName;
@@ -66,11 +43,11 @@ async function sendEmail(options) {
       fromEmail = options.from;
       fromName = process.env.EMAIL_FROM_NAME || "IAAI Training Platform";
     } else {
-      fromEmail = process.env.EMAIL_FROM || "info@iaa-i.com";
+      fromEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
       fromName = process.env.EMAIL_FROM_NAME || "IAAI Training Platform";
     }
 
-    // Ensure content exists and is properly formatted
+    // Ensure content exists
     const htmlContent = options.html || options.text || "";
     const textContent =
       options.text || options.html?.replace(/<[^>]*>/g, "") || "";
@@ -81,72 +58,62 @@ async function sendEmail(options) {
       );
     }
 
-    const msg = {
+    // Prepare email options
+    const mailOptions = {
+      from: `"${fromName}" <${fromEmail}>`,
       to: options.to,
-      from: {
-        email: fromEmail,
-        name: fromName,
-      },
       subject: options.subject,
-      content: [
-        {
-          type: "text/html",
-          value: htmlContent,
-        },
-      ],
+      text: textContent,
+      html: htmlContent,
     };
 
-    // Add text content if available
-    if (textContent && textContent !== htmlContent) {
-      msg.content.unshift({
-        type: "text/plain",
-        value: textContent,
-      });
+    // Add BCC if provided (for bulk emails)
+    if (options.bcc) {
+      mailOptions.bcc = options.bcc;
     }
 
-    console.log("📧 Sending email via SendGrid to:", options.to);
+    console.log("📧 Sending email via Gmail SMTP:");
     console.log("📧 From:", fromEmail);
+    console.log("📧 To:", options.to);
     console.log("📧 Subject:", options.subject);
-    console.log(
-      "📧 Content types:",
-      msg.content.map((c) => c.type)
-    );
 
-    const result = await sgMail.send(msg);
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
 
-    console.log("✅ Email sent successfully via SendGrid");
-    console.log("📧 Message ID:", result[0].headers["x-message-id"]);
+    console.log("✅ Email sent successfully via Gmail SMTP");
+    console.log("📧 Message ID:", info.messageId);
 
     return {
       success: true,
-      messageId: result[0].headers["x-message-id"] || "sendgrid-success",
-      response: "Email sent via SendGrid",
+      messageId: info.messageId,
+      response: info.response,
+      service: "Gmail SMTP",
     };
   } catch (error) {
-    console.error("❌ Email sending failed:", error);
+    console.error("❌ Gmail SMTP email sending failed:", error);
 
-    // Handle SendGrid specific errors
-    if (error.response && error.response.body) {
-      console.error("❌ SendGrid response:", error.response.body);
-
-      // Log specific SendGrid error details
-      if (error.response.body.errors) {
-        error.response.body.errors.forEach((err) => {
-          console.error(
-            `❌ SendGrid Error: ${err.message} (Field: ${err.field})`
-          );
-        });
-      }
-    }
-
-    // Handle SMTP specific errors
+    // Handle specific Gmail SMTP errors
     if (error.code === "EAUTH") {
-      console.error("Authentication failed. Check your email credentials.");
+      console.error(
+        "❌ Gmail Authentication failed. Check your EMAIL_USER and EMAIL_PASS (App Password)."
+      );
     } else if (error.code === "ECONNECTION") {
       console.error(
-        "Connection failed. Check your internet/firewall settings."
+        "❌ Connection failed. Check your internet connection and Gmail SMTP settings."
+      );
+    } else if (error.code === "EMESSAGE") {
+      console.error(
+        "❌ Message error. Check email content and recipient addresses."
       );
     }
+
+    // Enhanced error logging
+    console.error("Error details:", {
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+    });
 
     throw error;
   }

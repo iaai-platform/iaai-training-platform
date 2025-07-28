@@ -1,4 +1,4 @@
-// adminUserController.js - COMPLETE UPDATED VERSION WITH EMAIL_FROM FIX
+// adminUserController.js -
 const User = require("../models/user");
 const DeletedUser = require("../models/deletedUser");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");

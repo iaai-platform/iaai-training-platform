@@ -1,8 +1,253 @@
-//libraryController.js - COMPLETE VERSION WITH LINKED COURSE SUPPORT
+//libraryController.js - Enhanced with Dual Timezone Support
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
+
+// ============================================
+// ✅ ENHANCED TIMEZONE UTILITY FUNCTIONS
+// ============================================
+
+/**
+ * Get timezone abbreviation safely
+ */
+function getTimezoneAbbr(timezone) {
+  if (!timezone || timezone === "UTC") return "UTC";
+
+  try {
+    const tempDate = new Date();
+    return tempDate
+      .toLocaleString("en-US", {
+        timeZone: timezone,
+        timeZoneName: "short",
+      })
+      .split(" ")
+      .pop();
+  } catch (error) {
+    return timezone;
+  }
+}
+
+/**
+ * Combine course date with session time for accurate display
+ */
+function combineDateTime(courseDate, sessionTime, timezone) {
+  if (!courseDate) return null;
+
+  try {
+    // Get the date part
+    const date = new Date(courseDate);
+
+    // If we have session time, create a proper datetime
+    if (sessionTime) {
+      const [hours, minutes] = sessionTime.split(":").map(Number);
+
+      // Create date in the course timezone
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+
+      // Create a date object with the session time
+      const combinedDate = new Date();
+      combinedDate.setFullYear(year, month, day);
+      combinedDate.setHours(hours, minutes || 0, 0, 0);
+
+      return combinedDate;
+    }
+
+    return date;
+  } catch (error) {
+    console.error("DateTime combination error:", error);
+    return new Date(courseDate);
+  }
+}
+
+/**
+ * Enhanced date formatter that handles session times
+ */
+function formatCourseScheduleWithTime(courseDate, sessionTime, timezone) {
+  if (!courseDate) return "Schedule TBD";
+
+  try {
+    // Combine date and session time
+    const combinedDateTime = combineDateTime(courseDate, sessionTime, timezone);
+
+    if (sessionTime && timezone) {
+      // Show date + session time in timezone
+      const dateStr = combinedDateTime.toLocaleDateString("en-US", {
+        timeZone: timezone,
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+
+      const timeStr = sessionTime;
+
+      // Add timezone abbreviation
+      const tzAbbr = getTimezoneAbbr(timezone);
+
+      return `${dateStr} at ${timeStr} ${tzAbbr}`;
+    }
+
+    // Fallback to date only
+    return combinedDateTime.toLocaleDateString("en-US", {
+      timeZone: timezone || "UTC",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch (error) {
+    console.error("Schedule formatting error:", error);
+    return new Date(courseDate).toLocaleDateString();
+  }
+}
+
+/**
+ * ✅ ENHANCED: Format with dual timezone display
+ */
+function formatWithDualTimezone(
+  courseDate,
+  sessionTime,
+  courseTimezone,
+  showDual = true
+) {
+  if (!courseDate) return "Schedule TBD";
+
+  try {
+    const date = new Date(courseDate);
+
+    if (sessionTime && courseTimezone) {
+      // Parse session time
+      const [hours, minutes] = sessionTime.split(":").map(Number);
+
+      // Create combined datetime
+      const combinedDate = new Date(date);
+      combinedDate.setHours(hours, minutes || 0, 0, 0);
+
+      // Format in course timezone
+      const courseTime = combinedDate.toLocaleString("en-US", {
+        timeZone: courseTimezone,
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      const courseTzAbbr = getTimezoneAbbr(courseTimezone);
+
+      if (showDual) {
+        return {
+          primary: `${courseTime} ${courseTzAbbr}`,
+          courseTimezone: courseTimezone,
+          sessionTime: sessionTime,
+          utcTimestamp: combinedDate.getTime(),
+          // For JavaScript timezone conversion on frontend
+          displayData: {
+            year: combinedDate.getFullYear(),
+            month: combinedDate.getMonth(),
+            day: combinedDate.getDate(),
+            hour: hours,
+            minute: minutes,
+            courseTimezone: courseTimezone,
+          },
+        };
+      }
+
+      return `${courseTime} ${courseTzAbbr}`;
+    }
+
+    return date.toLocaleDateString("en-US", {
+      timeZone: courseTimezone || "UTC",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch (error) {
+    console.error("Dual timezone formatting error:", error);
+    return new Date(courseDate).toLocaleDateString();
+  }
+}
+
+/**
+ * Helper: Combine date and time to UTC timestamp
+ */
+function combineDateTimeToUTC(dateString, timeString, timezone) {
+  if (!dateString || !timeString || !timezone) return null;
+
+  try {
+    const date = new Date(dateString);
+    const [hours, minutes] = timeString.split(":").map(Number);
+
+    // Create date string in format that can be parsed with timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const time = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}:00`;
+
+    const dateTimeString = `${year}-${month}-${day}T${time}`;
+
+    // Parse as if it's in the course timezone (this is approximate)
+    const localDate = new Date(dateTimeString);
+
+    return localDate.getTime();
+  } catch (error) {
+    console.error("UTC combination error:", error);
+    return null;
+  }
+}
+
+/**
+ * Format course date with timezone awareness
+ */
+function formatCourseDate(dateString, timezone) {
+  if (!dateString) return "TBD";
+
+  try {
+    const date = new Date(dateString);
+    const options = {
+      timeZone: timezone || "UTC",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    };
+
+    return date.toLocaleString("en-US", options);
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return new Date(dateString).toLocaleString();
+  }
+}
+
+/**
+ * Format course date (date only) with timezone awareness
+ */
+function formatCourseDateOnly(dateString, timezone) {
+  if (!dateString) return "TBD";
+
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      timeZone: timezone || "UTC",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch (error) {
+    return new Date(dateString).toLocaleDateString();
+  }
+}
+
+// ============================================
+// ✅ MAIN CONTROLLER METHODS
+// ============================================
 
 /**
  * ✅ COMPLETE: Get Self-Paced Library with Linked Course Support
@@ -557,12 +802,12 @@ exports.getSelfPacedLibrary = async (req, res) => {
 };
 
 /**
- * ✅ COMPLETE: Get Live Library with Full Linked Course Support
+ * ✅ COMPLETE: Get Live Library with Enhanced Dual Timezone Support
  */
 exports.getLiveLibrary = async (req, res) => {
   try {
     console.log(
-      "📚 Loading live course library (safe mode) for user:",
+      "📚 Loading live course library (enhanced timezone) for user:",
       req.user.email
     );
 
@@ -670,6 +915,7 @@ exports.getLiveLibrary = async (req, res) => {
                 canViewCertificate,
               });
 
+              // ✅ ENHANCED: Build course object with dual timezone support
               liveCourses.push({
                 courseId: course._id,
                 title: course.basic?.title || "Untitled Course",
@@ -680,12 +926,84 @@ exports.getLiveLibrary = async (req, res) => {
                 dateOfRegistration: enrollment.enrollmentData.registrationDate,
                 status: enrollment.enrollmentData.status,
 
-                // ✅ FIXED: Enhanced date handling with timezone info
+                // ✅ ENHANCED: Raw dates and timezone with dual support
                 startDate: course.schedule?.startDate,
                 endDate: course.schedule?.endDate,
                 timezone: course.schedule?.primaryTimezone || "UTC",
 
-                // ✅ NEW: Pre-formatted dates for frontend
+                // ✅ ENHANCED: Session time with dual timezone data
+                sessionTime: {
+                  startTime: course.schedule?.sessionTime?.startTime || null,
+                  endTime: course.schedule?.sessionTime?.endTime || null,
+                  breakDuration:
+                    course.schedule?.sessionTime?.breakDuration || 15,
+                },
+
+                // ✅ ENHANCED: Display info with dual timezone support
+                displayInfo: {
+                  // Standard displays
+                  startDateOnly: formatCourseDateOnly(
+                    course.schedule?.startDate,
+                    course.schedule?.primaryTimezone
+                  ),
+                  endDateOnly: formatCourseDateOnly(
+                    course.schedule?.endDate,
+                    course.schedule?.primaryTimezone
+                  ),
+
+                  // ✅ ENHANCED: Dual timezone objects for frontend
+                  fullScheduleWithDual: formatWithDualTimezone(
+                    course.schedule?.startDate,
+                    course.schedule?.sessionTime?.startTime,
+                    course.schedule?.primaryTimezone,
+                    true
+                  ),
+
+                  sessionTimeWithDual:
+                    course.schedule?.sessionTime?.startTime &&
+                    course.schedule?.sessionTime?.endTime
+                      ? {
+                          primary: `${
+                            course.schedule.sessionTime.startTime
+                          } - ${
+                            course.schedule.sessionTime.endTime
+                          } ${getTimezoneAbbr(
+                            course.schedule?.primaryTimezone
+                          )}`,
+                          courseTimezone: course.schedule?.primaryTimezone,
+                          startTime: course.schedule.sessionTime.startTime,
+                          endTime: course.schedule.sessionTime.endTime,
+                          // For frontend conversion
+                          startUtc: combineDateTimeToUTC(
+                            course.schedule?.startDate,
+                            course.schedule.sessionTime.startTime,
+                            course.schedule?.primaryTimezone
+                          ),
+                          endUtc: combineDateTimeToUTC(
+                            course.schedule?.startDate,
+                            course.schedule.sessionTime.endTime,
+                            course.schedule?.primaryTimezone
+                          ),
+                        }
+                      : { primary: "Time TBD" },
+
+                  // Backward compatibility
+                  sessionTimeRange:
+                    course.schedule?.sessionTime?.startTime &&
+                    course.schedule?.sessionTime?.endTime
+                      ? `${course.schedule.sessionTime.startTime} - ${
+                          course.schedule.sessionTime.endTime
+                        } ${getTimezoneAbbr(course.schedule?.primaryTimezone)}`
+                      : "Time TBD",
+
+                  startsAt: formatCourseScheduleWithTime(
+                    course.schedule?.startDate,
+                    course.schedule?.sessionTime?.startTime,
+                    course.schedule?.primaryTimezone
+                  ),
+                },
+
+                // ✅ FIXED: Enhanced date handling with timezone info
                 displayDates: {
                   startDate: formatCourseDate(
                     course.schedule?.startDate,
@@ -704,6 +1022,7 @@ exports.getLiveLibrary = async (req, res) => {
                     course.schedule?.primaryTimezone
                   ),
                 },
+
                 schedule: course.schedule?.duration || "TBD",
                 platform: course.platform?.name || "Zoom",
                 platformFeatures: course.platform?.features || {},
@@ -835,7 +1154,7 @@ exports.getLiveLibrary = async (req, res) => {
       (course) => course.canGetCertificate && !course.hasCertificate
     ).length;
 
-    console.log(`📊 Live Library Statistics (Safe Mode):`, {
+    console.log(`📊 Live Library Statistics (Enhanced Timezone Mode):`, {
       totalCourses,
       attendedCourses,
       completedCourses,
@@ -866,54 +1185,6 @@ exports.getLiveLibrary = async (req, res) => {
     res.redirect("/dashboard");
   }
 };
-
-//new
-
-// Add these helper functions to your libraryController.js:
-
-/**
- * Format course date with timezone awareness
- */
-function formatCourseDate(dateString, timezone) {
-  if (!dateString) return "TBD";
-
-  try {
-    const date = new Date(dateString);
-    const options = {
-      timeZone: timezone || "UTC",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    };
-
-    return date.toLocaleString("en-US", options);
-  } catch (error) {
-    console.error("Date formatting error:", error);
-    return new Date(dateString).toLocaleString();
-  }
-}
-
-/**
- * Format course date (date only) with timezone awareness
- */
-function formatCourseDateOnly(dateString, timezone) {
-  if (!dateString) return "TBD";
-
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      timeZone: timezone || "UTC",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch (error) {
-    return new Date(dateString).toLocaleDateString();
-  }
-}
 
 /**
  * ✅ COMPLETE: Get In-Person Library with Full Linked Course Support

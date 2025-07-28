@@ -358,12 +358,13 @@ exports.getCourseDetails = async (req, res) => {
 
       // Recording info - ENHANCED
       recordingAvailable:
-        course.recording?.enabled &&
-        course.recording?.availability?.forStudents,
+        course.recording?.enabled !== false && // Default to true if not explicitly false
+        course.recording?.availability?.forStudents !== false, // Default to true if not explicitly false
       recordingDuration: course.recording?.availability?.duration || 90,
-      recordingDownloadable: course.recording?.availability?.downloadable,
+      recordingDownloadable:
+        course.recording?.availability?.downloadable || false,
       recordingDetails: {
-        available: course.recording?.availability?.forStudents || false,
+        available: course.recording?.availability?.forStudents !== false, // Default to true
         duration: course.recording?.availability?.duration || 90,
         downloadable: course.recording?.availability?.downloadable || false,
         passwordProtected:

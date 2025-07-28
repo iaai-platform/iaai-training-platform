@@ -1,4 +1,4 @@
-// adminUserController.js -
+// adminUserController.js - Updated Version with Enhanced Course Data Population
 const User = require("../models/user");
 const DeletedUser = require("../models/deletedUser");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
@@ -8,6 +8,24 @@ const crypto = require("crypto");
 const Instructor = require("../models/Instructor");
 const CoursePool = require("../models/CoursePool");
 const sendEmail = require("../utils/sendEmail");
+
+// ============================================
+// EMAIL CONFIGURATION HELPER (ALIGNED WITH USER CONTROLLER)
+// ============================================
+function createEmailTransporter() {
+  return {
+    verify: async () => {
+      console.log(
+        "✅ Using Gmail SMTP - verification handled by sendEmail utility"
+      );
+      return true;
+    },
+    sendMail: async (options) => {
+      const sendEmail = require("../utils/sendEmail");
+      return await sendEmail(options);
+    },
+  };
+}
 
 // Helper function to get course model
 const getCourseModel = (courseType) => {
@@ -23,32 +41,77 @@ const getCourseModel = (courseType) => {
   }
 };
 
-// ✅ Fetch All Users with Payment Information
+// ✅ Enhanced Fetch All Users with Complete Course Data Population
 exports.getAllUsers = async (req, res) => {
   try {
     console.log("🔍 Fetching all users for admin panel...");
 
-    // ✅ Fetch all users and populate course references
+    // ✅ Fetch all users and populate course references with enhanced data
     const users = await User.find()
-      .populate("myInPersonCourses.courseId", "title courseCode")
-      .populate("myLiveCourses.courseId", "title courseCode")
-      .populate("mySelfPacedCourses.courseId", "title courseCode")
+      .populate({
+        path: "myInPersonCourses.courseId",
+        select:
+          "basic.title basic.courseCode schedule.startDate schedule.endDate enrollment.price venue.city venue.country certification.enabled",
+      })
+      .populate({
+        path: "myLiveCourses.courseId",
+        select:
+          "basic.title basic.courseCode schedule.startDate schedule.endDate enrollment.price platform.name certification.enabled",
+      })
+      .populate({
+        path: "mySelfPacedCourses.courseId",
+        select:
+          "basic.title basic.courseCode content.estimatedMinutes enrollment.price access.accessDays certification.enabled videos",
+      })
       .sort({ createdAt: -1 })
       .lean();
 
-    // ✅ Process users to combine all courses and create wishlist
+    // ✅ Enhanced user processing with complete course data
     const processedUsers = users.map((user) => {
-      // Combine all courses from different types
       const allCourses = [];
       const wishlistCourses = [];
 
-      // Process In-Person Courses
+      // Enhanced In-Person Courses Processing
       if (user.myInPersonCourses && user.myInPersonCourses.length > 0) {
         user.myInPersonCourses.forEach((course) => {
           const courseData = {
             ...course,
             courseType: "In-Person",
-            courseTitle: course.courseId ? course.courseId.title : course.title,
+            courseTitle: course.courseId
+              ? course.courseId.basic?.title
+              : course.title,
+            courseCode: course.courseId
+              ? course.courseId.basic?.courseCode
+              : course.courseCode,
+            price:
+              course.enrollmentData?.paidAmount ||
+              course.courseId?.enrollment?.price ||
+              0,
+            // Enhanced progress tracking
+            enrollmentStatus: course.enrollmentData?.status || "unknown",
+            registrationDate:
+              course.enrollmentData?.registrationDate ||
+              course.dateOfRegistration,
+            paidAmount: course.enrollmentData?.paidAmount || 0,
+            promoCodeUsed:
+              course.enrollmentData?.promoCodeUsed || course.promoCode,
+            // Progress details
+            attendancePercentage:
+              course.userProgress?.overallAttendancePercentage || 0,
+            courseStatus:
+              course.userProgress?.courseStatus ||
+              course.status ||
+              "not-started",
+            completionDate: course.userProgress?.completionDate,
+            assessmentScore:
+              course.userProgress?.assessmentScore || course.assessmentScore,
+            certificateId: course.certificateId,
+            // Location info
+            location: course.courseId?.venue
+              ? `${course.courseId.venue.city}, ${course.courseId.venue.country}`
+              : null,
+            startDate: course.courseId?.schedule?.startDate,
+            endDate: course.courseId?.schedule?.endDate,
           };
           allCourses.push(courseData);
 
@@ -58,13 +121,51 @@ exports.getAllUsers = async (req, res) => {
         });
       }
 
-      // Process Online Live Courses
+      // Enhanced Online Live Courses Processing
       if (user.myLiveCourses && user.myLiveCourses.length > 0) {
         user.myLiveCourses.forEach((course) => {
           const courseData = {
             ...course,
             courseType: "Online Live",
-            courseTitle: course.courseId ? course.courseId.title : course.title,
+            courseTitle: course.courseId
+              ? course.courseId.basic?.title
+              : course.title,
+            courseCode: course.courseId
+              ? course.courseId.basic?.courseCode
+              : course.courseCode,
+            price:
+              course.enrollmentData?.paidAmount ||
+              course.courseId?.enrollment?.price ||
+              0,
+            // Enhanced progress tracking
+            enrollmentStatus: course.enrollmentData?.status || "unknown",
+            registrationDate:
+              course.enrollmentData?.registrationDate ||
+              course.dateOfRegistration,
+            paidAmount: course.enrollmentData?.paidAmount || 0,
+            promoCodeUsed:
+              course.enrollmentData?.promoCodeUsed || course.promoCode,
+            // Progress details
+            attendancePercentage:
+              course.userProgress?.overallAttendancePercentage || 0,
+            courseStatus:
+              course.userProgress?.courseStatus ||
+              course.status ||
+              "not-started",
+            completionDate: course.userProgress?.completionDate,
+            assessmentScore:
+              course.userProgress?.bestAssessmentScore ||
+              course.assessmentScore,
+            certificateId: course.certificateId,
+            // Online-specific details
+            sessionsAttended:
+              course.userProgress?.sessionsAttended?.length || 0,
+            recordingsWatched:
+              course.userProgress?.recordingsWatched?.length || 0,
+            assessmentAttempts: course.assessmentAttempts?.length || 0,
+            platform: course.courseId?.platform?.name || "Online Platform",
+            startDate: course.courseId?.schedule?.startDate,
+            endDate: course.courseId?.schedule?.endDate,
           };
           allCourses.push(courseData);
 
@@ -74,13 +175,55 @@ exports.getAllUsers = async (req, res) => {
         });
       }
 
-      // Process Self-Paced Courses
+      // Enhanced Self-Paced Courses Processing
       if (user.mySelfPacedCourses && user.mySelfPacedCourses.length > 0) {
         user.mySelfPacedCourses.forEach((course) => {
+          const totalVideos = course.courseId?.videos?.length || 0;
+          const completedVideos =
+            course.courseProgress?.completedVideos?.length || 0;
+          const overallPercentage =
+            totalVideos > 0
+              ? Math.round((completedVideos / totalVideos) * 100)
+              : 0;
+
           const courseData = {
             ...course,
             courseType: "Self-Paced",
-            courseTitle: course.courseId ? course.courseId.title : course.title,
+            courseTitle: course.courseId
+              ? course.courseId.basic?.title
+              : course.title,
+            courseCode: course.courseId
+              ? course.courseId.basic?.courseCode
+              : course.courseCode,
+            price:
+              course.enrollmentData?.paidAmount ||
+              course.courseId?.access?.price ||
+              0,
+            // Enhanced progress tracking
+            enrollmentStatus: course.enrollmentData?.status || "unknown",
+            registrationDate:
+              course.enrollmentData?.registrationDate ||
+              course.dateOfRegistration,
+            expiryDate: course.enrollmentData?.expiryDate,
+            paidAmount: course.enrollmentData?.paidAmount || 0,
+            promoCodeUsed:
+              course.enrollmentData?.promoCodeUsed || course.promoCode,
+            // Progress details
+            overallPercentage: overallPercentage,
+            courseStatus:
+              course.courseProgress?.status || course.status || "not-started",
+            completionDate: course.courseProgress?.completionDate,
+            lastAccessedAt: course.courseProgress?.lastAccessedAt,
+            totalWatchTime: course.courseProgress?.totalWatchTime || 0,
+            averageExamScore: course.courseProgress?.averageExamScore || 0,
+            certificateId: course.certificateId,
+            // Self-paced specific details
+            completedVideos: completedVideos,
+            totalVideos: totalVideos,
+            completedExams: course.courseProgress?.completedExams?.length || 0,
+            videoNotes: course.videoNotes?.length || 0,
+            bookmarks: course.bookmarks?.length || 0,
+            estimatedMinutes: course.courseId?.content?.estimatedMinutes || 0,
           };
           allCourses.push(courseData);
 
@@ -90,30 +233,79 @@ exports.getAllUsers = async (req, res) => {
         });
       }
 
-      // Calculate total spent by user
-      const totalSpent = user.paymentTransactions
-        ? user.paymentTransactions
-            .filter((t) => t.paymentStatus === "completed")
-            .reduce((sum, t) => sum + (t.finalAmount || 0), 0)
-        : 0;
+      // Calculate comprehensive user statistics
+      const userStats = {
+        totalSpent: user.paymentTransactions
+          ? user.paymentTransactions
+              .filter((t) => t.paymentStatus === "completed")
+              .reduce((sum, t) => sum + (t.finalAmount || 0), 0)
+          : 0,
+        totalTransactions: user.paymentTransactions
+          ? user.paymentTransactions.filter(
+              (t) => t.paymentStatus === "completed"
+            ).length
+          : 0,
+        totalCourses: allCourses.length,
+        completedCourses: allCourses.filter(
+          (c) =>
+            c.courseStatus === "completed" ||
+            c.completionDate ||
+            c.overallPercentage === 100
+        ).length,
+        inProgressCourses: allCourses.filter(
+          (c) =>
+            c.courseStatus === "in-progress" ||
+            (c.overallPercentage > 0 && c.overallPercentage < 100)
+        ).length,
+        certificatesEarned: allCourses.filter((c) => c.certificateId).length,
+        averageProgress:
+          allCourses.length > 0
+            ? Math.round(
+                allCourses.reduce(
+                  (sum, c) =>
+                    sum + (c.overallPercentage || c.attendancePercentage || 0),
+                  0
+                ) / allCourses.length
+              )
+            : 0,
+      };
 
-      // Calculate total courses purchased
-      const coursesPurchased = user.paymentTransactions
-        ? user.paymentTransactions
-            .filter((t) => t.paymentStatus === "completed")
-            .reduce(
-              (sum, t) =>
-                sum + (t.coursesRegistered ? t.coursesRegistered.length : 0),
-              0
-            )
-        : 0;
+      // Enhanced professional information processing
+      const professionalInfo = {
+        basic: {
+          title: user.professionalInfo?.title || "Not specified",
+          fieldOfStudy: user.professionalInfo?.fieldOfStudy || "Not specified",
+          specialty: user.professionalInfo?.specialty || "Not specified",
+          aestheticsExperience:
+            user.professionalInfo?.aestheticsExperience || "Not specified",
+          yearsOfExperience:
+            user.professionalInfo?.yearsOfExperience || "Not specified",
+          currentWorkplace:
+            user.professionalInfo?.currentWorkplace || "Not specified",
+          trainingGoals:
+            user.professionalInfo?.trainingGoals || "Not specified",
+        },
+        license: {
+          hasLicense: user.professionalInfo?.licenseInfo?.hasLicense || false,
+          licenseNumber:
+            user.professionalInfo?.licenseInfo?.licenseNumber || "Not provided",
+          licenseState:
+            user.professionalInfo?.licenseInfo?.licenseState || "Not provided",
+          licenseCountry:
+            user.professionalInfo?.licenseInfo?.licenseCountry ||
+            "Not provided",
+        },
+        interests: user.professionalInfo?.areasOfInterest || [],
+      };
 
       return {
         ...user,
         myCourses: allCourses,
         myWishlist: wishlistCourses,
-        totalSpent: totalSpent,
-        coursesPurchased: coursesPurchased,
+        userStats: userStats,
+        professionalInfo: professionalInfo,
+        totalSpent: userStats.totalSpent,
+        coursesPurchased: userStats.totalCourses,
         lastTransactionDate:
           user.paymentTransactions && user.paymentTransactions.length > 0
             ? Math.max(
@@ -125,7 +317,7 @@ exports.getAllUsers = async (req, res) => {
       };
     });
 
-    // ✅ Calculate overall statistics
+    // ✅ Calculate overall statistics (existing code remains the same)
     const overallStats = {
       totalRevenue: processedUsers.reduce(
         (sum, user) => sum + user.totalSpent,
@@ -200,6 +392,549 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+// ✅ Enhanced Get User Details with Complete Course Data
+exports.getUserDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const userDetails = await User.findById(userId)
+      .populate({
+        path: "myInPersonCourses.courseId",
+        select:
+          "basic.title basic.courseCode schedule.startDate schedule.endDate enrollment.price venue.city venue.country certification.enabled instructors",
+      })
+      .populate({
+        path: "myLiveCourses.courseId",
+        select:
+          "basic.title basic.courseCode schedule.startDate schedule.endDate enrollment.price platform.name certification.enabled instructors",
+      })
+      .populate({
+        path: "mySelfPacedCourses.courseId",
+        select:
+          "basic.title basic.courseCode content.estimatedMinutes access.price access.accessDays certification.enabled videos instructor",
+      })
+      .lean();
+
+    if (!userDetails) {
+      req.flash("error", "User not found");
+      return res.redirect("/admin-users");
+    }
+
+    // Process user data with enhanced course information (same logic as getAllUsers but with more detail)
+    const allCourses = [];
+    const wishlistCourses = [];
+
+    // Enhanced In-Person Courses Processing with full details
+    if (
+      userDetails.myInPersonCourses &&
+      userDetails.myInPersonCourses.length > 0
+    ) {
+      userDetails.myInPersonCourses.forEach((course) => {
+        const courseData = {
+          ...course,
+          courseType: "In-Person",
+          courseTitle: course.courseId
+            ? course.courseId.basic?.title
+            : course.title,
+          courseCode: course.courseId
+            ? course.courseId.basic?.courseCode
+            : course.courseCode,
+          price:
+            course.enrollmentData?.paidAmount ||
+            course.courseId?.enrollment?.price ||
+            0,
+          enrollmentStatus: course.enrollmentData?.status || "unknown",
+          registrationDate:
+            course.enrollmentData?.registrationDate ||
+            course.dateOfRegistration,
+          paidAmount: course.enrollmentData?.paidAmount || 0,
+          promoCodeUsed:
+            course.enrollmentData?.promoCodeUsed || course.promoCode,
+          attendancePercentage:
+            course.userProgress?.overallAttendancePercentage || 0,
+          courseStatus:
+            course.userProgress?.courseStatus || course.status || "not-started",
+          completionDate: course.userProgress?.completionDate,
+          assessmentScore:
+            course.userProgress?.assessmentScore || course.assessmentScore,
+          certificateId: course.certificateId,
+          location: course.courseId?.venue
+            ? `${course.courseId.venue.city}, ${course.courseId.venue.country}`
+            : null,
+          startDate: course.courseId?.schedule?.startDate,
+          endDate: course.courseId?.schedule?.endDate,
+          instructor: course.courseId?.instructors?.primary?.name || "TBA",
+        };
+        allCourses.push(courseData);
+
+        if (course.wishlistStatus === 1) {
+          wishlistCourses.push(courseData);
+        }
+      });
+    }
+
+    // Enhanced Online Live Courses Processing with full details
+    if (userDetails.myLiveCourses && userDetails.myLiveCourses.length > 0) {
+      userDetails.myLiveCourses.forEach((course) => {
+        const courseData = {
+          ...course,
+          courseType: "Online Live",
+          courseTitle: course.courseId
+            ? course.courseId.basic?.title
+            : course.title,
+          courseCode: course.courseId
+            ? course.courseId.basic?.courseCode
+            : course.courseCode,
+          price:
+            course.enrollmentData?.paidAmount ||
+            course.courseId?.enrollment?.price ||
+            0,
+          enrollmentStatus: course.enrollmentData?.status || "unknown",
+          registrationDate:
+            course.enrollmentData?.registrationDate ||
+            course.dateOfRegistration,
+          paidAmount: course.enrollmentData?.paidAmount || 0,
+          promoCodeUsed:
+            course.enrollmentData?.promoCodeUsed || course.promoCode,
+          attendancePercentage:
+            course.userProgress?.overallAttendancePercentage || 0,
+          courseStatus:
+            course.userProgress?.courseStatus || course.status || "not-started",
+          completionDate: course.userProgress?.completionDate,
+          assessmentScore:
+            course.userProgress?.bestAssessmentScore || course.assessmentScore,
+          certificateId: course.certificateId,
+          sessionsAttended: course.userProgress?.sessionsAttended?.length || 0,
+          recordingsWatched:
+            course.userProgress?.recordingsWatched?.length || 0,
+          assessmentAttempts: course.assessmentAttempts?.length || 0,
+          platform: course.courseId?.platform?.name || "Online Platform",
+          startDate: course.courseId?.schedule?.startDate,
+          endDate: course.courseId?.schedule?.endDate,
+          instructor: course.courseId?.instructors?.primary?.name || "TBA",
+        };
+        allCourses.push(courseData);
+
+        if (course.wishlistStatus === 1) {
+          wishlistCourses.push(courseData);
+        }
+      });
+    }
+
+    // Enhanced Self-Paced Courses Processing with full details
+    if (
+      userDetails.mySelfPacedCourses &&
+      userDetails.mySelfPacedCourses.length > 0
+    ) {
+      userDetails.mySelfPacedCourses.forEach((course) => {
+        const totalVideos = course.courseId?.videos?.length || 0;
+        const completedVideos =
+          course.courseProgress?.completedVideos?.length || 0;
+        const overallPercentage =
+          totalVideos > 0
+            ? Math.round((completedVideos / totalVideos) * 100)
+            : 0;
+
+        const courseData = {
+          ...course,
+          courseType: "Self-Paced",
+          courseTitle: course.courseId
+            ? course.courseId.basic?.title
+            : course.title,
+          courseCode: course.courseId
+            ? course.courseId.basic?.courseCode
+            : course.courseCode,
+          price:
+            course.enrollmentData?.paidAmount ||
+            course.courseId?.access?.price ||
+            0,
+          enrollmentStatus: course.enrollmentData?.status || "unknown",
+          registrationDate:
+            course.enrollmentData?.registrationDate ||
+            course.dateOfRegistration,
+          expiryDate: course.enrollmentData?.expiryDate,
+          paidAmount: course.enrollmentData?.paidAmount || 0,
+          promoCodeUsed:
+            course.enrollmentData?.promoCodeUsed || course.promoCode,
+          overallPercentage: overallPercentage,
+          courseStatus:
+            course.courseProgress?.status || course.status || "not-started",
+          completionDate: course.courseProgress?.completionDate,
+          lastAccessedAt: course.courseProgress?.lastAccessedAt,
+          totalWatchTime: course.courseProgress?.totalWatchTime || 0,
+          averageExamScore: course.courseProgress?.averageExamScore || 0,
+          certificateId: course.certificateId,
+          completedVideos: completedVideos,
+          totalVideos: totalVideos,
+          completedExams: course.courseProgress?.completedExams?.length || 0,
+          videoNotes: course.videoNotes?.length || 0,
+          bookmarks: course.bookmarks?.length || 0,
+          estimatedMinutes: course.courseId?.content?.estimatedMinutes || 0,
+          instructor: course.courseId?.instructor?.name || "TBA",
+        };
+        allCourses.push(courseData);
+
+        if (course.wishlistStatus === 1) {
+          wishlistCourses.push(courseData);
+        }
+      });
+    }
+
+    // Calculate comprehensive user statistics
+    const userStats = {
+      totalSpent: userDetails.paymentTransactions
+        ? userDetails.paymentTransactions
+            .filter((t) => t.paymentStatus === "completed")
+            .reduce((sum, t) => sum + (t.finalAmount || 0), 0)
+        : 0,
+      totalTransactions: userDetails.paymentTransactions
+        ? userDetails.paymentTransactions.filter(
+            (t) => t.paymentStatus === "completed"
+          ).length
+        : 0,
+      totalCourses: allCourses.length,
+      completedCourses: allCourses.filter(
+        (c) =>
+          c.courseStatus === "completed" ||
+          c.completionDate ||
+          c.overallPercentage === 100
+      ).length,
+      inProgressCourses: allCourses.filter(
+        (c) =>
+          c.courseStatus === "in-progress" ||
+          (c.overallPercentage > 0 && c.overallPercentage < 100)
+      ).length,
+      certificatesEarned: allCourses.filter((c) => c.certificateId).length,
+      averageProgress:
+        allCourses.length > 0
+          ? Math.round(
+              allCourses.reduce(
+                (sum, c) =>
+                  sum + (c.overallPercentage || c.attendancePercentage || 0),
+                0
+              ) / allCourses.length
+            )
+          : 0,
+    };
+
+    // Process professional information
+    const professionalInfo = {
+      basic: {
+        title: userDetails.professionalInfo?.title || "Not specified",
+        fieldOfStudy:
+          userDetails.professionalInfo?.fieldOfStudy || "Not specified",
+        specialty: userDetails.professionalInfo?.specialty || "Not specified",
+        aestheticsExperience:
+          userDetails.professionalInfo?.aestheticsExperience || "Not specified",
+        yearsOfExperience:
+          userDetails.professionalInfo?.yearsOfExperience || "Not specified",
+        currentWorkplace:
+          userDetails.professionalInfo?.currentWorkplace || "Not specified",
+        trainingGoals:
+          userDetails.professionalInfo?.trainingGoals || "Not specified",
+      },
+      license: {
+        hasLicense:
+          userDetails.professionalInfo?.licenseInfo?.hasLicense || false,
+        licenseNumber:
+          userDetails.professionalInfo?.licenseInfo?.licenseNumber ||
+          "Not provided",
+        licenseState:
+          userDetails.professionalInfo?.licenseInfo?.licenseState ||
+          "Not provided",
+        licenseCountry:
+          userDetails.professionalInfo?.licenseInfo?.licenseCountry ||
+          "Not provided",
+      },
+      interests: userDetails.professionalInfo?.areasOfInterest || [],
+    };
+
+    // Process profile and documentation
+    const profileInfo = {
+      profilePicture: userDetails.profileData?.profilePicture || null,
+      identificationDocument:
+        userDetails.profileData?.identificationDocument || null,
+      professionalDocuments:
+        userDetails.profileData?.professionalDocuments || [],
+      completionStatus: userDetails.profileData?.completionStatus || {
+        basicInfo: false,
+        professionalInfo: false,
+        profilePicture: false,
+        identificationDocument: false,
+        overallPercentage: 0,
+      },
+    };
+
+    // Process learning preferences and settings
+    const userPreferences = {
+      library: userDetails.libraryPreferences || {},
+      learning: userDetails.learningPreferences || {},
+      notifications: userDetails.notificationSettings || {},
+    };
+
+    // Process account status and security
+    const accountInfo = {
+      status: userDetails.accountStatus || {},
+      twoFactorAuth: userDetails.twoFactorAuth || { enabled: false },
+      loginActivity: userDetails.loginActivity || [],
+    };
+
+    res.render("admin-user-details", {
+      userDetails: {
+        ...userDetails,
+        myCourses: allCourses,
+        myWishlist: wishlistCourses,
+        userStats: userStats,
+        professionalInfo: professionalInfo,
+        profileInfo: profileInfo,
+        userPreferences: userPreferences,
+        accountInfo: accountInfo,
+      },
+      user: req.user,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching user details:", err);
+    req.flash("error", "Error fetching user details");
+    res.redirect("/admin-users");
+  }
+};
+
+// ✅ Enhanced Approve User - ALIGNED WITH USER CONTROLLER EMAIL STRATEGY
+exports.approveUser = async (req, res) => {
+  try {
+    const {
+      userId,
+      sendEmail: shouldSendEmail,
+      emailSubject,
+      emailContent,
+    } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isConfirmed: true },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    console.log(`✅ User ${user.email} approved successfully`);
+
+    // ============================================
+    // ENHANCED EMAIL NOTIFICATION (ALIGNED WITH USER CONTROLLER)
+    // ============================================
+    if (shouldSendEmail !== false) {
+      try {
+        const subject =
+          emailSubject || "Welcome to IAAI Training - Account Approved! 🎉";
+
+        const htmlContent = emailContent
+          ? `<!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }
+                .content { padding: 30px 25px; }
+                .welcome-box { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
+                .login-button { display: inline-block; padding: 15px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; text-align: center; }
+                .footer { background: #f8f9fa; color: #666; font-size: 14px; text-align: center; padding: 20px; border-top: 1px solid #eee; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>IAAI Training Institute</h1>
+                </div>
+                <div class="content">
+                  <h2>${subject}</h2>
+                  <div style="white-space: pre-wrap;">${emailContent.replace(
+                    /\n/g,
+                    "<br>"
+                  )}</div>
+                </div>
+              </div>
+            </body>
+            </html>`
+          : `<!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }
+                .content { padding: 30px 25px; }
+                .welcome-box { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
+                .login-button { display: inline-block; padding: 15px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; text-align: center; }
+                .footer { background: #f8f9fa; color: #666; font-size: 14px; text-align: center; padding: 20px; border-top: 1px solid #eee; }
+                .company-info { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #888; }
+                ul { margin: 15px 0; padding-left: 20px; }
+                li { margin: 8px 0; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Welcome to IAAI Training!</h1>
+                  <p style="margin: 10px 0 0 0;">Your account has been approved</p>
+                </div>
+                
+                <div class="content">
+                  <p>Dear ${user.firstName},</p>
+                  
+                  <div class="welcome-box">
+                    <h3 style="margin-top: 0;">Account Successfully Approved</h3>
+                    <p>Congratulations! Your account has been reviewed and approved by our team. You now have full access to the IAAI Training Platform.</p>
+                  </div>
+                  
+                  <h3>What's Next?</h3>
+                  <ul>
+                    <li>Log in to your account using your email and password</li>
+                    <li>Browse our comprehensive training programs</li>
+                    <li>Enroll in courses that match your interests</li>
+                    <li>Track your learning progress</li>
+                    ${
+                      user.role === "instructor"
+                        ? "<li>Access instructor tools and resources</li>"
+                        : ""
+                    }
+                  </ul>
+                  
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${
+                      process.env.BASE_URL || "https://www.iaa-i.com"
+                    }/login" class="login-button">
+                      Login to Your Account
+                    </a>
+                  </div>
+                  
+                  <p>If you have any questions or need assistance, please contact our support team.</p>
+                  
+                  <p>Best regards,<br>
+                  <strong>IAAI Training Institute</strong></p>
+                  
+                  <div class="company-info">
+                    <p><strong>IAAI Training Institute</strong><br>
+                    Professional Aesthetic Training<br>
+                    Email: ${process.env.ADMIN_EMAIL || "info@iaa-i.com"}<br>
+                    Website: ${
+                      process.env.BASE_URL || "https://www.iaa-i.com"
+                    }</p>
+                  </div>
+                </div>
+                
+                <div class="footer">
+                  <p>This email was sent to ${
+                    user.email
+                  } because you created an account with IAAI Training Institute.</p>
+                  <p>If you did not create this account, please ignore this email.</p>
+                  <p><a href="${
+                    process.env.BASE_URL || "https://www.iaa-i.com"
+                  }/unsubscribe" style="color: #667eea;">Unsubscribe</a> | 
+                     <a href="${
+                       process.env.BASE_URL || "https://www.iaa-i.com"
+                     }/contact" style="color: #667eea;">Contact Us</a></p>
+                </div>
+              </div>
+            </body>
+            </html>`;
+
+        // Create email transporter using same method as userController
+        const transporter = createEmailTransporter();
+
+        await transporter.sendMail({
+          from: {
+            name: "IAAI Training Institute",
+            address:
+              process.env.ADMIN_EMAIL ||
+              process.env.EMAIL_FROM ||
+              "info@iaa-i.com",
+          },
+          to: user.email,
+          subject: subject,
+          // Add anti-spam headers like in userController
+          headers: {
+            "List-Unsubscribe": `<${process.env.BASE_URL}/unsubscribe>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+            "X-Entity-ID": "IAAI-Training-Institute",
+            "X-Mailer": "IAAI Training Platform",
+          },
+          html: htmlContent,
+          // Add plain text version to avoid spam filters
+          text: `
+            Welcome to IAAI Training Institute!
+            
+            Dear ${user.firstName},
+            
+            Your account has been approved and is now active.
+            
+            You can now log in at: ${
+              process.env.BASE_URL || "https://www.iaa-i.com"
+            }/login
+            
+            What's next:
+            - Log in using your email and password
+            - Browse our training programs
+            - Enroll in courses
+            - Track your progress
+            ${
+              user.role === "instructor"
+                ? "- Access instructor tools and resources"
+                : ""
+            }
+            
+            If you have questions, contact our support team.
+            
+            Best regards,
+            IAAI Training Institute
+            
+            Email: ${process.env.ADMIN_EMAIL || "info@iaa-i.com"}
+            Website: ${process.env.BASE_URL || "https://www.iaa-i.com"}
+          `,
+        });
+
+        console.log("📧 User approval email sent successfully to:", user.email);
+
+        return res.json({
+          success: true,
+          message: "✅ User Approved Successfully! Welcome email sent.",
+          emailSent: true,
+        });
+      } catch (emailError) {
+        console.error("❌ Error sending approval email:", emailError);
+        return res.json({
+          success: true,
+          message:
+            "✅ User Approved Successfully! (Note: Email notification failed)",
+          emailSent: false,
+          emailError: emailError.message,
+        });
+      }
+    } else {
+      return res.json({
+        success: true,
+        message: "✅ User Approved Successfully!",
+        emailSent: false,
+      });
+    }
+  } catch (err) {
+    console.error("❌ Error approving user:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error updating user status",
+      error: err.message,
+    });
+  }
+};
 // ✅ NEW: Get Payment Analytics
 exports.getPaymentAnalytics = async (req, res) => {
   try {

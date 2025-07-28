@@ -906,14 +906,18 @@
                             <span>Status</span>
                             <span style="color: #28a745;">✓ Uploaded</span>
                         </div>
-                        <div class="setting-item">
-                            <span>Upload Date</span>
-                            <span><%= new Date(userDetails.profileInfo.profilePicture.uploadDate).toLocaleDateString() %></span>
-                        </div>
-                        <div class="setting-item">
-                            <span>File Size</span>
-                            <span><%= (userDetails.profileInfo.profilePicture.fileSize / 1024).toFixed(2) %> KB</span>
-                        </div>
+                        <% if (userDetails.profileInfo.profilePicture.uploadDate) { %>
+                            <div class="setting-item">
+                                <span>Upload Date</span>
+                                <span><%= new Date(userDetails.profileInfo.profilePicture.uploadDate).toLocaleDateString() %></span>
+                            </div>
+                        <% } %>
+                        <% if (userDetails.profileInfo.profilePicture.fileSize) { %>
+                            <div class="setting-item">
+                                <span>File Size</span>
+                                <span><%= (userDetails.profileInfo.profilePicture.fileSize / 1024).toFixed(2) %> KB</span>
+                            </div>
+                        <% } %>
                         <div style="margin-top: 10px;">
                             <img src="<%= userDetails.profileInfo.profilePicture.url %>" alt="Profile" class="document-preview">
                         </div>
@@ -933,14 +937,16 @@
                             <span>Document Type</span>
                             <span><%= userDetails.profileInfo.identificationDocument.documentType || 'Not specified' %></span>
                         </div>
-                        <div class="setting-item">
-                            <span>Upload Date</span>
-                            <span><%= new Date(userDetails.profileInfo.identificationDocument.uploadDate).toLocaleDateString() %></span>
-                        </div>
+                        <% if (userDetails.profileInfo.identificationDocument.uploadDate) { %>
+                            <div class="setting-item">
+                                <span>Upload Date</span>
+                                <span><%= new Date(userDetails.profileInfo.identificationDocument.uploadDate).toLocaleDateString() %></span>
+                            </div>
+                        <% } %>
                         <div class="setting-item">
                             <span>Verification Status</span>
-                            <span class="status-pill status-<%= userDetails.profileInfo.identificationDocument.verificationStatus %>">
-                                <%= userDetails.profileInfo.identificationDocument.verificationStatus %>
+                            <span class="status-pill status-<%= userDetails.profileInfo.identificationDocument.verificationStatus || 'pending' %>">
+                                <%= userDetails.profileInfo.identificationDocument.verificationStatus || 'pending' %>
                             </span>
                         </div>
                         <% if (userDetails.profileInfo.identificationDocument.verificationNotes) { %>
@@ -975,8 +981,8 @@
                     <% if (userDetails.profileInfo && userDetails.profileInfo.professionalDocuments && userDetails.profileInfo.professionalDocuments.length > 0) { %>
                         <% userDetails.profileInfo.professionalDocuments.forEach(doc => { %>
                             <div class="setting-item">
-                                <span><%= doc.type.toUpperCase() %></span>
-                                <span><%= new Date(doc.uploadDate).toLocaleDateString() %></span>
+                                <span><%= doc.type ? doc.type.toUpperCase() : 'DOCUMENT' %></span>
+                                <span><%= doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString() : 'Unknown' %></span>
                             </div>
                             <% if (doc.description) { %>
                                 <div style="margin-top: 5px; font-size: 0.85rem; color: #666;">
@@ -1012,10 +1018,12 @@
                             <span>ID Document</span>
                             <span><%= userDetails.profileInfo.completionStatus.identificationDocument ? '✓' : '✗' %></span>
                         </div>
-                        <div class="setting-item">
-                            <span>Last Updated</span>
-                            <span><%= new Date(userDetails.profileInfo.completionStatus.lastUpdated).toLocaleDateString() %></span>
-                        </div>
+                        <% if (userDetails.profileInfo.completionStatus.lastUpdated) { %>
+                            <div class="setting-item">
+                                <span>Last Updated</span>
+                                <span><%= new Date(userDetails.profileInfo.completionStatus.lastUpdated).toLocaleDateString() %></span>
+                            </div>
+                        <% } %>
                     <% } else { %>
                         <div class="setting-item">
                             <span>Status</span>
@@ -1040,16 +1048,29 @@
                     <% userDetails.myCourses.forEach(course => { %>
                         <div class="course-item">
                             <div class="course-details">
-                                <h4><%= course.courseTitle || course.title %></h4>
+                                <h4><%= course.courseTitle || course.title || 'Unknown Course' %></h4>
                                 <div class="course-meta">
-                                    <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
-                                    <span><i class="fas fa-dollar-sign"></i> $<%= course.price || course.paidAmount || 0 %></span>
-                                    <span><i class="fas fa-calendar"></i> <%= new Date(course.registrationDate || course.dateOfRegistration).toLocaleDateString() %></span>
+                                    <% if (course.courseCode) { %>
+                                        <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
+                                    <% } %>
+                                    <span><i class="fas fa-dollar-sign"></i> $<%= (course.price || course.paidAmount || 0).toFixed(2) %></span>
+                                    <% if (course.registrationDate) { %>
+                                        <span><i class="fas fa-calendar"></i> <%= new Date(course.registrationDate).toLocaleDateString() %></span>
+                                    <% } %>
                                     <% if (course.promoCodeUsed) { %>
                                         <span><i class="fas fa-tag"></i> <%= course.promoCodeUsed %></span>
                                     <% } %>
                                     <% if (course.expiryDate) { %>
                                         <span><i class="fas fa-clock"></i> Expires: <%= new Date(course.expiryDate).toLocaleDateString() %></span>
+                                    <% } %>
+                                    <% if (course.location) { %>
+                                        <span><i class="fas fa-map-marker-alt"></i> <%= course.location %></span>
+                                    <% } %>
+                                    <% if (course.platform) { %>
+                                        <span><i class="fas fa-laptop"></i> <%= course.platform %></span>
+                                    <% } %>
+                                    <% if (course.instructor) { %>
+                                        <span><i class="fas fa-user-tie"></i> <%= course.instructor %></span>
                                     <% } %>
                                 </div>
 
@@ -1073,6 +1094,9 @@
                                             <% } %>
                                             <div><small><strong>Notes:</strong> <%= course.videoNotes || 0 %></small></div>
                                             <div><small><strong>Bookmarks:</strong> <%= course.bookmarks || 0 %></small></div>
+                                            <% if (course.estimatedMinutes) { %>
+                                                <div><small><strong>Duration:</strong> <%= course.estimatedMinutes %> min</small></div>
+                                            <% } %>
                                         </div>
                                     </div>
                                 <% } else if (course.courseType === 'Online Live') { %>
@@ -1085,6 +1109,9 @@
                                             <% if (course.assessmentScore) { %>
                                                 <div><small><strong>Best Score:</strong> <%= course.assessmentScore %>%</small></div>
                                             <% } %>
+                                            <% if (course.startDate) { %>
+                                                <div><small><strong>Start Date:</strong> <%= new Date(course.startDate).toLocaleDateString() %></small></div>
+                                            <% } %>
                                         </div>
                                     </div>
                                 <% } else if (course.courseType === 'In-Person') { %>
@@ -1096,6 +1123,12 @@
                                             <% } %>
                                             <% if (course.completionDate) { %>
                                                 <div><small><strong>Completed:</strong> <%= new Date(course.completionDate).toLocaleDateString() %></small></div>
+                                            <% } %>
+                                            <% if (course.startDate) { %>
+                                                <div><small><strong>Start Date:</strong> <%= new Date(course.startDate).toLocaleDateString() %></small></div>
+                                            <% } %>
+                                            <% if (course.endDate) { %>
+                                                <div><small><strong>End Date:</strong> <%= new Date(course.endDate).toLocaleDateString() %></small></div>
                                             <% } %>
                                         </div>
                                     </div>
@@ -1113,7 +1146,7 @@
                                     <%= course.courseType %>
                                 </span>
                                 <span class="status-pill <%= course.enrollmentStatus === 'paid' || course.status === 'Paid and Registered' ? 'status-paid' : 'status-cart' %>">
-                                    <%= course.enrollmentStatus || course.status %>
+                                    <%= course.enrollmentStatus || course.status || 'unknown' %>
                                 </span>
                                 <% if (course.courseStatus) { %>
                                     <span class="status-pill status-<%= course.courseStatus %>">
@@ -1146,10 +1179,18 @@
                     <% userDetails.myWishlist.forEach(course => { %>
                         <div class="course-item">
                             <div class="course-details">
-                                <h4><%= course.courseTitle || course.title %></h4>
+                                <h4><%= course.courseTitle || course.title || 'Unknown Course' %></h4>
                                 <div class="course-meta">
-                                    <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
-                                    <span><i class="fas fa-dollar-sign"></i> $<%= course.price %></span>
+                                    <% if (course.courseCode) { %>
+                                        <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
+                                    <% } %>
+                                    <span><i class="fas fa-dollar-sign"></i> $<%= (course.price || 0).toFixed(2) %></span>
+                                    <% if (course.location) { %>
+                                        <span><i class="fas fa-map-marker-alt"></i> <%= course.location %></span>
+                                    <% } %>
+                                    <% if (course.platform) { %>
+                                        <span><i class="fas fa-laptop"></i> <%= course.platform %></span>
+                                    <% } %>
                                 </div>
                             </div>
                             <span class="course-type-badge type-<%= course.courseType.toLowerCase().replace(' ', '-') %>">
@@ -1180,19 +1221,25 @@
                     <% userDetails.myCertificates.forEach(cert => { %>
                         <div class="course-item">
                             <div class="course-details">
-                                <h4><%= cert.certificateData.courseTitle %></h4>
+                                <h4><%= cert.certificateData ? cert.certificateData.courseTitle : 'Certificate' %></h4>
                                 <div class="course-meta">
-                                    <span><i class="fas fa-code"></i> <%= cert.certificateData.courseCode %></span>
+                                    <% if (cert.certificateData && cert.certificateData.courseCode) { %>
+                                        <span><i class="fas fa-code"></i> <%= cert.certificateData.courseCode %></span>
+                                    <% } %>
                                     <span><i class="fas fa-id-badge"></i> <%= cert.certificateId %></span>
-                                    <span><i class="fas fa-calendar-check"></i> Completed: <%= new Date(cert.certificateData.completionDate).toLocaleDateString() %></span>
-                                    <span><i class="fas fa-calendar-plus"></i> Issued: <%= new Date(cert.certificateData.issueDate).toLocaleDateString() %></span>
-                                    <% if (cert.certificateData.expiryDate) { %>
+                                    <% if (cert.certificateData && cert.certificateData.completionDate) { %>
+                                        <span><i class="fas fa-calendar-check"></i> Completed: <%= new Date(cert.certificateData.completionDate).toLocaleDateString() %></span>
+                                    <% } %>
+                                    <% if (cert.certificateData && cert.certificateData.issueDate) { %>
+                                        <span><i class="fas fa-calendar-plus"></i> Issued: <%= new Date(cert.certificateData.issueDate).toLocaleDateString() %></span>
+                                    <% } %>
+                                    <% if (cert.certificateData && cert.certificateData.expiryDate) { %>
                                         <span><i class="fas fa-calendar-times"></i> Expires: <%= new Date(cert.certificateData.expiryDate).toLocaleDateString() %></span>
                                     <% } %>
                                 </div>
 
                                 <!-- Achievement Details -->
-                                <% if (cert.certificateData.achievement) { %>
+                                <% if (cert.certificateData && cert.certificateData.achievement) { %>
                                     <div class="progress-section">
                                         <div class="progress-grid">
                                             <% if (cert.certificateData.achievement.attendancePercentage) { %>
@@ -1219,15 +1266,15 @@
                                             <div><small><strong>Last Downloaded:</strong> <%= new Date(cert.lastDownloaded).toLocaleDateString() %></small></div>
                                         <% } %>
                                         <div><small><strong>Public:</strong> <%= cert.isPublic ? 'Yes' : 'No' %></small></div>
-                                        <% if (cert.certificateData.verificationCode) { %>
+                                        <% if (cert.certificateData && cert.certificateData.verificationCode) { %>
                                             <div><small><strong>Verification:</strong> <%= cert.certificateData.verificationCode %></small></div>
                                         <% } %>
                                     </div>
                                 </div>
                             </div>
                             <div class="course-status-info">
-                                <span class="course-type-badge type-<%= cert.courseType.toLowerCase().replace('training', '').replace('online', 'online-') %>">
-                                    <%= cert.courseType.replace('Training', '') %>
+                                <span class="course-type-badge type-<%= cert.courseType ? cert.courseType.toLowerCase().replace('training', '').replace('online', 'online-') : 'certificate' %>">
+                                    <%= cert.courseType ? cert.courseType.replace('Training', '') : 'Certificate' %>
                                 </span>
                                 <span class="status-pill status-paid">Valid</span>
                             </div>
@@ -1249,7 +1296,7 @@
                 <!-- Library Preferences -->
                 <div class="setting-card">
                     <h5><i class="fas fa-book-open"></i> Library Preferences</h5>
-                    <% if (userDetails.userPreferences && userDetails.userPreferences.library) { %>
+                    <% if (userDetails.userPreferences && userDetails.userPreferences.library && Object.keys(userDetails.userPreferences.library).length > 0) { %>
                         <div class="setting-item">
                             <span>Default View</span>
                             <span><%= userDetails.userPreferences.library.defaultView || 'grid' %></span>
@@ -1277,7 +1324,7 @@
                 <!-- Learning Preferences -->
                 <div class="setting-card">
                     <h5><i class="fas fa-play"></i> Learning Preferences</h5>
-                    <% if (userDetails.userPreferences && userDetails.userPreferences.learning) { %>
+                    <% if (userDetails.userPreferences && userDetails.userPreferences.learning && Object.keys(userDetails.userPreferences.learning).length > 0) { %>
                         <div class="setting-item">
                             <span>Video Quality</span>
                             <span><%= userDetails.userPreferences.learning.videoQuality || 'auto' %></span>
@@ -1298,7 +1345,7 @@
                             <span>Language</span>
                             <span><%= userDetails.userPreferences.learning.language || 'en' %></span>
                         </div>
-                    <% } else if (userDetails.learningPreferences) { %>
+                    <% } else if (userDetails.learningPreferences && Object.keys(userDetails.learningPreferences).length > 0) { %>
                         <!-- Legacy support -->
                         <div class="setting-item">
                             <span>Pace</span>
@@ -1327,7 +1374,7 @@
                 <!-- Notification Settings -->
                 <div class="setting-card">
                     <h5><i class="fas fa-bell"></i> Notifications</h5>
-                    <% if (userDetails.userPreferences && userDetails.userPreferences.notifications) { %>
+                    <% if (userDetails.userPreferences && userDetails.userPreferences.notifications && Object.keys(userDetails.userPreferences.notifications).length > 0) { %>
                         <div class="setting-item">
                             <span>Email Notifications</span>
                             <span><%= userDetails.userPreferences.notifications.email !== false ? '✓' : '✗' %></span>
@@ -1344,7 +1391,7 @@
                             <span>Reminders</span>
                             <span><%= userDetails.userPreferences.notifications.reminders !== false ? '✓' : '✗' %></span>
                         </div>
-                    <% } else if (userDetails.notificationSettings) { %>
+                    <% } else if (userDetails.notificationSettings && Object.keys(userDetails.notificationSettings).length > 0) { %>
                         <!-- Legacy support -->
                         <div class="setting-item">
                             <span>Email Notifications</span>
@@ -1373,7 +1420,7 @@
                 <!-- Account Security -->
                 <div class="setting-card">
                     <h5><i class="fas fa-shield-alt"></i> Account Security</h5>
-                    <% if (userDetails.accountInfo && userDetails.accountInfo.status) { %>
+                    <% if (userDetails.accountInfo && userDetails.accountInfo.status && Object.keys(userDetails.accountInfo.status).length > 0) { %>
                         <div class="setting-item">
                             <span>Account Status</span>
                             <span style="color: <%= userDetails.accountInfo.status.isActive !== false ? '#28a745' : '#dc3545' %>;">
@@ -1396,7 +1443,7 @@
                                 <span><%= new Date(userDetails.accountInfo.status.lastLoginAt).toLocaleString() %></span>
                             </div>
                         <% } %>
-                    <% } else if (userDetails.accountStatus) { %>
+                    <% } else if (userDetails.accountStatus && Object.keys(userDetails.accountStatus).length > 0) { %>
                         <!-- Legacy support -->
                         <div class="setting-item">
                             <span>Account Status</span>
@@ -1532,15 +1579,15 @@
                     <% userDetails.paymentTransactions.slice(0, 10).forEach(transaction => { %>
                         <div class="course-item">
                             <div class="course-details">
-                                <h4>Receipt #<%= transaction.receiptNumber %></h4>
+                                <h4>Receipt #<%= transaction.receiptNumber || 'N/A' %></h4>
                                 <div class="course-meta">
                                     <span><i class="fas fa-calendar"></i> <%= new Date(transaction.transactionDate).toLocaleDateString() %></span>
                                     <span><i class="fas fa-credit-card"></i> <%= transaction.paymentMethod || 'Card' %></span>
-                                    <span><i class="fas fa-dollar-sign"></i> Subtotal: $<%= transaction.subtotal.toFixed(2) %></span>
-                                    <% if (transaction.discountAmount > 0) { %>
+                                    <span><i class="fas fa-dollar-sign"></i> Subtotal: $<%= (transaction.subtotal || 0).toFixed(2) %></span>
+                                    <% if (transaction.discountAmount && transaction.discountAmount > 0) { %>
                                         <span><i class="fas fa-tag"></i> Discount: $<%= transaction.discountAmount.toFixed(2) %></span>
                                     <% } %>
-                                    <span><i class="fas fa-money-bill"></i> Total: $<%= transaction.finalAmount.toFixed(2) %></span>
+                                    <span><i class="fas fa-money-bill"></i> Total: $<%= (transaction.finalAmount || 0).toFixed(2) %></span>
                                     <% if (transaction.promoCode) { %>
                                         <span><i class="fas fa-percent"></i> Promo: <%= transaction.promoCode %></span>
                                     <% } %>
@@ -1552,7 +1599,16 @@
                                         <small><strong>Items purchased:</strong></small>
                                         <% transaction.items.forEach(item => { %>
                                             <div style="margin-top: 5px;">
-                                                <small>• <%= item.courseType %> - $<%= item.paidPrice.toFixed(2) %></small>
+                                                <small>• <%= item.courseType || 'Course' %> - $<%= (item.paidPrice || 0).toFixed(2) %></small>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                <% } else if (transaction.coursesRegistered && transaction.coursesRegistered.length > 0) { %>
+                                    <div style="margin-top: 10px; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+                                        <small><strong>Courses registered:</strong></small>
+                                        <% transaction.coursesRegistered.forEach(course => { %>
+                                            <div style="margin-top: 5px;">
+                                                <small>• <%= course.courseType || 'Course' %> - $<%= (course.paidPrice || 0).toFixed(2) %></small>
                                             </div>
                                         <% }) %>
                                     </div>
@@ -1560,7 +1616,7 @@
                             </div>
                             <div class="course-status-info">
                                 <span class="status-pill status-<%= transaction.paymentStatus === 'completed' ? 'paid' : transaction.paymentStatus %>">
-                                    <%= transaction.paymentStatus %>
+                                    <%= transaction.paymentStatus || 'unknown' %>
                                 </span>
                                 <span class="badge badge-info">
                                     <%= transaction.currency || 'USD' %>

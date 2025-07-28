@@ -1,4 +1,4 @@
-// controllers/userController.js - Complete Updated Version for Render
+// controllers/userController.js - Complete Updated Version with Anti-Spam Improvements
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const passport = require("passport");
@@ -9,10 +9,12 @@ const axios = require("axios");
 // EMAIL CONFIGURATION HELPER
 // ============================================
 function createEmailTransporter() {
-  // Return a mock transporter that uses SendGrid
+  // Return a mock transporter that uses Gmail SMTP
   return {
     verify: async () => {
-      console.log("✅ Using SendGrid - no verification needed");
+      console.log(
+        "✅ Using Gmail SMTP - verification handled by sendEmail utility"
+      );
       return true;
     },
     sendMail: async (options) => {
@@ -126,13 +128,13 @@ exports.registerUser = async (req, res) => {
     try {
       console.log("📧 Sending admin notification email...");
 
-      // Create email transporter with SendGrid
+      // Create email transporter with Gmail SMTP
       const transporter = createEmailTransporter();
 
       // Email content for admin notification
       const mailOptions = {
         from: {
-          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          name: "IAAI Training Institute",
           address:
             process.env.ADMIN_EMAIL ||
             process.env.EMAIL_FROM ||
@@ -142,22 +144,29 @@ exports.registerUser = async (req, res) => {
         subject: `New User Registration - ${
           role === "instructor" ? "Instructor" : "Student"
         } Application`,
+        headers: {
+          "X-Entity-ID": "IAAI-Training-Institute",
+          "X-Mailer": "IAAI Training Platform",
+        },
         html: `
           <!DOCTYPE html>
           <html>
           <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center; }
-              .content { padding: 20px 0; }
-              .user-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+              .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              .header { background-color: #667eea; color: white; padding: 30px 20px; text-align: center; }
+              .content { padding: 30px 25px; }
+              .user-info { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
               .role-badge { 
                 display: inline-block; 
-                padding: 4px 12px; 
-                border-radius: 12px; 
+                padding: 6px 16px; 
+                border-radius: 20px; 
                 font-size: 12px; 
                 font-weight: bold;
+                margin-top: 10px;
                 ${
                   role === "instructor"
                     ? "background-color: #e3f2fd; color: #1976d2;"
@@ -166,19 +175,21 @@ exports.registerUser = async (req, res) => {
               }
               .action-button {
                 display: inline-block;
-                padding: 12px 24px;
-                background-color: #007bff;
+                padding: 15px 25px;
+                background-color: #667eea;
                 color: white;
                 text-decoration: none;
-                border-radius: 5px;
+                border-radius: 6px;
+                font-weight: 600;
                 margin: 10px 5px;
               }
+              .footer { background: #f8f9fa; color: #666; font-size: 14px; text-align: center; padding: 20px; border-top: 1px solid #eee; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <h2>🆕 New User Registration</h2>
+                <h2 style="margin: 0;">New User Registration</h2>
                 <span class="role-badge">${
                   role === "instructor" ? "👨‍🏫 INSTRUCTOR" : "🎓 STUDENT"
                 }</span>
@@ -188,7 +199,7 @@ exports.registerUser = async (req, res) => {
                 <p>A new user has registered on the IAAI Training Platform and requires your approval.</p>
                 
                 <div class="user-info">
-                  <h3>👤 User Information:</h3>
+                  <h3 style="margin-top: 0;">User Information:</h3>
                   <p><strong>Name:</strong> ${firstName} ${lastName}</p>
                   <p><strong>Email:</strong> ${email}</p>
                   <p><strong>Phone:</strong> ${
@@ -203,8 +214,8 @@ exports.registerUser = async (req, res) => {
                   ${
                     role === "instructor"
                       ? `
-                    <hr style="margin: 15px 0;">
-                    <h4>👨‍🏫 Instructor Details:</h4>
+                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
+                    <h4>Instructor Details:</h4>
                     <p><strong>Experience:</strong> ${
                       experience || "Not provided"
                     }</p>
@@ -239,9 +250,44 @@ exports.registerUser = async (req, res) => {
                   3. The user will receive a confirmation email automatically
                 </p>
               </div>
+              
+              <div class="footer">
+                <p><strong>IAAI Training Institute</strong><br>
+                Professional Aesthetic Training<br>
+                ${process.env.BASE_URL || "https://www.iaa-i.com"}</p>
+              </div>
             </div>
           </body>
           </html>
+        `,
+        text: `
+          New User Registration - ${
+            role === "instructor" ? "Instructor" : "Student"
+          } Application
+          
+          A new user has registered and requires approval:
+          
+          Name: ${firstName} ${lastName}
+          Email: ${email}
+          Phone: ${phoneNumber || "Not provided"}
+          Profession: ${profession || "Not provided"}
+          Country: ${country || "Not provided"}
+          Role: ${role}
+          
+          ${
+            role === "instructor"
+              ? `
+          Instructor Details:
+          Experience: ${experience || "Not provided"}
+          Expertise: ${expertise || "Not provided"}  
+          CV: ${cv || "Not provided"}
+          `
+              : ""
+          }
+          
+          Approve at: ${
+            process.env.BASE_URL || "https://www.iaa-i.com"
+          }/confirm-user/${encodeURIComponent(email)}
         `,
       };
 
@@ -267,7 +313,7 @@ exports.registerUser = async (req, res) => {
     console.log("🎉 Setting success flash message...");
     req.flash(
       "success_message",
-      "Your request for creating an account has been received. We will review and get back to you within 24 hours."
+      "Your request for creating an account has been received. We will review and get back to you within 24 hours. Please check your spam/junk folder for our emails."
     );
     console.log("✅ Success message set, redirecting to /signup...");
     res.redirect("/signup");
@@ -311,10 +357,10 @@ exports.confirmUser = async (req, res) => {
           <head>
             <title>User Not Found</title>
             <style>
-              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
               .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
               .error { color: #dc3545; }
-              .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+              .btn { display: inline-block; padding: 12px 24px; background-color: #667eea; color: white; text-decoration: none; border-radius: 6px; margin: 10px; font-weight: 600; }
             </style>
           </head>
           <body>
@@ -337,10 +383,10 @@ exports.confirmUser = async (req, res) => {
           <head>
             <title>Already Confirmed</title>
             <style>
-              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
               .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
               .warning { color: #ffc107; }
-              .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+              .btn { display: inline-block; padding: 12px 24px; background-color: #667eea; color: white; text-decoration: none; border-radius: 6px; margin: 10px; font-weight: 600; }
             </style>
           </head>
           <body>
@@ -363,7 +409,7 @@ exports.confirmUser = async (req, res) => {
     console.log("✅ Account confirmed successfully");
 
     // ============================================
-    // USER CONFIRMATION EMAIL
+    // USER CONFIRMATION EMAIL (ANTI-SPAM OPTIMIZED)
     // ============================================
     try {
       console.log("📧 Sending user confirmation email...");
@@ -373,85 +419,186 @@ exports.confirmUser = async (req, res) => {
 
       const mailOptions = {
         from: {
-          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          name: "IAAI Training Institute",
           address:
             process.env.ADMIN_EMAIL ||
             process.env.EMAIL_FROM ||
             "info@iaa-i.com",
         },
         to: email,
-        subject: "🎉 Welcome to IAAI Training - Account Confirmed!",
+        subject: "Welcome to IAAI Training - Account Approved",
+        // Add anti-spam headers
+        headers: {
+          "List-Unsubscribe": `<${process.env.BASE_URL}/unsubscribe>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          "X-Entity-ID": "IAAI-Training-Institute",
+          "X-Mailer": "IAAI Training Platform",
+        },
         html: `
           <!DOCTYPE html>
           <html>
           <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Welcome to IAAI Training</title>
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
-              .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
-              .welcome-box { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+              body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                line-height: 1.6; 
+                color: #333; 
+                margin: 0; 
+                padding: 0;
+                background-color: #f4f4f4;
+              }
+              .container { 
+                max-width: 600px; 
+                margin: 20px auto; 
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              }
+              .header { 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                color: white; 
+                padding: 30px 20px; 
+                text-align: center; 
+              }
+              .content { 
+                padding: 30px 25px; 
+              }
+              .welcome-box { 
+                background-color: #f8f9fa; 
+                padding: 20px; 
+                border-radius: 8px; 
+                margin: 20px 0; 
+                border-left: 4px solid #667eea;
+              }
               .login-button {
                 display: inline-block;
                 padding: 15px 30px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #667eea;
                 color: white;
                 text-decoration: none;
-                border-radius: 25px;
-                font-weight: bold;
+                border-radius: 6px;
+                font-weight: 600;
                 margin: 20px 0;
+                text-align: center;
               }
-              .footer { color: #666; font-size: 14px; text-align: center; margin-top: 30px; }
+              .footer { 
+                background: #f8f9fa;
+                color: #666; 
+                font-size: 14px; 
+                text-align: center; 
+                padding: 20px;
+                border-top: 1px solid #eee;
+              }
+              .company-info {
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+                font-size: 12px;
+                color: #888;
+              }
+              ul { margin: 15px 0; padding-left: 20px; }
+              li { margin: 8px 0; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <h1>🎉 Welcome to IAAI Training!</h1>
-                <p>Your account has been approved and activated</p>
+                <h1 style="margin: 0;">Welcome to IAAI Training!</h1>
+                <p style="margin: 10px 0 0 0;">Your account has been approved</p>
               </div>
               
               <div class="content">
-                <p>Hi <strong>${user.firstName}</strong>,</p>
+                <p>Dear ${user.firstName},</p>
                 
                 <div class="welcome-box">
-                  <h3>✅ Account Successfully Confirmed</h3>
+                  <h3 style="margin-top: 0;">Account Successfully Approved</h3>
                   <p>Congratulations! Your account has been reviewed and approved by our team. You now have full access to the IAAI Training Platform.</p>
                 </div>
                 
-                <h3>🚀 What's Next?</h3>
+                <h3>What's Next?</h3>
                 <ul>
-                  <li>🔐 Log in to your account using your email and password</li>
-                  <li>📚 Browse our comprehensive training programs</li>
-                  <li>🎓 Enroll in courses that match your interests</li>
-                  <li>📈 Track your learning progress</li>
+                  <li>Log in to your account using your email and password</li>
+                  <li>Browse our comprehensive training programs</li>
+                  <li>Enroll in courses that match your interests</li>
+                  <li>Track your learning progress</li>
                   ${
                     user.role === "instructor"
-                      ? "<li>👨‍🏫 Access instructor tools and resources</li>"
+                      ? "<li>Access instructor tools and resources</li>"
                       : ""
                   }
                 </ul>
                 
-                <div style="text-align: center;">
+                <div style="text-align: center; margin: 30px 0;">
                   <a href="${
                     process.env.BASE_URL || "https://www.iaa-i.com"
                   }/login" class="login-button">
-                    🔐 Login to Your Account
+                    Login to Your Account
                   </a>
                 </div>
                 
-                <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+                <p>If you have any questions or need assistance, please contact our support team.</p>
                 
-                <p>Welcome aboard!<br>
-                <strong>The IAAI Training Team</strong></p>
+                <p>Best regards,<br>
+                <strong>IAAI Training Institute</strong></p>
+                
+                <div class="company-info">
+                  <p><strong>IAAI Training Institute</strong><br>
+                  Professional Aesthetic Training<br>
+                  Email: ${process.env.ADMIN_EMAIL || "info@iaa-i.com"}<br>
+                  Website: ${
+                    process.env.BASE_URL || "https://www.iaa-i.com"
+                  }</p>
+                </div>
               </div>
               
               <div class="footer">
-                <p>This email was sent to ${email}. If you did not create an account, please ignore this email.</p>
+                <p>This email was sent to ${email} because you created an account with IAAI Training Institute.</p>
+                <p>If you did not create this account, please ignore this email.</p>
+                <p><a href="${
+                  process.env.BASE_URL || "https://www.iaa-i.com"
+                }/unsubscribe" style="color: #667eea;">Unsubscribe</a> | 
+                   <a href="${
+                     process.env.BASE_URL || "https://www.iaa-i.com"
+                   }/contact" style="color: #667eea;">Contact Us</a></p>
               </div>
             </div>
           </body>
           </html>
+        `,
+        // Add plain text version to avoid spam filters
+        text: `
+          Welcome to IAAI Training Institute!
+          
+          Dear ${user.firstName},
+          
+          Your account has been approved and is now active.
+          
+          You can now log in at: ${
+            process.env.BASE_URL || "https://www.iaa-i.com"
+          }/login
+          
+          What's next:
+          - Log in using your email and password
+          - Browse our training programs
+          - Enroll in courses
+          - Track your progress
+          ${
+            user.role === "instructor"
+              ? "- Access instructor tools and resources"
+              : ""
+          }
+          
+          If you have questions, contact our support team.
+          
+          Best regards,
+          IAAI Training Institute
+          
+          Email: ${process.env.ADMIN_EMAIL || "info@iaa-i.com"}
+          Website: ${process.env.BASE_URL || "https://www.iaa-i.com"}
         `,
       };
 
@@ -475,10 +622,10 @@ exports.confirmUser = async (req, res) => {
         <head>
           <title>Account Confirmed</title>
           <style>
-            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
             .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
             .success { color: #28a745; }
-            .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+            .btn { display: inline-block; padding: 12px 24px; background-color: #667eea; color: white; text-decoration: none; border-radius: 6px; margin: 10px; font-weight: 600; }
           </style>
         </head>
         <body>
@@ -503,10 +650,10 @@ exports.confirmUser = async (req, res) => {
         <head>
           <title>Error</title>
           <style>
-            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
             .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
             .error { color: #dc3545; }
-            .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+            .btn { display: inline-block; padding: 12px 24px; background-color: #667eea; color: white; text-decoration: none; border-radius: 6px; margin: 10px; font-weight: 600; }
           </style>
         </head>
         <body>
@@ -648,41 +795,47 @@ exports.requestPasswordReset = async (req, res) => {
 
       const mailOptions = {
         from: {
-          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          name: "IAAI Training Institute",
           address:
             process.env.ADMIN_EMAIL ||
             process.env.EMAIL_FROM ||
             "info@iaa-i.com",
         },
         to: email,
-        subject: "🔐 Password Reset Request - IAAI Training",
+        subject: "Password Reset Request - IAAI Training",
+        headers: {
+          "X-Entity-ID": "IAAI-Training-Institute",
+          "X-Mailer": "IAAI Training Platform",
+        },
         html: `
           <!DOCTYPE html>
           <html>
           <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: #dc3545; color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
-              .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+              .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              .header { background: #dc3545; color: white; padding: 30px 20px; text-align: center; }
+              .content { padding: 30px 25px; }
               .reset-button {
                 display: inline-block;
                 padding: 15px 30px;
                 background: #dc3545;
                 color: white;
                 text-decoration: none;
-                border-radius: 25px;
-                font-weight: bold;
+                border-radius: 6px;
+                font-weight: 600;
                 margin: 20px 0;
               }
-              .footer { color: #666; font-size: 14px; text-align: center; margin-top: 30px; }
+              .footer { background: #f8f9fa; color: #666; font-size: 14px; text-align: center; padding: 20px; border-top: 1px solid #eee; }
               .warning { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin: 15px 0; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <h1>🔐 Password Reset Request</h1>
+                <h1 style="margin: 0;">Password Reset Request</h1>
               </div>
               
               <div class="content">
@@ -698,7 +851,7 @@ exports.requestPasswordReset = async (req, res) => {
                   <a href="${
                     process.env.BASE_URL || "https://www.iaa-i.com"
                   }/reset-password/${resetToken}" class="reset-button">
-                    🔑 Reset My Password
+                    Reset My Password
                   </a>
                 </div>
                 
@@ -717,15 +870,36 @@ exports.requestPasswordReset = async (req, res) => {
                 </ul>
                 
                 <p>Best regards,<br>
-                <strong>The IAAI Training Team</strong></p>
+                <strong>IAAI Training Institute</strong></p>
               </div>
               
               <div class="footer">
                 <p>This email was sent to ${email}. If you did not request a password reset, please ignore this email.</p>
+                <p><strong>IAAI Training Institute</strong> | ${
+                  process.env.BASE_URL || "https://www.iaa-i.com"
+                }</p>
               </div>
             </div>
           </body>
           </html>
+        `,
+        text: `
+          Password Reset Request - IAAI Training
+          
+          Hi ${user.firstName},
+          
+          We received a request to reset your password for your IAAI Training account.
+          
+          Reset your password at: ${
+            process.env.BASE_URL || "https://www.iaa-i.com"
+          }/reset-password/${resetToken}
+          
+          This link will expire in 1 hour for security reasons.
+          
+          If you didn't request this password reset, please ignore this email.
+          
+          Best regards,
+          IAAI Training Institute
         `,
       };
 
@@ -734,7 +908,7 @@ exports.requestPasswordReset = async (req, res) => {
 
       req.flash(
         "success_message",
-        "Password reset instructions have been sent to your email address."
+        "Password reset instructions have been sent to your email address. Please check your spam/junk folder if you don't see it in your inbox."
       );
       res.redirect("/forgot-password");
     } catch (emailError) {
@@ -794,41 +968,47 @@ exports.resetPassword = async (req, res) => {
 
       const mailOptions = {
         from: {
-          name: process.env.EMAIL_FROM_NAME || "IAAI Training Platform",
+          name: "IAAI Training Institute",
           address:
             process.env.ADMIN_EMAIL ||
             process.env.EMAIL_FROM ||
             "info@iaa-i.com",
         },
         to: user.email,
-        subject: "✅ Password Successfully Changed - IAAI Training",
+        subject: "Password Successfully Changed - IAAI Training",
+        headers: {
+          "X-Entity-ID": "IAAI-Training-Institute",
+          "X-Mailer": "IAAI Training Platform",
+        },
         html: `
           <!DOCTYPE html>
           <html>
           <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: #28a745; color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
-              .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+              .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              .header { background: #28a745; color: white; padding: 30px 20px; text-align: center; }
+              .content { padding: 30px 25px; }
               .login-button {
                 display: inline-block;
                 padding: 15px 30px;
                 background: #28a745;
                 color: white;
                 text-decoration: none;
-                border-radius: 25px;
-                font-weight: bold;
+                border-radius: 6px;
+                font-weight: 600;
                 margin: 20px 0;
               }
-              .footer { color: #666; font-size: 14px; text-align: center; margin-top: 30px; }
+              .footer { background: #f8f9fa; color: #666; font-size: 14px; text-align: center; padding: 20px; border-top: 1px solid #eee; }
               .security-info { background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <h1>✅ Password Successfully Changed</h1>
+                <h1 style="margin: 0;">Password Successfully Changed</h1>
               </div>
               
               <div class="content">
@@ -849,7 +1029,7 @@ exports.resetPassword = async (req, res) => {
                   <a href="${
                     process.env.BASE_URL || "https://www.iaa-i.com"
                   }/login" class="login-button">
-                    🔐 Login to Your Account
+                    Login to Your Account
                   </a>
                 </div>
                 
@@ -861,17 +1041,39 @@ exports.resetPassword = async (req, res) => {
                 </ul>
                 
                 <p>Best regards,<br>
-                <strong>The IAAI Training Team</strong></p>
+                <strong>IAAI Training Institute</strong></p>
               </div>
               
               <div class="footer">
                 <p>This email was sent to ${
                   user.email
                 } to confirm your password change.</p>
+                <p><strong>IAAI Training Institute</strong> | ${
+                  process.env.BASE_URL || "https://www.iaa-i.com"
+                }</p>
               </div>
             </div>
           </body>
           </html>
+        `,
+        text: `
+          Password Successfully Changed - IAAI Training
+          
+          Hi ${user.firstName},
+          
+          Your password has been successfully changed for your IAAI Training account.
+          
+          Security Information:
+          - Change completed on: ${new Date().toLocaleString()}
+          - Your account is now secure with your new password
+          - You can now log in using your new password
+          
+          Login at: ${process.env.BASE_URL || "https://www.iaa-i.com"}/login
+          
+          If you didn't make this change, contact our support team immediately.
+          
+          Best regards,
+          IAAI Training Institute
         `,
       };
 

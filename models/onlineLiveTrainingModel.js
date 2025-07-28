@@ -734,6 +734,147 @@ onlineLiveCourseSchema.index({ "metadata.createdBy": 1 }); // Creator-based quer
 // ║                            Smart Computed Properties                         ║
 // ════════════════════════════════════════════════════════════════════════════════
 
+// Add this virtual method to the schema (around line 1200+ after other virtuals)
+
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                    🌍 TIMEZONE-AWARE DATE VIRTUALS                  │
+// └─────────────────────────────────────────────────────────────────────┘
+
+/**
+ * Get start date in the course's primary timezone
+ */
+onlineLiveCourseSchema.virtual("startDateInTimezone").get(function () {
+  if (!this.schedule?.startDate || !this.schedule?.primaryTimezone) {
+    return this.schedule?.startDate;
+  }
+
+  // Return an object with both UTC and timezone info
+  return {
+    utc: this.schedule.startDate,
+    timezone: this.schedule.primaryTimezone,
+    // For display purposes, you can add a formatted string
+    display: this.schedule.startDate.toLocaleString("en-US", {
+      timeZone: this.schedule.primaryTimezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }),
+  };
+});
+
+/**
+ * Get end date in the course's primary timezone
+ */
+onlineLiveCourseSchema.virtual("endDateInTimezone").get(function () {
+  if (!this.schedule?.endDate || !this.schedule?.primaryTimezone) {
+    return this.schedule?.endDate;
+  }
+
+  return {
+    utc: this.schedule.endDate,
+    timezone: this.schedule.primaryTimezone,
+    display: this.schedule.endDate.toLocaleString("en-US", {
+      timeZone: this.schedule.primaryTimezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }),
+  };
+});
+
+/**
+ * Get session times in the course's primary timezone
+ */
+onlineLiveCourseSchema.virtual("sessionTimesInTimezone").get(function () {
+  if (!this.schedule?.sessions || !this.schedule?.primaryTimezone) {
+    return this.schedule?.sessions || [];
+  }
+
+  return this.schedule.sessions.map((session) => ({
+    ...session,
+    dateInTimezone: session.date
+      ? {
+          utc: session.date,
+          timezone: this.schedule.primaryTimezone,
+          display: session.date.toLocaleString("en-US", {
+            timeZone: this.schedule.primaryTimezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }),
+        }
+      : null,
+  }));
+});
+
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                    🌍 TIMEZONE CONVERSION METHODS                   │
+// └─────────────────────────────────────────────────────────────────────┘
+
+/**
+ * Convert a UTC date to the course's timezone for display
+ */
+onlineLiveCourseSchema.methods.convertToTimezone = function (
+  utcDate,
+  targetTimezone = null
+) {
+  if (!utcDate) return null;
+
+  const timezone = targetTimezone || this.schedule?.primaryTimezone || "UTC";
+
+  return {
+    utc: utcDate,
+    timezone: timezone,
+    display: utcDate.toLocaleString("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }),
+    // For HTML datetime-local inputs
+    htmlInput: utcDate
+      .toLocaleString("sv-SE", {
+        timeZone: timezone,
+      })
+      .replace(" ", "T")
+      .slice(0, 16),
+  };
+};
+
+/**
+ * Get all course dates formatted for a specific timezone
+ */
+onlineLiveCourseSchema.methods.getDatesForTimezone = function (
+  targetTimezone = null
+) {
+  const timezone = targetTimezone || this.schedule?.primaryTimezone || "UTC";
+
+  return {
+    startDate: this.convertToTimezone(this.schedule?.startDate, timezone),
+    endDate: this.convertToTimezone(this.schedule?.endDate, timezone),
+    registrationDeadline: this.convertToTimezone(
+      this.schedule?.registrationDeadline,
+      timezone
+    ),
+    sessions: (this.schedule?.sessions || []).map((session) => ({
+      ...session,
+      dateInTimezone: this.convertToTimezone(session.date, timezone),
+    })),
+  };
+};
+
 // ┌─────────────────────────────────────────────────────────────────────┐
 // │                    📅 Schedule & Duration Virtuals                  │
 // └─────────────────────────────────────────────────────────────────────┘

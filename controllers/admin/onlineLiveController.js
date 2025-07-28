@@ -152,34 +152,53 @@ class OnlineLiveCoursesController {
 
       // Format dates for form inputs
       if (course.schedule) {
+        const timezone = course.schedule.primaryTimezone || "UTC";
+
         course.schedule.startDate = course.schedule.startDate
-          ? new Date(course.schedule.startDate).toISOString().slice(0, 16)
+          ? this._formatDateForInput(course.schedule.startDate, timezone)
           : null;
         course.schedule.endDate = course.schedule.endDate
-          ? new Date(course.schedule.endDate).toISOString().slice(0, 16)
+          ? this._formatDateForInput(course.schedule.endDate, timezone)
           : null;
         course.schedule.registrationDeadline = course.schedule
           .registrationDeadline
-          ? new Date(course.schedule.registrationDeadline)
-              .toISOString()
-              .slice(0, 16)
+          ? this._formatDateForInput(
+              course.schedule.registrationDeadline,
+              timezone
+            )
           : null;
+
+        // Also format session dates
+        if (
+          course.schedule.sessions &&
+          Array.isArray(course.schedule.sessions)
+        ) {
+          course.schedule.sessions = course.schedule.sessions.map(
+            (session) => ({
+              ...session,
+              date: session.date
+                ? this._formatDateForInput(session.date, timezone)
+                : null,
+            })
+          );
+        }
       }
 
+      // Format other date fields
       if (course.technical?.techCheckDate) {
-        course.technical.techCheckDate = new Date(
-          course.technical.techCheckDate
-        )
-          .toISOString()
-          .slice(0, 16);
+        const timezone = course.schedule?.primaryTimezone || "UTC";
+        course.technical.techCheckDate = this._formatDateForInput(
+          course.technical.techCheckDate,
+          timezone
+        );
       }
 
       if (course.experience?.onboarding?.orientationDate) {
-        course.experience.onboarding.orientationDate = new Date(
-          course.experience.onboarding.orientationDate
-        )
-          .toISOString()
-          .slice(0, 16);
+        const timezone = course.schedule?.primaryTimezone || "UTC";
+        course.experience.onboarding.orientationDate = this._formatDateForInput(
+          course.experience.onboarding.orientationDate,
+          timezone
+        );
       }
 
       // Process instructor data for frontend
@@ -2407,20 +2426,30 @@ class OnlineLiveCoursesController {
   /**
    * Process schedule data
    */
+  /**
+   * Process schedule data - TIMEZONE AWARE VERSION
+   */
   _processScheduleData(formData, savedDynamicItems) {
     const scheduleData = formData.schedule || {};
+
+    // Get the timezone for proper date parsing
+    const timezone = scheduleData.primaryTimezone || "UTC";
+
     return {
       startDate: scheduleData.startDate
-        ? new Date(scheduleData.startDate)
+        ? this._parseTimezoneAwareDate(scheduleData.startDate, timezone)
         : undefined,
       endDate: scheduleData.endDate
-        ? new Date(scheduleData.endDate)
+        ? this._parseTimezoneAwareDate(scheduleData.endDate, timezone)
         : undefined,
       registrationDeadline: scheduleData.registrationDeadline
-        ? new Date(scheduleData.registrationDeadline)
+        ? this._parseTimezoneAwareDate(
+            scheduleData.registrationDeadline,
+            timezone
+          )
         : undefined,
       duration: scheduleData.duration || "",
-      primaryTimezone: scheduleData.primaryTimezone || "UTC",
+      primaryTimezone: timezone,
       displayTimezones: scheduleData.displayTimezones
         ? scheduleData.displayTimezones
             .split(",")
@@ -2434,6 +2463,39 @@ class OnlineLiveCoursesController {
         breakDuration: parseInt(scheduleData.sessionTime?.breakDuration) || 15,
       },
       sessions: this._mergeDynamicArray(savedDynamicItems.sessions, "object"),
+    };
+  }
+
+  /**
+   * Process schedule data from merged form data - TIMEZONE AWARE VERSION
+   */
+  _processScheduleDataFromMerged(formData) {
+    const scheduleData = formData.schedule || {};
+    const timezone = scheduleData.primaryTimezone || "UTC";
+
+    return {
+      startDate: scheduleData.startDate
+        ? this._parseTimezoneAwareDate(scheduleData.startDate, timezone)
+        : undefined,
+      endDate: scheduleData.endDate
+        ? this._parseTimezoneAwareDate(scheduleData.endDate, timezone)
+        : undefined,
+      registrationDeadline: scheduleData.registrationDeadline
+        ? this._parseTimezoneAwareDate(
+            scheduleData.registrationDeadline,
+            timezone
+          )
+        : undefined,
+      duration: scheduleData.duration || "",
+      primaryTimezone: timezone,
+      displayTimezones: scheduleData.displayTimezones || [],
+      pattern: scheduleData.pattern || "single",
+      sessionTime: {
+        startTime: scheduleData.sessionTime?.startTime || "",
+        endTime: scheduleData.sessionTime?.endTime || "",
+        breakDuration: parseInt(scheduleData.sessionTime?.breakDuration) || 15,
+      },
+      sessions: scheduleData.sessions || [], // Already processed from dynamic items
     };
   }
 
@@ -3476,6 +3538,83 @@ class OnlineLiveCoursesController {
     }
   }
 
+  //new
+  // ADD this new helper method:
+
+  /**
+   * Parse a date string as if it were in the specified timezone
+   * @param {string} dateString - Date string from form input
+   * @param {string} timezone - Timezone to interpret the date in
+   * @returns {Date} - UTC Date object
+   */
+  _parseTimezoneAwareDate(dateString, timezone = "UTC") {
+    if (!dateString) return undefined;
+
+    try {
+      // If the dateString doesn't include timezone info, interpret it as being in the course timezone
+      if (!dateString.includes("T")) {
+        dateString += "T00:00:00";
+      }
+
+      // Create a date as if it were in the target timezone
+      const tempDate = new Date(dateString);
+
+      if (timezone === "UTC") {
+        return tempDate;
+      }
+
+      // Get the timezone offset for the target timezone
+      const utcDate = new Date(
+        tempDate.toLocaleString("en-US", { timeZone: "UTC" })
+      );
+      const timezoneDate = new Date(
+        tempDate.toLocaleString("en-US", { timeZone: timezone })
+      );
+      const offsetDiff = utcDate.getTime() - timezoneDate.getTime();
+
+      // Adjust the date to account for timezone difference
+      return new Date(tempDate.getTime() + offsetDiff);
+    } catch (error) {
+      console.error("Error parsing timezone-aware date:", error);
+      // Fallback to regular date parsing
+      return new Date(dateString);
+    }
+  }
+
+  //new
+
+  // ADD this new helper method to the controller class (around line 2500+ after other helper methods):
+
+  /**
+   * Format date for HTML input in the specified timezone
+   * @param {Date} date - The UTC date to format
+   * @param {string} timezone - Target timezone (e.g., 'Europe/Istanbul')
+   * @returns {string} - Formatted date string for datetime-local input
+   */
+  _formatDateForInput(date, timezone = "UTC") {
+    if (!date) return null;
+
+    try {
+      // Convert to the target timezone and format for HTML input
+      const formatted = new Date(date)
+        .toLocaleString("sv-SE", {
+          timeZone: timezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+        .replace(" ", "T");
+
+      return formatted;
+    } catch (error) {
+      console.error("Error formatting date for timezone:", error);
+      // Fallback to UTC
+      return new Date(date).toISOString().slice(0, 16);
+    }
+  }
+
   // 5. ADD THIS HELPER METHOD
   // Add this helper method to extract public_id from Cloudinary URLs:
 
@@ -3969,34 +4108,6 @@ class OnlineLiveCoursesController {
       message: "Error processing request",
       error: error.message,
     });
-  }
-
-  /**
-   * Process schedule data from merged form data
-   */
-  _processScheduleDataFromMerged(formData) {
-    const scheduleData = formData.schedule || {};
-    return {
-      startDate: scheduleData.startDate
-        ? new Date(scheduleData.startDate)
-        : undefined,
-      endDate: scheduleData.endDate
-        ? new Date(scheduleData.endDate)
-        : undefined,
-      registrationDeadline: scheduleData.registrationDeadline
-        ? new Date(scheduleData.registrationDeadline)
-        : undefined,
-      duration: scheduleData.duration || "",
-      primaryTimezone: scheduleData.primaryTimezone || "UTC",
-      displayTimezones: scheduleData.displayTimezones || [],
-      pattern: scheduleData.pattern || "single",
-      sessionTime: {
-        startTime: scheduleData.sessionTime?.startTime || "",
-        endTime: scheduleData.sessionTime?.endTime || "",
-        breakDuration: parseInt(scheduleData.sessionTime?.breakDuration) || 15,
-      },
-      sessions: scheduleData.sessions || [], // Already processed from dynamic items
-    };
   }
 
   /**

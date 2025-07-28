@@ -679,8 +679,31 @@ exports.getLiveLibrary = async (req, res) => {
                 courseType: "OnlineLiveTraining",
                 dateOfRegistration: enrollment.enrollmentData.registrationDate,
                 status: enrollment.enrollmentData.status,
+
+                // ✅ FIXED: Enhanced date handling with timezone info
                 startDate: course.schedule?.startDate,
                 endDate: course.schedule?.endDate,
+                timezone: course.schedule?.primaryTimezone || "UTC",
+
+                // ✅ NEW: Pre-formatted dates for frontend
+                displayDates: {
+                  startDate: formatCourseDate(
+                    course.schedule?.startDate,
+                    course.schedule?.primaryTimezone
+                  ),
+                  endDate: formatCourseDate(
+                    course.schedule?.endDate,
+                    course.schedule?.primaryTimezone
+                  ),
+                  startDateOnly: formatCourseDateOnly(
+                    course.schedule?.startDate,
+                    course.schedule?.primaryTimezone
+                  ),
+                  endDateOnly: formatCourseDateOnly(
+                    course.schedule?.endDate,
+                    course.schedule?.primaryTimezone
+                  ),
+                },
                 schedule: course.schedule?.duration || "TBD",
                 platform: course.platform?.name || "Zoom",
                 platformFeatures: course.platform?.features || {},
@@ -843,6 +866,54 @@ exports.getLiveLibrary = async (req, res) => {
     res.redirect("/dashboard");
   }
 };
+
+//new
+
+// Add these helper functions to your libraryController.js:
+
+/**
+ * Format course date with timezone awareness
+ */
+function formatCourseDate(dateString, timezone) {
+  if (!dateString) return "TBD";
+
+  try {
+    const date = new Date(dateString);
+    const options = {
+      timeZone: timezone || "UTC",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    };
+
+    return date.toLocaleString("en-US", options);
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return new Date(dateString).toLocaleString();
+  }
+}
+
+/**
+ * Format course date (date only) with timezone awareness
+ */
+function formatCourseDateOnly(dateString, timezone) {
+  if (!dateString) return "TBD";
+
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      timeZone: timezone || "UTC",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch (error) {
+    return new Date(dateString).toLocaleDateString();
+  }
+}
 
 /**
  * ✅ COMPLETE: Get In-Person Library with Full Linked Course Support

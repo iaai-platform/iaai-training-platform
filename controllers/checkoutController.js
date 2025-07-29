@@ -914,6 +914,7 @@ exports.completeRegistration = async (req, res) => {
 };
 
 // ✅ FIXED: Proceed to Payment with decimal precision
+// ✅ FIXED: Proceed to Payment with all required CCAvenue parameters
 exports.proceedToPayment = async (req, res) => {
   try {
     console.log("💳 Processing payment with CCAvenue...");
@@ -1013,7 +1014,6 @@ exports.proceedToPayment = async (req, res) => {
         code: req.session.appliedPromoCode,
       });
       if (promo) {
-        // ✅ FIXED: Use helper function for precise calculation
         const promoResult = calculateDiscount(
           totalCurrentPrice,
           promo.discountPercentage
@@ -1161,69 +1161,238 @@ exports.proceedToPayment = async (req, res) => {
 
     console.log("✅ Transaction saved successfully");
 
-    // ✅ FIXED: CCAvenue payment data with proper formatting
+    // ✅ FIXED: CCAvenue payment data with ALL required parameters
     const ccavenuePaymentData = {
+      // ✅ REQUIRED PARAMETERS
       merchant_id: process.env.CCAVENUE_MERCHANT_ID,
       order_id: orderNumber,
-      amount: finalAmount.toFixed(2), // ✅ Exactly 2 decimal places
+      amount: finalAmount.toFixed(2),
       currency: "USD",
+
+      // ✅ FIXED: Use domain without www to match your actual domain
       redirect_url: "https://iaa-i.com/payment/response",
       cancel_url: "https://iaa-i.com/payment/cancel",
+
+      // ✅ REQUIRED: Language parameter
       language: "EN",
-      billing_name: `${user.firstName} ${user.lastName}`,
+
+      // ✅ BILLING INFORMATION (Required for validation)
+      billing_name: `${user.firstName} ${user.lastName}`.trim(),
       billing_email: user.email,
       billing_tel: user.phoneNumber || "",
+      billing_address: user.address || "Not provided",
+      billing_city: user.city || "Not provided",
+      billing_state: user.state || "Not provided",
+      billing_zip: user.zipCode || "00000",
       billing_country: user.country || "United States",
+
+      // ✅ DELIVERY INFORMATION (Can be same as billing)
+      delivery_name: `${user.firstName} ${user.lastName}`.trim(),
+      delivery_address: user.address || "Not provided",
+      delivery_city: user.city || "Not provided",
+      delivery_state: user.state || "Not provided",
+      delivery_zip: user.zipCode || "00000",
+      delivery_country: user.country || "United States",
+      delivery_tel: user.phoneNumber || "",
+
+      // ✅ MERCHANT PARAMETERS (for tracking)
       merchant_param1: transactionId,
       merchant_param2: userId.toString(),
       merchant_param3: cartItems.length.toString(),
+      merchant_param4: req.session.appliedPromoCode || "none",
+      merchant_param5: "IAAI_TRAINING",
+
+      // ✅ ADDITIONAL REQUIRED PARAMETERS
+      order_description: `IAAI Training Course${
+        cartItems.length > 1 ? "s" : ""
+      }: ${cartItems
+        .map((item) => item.courseTitle)
+        .join(", ")
+        .substring(0, 200)}`,
+      promo_code: req.session.appliedPromoCode || "",
+      customer_identifier: user.email,
+
+      // ✅ INTEGRATION PARAMETERS
+      integration_type: "iframe_normal",
+      payment_option: "OPTCRDC,OPTNBK,OPTCASHC,OPTMOBP",
+
+      // ✅ ADDITIONAL VALIDATION FIELDS
+      tid: Date.now().toString(),
+
+      // ✅ Add some safety validations
+      sub_acc_id: "", // Leave empty unless using sub-accounts
+      invoice_number: orderNumber,
     };
 
-    // ✅ Additional validation before sending to CCAvenue
-    console.log("💳 CCAvenue Parameters:", {
+    // ✅ ENHANCED VALIDATION: Check all required parameters
+    const requiredParams = [
+      "merchant_id",
+      "order_id",
+      "amount",
+      "currency",
+      "redirect_url",
+      "cancel_url",
+      "language",
+      "billing_name",
+      "billing_email",
+    ];
+
+    const missingParams = requiredParams.filter(
+      (param) =>
+        !ccavenuePaymentData[param] ||
+        ccavenuePaymentData[param].toString().trim() === ""
+    );
+
+    if (missingParams.length > 0) {
+      console.error("❌ Missing required CCAvenue parameters:", missingParams);
+      return res.status(500).json({
+        success: false,
+        message: `Missing required parameters: ${missingParams.join(", ")}`,
+      });
+    }
+
+    // ✅ ADDITIONAL VALIDATION: Amount validation
+    if (
+      isNaN(parseFloat(ccavenuePaymentData.amount)) ||
+      parseFloat(ccavenuePaymentData.amount) <= 0
+    ) {
+      console.error("❌ Invalid amount:", ccavenuePaymentData.amount);
+      return res.status(500).json({
+        success: false,
+        message: "Invalid payment amount",
+      });
+    }
+
+    // ✅ Enhanced logging for debugging
+    console.log("💳 CCAvenue Parameters (Full):", {
       merchant_id: ccavenuePaymentData.merchant_id,
       order_id: ccavenuePaymentData.order_id,
       amount: ccavenuePaymentData.amount,
       currency: ccavenuePaymentData.currency,
       billing_email: ccavenuePaymentData.billing_email,
+      redirect_url: ccavenuePaymentData.redirect_url,
+      cancel_url: ccavenuePaymentData.cancel_url,
+      language: ccavenuePaymentData.language,
+      billing_name: ccavenuePaymentData.billing_name,
+      billing_country: ccavenuePaymentData.billing_country,
+      paramCount: Object.keys(ccavenuePaymentData).length,
     });
 
-    // Validate required parameters
-    if (
-      !ccavenuePaymentData.merchant_id ||
-      !ccavenuePaymentData.order_id ||
-      !ccavenuePaymentData.amount ||
-      !ccavenuePaymentData.billing_email
-    ) {
-      console.error("❌ Missing required CCAvenue parameters");
-      return res
-        .status(500)
-        .json({ success: false, message: "Payment configuration error" });
-    }
-
-    // Convert to query string and encrypt
+    // ✅ Convert to query string with proper encoding
     const dataString = Object.keys(ccavenuePaymentData)
+      .filter(
+        (key) =>
+          ccavenuePaymentData[key] !== null &&
+          ccavenuePaymentData[key] !== undefined
+      )
       .map((key) => `${key}=${encodeURIComponent(ccavenuePaymentData[key])}`)
       .join("&");
 
-    const encRequest = ccavUtil.encrypt(dataString);
+    console.log("🔐 Data string length:", dataString.length);
+    console.log("🔐 Sample data string:", dataString.substring(0, 200) + "...");
+
+    // ✅ ENCRYPTION: Use the CCAvenue utility
+    let encRequest;
+    try {
+      encRequest = ccavUtil.encrypt(dataString);
+      console.log("✅ Encryption successful, length:", encRequest.length);
+    } catch (encryptionError) {
+      console.error("❌ Encryption failed:", encryptionError);
+      return res.status(500).json({
+        success: false,
+        message: "Payment encryption failed",
+      });
+    }
+
+    // ✅ VALIDATE ENVIRONMENT VARIABLES
+    if (
+      !process.env.CCAVENUE_ACCESS_CODE ||
+      !process.env.CCAVENUE_WORKING_KEY
+    ) {
+      console.error("❌ Missing CCAvenue environment variables");
+      return res.status(500).json({
+        success: false,
+        message: "Payment gateway configuration error",
+      });
+    }
+
     const paymentUrl =
       "https://secure.ccavenue.ae/transaction/transaction.do?command=initiateTransaction";
 
-    // Create auto-submit form
+    // ✅ IMPROVED: Enhanced auto-submit form with better error handling
     const paymentForm = `
+      <!DOCTYPE html>
       <html>
-        <head><title>Redirecting to Payment Gateway...</title></head>
+        <head>
+          <title>Redirecting to Payment Gateway...</title>
+          <meta charset="UTF-8">
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              text-align: center; 
+              padding: 50px; 
+              background: #f8f9fa;
+            }
+            .loader { 
+              border: 4px solid #f3f3f3; 
+              border-top: 4px solid #007bff; 
+              border-radius: 50%; 
+              width: 40px; 
+              height: 40px; 
+              animation: spin 2s linear infinite; 
+              margin: 20px auto;
+            }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            .container { max-width: 500px; margin: 0 auto; }
+            .btn { 
+              background: #007bff; 
+              color: white; 
+              padding: 10px 20px; 
+              border: none; 
+              border-radius: 5px; 
+              cursor: pointer; 
+              margin: 10px;
+            }
+          </style>
+        </head>
         <body>
-          <h3>🔒 Redirecting to secure payment gateway...</h3>
-          <form id="paymentForm" method="post" action="${paymentUrl}">
-            <input type="hidden" name="encRequest" value="${encRequest}">
-            <input type="hidden" name="access_code" value="${process.env.CCAVENUE_ACCESS_CODE}">
-          </form>
+          <div class="container">
+            <h3>🔒 Redirecting to Secure Payment Gateway...</h3>
+            <div class="loader"></div>
+            <p>Please wait while we redirect you to CCAvenue secure payment page.</p>
+            <p><small>If you are not redirected automatically, click the button below:</small></p>
+            
+            <form id="paymentForm" method="post" action="${paymentUrl}">
+              <input type="hidden" name="encRequest" value="${encRequest}">
+              <input type="hidden" name="access_code" value="${
+                process.env.CCAVENUE_ACCESS_CODE
+              }">
+              <button type="submit" class="btn">Proceed to Payment</button>
+            </form>
+            
+            <div id="debug" style="margin-top: 30px; font-size: 12px; color: #666;">
+              <p>Order ID: ${orderNumber}</p>
+              <p>Amount: $${finalAmount.toFixed(2)} USD</p>
+              <p>Merchant ID: ${process.env.CCAVENUE_MERCHANT_ID}</p>
+            </div>
+          </div>
+          
           <script>
+            // Auto-submit after 3 seconds
             setTimeout(() => {
+              console.log('🔄 Auto-submitting payment form...');
               document.getElementById('paymentForm').submit();
-            }, 2000);
+            }, 3000);
+            
+            // Manual submit handler
+            document.getElementById('paymentForm').addEventListener('submit', function(e) {
+              console.log('💳 Submitting to CCAvenue:', '${paymentUrl}');
+              console.log('📊 Order Details:', {
+                orderId: '${orderNumber}',
+                amount: '${finalAmount.toFixed(2)}',
+                merchantId: '${process.env.CCAVENUE_MERCHANT_ID}'
+              });
+            });
           </script>
         </body>
       </html>
@@ -1234,12 +1403,16 @@ exports.proceedToPayment = async (req, res) => {
         2
       )}`
     );
+    console.log(`🔗 Redirect URL: ${ccavenuePaymentData.redirect_url}`);
+    console.log(`🔗 Cancel URL: ${ccavenuePaymentData.cancel_url}`);
+
     res.send(paymentForm);
   } catch (error) {
     console.error("❌ Payment processing error:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Payment processing failed" });
+    res.status(500).json({
+      success: false,
+      message: "Payment processing failed: " + error.message,
+    });
   }
 };
 

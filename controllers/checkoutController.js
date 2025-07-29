@@ -41,7 +41,7 @@ function calculateCoursePricing(
     currentPrice: 0,
     isEarlyBird: false,
     earlyBirdSavings: 0,
-    currency: "USD",
+    currency: "AED",
     isLinkedCourseFree: isLinkedCourse,
   };
 
@@ -915,9 +915,13 @@ exports.completeRegistration = async (req, res) => {
 
 // ✅ FIXED: Proceed to Payment with decimal precision
 // ✅ FIXED: Proceed to Payment with all required CCAvenue parameters
+// ✅ UPDATED: proceedToPayment function with AED currency for testing
 exports.proceedToPayment = async (req, res) => {
   try {
-    console.log("💳 Processing payment with CCAvenue...");
+    console.log(
+      "💳 Processing payment with CCAvenue (AED currency for testing)..."
+    );
+
     const userId = req.user._id;
     const user = await User.findById(userId)
       .populate("myInPersonCourses.courseId")
@@ -925,18 +929,20 @@ exports.proceedToPayment = async (req, res) => {
       .populate("mySelfPacedCourses.courseId");
 
     if (!user) {
+      console.error("❌ User not found");
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
 
+    // ✅ Collect cart items and calculate totals using enhanced pricing with linked course support
     const cartItems = [];
     let totalOriginalPrice = 0;
     let totalCurrentPrice = 0;
     let totalEarlyBirdSavings = 0;
     let totalLinkedCourseSavings = 0;
 
-    // Helper function to process cart items
+    // Helper function to process cart items with linked course support
     const processCartItems = (enrollments, courseType) => {
       enrollments
         .filter((e) => e.enrollmentData.status === "cart")
@@ -951,16 +957,34 @@ exports.proceedToPayment = async (req, res) => {
               isLinkedCourse
             );
 
+            // 🔄 UPDATED: Convert USD to AED (1 USD = 3.67 AED)
+            const usdToAedRate = 3.67;
+            const originalPriceAED = Math.round(
+              pricing.regularPrice * usdToAedRate
+            );
+            const currentPriceAED = Math.round(
+              pricing.currentPrice * usdToAedRate
+            );
+            const earlyBirdSavingsAED = Math.round(
+              pricing.earlyBirdSavings * usdToAedRate
+            );
+
             cartItems.push({
               courseId: course._id,
               courseType: courseType,
               courseTitle: course.basic?.title || "Untitled Course",
               courseCode: course.basic?.courseCode || "N/A",
-              originalPrice: pricing.regularPrice,
-              finalPrice: pricing.currentPrice,
+
+              // 🔄 UPDATED: Use AED prices
+              originalPrice: originalPriceAED,
+              earlyBirdPrice: pricing.earlyBirdPrice
+                ? Math.round(pricing.earlyBirdPrice * usdToAedRate)
+                : null,
+              finalPrice: currentPriceAED,
               isEarlyBird: pricing.isEarlyBird,
-              earlyBirdSavings: pricing.earlyBirdSavings,
+              earlyBirdSavings: earlyBirdSavingsAED,
               isLinkedCourseFree: pricing.isLinkedCourseFree,
+
               courseSchedule: {
                 startDate: course.schedule?.startDate,
                 endDate: course.schedule?.endDate,
@@ -969,6 +993,7 @@ exports.proceedToPayment = async (req, res) => {
                 platform: course.platform?.name,
                 accessDays: course.access?.accessDays,
               },
+
               instructor: {
                 name:
                   course.instructors?.primary?.name || course.instructor?.name,
@@ -978,11 +1003,12 @@ exports.proceedToPayment = async (req, res) => {
               },
             });
 
-            totalOriginalPrice += pricing.regularPrice;
-            totalCurrentPrice += pricing.currentPrice;
-            totalEarlyBirdSavings += pricing.earlyBirdSavings;
+            // 🔄 UPDATED: Use AED prices for totals
+            totalOriginalPrice += originalPriceAED;
+            totalCurrentPrice += currentPriceAED;
+            totalEarlyBirdSavings += earlyBirdSavingsAED;
             if (pricing.isLinkedCourseFree) {
-              totalLinkedCourseSavings += pricing.regularPrice;
+              totalLinkedCourseSavings += originalPriceAED;
             }
           }
         });
@@ -999,13 +1025,7 @@ exports.proceedToPayment = async (req, res) => {
         .json({ success: false, message: "No items in cart" });
     }
 
-    // ✅ Round all totals to avoid floating point issues
-    totalOriginalPrice = roundToTwoDecimals(totalOriginalPrice);
-    totalCurrentPrice = roundToTwoDecimals(totalCurrentPrice);
-    totalEarlyBirdSavings = roundToTwoDecimals(totalEarlyBirdSavings);
-    totalLinkedCourseSavings = roundToTwoDecimals(totalLinkedCourseSavings);
-
-    // Apply promo code discount
+    // Apply promo code discount if exists in session
     let promoCodeDiscount = 0;
     let promoCodeData = null;
 
@@ -1014,67 +1034,45 @@ exports.proceedToPayment = async (req, res) => {
         code: req.session.appliedPromoCode,
       });
       if (promo) {
-        const promoResult = calculateDiscount(
-          totalCurrentPrice,
-          promo.discountPercentage
-        );
-        promoCodeDiscount = promoResult.discountAmount;
-
+        promoCodeDiscount =
+          totalCurrentPrice * (promo.discountPercentage / 100);
         promoCodeData = {
           code: promo.code,
           discountType: "percentage",
           discountValue: promo.discountPercentage,
           discountAmount: promoCodeDiscount,
         };
-
-        console.log(`💰 Promo discount: ${promoCodeDiscount}`);
       }
     }
 
-    // ✅ FIXED: Ensure final amount is properly rounded
-    const finalAmount = roundToTwoDecimals(
-      Math.max(0, totalCurrentPrice - promoCodeDiscount)
-    );
-    console.log(`💰 Final amount for CCAvenue: $${finalAmount}`);
+    const finalAmount = Math.max(0, totalCurrentPrice - promoCodeDiscount);
 
-    // If final amount is 0, redirect to free registration
+    // If final amount is 0 or very small, complete as free registration
     if (finalAmount <= 0) {
-      console.log("🎯 Final amount is $0, redirecting to free registration");
       return res.redirect("/complete-registration");
     }
 
-    // Create transaction IDs
+    // ✅ Create payment transaction record with AED currency
     const transactionId = `TXN_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}`;
     const orderNumber = `ORD_${Date.now()}_${userId.toString().slice(-6)}`;
 
-    console.log("🔧 Creating transaction...");
-
-    // ✅ Create transaction with proper decimal handling
-    const transaction = {
-      transactionId: transactionId,
-      orderNumber: orderNumber,
-      receiptNumber: `REC_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-
-      createdAt: new Date(),
-      transactionDate: new Date(),
-      completedAt: null,
-
-      paymentStatus: "pending",
+    const transactionData = {
+      transactionId,
+      orderNumber,
       paymentMethod: "CCAvenue",
+      paymentStatus: "pending",
 
       financial: {
         subtotal: totalOriginalPrice,
-        discountAmount: roundToTwoDecimals(
-          totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount
-        ),
+        discountAmount:
+          totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount,
         earlyBirdSavings: totalEarlyBirdSavings,
+        linkedCourseSavings: totalLinkedCourseSavings,
         promoCodeDiscount: promoCodeDiscount,
-        tax: 0,
-        processingFee: 0,
         finalAmount: finalAmount,
-        currency: "USD",
+        currency: "AED", // 🔄 UPDATED: Changed from USD to AED
       },
 
       discounts: {
@@ -1086,333 +1084,168 @@ exports.proceedToPayment = async (req, res) => {
             .filter((item) => item.isEarlyBird)
             .map((item) => item.courseId.toString()),
         },
-      },
-
-      items: cartItems.map((item) => ({
-        courseId: item.courseId,
-        courseType: item.courseType,
-        courseTitle: item.courseTitle,
-        courseCode: item.courseCode,
-        originalPrice: item.originalPrice,
-        finalPrice: item.finalPrice,
-        isEarlyBird: item.isEarlyBird,
-        earlyBirdSavings: item.earlyBirdSavings,
-        courseSchedule: item.courseSchedule,
-        instructor: item.instructor,
-      })),
-
-      customerInfo: {
-        userId: user._id,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        phone: user.phoneNumber || "",
-        country: user.country || "",
-        billingAddress: {
-          name: `${user.firstName} ${user.lastName}`,
-          address: "",
-          city: "",
-          state: "",
-          country: user.country || "",
-          zip: "",
+        linkedCourses: {
+          applied: totalLinkedCourseSavings > 0,
+          totalSavings: totalLinkedCourseSavings,
+          coursesIncluded: cartItems
+            .filter((item) => item.isLinkedCourseFree)
+            .map((item) => item.courseId.toString()),
         },
       },
 
+      items: cartItems,
+
       gift: {
         isGift: req.body.isGift || false,
-        recipientEmail: req.body.giftRecipientEmail || null,
-        giftMessage: req.body.giftMessage || null,
+        recipientEmail: req.body.giftRecipientEmail,
+        giftMessage: req.body.giftMessage,
         senderName: `${user.firstName} ${user.lastName}`,
       },
 
       metadata: {
-        userAgent: req.get("User-Agent") || "",
-        ipAddress: req.ip || "",
-        sessionId: req.sessionID || "",
-        orderNotes: req.body.orderNotes || "",
+        userAgent: req.get("User-Agent"),
+        ipAddress: req.ip,
+        sessionId: req.sessionID,
+        orderNotes: req.body.orderNotes,
         source: "website",
-      },
-
-      ccavenue: {},
-      communications: [],
-
-      refund: {
-        isRefunded: false,
-        refundAmount: 0,
-        refundDate: null,
-        refundReason: null,
-        refundTransactionId: null,
-        refundMethod: null,
-        processedBy: null,
-      },
-
-      documentation: {
-        receiptUrl: null,
-        invoiceUrl: null,
-        contractUrl: null,
-        certificateEligible: true,
       },
     };
 
-    console.log("💾 Saving transaction...");
+    // Create transaction record in user
+    const transaction = user.createPaymentTransaction(transactionData);
+    await user.save();
 
-    // Add transaction to user
-    user.paymentTransactions.push(transaction);
-    await user.save({ validateBeforeSave: false });
-
-    console.log("✅ Transaction saved successfully");
-
-    // ✅ FIXED: CCAvenue payment data with ALL required parameters
+    // 🔄 UPDATED: Prepare CCAvenue payment data with AED currency
     const ccavenuePaymentData = {
-      // ✅ REQUIRED PARAMETERS
       merchant_id: process.env.CCAVENUE_MERCHANT_ID,
       order_id: orderNumber,
       amount: finalAmount.toFixed(2),
-      currency: "USD",
-
-      // ✅ FIXED: Use domain without www to match your actual domain
-      redirect_url: "https://iaa-i.com/payment/response",
-      cancel_url: "https://iaa-i.com/payment/cancel",
-
-      // ✅ REQUIRED: Language parameter
+      currency: "AED", // 🔄 UPDATED: Changed from USD to AED
+      redirect_url: `${req.protocol}://${req.get("host")}/payment/response`,
+      cancel_url: `${req.protocol}://${req.get("host")}/payment/cancel`,
       language: "EN",
 
-      // ✅ BILLING INFORMATION (Required for validation)
-      billing_name: `${user.firstName} ${user.lastName}`.trim(),
+      // Customer details
+      billing_name: `${user.firstName} ${user.lastName}`,
       billing_email: user.email,
       billing_tel: user.phoneNumber || "",
-      billing_address: user.address || "Not provided",
-      billing_city: user.city || "Not provided",
-      billing_state: user.state || "Not provided",
-      billing_zip: user.zipCode || "00000",
-      billing_country: user.country || "United States",
+      billing_country: user.country || "United Arab Emirates", // 🔄 UPDATED: Changed default country
 
-      // ✅ DELIVERY INFORMATION (Can be same as billing)
-      delivery_name: `${user.firstName} ${user.lastName}`.trim(),
-      delivery_address: user.address || "Not provided",
-      delivery_city: user.city || "Not provided",
-      delivery_state: user.state || "Not provided",
-      delivery_zip: user.zipCode || "00000",
-      delivery_country: user.country || "United States",
-      delivery_tel: user.phoneNumber || "",
-
-      // ✅ MERCHANT PARAMETERS (for tracking)
+      // Store transaction ID and user ID in merchant params
       merchant_param1: transactionId,
       merchant_param2: userId.toString(),
       merchant_param3: cartItems.length.toString(),
-      merchant_param4: req.session.appliedPromoCode || "none",
-      merchant_param5: "IAAI_TRAINING",
-
-      // ✅ ADDITIONAL REQUIRED PARAMETERS
-      order_description: `IAAI Training Course${
-        cartItems.length > 1 ? "s" : ""
-      }: ${cartItems
-        .map((item) => item.courseTitle)
-        .join(", ")
-        .substring(0, 200)}`,
-      promo_code: req.session.appliedPromoCode || "",
-      customer_identifier: user.email,
-
-      // ✅ INTEGRATION PARAMETERS
-      integration_type: "iframe_normal",
-      payment_option: "OPTCRDC,OPTNBK,OPTCASHC,OPTMOBP",
-
-      // ✅ ADDITIONAL VALIDATION FIELDS
-      tid: Date.now().toString(),
-
-      // ✅ Add some safety validations
-      sub_acc_id: "", // Leave empty unless using sub-accounts
-      invoice_number: orderNumber,
     };
 
-    // ✅ ENHANCED VALIDATION: Check all required parameters
-    const requiredParams = [
-      "merchant_id",
-      "order_id",
-      "amount",
-      "currency",
-      "redirect_url",
-      "cancel_url",
-      "language",
-      "billing_name",
-      "billing_email",
-    ];
-
-    const missingParams = requiredParams.filter(
-      (param) =>
-        !ccavenuePaymentData[param] ||
-        ccavenuePaymentData[param].toString().trim() === ""
-    );
-
-    if (missingParams.length > 0) {
-      console.error("❌ Missing required CCAvenue parameters:", missingParams);
-      return res.status(500).json({
-        success: false,
-        message: `Missing required parameters: ${missingParams.join(", ")}`,
-      });
-    }
-
-    // ✅ ADDITIONAL VALIDATION: Amount validation
-    if (
-      isNaN(parseFloat(ccavenuePaymentData.amount)) ||
-      parseFloat(ccavenuePaymentData.amount) <= 0
-    ) {
-      console.error("❌ Invalid amount:", ccavenuePaymentData.amount);
-      return res.status(500).json({
-        success: false,
-        message: "Invalid payment amount",
-      });
-    }
-
-    // ✅ Enhanced logging for debugging
-    console.log("💳 CCAvenue Parameters (Full):", {
-      merchant_id: ccavenuePaymentData.merchant_id,
-      order_id: ccavenuePaymentData.order_id,
-      amount: ccavenuePaymentData.amount,
-      currency: ccavenuePaymentData.currency,
-      billing_email: ccavenuePaymentData.billing_email,
-      redirect_url: ccavenuePaymentData.redirect_url,
-      cancel_url: ccavenuePaymentData.cancel_url,
-      language: ccavenuePaymentData.language,
-      billing_name: ccavenuePaymentData.billing_name,
-      billing_country: ccavenuePaymentData.billing_country,
-      paramCount: Object.keys(ccavenuePaymentData).length,
-    });
-
-    // ✅ Convert to query string with proper encoding
+    // Convert to query string and encrypt
     const dataString = Object.keys(ccavenuePaymentData)
-      .filter(
-        (key) =>
-          ccavenuePaymentData[key] !== null &&
-          ccavenuePaymentData[key] !== undefined
-      )
       .map((key) => `${key}=${encodeURIComponent(ccavenuePaymentData[key])}`)
       .join("&");
 
-    console.log("🔐 Data string length:", dataString.length);
-    console.log("🔐 Sample data string:", dataString.substring(0, 200) + "...");
+    const encRequest = ccavUtil.encrypt(dataString);
 
-    // ✅ ENCRYPTION: Use the CCAvenue utility
-    let encRequest;
-    try {
-      encRequest = ccavUtil.encrypt(dataString);
-      console.log("✅ Encryption successful, length:", encRequest.length);
-    } catch (encryptionError) {
-      console.error("❌ Encryption failed:", encryptionError);
-      return res.status(500).json({
-        success: false,
-        message: "Payment encryption failed",
-      });
-    }
-
-    // ✅ VALIDATE ENVIRONMENT VARIABLES
-    if (
-      !process.env.CCAVENUE_ACCESS_CODE ||
-      !process.env.CCAVENUE_WORKING_KEY
-    ) {
-      console.error("❌ Missing CCAvenue environment variables");
-      return res.status(500).json({
-        success: false,
-        message: "Payment gateway configuration error",
-      });
-    }
-
+    // Determine payment URL
     const paymentUrl =
-      "https://secure.ccavenue.ae/transaction/transaction.do?command=initiateTransaction";
+      process.env.NODE_ENV === "production"
+        ? process.env.CCAVENUE_PROD_URL
+        : process.env.CCAVENUE_TEST_URL;
 
-    // ✅ IMPROVED: Enhanced auto-submit form with better error handling
+    // 🔄 UPDATED: Create auto-submit form with AED currency display
     const paymentForm = `
-      <!DOCTYPE html>
       <html>
         <head>
           <title>Redirecting to Payment Gateway...</title>
-          <meta charset="UTF-8">
           <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              text-align: center; 
-              padding: 50px; 
-              background: #f8f9fa;
-            }
-            .loader { 
-              border: 4px solid #f3f3f3; 
-              border-top: 4px solid #007bff; 
-              border-radius: 50%; 
-              width: 40px; 
-              height: 40px; 
-              animation: spin 2s linear infinite; 
-              margin: 20px auto;
-            }
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f8f9fa; }
+            .container { max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+            .loader { border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-            .container { max-width: 500px; margin: 0 auto; }
-            .btn { 
-              background: #007bff; 
-              color: white; 
-              padding: 10px 20px; 
-              border: none; 
-              border-radius: 5px; 
-              cursor: pointer; 
-              margin: 10px;
-            }
+            .summary { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; }
+            .summary h4 { margin: 0 0 15px 0; color: #333; }
+            .summary p { margin: 5px 0; color: #666; }
+            .amount { font-size: 24px; font-weight: bold; color: #28a745; }
+            .savings { color: #28a745; font-weight: 600; }
+            .currency-note { background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffeaa7; }
           </style>
         </head>
         <body>
           <div class="container">
-            <h3>🔒 Redirecting to Secure Payment Gateway...</h3>
+            <h3>🔒 Secure Payment Processing</h3>
             <div class="loader"></div>
-            <p>Please wait while we redirect you to CCAvenue secure payment page.</p>
-            <p><small>If you are not redirected automatically, click the button below:</small></p>
+            <p>Please wait while we redirect you to our secure payment gateway...</p>
             
-            <form id="paymentForm" method="post" action="${paymentUrl}">
-              <input type="hidden" name="encRequest" value="${encRequest}">
-              <input type="hidden" name="access_code" value="${
-                process.env.CCAVENUE_ACCESS_CODE
-              }">
-              <button type="submit" class="btn">Proceed to Payment</button>
-            </form>
-            
-            <div id="debug" style="margin-top: 30px; font-size: 12px; color: #666;">
-              <p>Order ID: ${orderNumber}</p>
-              <p>Amount: $${finalAmount.toFixed(2)} USD</p>
-              <p>Merchant ID: ${process.env.CCAVENUE_MERCHANT_ID}</p>
+            <div class="currency-note">
+              <h4>💱 Currency Information</h4>
+              <p><strong>Note:</strong> Payment will be processed in AED (UAE Dirham) for testing purposes.</p>
+              <p><strong>Original Price:</strong> ${(
+                totalOriginalPrice / 3.67
+              ).toFixed(2)} USD ≈ ${totalOriginalPrice.toFixed(2)} AED</p>
             </div>
+            
+            <div class="summary">
+              <h4>Order Summary</h4>
+              <p><strong>Order #:</strong> ${orderNumber}</p>
+              <p><strong>Items:</strong> ${cartItems.length} course(s)</p>
+              ${
+                totalEarlyBirdSavings > 0
+                  ? `<p class="savings"><strong>Early Bird Savings:</strong> ${totalEarlyBirdSavings.toFixed(
+                      2
+                    )} AED</p>`
+                  : ""
+              }
+              ${
+                totalLinkedCourseSavings > 0
+                  ? `<p class="savings"><strong>Included Course Savings:</strong> ${totalLinkedCourseSavings.toFixed(
+                      2
+                    )} AED</p>`
+                  : ""
+              }
+              ${
+                promoCodeDiscount > 0
+                  ? `<p class="savings"><strong>Promo Discount:</strong> ${promoCodeDiscount.toFixed(
+                      2
+                    )} AED</p>`
+                  : ""
+              }
+              <p class="amount">Total: ${finalAmount.toFixed(2)} AED</p>
+            </div>
+            
+            <p><small>🔐 This is a secure SSL encrypted connection</small></p>
           </div>
           
+          <form id="paymentForm" method="post" action="${paymentUrl}">
+            <input type="hidden" name="encRequest" value="${encRequest}">
+            <input type="hidden" name="access_code" value="${
+              process.env.CCAVENUE_ACCESS_CODE
+            }">
+          </form>
+          
           <script>
-            // Auto-submit after 3 seconds
+            // Auto-submit after 2 seconds
             setTimeout(() => {
-              console.log('🔄 Auto-submitting payment form...');
               document.getElementById('paymentForm').submit();
-            }, 3000);
-            
-            // Manual submit handler
-            document.getElementById('paymentForm').addEventListener('submit', function(e) {
-              console.log('💳 Submitting to CCAvenue:', '${paymentUrl}');
-              console.log('📊 Order Details:', {
-                orderId: '${orderNumber}',
-                amount: '${finalAmount.toFixed(2)}',
-                merchantId: '${process.env.CCAVENUE_MERCHANT_ID}'
-              });
-            });
+            }, 2000);
           </script>
         </body>
       </html>
     `;
 
     console.log(
-      `💳 Payment initiated: Order ${orderNumber}, Amount $${finalAmount.toFixed(
+      `💳 AED Payment initiated: Order ${orderNumber}, Amount ${finalAmount.toFixed(
         2
-      )}`
+      )} AED (converted from ${(finalAmount / 3.67).toFixed(
+        2
+      )} USD), Transaction ${transactionId}`
     );
-    console.log(`🔗 Redirect URL: ${ccavenuePaymentData.redirect_url}`);
-    console.log(`🔗 Cancel URL: ${ccavenuePaymentData.cancel_url}`);
-
+    console.log(
+      `💰 Savings breakdown: Early Bird ${totalEarlyBirdSavings} AED, Linked Courses ${totalLinkedCourseSavings} AED, Promo ${promoCodeDiscount} AED`
+    );
     res.send(paymentForm);
   } catch (error) {
     console.error("❌ Payment processing error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Payment processing failed: " + error.message,
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Payment processing failed" });
   }
 };
 

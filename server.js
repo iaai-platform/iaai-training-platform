@@ -571,10 +571,49 @@ app.use("/", latestNewsRoutes);
 // 14. MISCELLANEOUS ROUTES
 // ============================================
 
-// About page
+// ============================================
+// 14. ABOUT US ROUTES (UPDATED)
+// ============================================
+
+// Main About Us page
 app.get("/about-us", (req, res) => {
-  res.render("about-us", { title: "About Us" });
+  const user = req.user || null;
+  res.render("about-us", {
+    user: user,
+    title: "About IAAI - International Aesthetic Academic Institution",
+  });
 });
+
+// Mission & Vision page
+app.get("/mission-vision", (req, res) => {
+  const user = req.user || null;
+  res.render("mission-vision", {
+    user: user,
+    title: "Mission & Vision - IAAI",
+  });
+});
+
+// Why Choose IAAI page
+app.get("/why-iaai", (req, res) => {
+  const user = req.user || null;
+  res.render("why-iaai", {
+    user: user,
+    title: "Why Choose IAAI - International Aesthetic Academic Institution",
+  });
+});
+
+// Training Centres & Instructors (Combined)
+app.get("/training-centres", (req, res) => {
+  const user = req.user || null;
+  res.render("training-centres", {
+    user: user,
+    title: "Our Training Centres & Expert Instructors - IAAI",
+  });
+});
+
+console.log(
+  "ℹ️ About Us routes loaded (about-us, mission-vision, why-iaai, training-centres)"
+);
 
 // ============================================
 // 15. ERROR HANDLING

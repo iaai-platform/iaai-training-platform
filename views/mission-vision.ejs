@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission & Vision - International Aesthetic Academic Institution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .content-section {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            margin-bottom: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .content-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            align-items: center;
+        }
+
+        .section-content {
+            padding: 60px;
+        }
+
+        .section-content h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .section-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .section-content p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .section-image {
+            position: relative;
+            overflow: hidden;
+            height: 400px;
+        }
+
+        .section-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .section-image:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Values Section */
+        .values-section {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            color: #ffffff;
+            margin-top: 80px;
+        }
+
+        .values-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .section-title p {
+            font-size: 18px;
+            color: #e0e0e0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .value-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .value-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 25px;
+        }
+
+        .value-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .value-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            background: #002147;
+            color: #ffffff;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
+            background: #001a3a;
+        }
+
+        .cta-btn.secondary {
+            background: transparent;
+            border: 2px solid #002147;
+            color: #002147;
+        }
+
+        .cta-btn.secondary:hover {
+            background: #002147;
+            color: #ffffff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .section-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-content {
+                padding: 40px 30px;
+            }
+
+            .section-content h2 {
+                font-size: 28px;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <a href="/about-us">About Us</a> > <span>Mission & Vision</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Our Mission & Vision</h1>
+            <p>Empowering aesthetic excellence worldwide through innovative education and transformative learning experiences</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mission Section -->
+        <div class="content-section fade-in">
+            <div class="section-grid">
+                <div class="section-content">
+                    <h2>Our Mission</h2>
+                    <p><strong>Empowering Aesthetic Excellence Worldwide.</strong> We are dedicated to advancing the field of aesthetic medicine through comprehensive education, innovative training methodologies, and internationally recognized certification programs.</p>
+                    <p>Our mission is to equip healthcare professionals with the knowledge, skills, and confidence needed to deliver exceptional patient care while driving innovation in aesthetic medicine across the globe.</p>
+                    <p>We strive to create a global community of aesthetic practitioners who uphold the highest standards of safety, ethics, and professional excellence in their practice.</p>
+                </div>
+                <div class="section-image">
+                    <img src="/images/mission.jpg" alt="Our Mission">
+                </div>
+            </div>
+        </div>
+
+        <!-- Vision Section -->
+        <div class="content-section fade-in">
+            <div class="section-grid">
+                <div class="section-image">
+                    <img src="/images/vision.jpg" alt="Our Vision">
+                </div>
+                <div class="section-content">
+                    <h2>Our Vision</h2>
+                    <p><strong>Shaping the Global Standard for Aesthetic Education.</strong> To be the world's leading authority in aesthetic medicine education, recognized for excellence, innovation, and transformative impact on the industry.</p>
+                    <p>We envision a future where every aesthetic professional has access to world-class training, enabling them to achieve exceptional results while advancing evidence-based practices globally.</p>
+                    <p>Our vision encompasses creating a worldwide network of skilled practitioners who contribute to raising the standards of aesthetic medicine through continuous learning and professional development.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="values-container">
+            <div class="section-title">
+                <h2>Our Core Values</h2>
+                <p>The fundamental principles that guide our educational approach and institutional philosophy</p>
+            </div>
+            <div class="values-grid">
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-lightbulb"></i></div>
+                    <h3>Innovation & Excellence</h3>
+                    <p>Continuously advancing educational methodologies and maintaining the highest standards in aesthetic medicine training worldwide.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-medal"></i></div>
+                    <h3>Professional Integrity</h3>
+                    <p>Upholding ethical standards, evidence-based practices, and professional responsibility in all educational and clinical activities.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-globe"></i></div>
+                    <h3>Global Accessibility</h3>
+                    <p>Making world-class aesthetic education accessible to healthcare professionals worldwide through diverse delivery modalities.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-handshake"></i></div>
+                    <h3>Partnership & Support</h3>
+                    <p>Building lasting relationships with our graduates and providing ongoing support throughout their professional journey.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Safety & Quality</h3>
+                    <p>Prioritizing patient safety, evidence-based techniques, and rigorous quality assurance in all training programs.</p>
+                </div>
+                <div class="value-card fade-in">
+                    <div class="value-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>Lifelong Learning</h3>
+                    <p>Fostering a culture of continuous education, professional development, and career advancement in aesthetic medicine.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>Ready to Join Our Mission?</h2>
+            <p>Become part of a global community dedicated to advancing aesthetic medicine through exceptional education and professional excellence.</p>
+            <div class="cta-buttons">
+                <a href="/training-programs" class="cta-btn">Explore Programs</a>
+                <a href="/why-iaai" class="cta-btn secondary">Why Choose IAAI</a>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('.fade-in').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Enhanced hover effects for cards
+        document.querySelectorAll('.value-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About IAAI - International Aesthetic Academic Institution</title>
+    <title>Why Choose IAAI - International Aesthetic Academic Institution</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -141,14 +141,115 @@
             letter-spacing: 1px;
         }
 
-        /* Quick Links Section */
-        .quick-links-section {
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-            padding: 80px 0;
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
         }
 
-        .quick-links-container {
-            max-width: 1400px;
+        .content-section {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            margin-bottom: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .content-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            align-items: center;
+        }
+
+        .section-content {
+            padding: 60px;
+        }
+
+        .section-content h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .section-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .section-content p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .section-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .section-content li {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .section-content li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .section-image {
+            position: relative;
+            overflow: hidden;
+            height: 400px;
+        }
+
+        .section-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .section-image:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Technology Section */
+        .technology-section {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            color: #ffffff;
+        }
+
+        .technology-container {
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
@@ -161,147 +262,117 @@
         .section-title h2 {
             font-size: 42px;
             font-weight: 700;
-            color: #002147;
+            color: #ffffff;
             margin-bottom: 20px;
         }
 
         .section-title p {
             font-size: 18px;
-            color: #666;
+            color: #e0e0e0;
             max-width: 600px;
             margin: 0 auto;
         }
 
-        .links-grid {
+        .tech-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 40px;
         }
 
-        .link-card {
-            background: #ffffff;
-            border-radius: 25px;
-            padding: 50px 40px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+        .tech-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
             text-align: center;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .tech-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 25px;
+        }
+
+        .tech-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .tech-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* Global Impact Section */
+        .global-impact-section {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 80px 0;
+        }
+
+        .impact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .impact-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .link-card::before {
+        .impact-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 6px;
-            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
-        }
-
-        .link-card:hover {
-            transform: translateY(-15px);
-            box-shadow: 0 35px 100px rgba(0, 0, 0, 0.15);
-        }
-
-        .link-icon {
-            font-size: 64px;
-            color: #ffcc00;
-            margin-bottom: 30px;
-        }
-
-        .link-card h3 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #002147;
-            margin-bottom: 20px;
-        }
-
-        .link-card p {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.8;
-            margin-bottom: 30px;
-        }
-
-        .link-btn {
-            background: linear-gradient(135deg, #002147, #003366);
-            color: #ffffff;
-            padding: 15px 35px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .link-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
-            background: linear-gradient(135deg, #001a3a, #002147);
-        }
-
-        /* Introduction Section */
-        .intro-section {
-            background: #ffffff;
-            padding: 80px 0;
-        }
-
-        .intro-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
-
-        .intro-content h2 {
-            font-size: 36px;
-            font-weight: 700;
-            color: #002147;
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .intro-content h2::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 60px;
             height: 4px;
             background: linear-gradient(90deg, #ffcc00, #b8860b);
         }
 
-        .intro-content p {
-            font-size: 18px;
-            color: #555;
-            line-height: 1.8;
-            margin-bottom: 20px;
+        .impact-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
         }
 
-        .intro-image {
-            position: relative;
-            overflow: hidden;
-            border-radius: 20px;
-            height: 400px;
+        .impact-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 25px;
         }
 
-        .intro-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
+        .impact-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 15px;
         }
 
-        .intro-image:hover img {
-            transform: scale(1.05);
+        .impact-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
         }
 
         /* CTA Section */
@@ -368,41 +439,35 @@
         }
 
         /* Responsive Design */
-        @media (max-width: 968px) {
-            .intro-container {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-
+        @media (max-width: 768px) {
             .hero h1 {
-                font-size: 36px;
+                font-size: 32px;
             }
 
             .hero p {
                 font-size: 16px;
             }
 
-            .link-card {
+            .section-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-content {
                 padding: 40px 30px;
             }
 
-            .links-grid {
-                grid-template-columns: 1fr;
+            .section-content h2 {
+                font-size: 28px;
             }
 
             .stats-container {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
                 gap: 20px;
             }
-        }
 
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 28px;
-            }
-
-            .link-card {
-                padding: 30px 20px;
+            .tech-grid,
+            .impact-grid {
+                grid-template-columns: 1fr;
             }
 
             .cta-buttons {
@@ -434,15 +499,15 @@
     <!-- Breadcrumb -->
     <nav class="breadcrumb">
         <div class="breadcrumb-container">
-            <a href="/">Home</a> > <span>About Us</span>
+            <a href="/">Home</a> > <a href="/about-us">About Us</a> > <span>Why Choose IAAI</span>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Leading the Future of Aesthetic Medicine Education</h1>
-            <p>International Aesthetic Academic Institution (IAAI) is the world's premier destination for comprehensive aesthetic medicine training, certification, and professional development across multiple modalities and global locations.</p>
+            <h1>Why Choose IAAI?</h1>
+            <p>Discover what makes IAAI the world's leading institution for aesthetic medicine education and professional development</p>
         </div>
     </section>
 
@@ -482,63 +547,102 @@
         </div>
     </section>
 
-    <!-- Introduction Section -->
-    <section class="intro-section">
-        <div class="intro-container">
-            <div class="intro-content fade-in">
-                <h2>Welcome to IAAI</h2>
-                <p><strong>Empowering Aesthetic Excellence Worldwide.</strong> The International Aesthetic Academic Institution (IAAI) stands as the global leader in aesthetic medicine education, offering comprehensive training programs designed to advance the careers of healthcare professionals worldwide.</p>
-                <p>Through our innovative approach to education, we combine theoretical knowledge with practical hands-on experience, ensuring our graduates are equipped with the skills and confidence needed to excel in the rapidly evolving field of aesthetic medicine.</p>
-                <p>Our commitment to excellence, safety, and professional development has made us the trusted choice for thousands of medical professionals across 75+ countries.</p>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Why Choose Us Section -->
+        <div class="content-section fade-in">
+            <div class="section-grid">
+                <div class="section-content">
+                    <h2>Our Distinctive Advantages</h2>
+                    <p>Our commitment to excellence and comprehensive approach sets us apart in aesthetic medicine education:</p>
+                    <ul>
+                        <li>Internationally recognized expert instructors with decades of experience</li>
+                        <li>Multiple training modalities: In-person, Live Online, and Self-paced learning</li>
+                        <li>Premium global locations: Istanbul, Dubai, and Verona, Italy</li>
+                        <li>Comprehensive certification programs with international accreditation</li>
+                        <li>State-of-the-art facilities and latest medical technologies</li>
+                        <li>Small class sizes ensuring personalized attention and mentorship</li>
+                        <li>Ongoing support through our digital learning platform</li>
+                        <li>Global professional network and career advancement opportunities</li>
+                        <li>Comprehensive assessment and quality assurance systems</li>
+                    </ul>
+                </div>
+                <div class="section-image">
+                    <img src="/images/choose-us.jpg" alt="Why Choose IAAI">
+                </div>
             </div>
-            <div class="intro-image fade-in">
-                <img src="/images/about-intro.jpg" alt="IAAI Introduction">
+        </div>
+    </main>
+
+    <!-- Technology & Innovation Section -->
+    <section class="technology-section">
+        <div class="technology-container">
+            <div class="section-title">
+                <h2>Advanced Learning Technologies</h2>
+                <p>Cutting-edge educational technologies and platforms that enhance learning outcomes and professional development</p>
+            </div>
+            <div class="tech-grid">
+                <div class="tech-card fade-in">
+                    <div class="tech-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h3>Digital Learning Platform</h3>
+                    <p>Advanced LMS with progress tracking, interactive assessments, digital certificates, and comprehensive student dashboards.</p>
+                </div>
+                <div class="tech-card fade-in">
+                    <div class="tech-icon"><i class="fas fa-vr-cardboard"></i></div>
+                    <h3>Virtual Reality Training</h3>
+                    <p>Immersive VR simulations for safe practice of injection techniques and patient interaction scenarios.</p>
+                </div>
+                <div class="tech-card fade-in">
+                    <div class="tech-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Mobile Learning</h3>
+                    <p>Fully responsive mobile applications enabling learning anywhere, anytime with offline content access.</p>
+                </div>
+                <div class="tech-card fade-in">
+                    <div class="tech-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Analytics & Reporting</h3>
+                    <p>Comprehensive learning analytics, progress monitoring, and performance assessment tools for continuous improvement.</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Quick Links Section -->
-    <section class="quick-links-section">
-        <div class="quick-links-container">
+    <!-- Global Impact Section -->
+    <section class="global-impact-section">
+        <div class="impact-container">
             <div class="section-title">
-                <h2>Explore IAAI</h2>
-                <p>Discover more about our institution, values, capabilities, and global network</p>
+                <h2 style="color: #002147;">Global Impact & Recognition</h2>
+                <p style="color: #666;">Transforming aesthetic medicine education worldwide through exceptional training and professional excellence</p>
             </div>
-            <div class="links-grid">
-                <div class="link-card fade-in">
-                    <div class="link-icon"><i class="fas fa-bullseye"></i></div>
-                    <h3>Mission & Vision</h3>
-                    <p>Learn about our core mission to empower aesthetic excellence worldwide and our vision to shape the global standard for aesthetic education.</p>
-                    <a href="/mission-vision" class="link-btn">
-                        Explore Our Purpose <i class="fas fa-arrow-right"></i>
-                    </a>
+            <div class="impact-grid">
+                <div class="impact-card fade-in">
+                    <div class="impact-icon"><i class="fas fa-medal"></i></div>
+                    <h3>International Accreditation</h3>
+                    <p>Recognition by leading aesthetic medicine associations worldwide, including Europass and CPD certification.</p>
                 </div>
-
-                <div class="link-card fade-in">
-                    <div class="link-icon"><i class="fas fa-trophy"></i></div>
-                    <h3>Why Choose IAAI</h3>
-                    <p>Discover what sets us apart as the world's leading aesthetic medicine institution and the unique advantages we offer to our students.</p>
-                    <a href="/why-iaai" class="link-btn">
-                        See Our Advantages <i class="fas fa-arrow-right"></i>
-                    </a>
+                <div class="impact-card fade-in">
+                    <div class="impact-icon"><i class="fas fa-handshake"></i></div>
+                    <h3>Premier Partnerships</h3>
+                    <p>Strategic collaborations with top medical institutions and healthcare organizations globally.</p>
                 </div>
-
-                <div class="link-card fade-in">
-                    <div class="link-icon"><i class="fas fa-map-marked-alt"></i></div>
-                    <h3>Our Training Centres</h3>
-                    <p>Explore our premium training facilities across Istanbul, Dubai, and Verona, each offering specialized programs and state-of-the-art equipment.</p>
-                    <a href="/training-centres" class="link-btn">
-                        View Locations <i class="fas fa-arrow-right"></i>
-                    </a>
+                <div class="impact-card fade-in">
+                    <div class="impact-icon"><i class="fas fa-network-wired"></i></div>
+                    <h3>Alumni Network</h3>
+                    <p>Extensive professional network spanning 75+ countries across 6 continents for career advancement.</p>
                 </div>
-
-                <div class="link-card fade-in">
-                    <div class="link-icon"><i class="fas fa-user-graduate"></i></div>
-                    <h3>Expert Instructors</h3>
-                    <p>Meet our world-class faculty of internationally recognized experts who bring decades of experience and cutting-edge knowledge to your education.</p>
-                    <a href="/our-instructors" class="link-btn">
-                        Meet Our Faculty <i class="fas fa-arrow-right"></i>
-                    </a>
+                <div class="impact-card fade-in">
+                    <div class="impact-icon"><i class="fas fa-journal-whills"></i></div>
+                    <h3>Research Excellence</h3>
+                    <p>Featured in international medical journals and conferences, contributing to evidence-based practices.</p>
+                </div>
+                <div class="impact-card fade-in">
+                    <div class="impact-icon"><i class="fas fa-sync-alt"></i></div>
+                    <h3>Continuous Innovation</h3>
+                    <p>Regular curriculum updates based on latest research, techniques, and industry developments.</p>
+                </div>
+                <div class="impact-card fade-in">
+                    <div class="impact-icon"><i class="fas fa-shield-check"></i></div>
+                    <h3>Quality Assurance</h3>
+                    <p>Rigorous assessment systems and feedback mechanisms ensuring the highest educational standards.</p>
                 </div>
             </div>
         </div>
@@ -547,11 +651,11 @@
     <!-- Call to Action Section -->
     <section class="cta-section">
         <div class="cta-container">
-            <h2>Ready to Transform Your Career?</h2>
-            <p>Join thousands of healthcare professionals who have advanced their careers through IAAI's comprehensive training programs. Start your journey to aesthetic excellence today.</p>
+            <h2>Experience the IAAI Advantage</h2>
+            <p>Join thousands of healthcare professionals who have transformed their careers through IAAI's world-class training programs and exceptional educational experience.</p>
             <div class="cta-buttons">
-                <a href="/training-programs" class="cta-btn">Explore Training Programs</a>
-                <a href="/mission-vision" class="cta-btn secondary">Learn More About Us</a>
+                <a href="/training-programs" class="cta-btn">Explore Programs</a>
+                <a href="/training-centres" class="cta-btn secondary">Our Training Centres</a>
                 <a href="/contact-us" class="cta-btn secondary">Contact Us</a>
             </div>
         </div>
@@ -627,28 +731,13 @@
         });
 
         // Enhanced hover effects for cards
-        document.querySelectorAll('.link-card, .stat-item').forEach(card => {
+        document.querySelectorAll('.tech-card, .impact-card').forEach(card => {
             card.addEventListener('mouseenter', function() {
-                if (this.classList.contains('link-card')) {
-                    this.style.transform = 'translateY(-15px) scale(1.02)';
-                } else {
-                    this.style.transform = 'translateY(-10px) scale(1.02)';
-                }
+                this.style.transform = 'translateY(-10px) scale(1.02)';
             });
             
             card.addEventListener('mouseleave', function() {
                 this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
-
-        // Smooth scrolling for link buttons
-        document.querySelectorAll('.link-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                // Add a subtle click animation
-                this.style.transform = 'translateY(-3px) scale(0.98)';
-                setTimeout(() => {
-                    this.style.transform = 'translateY(-3px)';
-                }, 150);
             });
         });
     </script>

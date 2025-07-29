@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Training Centres & Expert Instructors - International Aesthetic Academic Institution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffcc00;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #002147 0%, #003366 100%);
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Statistics Section */
+        .stats-section {
+            background: #ffffff;
+            padding: 80px 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        .stat-number {
+            font-size: 42px;
+            font-weight: 800;
+            color: #002147;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Office Locations Section */
+        .office-locations {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 80px 0;
+        }
+
+        .office-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .section-title p {
+            font-size: 18px;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .offices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .office-card {
+            background: #ffffff;
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .office-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .office-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 35px 100px rgba(0, 0, 0, 0.15);
+        }
+
+        .office-card h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .office-card .flag {
+            font-size: 32px;
+        }
+
+        .office-info {
+            color: #555;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .office-info strong {
+            color: #002147;
+            font-weight: 700;
+        }
+
+        .office-info br {
+            margin-bottom: 12px;
+        }
+
+        .partnership-note {
+            background: rgba(255, 204, 0, 0.1);
+            border-left: 5px solid #ffcc00;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 40px;
+        }
+
+        .partnership-note p {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.8;
+            font-style: italic;
+            margin: 0;
+        }
+
+        /* Programs by Location Section */
+        .programs-section {
+            background: #ffffff;
+            padding: 80px 0;
+        }
+
+        .programs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .location-programs {
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .location-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .location-header h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #002147;
+        }
+
+        .location-header .flag {
+            font-size: 32px;
+        }
+
+        .programs-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .program-item {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 4px solid #ffcc00;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .program-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .program-item h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 10px;
+        }
+
+        .program-item p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Expert Instructors Section */
+        .instructors-section {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            color: #ffffff;
+        }
+
+        .instructors-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .instructors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .instructor-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 50px 40px;
+            position: relative;
+        }
+
+        .instructor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .instructor-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .instructor-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: #ffffff;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instructor-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .instructor-card h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .instructor-card h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffcc00;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .instructor-card p {
+            font-size: 16px;
+            color: #e0e0e0;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .instructor-specialties {
+            margin-bottom: 25px;
+        }
+
+        .specialty-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .instructor-contact {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+        }
+
+        .contact-btn.secondary {
+            background: transparent;
+            border: 2px solid #ffcc00;
+            color: #ffcc00;
+        }
+
+        .contact-btn.secondary:hover {
+            background: #ffcc00;
+            color: #002147;
+        }
+
+        /* Facilities Section */
+        .facilities-section {
+            background: #ffffff;
+            padding: 80px 0;
+        }
+
+        .facilities-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .facilities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .facility-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .facility-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+        }
+
+        .facility-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .facility-icon {
+            font-size: 48px;
+            color: #ffcc00;
+            margin-bottom: 25px;
+        }
+
+        .facility-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #002147;
+        }
+
+        .facility-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            background: #002147;
+            color: #ffffff;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
+            background: #001a3a;
+        }
+
+        .cta-btn.secondary {
+            background: transparent;
+            border: 2px solid #002147;
+            color: #002147;
+        }
+
+        .cta-btn.secondary:hover {
+            background: #002147;
+            color: #ffffff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .offices-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .office-card {
+                padding: 40px 30px;
+            }
+
+            .instructors-grid,
+            .facilities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .programs-list {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .office-card {
+                padding: 30px 20px;
+            }
+
+            .instructor-card {
+                padding: 40px 30px;
+            }
+
+            .facility-card {
+                padding: 30px 20px;
+            }
+
+            .location-programs {
+                padding: 30px 20px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> > <a href="/about-us">About Us</a> > <span>Our Training Centres & Instructors</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Our Global Training Network & Expert Faculty</h1>
+            <p>Experience world-class aesthetic medicine education at our premium training facilities across three continents, guided by internationally recognized expert instructors with decades of experience.</p>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-map-marked-alt"></i></div>
+                <div class="stat-number">3</div>
+                <div class="stat-label">Training Centres</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-number">15+</div>
+                <div class="stat-label">Expert Instructors</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                <div class="stat-number">75+</div>
+                <div class="stat-label">Countries Served</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-certificate"></i></div>
+                <div class="stat-number">200+</div>
+                <div class="stat-label">Years Combined Experience</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
+                <div class="stat-number">5000+</div>
+                <div class="stat-label">Students Trained</div>
+            </div>
+            <div class="stat-item fade-in">
+                <div class="stat-icon"><i class="fas fa-award"></i></div>
+                <div class="stat-number">50+</div>
+                <div class="stat-label">International Certifications</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Office Locations Section -->
+    <section class="office-locations">
+        <div class="office-container">
+            <div class="section-title">
+                <h2>Strategic Partnership Locations</h2>
+                <p>Through strategic partnerships with leading medical institutions worldwide, IAAI Academy delivers exceptional training experiences in state-of-the-art facilities across three continents</p>
+            </div>
+            <div class="offices-grid">
+                <div class="office-card fade-in">
+                    <h3><span class="flag">🇹🇷</span>Istanbul, Turkey</h3>
+                    <div class="office-info">
+                        <strong>Partner Institution:</strong> Liv Hospital Ulus<br><br>
+                        <strong>Specialized Programs:</strong> Full Face Harmonization, Foundation Fillers, Cosmetic Gynecology, Hair Transplant<br><br>
+                        <strong>Collaborative Features:</strong> Access to advanced hospital infrastructure, dedicated operating theaters, and comprehensive hands-on surgical training environments with the latest medical technologies and patient care facilities.
+                    </div>
+                </div>
+                <div class="office-card fade-in">
+                    <h3><span class="flag">🇦🇪</span>Dubai, UAE</h3>
+                    <div class="office-info">
+                        <strong>Partner Institution:</strong> Premier Medical Centers<br><br>
+                        <strong>Specialized Programs:</strong> Advanced Aesthetic Techniques, Botox Training, Dermal Fillers<br><br>
+                        <strong>Collaborative Features:</strong> Partnership with internationally accredited medical facilities, cutting-edge clinical equipment, and luxury hospitality integration providing world-class training experience.
+                    </div>
+                </div>
+                <div class="office-card fade-in">
+                    <h3><span class="flag">🇮🇹</span>Verona, Italy</h3>
+                    <div class="office-info">
+                        <strong>Partner Institution:</strong> ICLO Teaching and Research Center<br><br>
+                        <strong>Specialized Programs:</strong> Rhinoplasty & Cadaver Dissection, Advanced Surgical Techniques<br><br>
+                        <strong>Collaborative Features:</strong> Alliance with European research excellence, specialized cadaver laboratory access, and Europass certification pathway for international recognition.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="partnership-note">
+                <p><em>IAAI Academy maintains strategic collaborations with world-renowned medical institutions to ensure our participants receive training in authentic clinical environments with access to the latest medical technologies and facilities.</em></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Programs by Location Section -->
+    <section class="programs-section">
+        <div class="programs-container">
+            <div class="section-title">
+                <h2>Specialized Programs by Location</h2>
+                <p>Each training center offers unique specializations designed to leverage local expertise and medical infrastructure</p>
+            </div>
+
+            <!-- Istanbul Programs -->
+            <div class="location-programs fade-in">
+                <div class="location-header">
+                    <span class="flag">🇹🇷</span>
+                    <h3>Istanbul, Turkey - Liv Hospital Ulus</h3>
+                </div>
+                <div class="programs-list">
+                    <div class="program-item">
+                        <h4>Full Face Harmonization</h4>
+                        <p>Comprehensive facial aesthetic training with advanced injection techniques and facial contouring methods using real patient cases.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Foundation Fillers Training</h4>
+                        <p>Essential dermal filler techniques covering safety protocols, anatomy, and practical application with hands-on experience.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Cosmetic Gynecology</h4>
+                        <p>Specialized intimate area treatments including non-surgical vaginal rejuvenation and aesthetic procedures.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Hair Transplant Techniques</h4>
+                        <p>Advanced hair restoration methods including FUE and FUT techniques with live surgical demonstrations.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Advanced Botox Applications</h4>
+                        <p>Comprehensive neurotoxin training covering facial muscles, injection patterns, and complication management.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>PRP & Regenerative Medicine</h4>
+                        <p>Platelet-rich plasma applications for skin rejuvenation, hair restoration, and aesthetic enhancement.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dubai Programs -->
+            <div class="location-programs fade-in">
+                <div class="location-header">
+                    <span class="flag">🇦🇪</span>
+                    <h3>Dubai, UAE - Premier Medical Centers</h3>
+                </div>
+                <div class="programs-list">
+                    <div class="program-item">
+                        <h4>Advanced Aesthetic Techniques</h4>
+                        <p>Cutting-edge aesthetic procedures using the latest technology and equipment in luxury medical facilities.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Botox Mastery Program</h4>
+                        <p>Comprehensive neurotoxin training with international certification and advanced injection techniques.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Dermal Filler Excellence</h4>
+                        <p>Advanced filler techniques for facial contouring, volumization, and non-surgical enhancement procedures.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Laser Therapy Applications</h4>
+                        <p>Training on advanced laser systems for skin rejuvenation, hair removal, and aesthetic treatments.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Chemical Peel Protocols</h4>
+                        <p>Professional chemical peel applications for skin resurfacing and rejuvenation with safety protocols.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Luxury Aesthetic Medicine</h4>
+                        <p>High-end aesthetic procedures and patient care in premium medical spa environments.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verona Programs -->
+            <div class="location-programs fade-in">
+                <div class="location-header">
+                    <span class="flag">🇮🇹</span>
+                    <h3>Verona, Italy - ICLO Teaching Center</h3>
+                </div>
+                <div class="programs-list">
+                    <div class="program-item">
+                        <h4>Rhinoplasty & Cadaver Dissection</h4>
+                        <p>Advanced surgical rhinoplasty techniques with hands-on cadaver dissection for anatomical understanding.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Advanced Surgical Techniques</h4>
+                        <p>Comprehensive surgical training with European standards and research-based methodologies.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Facial Anatomy Mastery</h4>
+                        <p>In-depth anatomical study using cadaver specimens and advanced imaging techniques for precise understanding.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>European Certification Program</h4>
+                        <p>Europass certified training programs meeting European Union educational standards and requirements.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Research & Development</h4>
+                        <p>Participation in ongoing research projects and development of new aesthetic medicine techniques.</p>
+                    </div>
+                    <div class="program-item">
+                        <h4>Surgical Complication Management</h4>
+                        <p>Advanced training in identifying, preventing, and managing surgical complications in aesthetic procedures.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expert Instructors Section -->
+    <section class="instructors-section">
+        <div class="instructors-container">
+            <div class="section-title">
+                <h2 style="color: #ffffff;">World-Class Expert Instructors</h2>
+                <p style="color: #e0e0e0;">Learn from internationally recognized leaders in aesthetic medicine with decades of experience and proven track records of excellence in clinical practice and education</p>
+            </div>
+            <div class="instructors-grid">
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">
+                        <!-- Placeholder for actual image: <img src="/images/dr-fatma-gokce.jpg" alt="Dr. Fatma Gökçe Haspolat"> -->
+                        FG
+                    </div>
+                    <h3>Dr. Fatma Gökçe Haspolat</h3>
+                    <h4>Lead Medical Aesthetician</h4>
+                    <p>18+ years specializing in advanced injection techniques, facial contouring, and non-surgical aesthetic procedures. International speaker and published researcher in aesthetic medicine with extensive experience in training healthcare professionals worldwide.</p>
+                    <div class="instructor-specialties">
+                        <span class="specialty-tag">Facial Harmonization</span>
+                        <span class="specialty-tag">Botox & Fillers</span>
+                        <span class="specialty-tag">PRP Therapy</span>
+                        <span class="specialty-tag">Non-Surgical Procedures</span>
+                    </div>
+                    <div class="instructor-contact">
+                        <a href="/contact-instructor/fatma-gokce" class="contact-btn">
+                            <i class="fas fa-envelope"></i> Contact
+                        </a>
+                        <a href="/instructor-profile/fatma-gokce" class="contact-btn secondary">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </div>
+                </div>
+
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">
+                        <!-- Placeholder for actual image: <img src="/images/dr-jamila-atannaz.jpg" alt="Dr. Jamila Atannaz"> -->
+                        JA
+                    </div>
+                    <h3>Dr. Jamila Atannaz</h3>
+                    <h4>Plastic Surgeon & CEO</h4>
+                    <p>Leading plastic surgeon and CEO of Atannaz Plastic Surgery Morocco. Expert in facial aesthetics, reconstructive surgery, and advanced aesthetic techniques with international recognition and extensive teaching experience.</p>
+                    <div class="instructor-specialties">
+                        <span class="specialty-tag">Plastic Surgery</span>
+                        <span class="specialty-tag">Facial Aesthetics</span>
+                        <span class="specialty-tag">Reconstructive Surgery</span>
+                        <span class="specialty-tag">Leadership</span>
+                    </div>
+                    <div class="instructor-contact">
+                        <a href="/contact-instructor/jamila-atannaz" class="contact-btn">
+                            <i class="fas fa-envelope"></i> Contact
+                        </a>
+                        <a href="/instructor-profile/jamila-atannaz" class="contact-btn secondary">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </div>
+                </div>
+
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">
+                        <!-- Placeholder for actual image: <img src="/images/dr-giovanni-angiolini.jpg" alt="Dr. Giovanni Angiolini"> -->
+                        GA
+                    </div>
+                    <h3>Dr. Giovanni Angiolini</h3>
+                    <h4>Aesthetic Physician</h4>
+                    <p>Renowned aesthetic physician with expertise in advanced facial enhancement, non-surgical procedures, and innovative treatment protocols. Pioneer in European aesthetic medicine education and research.</p>
+                    <div class="instructor-specialties">
+                        <span class="specialty-tag">Aesthetic Medicine</span>
+                        <span class="specialty-tag">Facial Enhancement</span>
+                        <span class="specialty-tag">Innovation</span>
+                        <span class="specialty-tag">Research</span>
+                    </div>
+                    <div class="instructor-contact">
+                        <a href="/contact-instructor/giovanni-angiolini" class="contact-btn">
+                            <i class="fas fa-envelope"></i> Contact
+                        </a>
+                        <a href="/instructor-profile/giovanni-angiolini" class="contact-btn secondary">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </div>
+                </div>
+
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">
+                        DR
+                    </div>
+                    <h3>Dr. [Name]</h3>
+                    <h4>Cosmetic Gynecologist</h4>
+                    <p>Specialist in intimate area aesthetics and cosmetic gynecology with extensive experience in non-surgical intimate rejuvenation procedures and women's wellness treatments.</p>
+                    <div class="instructor-specialties">
+                        <span class="specialty-tag">Cosmetic Gynecology</span>
+                        <span class="specialty-tag">Intimate Rejuvenation</span>
+                        <span class="specialty-tag">Women's Wellness</span>
+                        <span class="specialty-tag">Non-Surgical Procedures</span>
+                    </div>
+                    <div class="instructor-contact">
+                        <a href="/contact-instructor/cosmetic-gynecologist" class="contact-btn">
+                            <i class="fas fa-envelope"></i> Contact
+                        </a>
+                        <a href="/instructor-profile/cosmetic-gynecologist" class="contact-btn secondary">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </div>
+                </div>
+
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">
+                        DR
+                    </div>
+                    <h3>Dr. [Name]</h3>
+                    <h4>Hair Transplant Specialist</h4>
+                    <p>Leading expert in hair restoration techniques including FUE and FUT methods. Internationally recognized for innovative approaches in hair transplantation and scalp aesthetics.</p>
+                    <div class="instructor-specialties">
+                        <span class="specialty-tag">Hair Transplantation</span>
+                        <span class="specialty-tag">FUE Technique</span>
+                        <span class="specialty-tag">Scalp Aesthetics</span>
+                        <span class="specialty-tag">Restoration Surgery</span>
+                    </div>
+                    <div class="instructor-contact">
+                        <a href="/contact-instructor/hair-transplant-specialist" class="contact-btn">
+                            <i class="fas fa-envelope"></i> Contact
+                        </a>
+                        <a href="/instructor-profile/hair-transplant-specialist" class="contact-btn secondary">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </div>
+                </div>
+
+                <div class="instructor-card fade-in">
+                    <div class="instructor-avatar">
+                        DR
+                    </div>
+                    <h3>Dr. [Name]</h3>
+                    <h4>Laser & Energy Specialist</h4>
+                    <p>Expert in laser treatments and energy-based aesthetic devices with advanced training in skin rejuvenation, hair removal, and therapeutic laser applications.</p>
+                    <div class="instructor-specialties">
+                        <span class="specialty-tag">Laser Therapy</span>
+                        <span class="specialty-tag">Energy Devices</span>
+                        <span class="specialty-tag">Skin Rejuvenation</span>
+                        <span class="specialty-tag">Medical Technology</span>
+                    </div>
+                    <div class="instructor-contact">
+                        <a href="/contact-instructor/laser-specialist" class="contact-btn">
+                            <i class="fas fa-envelope"></i> Contact
+                        </a>
+                        <a href="/instructor-profile/laser-specialist" class="contact-btn secondary">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Facilities Section -->
+    <section class="facilities-section">
+        <div class="facilities-container">
+            <div class="section-title">
+                <h2>World-Class Training Facilities</h2>
+                <p>State-of-the-art infrastructure and advanced medical equipment ensuring optimal learning experiences across all our training centers</p>
+            </div>
+            <div class="facilities-grid">
+                <div class="facility-card fade-in">
+                    <div class="facility-icon"><i class="fas fa-hospital"></i></div>
+                    <h3>Advanced Medical Infrastructure</h3>
+                    <p>Full access to hospital-grade facilities including operating theaters, patient care units, and emergency medical equipment.</p>
+                </div>
+                <div class="facility-card fade-in">
+                    <div class="facility-icon"><i class="fas fa-microscope"></i></div>
+                    <h3>Research Laboratories</h3>
+                    <p>Specialized research facilities including cadaver laboratories and advanced anatomical study centers for comprehensive learning.</p>
+                </div>
+                <div class="facility-card fade-in">
+                    <div class="facility-icon"><i class="fas fa-desktop"></i></div>
+                    <h3>Digital Learning Centers</h3>
+                    <p>Modern classrooms equipped with HD projection systems, interactive displays, and high-speed internet connectivity.</p>
+                </div>
+                <div class="facility-card fade-in">
+                    <div class="facility-icon"><i class="fas fa-tools"></i></div>
+                    <h3>Latest Medical Equipment</h3>
+                    <p>Access to cutting-edge aesthetic medicine devices, laser systems, and injection equipment for hands-on training.</p>
+                </div>
+                <div class="facility-card fade-in">
+                    <div class="facility-icon"><i class="fas fa-hotel"></i></div>
+                    <h3>Luxury Hospitality</h3>
+                    <p>Premium accommodation arrangements and hospitality services ensuring comfortable learning environment for international participants.</p>
+                </div>
+                <div class="facility-card fade-in">
+                    <div class="facility-icon"><i class="fas fa-certificate"></i></div>
+                    <h3>Certification Centers</h3>
+                    <p>Dedicated assessment and certification facilities with secure testing environments and digital certificate issuance systems.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>Choose Your Training Destination</h2>
+            <p>Select the perfect location for your aesthetic medicine education based on your specialization interests and preferred learning environment. Each center offers unique advantages and specialized programs with expert instructors.</p>
+            <div class="cta-buttons">
+                <a href="/training-programs" class="cta-btn">View All Programs</a>
+                <a href="/why-iaai" class="cta-btn secondary">Why Choose IAAI</a>
+                <a href="/contact-us" class="cta-btn secondary">Contact Us</a>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('.fade-in').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target, duration = 2000) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (target > 100) {
+                    element.textContent = Math.floor(current).toLocaleString() + '+';
+                } else if (target < 10) {
+                    element.textContent = current.toFixed(1) + '/5';
+                } else {
+                    element.textContent = Math.floor(current) + '+';
+                }
+            }, 16);
+        }
+
+        // Animate counters when they come into view
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target.querySelector('.stat-number');
+                    const text = counter.textContent;
+                    let target;
+                    
+                    if (text.includes('/5')) {
+                        target = 4.9;
+                    } else {
+                        target = parseInt(text.replace(/\D/g, ''));
+                    }
+                    
+                    animateCounter(counter, target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-item').forEach(item => {
+            counterObserver.observe(item);
+        });
+
+        // Enhanced hover effects for cards
+        document.querySelectorAll('.office-card, .instructor-card, .facility-card, .location-programs, .program-item').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (this.classList.contains('office-card') || this.classList.contains('instructor-card')) {
+                    this.style.transform = 'translateY(-15px) scale(1.02)';
+                } else if (this.classList.contains('facility-card')) {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                } else if (this.classList.contains('program-item')) {
+                    this.style.transform = 'translateY(-5px) scale(1.02)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Contact button animations
+        document.querySelectorAll('.contact-btn, .cta-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'translateY(-3px) scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-3px)';
+                }, 150);
+            });
+        });
+    </script>
+</body>
+</html>

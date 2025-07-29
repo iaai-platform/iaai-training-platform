@@ -1,4 +1,4 @@
-// controllers/checkoutController.js - FULLY ALIGNED WITH LINKED COURSES
+// controllers/checkoutController.js - FULLY ALIGNED WITH LINKED COURSES - FINAL VERSION
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
@@ -24,10 +24,10 @@ function calculateCoursePricing(
     isEarlyBird: false,
     earlyBirdSavings: 0,
     currency: "USD",
-    isLinkedCourseFree: isLinkedCourse, // ⭐ CRITICAL: Track if this is a free linked course
+    isLinkedCourseFree: isLinkedCourse,
   };
 
-  // ⭐ ENHANCED: If this is a linked course, set price to 0
+  // If this is a linked course, set price to 0
   if (isLinkedCourse) {
     if (course.enrollment) {
       pricing.regularPrice = course.enrollment.price || 0;
@@ -44,7 +44,7 @@ function calculateCoursePricing(
     return pricing;
   }
 
-  // Rest of the existing pricing logic for non-linked courses
+  // Regular pricing logic for non-linked courses
   if (course.enrollment) {
     // For InPerson and OnlineLive courses
     pricing.regularPrice = course.enrollment.price || 0;
@@ -82,7 +82,7 @@ function calculateCoursePricing(
   return pricing;
 }
 
-// ✅ ENHANCED: Display Checkout Page with linked course support
+// ✅ Display Checkout Page with linked course support
 exports.getCheckoutPage = async (req, res) => {
   try {
     console.log("🔍 Loading checkout page with linked course support...");
@@ -99,7 +99,7 @@ exports.getCheckoutPage = async (req, res) => {
     let totalEarlyBirdSavings = 0;
     let totalLinkedCourseSavings = 0;
 
-    // ✅ ENHANCED: Process In-Person Courses with linked course detection
+    // Process In-Person Courses
     const inPersonCartItems =
       user.myInPersonCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -125,7 +125,7 @@ exports.getCheckoutPage = async (req, res) => {
           originalPrice: pricing.regularPrice,
           isEarlyBird: pricing.isEarlyBird,
           earlyBirdSavings: pricing.earlyBirdSavings,
-          isLinkedCourseFree: pricing.isLinkedCourseFree, // ⭐ NEW
+          isLinkedCourseFree: pricing.isLinkedCourseFree,
           courseType: "InPersonAestheticTraining",
           displayType: "In-Person",
           startDate: course.schedule?.startDate || null,
@@ -140,7 +140,7 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    // ✅ ENHANCED: Process Online Live Courses with linked course detection
+    // Process Online Live Courses
     const liveCartItems =
       user.myLiveCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -162,13 +162,13 @@ exports.getCheckoutPage = async (req, res) => {
           courseCode: course.basic?.courseCode || "N/A",
           price: pricing.currentPrice,
           originalPrice: pricing.regularPrice,
-          isEarlyBird: pricing.isEarlyBird && !isLinkedCourse, // ⭐ ENHANCED: Don't show early bird for linked
-          earlyBirdSavings: isLinkedCourse ? 0 : pricing.earlyBirdSavings, // ⭐ ENHANCED
-          isLinkedCourseFree: pricing.isLinkedCourseFree, // ⭐ NEW
+          isEarlyBird: pricing.isEarlyBird && !isLinkedCourse,
+          earlyBirdSavings: isLinkedCourse ? 0 : pricing.earlyBirdSavings,
+          isLinkedCourseFree: pricing.isLinkedCourseFree,
           courseType: "OnlineLiveTraining",
           displayType: isLinkedCourse
             ? "Online Live (Included)"
-            : "Online Live", // ⭐ ENHANCED
+            : "Online Live",
           startDate: course.schedule?.startDate || null,
         });
 
@@ -183,7 +183,7 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    // ✅ Process Self-Paced Courses (no linked course logic needed)
+    // Process Self-Paced Courses
     const selfPacedCartItems =
       user.mySelfPacedCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -205,9 +205,9 @@ exports.getCheckoutPage = async (req, res) => {
           courseCode: course.basic?.courseCode || "N/A",
           price: pricing.currentPrice,
           originalPrice: pricing.regularPrice,
-          isEarlyBird: false, // Self-paced courses don't have early bird
+          isEarlyBird: false,
           earlyBirdSavings: 0,
-          isLinkedCourseFree: false, // ⭐ NEW
+          isLinkedCourseFree: false,
           courseType: "SelfPacedOnlineTraining",
           displayType: "Self-Paced",
           startDate: null,
@@ -218,7 +218,6 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    // ✅ ENHANCED: Calculate total savings (early bird + linked courses)
     const totalSavings = totalEarlyBirdSavings + totalLinkedCourseSavings;
 
     console.log("📌 Enhanced Cart Summary:", {
@@ -237,7 +236,7 @@ exports.getCheckoutPage = async (req, res) => {
       totalPrice: totalCurrentPrice,
       totalOriginalPrice: totalOriginalPrice,
       totalSavings: totalSavings.toFixed(2),
-      hasEarlyBirdDiscounts: totalSavings > 0, // ⭐ ENHANCED: Include linked course savings
+      hasEarlyBirdDiscounts: totalSavings > 0,
       user,
       successMessage: "",
     });
@@ -247,7 +246,7 @@ exports.getCheckoutPage = async (req, res) => {
   }
 };
 
-// ✅ ENHANCED: Apply Promo Code with linked course support
+// ✅ Apply Promo Code
 exports.applyPromoCode = async (req, res) => {
   try {
     const { promoCode } = req.body;
@@ -259,10 +258,9 @@ exports.applyPromoCode = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // ✅ ENHANCED: Calculate total price using enhanced pricing with linked course support
     let totalPrice = 0;
 
-    // Get in-person cart courses
+    // Calculate total from all course types
     const inPersonCartItems =
       user.myInPersonCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -281,7 +279,6 @@ exports.applyPromoCode = async (req, res) => {
       }
     }
 
-    // Get online live cart courses
     const liveCartItems =
       user.myLiveCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -300,7 +297,6 @@ exports.applyPromoCode = async (req, res) => {
       }
     }
 
-    // Get self-paced cart courses
     const selfPacedCartItems =
       user.mySelfPacedCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -321,7 +317,7 @@ exports.applyPromoCode = async (req, res) => {
       return res.json({ success: false, message: "No courses in cart." });
     }
 
-    // Fetch promo code from database
+    // Validate promo code
     const promo = await PromoCode.findOne({
       code: promoCode.toUpperCase(),
       isActive: true,
@@ -334,7 +330,6 @@ exports.applyPromoCode = async (req, res) => {
       });
     }
 
-    // Check if promo code has expired
     if (promo.expiryDate && new Date() > promo.expiryDate) {
       return res.json({
         success: false,
@@ -348,9 +343,7 @@ exports.applyPromoCode = async (req, res) => {
     const discountAmount = totalPrice * (promo.discountPercentage / 100);
     const discountedPrice = totalPrice - discountAmount;
 
-    // Store promo code in session for later use
     req.session.appliedPromoCode = promo.code;
-
     const completeRegistration = discountedPrice <= 0;
 
     res.json({
@@ -366,13 +359,11 @@ exports.applyPromoCode = async (req, res) => {
   }
 };
 
-// ✅ ENHANCED: Process Checkout with linked course support
-// ✅ ENHANCED: Process Checkout with improved $0 price handling
+// ✅ Process Checkout - decides between payment or free registration
 exports.processCheckout = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    // Check if user has any courses in cart
     const hasCartItems =
       user.myInPersonCourses?.some((e) => e.enrollmentData.status === "cart") ||
       user.myLiveCourses?.some((e) => e.enrollmentData.status === "cart") ||
@@ -384,10 +375,9 @@ exports.processCheckout = async (req, res) => {
         .json({ success: false, message: "No courses in cart." });
     }
 
-    // ✅ ENHANCED: Calculate total price with linked course support
     let totalPrice = 0;
 
-    // Process all course types with enhanced pricing
+    // Calculate total price with linked course support
     for (const enrollment of user.myInPersonCourses?.filter(
       (e) => e.enrollmentData.status === "cart"
     ) || []) {
@@ -439,11 +429,10 @@ exports.processCheckout = async (req, res) => {
 
     console.log(`💰 Calculated total price: $${totalPrice}`);
 
-    // ✅ NEW: Enhanced logic for $0 total (including promo codes)
+    // Apply promo code discount if exists
     const appliedPromo = req.session.appliedPromoCode;
     let finalPrice = totalPrice;
 
-    // Apply promo code discount if exists
     if (appliedPromo) {
       const promo = await PromoCode.findOne({
         code: appliedPromo,
@@ -459,7 +448,7 @@ exports.processCheckout = async (req, res) => {
       }
     }
 
-    // ✅ ENHANCED: More explicit $0 handling
+    // Decide between free registration or payment
     if (finalPrice <= 0) {
       console.log("🎯 Total is $0 - redirecting to complete registration");
       return res.redirect("/complete-registration");
@@ -472,15 +461,15 @@ exports.processCheckout = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-// ✅ ENHANCED: Process Payment with linked course support
+
+// ✅ Process Payment - show payment page
 exports.processPayment = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     let totalPrice = 0;
     const cartCourses = [];
 
-    // ✅ ENHANCED: Calculate totals using enhanced pricing with linked course support
-    // Process in-person courses
+    // Process all course types
     for (const enrollment of user.myInPersonCourses?.filter(
       (e) => e.enrollmentData.status === "cart"
     ) || []) {
@@ -504,7 +493,6 @@ exports.processPayment = async (req, res) => {
       }
     }
 
-    // Process online live courses
     for (const enrollment of user.myLiveCourses?.filter(
       (e) => e.enrollmentData.status === "cart"
     ) || []) {
@@ -526,7 +514,6 @@ exports.processPayment = async (req, res) => {
       }
     }
 
-    // Process self-paced courses
     for (const enrollment of user.mySelfPacedCourses?.filter(
       (e) => e.enrollmentData.status === "cart"
     ) || []) {
@@ -558,15 +545,10 @@ exports.processPayment = async (req, res) => {
   }
 };
 
-// ✅ ENHANCED: Complete Registration with linked course support
-// ✅ ENHANCED: Complete Registration with better success handling
-// checkoutController.js - Complete Registration Function
-// checkoutController.js - Fixed Complete Registration Function
+// ✅ Complete Registration - for FREE courses
 exports.completeRegistration = async (req, res) => {
   try {
-    console.log(
-      "🎯 Starting FREE registration process (bypassing CCAvenue)..."
-    );
+    console.log("🎯 Starting FREE registration process...");
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -580,7 +562,7 @@ exports.completeRegistration = async (req, res) => {
     const referenceNumber = uuidv4();
     const transactionId = uuidv4();
 
-    // ✅ PROCESS IN-PERSON COURSES
+    // Process In-Person Courses
     for (let i = 0; i < user.myInPersonCourses.length; i++) {
       const enrollment = user.myInPersonCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
@@ -588,7 +570,6 @@ exports.completeRegistration = async (req, res) => {
           enrollment.courseId
         );
         if (course) {
-          // Update enrollment status
           user.myInPersonCourses[i].enrollmentData.status = "registered";
           user.myInPersonCourses[i].enrollmentData.paidAmount = 0;
           user.myInPersonCourses[i].enrollmentData.promoCodeUsed =
@@ -618,13 +599,12 @@ exports.completeRegistration = async (req, res) => {
       }
     }
 
-    // ✅ PROCESS ONLINE LIVE COURSES
+    // Process Online Live Courses
     for (let i = 0; i < user.myLiveCourses.length; i++) {
       const enrollment = user.myLiveCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
         const course = await OnlineLiveTraining.findById(enrollment.courseId);
         if (course) {
-          // Update enrollment status
           user.myLiveCourses[i].enrollmentData.status = "registered";
           user.myLiveCourses[i].enrollmentData.paidAmount = 0;
           user.myLiveCourses[i].enrollmentData.promoCodeUsed =
@@ -656,7 +636,7 @@ exports.completeRegistration = async (req, res) => {
       }
     }
 
-    // ✅ PROCESS SELF-PACED COURSES
+    // Process Self-Paced Courses
     for (let i = 0; i < user.mySelfPacedCourses.length; i++) {
       const enrollment = user.mySelfPacedCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
@@ -664,13 +644,12 @@ exports.completeRegistration = async (req, res) => {
           enrollment.courseId
         );
         if (course) {
-          // Update enrollment status and set expiry date
           user.mySelfPacedCourses[i].enrollmentData.status = "registered";
           user.mySelfPacedCourses[i].enrollmentData.paidAmount = 0;
           user.mySelfPacedCourses[i].enrollmentData.promoCodeUsed =
             req.session.appliedPromoCode || "FREE";
 
-          // Set expiry date based on course access days
+          // Set expiry date for self-paced courses
           if (course.access?.accessDays) {
             const expiryDate = new Date();
             expiryDate.setDate(expiryDate.getDate() + course.access.accessDays);
@@ -698,21 +677,18 @@ exports.completeRegistration = async (req, res) => {
       }
     }
 
-    // ✅ CHECK IF ANY COURSES WERE PROCESSED
     if (coursesUpdated === 0) {
       console.log("❌ No courses found in cart");
-
       if (req.method === "POST") {
-        return res.status(400).json({
-          success: false,
-          message: "No courses in cart.",
-        });
+        return res
+          .status(400)
+          .json({ success: false, message: "No courses in cart." });
       } else {
         return res.status(400).send("No courses in cart.");
       }
     }
 
-    // ✅ Calculate totals
+    // Calculate totals
     const totalAmount = registeredCourses.reduce(
       (sum, course) => sum + course.price,
       0
@@ -723,7 +699,7 @@ exports.completeRegistration = async (req, res) => {
     );
     const totalSavings = totalAmount - finalAmount;
 
-    // ✅ FIXED: Direct transaction creation (NO user.createPaymentTransaction)
+    // ✅ FIXED: Direct transaction creation
     const transaction = {
       transactionId: transactionId,
       orderNumber: `ORD-FREE-${Date.now()}-${user._id.toString().slice(-6)}`,
@@ -740,15 +716,14 @@ exports.completeRegistration = async (req, res) => {
         ? "Promo Code"
         : "Free Course",
 
-      // ✅ Required financial object
       financial: {
-        subtotal: totalAmount, // ✅ Required
+        subtotal: totalAmount,
         discountAmount: totalSavings,
         earlyBirdSavings: 0,
         promoCodeDiscount: req.session.appliedPromoCode ? totalSavings : 0,
         tax: 0,
         processingFee: 0,
-        finalAmount: 0, // ✅ Required - Always $0 for free
+        finalAmount: 0,
         currency: "USD",
       },
 
@@ -773,7 +748,7 @@ exports.completeRegistration = async (req, res) => {
         courseTitle: course.title,
         courseCode: course.courseCode,
         originalPrice: course.price,
-        finalPrice: 0, // Free
+        finalPrice: 0,
         isEarlyBird: false,
         earlyBirdSavings: 0,
         courseSchedule: {
@@ -791,9 +766,8 @@ exports.completeRegistration = async (req, res) => {
         },
       })),
 
-      // ✅ Required customer info
       customerInfo: {
-        userId: user._id, // ✅ Required
+        userId: user._id,
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber || "",
@@ -845,14 +819,14 @@ exports.completeRegistration = async (req, res) => {
       },
     };
 
-    // ✅ Add directly to user's paymentTransactions array
+    // Add transaction directly to user
     user.paymentTransactions.push(transaction);
     await user.save({ validateBeforeSave: false });
 
-    // ✅ Clear applied promo code from session
+    // Clear promo code from session
     delete req.session.appliedPromoCode;
 
-    // ✅ Send confirmation email
+    // Send confirmation email
     try {
       await sendCourseRegistrationEmail(
         user,
@@ -863,13 +837,11 @@ exports.completeRegistration = async (req, res) => {
       console.log("✅ Free registration email sent successfully");
     } catch (emailError) {
       console.error("❌ Error sending registration email:", emailError);
-      // Don't fail the registration if email fails
     }
 
     console.log(`✅ FREE registration completed for ${coursesUpdated} courses`);
     console.log(`📋 Reference number: ${referenceNumber}`);
 
-    // ✅ Redirect to unified success page
     const successUrl = `/payment/success?order_id=FREE&amount=0.00&ref=${referenceNumber}`;
 
     if (req.method === "POST") {
@@ -881,7 +853,6 @@ exports.completeRegistration = async (req, res) => {
         redirect: successUrl,
       });
     } else {
-      // GET request - redirect directly
       res.redirect(successUrl);
     }
   } catch (err) {
@@ -898,11 +869,10 @@ exports.completeRegistration = async (req, res) => {
   }
 };
 
-// ✅ ENHANCED: Initiate CCAvenue Payment with linked course support
-
+// ✅ Proceed to Payment - initiate CCAvenue payment
 exports.proceedToPayment = async (req, res) => {
   try {
-    console.log("💳 Processing payment with CCAvenue (FIXED VERSION)...");
+    console.log("💳 Processing payment with CCAvenue...");
     const userId = req.user._id;
     const user = await User.findById(userId)
       .populate("myInPersonCourses.courseId")
@@ -915,14 +885,13 @@ exports.proceedToPayment = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Calculate totals and prepare cart items
     const cartItems = [];
     let totalOriginalPrice = 0;
     let totalCurrentPrice = 0;
     let totalEarlyBirdSavings = 0;
     let totalLinkedCourseSavings = 0;
 
-    // Helper function to process cart items with linked course support
+    // Helper function to process cart items
     const processCartItems = (enrollments, courseType) => {
       enrollments
         .filter((e) => e.enrollmentData.status === "cart")
@@ -939,7 +908,7 @@ exports.proceedToPayment = async (req, res) => {
 
             cartItems.push({
               courseId: course._id,
-              courseType: courseType, // ✅ Already correct enum values
+              courseType: courseType,
               courseTitle: course.basic?.title || "Untitled Course",
               courseCode: course.basic?.courseCode || "N/A",
               originalPrice: pricing.regularPrice,
@@ -974,7 +943,7 @@ exports.proceedToPayment = async (req, res) => {
         });
     };
 
-    // Process all course types with CORRECT enum values
+    // Process all course types
     processCartItems(user.myInPersonCourses, "InPersonAestheticTraining");
     processCartItems(user.myLiveCourses, "OnlineLiveTraining");
     processCartItems(user.mySelfPacedCourses, "SelfPacedOnlineTraining");
@@ -1019,38 +988,33 @@ exports.proceedToPayment = async (req, res) => {
       .substr(2, 9)}`;
     const orderNumber = `ORD_${Date.now()}_${userId.toString().slice(-6)}`;
 
-    console.log("🔧 Creating transaction with direct method...");
+    console.log("🔧 Creating transaction...");
 
-    // ✅ FIXED: Direct transaction creation with ALL required fields
+    // ✅ FIXED: Direct transaction creation
     const transaction = {
-      // ✅ All required fields
       transactionId: transactionId,
       orderNumber: orderNumber,
       receiptNumber: `REC_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
 
-      // Timestamps
       createdAt: new Date(),
       transactionDate: new Date(),
       completedAt: null,
 
-      // Payment details
       paymentStatus: "pending",
       paymentMethod: "CCAvenue",
 
-      // ✅ REQUIRED: Complete financial object
       financial: {
-        subtotal: totalOriginalPrice, // ✅ REQUIRED field
+        subtotal: totalOriginalPrice,
         discountAmount:
           totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount,
         earlyBirdSavings: totalEarlyBirdSavings,
         promoCodeDiscount: promoCodeDiscount,
         tax: 0,
         processingFee: 0,
-        finalAmount: finalAmount, // ✅ REQUIRED field
+        finalAmount: finalAmount,
         currency: "USD",
       },
 
-      // Discounts
       discounts: {
         promoCode: promoCodeData,
         earlyBird: {
@@ -1062,10 +1026,9 @@ exports.proceedToPayment = async (req, res) => {
         },
       },
 
-      // ✅ Items with CORRECT courseType enum values
       items: cartItems.map((item) => ({
         courseId: item.courseId,
-        courseType: item.courseType, // ✅ Already correct: "InPersonAestheticTraining", "OnlineLiveTraining", etc.
+        courseType: item.courseType,
         courseTitle: item.courseTitle,
         courseCode: item.courseCode,
         originalPrice: item.originalPrice,
@@ -1076,9 +1039,8 @@ exports.proceedToPayment = async (req, res) => {
         instructor: item.instructor,
       })),
 
-      // ✅ REQUIRED: Complete customer info
       customerInfo: {
-        userId: user._id, // ✅ REQUIRED field
+        userId: user._id,
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber || "",
@@ -1093,7 +1055,6 @@ exports.proceedToPayment = async (req, res) => {
         },
       },
 
-      // Gift info
       gift: {
         isGift: req.body.isGift || false,
         recipientEmail: req.body.giftRecipientEmail || null,
@@ -1101,7 +1062,6 @@ exports.proceedToPayment = async (req, res) => {
         senderName: `${user.firstName} ${user.lastName}`,
       },
 
-      // Metadata
       metadata: {
         userAgent: req.get("User-Agent") || "",
         ipAddress: req.ip || "",
@@ -1110,13 +1070,9 @@ exports.proceedToPayment = async (req, res) => {
         source: "website",
       },
 
-      // CCAvenue (empty initially)
       ccavenue: {},
-
-      // Communications
       communications: [],
 
-      // Refund info
       refund: {
         isRefunded: false,
         refundAmount: 0,
@@ -1127,7 +1083,6 @@ exports.proceedToPayment = async (req, res) => {
         processedBy: null,
       },
 
-      // Documentation
       documentation: {
         receiptUrl: null,
         invoiceUrl: null,
@@ -1136,9 +1091,9 @@ exports.proceedToPayment = async (req, res) => {
       },
     };
 
-    console.log("💾 Adding transaction to user and saving...");
+    console.log("💾 Saving transaction...");
 
-    // ✅ Add transaction directly to user's array
+    // Add transaction to user
     user.paymentTransactions.push(transaction);
     await user.save({ validateBeforeSave: false });
 
@@ -1202,7 +1157,7 @@ exports.proceedToPayment = async (req, res) => {
   }
 };
 
-// ✅ ENHANCED: Handle CCAvenue Payment Response with linked course support
+// ✅ Handle CCAvenue Payment Response
 exports.handlePaymentResponse = async (req, res) => {
   try {
     console.log("📥 Received payment response from CCAvenue");
@@ -1234,7 +1189,6 @@ exports.handlePaymentResponse = async (req, res) => {
       order_id,
       tracking_id,
       amount,
-      currency,
       merchant_param1: transactionId,
       merchant_param2: userId,
       payment_mode,
@@ -1259,7 +1213,7 @@ exports.handlePaymentResponse = async (req, res) => {
     }
 
     if (order_status === "Success") {
-      // ✅ ENHANCED: Payment successful - update enrollment status (including linked courses)
+      // Payment successful - update enrollment status
       user.updateEnrollmentStatusAfterPayment(transactionId);
 
       // Add communication record
@@ -1277,13 +1231,10 @@ exports.handlePaymentResponse = async (req, res) => {
       // Send confirmation email
       try {
         await sendPaymentConfirmationEmail(user, transaction);
-
-        // Update communication status
         const lastComm =
           transaction.communications[transaction.communications.length - 1];
         lastComm.status = "sent";
         await user.save();
-
         console.log("✅ Payment confirmation email sent");
       } catch (emailError) {
         console.error("❌ Error sending confirmation email:", emailError);
@@ -1299,7 +1250,6 @@ exports.handlePaymentResponse = async (req, res) => {
       // Payment failed
       console.log("❌ Payment failed:", failure_message);
 
-      // Add failed communication record
       transaction.communications.push({
         type: "email",
         template: "payment_failed",
@@ -1323,13 +1273,13 @@ exports.handlePaymentResponse = async (req, res) => {
   }
 };
 
-// ✅ Handle Payment Cancellation (unchanged)
+// ✅ Handle Payment Cancellation
 exports.handlePaymentCancel = (req, res) => {
   console.log("❌ Payment cancelled by user");
   res.redirect("/payment/cancelled");
 };
 
-// ✅ ENHANCED: Send payment confirmation email with linked course info
+// ✅ Send payment confirmation email
 async function sendPaymentConfirmationEmail(user, transaction) {
   const courseListHtml = transaction.items
     .map(
@@ -1337,49 +1287,10 @@ async function sendPaymentConfirmationEmail(user, transaction) {
     <tr>
       <td style="padding: 12px; border-bottom: 1px solid #eee;">
         <strong>${item.courseTitle}</strong><br>
-        <span style="color: #666; font-size: 14px;">
-          Code: ${item.courseCode}
-          ${
-            item.courseSchedule.startDate
-              ? `| Starts: ${new Date(
-                  item.courseSchedule.startDate
-                ).toLocaleDateString()}`
-              : ""
-          }
-          ${
-            item.isEarlyBird
-              ? '| <span style="color: #28a745;">Early Bird Applied!</span>'
-              : ""
-          }
-          ${
-            item.isLinkedCourseFree
-              ? '| <span style="color: #007bff;">Included Free!</span>'
-              : ""
-          }
-        </span>
+        <span style="color: #666; font-size: 14px;">Code: ${item.courseCode}</span>
       </td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
-        ${
-          item.isLinkedCourseFree
-            ? `
-          <span style="text-decoration: line-through; color: #999;">${item.originalPrice}</span><br>
-          <strong style="color: #007bff;">FREE</strong><br>
-          <small style="color: #007bff;">Included with In-Person Course</small>
-        `
-            : `
-          ${
-            item.isEarlyBird
-              ? `<span style="text-decoration: line-through; color: #999;">${item.originalPrice}</span><br>`
-              : ""
-          }
-          <strong>${item.finalPrice}</strong>
-          ${
-            item.isEarlyBird
-              ? `<br><small style="color: #28a745;">Saved ${item.earlyBirdSavings}</small>`
-              : ""
-          }
-        `
-        }
+        <strong>$${item.finalPrice}</strong>
       </td>
     </tr>
   `
@@ -1387,121 +1298,32 @@ async function sendPaymentConfirmationEmail(user, transaction) {
     .join("");
 
   const emailHtml = `
-    <!DOCTYPE html>
     <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: white; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
-        .success-badge { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center; }
-        .transaction-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .course-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .course-table th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; }
-        .financial-summary { background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .button { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-      </style>
-    </head>
     <body>
-      <div class="header">
-        <h1>🎉 Payment Confirmed!</h1>
-        <p>Your course enrollment is now complete</p>
-      </div>
+      <h1>🎉 Payment Confirmed!</h1>
+      <p>Hello ${user.firstName} ${user.lastName},</p>
+      <p>Thank you for your payment! Your transaction has been successfully processed.</p>
       
-      <div class="content">
-        <div class="success-badge">
-          <strong>✅ Payment Successfully Processed</strong><br>
-          Your enrollment is confirmed and you now have full access to your courses.
-        </div>
-        
-        <h2>Hello ${user.firstName} ${user.lastName},</h2>
-        <p>Thank you for your payment! Your transaction has been successfully processed.</p>
-        
-        <div class="transaction-details">
-          <h3>📄 Transaction Details</h3>
-          <p><strong>Order Number:</strong> ${transaction.orderNumber}</p>
-          <p><strong>Transaction ID:</strong> ${
-            transaction.ccavenue.trackingId
-          }</p>
-          <p><strong>Receipt Number:</strong> ${transaction.receiptNumber}</p>
-          <p><strong>Payment Date:</strong> ${new Date(
-            transaction.completedAt
-          ).toLocaleDateString()}</p>
-          <p><strong>Payment Method:</strong> ${
-            transaction.ccavenue.paymentMode
-          } - ${transaction.ccavenue.cardName}</p>
-        </div>
-        
-        <h3>📚 Enrolled Courses</h3>
-        <table class="course-table">
-          <thead>
-            <tr>
-              <th>Course Details</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${courseListHtml}
-          </tbody>
-        </table>
-        
-        <div class="financial-summary">
-          <h3>💰 Payment Summary</h3>
-          <p><strong>Subtotal:</strong> ${transaction.financial.subtotal.toFixed(
-            2
-          )}</p>
-          ${
-            transaction.financial.earlyBirdSavings > 0
-              ? `<p><strong>Early Bird Savings:</strong> -${transaction.financial.earlyBirdSavings.toFixed(
-                  2
-                )}</p>`
-              : ""
-          }
-          ${
-            transaction.financial.linkedCourseSavings > 0
-              ? `<p><strong>Included Course Savings:</strong> -${transaction.financial.linkedCourseSavings.toFixed(
-                  2
-                )}</p>`
-              : ""
-          }
-          ${
-            transaction.financial.promoCodeDiscount > 0
-              ? `<p><strong>Promo Code Discount:</strong> -${transaction.financial.promoCodeDiscount.toFixed(
-                  2
-                )}</p>`
-              : ""
-          }
-          <p style="font-size: 18px; color: #28a745;"><strong>Total Paid: ${transaction.financial.finalAmount.toFixed(
-            2
-          )} ${transaction.financial.currency}</strong></p>
-        </div>
-        
-        <h3>🚀 What's Next?</h3>
-        <ul>
-          <li><strong>Access Your Courses:</strong> Login to your dashboard to start learning</li>
-          <li><strong>Course Materials:</strong> All resources are now available in your account</li>
-          <li><strong>Certificates:</strong> Complete courses to earn your certificates</li>
-          <li><strong>Support:</strong> Contact us anytime for assistance</li>
-        </ul>
-        
-        <center>
-          <a href="${
-            process.env.BASE_URL || "http://localhost:3000"
-          }/dashboard" class="button">
-            🎯 Access My Courses
-          </a>
-        </center>
-        
-        <p>Thank you for choosing IAAI Training Institute! We're excited to be part of your learning journey.</p>
-        
-        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-        <p style="font-size: 12px; color: #666;">
-          For support, contact us at ${
-            process.env.SUPPORT_EMAIL || "support@iaai-training.com"
-          }<br>
-          Transaction processed securely by CCAvenue
-        </p>
-      </div>
+      <h3>📄 Transaction Details</h3>
+      <p><strong>Order Number:</strong> ${transaction.orderNumber}</p>
+      <p><strong>Amount Paid:</strong> $${transaction.financial.finalAmount.toFixed(
+        2
+      )} USD</p>
+      
+      <h3>📚 Enrolled Courses</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f8f9fa;">
+            <th style="padding: 12px; text-align: left;">Course</th>
+            <th style="padding: 12px; text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${courseListHtml}
+        </tbody>
+      </table>
+      
+      <p>Thank you for choosing IAAI Training Institute!</p>
     </body>
     </html>
   `;
@@ -1513,7 +1335,7 @@ async function sendPaymentConfirmationEmail(user, transaction) {
   });
 }
 
-// ✅ ENHANCED: Send course registration email with linked course info
+// ✅ Send course registration email
 async function sendCourseRegistrationEmail(
   user,
   courses,
@@ -1526,19 +1348,9 @@ async function sendCourseRegistrationEmail(
     <tr>
       <td style="padding: 12px; border-bottom: 1px solid #eee;">
         <strong>${course.title}</strong><br>
-        <span style="color: #666; font-size: 14px;">
-          Code: ${course.courseCode} | Type: ${course.courseType}
-          ${
-            course.startDate
-              ? `| Starts: ${new Date(course.startDate).toLocaleDateString()}`
-              : ""
-          }
-          ${
-            course.isLinkedCourseFree
-              ? '| <span style="color: #007bff;">Included Free</span>'
-              : ""
-          }
-        </span>
+        <span style="color: #666; font-size: 14px;">Code: ${
+          course.courseCode
+        }</span>
       </td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
         ${
@@ -1546,7 +1358,7 @@ async function sendCourseRegistrationEmail(
             ? '<span style="color: #007bff;">FREE (Included)</span>'
             : isPromoCode
             ? '<span style="color: #28a745;">FREE</span>'
-            : `${course.price}`
+            : `$${course.price}`
         }
       </td>
     </tr>
@@ -1555,71 +1367,29 @@ async function sendCourseRegistrationEmail(
     .join("");
 
   const emailHtml = `
-    <!DOCTYPE html>
     <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .header { background: #1a365d; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: white; padding: 30px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; }
-        .button { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-        .course-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .success-box { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        .info-box { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
-      </style>
-    </head>
     <body>
-      <div class="container">
-        <div class="header">
-          <h1>Course Registration Confirmed! 🎉</h1>
-        </div>
-        <div class="content">
-          <h2>Hello ${user.firstName} ${user.lastName},</h2>
-          
-          <div class="success-box">
-            <strong>Congratulations!</strong> You have successfully registered for the following course(s).
-            ${
-              isPromoCode
-                ? "<br><em>These courses were registered using a promotional code.</em>"
-                : ""
-            }
-          </div>
-          
-          <h3>Registration Details:</h3>
-          <table class="course-table">
-            ${courseListHtml}
-          </table>
-          
-          <div class="info-box">
-            <strong>Reference Number:</strong> ${referenceNumber}<br>
-            <strong>Registration Date:</strong> ${new Date().toLocaleDateString()}<br>
-            <strong>Total Courses:</strong> ${courses.length}
-          </div>
-          
-          <h3>What's Next?</h3>
-          <ul>
-            <li>You can access your courses from your dashboard</li>
-            <li>For in-person courses, you'll receive location details closer to the date</li>
-            <li>For online courses, login links will be sent before the session</li>
-            <li>Self-paced courses are available immediately</li>
-          </ul>
-          
-          <center>
-            <a href="${
-              process.env.BASE_URL || "http://localhost:3000"
-            }/my-courses" class="button">
-              View My Courses
-            </a>
-          </center>
-          
-          <p>If you have any questions, please contact our support team at ${
-            process.env.SUPPORT_EMAIL || "support@iaai-training.com"
-          }</p>
-          
-          <p>Thank you for choosing IAAI Training Institute!</p>
-        </div>
-      </div>
+      <h1>Course Registration Confirmed! 🎉</h1>
+      <p>Hello ${user.firstName} ${user.lastName},</p>
+      <p>You have successfully registered for the following courses.</p>
+      
+      <h3>Registration Details:</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f8f9fa;">
+            <th style="padding: 12px; text-align: left;">Course</th>
+            <th style="padding: 12px; text-align: right;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${courseListHtml}
+        </tbody>
+      </table>
+      
+      <p><strong>Reference Number:</strong> ${referenceNumber}</p>
+      <p><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</p>
+      
+      <p>Thank you for choosing IAAI Training Institute!</p>
     </body>
     </html>
   `;

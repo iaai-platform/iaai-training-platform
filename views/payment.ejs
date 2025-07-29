@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - IAAI Training Institute</title>
+    <link rel="stylesheet" href="/css/checkoutstyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .payment-container {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .payment-summary {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .course-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .course-item:last-child {
+            border-bottom: none;
+        }
+        
+        .total-amount {
+            font-size: 28px;
+            color: #28a745;
+            font-weight: 700;
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #28a745;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #545b62);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .free-badge {
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main>
+        <div class="payment-container">
+            <h1><i class="fas fa-credit-card"></i> Payment Summary</h1>
+            
+            <div class="payment-summary">
+                <h3>Order Details</h3>
+                <% if (cartCourses && cartCourses.length > 0) { %>
+                    <% cartCourses.forEach(course => { %>
+                    <div class="course-item">
+                        <div>
+                            <strong><%= course.title %></strong>
+                            <% if (course.isLinkedCourseFree) { %>
+                                <span class="free-badge">Included Free</span>
+                            <% } %>
+                        </div>
+                        <div>
+                            <% if (course.isLinkedCourseFree) { %>
+                                <span style="color: #28a745; font-weight: bold;">FREE</span>
+                            <% } else { %>
+                                <strong>$<%= course.price.toFixed(2) %></strong>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% }) %>
+                <% } %>
+            </div>
+            
+            <div class="total-amount">
+                Total: $<%= totalPrice.toFixed(2) %> USD
+            </div>
+            
+            <% if (totalPrice > 0) { %>
+                <form method="POST" action="/payment/initiate">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-lock"></i> Proceed to Secure Payment
+                    </button>
+                </form>
+            <% } else { %>
+                <a href="/complete-registration" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Complete Free Registration
+                </a>
+            <% } %>
+            
+            <a href="/checkout" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Cart
+            </a>
+            
+            <div style="margin-top: 30px; font-size: 14px; color: #666;">
+                <i class="fas fa-shield-alt"></i> Secure SSL encrypted payment
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

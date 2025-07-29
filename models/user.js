@@ -1643,6 +1643,7 @@ userSchema.statics.getNotificationRecipients = function (
  */
 userSchema.methods.createPaymentTransaction = function (transactionData) {
   const transaction = {
+    // ✅ REQUIRED FIELDS
     transactionId:
       transactionData.transactionId ||
       `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -1653,29 +1654,90 @@ userSchema.methods.createPaymentTransaction = function (transactionData) {
       transactionData.receiptNumber ||
       `REC_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
 
+    // Timestamps
+    createdAt: new Date(),
+    transactionDate: new Date(),
+    completedAt: transactionData.completedAt || null,
+
+    // Payment details
     paymentStatus: transactionData.paymentStatus || "pending",
     paymentMethod: transactionData.paymentMethod || "CCAvenue",
 
-    financial: transactionData.financial || {},
-    discounts: transactionData.discounts || {},
-    items: transactionData.items || [],
-
-    customerInfo: {
-      userId: this._id,
-      name: `${this.firstName} ${this.lastName}`,
-      email: this.email,
-      phone: this.phoneNumber,
-      country: this.country,
+    // ✅ REQUIRED: Financial object with all required fields
+    financial: {
+      subtotal: transactionData.financial?.subtotal || 0, // ✅ REQUIRED
+      discountAmount: transactionData.financial?.discountAmount || 0,
+      earlyBirdSavings: transactionData.financial?.earlyBirdSavings || 0,
+      promoCodeDiscount: transactionData.financial?.promoCodeDiscount || 0,
+      tax: transactionData.financial?.tax || 0,
+      processingFee: transactionData.financial?.processingFee || 0,
+      finalAmount: transactionData.financial?.finalAmount || 0, // ✅ REQUIRED
+      currency: transactionData.financial?.currency || "USD",
     },
 
+    // Discounts
+    discounts: transactionData.discounts || {},
+
+    // Items
+    items: transactionData.items || [],
+
+    // ✅ REQUIRED: Customer info with userId
+    customerInfo: {
+      userId: this._id, // ✅ REQUIRED - Always use the current user's ID
+      name:
+        transactionData.customerInfo?.name ||
+        `${this.firstName} ${this.lastName}`,
+      email: transactionData.customerInfo?.email || this.email,
+      phone: transactionData.customerInfo?.phone || this.phoneNumber,
+      country: transactionData.customerInfo?.country || this.country,
+      billingAddress: transactionData.customerInfo?.billingAddress || {
+        name: `${this.firstName} ${this.lastName}`,
+        address: "",
+        city: "",
+        state: "",
+        country: this.country || "",
+        zip: "",
+      },
+    },
+
+    // Gift information
     gift: transactionData.gift || { isGift: false },
+
+    // Metadata
     metadata: transactionData.metadata || {},
+
+    // CCAvenue details (for paid transactions)
+    ccavenue: transactionData.ccavenue || {},
+
+    // Communications
+    communications: [],
+
+    // Refund information
+    refund: {
+      isRefunded: false,
+      refundAmount: 0,
+      refundDate: null,
+      refundReason: null,
+      refundTransactionId: null,
+      refundMethod: null,
+      processedBy: null,
+    },
+
+    // Documentation
+    documentation: {
+      receiptUrl: null,
+      invoiceUrl: null,
+      contractUrl: null,
+      certificateEligible: true,
+    },
   };
 
+  // Add the transaction to the user's paymentTransactions array
   this.paymentTransactions.push(transaction);
+
+  // Return the transaction for reference
   return transaction;
 };
-
 /**
  * Update payment transaction with CCAvenue response
  */

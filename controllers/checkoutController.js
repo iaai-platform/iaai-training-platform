@@ -562,7 +562,6 @@ exports.processPayment = async (req, res) => {
 // ✅ ENHANCED: Complete Registration with better success handling
 // checkoutController.js - Complete Registration Function
 // checkoutController.js - Fixed Complete Registration Function
-
 exports.completeRegistration = async (req, res) => {
   try {
     console.log(
@@ -608,7 +607,7 @@ exports.completeRegistration = async (req, res) => {
             courseId: enrollment.courseId,
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            courseType: "InPersonAestheticTraining", // ✅ FIXED: Use model name, not display name
+            courseType: "InPersonAestheticTraining",
             displayType: "In-Person",
             price: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
@@ -644,7 +643,7 @@ exports.completeRegistration = async (req, res) => {
             courseId: enrollment.courseId,
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            courseType: "OnlineLiveTraining", // ✅ FIXED: Use model name, not display name
+            courseType: "OnlineLiveTraining",
             displayType: isLinkedCourse
               ? "Online Live (Included)"
               : "Online Live",
@@ -688,7 +687,7 @@ exports.completeRegistration = async (req, res) => {
             courseId: enrollment.courseId,
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            courseType: "SelfPacedOnlineTraining", // ✅ FIXED: Use model name
+            courseType: "SelfPacedOnlineTraining",
             displayType: "Self-Paced",
             price: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
@@ -713,7 +712,7 @@ exports.completeRegistration = async (req, res) => {
       }
     }
 
-    // ✅ FIXED: Create proper transaction record matching User model requirements
+    // ✅ Calculate totals
     const totalAmount = registeredCourses.reduce(
       (sum, course) => sum + course.price,
       0
@@ -724,27 +723,32 @@ exports.completeRegistration = async (req, res) => {
     );
     const totalSavings = totalAmount - finalAmount;
 
-    // ✅ CRITICAL: Use the user.createPaymentTransaction method to ensure all required fields
-    const transactionData = {
+    // ✅ FIXED: Direct transaction creation (NO user.createPaymentTransaction)
+    const transaction = {
       transactionId: transactionId,
       orderNumber: `ORD-FREE-${Date.now()}-${user._id.toString().slice(-6)}`,
       receiptNumber: `REC-FREE-${Date.now()}-${Math.floor(
         Math.random() * 1000
       )}`,
+
+      createdAt: new Date(),
+      transactionDate: new Date(),
+      completedAt: new Date(),
+
+      paymentStatus: "completed",
       paymentMethod: req.session.appliedPromoCode
         ? "Promo Code"
         : "Free Course",
-      paymentStatus: "completed",
 
-      // ✅ REQUIRED: Financial object with all required fields
+      // ✅ Required financial object
       financial: {
-        subtotal: totalAmount, // ✅ REQUIRED
+        subtotal: totalAmount, // ✅ Required
         discountAmount: totalSavings,
         earlyBirdSavings: 0,
         promoCodeDiscount: req.session.appliedPromoCode ? totalSavings : 0,
         tax: 0,
         processingFee: 0,
-        finalAmount: 0, // ✅ REQUIRED - Always $0 for free registration
+        finalAmount: 0, // ✅ Required - Always $0 for free
         currency: "USD",
       },
 
@@ -763,10 +767,9 @@ exports.completeRegistration = async (req, res) => {
         },
       },
 
-      // ✅ FIXED: Items array with correct courseType enum values
       items: registeredCourses.map((course) => ({
         courseId: course.courseId,
-        courseType: course.courseType, // ✅ FIXED: Now uses correct enum values
+        courseType: course.courseType,
         courseTitle: course.title,
         courseCode: course.courseCode,
         originalPrice: course.price,
@@ -788,13 +791,13 @@ exports.completeRegistration = async (req, res) => {
         },
       })),
 
-      // ✅ REQUIRED: Customer info object
+      // ✅ Required customer info
       customerInfo: {
-        userId: user._id, // ✅ REQUIRED
+        userId: user._id, // ✅ Required
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
-        phone: user.phoneNumber,
-        country: user.country,
+        phone: user.phoneNumber || "",
+        country: user.country || "",
         billingAddress: {
           name: `${user.firstName} ${user.lastName}`,
           address: "",
@@ -820,18 +823,36 @@ exports.completeRegistration = async (req, res) => {
         orderNotes: "",
         source: "website",
       },
+
+      ccavenue: {},
+      communications: [],
+
+      refund: {
+        isRefunded: false,
+        refundAmount: 0,
+        refundDate: null,
+        refundReason: null,
+        refundTransactionId: null,
+        refundMethod: null,
+        processedBy: null,
+      },
+
+      documentation: {
+        receiptUrl: null,
+        invoiceUrl: null,
+        contractUrl: null,
+        certificateEligible: true,
+      },
     };
 
-    // ✅ Use the user method to create transaction (ensures all required fields)
-    const transaction = user.createPaymentTransaction(transactionData);
-
-    // ✅ Save user with the transaction
+    // ✅ Add directly to user's paymentTransactions array
+    user.paymentTransactions.push(transaction);
     await user.save({ validateBeforeSave: false });
 
-    // ✅ CLEAR APPLIED PROMO CODE FROM SESSION
+    // ✅ Clear applied promo code from session
     delete req.session.appliedPromoCode;
 
-    // ✅ SEND CONFIRMATION EMAIL
+    // ✅ Send confirmation email
     try {
       await sendCourseRegistrationEmail(
         user,
@@ -848,7 +869,7 @@ exports.completeRegistration = async (req, res) => {
     console.log(`✅ FREE registration completed for ${coursesUpdated} courses`);
     console.log(`📋 Reference number: ${referenceNumber}`);
 
-    // ✅ REDIRECT TO UNIFIED SUCCESS PAGE
+    // ✅ Redirect to unified success page
     const successUrl = `/payment/success?order_id=FREE&amount=0.00&ref=${referenceNumber}`;
 
     if (req.method === "POST") {
@@ -1057,8 +1078,123 @@ exports.proceedToPayment = async (req, res) => {
       },
     };
 
-    // ✅ Use the user method to create transaction (ensures all required fields)
-    const transaction = user.createPaymentTransaction(transactionData);
+    // ✅ FIXED: Direct transaction creation (bypassing the problematic method)
+    const transaction = {
+      // Required fields
+      transactionId: transactionId,
+      orderNumber: orderNumber,
+      receiptNumber: `REC_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+
+      // Timestamps
+      createdAt: new Date(),
+      transactionDate: new Date(),
+      completedAt: null,
+
+      // Payment details
+      paymentStatus: "pending",
+      paymentMethod: "CCAvenue",
+
+      // ✅ Required financial object
+      financial: {
+        subtotal: totalOriginalPrice, // ✅ Required
+        discountAmount:
+          totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount,
+        earlyBirdSavings: totalEarlyBirdSavings,
+        promoCodeDiscount: promoCodeDiscount,
+        tax: 0,
+        processingFee: 0,
+        finalAmount: finalAmount, // ✅ Required
+        currency: "USD",
+      },
+
+      // Discounts
+      discounts: {
+        promoCode: promoCodeData,
+        earlyBird: {
+          applied: totalEarlyBirdSavings > 0,
+          totalSavings: totalEarlyBirdSavings,
+          coursesWithEarlyBird: cartItems
+            .filter((item) => item.isEarlyBird)
+            .map((item) => item.courseId.toString()),
+        },
+      },
+
+      // Items (with correct enum values)
+      items: cartItems.map((item) => ({
+        courseId: item.courseId,
+        courseType: item.courseType, // Already correct enum values
+        courseTitle: item.courseTitle,
+        courseCode: item.courseCode,
+        originalPrice: item.originalPrice,
+        finalPrice: item.finalPrice,
+        isEarlyBird: item.isEarlyBird,
+        earlyBirdSavings: item.earlyBirdSavings,
+        courseSchedule: item.courseSchedule,
+        instructor: item.instructor,
+      })),
+
+      // ✅ Required customer info
+      customerInfo: {
+        userId: user._id, // ✅ Required
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        phone: user.phoneNumber || "",
+        country: user.country || "",
+        billingAddress: {
+          name: `${user.firstName} ${user.lastName}`,
+          address: "",
+          city: "",
+          state: "",
+          country: user.country || "",
+          zip: "",
+        },
+      },
+
+      // Gift info
+      gift: {
+        isGift: req.body.isGift || false,
+        recipientEmail: req.body.giftRecipientEmail || null,
+        giftMessage: req.body.giftMessage || null,
+        senderName: `${user.firstName} ${user.lastName}`,
+      },
+
+      // Metadata
+      metadata: {
+        userAgent: req.get("User-Agent") || "",
+        ipAddress: req.ip || "",
+        sessionId: req.sessionID || "",
+        orderNotes: req.body.orderNotes || "",
+        source: "website",
+      },
+
+      // CCAvenue (empty for now)
+      ccavenue: {},
+
+      // Communications
+      communications: [],
+
+      // Refund info
+      refund: {
+        isRefunded: false,
+        refundAmount: 0,
+        refundDate: null,
+        refundReason: null,
+        refundTransactionId: null,
+        refundMethod: null,
+        processedBy: null,
+      },
+
+      // Documentation
+      documentation: {
+        receiptUrl: null,
+        invoiceUrl: null,
+        contractUrl: null,
+        certificateEligible: true,
+      },
+    };
+
+    // ✅ Add directly to user's paymentTransactions array
+    user.paymentTransactions.push(transaction);
     await user.save();
 
     // Prepare CCAvenue payment data

@@ -561,6 +561,8 @@ exports.processPayment = async (req, res) => {
 // ✅ ENHANCED: Complete Registration with linked course support
 // ✅ ENHANCED: Complete Registration with better success handling
 // checkoutController.js - Complete Registration Function
+// checkoutController.js - Fixed Complete Registration Function
+
 exports.completeRegistration = async (req, res) => {
   try {
     console.log(
@@ -606,7 +608,7 @@ exports.completeRegistration = async (req, res) => {
             courseId: enrollment.courseId,
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            courseType: "InPersonAestheticTraining",
+            courseType: "InPersonAestheticTraining", // ✅ FIXED: Use model name, not display name
             displayType: "In-Person",
             price: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
@@ -642,7 +644,7 @@ exports.completeRegistration = async (req, res) => {
             courseId: enrollment.courseId,
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            courseType: "OnlineLiveTraining",
+            courseType: "OnlineLiveTraining", // ✅ FIXED: Use model name, not display name
             displayType: isLinkedCourse
               ? "Online Live (Included)"
               : "Online Live",
@@ -686,11 +688,11 @@ exports.completeRegistration = async (req, res) => {
             courseId: enrollment.courseId,
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            courseType: "SelfPacedOnlineTraining",
+            courseType: "SelfPacedOnlineTraining", // ✅ FIXED: Use model name
             displayType: "Self-Paced",
             price: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
-            isLinkedCourseFree: false, // Self-paced courses are never linked
+            isLinkedCourseFree: false,
             startDate: null,
           });
         }
@@ -711,7 +713,7 @@ exports.completeRegistration = async (req, res) => {
       }
     }
 
-    // ✅ CREATE TRANSACTION RECORD FOR FREE REGISTRATION
+    // ✅ FIXED: Create proper transaction record matching User model requirements
     const totalAmount = registeredCourses.reduce(
       (sum, course) => sum + course.price,
       0
@@ -722,27 +724,27 @@ exports.completeRegistration = async (req, res) => {
     );
     const totalSavings = totalAmount - finalAmount;
 
-    const transaction = {
+    // ✅ CRITICAL: Use the user.createPaymentTransaction method to ensure all required fields
+    const transactionData = {
       transactionId: transactionId,
       orderNumber: `ORD-FREE-${Date.now()}-${user._id.toString().slice(-6)}`,
       receiptNumber: `REC-FREE-${Date.now()}-${Math.floor(
         Math.random() * 1000
       )}`,
-      transactionDate: new Date(),
-      completedAt: new Date(),
       paymentMethod: req.session.appliedPromoCode
         ? "Promo Code"
         : "Free Course",
       paymentStatus: "completed",
 
+      // ✅ REQUIRED: Financial object with all required fields
       financial: {
-        subtotal: totalAmount,
+        subtotal: totalAmount, // ✅ REQUIRED
         discountAmount: totalSavings,
-        earlyBirdSavings: 0, // Calculate if needed
+        earlyBirdSavings: 0,
         promoCodeDiscount: req.session.appliedPromoCode ? totalSavings : 0,
         tax: 0,
         processingFee: 0,
-        finalAmount: 0, // Always $0 for free registration
+        finalAmount: 0, // ✅ REQUIRED - Always $0 for free registration
         currency: "USD",
       },
 
@@ -754,38 +756,76 @@ exports.completeRegistration = async (req, res) => {
               discountAmount: totalSavings,
             }
           : null,
+        earlyBird: {
+          applied: false,
+          totalSavings: 0,
+          coursesWithEarlyBird: [],
+        },
       },
 
+      // ✅ FIXED: Items array with correct courseType enum values
       items: registeredCourses.map((course) => ({
         courseId: course.courseId,
-        courseType: course.courseType,
+        courseType: course.courseType, // ✅ FIXED: Now uses correct enum values
         courseTitle: course.title,
         courseCode: course.courseCode,
         originalPrice: course.price,
         finalPrice: 0, // Free
-        isLinkedCourseFree: course.isLinkedCourseFree || false,
+        isEarlyBird: false,
+        earlyBirdSavings: 0,
         courseSchedule: {
           startDate: course.startDate,
+          endDate: null,
+          duration: null,
+          location: null,
+          platform: null,
+          accessDays: null,
+          expiryDate: null,
+        },
+        instructor: {
+          name: null,
+          id: null,
         },
       })),
 
+      // ✅ REQUIRED: Customer info object
       customerInfo: {
-        userId: user._id,
+        userId: user._id, // ✅ REQUIRED
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber,
         country: user.country,
+        billingAddress: {
+          name: `${user.firstName} ${user.lastName}`,
+          address: "",
+          city: "",
+          state: "",
+          country: user.country || "",
+          zip: "",
+        },
+      },
+
+      gift: {
+        isGift: false,
+        recipientEmail: null,
+        recipientName: null,
+        giftMessage: null,
+        senderName: null,
       },
 
       metadata: {
+        userAgent: req.get("User-Agent") || "",
+        ipAddress: req.ip || "",
+        sessionId: req.sessionID || "",
+        orderNotes: "",
         source: "website",
-        registrationType: "free",
-        promoCode: req.session.appliedPromoCode || "FREE",
       },
     };
 
-    // ✅ SAVE TRANSACTION AND USER DATA
-    user.paymentTransactions.push(transaction);
+    // ✅ Use the user method to create transaction (ensures all required fields)
+    const transaction = user.createPaymentTransaction(transactionData);
+
+    // ✅ Save user with the transaction
     await user.save({ validateBeforeSave: false });
 
     // ✅ CLEAR APPLIED PROMO CODE FROM SESSION
@@ -838,6 +878,7 @@ exports.completeRegistration = async (req, res) => {
 };
 
 // ✅ ENHANCED: Initiate CCAvenue Payment with linked course support
+
 exports.proceedToPayment = async (req, res) => {
   try {
     console.log(
@@ -879,7 +920,7 @@ exports.proceedToPayment = async (req, res) => {
 
             cartItems.push({
               courseId: course._id,
-              courseType: courseType,
+              courseType: courseType, // ✅ FIXED: Use correct enum values
               courseTitle: course.basic?.title || "Untitled Course",
               courseCode: course.basic?.courseCode || "N/A",
               originalPrice: pricing.regularPrice,
@@ -887,7 +928,7 @@ exports.proceedToPayment = async (req, res) => {
               finalPrice: pricing.currentPrice,
               isEarlyBird: pricing.isEarlyBird,
               earlyBirdSavings: pricing.earlyBirdSavings,
-              isLinkedCourseFree: pricing.isLinkedCourseFree, // ⭐ NEW
+              isLinkedCourseFree: pricing.isLinkedCourseFree,
               courseSchedule: {
                 startDate: course.schedule?.startDate,
                 endDate: course.schedule?.endDate,
@@ -950,10 +991,11 @@ exports.proceedToPayment = async (req, res) => {
 
     // If final amount is 0 or very small, complete as free registration
     if (finalAmount <= 0) {
+      console.log("🎯 Final amount is $0, redirecting to free registration");
       return res.redirect("/complete-registration");
     }
 
-    // ✅ ENHANCED: Create payment transaction record with linked course info
+    // ✅ FIXED: Create payment transaction record with proper structure
     const transactionId = `TXN_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}`;
@@ -965,14 +1007,17 @@ exports.proceedToPayment = async (req, res) => {
       paymentMethod: "CCAvenue",
       paymentStatus: "pending",
 
+      // ✅ REQUIRED: Financial object with all required fields
       financial: {
-        subtotal: totalOriginalPrice,
+        subtotal: totalOriginalPrice, // ✅ REQUIRED
         discountAmount:
-          totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount, // ⭐ ENHANCED
+          totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount,
         earlyBirdSavings: totalEarlyBirdSavings,
-        linkedCourseSavings: totalLinkedCourseSavings, // ⭐ NEW
+        linkedCourseSavings: totalLinkedCourseSavings,
         promoCodeDiscount: promoCodeDiscount,
-        finalAmount: finalAmount,
+        tax: 0,
+        processingFee: 0,
+        finalAmount: finalAmount, // ✅ REQUIRED
         currency: "USD",
       },
 
@@ -986,7 +1031,6 @@ exports.proceedToPayment = async (req, res) => {
             .map((item) => item.courseId.toString()),
         },
         linkedCourses: {
-          // ⭐ NEW
           applied: totalLinkedCourseSavings > 0,
           totalSavings: totalLinkedCourseSavings,
           coursesIncluded: cartItems
@@ -1005,15 +1049,15 @@ exports.proceedToPayment = async (req, res) => {
       },
 
       metadata: {
-        userAgent: req.get("User-Agent"),
-        ipAddress: req.ip,
-        sessionId: req.sessionID,
-        orderNotes: req.body.orderNotes,
+        userAgent: req.get("User-Agent") || "",
+        ipAddress: req.ip || "",
+        sessionId: req.sessionID || "",
+        orderNotes: req.body.orderNotes || "",
         source: "website",
       },
     };
 
-    // Create transaction record in user
+    // ✅ Use the user method to create transaction (ensures all required fields)
     const transaction = user.createPaymentTransaction(transactionData);
     await user.save();
 
@@ -1023,8 +1067,8 @@ exports.proceedToPayment = async (req, res) => {
       order_id: orderNumber,
       amount: finalAmount.toFixed(2),
       currency: "USD",
-      redirect_url: `${baseUrl}/payment/response`, // ✅ Updated
-      cancel_url: `${baseUrl}/payment/cancel`, // ✅ Updated
+      redirect_url: "https://iaa-i.com/payment/response", // ✅ FIXED: Use your actual domain
+      cancel_url: "https://iaa-i.com/payment/cancel", // ✅ FIXED: Use your actual domain
       language: "EN",
 
       // Customer details
@@ -1046,11 +1090,11 @@ exports.proceedToPayment = async (req, res) => {
 
     const encRequest = ccavUtil.encrypt(dataString);
 
-    // Determine payment URL
+    // ✅ FIXED: Use the correct CCAvenue URL
     const paymentUrl =
       "https://secure.ccavenue.ae/transaction/transaction.do?command=initiateTransaction";
 
-    // ✅ ENHANCED: Create auto-submit form with linked course info
+    // ✅ Create auto-submit form
     const paymentForm = `
       <html>
         <head>
@@ -1061,8 +1105,6 @@ exports.proceedToPayment = async (req, res) => {
             .loader { border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
             .summary { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; }
-            .summary h4 { margin: 0 0 15px 0; color: #333; }
-            .summary p { margin: 5px 0; color: #666; }
             .amount { font-size: 24px; font-weight: bold; color: #28a745; }
             .savings { color: #28a745; font-weight: 600; }
           </style>
@@ -1079,26 +1121,26 @@ exports.proceedToPayment = async (req, res) => {
               <p><strong>Items:</strong> ${cartItems.length} course(s)</p>
               ${
                 totalEarlyBirdSavings > 0
-                  ? `<p class="savings"><strong>Early Bird Savings:</strong> ${totalEarlyBirdSavings.toFixed(
+                  ? `<p class="savings"><strong>Early Bird Savings:</strong> $${totalEarlyBirdSavings.toFixed(
                       2
                     )}</p>`
                   : ""
               }
               ${
                 totalLinkedCourseSavings > 0
-                  ? `<p class="savings"><strong>Included Course Savings:</strong> ${totalLinkedCourseSavings.toFixed(
+                  ? `<p class="savings"><strong>Included Course Savings:</strong> $${totalLinkedCourseSavings.toFixed(
                       2
                     )}</p>`
                   : ""
               }
               ${
                 promoCodeDiscount > 0
-                  ? `<p class="savings"><strong>Promo Discount:</strong> ${promoCodeDiscount.toFixed(
+                  ? `<p class="savings"><strong>Promo Discount:</strong> $${promoCodeDiscount.toFixed(
                       2
                     )}</p>`
                   : ""
               }
-              <p class="amount">Total: ${finalAmount.toFixed(2)} USD</p>
+              <p class="amount">Total: $${finalAmount.toFixed(2)} USD</p>
             </div>
             
             <p><small>🔐 This is a secure SSL encrypted connection</small></p>
@@ -1122,10 +1164,7 @@ exports.proceedToPayment = async (req, res) => {
     `;
 
     console.log(
-      `💳 Enhanced Payment initiated: Order ${orderNumber}, Amount ${finalAmount}, Transaction ${transactionId}`
-    );
-    console.log(
-      `💰 Savings breakdown: Early Bird ${totalEarlyBirdSavings}, Linked Courses ${totalLinkedCourseSavings}, Promo ${promoCodeDiscount}`
+      `💳 Enhanced Payment initiated: Order ${orderNumber}, Amount $${finalAmount}, Transaction ${transactionId}`
     );
     res.send(paymentForm);
   } catch (error) {

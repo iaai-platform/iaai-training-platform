@@ -1,0 +1,30 @@
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /
+Allow: /about
+Allow: /all-courses
+Allow: /training-programs
+Allow: /our-instructors
+Allow: /contact-us
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /uploads/
+
+# Disallow authentication pages from indexing
+Disallow: /login
+Disallow: /signup
+Disallow: /logout
+
+# Allow important static files
+Allow: /css/
+Allow: /js/
+Allow: /images/
+Allow: /icons/
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml

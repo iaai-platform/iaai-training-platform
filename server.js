@@ -114,6 +114,25 @@ app.use((req, res, next) => {
 // 6. STATIC FILE SERVING
 // ============================================
 app.use(express.static(path.join(__dirname, "public")));
+
+// Serve favicon and icons specifically
+app.use("/icons", express.static(path.join(__dirname, "public/icons")));
+
+// Serve SEO files
+app.use(
+  "/manifest.json",
+  express.static(path.join(__dirname, "public/manifest.json"))
+);
+app.use(
+  "/sitemap.xml",
+  express.static(path.join(__dirname, "public/sitemap.xml"))
+);
+app.use(
+  "/robots.txt",
+  express.static(path.join(__dirname, "public/robots.txt"))
+);
+
+// Existing static file routes...
 app.use(
   "/uploads/videos",
   express.static(path.join(__dirname, "uploads/videos"))
@@ -129,6 +148,8 @@ console.log(
   "👤 Serving instructor photos from:",
   path.join(__dirname, "uploads/instructors")
 );
+console.log("🎨 Serving icons from:", path.join(__dirname, "public/icons"));
+console.log("📋 Serving SEO files: manifest.json, sitemap.xml, robots.txt");
 
 // ============================================
 // 7. AUTHENTICATION ROUTES

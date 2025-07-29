@@ -164,12 +164,12 @@
             line-height: 1.6;
         }
 
-        /* Live Indicator */
-        .live-indicator {
-            background: linear-gradient(135deg, #ff4757, #ff6b7a);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
+        /* Available Soon Badge */
+        .available-soon-badge {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 8px 16px;
+            border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
@@ -187,19 +187,6 @@
             100% { transform: scale(1); }
         }
 
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: white;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
-        }
-
         /* Main Content */
         .main-content {
             max-width: 1200px;
@@ -207,22 +194,39 @@
             padding: 0 20px;
         }
 
-        /* Webinar Card */
-        .webinar-card {
+        /* Webinar Categories */
+        .webinar-categories {
+            background: #ffffff;
+            padding: 80px 0;
+            margin-bottom: 40px;
+        }
+
+        .categories-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .category-card {
             background: #ffffff;
             border-radius: 25px;
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
-            margin-bottom: 60px;
             overflow: hidden;
             position: relative;
             transition: transform 0.3s ease;
         }
 
-        .webinar-card:hover {
+        .category-card:hover {
             transform: translateY(-10px);
         }
 
-        .webinar-card::before {
+        .category-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -232,208 +236,235 @@
             background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
         }
 
-        .webinar-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0;
-            align-items: center;
+        .category-header {
+            padding: 40px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
         }
 
-        .webinar-content {
-            padding: 60px;
-        }
-
-        .webinar-badge {
-            background: linear-gradient(135deg, #ffcc00, #b8860b);
-            color: #002147;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: inline-block;
+        .category-icon {
+            font-size: 48px;
+            color: #ffcc00;
             margin-bottom: 20px;
         }
 
-        .webinar-content h2 {
-            font-size: 32px;
+        .category-card h3 {
+            font-size: 28px;
             font-weight: 700;
             color: #002147;
-            margin-bottom: 25px;
-            position: relative;
+            margin-bottom: 15px;
         }
 
-        .webinar-content h2::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, #ffcc00, #b8860b);
-        }
-
-        .webinar-content p {
-            font-size: 18px;
-            color: #555;
-            line-height: 1.8;
-            margin-bottom: 25px;
-        }
-
-        .webinar-highlights {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 30px;
-        }
-
-        .webinar-highlights li {
+        .category-card p {
             font-size: 16px;
             color: #666;
-            margin-bottom: 12px;
-            padding-left: 25px;
-            position: relative;
+            line-height: 1.6;
+            margin-bottom: 25px;
         }
 
-        .webinar-highlights li::before {
-            content: '✓';
+        .category-topics {
+            padding: 0 40px 40px;
+        }
+
+        .topics-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .topics-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .topics-list li::before {
+            content: '•';
             position: absolute;
             left: 0;
             color: #ffcc00;
             font-weight: bold;
+            font-size: 16px;
         }
 
-        .webinar-features-list {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
+        .category-cta {
+            padding: 0 40px 40px;
         }
 
-        .features-title {
-            font-size: 18px;
-            font-weight: 600;
+        .category-btn {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
             color: #002147;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .features-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .feature-item {
-            background: #ffffff;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
             font-size: 14px;
-            color: #666;
-            border-left: 4px solid #ffcc00;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            justify-content: center;
         }
 
-        .feature-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+        .category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
         }
 
-        .webinar-details {
+        /* How It Works Section */
+        .how-it-works {
+            background: linear-gradient(135deg, #002147, #003366);
+            padding: 80px 0;
+            color: #ffffff;
+        }
+
+        .how-it-works-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .section-title p {
+            font-size: 18px;
+            color: #e0e0e0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .steps-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
         }
 
-        .detail-item {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 15px;
+        .step-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
             text-align: center;
         }
 
-        .detail-item i {
-            font-size: 24px;
-            color: #ffcc00;
-            margin-bottom: 10px;
+        .step-card:hover {
+            transform: translateY(-10px);
         }
 
-        .detail-item h4 {
-            font-size: 14px;
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: #ffcc00;
             color: #002147;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .detail-item p {
-            font-size: 14px;
-            color: #666;
-            margin: 0;
-        }
-
-        .webinar-image {
-            position: relative;
-            overflow: hidden;
-            height: 500px;
-        }
-
-        .webinar-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .webinar-card:hover .webinar-image img {
-            transform: scale(1.05);
-        }
-
-        .webinar-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, rgba(0, 33, 71, 0.8), rgba(255, 204, 0, 0.3));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .webinar-card:hover .webinar-overlay {
-            opacity: 1;
-        }
-
-        .play-button {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.9);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .step-card h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .step-card p {
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        /* Registration Section */
+        .registration-section {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 80px 0;
+        }
+
+        .registration-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .registration-card {
+            background: #ffffff;
+            border-radius: 25px;
+            padding: 60px 40px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .registration-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        .registration-card h2 {
+            font-size: 36px;
+            font-weight: 700;
             color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .registration-card p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .notification-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .notification-input {
+            flex: 1;
+            min-width: 280px;
+            max-width: 400px;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
             transition: all 0.3s ease;
         }
 
-        .play-button:hover {
-            transform: scale(1.1);
-            background: #ffffff;
+        .notification-input:focus {
+            outline: none;
+            border-color: #ffcc00;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
         }
 
-        .webinar-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn-primary {
+        .notification-btn {
             background: linear-gradient(135deg, #ffcc00, #b8860b);
             color: #002147;
             padding: 15px 30px;
@@ -441,120 +472,63 @@
             border-radius: 25px;
             font-size: 16px;
             font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .btn-primary:hover {
+        .notification-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: #002147;
-            border: 2px solid #002147;
-            padding: 13px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-secondary:hover {
-            background: #002147;
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-
-        /* Upcoming Webinars */
-        .upcoming-webinars {
-            background: linear-gradient(135deg, #002147, #003366);
-            padding: 80px 0;
-            margin-top: 80px;
-            color: #ffffff;
-        }
-
-        .upcoming-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .upcoming-header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .upcoming-header h2 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .upcoming-header p {
-            font-size: 18px;
-            color: #e0e0e0;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .upcoming-grid {
+        .contact-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
         }
 
-        .upcoming-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease;
-        }
-
-        .upcoming-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .upcoming-date {
-            background: #ffcc00;
-            color: #002147;
-            padding: 8px 16px;
+        .contact-option {
+            background: #f8f9fa;
+            padding: 20px;
             border-radius: 15px;
-            font-size: 14px;
-            font-weight: 700;
             text-align: center;
-            margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
 
-        .upcoming-card h3 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 15px;
+        .contact-option:hover {
+            background: #e9ecef;
+            transform: translateY(-5px);
         }
 
-        .upcoming-card p {
+        .contact-option i {
+            font-size: 24px;
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+
+        .contact-option h4 {
+            font-size: 16px;
+            color: #002147;
+            margin-bottom: 5px;
+        }
+
+        .contact-option p {
             font-size: 14px;
-            color: #e0e0e0;
-            margin-bottom: 20px;
+            color: #666;
+            margin: 0;
         }
 
-        .upcoming-card .btn-primary {
-            width: 100%;
-            justify-content: center;
+        .contact-option a {
+            color: #002147;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .contact-option a:hover {
+            color: #ffcc00;
         }
 
         /* CTA Section */
@@ -621,36 +595,30 @@
                 font-size: 16px;
             }
 
-            .features-grid {
+            .features-grid,
+            .categories-grid,
+            .steps-grid {
                 grid-template-columns: 1fr;
             }
 
-            .webinar-grid {
-                grid-template-columns: 1fr;
+            .category-header,
+            .category-topics,
+            .category-cta {
+                padding: 30px 20px;
             }
 
-            .webinar-content {
+            .registration-card {
                 padding: 40px 30px;
             }
 
-            .webinar-content h2 {
-                font-size: 24px;
-            }
-
-            .webinar-details {
-                grid-template-columns: 1fr;
-            }
-
-            .features-list {
-                grid-template-columns: 1fr;
-            }
-
-            .webinar-buttons {
+            .notification-form {
                 flex-direction: column;
+                align-items: center;
             }
 
-            .upcoming-grid {
-                grid-template-columns: 1fr;
+            .notification-input {
+                min-width: auto;
+                width: 100%;
             }
 
             .cta-buttons {
@@ -690,7 +658,7 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Interactive Webinar Programs</h1>
-            <p>Join our expert-led virtual training sessions featuring real-time demonstrations, live Q&A, and specialized techniques in aesthetic medicine. Learn from anywhere with professional-grade interactive education.</p>
+            <p>Join our expert-led virtual training sessions featuring real-time demonstrations, live Q&A, and specialized techniques in aesthetic medicine. Learn from anywhere with professional-grade interactive education delivered by internationally recognized instructors.</p>
         </div>
     </section>
 
@@ -699,7 +667,7 @@
         <div class="features-container">
             <div class="features-header">
                 <h2>Why Choose Our Interactive Webinars?</h2>
-                <p>Experience the future of aesthetic medicine education with our cutting-edge virtual training platform</p>
+                <p>Experience the future of aesthetic medicine education with our cutting-edge virtual training platform and expert instructors</p>
             </div>
 
             <div class="features-grid">
@@ -721,12 +689,12 @@
                 <div class="feature-card fade-in">
                     <div class="feature-icon"><i class="fas fa-globe"></i></div>
                     <h3>Global Access</h3>
-                    <p>Join from anywhere in the world with flexible scheduling across different time zones</p>
+                    <p>Join from anywhere in the world with flexible scheduling based on instructor availability</p>
                 </div>
                 <div class="feature-card fade-in">
                     <div class="feature-icon"><i class="fas fa-play-circle"></i></div>
                     <h3>Recording Access</h3>
-                    <p>Lifetime access to webinar recordings for review and continuous learning</p>
+                    <p>Access to webinar recordings for review and continuous learning (when available)</p>
                 </div>
                 <div class="feature-card fade-in">
                     <div class="feature-icon"><i class="fas fa-certificate"></i></div>
@@ -737,197 +705,192 @@
         </div>
     </section>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Perfect Jawline Webinar -->
-        <div class="webinar-card fade-in">
-            <div class="webinar-grid">
-                <div class="webinar-content">
-                    <div class="live-indicator">
-                        <div class="live-dot"></div>
-                        Live Webinar
-                    </div>
-                    <div class="webinar-badge">Facial Contouring</div>
-                    <h2>Perfect Jawline: Sculpt, Define & Impress</h2>
-                    <p>This specialized webinar program focuses on the art and science of facial contouring, addressing one of the most sought-after aesthetic procedures in modern practice.</p>
-                    
-                    <div class="webinar-features-list">
-                        <div class="features-title">
-                            <i class="fas fa-star"></i>
-                            Key Features
-                        </div>
-                        <div class="features-list">
-                            <div class="feature-item">Gender-Specific Techniques</div>
-                            <div class="feature-item">Advanced Injection Methods</div>
-                            <div class="feature-item">Anatomical Danger Zones</div>
-                            <div class="feature-item">Real-Time Case Reviews</div>
-                            <div class="feature-item">Combination Protocols</div>
-                            <div class="feature-item">Practice Management</div>
-                        </div>
-                    </div>
-
-                    <ul class="webinar-highlights">
-                        <li>Gender-specific jawline aesthetics and patient expectations</li>
-                        <li>Advanced injection techniques with needle and cannula applications</li>
-                        <li>Product selection including density and G-prime considerations</li>
-                        <li>Comprehensive video case reviews and asymmetry management</li>
-                        <li>Business integration with pricing strategies and patient retention</li>
-                    </ul>
-
-                    <div class="webinar-details">
-                        <div class="detail-item">
-                            <i class="fas fa-clock"></i>
-                            <h4>Duration</h4>
-                            <p>2 Hours Live</p>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-users"></i>
-                            <h4>Format</h4>
-                            <p>Interactive</p>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-video"></i>
-                            <h4>Recording</h4>
-                            <p>Lifetime Access</p>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-money-bill"></i>
-                            <h4>Business Focus</h4>
-                            <p>Included</p>
-                        </div>
-                    </div>
-
-                    <div class="webinar-buttons">
-                        <a href="/contact-us" class="btn-primary">
-                            Register Now <i class="fas fa-user-plus"></i>
-                        </a>
-                        <a href="/training-programs" class="btn-secondary">
-                            All Programs <i class="fas fa-list"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="webinar-image">
-                    <img src="/images/jawline-webinar.jpg" alt="Perfect Jawline Webinar">
-                    <div class="webinar-overlay">
-                        <div class="play-button">
-                            <i class="fas fa-play"></i>
-                        </div>
-                    </div>
-                </div>
+    <!-- Webinar Categories -->
+    <section class="webinar-categories">
+        <div class="categories-container">
+            <div class="section-title">
+                <h2>Webinar Topic Categories</h2>
+                <p>Our webinars cover a comprehensive range of aesthetic medicine topics, scheduled based on instructor availability and demand</p>
             </div>
-        </div>
 
-        <!-- Rhinofiller Secrets Webinar -->
-        <div class="webinar-card fade-in">
-            <div class="webinar-grid">
-                <div class="webinar-image">
-                    <img src="/images/rhinofiller-webinar.jpg" alt="Rhinofiller Secrets Webinar">
-                    <div class="webinar-overlay">
-                        <div class="play-button">
-                            <i class="fas fa-play"></i>
+            <div class="categories-grid">
+                <!-- Facial Contouring Category -->
+                <div class="category-card fade-in">
+                    <div class="category-header">
+                        <div class="available-soon-badge">
+                            <i class="fas fa-calendar-alt"></i>
+                            Scheduled on Demand
                         </div>
+                        <div class="category-icon"><i class="fas fa-user-md"></i></div>
+                        <h3>Facial Contouring & Enhancement</h3>
+                        <p>Master advanced facial contouring techniques and aesthetic enhancement procedures through interactive demonstrations.</p>
+                    </div>
+                    <div class="category-topics">
+                        <ul class="topics-list">
+                            <li>Perfect Jawline Sculpting Techniques</li>
+                            <li>Advanced Cheek Contouring Methods</li>
+                            <li>Non-Surgical Facial Lifting</li>
+                            <li>Gender-Specific Facial Aesthetics</li>
+                            <li>Combination Treatment Protocols</li>
+                        </ul>
+                    </div>
+                    <div class="category-cta">
+                        <a href="#register" class="category-btn">
+                            Get Notified <i class="fas fa-bell"></i>
+                        </a>
                     </div>
                 </div>
-                <div class="webinar-content">
-                    <div class="live-indicator">
-                        <div class="live-dot"></div>
-                        Live Webinar
-                    </div>
-                    <div class="webinar-badge">Non-Surgical Rhinoplasty</div>
-                    <h2>Rhinofiller Secrets: Non-Surgical Nose Perfection</h2>
-                    <p>This specialized webinar program focuses on mastering non-surgical rhinoplasty techniques, addressing the growing demand for minimally invasive nasal enhancement procedures.</p>
-                    
-                    <div class="webinar-features-list">
-                        <div class="features-title">
-                            <i class="fas fa-nose"></i>
-                            Specialized Topics
-                        </div>
-                        <div class="features-list">
-                            <div class="feature-item">Ethnic Considerations</div>
-                            <div class="feature-item">Nasal Anatomy Mastery</div>
-                            <div class="feature-item">Vascular Safety Protocols</div>
-                            <div class="feature-item">Injection Mapping</div>
-                            <div class="feature-item">Complication Management</div>
-                            <div class="feature-item">Marketing Strategies</div>
-                        </div>
-                    </div>
 
-                    <ul class="webinar-highlights">
-                        <li>Ethnic and gender-specific nasal aesthetic considerations</li>
-                        <li>Comprehensive nasal anatomy with emphasis on danger zones</li>
-                        <li>Advanced product selection and precise depth control techniques</li>
-                        <li>Injection mapping for hump correction and tip lifting</li>
-                        <li>Integration with complementary treatments and business strategies</li>
-                    </ul>
-
-                    <div class="webinar-details">
-                        <div class="detail-item">
-                            <i class="fas fa-clock"></i>
-                            <h4>Duration</h4>
-                            <p>90 Minutes</p>
+                <!-- Injectable Techniques Category -->
+                <div class="category-card fade-in">
+                    <div class="category-header">
+                        <div class="available-soon-badge">
+                            <i class="fas fa-calendar-alt"></i>
+                            Scheduled on Demand
                         </div>
-                        <div class="detail-item">
-                            <i class="fas fa-shield-alt"></i>
-                            <h4>Safety Focus</h4>
-                            <p>Comprehensive</p>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-chart-line"></i>
-                            <h4>Case Studies</h4>
-                            <p>Real Patients</p>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-globe"></i>
-                            <h4>Cultural</h4>
-                            <p>Diverse Approach</p>
-                        </div>
+                        <div class="category-icon"><i class="fas fa-syringe"></i></div>
+                        <h3>Injectable Techniques & Safety</h3>
+                        <p>Comprehensive training on injection techniques, product selection, and safety protocols for aesthetic treatments.</p>
                     </div>
-
-                    <div class="webinar-buttons">
-                        <a href="/contact-us" class="btn-primary">
-                            Join Webinar <i class="fas fa-video"></i>
+                    <div class="category-topics">
+                        <ul class="topics-list">
+                            <li>Rhinofiller Secrets & Non-Surgical Rhinoplasty</li>
+                            <li>Advanced Botox Application Techniques</li>
+                            <li>Dermal Filler Selection & Placement</li>
+                            <li>Danger Zone Identification & Avoidance</li>
+                            <li>Complication Management</li>
+                        </ul>
+                    </div>
+                    <div class="category-cta">
+                        <a href="#register" class="category-btn">
+                            Get Notified <i class="fas fa-bell"></i>
                         </a>
-                        <a href="/our-instructors" class="btn-secondary">
-                            Meet Instructors <i class="fas fa-user-md"></i>
+                    </div>
+                </div>
+
+                <!-- Foundational Knowledge Category -->
+                <div class="category-card fade-in">
+                    <div class="category-header">
+                        <div class="available-soon-badge">
+                            <i class="fas fa-gift"></i>
+                            Free Sessions Available
+                        </div>
+                        <div class="category-icon"><i class="fas fa-brain"></i></div>
+                        <h3>Foundational Anatomy & Safety</h3>
+                        <p>Essential anatomy and safety knowledge for practitioners entering aesthetic medicine, including free introductory sessions.</p>
+                    </div>
+                    <div class="category-topics">
+                        <ul class="topics-list">
+                            <li>Free Anatomy Unlocked Course</li>
+                            <li>Facial Layers & Structures</li>
+                            <li>Injection Safety Protocols</li>
+                            <li>Surface Anatomy Landmarks</li>
+                            <li>Beginner Injection Techniques</li>
+                        </ul>
+                    </div>
+                    <div class="category-cta">
+                        <a href="#register" class="category-btn">
+                            Get Notified <i class="fas fa-bell"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Specialized Procedures Category -->
+                <div class="category-card fade-in">
+                    <div class="category-header">
+                        <div class="available-soon-badge">
+                            <i class="fas fa-calendar-alt"></i>
+                            Scheduled on Demand
+                        </div>
+                        <div class="category-icon"><i class="fas fa-spa"></i></div>
+                        <h3>Specialized Procedures</h3>
+                        <p>Advanced and specialized aesthetic procedures covering niche areas and innovative treatment approaches.</p>
+                    </div>
+                    <div class="category-topics">
+                        <ul class="topics-list">
+                            <li>Lip Enhancement Mastery</li>
+                            <li>Under-Eye Rejuvenation Techniques</li>
+                            <li>PRP & Regenerative Treatments</li>
+                            <li>Skin Rejuvenation Protocols</li>
+                            <li>Business Integration Strategies</li>
+                        </ul>
+                    </div>
+                    <div class="category-cta">
+                        <a href="#register" class="category-btn">
+                            Get Notified <i class="fas fa-bell"></i>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
+    </section>
 
-    <!-- Upcoming Webinars -->
-    <section class="upcoming-webinars">
-        <div class="upcoming-container">
-            <div class="upcoming-header">
-                <h2>Upcoming Webinar Schedule</h2>
-                <p>Reserve your spot in our upcoming interactive webinar sessions</p>
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="how-it-works-container">
+            <div class="section-title">
+                <h2>How Our Webinar Programs Work</h2>
+                <p>Simple steps to join our interactive learning community and advance your aesthetic medicine skills</p>
             </div>
 
-            <div class="upcoming-grid">
-                <div class="upcoming-card fade-in">
-                    <div class="upcoming-date">March 15, 2024</div>
-                    <h3>Advanced Lip Enhancement Techniques</h3>
-                    <p>Master the art of natural lip augmentation with expert techniques and safety protocols.</p>
-                    <a href="/contact-us" class="btn-primary">
-                        Register <i class="fas fa-calendar-plus"></i>
-                    </a>
+            <div class="steps-grid">
+                <div class="step-card fade-in">
+                    <div class="step-number">1</div>
+                    <h4>Express Interest</h4>
+                    <p>Register your interest in specific webinar topics through our notification system or contact channels.</p>
                 </div>
-                <div class="upcoming-card fade-in">
-                    <div class="upcoming-date">March 22, 2024</div>
-                    <h3>Under-Eye Rejuvenation Mastery</h3>
-                    <p>Comprehensive approach to treating the delicate under-eye area with confidence.</p>
-                    <a href="/contact-us" class="btn-primary">
-                        Register <i class="fas fa-calendar-plus"></i>
-                    </a>
+                <div class="step-card fade-in">
+                    <div class="step-number">2</div>
+                    <h4>Get Notified</h4>
+                    <p>Receive notifications when webinars are scheduled based on instructor availability and participant demand.</p>
                 </div>
-                <div class="upcoming-card fade-in">
-                    <div class="upcoming-date">April 5, 2024</div>
-                    <h3>Combination Therapy Protocols</h3>
-                    <p>Learn to combine different aesthetic treatments for optimal patient outcomes.</p>
-                    <a href="/contact-us" class="btn-primary">
-                        Register <i class="fas fa-calendar-plus"></i>
-                    </a>
+                <div class="step-card fade-in">
+                    <div class="step-number">3</div>
+                    <h4>Secure Your Spot</h4>
+                    <p>Complete your registration and receive access details, pre-webinar materials, and technical requirements.</p>
+                </div>
+                <div class="step-card fade-in">
+                    <div class="step-number">4</div>
+                    <h4>Join & Learn</h4>
+                    <p>Participate in interactive sessions with expert instructors, ask questions, and engage with fellow practitioners.</p>
+                </div>
+                <div class="step-card fade-in">
+                    <div class="step-number">5</div>
+                    <h4>Receive Certificate</h4>
+                    <p>Complete the session and receive your digital certificate, along with access to any available recordings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Section -->
+    <section class="registration-section" id="register">
+        <div class="registration-container">
+            <div class="registration-card">
+                <h2>Stay Updated on Upcoming Webinars</h2>
+                <p>Be the first to know when new webinar sessions are scheduled. Our webinars are organized based on instructor availability and participant interest.</p>
+                
+                <form class="notification-form" action="/webinar-notification" method="POST">
+                    <input type="email" class="notification-input" placeholder="Enter your email address" required>
+                    <button type="submit" class="notification-btn">Notify Me</button>
+                </form>
+
+                <div class="contact-options">
+                    <div class="contact-option">
+                        <i class="fas fa-envelope"></i>
+                        <h4>Email</h4>
+                        <p><a href="mailto:info@iaa-i.com">info@iaa-i.com</a></p>
+                    </div>
+                    <div class="contact-option">
+                        <i class="fab fa-whatsapp"></i>
+                        <h4>WhatsApp</h4>
+                        <p><a href="https://wa.me/905367458666">+90 536 745 86 66</a></p>
+                    </div>
+                    <div class="contact-option">
+                        <i class="fas fa-phone"></i>
+                        <h4>Direct Contact</h4>
+                        <p><a href="/contact-us">Contact Form</a></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -937,10 +900,10 @@
     <section class="cta-section">
         <div class="cta-container">
             <h2>Ready to Join Our Interactive Learning Community?</h2>
-            <p>Experience the convenience of professional-grade training from anywhere in the world. Join thousands of practitioners who are advancing their skills through our interactive webinar programs.</p>
+            <p>Experience the convenience of professional-grade training from anywhere in the world. Our webinars are scheduled based on demand and instructor availability to ensure the highest quality education.</p>
             <div class="cta-buttons">
-                <a href="/contact-us" class="cta-btn">Register for Webinars</a>
-                <a href="/about" class="cta-btn">Learn About IAAI</a>
+                <a href="/contact-us" class="cta-btn">Contact Us</a>
+                <a href="/about-us" class="cta-btn">Learn About IAAI</a>
             </div>
         </div>
     </section>
@@ -963,55 +926,9 @@
         }, observerOptions);
 
         // Observe all elements
-        document.querySelectorAll('.webinar-card, .feature-card, .upcoming-card').forEach(card => {
+        document.querySelectorAll('.feature-card, .category-card, .step-card').forEach(card => {
             observer.observe(card);
         });
-
-        // Feature item hover effects
-        document.querySelectorAll('.feature-item').forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                item.style.backgroundColor = '#f0f8ff';
-                item.style.borderLeftColor = '#b8860b';
-            });
-            
-            item.addEventListener('mouseleave', () => {
-                item.style.backgroundColor = '#ffffff';
-                item.style.borderLeftColor = '#ffcc00';
-            });
-        });
-
-        // Play button interaction
-        document.querySelectorAll('.play-button').forEach(button => {
-            button.addEventListener('click', () => {
-                // Add click animation
-                button.style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    button.style.transform = 'scale(1)';
-                }, 150);
-            });
-        });
-
-        // Countdown timer simulation for upcoming webinars
-        function updateCountdown() {
-            const countdownElements = document.querySelectorAll('.upcoming-date');
-            countdownElements.forEach(element => {
-                const dateText = element.textContent;
-                const eventDate = new Date(dateText);
-                const now = new Date();
-                const timeDiff = eventDate - now;
-                
-                if (timeDiff > 0) {
-                    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-                    if (days > 0) {
-                        element.innerHTML = `${dateText}<br><small>In ${days} days</small>`;
-                    }
-                }
-            });
-        }
-
-        // Update countdown every hour
-        updateCountdown();
-        setInterval(updateCountdown, 3600000);
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1027,14 +944,38 @@
             });
         });
 
-        // Live indicator pulse effect
-        document.querySelectorAll('.live-indicator').forEach(indicator => {
+        // Contact option hover effects
+        document.querySelectorAll('.contact-option').forEach(option => {
+            option.addEventListener('mouseenter', () => {
+                option.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            option.addEventListener('mouseleave', () => {
+                option.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Form submission handling
+        document.querySelector('.notification-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            
+            // Simple validation
+            if (email) {
+                // You can implement actual form submission here
+                alert('Thank you! We\'ll notify you when new webinars are available.');
+                this.querySelector('input[type="email"]').value = '';
+            }
+        });
+
+        // Pulse effect for available soon badges
+        document.querySelectorAll('.available-soon-badge').forEach(badge => {
             setInterval(() => {
-                indicator.style.transform = 'scale(1.02)';
+                badge.style.transform = 'scale(1.05)';
                 setTimeout(() => {
-                    indicator.style.transform = 'scale(1)';
+                    badge.style.transform = 'scale(1)';
                 }, 500);
-            }, 2000);
+            }, 3000);
         });
     </script>
 </body>

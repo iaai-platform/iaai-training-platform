@@ -113,10 +113,10 @@ app.use((req, res, next) => {
 // ============================================
 // 6. STATIC FILE SERVING
 // ============================================
+// ============================================
+// 6. STATIC FILE SERVING - ADD ICONS SERVING
+// ============================================
 app.use(express.static(path.join(__dirname, "public")));
-
-// Serve favicon and icons specifically
-app.use("/icons", express.static(path.join(__dirname, "public/icons")));
 
 // Serve SEO files
 app.use(
@@ -132,7 +132,7 @@ app.use(
   express.static(path.join(__dirname, "public/robots.txt"))
 );
 
-// Existing static file routes...
+// Existing uploads folders
 app.use(
   "/uploads/videos",
   express.static(path.join(__dirname, "uploads/videos"))
@@ -142,15 +142,20 @@ app.use(
   express.static(path.join(__dirname, "uploads/instructors"))
 );
 
+// ADD THIS: Serve icons from uploads folder
+app.use(
+  "/uploads/icons",
+  express.static(path.join(__dirname, "uploads/icons"))
+);
+
 console.log("📁 Serving static files from:", path.join(__dirname, "public"));
 console.log("🎥 Serving videos from:", path.join(__dirname, "uploads/videos"));
 console.log(
   "👤 Serving instructor photos from:",
   path.join(__dirname, "uploads/instructors")
 );
-console.log("🎨 Serving icons from:", path.join(__dirname, "public/icons"));
+console.log("🎨 Serving icons from:", path.join(__dirname, "uploads/icons"));
 console.log("📋 Serving SEO files: manifest.json, sitemap.xml, robots.txt");
-
 // ============================================
 // 7. AUTHENTICATION ROUTES
 // ============================================

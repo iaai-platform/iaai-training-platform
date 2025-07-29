@@ -3,7 +3,7 @@ Allow: /
 
 # Important pages
 Allow: /
-Allow: /about
+Allow: /about-us
 Allow: /all-courses
 Allow: /training-programs
 Allow: /our-instructors
@@ -27,4 +27,4 @@ Allow: /images/
 Allow: /icons/
 
 # Sitemap location
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://iaa-i.com/sitemap.xml

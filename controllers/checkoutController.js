@@ -1,4 +1,4 @@
-// controllers/checkoutController.js - FULLY ALIGNED WITH LINKED COURSES - FINAL VERSION
+// controllers/checkoutController.js - FINAL VERSION WITH DECIMAL PRECISION FIXES
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
@@ -11,7 +11,25 @@ const { v4: uuidv4 } = require("uuid");
 const CCavenueUtils = require("../utils/ccavenueUtils");
 const ccavUtil = new CCavenueUtils(process.env.CCAVENUE_WORKING_KEY);
 
-// ✅ ENHANCED: Helper function to calculate pricing with linked course support
+// ✅ DECIMAL PRECISION HELPER FUNCTIONS
+function roundToTwoDecimals(num) {
+  return Math.round((num + Number.EPSILON) * 100) / 100;
+}
+
+function calculateDiscount(totalPrice, discountPercentage) {
+  const discountAmount = roundToTwoDecimals(
+    totalPrice * (discountPercentage / 100)
+  );
+  const finalPrice = roundToTwoDecimals(totalPrice - discountAmount);
+
+  return {
+    discountAmount,
+    finalPrice,
+    originalPrice: roundToTwoDecimals(totalPrice),
+  };
+}
+
+// ✅ Helper function to calculate pricing with linked course support
 function calculateCoursePricing(
   course,
   registrationDate = new Date(),
@@ -47,8 +65,10 @@ function calculateCoursePricing(
   // Regular pricing logic for non-linked courses
   if (course.enrollment) {
     // For InPerson and OnlineLive courses
-    pricing.regularPrice = course.enrollment.price || 0;
-    pricing.earlyBirdPrice = course.enrollment.earlyBirdPrice || null;
+    pricing.regularPrice = roundToTwoDecimals(course.enrollment.price || 0);
+    pricing.earlyBirdPrice = course.enrollment.earlyBirdPrice
+      ? roundToTwoDecimals(course.enrollment.earlyBirdPrice)
+      : null;
     pricing.currency = course.enrollment.currency || "USD";
 
     if (
@@ -64,8 +84,9 @@ function calculateCoursePricing(
       if (new Date(registrationDate) <= earlyBirdDeadline) {
         pricing.isEarlyBird = true;
         pricing.currentPrice = pricing.earlyBirdPrice;
-        pricing.earlyBirdSavings =
-          pricing.regularPrice - pricing.earlyBirdPrice;
+        pricing.earlyBirdSavings = roundToTwoDecimals(
+          pricing.regularPrice - pricing.earlyBirdPrice
+        );
       } else {
         pricing.currentPrice = pricing.regularPrice;
       }
@@ -74,7 +95,7 @@ function calculateCoursePricing(
     }
   } else if (course.access) {
     // For SelfPaced courses
-    pricing.regularPrice = course.access.price || 0;
+    pricing.regularPrice = roundToTwoDecimals(course.access.price || 0);
     pricing.currentPrice = pricing.regularPrice;
     pricing.currency = course.access.currency || "USD";
   }
@@ -218,7 +239,14 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    const totalSavings = totalEarlyBirdSavings + totalLinkedCourseSavings;
+    // ✅ Round all totals to avoid floating point issues
+    totalOriginalPrice = roundToTwoDecimals(totalOriginalPrice);
+    totalCurrentPrice = roundToTwoDecimals(totalCurrentPrice);
+    totalEarlyBirdSavings = roundToTwoDecimals(totalEarlyBirdSavings);
+    totalLinkedCourseSavings = roundToTwoDecimals(totalLinkedCourseSavings);
+    const totalSavings = roundToTwoDecimals(
+      totalEarlyBirdSavings + totalLinkedCourseSavings
+    );
 
     console.log("📌 Enhanced Cart Summary:", {
       inPerson: inPersonCartItems.length,
@@ -246,7 +274,7 @@ exports.getCheckoutPage = async (req, res) => {
   }
 };
 
-// ✅ Apply Promo Code
+// ✅ FIXED: Apply Promo Code with decimal precision
 exports.applyPromoCode = async (req, res) => {
   try {
     const { promoCode } = req.body;
@@ -313,6 +341,9 @@ exports.applyPromoCode = async (req, res) => {
       }
     }
 
+    // ✅ Round total price to avoid floating point issues
+    totalPrice = roundToTwoDecimals(totalPrice);
+
     if (totalPrice === 0) {
       return res.json({ success: false, message: "No courses in cart." });
     }
@@ -340,16 +371,21 @@ exports.applyPromoCode = async (req, res) => {
     console.log(
       `✅ Applying Promo Code: ${promo.code} - Discount: ${promo.discountPercentage}%`
     );
-    const discountAmount = totalPrice * (promo.discountPercentage / 100);
-    const discountedPrice = totalPrice - discountAmount;
+
+    // ✅ FIXED: Use helper function for precise calculation
+    const promoResult = calculateDiscount(totalPrice, promo.discountPercentage);
+
+    console.log(
+      `💰 Promo Calculation: ${promoResult.originalPrice} - ${promoResult.discountAmount} = ${promoResult.finalPrice}`
+    );
 
     req.session.appliedPromoCode = promo.code;
-    const completeRegistration = discountedPrice <= 0;
+    const completeRegistration = promoResult.finalPrice <= 0;
 
     res.json({
       success: true,
-      newTotalPrice: discountedPrice.toFixed(2),
-      discountAmount: discountAmount.toFixed(2),
+      newTotalPrice: promoResult.finalPrice.toFixed(2),
+      discountAmount: promoResult.discountAmount.toFixed(2),
       discountPercentage: promo.discountPercentage,
       completeRegistration,
     });
@@ -359,7 +395,7 @@ exports.applyPromoCode = async (req, res) => {
   }
 };
 
-// ✅ Process Checkout - decides between payment or free registration
+// ✅ FIXED: Process Checkout with decimal precision
 exports.processCheckout = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -427,6 +463,8 @@ exports.processCheckout = async (req, res) => {
       }
     }
 
+    // ✅ Round total price
+    totalPrice = roundToTwoDecimals(totalPrice);
     console.log(`💰 Calculated total price: $${totalPrice}`);
 
     // Apply promo code discount if exists
@@ -440,8 +478,13 @@ exports.processCheckout = async (req, res) => {
       });
 
       if (promo && (!promo.expiryDate || new Date() <= promo.expiryDate)) {
-        const discountAmount = totalPrice * (promo.discountPercentage / 100);
-        finalPrice = totalPrice - discountAmount;
+        // ✅ FIXED: Use helper function for precise calculation
+        const promoResult = calculateDiscount(
+          totalPrice,
+          promo.discountPercentage
+        );
+        finalPrice = promoResult.finalPrice;
+
         console.log(
           `🏷️ Promo applied: ${appliedPromo}, Final price: $${finalPrice}`
         );
@@ -533,6 +576,9 @@ exports.processPayment = async (req, res) => {
         });
       }
     }
+
+    // ✅ Round total price
+    totalPrice = roundToTwoDecimals(totalPrice);
 
     if (totalPrice === 0) {
       return res.redirect("/complete-registration");
@@ -688,18 +734,16 @@ exports.completeRegistration = async (req, res) => {
       }
     }
 
-    // Calculate totals
-    const totalAmount = registeredCourses.reduce(
-      (sum, course) => sum + course.price,
-      0
+    // ✅ Calculate totals with decimal precision
+    const totalAmount = roundToTwoDecimals(
+      registeredCourses.reduce((sum, course) => sum + course.price, 0)
     );
-    const finalAmount = registeredCourses.reduce(
-      (sum, course) => sum + course.finalPrice,
-      0
+    const finalAmount = roundToTwoDecimals(
+      registeredCourses.reduce((sum, course) => sum + course.finalPrice, 0)
     );
-    const totalSavings = totalAmount - finalAmount;
+    const totalSavings = roundToTwoDecimals(totalAmount - finalAmount);
 
-    // ✅ FIXED: Direct transaction creation
+    // ✅ Create transaction with proper decimal handling
     const transaction = {
       transactionId: transactionId,
       orderNumber: `ORD-FREE-${Date.now()}-${user._id.toString().slice(-6)}`,
@@ -869,7 +913,7 @@ exports.completeRegistration = async (req, res) => {
   }
 };
 
-// ✅ Proceed to Payment - initiate CCAvenue payment
+// ✅ FIXED: Proceed to Payment with decimal precision
 exports.proceedToPayment = async (req, res) => {
   try {
     console.log("💳 Processing payment with CCAvenue...");
@@ -954,6 +998,12 @@ exports.proceedToPayment = async (req, res) => {
         .json({ success: false, message: "No items in cart" });
     }
 
+    // ✅ Round all totals to avoid floating point issues
+    totalOriginalPrice = roundToTwoDecimals(totalOriginalPrice);
+    totalCurrentPrice = roundToTwoDecimals(totalCurrentPrice);
+    totalEarlyBirdSavings = roundToTwoDecimals(totalEarlyBirdSavings);
+    totalLinkedCourseSavings = roundToTwoDecimals(totalLinkedCourseSavings);
+
     // Apply promo code discount
     let promoCodeDiscount = 0;
     let promoCodeData = null;
@@ -963,18 +1013,29 @@ exports.proceedToPayment = async (req, res) => {
         code: req.session.appliedPromoCode,
       });
       if (promo) {
-        promoCodeDiscount =
-          totalCurrentPrice * (promo.discountPercentage / 100);
+        // ✅ FIXED: Use helper function for precise calculation
+        const promoResult = calculateDiscount(
+          totalCurrentPrice,
+          promo.discountPercentage
+        );
+        promoCodeDiscount = promoResult.discountAmount;
+
         promoCodeData = {
           code: promo.code,
           discountType: "percentage",
           discountValue: promo.discountPercentage,
           discountAmount: promoCodeDiscount,
         };
+
+        console.log(`💰 Promo discount: ${promoCodeDiscount}`);
       }
     }
 
-    const finalAmount = Math.max(0, totalCurrentPrice - promoCodeDiscount);
+    // ✅ FIXED: Ensure final amount is properly rounded
+    const finalAmount = roundToTwoDecimals(
+      Math.max(0, totalCurrentPrice - promoCodeDiscount)
+    );
+    console.log(`💰 Final amount for CCAvenue: $${finalAmount}`);
 
     // If final amount is 0, redirect to free registration
     if (finalAmount <= 0) {
@@ -990,7 +1051,7 @@ exports.proceedToPayment = async (req, res) => {
 
     console.log("🔧 Creating transaction...");
 
-    // ✅ FIXED: Direct transaction creation
+    // ✅ Create transaction with proper decimal handling
     const transaction = {
       transactionId: transactionId,
       orderNumber: orderNumber,
@@ -1005,8 +1066,9 @@ exports.proceedToPayment = async (req, res) => {
 
       financial: {
         subtotal: totalOriginalPrice,
-        discountAmount:
-          totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount,
+        discountAmount: roundToTwoDecimals(
+          totalEarlyBirdSavings + totalLinkedCourseSavings + promoCodeDiscount
+        ),
         earlyBirdSavings: totalEarlyBirdSavings,
         promoCodeDiscount: promoCodeDiscount,
         tax: 0,
@@ -1099,11 +1161,11 @@ exports.proceedToPayment = async (req, res) => {
 
     console.log("✅ Transaction saved successfully");
 
-    // Prepare CCAvenue payment data
+    // ✅ FIXED: CCAvenue payment data with proper formatting
     const ccavenuePaymentData = {
       merchant_id: process.env.CCAVENUE_MERCHANT_ID,
       order_id: orderNumber,
-      amount: finalAmount.toFixed(2),
+      amount: finalAmount.toFixed(2), // ✅ Exactly 2 decimal places
       currency: "USD",
       redirect_url: "https://iaa-i.com/payment/response",
       cancel_url: "https://iaa-i.com/payment/cancel",
@@ -1116,6 +1178,28 @@ exports.proceedToPayment = async (req, res) => {
       merchant_param2: userId.toString(),
       merchant_param3: cartItems.length.toString(),
     };
+
+    // ✅ Additional validation before sending to CCAvenue
+    console.log("💳 CCAvenue Parameters:", {
+      merchant_id: ccavenuePaymentData.merchant_id,
+      order_id: ccavenuePaymentData.order_id,
+      amount: ccavenuePaymentData.amount,
+      currency: ccavenuePaymentData.currency,
+      billing_email: ccavenuePaymentData.billing_email,
+    });
+
+    // Validate required parameters
+    if (
+      !ccavenuePaymentData.merchant_id ||
+      !ccavenuePaymentData.order_id ||
+      !ccavenuePaymentData.amount ||
+      !ccavenuePaymentData.billing_email
+    ) {
+      console.error("❌ Missing required CCAvenue parameters");
+      return res
+        .status(500)
+        .json({ success: false, message: "Payment configuration error" });
+    }
 
     // Convert to query string and encrypt
     const dataString = Object.keys(ccavenuePaymentData)
@@ -1146,7 +1230,9 @@ exports.proceedToPayment = async (req, res) => {
     `;
 
     console.log(
-      `💳 Payment initiated: Order ${orderNumber}, Amount $${finalAmount}`
+      `💳 Payment initiated: Order ${orderNumber}, Amount $${finalAmount.toFixed(
+        2
+      )}`
     );
     res.send(paymentForm);
   } catch (error) {

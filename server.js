@@ -602,6 +602,10 @@ app.use("/", customerSupportRoutes);
 const latestNewsRoutes = require("./routes/latestNewsRoutes");
 app.use("/", latestNewsRoutes);
 
+// 🆕 ADD THIS: Email collection system
+const emailCollectionRoutes = require("./routes/emailCollectionRoutes");
+app.use("/", emailCollectionRoutes);
+console.log("📧 Email collection routes loaded");
 // ============================================
 // 14. MISCELLANEOUS ROUTES
 // ============================================

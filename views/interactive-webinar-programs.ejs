@@ -871,10 +871,7 @@
                 <p>Be the first to know when new webinar sessions are scheduled. Our webinars are organized based on instructor availability and participant interest.</p>
                 
                 <form class="notification-form" id="webinarNotificationForm">
-                    <input type="email" class="notification-input" name="email" placeholder="Enter your email address" required>
-                    <input type="hidden" name="reason" value="webinar-notification">
-                    <input type="hidden" name="source" value="interactive-webinar-programs">
-                    <input type="hidden" name="additionalInfo" value="Interested in webinar notifications">
+                    <input type="email" class="notification-input" placeholder="Enter your email address" required>
                     <button type="submit" class="notification-btn">Notify Me</button>
                 </form>
                 
@@ -960,18 +957,42 @@
         });
 
         // Form submission handling
-        document.querySelector('.notification-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = this.querySelector('input[type="email"]').value;
-            
-            // Simple validation
-            if (email) {
-                // You can implement actual form submission here
-                alert('Thank you! We\'ll notify you when new webinars are available.');
-                this.querySelector('input[type="email"]').value = '';
-            }
+        // Form submission handling
+document.querySelector('.notification-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = this.querySelector('input[type="email"]').value;
+    
+    // Prepare data with automatic reason and source
+    const data = {
+        email: email,
+        reason: 'webinar-notification',
+        source: 'interactive-webinar-programs',
+        additionalInfo: 'Interested in upcoming webinar notifications'
+    };
+    
+    try {
+        const response = await fetch('/collect-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
         });
-
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(result.message || 'Thank you! We\'ll notify you when new webinars are available.');
+            this.querySelector('input[type="email"]').value = '';
+        } else {
+            alert(result.message || 'Something went wrong. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    }
+});
         // Pulse effect for available soon badges
         document.querySelectorAll('.available-soon-badge').forEach(badge => {
             setInterval(() => {

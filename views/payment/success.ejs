@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful - IAAI Training Institute</title>
+    <title><%= title || 'Success - IAAI Training Institute' %></title>
     <link rel="stylesheet" href="/css/checkoutstyle.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Same styles as your success.ejs */
+        /* Your existing styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Montserrat', sans-serif; 
@@ -18,13 +18,7 @@
             flex-direction: column;
         }
         
-        main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
         
         .success-container {
             background: white;
@@ -61,10 +55,7 @@
             box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
         }
         
-        .success-icon i {
-            font-size: 60px;
-            color: white;
-        }
+        .success-icon i { font-size: 60px; color: white; }
         
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -72,19 +63,9 @@
             100% { transform: scale(1); }
         }
         
-        h1 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 36px;
-            font-weight: 700;
-        }
+        h1 { color: #333; margin-bottom: 15px; font-size: 36px; font-weight: 700; }
         
-        .subtitle {
-            color: #666;
-            font-size: 18px;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
+        .subtitle { color: #666; font-size: 18px; margin-bottom: 30px; line-height: 1.5; }
         
         .order-details {
             background: #f8f9fa;
@@ -118,15 +99,8 @@
             border-bottom: 1px solid #eee;
         }
         
-        .detail-label {
-            font-weight: 500;
-            color: #666;
-        }
-        
-        .detail-value {
-            font-weight: 600;
-            color: #333;
-        }
+        .detail-label { font-weight: 500; color: #666; }
+        .detail-value { font-weight: 600; color: #333; }
         
         .amount-display {
             font-size: 28px;
@@ -138,6 +112,12 @@
             border-radius: 15px;
             margin: 20px 0;
             border: 3px solid #28a745;
+        }
+        
+        .free-registration {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+            color: #0d47a1;
         }
         
         .buttons {
@@ -168,20 +148,10 @@
             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
         }
         
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-        }
-        
         .btn-secondary {
             background: linear-gradient(135deg, #6c757d, #545b62);
             color: white;
             box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-        
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
         }
         
         .btn-success {
@@ -190,10 +160,7 @@
             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
         
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-        }
+        .btn:hover { transform: translateY(-2px); }
         
         .payment-method {
             display: inline-flex;
@@ -220,30 +187,15 @@
         }
         
         @media (max-width: 768px) {
-            .success-container { 
-                padding: 30px 20px; 
-                margin: 10px;
-            }
-            .detail-grid { 
-                grid-template-columns: 1fr; 
-            }
-            .buttons { 
-                flex-direction: column; 
-                align-items: center; 
-            }
-            .btn { 
-                width: 100%; 
-                max-width: 300px; 
-                justify-content: center; 
-            }
-            h1 {
-                font-size: 28px;
-            }
+            .success-container { padding: 30px 20px; margin: 10px; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .buttons { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: 300px; justify-content: center; }
+            h1 { font-size: 28px; }
         }
     </style>
 </head>
 <body>
-    <!-- ✅ FIXED: Use relative path from payment/ folder -->
     <%- include('../partials/header') %>
 
     <main>
@@ -252,13 +204,32 @@
                 <i class="fas fa-check"></i>
             </div>
             
-            <h1>🎉 Payment Successful!</h1>
+            <!-- ✅ Dynamic title based on free vs paid -->
+            <% 
+            const isFree = (typeof amount !== 'undefined' && (amount === '0.00' || order_id === 'FREE'));
+            %>
+            
+            <h1>
+                <% if (isFree) { %>
+                    🎉 Registration Successful!
+                <% } else { %>
+                    🎉 Payment Successful!
+                <% } %>
+            </h1>
+            
             <p class="subtitle">
-                Thank you for your payment! Your transaction has been processed successfully and you now have full access to your enrolled courses.
+                <% if (isFree) { %>
+                    Thank you for registering! Your courses have been activated and you now have full access to your enrolled programs.
+                <% } else { %>
+                    Thank you for your payment! Your transaction has been processed successfully and you now have full access to your enrolled courses.
+                <% } %>
             </p>
             
             <div class="order-details">
-                <h3><i class="fas fa-receipt"></i> Payment Details</h3>
+                <h3>
+                    <i class="fas fa-<%= isFree ? 'graduation-cap' : 'receipt' %>"></i> 
+                    <%= isFree ? 'Registration' : 'Payment' %> Details
+                </h3>
                 
                 <div class="detail-grid">
                     <% if (typeof order_id !== 'undefined') { %>
@@ -276,7 +247,7 @@
                     <% } %>
                     
                     <div class="detail-item">
-                        <span class="detail-label">Payment Date:</span>
+                        <span class="detail-label"><%= isFree ? 'Registration' : 'Payment' %> Date:</span>
                         <span class="detail-value"><%= new Date().toLocaleDateString() %></span>
                     </div>
                     
@@ -290,9 +261,9 @@
                     </div>
                     
                     <div class="detail-item">
-                        <span class="detail-label">Payment Method:</span>
+                        <span class="detail-label">Method:</span>
                         <span class="detail-value">
-                            <% if (typeof amount !== 'undefined' && (amount === '0.00' || order_id === 'FREE')) { %>
+                            <% if (isFree) { %>
                                 <span class="payment-method">
                                     <i class="fas fa-gift"></i> Free Registration
                                 </span>
@@ -306,8 +277,8 @@
                 </div>
                 
                 <% if (typeof amount !== 'undefined') { %>
-                <div class="amount-display">
-                    <% if (amount === '0.00' || order_id === 'FREE') { %>
+                <div class="amount-display <%= isFree ? 'free-registration' : '' %>">
+                    <% if (isFree) { %>
                         🎁 Registration Completed: FREE
                     <% } else { %>
                         💳 Amount Paid: $<%= amount %> USD
@@ -330,11 +301,11 @@
         </div>
     </main>
 
-    <!-- ✅ FIXED: Use relative path from payment/ folder -->
     <%- include('../partials/footer') %>
 
     <script>
-        console.log('💳 Payment/Registration successful!');
+        const isFree = <%= JSON.stringify(isFree) %>;
+        console.log(isFree ? '🎁 Free registration successful!' : '💳 Payment successful!');
         <% if (referenceNumber) { %>
         console.log('📝 Reference Number:', '<%= referenceNumber %>');
         <% } %>

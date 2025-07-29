@@ -1,31 +1,30 @@
-// routes/checkoutRoutes.js - Updated with CCAvenue Integration & Linked Course Support
+// routes/checkoutRoutes.js - Updated with proper free course handling
 const express = require("express");
 const router = express.Router();
 const checkoutController = require("../controllers/checkoutController");
 const isAuthenticated = require("../middlewares/isAuthenticated");
 
 // ========================================
-// EXISTING CHECKOUT ROUTES (Keep these)
-// ✅ These already handle linked courses through the controller
+// CHECKOUT FLOW ROUTES
 // ========================================
 
-// ✅ Route to display the checkout page (handles linked courses automatically)
+// ✅ Display checkout page
 router.get("/checkout", isAuthenticated, checkoutController.getCheckoutPage);
 
-// ✅ Route to apply promo codes and update the price
+// ✅ Apply promo codes
 router.post(
   "/apply-promo-code",
   isAuthenticated,
   checkoutController.applyPromoCode
 );
 
-// ✅ Route to decide if user should go to payment or success (checks total price)
+// ✅ Process checkout - decides between free registration or payment
 router.post("/checkout", isAuthenticated, checkoutController.processCheckout);
 
-// ✅ Route to process payment (for users who need to pay)
+// ✅ Payment page (only for paid courses)
 router.get("/payment", isAuthenticated, checkoutController.processPayment);
 
-// ✅ Route to complete registration (for 100% discount users) - BOTH POST AND GET
+// ✅ Complete registration for FREE courses (promo codes, linked courses, $0 total)
 router.post(
   "/complete-registration",
   isAuthenticated,
@@ -38,61 +37,66 @@ router.get(
 );
 
 // ========================================
-// NEW CCAVENUE ROUTES (Add these to existing file)
+// CCAVENUE PAYMENT ROUTES (Only for paid courses)
 // ========================================
 
-// ✅ NEW: Route to initiate CCAvenue payment (handles linked courses automatically)
+// ✅ Initiate CCAvenue payment (only called for paid courses)
 router.post(
   "/payment/initiate",
   isAuthenticated,
   checkoutController.proceedToPayment
 );
 
-// ✅ NEW: CCAvenue response handler (NO authentication needed - this is a webhook)
+// ✅ CCAvenue response handler (webhook - no authentication)
 router.post("/payment/response", checkoutController.handlePaymentResponse);
 
-// ✅ NEW: CCAvenue cancellation handler
+// ✅ CCAvenue cancellation handlers
 router.get("/payment/cancel", checkoutController.handlePaymentCancel);
-router.post("/payment/cancel", checkoutController.handlePaymentCancel); // Some gateways use POST
+router.post("/payment/cancel", checkoutController.handlePaymentCancel);
 
 // ========================================
-// PAYMENT RESULT PAGES (Updated)
+// SUCCESS/RESULT PAGES
 // ========================================
 
-// ✅ UPDATED: Payment success page for PAID transactions
-router.get("/payment/success", isAuthenticated, (req, res) => {
+// ✅ UNIFIED SUCCESS PAGE - handles both free and paid courses
+router.get("/payment/success", (req, res) => {
   const { order_id, amount, ref } = req.query;
 
-  console.log(
-    `🎉 Payment success page: Order ${order_id}, Amount $${amount}, Ref ${ref}`
-  );
+  // Determine if this was a free registration or paid transaction
+  const isFreeRegistration = amount === "0.00" || order_id === "FREE";
+
+  console.log(`🎉 Success page accessed:`, {
+    order_id,
+    amount,
+    ref,
+    isFree: isFreeRegistration,
+  });
 
   res.render("payment/success", {
-    order_id: order_id,
-    amount: amount,
-    referenceNumber: ref,
-    user: req.user,
-    title: "Payment Successful - IAAI Training",
-  });
-});
-
-// ✅ UPDATED: Success page for FREE registrations (promo codes, linked courses, etc.)
-router.get("/success", isAuthenticated, (req, res) => {
-  const { order_id, amount, ref } = req.query;
-  console.log(
-    `🎉 Free registration success page accessed with reference: ${ref}`
-  );
-
-  res.render("success", {
     order_id: order_id || "FREE",
     amount: amount || "0.00",
     referenceNumber: ref,
-    user: req.user,
-    title: "Registration Successful - IAAI Training",
+    user: req.user || null,
+    isFreeRegistration: isFreeRegistration,
+    title: isFreeRegistration
+      ? "Registration Successful - IAAI Training"
+      : "Payment Successful - IAAI Training",
   });
 });
 
-// Payment failure page
+// ✅ LEGACY SUCCESS ROUTE - redirect to unified success page
+router.get("/success", (req, res) => {
+  const { order_id, amount, ref } = req.query;
+
+  // Redirect to the unified success page
+  res.redirect(
+    `/payment/success?order_id=${order_id || "FREE"}&amount=${
+      amount || "0.00"
+    }&ref=${ref || ""}`
+  );
+});
+
+// ✅ Payment failure page
 router.get("/payment/failure", (req, res) => {
   const { order_id, reason } = req.query;
 
@@ -106,7 +110,7 @@ router.get("/payment/failure", (req, res) => {
   });
 });
 
-// Payment error page
+// ✅ Payment error page
 router.get("/payment/error", (req, res) => {
   const { message } = req.query;
 
@@ -119,7 +123,7 @@ router.get("/payment/error", (req, res) => {
   });
 });
 
-// Payment cancelled page
+// ✅ Payment cancelled page
 router.get("/payment/cancelled", (req, res) => {
   console.log(`❌ Payment cancelled by user`);
 
@@ -129,7 +133,7 @@ router.get("/payment/cancelled", (req, res) => {
   });
 });
 
-// ✅ EXISTING policies route
+// ✅ Policies page
 router.get("/policies", (req, res) => {
   res.render("policies", {
     user: req.user || null,

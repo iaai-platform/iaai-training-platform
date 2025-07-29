@@ -1,28 +1,16 @@
-// utils/ccavenueUtils.js - Safe version for development
-
+// utils/ccavenueUtils.js - Production-ready version
 const crypto = require("crypto");
 
 class CCavenueUtils {
   constructor(workingKey) {
     if (!workingKey) {
-      console.log(
-        "⚠️ CCAvenue working key not provided - running in development mode"
-      );
-      this.workingKey = "development_key_placeholder";
-      this.isDevelopment = true;
-    } else {
-      this.workingKey = workingKey;
-      this.isDevelopment = false;
+      throw new Error("CCAvenue working key is required for production");
     }
+    this.workingKey = workingKey;
   }
 
   // Encrypt function for CCAvenue
   encrypt(plainText) {
-    if (this.isDevelopment) {
-      console.log("⚠️ CCAvenue encrypt called in development mode");
-      return "development_encrypted_data";
-    }
-
     try {
       const md5 = crypto.createHash("md5").update(this.workingKey).digest();
       const keyBase64 = Buffer.from(md5).toString("base64");
@@ -41,17 +29,12 @@ class CCavenueUtils {
       return encrypted;
     } catch (error) {
       console.error("❌ CCAvenue encryption error:", error);
-      return "encryption_error";
+      throw new Error("Encryption failed");
     }
   }
 
   // Decrypt function for CCAvenue response
   decrypt(encText) {
-    if (this.isDevelopment) {
-      console.log("⚠️ CCAvenue decrypt called in development mode");
-      return "order_status=Success&order_id=DEV_ORDER&tracking_id=DEV_TRACK&amount=99.99&merchant_param1=DEV_TXN&merchant_param2=DEV_USER";
-    }
-
     try {
       const md5 = crypto.createHash("md5").update(this.workingKey).digest();
       const keyBase64 = Buffer.from(md5).toString("base64");
@@ -70,7 +53,7 @@ class CCavenueUtils {
       return decrypted;
     } catch (error) {
       console.error("❌ CCAvenue decryption error:", error);
-      return "decryption_error";
+      throw new Error("Decryption failed");
     }
   }
 }

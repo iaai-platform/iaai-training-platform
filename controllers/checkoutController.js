@@ -560,19 +560,26 @@ exports.processPayment = async (req, res) => {
 
 // ✅ ENHANCED: Complete Registration with linked course support
 // ✅ ENHANCED: Complete Registration with better success handling
+// checkoutController.js - Complete Registration Function
 exports.completeRegistration = async (req, res) => {
   try {
     console.log(
-      "🎯 Starting registration process with linked course support..."
+      "🎯 Starting FREE registration process (bypassing CCAvenue)..."
     );
     const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
 
     const registeredCourses = [];
     let coursesUpdated = 0;
     const referenceNumber = uuidv4();
     const transactionId = uuidv4();
 
-    // ✅ ENHANCED: Update in-person courses with linked course awareness
+    // ✅ PROCESS IN-PERSON COURSES
     for (let i = 0; i < user.myInPersonCourses.length; i++) {
       const enrollment = user.myInPersonCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
@@ -597,9 +604,10 @@ exports.completeRegistration = async (req, res) => {
 
           registeredCourses.push({
             courseId: enrollment.courseId,
-            title: course.basic?.title,
-            courseCode: course.basic?.courseCode,
-            courseType: "In-Person",
+            title: course.basic?.title || "Untitled Course",
+            courseCode: course.basic?.courseCode || "N/A",
+            courseType: "InPersonAestheticTraining",
+            displayType: "In-Person",
             price: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
             isLinkedCourseFree: pricing.isLinkedCourseFree,
@@ -609,7 +617,7 @@ exports.completeRegistration = async (req, res) => {
       }
     }
 
-    // ✅ ENHANCED: Update online live courses with linked course awareness
+    // ✅ PROCESS ONLINE LIVE COURSES
     for (let i = 0; i < user.myLiveCourses.length; i++) {
       const enrollment = user.myLiveCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
@@ -632,9 +640,10 @@ exports.completeRegistration = async (req, res) => {
 
           registeredCourses.push({
             courseId: enrollment.courseId,
-            title: course.basic?.title,
-            courseCode: course.basic?.courseCode,
-            courseType: isLinkedCourse
+            title: course.basic?.title || "Untitled Course",
+            courseCode: course.basic?.courseCode || "N/A",
+            courseType: "OnlineLiveTraining",
+            displayType: isLinkedCourse
               ? "Online Live (Included)"
               : "Online Live",
             price: pricing.regularPrice,
@@ -646,7 +655,7 @@ exports.completeRegistration = async (req, res) => {
       }
     }
 
-    // ✅ Update self-paced courses (no linked course logic needed)
+    // ✅ PROCESS SELF-PACED COURSES
     for (let i = 0; i < user.mySelfPacedCourses.length; i++) {
       const enrollment = user.mySelfPacedCourses[i];
       if (enrollment.enrollmentData.status === "cart") {
@@ -675,26 +684,34 @@ exports.completeRegistration = async (req, res) => {
 
           registeredCourses.push({
             courseId: enrollment.courseId,
-            title: course.basic?.title,
-            courseCode: course.basic?.courseCode,
-            courseType: "Self-Paced",
+            title: course.basic?.title || "Untitled Course",
+            courseCode: course.basic?.courseCode || "N/A",
+            courseType: "SelfPacedOnlineTraining",
+            displayType: "Self-Paced",
             price: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
-            isLinkedCourseFree: false,
+            isLinkedCourseFree: false, // Self-paced courses are never linked
             startDate: null,
           });
         }
       }
     }
 
+    // ✅ CHECK IF ANY COURSES WERE PROCESSED
     if (coursesUpdated === 0) {
       console.log("❌ No courses found in cart");
-      return res
-        .status(400)
-        .json({ success: false, message: "No courses in cart." });
+
+      if (req.method === "POST") {
+        return res.status(400).json({
+          success: false,
+          message: "No courses in cart.",
+        });
+      } else {
+        return res.status(400).send("No courses in cart.");
+      }
     }
 
-    // ✅ ENHANCED: Create payment transaction record with linked course info
+    // ✅ CREATE TRANSACTION RECORD FOR FREE REGISTRATION
     const totalAmount = registeredCourses.reduce(
       (sum, course) => sum + course.price,
       0
@@ -707,34 +724,74 @@ exports.completeRegistration = async (req, res) => {
 
     const transaction = {
       transactionId: transactionId,
-      receiptNumber: `REC-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      orderNumber: `ORD-FREE-${Date.now()}-${user._id.toString().slice(-6)}`,
+      receiptNumber: `REC-FREE-${Date.now()}-${Math.floor(
+        Math.random() * 1000
+      )}`,
       transactionDate: new Date(),
+      completedAt: new Date(),
       paymentMethod: req.session.appliedPromoCode
         ? "Promo Code"
         : "Free Course",
       paymentStatus: "completed",
-      subtotal: totalAmount,
-      discountAmount: totalSavings,
-      tax: 0,
-      finalAmount: 0,
-      currency: "USD",
+
+      financial: {
+        subtotal: totalAmount,
+        discountAmount: totalSavings,
+        earlyBirdSavings: 0, // Calculate if needed
+        promoCodeDiscount: req.session.appliedPromoCode ? totalSavings : 0,
+        tax: 0,
+        processingFee: 0,
+        finalAmount: 0, // Always $0 for free registration
+        currency: "USD",
+      },
+
+      discounts: {
+        promoCode: req.session.appliedPromoCode
+          ? {
+              code: req.session.appliedPromoCode,
+              discountType: "percentage",
+              discountAmount: totalSavings,
+            }
+          : null,
+      },
+
       items: registeredCourses.map((course) => ({
         courseId: course.courseId,
         courseType: course.courseType,
+        courseTitle: course.title,
+        courseCode: course.courseCode,
         originalPrice: course.price,
-        paidPrice: 0,
+        finalPrice: 0, // Free
         isLinkedCourseFree: course.isLinkedCourseFree || false,
+        courseSchedule: {
+          startDate: course.startDate,
+        },
       })),
-      promoCode: req.session.appliedPromoCode || "FREE",
+
+      customerInfo: {
+        userId: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        phone: user.phoneNumber,
+        country: user.country,
+      },
+
+      metadata: {
+        source: "website",
+        registrationType: "free",
+        promoCode: req.session.appliedPromoCode || "FREE",
+      },
     };
 
+    // ✅ SAVE TRANSACTION AND USER DATA
     user.paymentTransactions.push(transaction);
     await user.save({ validateBeforeSave: false });
 
-    // Clear the applied promo code from session
+    // ✅ CLEAR APPLIED PROMO CODE FROM SESSION
     delete req.session.appliedPromoCode;
 
-    // Send confirmation email
+    // ✅ SEND CONFIRMATION EMAIL
     try {
       await sendCourseRegistrationEmail(
         user,
@@ -742,39 +799,40 @@ exports.completeRegistration = async (req, res) => {
         referenceNumber,
         true
       );
-      console.log("✅ Registration email sent successfully");
+      console.log("✅ Free registration email sent successfully");
     } catch (emailError) {
       console.error("❌ Error sending registration email:", emailError);
+      // Don't fail the registration if email fails
     }
 
-    console.log(
-      `✅ Registration completed for ${coursesUpdated} courses (including linked courses)`
-    );
+    console.log(`✅ FREE registration completed for ${coursesUpdated} courses`);
     console.log(`📋 Reference number: ${referenceNumber}`);
 
-    // ✅ ENHANCED: Always handle both POST and GET, with better response
+    // ✅ REDIRECT TO UNIFIED SUCCESS PAGE
+    const successUrl = `/payment/success?order_id=FREE&amount=0.00&ref=${referenceNumber}`;
+
     if (req.method === "POST") {
       res.json({
         success: true,
         message: "Registration completed successfully!",
         referenceNumber: referenceNumber,
-        redirect: `/payment/success?order_id=FREE&amount=0.00&ref=${referenceNumber}`,
+        coursesRegistered: coursesUpdated,
+        redirect: successUrl,
       });
     } else {
-      // GET request - redirect to success page
-      res.redirect(
-        `/payment/success?order_id=FREE&amount=0.00&ref=${referenceNumber}`
-      );
+      // GET request - redirect directly
+      res.redirect(successUrl);
     }
   } catch (err) {
-    console.error("❌ Error completing registration:", err);
+    console.error("❌ Error completing free registration:", err);
 
     if (req.method === "POST") {
-      res
-        .status(500)
-        .json({ success: false, message: "Server error during registration" });
+      res.status(500).json({
+        success: false,
+        message: "Server error during registration. Please try again.",
+      });
     } else {
-      res.status(500).send("Error completing registration");
+      res.status(500).send("Error completing registration. Please try again.");
     }
   }
 };
@@ -965,8 +1023,8 @@ exports.proceedToPayment = async (req, res) => {
       order_id: orderNumber,
       amount: finalAmount.toFixed(2),
       currency: "USD",
-      redirect_url: `${req.protocol}://${req.get("host")}/payment/response`,
-      cancel_url: `${req.protocol}://${req.get("host")}/payment/cancel`,
+      redirect_url: `${baseUrl}/payment/response`, // ✅ Updated
+      cancel_url: `${baseUrl}/payment/cancel`, // ✅ Updated
       language: "EN",
 
       // Customer details
@@ -990,9 +1048,7 @@ exports.proceedToPayment = async (req, res) => {
 
     // Determine payment URL
     const paymentUrl =
-      process.env.NODE_ENV === "production"
-        ? process.env.CCAVENUE_PROD_URL
-        : process.env.CCAVENUE_TEST_URL;
+      "https://secure.ccavenue.ae/transaction/transaction.do?command=initiateTransaction";
 
     // ✅ ENHANCED: Create auto-submit form with linked course info
     const paymentForm = `

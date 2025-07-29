@@ -765,16 +765,7 @@
 <body>
     <%- include('partials/header') %>
 
-    <!-- ✅ NEW: Debug info (only shown in development) -->
-    <% if (process.env.NODE_ENV === 'development') { %>
-        <div class="debug-info" style="display: block;">
-            <strong>DEBUG INFO:</strong> 
-            Total instructors passed to template: <%= instructors ? instructors.length : 0 %>
-            <% if (instructors && instructors.length > 0) { %>
-                | First instructor visibility: <%= instructors[0].showOnPublicPage !== false ? 'Visible' : 'Hidden' %>
-            <% } %>
-        </div>
-    <% } %>
+   
 
     <!-- Breadcrumb -->
     <nav class="breadcrumb">

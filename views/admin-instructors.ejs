@@ -860,6 +860,16 @@
                                 <label>Hourly Rate</label>
                                 <input type="number" name="hourlyRate" class="form-control" min="0" step="0.01">
                             </div>
+                    
+                            <!-- ✅ NEW FIELD - Visibility Control -->
+                            <div class="form-group">
+                                <label>Show on Public Page</label>
+                                <select name="showOnPublicPage" class="form-control">
+                                    <option value="true">Yes - Show on "Our Instructors" page</option>
+                                    <option value="false">No - Hide from public page</option>
+                                </select>
+                                <small class="form-text">Controls whether this instructor appears on the public "Our Instructors" page</small>
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -1390,6 +1400,7 @@
                 form.status.value = instructor.status || 'Active';
                 form.contractType.value = instructor.contractType || 'Contract';
                 form.hourlyRate.value = instructor.hourlyRate || '';
+                form.showOnPublicPage.value = instructor.showOnPublicPage !== undefined ? instructor.showOnPublicPage.toString() : 'true'; 
                 form.notes.value = instructor.notes || '';
                 console.log('   ✅ Basic fields populated');
                 

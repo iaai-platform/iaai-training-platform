@@ -25,10 +25,11 @@ class InstructorViewController {
       const limit = parseInt(req.query.limit) || 12;
       const skip = (page - 1) * limit;
 
-      // Build search query
+      // Build search query - ✅ UPDATED: Added showOnPublicPage filter
       let searchQuery = {
         isDeleted: false,
         status: "Active",
+        showOnPublicPage: true, // ✅ Only show instructors marked as visible on public page
       };
 
       // Add search filters
@@ -85,10 +86,11 @@ class InstructorViewController {
         };
       });
 
-      // Get unique values for filters
+      // Get unique values for filters - ✅ UPDATED: Only from public instructors
       const allInstructors = await Instructor.find({
         isDeleted: false,
         status: "Active",
+        showOnPublicPage: true, // ✅ Only get filter options from public instructors
       }).lean();
 
       const expertiseOptions = [
@@ -158,10 +160,12 @@ class InstructorViewController {
         return res.redirect("/our-instructors");
       }
 
+      // ✅ UPDATED: Added showOnPublicPage filter
       const instructor = await Instructor.findOne({
         _id: instructorId,
         isDeleted: false,
         status: "Active",
+        showOnPublicPage: true, // ✅ Only allow viewing profiles of public instructors
       }).lean();
 
       if (!instructor) {
@@ -209,7 +213,7 @@ class InstructorViewController {
           : 0,
       };
 
-      // Get related instructors (same expertise area) - optional, only if we have expertise
+      // Get related instructors (same expertise area) - ✅ UPDATED: Only public instructors
       let relatedInstructors = [];
       if (instructor.expertise && instructor.expertise.length > 0) {
         try {
@@ -217,6 +221,7 @@ class InstructorViewController {
             _id: { $ne: instructor._id },
             isDeleted: false,
             status: "Active",
+            showOnPublicPage: true, // ✅ Only show public instructors as related
             expertise: { $in: instructor.expertise },
           })
             .limit(4)
@@ -271,9 +276,12 @@ class InstructorViewController {
       }
 
       const searchRegex = new RegExp(term, "i");
+
+      // ✅ UPDATED: Added showOnPublicPage filter
       const instructors = await Instructor.find({
         isDeleted: false,
         status: "Active",
+        showOnPublicPage: true, // ✅ Only search among public instructors
         $or: [
           { firstName: searchRegex },
           { lastName: searchRegex },
@@ -319,7 +327,14 @@ class InstructorViewController {
           .json({ error: "Instructor ID and start date are required" });
       }
 
-      const instructor = await Instructor.findById(instructorId);
+      // ✅ UPDATED: Added showOnPublicPage filter for public availability check
+      const instructor = await Instructor.findOne({
+        _id: instructorId,
+        isDeleted: false,
+        status: "Active",
+        showOnPublicPage: true, // ✅ Only check availability for public instructors
+      });
+
       if (!instructor) {
         return res.status(404).json({ error: "Instructor not found" });
       }
@@ -421,7 +436,7 @@ class InstructorViewController {
   }
 
   /**
-   * Get related instructors (same expertise area)
+   * Get related instructors (same expertise area) - ✅ UPDATED: Only public instructors
    * @param {Object} instructor - Current instructor
    * @returns {Array} Array of related instructors
    */
@@ -435,6 +450,7 @@ class InstructorViewController {
         _id: { $ne: instructor._id }, // Exclude current instructor
         isDeleted: false,
         status: "Active",
+        showOnPublicPage: true, // ✅ Only show public instructors as related
         expertise: { $in: instructor.expertise },
       })
         .limit(4)
@@ -460,6 +476,7 @@ class InstructorViewController {
    */
   static async getInstructorStats(req, res) {
     try {
+      // ✅ NOTE: This method provides admin stats, so it shows ALL instructors regardless of visibility
       const stats = await Instructor.aggregate([
         { $match: { isDeleted: false } },
         {
@@ -475,6 +492,13 @@ class InstructorViewController {
             onLeaveInstructors: {
               $sum: { $cond: [{ $eq: ["$status", "On Leave"] }, 1, 0] },
             },
+            // ✅ NEW: Add visibility stats
+            publicInstructors: {
+              $sum: { $cond: [{ $eq: ["$showOnPublicPage", true] }, 1, 0] },
+            },
+            hiddenInstructors: {
+              $sum: { $cond: [{ $eq: ["$showOnPublicPage", false] }, 1, 0] },
+            },
             averageExperience: { $avg: { $toDouble: "$experience" } },
             totalCourses: {
               $sum: { $size: { $ifNull: ["$assignedCourses", []] } },
@@ -483,8 +507,15 @@ class InstructorViewController {
         },
       ]);
 
+      // ✅ Expertise stats from public instructors only (for public page insights)
       const expertiseStats = await Instructor.aggregate([
-        { $match: { isDeleted: false, status: "Active" } },
+        {
+          $match: {
+            isDeleted: false,
+            status: "Active",
+            showOnPublicPage: true,
+          },
+        },
         { $unwind: { path: "$expertise", preserveNullAndEmptyArrays: true } },
         { $group: { _id: "$expertise", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
@@ -498,6 +529,8 @@ class InstructorViewController {
           activeInstructors: 0,
           inactiveInstructors: 0,
           onLeaveInstructors: 0,
+          publicInstructors: 0, // ✅ NEW
+          hiddenInstructors: 0, // ✅ NEW
           averageExperience: 0,
           totalCourses: 0,
         },

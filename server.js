@@ -567,8 +567,8 @@ app.use("/", latestNewsRoutes);
 // ============================================
 
 // About page
-app.get("/about", (req, res) => {
-  res.render("about", { title: "About Us" });
+app.get("/about-us", (req, res) => {
+  res.render("about-us", { title: "About Us" });
 });
 
 // ============================================

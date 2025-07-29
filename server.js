@@ -229,6 +229,41 @@ app.get("/training-programs", (req, res) => {
 });
 
 // ============================================
+// 9.1 UNDER CONSTRUCTION TRAINING ROUTES (NEW)
+// ============================================
+
+// Mentorship Program - Under Construction
+app.get("/mentorship-program", (req, res) => {
+  const user = req.user || null;
+  res.render("mentorship-program", {
+    user: user,
+    title: "Mentorship Program - IAAI",
+  });
+});
+
+// Advanced Aesthetic Techniques - Under Construction
+app.get("/advanced-aesthetic-techniques", (req, res) => {
+  const user = req.user || null;
+  res.render("advanced-aesthetic-techniques", {
+    user: user,
+    title: "Advanced Aesthetic Techniques - IAAI",
+  });
+});
+
+// Corporate Aesthetic Training - Under Construction
+app.get("/corporate-aesthetic-training", (req, res) => {
+  const user = req.user || null;
+  res.render("corporate-aesthetic-training", {
+    user: user,
+    title: "Corporate Aesthetic Training - IAAI",
+  });
+});
+
+console.log(
+  "🚧 Under construction training routes loaded (mentorship, advanced-techniques, corporate)"
+);
+
+// ============================================
 // SEARCH FUNCTIONALITY
 // ============================================
 app.get("/search", async (req, res) => {

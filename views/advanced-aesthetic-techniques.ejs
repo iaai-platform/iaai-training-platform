@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Aesthetic Techniques - International Aesthetic Academic Institution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Placeholder */
+        .header-placeholder {
+            height: 80px;
+            background: #002147;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Construction Card */
+        .construction-card {
+            background: #ffffff;
+            border-radius: 25px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .construction-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #b8860b, #002147);
+        }
+
+        /* Construction Icon */
+        .construction-icon {
+            font-size: 80px;
+            color: #ffcc00;
+            margin-bottom: 30px;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Typography */
+        .construction-card h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #002147;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .construction-card h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffcc00;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .construction-card p {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        /* Coming Soon Badge */
+        .coming-soon-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            color: #002147;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(255, 204, 0, 0.8), 0 0 30px rgba(255, 204, 0, 0.6);
+            }
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #002147, #003366);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(0, 33, 71, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 33, 71, 0.5);
+            background: linear-gradient(135deg, #001a3a, #002147);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #002147;
+            color: #002147;
+        }
+
+        .btn-secondary:hover {
+            background: #002147;
+            color: #ffffff;
+            transform: translateY(-3px);
+        }
+
+        /* Features Preview */
+        .features-preview {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px dashed #e0e0e0;
+        }
+
+        .features-preview h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #002147;
+            margin-bottom: 20px;
+        }
+
+        .features-list {
+            list-style: none;
+            text-align: left;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .features-list li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 16px;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .features-list li::before {
+            content: '💉';
+            position: absolute;
+            left: 0;
+            font-size: 14px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffcc00, #b8860b);
+            width: 75%;
+            border-radius: 4px;
+            animation: loading-progress 3s ease-in-out infinite;
+        }
+
+        @keyframes loading-progress {
+            0%, 100% { width: 75%; }
+            50% { width: 85%; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .construction-card {
+                padding: 40px 30px;
+                margin: 20px;
+            }
+
+            .construction-card h1 {
+                font-size: 28px;
+            }
+
+            .construction-card h2 {
+                font-size: 20px;
+            }
+
+            .construction-card p {
+                font-size: 16px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+
+        /* Floating Icons */
+        .floating-icons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            opacity: 0.1;
+            font-size: 40px;
+            color: #002147;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main class="main-container">
+        <div class="construction-card">
+            <div class="floating-icons">
+                <i class="fas fa-syringe"></i>
+            </div>
+            
+            <div class="construction-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            
+            <div class="coming-soon-badge">
+                In Development
+            </div>
+            
+            <h1>Advanced Aesthetic Techniques</h1>
+            <h2>Under Construction</h2>
+            
+            <p>We're developing cutting-edge training programs for the most advanced aesthetic techniques in the industry. This comprehensive course will feature the latest innovations, advanced injection methods, and breakthrough technologies in aesthetic medicine.</p>
+            
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Development Progress</span>
+                    <span><strong>75%</strong></span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div class="features-preview">
+                <h3>Advanced Techniques Coming Soon:</h3>
+                <ul class="features-list">
+                    <li>Advanced micro-injection techniques</li>
+                    <li>Non-surgical facelift procedures</li>
+                    <li>Latest laser and energy-based treatments</li>
+                    <li>Combination therapy protocols</li>
+                    <li>Complication management masterclass</li>
+                    <li>Innovation in aesthetic technology</li>
+                    <li>Master-level injection artistry</li>
+                </ul>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/training-programs" class="btn btn-primary">
+                    <i class="fas fa-microscope"></i>
+                    Current Advanced Programs
+                </a>
+                <a href="/contact-us" class="btn btn-secondary">
+                    <i class="fas fa-bell"></i>
+                    Notify Me When Available
+                </a>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 14px; color: #999;">
+                <i class="fas fa-flask"></i>
+                <strong>Advanced techniques</strong> require advanced preparation. We're perfecting every detail.
+            </p>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Add interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const card = document.querySelector('.construction-card');
+            const icon = document.querySelector('.construction-icon');
+            
+            // Enhanced hover effect
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+                this.style.boxShadow = '0 35px 100px rgba(0, 0, 0, 0.15)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+                this.style.boxShadow = '0 25px 80px rgba(0, 0, 0, 0.1)';
+            });
+
+            // Button effects
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+
+            // Random progress animation
+            setInterval(() => {
+                const progressFill = document.querySelector('.progress-fill');
+                const randomWidth = 75 + Math.random() * 10;
+                progressFill.style.width = randomWidth + '%';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

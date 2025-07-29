@@ -374,12 +374,12 @@
     }
 
     .news-right img {
-  width: 100%;
-  height: 300px;
-  object-fit: contain;
-  background-color: #f8f9fa;
-  transition: transform 0.5s ease;
-}
+      width: 100%;
+      height: 300px;
+      object-fit: contain;
+      background-color: #f8f9fa;
+      transition: transform 0.5s ease;
+    }
 
     .news-right:hover img {
       transform: scale(1.1);
@@ -506,7 +506,7 @@
     }
 
     /* ============================================================
-       ✅ 7. Newsletter Section
+       ✅ 7. Enhanced Newsletter Section with Email Collection
     ============================================================ */
     .newsletter-section {
       background: linear-gradient(135deg, #002147, #003366);
@@ -514,6 +514,17 @@
       margin: 80px 0;
       position: relative;
       overflow: hidden;
+    }
+
+    .newsletter-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.3;
     }
 
     .newsletter-container {
@@ -529,6 +540,7 @@
       font-size: 36px;
       color: #ffffff;
       margin-bottom: 20px;
+      font-weight: 700;
     }
 
     .newsletter-section p {
@@ -536,6 +548,7 @@
       color: #e0e0e0;
       margin-bottom: 40px;
       font-family: 'Montserrat', sans-serif;
+      line-height: 1.6;
     }
 
     .newsletter-form {
@@ -543,10 +556,13 @@
       max-width: 500px;
       margin: 0 auto;
       gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .newsletter-input {
       flex: 1;
+      min-width: 280px;
       padding: 15px 20px;
       border: none;
       border-radius: 50px;
@@ -556,6 +572,13 @@
       color: #ffffff;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .newsletter-input:focus {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: #ffcc00;
+      box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
     }
 
     .newsletter-input::placeholder {
@@ -571,11 +594,47 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
     }
 
     .newsletter-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(255, 204, 0, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(255, 204, 0, 0.5);
+      background: linear-gradient(135deg, #e5b300, #b8860b);
+    }
+
+    .newsletter-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    .newsletter-feature {
+      color: #e0e0e0;
+    }
+
+    .newsletter-feature i {
+      font-size: 32px;
+      color: #ffcc00;
+      margin-bottom: 15px;
+    }
+
+    .newsletter-feature h4 {
+      font-size: 16px;
+      color: #ffffff;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .newsletter-feature p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
     }
 
     /* ============================================================
@@ -610,7 +669,6 @@
 
       .hero-content {
         padding: 30px 20px 50px;
-       
       }
 
       #services {
@@ -640,6 +698,17 @@
       .newsletter-form {
         flex-direction: column;
         gap: 15px;
+        align-items: center;
+      }
+
+      .newsletter-input {
+        min-width: auto;
+        width: 100%;
+      }
+
+      .newsletter-features {
+        grid-template-columns: 1fr;
+        gap: 20px;
       }
 
       .stats-container {
@@ -773,15 +842,36 @@
     </div>
   </section>
 
-  <!-- Newsletter Section -->
+  <!-- Enhanced Newsletter Section with Email Collection -->
   <section class="newsletter-section">
     <div class="newsletter-container">
       <h2>Stay Updated</h2>
-      <p>Subscribe to our newsletter for the latest updates on courses, events, and industry insights.</p>
-      <form class="newsletter-form">
-        <input type="email" class="newsletter-input" placeholder="Enter your email address" required>
+      <p>Subscribe to our newsletter for the latest updates on courses, events, industry insights, and exclusive offers from IAAI.</p>
+      
+      <!-- ✅ NEW: Updated Newsletter Form with Email Collection -->
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" class="newsletter-input" name="email" placeholder="Enter your email address" required>
         <button type="submit" class="newsletter-btn">Subscribe</button>
       </form>
+
+      <!-- ✅ NEW: Newsletter Features -->
+      <div class="newsletter-features">
+        <div class="newsletter-feature">
+          <i class="fas fa-newspaper"></i>
+          <h4>Latest News</h4>
+          <p>Get the latest updates on new courses and training programs</p>
+        </div>
+        <div class="newsletter-feature">
+          <i class="fas fa-calendar-alt"></i>
+          <h4>Upcoming Events</h4>
+          <p>Be the first to know about webinars and live training sessions</p>
+        </div>
+        <div class="newsletter-feature">
+          <i class="fas fa-tag"></i>
+          <h4>Exclusive Offers</h4>
+          <p>Receive special discounts and early bird pricing</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -847,13 +937,41 @@
       counterObserver.observe(item);
     });
 
-    // Newsletter form submission
-    document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
+    // ✅ NEW: Enhanced Newsletter form submission with email collection
+    document.getElementById('newsletterForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const email = this.querySelector('.newsletter-input').value;
-      // Add your newsletter subscription logic here
-      alert('Thank you for subscribing to our newsletter!');
-      this.reset();
+      
+      const email = this.querySelector('input[type="email"]').value;
+      
+      // Prepare data for email collection
+      const data = {
+        email: email,
+        reason: 'newsletter',
+        source: 'homepage-newsletter',
+        additionalInfo: 'Newsletter subscription from homepage'
+      };
+      
+      try {
+        const response = await fetch('/collect-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert(result.message || 'Thank you for subscribing to our newsletter!');
+          this.querySelector('input[type="email"]').value = '';
+        } else {
+          alert(result.message || 'Something went wrong. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+      }
     });
 
     // ✅ NEW: Button hover effects
@@ -865,6 +983,15 @@
       btn.addEventListener('mouseleave', function() {
         this.style.transform = 'translateY(0) scale(1)';
       });
+    });
+
+    // Enhanced newsletter form interactions
+    document.querySelector('.newsletter-input').addEventListener('focus', function() {
+      this.style.transform = 'scale(1.02)';
+    });
+
+    document.querySelector('.newsletter-input').addEventListener('blur', function() {
+      this.style.transform = 'scale(1)';
     });
   </script>
 

@@ -6,21 +6,25 @@ const emailCollectionController = {
     try {
       const { email, reason, source, additionalInfo } = req.body;
 
-      // Basic validation
-      if (!email || !reason || !source) {
+      // Basic validation - only check for email
+      if (!email) {
         return res.status(400).json({
           success: false,
-          message: "Email, reason, and source are required",
+          message: "Please enter a valid email address",
         });
       }
 
+      // Set defaults if missing
+      const finalReason = reason || "general-updates";
+      const finalSource = source || "website-form";
+
       // Try to save (will update if already exists)
       const emailData = await EmailCollection.findOneAndUpdate(
-        { email: email.toLowerCase(), reason },
+        { email: email.toLowerCase(), reason: finalReason },
         {
           email: email.toLowerCase(),
-          reason,
-          source,
+          reason: finalReason,
+          source: finalSource,
           additionalInfo: additionalInfo || "",
           ipAddress: req.ip,
           userAgent: req.get("User-Agent"),
@@ -33,7 +37,9 @@ const emailCollectionController = {
         }
       );
 
-      console.log(`📧 Email collected: ${email} for ${reason} from ${source}`);
+      console.log(
+        `📧 Email collected: ${email} for ${finalReason} from ${finalSource}`
+      );
 
       res.json({
         success: true,

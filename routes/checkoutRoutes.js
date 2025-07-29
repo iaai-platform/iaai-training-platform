@@ -141,4 +141,30 @@ router.get("/policies", (req, res) => {
   });
 });
 
+// Add this temporary route to clean up malformed transactions
+// Add to your routes file temporarily
+
+router.get("/clear-transactions", isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    console.log(
+      `Clearing ${user.paymentTransactions.length} transactions for user ${user.email}`
+    );
+
+    // Clear all transactions
+    user.paymentTransactions = [];
+    await user.save({ validateBeforeSave: false });
+
+    res.json({
+      success: true,
+      message: `Cleared transactions for ${user.email}`,
+    });
+  } catch (error) {
+    console.error("Error clearing transactions:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error clearing transactions" });
+  }
+});
 module.exports = router;

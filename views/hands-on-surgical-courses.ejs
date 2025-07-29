@@ -133,13 +133,15 @@
 
         /* UPDATED: Fixed course image for full display without zoom */
         .course-image {
-            height: 280px;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            position: relative;
-            overflow: hidden;
-        }
+    height: 280px;
+    background-size: contain;      /* ← CHANGE FROM 'cover' TO 'contain' */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #f8f9fa;     /* ← ADD BACKGROUND COLOR */
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 0 0;        /* Optional: no rounding on image area */
+}
 
         /* UPDATED: Overlay effect - maintains image size */
         .course-image::before {

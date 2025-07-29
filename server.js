@@ -436,6 +436,12 @@ const certificationBodyRoutes = require("./routes/certificationBodyRoutes");
 app.use("/", certificationBodyRoutes); // Mount at root so /admin-certification-bodies works
 
 // ============================================
+// COURSE STATUS MONITORING ROUTES (NEW)
+// ============================================
+const courseStatusRoutes = require("./routes/admin/courseStatusRoutes");
+app.use("/admin-course-status", courseStatusRoutes);
+console.log("📊 Course status monitoring routes loaded");
+// ============================================
 // ADD THE LINKED COURSE ROUTES HERE (NEW)
 // ============================================
 const linkedCourseRoutes = require("./routes/linkedCourseRoutes");

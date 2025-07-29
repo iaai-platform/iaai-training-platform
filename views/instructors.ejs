@@ -629,6 +629,18 @@
             margin-bottom: 30px;
         }
 
+        /* ✅ NEW: Debug styles for development */
+        .debug-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #856404;
+            display: none; /* Hidden by default */
+        }
+
         /* Responsive Design */
         @media (max-width: 1200px) {
             .instructors-grid {
@@ -753,6 +765,17 @@
 <body>
     <%- include('partials/header') %>
 
+    <!-- ✅ NEW: Debug info (only shown in development) -->
+    <% if (process.env.NODE_ENV === 'development') { %>
+        <div class="debug-info" style="display: block;">
+            <strong>DEBUG INFO:</strong> 
+            Total instructors passed to template: <%= instructors ? instructors.length : 0 %>
+            <% if (instructors && instructors.length > 0) { %>
+                | First instructor visibility: <%= instructors[0].showOnPublicPage !== false ? 'Visible' : 'Hidden' %>
+            <% } %>
+        </div>
+    <% } %>
+
     <!-- Breadcrumb -->
     <nav class="breadcrumb">
         <div class="breadcrumb-container">
@@ -861,7 +884,15 @@
         <div class="results-header">
             <div class="results-count">
                 <i class="fas fa-users"></i> 
-                <%= totalInstructors %> instructor<%= totalInstructors !== 1 ? 's' : '' %> found
+                <!-- ✅ UPDATED: Added safety check and filtering count -->
+                <% 
+                let visibleInstructors = instructors ? instructors.filter(instructor => 
+                    instructor.showOnPublicPage !== false && 
+                    instructor.status === 'Active' && 
+                    !instructor.isDeleted
+                ) : [];
+                %>
+                <%= visibleInstructors.length %> instructor<%= visibleInstructors.length !== 1 ? 's' : '' %> found
             </div>
             <div class="view-toggle">
                 <button class="view-btn active" data-view="grid">
@@ -875,142 +906,169 @@
 
         <!-- Instructors Grid View -->
         <section class="instructors-grid active" id="gridView">
+            <!-- ✅ UPDATED: Added visibility filtering and safety checks -->
             <% if (instructors && instructors.length > 0) { %>
                 <% instructors.forEach(instructor => { %>
-                    <div class="instructor-card fade-in">
-                        <div class="instructor-image">
-                            <img src="<%= instructor.profileImage || '/images/default-instructor.jpg' %>" alt="<%= instructor.firstName %> <%= instructor.lastName %>">
-                            <div class="instructor-status">
-                                <i class="fas fa-circle"></i> <%= instructor.status %>
-                            </div>
-                            <% if (instructor.averageRating > 0) { %>
-                                <div class="instructor-rating">
-                                    <i class="fas fa-star"></i> <%= instructor.averageRating %>
+                    <!-- ✅ NEW: Double-check visibility before rendering -->
+                    <% if (instructor.showOnPublicPage !== false && instructor.status === 'Active' && !instructor.isDeleted) { %>
+                        <div class="instructor-card fade-in" data-instructor-id="<%= instructor._id %>">
+                            <!-- ✅ NEW: Add data attribute for debugging -->
+                            <% if (process.env.NODE_ENV === 'development') { %>
+                                <div class="debug-info" style="display: none;">
+                                    Visibility: <%= instructor.showOnPublicPage !== false ? 'Visible' : 'Hidden' %> | 
+                                    Status: <%= instructor.status %> | 
+                                    Deleted: <%= instructor.isDeleted ? 'Yes' : 'No' %>
                                 </div>
                             <% } %>
-                        </div>
-                        
-                        <div class="instructor-content">
-                            <div class="instructor-header">
-                                <h3 class="instructor-name">
-                                    <%= instructor.title ? instructor.title + ' ' : '' %><%= instructor.firstName %> <%= instructor.lastName %>
-                                </h3>
-                                <div class="instructor-designation"><%= instructor.designation || 'Aesthetic Medicine Expert' %></div>
+                            
+                            <div class="instructor-image">
+                                <img src="<%= instructor.profileImage || '/images/default-instructor.jpg' %>" alt="<%= instructor.firstName %> <%= instructor.lastName %>">
+                                <div class="instructor-status">
+                                    <i class="fas fa-circle"></i> <%= instructor.status %>
+                                </div>
+                                <% if (instructor.averageRating > 0) { %>
+                                    <div class="instructor-rating">
+                                        <i class="fas fa-star"></i> <%= instructor.averageRating %>
+                                    </div>
+                                <% } %>
                             </div>
                             
-                            <div class="instructor-expertise">
-                                <div class="expertise-tags">
-                                    <% if (instructor.expertise && instructor.expertise.length > 0) { %>
-                                        <% instructor.expertise.slice(0, 3).forEach(exp => { %>
-                                            <span class="expertise-tag"><%= exp %></span>
-                                        <% }) %>
-                                        <% if (instructor.expertise.length > 3) { %>
-                                            <span class="expertise-tag">+<%= instructor.expertise.length - 3 %> more</span>
+                            <div class="instructor-content">
+                                <div class="instructor-header">
+                                    <h3 class="instructor-name">
+                                        <%= instructor.title ? instructor.title + ' ' : '' %><%= instructor.firstName %> <%= instructor.lastName %>
+                                    </h3>
+                                    <div class="instructor-designation"><%= instructor.designation || 'Aesthetic Medicine Expert' %></div>
+                                </div>
+                                
+                                <div class="instructor-expertise">
+                                    <div class="expertise-tags">
+                                        <% if (instructor.expertise && instructor.expertise.length > 0) { %>
+                                            <% instructor.expertise.slice(0, 3).forEach(exp => { %>
+                                                <span class="expertise-tag"><%= exp %></span>
+                                            <% }) %>
+                                            <% if (instructor.expertise.length > 3) { %>
+                                                <span class="expertise-tag">+<%= instructor.expertise.length - 3 %> more</span>
+                                            <% } %>
                                         <% } %>
-                                    <% } %>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="instructor-stats">
-                                <div class="stat-item">
-                                    <span class="stat-number"><%= instructor.experience || '5+' %></span>
-                                    <span class="stat-label">Years Exp.</span>
+                                
+                                <div class="instructor-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-number"><%= instructor.experience || '5+' %></span>
+                                        <span class="stat-label">Years Exp.</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number"><%= instructor.totalCourses %></span>
+                                        <span class="stat-label">Courses</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number"><%= instructor.upcomingCourses %></span>
+                                        <span class="stat-label">Upcoming</span>
+                                    </div>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-number"><%= instructor.totalCourses %></span>
-                                    <span class="stat-label">Courses</span>
+                                
+                                <div class="instructor-actions">
+                                    <a href="/our-instructors/<%= instructor._id %>" class="btn-view">
+                                        <i class="fas fa-user"></i> View Profile
+                                    </a>
+                                    <button class="btn-contact" onclick="contactInstructor('<%= instructor._id %>')">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-number"><%= instructor.upcomingCourses %></span>
-                                    <span class="stat-label">Upcoming</span>
-                                </div>
-                            </div>
-                            
-                            <div class="instructor-actions">
-                                <a href="/our-instructors/<%= instructor._id %>" class="btn-view">
-                                    <i class="fas fa-user"></i> View Profile
-                                </a>
-                                <button class="btn-contact" onclick="contactInstructor('<%= instructor._id %>')">
-                                    <i class="fas fa-envelope"></i>
-                                </button>
                             </div>
                         </div>
-                    </div>
+                    <% } %>
                 <% }) %>
             <% } %>
         </section>
 
         <!-- Instructors List View -->
         <section class="instructors-list" id="listView">
+            <!-- ✅ UPDATED: Added visibility filtering and safety checks -->
             <% if (instructors && instructors.length > 0) { %>
                 <% instructors.forEach(instructor => { %>
-                    <div class="instructor-list-item fade-in">
-                        <div class="list-instructor-image">
-                            <img src="<%= instructor.profileImage || '/images/default-instructor.jpg' %>" alt="<%= instructor.firstName %> <%= instructor.lastName %>">
-                        </div>
-                        
-                        <div class="list-instructor-content">
-                            <div class="list-instructor-header">
-                                <div class="list-instructor-info">
-                                    <h3><%= instructor.title ? instructor.title + ' ' : '' %><%= instructor.firstName %> <%= instructor.lastName %></h3>
-                                    <div class="title"><%= instructor.designation || 'Aesthetic Medicine Expert' %></div>
-                                    <div class="designation"><%= instructor.expertise?.[0] || 'General Practice' %></div>
+                    <!-- ✅ NEW: Double-check visibility before rendering -->
+                    <% if (instructor.showOnPublicPage !== false && instructor.status === 'Active' && !instructor.isDeleted) { %>
+                        <div class="instructor-list-item fade-in" data-instructor-id="<%= instructor._id %>">
+                            <!-- ✅ NEW: Add data attribute for debugging -->
+                            <% if (process.env.NODE_ENV === 'development') { %>
+                                <div class="debug-info" style="display: none;">
+                                    Visibility: <%= instructor.showOnPublicPage !== false ? 'Visible' : 'Hidden' %> | 
+                                    Status: <%= instructor.status %> | 
+                                    Deleted: <%= instructor.isDeleted ? 'Yes' : 'No' %>
                                 </div>
-                                <% if (instructor.averageRating > 0) { %>
-                                    <div class="list-rating">
-                                        <div class="rating-stars">
-                                            <% for(let i = 1; i <= 5; i++) { %>
-                                                <i class="fas fa-star <%= i <= Math.floor(instructor.averageRating) ? '' : 'far' %>"></i>
-                                            <% } %>
-                                        </div>
-                                        <div class="rating-number"><%= instructor.averageRating %></div>
-                                    </div>
-                                <% } %>
+                            <% } %>
+                            
+                            <div class="list-instructor-image">
+                                <img src="<%= instructor.profileImage || '/images/default-instructor.jpg' %>" alt="<%= instructor.firstName %> <%= instructor.lastName %>">
                             </div>
                             
-                            <div class="list-expertise">
-                                <div class="expertise-tags">
-                                    <% if (instructor.expertise && instructor.expertise.length > 0) { %>
-                                        <% instructor.expertise.forEach(exp => { %>
-                                            <span class="expertise-tag"><%= exp %></span>
-                                        <% }) %>
+                            <div class="list-instructor-content">
+                                <div class="list-instructor-header">
+                                    <div class="list-instructor-info">
+                                        <h3><%= instructor.title ? instructor.title + ' ' : '' %><%= instructor.firstName %> <%= instructor.lastName %></h3>
+                                        <div class="title"><%= instructor.designation || 'Aesthetic Medicine Expert' %></div>
+                                        <div class="designation"><%= instructor.expertise?.[0] || 'General Practice' %></div>
+                                    </div>
+                                    <% if (instructor.averageRating > 0) { %>
+                                        <div class="list-rating">
+                                            <div class="rating-stars">
+                                                <% for(let i = 1; i <= 5; i++) { %>
+                                                    <i class="fas fa-star <%= i <= Math.floor(instructor.averageRating) ? '' : 'far' %>"></i>
+                                                <% } %>
+                                            </div>
+                                            <div class="rating-number"><%= instructor.averageRating %></div>
+                                        </div>
                                     <% } %>
                                 </div>
-                            </div>
-                            
-                            <div class="list-stats">
-                                <div class="list-stat">
-                                    <strong><%= instructor.experience || '5+' %></strong> years experience
-                                </div>
-                                <div class="list-stat">
-                                    <strong><%= instructor.totalCourses %></strong> courses taught
-                                </div>
-                                <div class="list-stat">
-                                    <strong><%= instructor.upcomingCourses %></strong> upcoming sessions
-                                </div>
-                                <% if (instructor.languages && instructor.languages.length > 0) { %>
-                                    <div class="list-stat">
-                                        <strong>Languages:</strong> <%= instructor.languages.join(', ') %>
+                                
+                                <div class="list-expertise">
+                                    <div class="expertise-tags">
+                                        <% if (instructor.expertise && instructor.expertise.length > 0) { %>
+                                            <% instructor.expertise.forEach(exp => { %>
+                                                <span class="expertise-tag"><%= exp %></span>
+                                            <% }) %>
+                                        <% } %>
                                     </div>
-                                <% } %>
-                            </div>
-                            
-                            <div class="list-actions">
-                                <a href="/our-instructors/<%= instructor._id %>" class="btn-view">
-                                    <i class="fas fa-user"></i> View Full Profile
-                                </a>
-                                <button class="btn-contact" onclick="contactInstructor('<%= instructor._id %>')">
-                                    <i class="fas fa-envelope"></i> Contact
-                                </button>
+                                </div>
+                                
+                                <div class="list-stats">
+                                    <div class="list-stat">
+                                        <strong><%= instructor.experience || '5+' %></strong> years experience
+                                    </div>
+                                    <div class="list-stat">
+                                        <strong><%= instructor.totalCourses %></strong> courses taught
+                                    </div>
+                                    <div class="list-stat">
+                                        <strong><%= instructor.upcomingCourses %></strong> upcoming sessions
+                                    </div>
+                                    <% if (instructor.languages && instructor.languages.length > 0) { %>
+                                        <div class="list-stat">
+                                            <strong>Languages:</strong> <%= instructor.languages.join(', ') %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                
+                                <div class="list-actions">
+                                    <a href="/our-instructors/<%= instructor._id %>" class="btn-view">
+                                        <i class="fas fa-user"></i> View Full Profile
+                                    </a>
+                                    <button class="btn-contact" onclick="contactInstructor('<%= instructor._id %>')">
+                                        <i class="fas fa-envelope"></i> Contact
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    <% } %>
                 <% }) %>
             <% } %>
         </section>
 
         <!-- Empty State -->
-        <% if (!instructors || instructors.length === 0) { %>
+        <!-- ✅ UPDATED: Show empty state if no visible instructors -->
+        <% if (!instructors || instructors.length === 0 || visibleInstructors.length === 0) { %>
             <div class="empty-state">
                 <i class="fas fa-search"></i>
                 <h3>No Instructors Found</h3>
@@ -1026,6 +1084,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ✅ NEW: Debug logging for client-side troubleshooting
+            console.log('🔍 CLIENT DEBUG: Instructors loaded on page:', document.querySelectorAll('.instructor-card, .instructor-list-item').length);
+            
+            // ✅ NEW: Check for any hidden instructors that might have slipped through
+            const allInstructorElements = document.querySelectorAll('[data-instructor-id]');
+            console.log('🔍 CLIENT DEBUG: Total instructor elements found:', allInstructorElements.length);
+            
             // View toggle functionality
             const viewButtons = document.querySelectorAll('.view-btn');
             const gridView = document.getElementById('gridView');
@@ -1094,6 +1159,9 @@
                     const response = await fetch(`/api/our-instructors/search?term=${encodeURIComponent(term)}`);
                     const suggestions = await response.json();
                     
+                    // ✅ NEW: Debug log search suggestions
+                    console.log('🔍 CLIENT DEBUG: Search suggestions received:', suggestions.length);
+                    
                     displaySuggestions(suggestions);
                 } catch (error) {
                     console.error('Search suggestions error:', error);
@@ -1145,6 +1213,24 @@
             document.querySelectorAll('.instructor-card, .instructor-list-item').forEach(el => {
                 observer.observe(el);
             });
+
+            // ✅ NEW: Development debug helper
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                window.debugInstructors = function() {
+                    const cards = document.querySelectorAll('[data-instructor-id]');
+                    console.log('='.repeat(50));
+                    console.log('FRONTEND DEBUG: Instructor cards on page');
+                    console.log('='.repeat(50));
+                    cards.forEach((card, index) => {
+                        const name = card.querySelector('.instructor-name, h3')?.textContent?.trim();
+                        const instructorId = card.dataset.instructorId;
+                        console.log(`${index + 1}. ${name} (ID: ${instructorId})`);
+                    });
+                    console.log(`Total cards: ${cards.length}`);
+                    console.log('Run debugInstructors() in console anytime to check');
+                };
+                console.log('🔧 Debug helper loaded. Run debugInstructors() to see all instructors on page');
+            }
         });
 
         // Global functions

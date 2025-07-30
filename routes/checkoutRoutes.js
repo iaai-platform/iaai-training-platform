@@ -59,8 +59,24 @@ router.post("/payment/cancel", checkoutController.handlePaymentCancel);
 // ========================================
 
 // ✅ UNIFIED SUCCESS PAGE - handles both free and paid courses
-router.get("/payment/success", (req, res) => {
-  const { order_id, amount, ref } = req.query;
+// ✅ UNIFIED SUCCESS PAGE - handles both free and paid courses with session recovery
+router.get("/payment/success", async (req, res) => {
+  const { order_id, amount, ref, userId } = req.query;
+
+  // MINIMAL SESSION RECOVERY - Add this block
+  if (!req.user && userId) {
+    try {
+      const User = require("../models/user");
+      const user = await User.findById(userId);
+      if (user && user.accountStatus.isActive) {
+        req.login(user, () => {});
+        console.log("✅ Session recovered for user:", user.email);
+      }
+    } catch (error) {
+      console.error("❌ Session recovery failed:", error);
+    }
+  }
+  // END SESSION RECOVERY
 
   // Determine if this was a free registration or paid transaction
   const isFreeRegistration = amount === "0.00" || order_id === "FREE";

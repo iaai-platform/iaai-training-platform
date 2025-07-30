@@ -1,0 +1,270 @@
+<%- include('../../partials/header') %>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 bg-light sidebar">
+      <%- include('../../partials/admin-sidebar') %>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10 ml-sm-auto px-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">📧 Course Reminder Management</h1>
+      </div>
+
+      <!-- Status Cards -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card border-primary">
+            <div class="card-body">
+              <h5 class="card-title text-primary">📅 Total Scheduled</h5>
+              <h2 class="card-text"><%= status.totalScheduled %></h2>
+              <small class="text-muted">Active reminder jobs</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-success">
+            <div class="card-body">
+              <h5 class="card-title text-success">✅ System Status</h5>
+              <h3 class="card-text"><%= status.isShuttingDown ? 'Offline' : 'Online' %></h3>
+              <small class="text-muted">Reminder scheduler</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-info">
+            <div class="card-body">
+              <h5 class="card-title text-info">📊 Next Reminder</h5>
+              <p class="card-text">
+                <% if (reminders.length > 0) { %>
+                  <%= new Date(reminders[0].reminderDate).toLocaleDateString() %>
+                <% } else { %>
+                  None scheduled
+                <% } %>
+              </p>
+              <small class="text-muted">Upcoming notification</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <button class="btn btn-primary mr-2" onclick="scheduleAllReminders()">
+            📅 Schedule All Upcoming Reminders
+          </button>
+          <button class="btn btn-outline-secondary" onclick="refreshPage()">
+            🔄 Refresh Status
+          </button>
+        </div>
+      </div>
+
+      <!-- Flash Messages -->
+      <% if (typeof success_message !== 'undefined' && success_message.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <%= success_message %>
+          <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+          </button>
+        </div>
+      <% } %>
+
+      <% if (typeof error_message !== 'undefined' && error_message.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <%= error_message %>
+          <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+          </button>
+        </div>
+      <% } %>
+
+      <!-- Scheduled Reminders Table -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">📋 Scheduled Course Reminders</h5>
+        </div>
+        <div class="card-body">
+          <% if (reminders.length === 0) { %>
+            <div class="text-center py-5">
+              <h4 class="text-muted">📭 No Reminders Scheduled</h4>
+              <p class="text-muted">Click "Schedule All Upcoming Reminders" to automatically schedule reminders for courses starting in the next month.</p>
+            </div>
+          <% } else { %>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>📚 Course Name</th>
+                    <th>🏷️ Type</th>
+                    <th>📅 Reminder Date</th>
+                    <th>👥 Recipients</th>
+                    <th>⏰ Next Execution</th>
+                    <th>🔧 Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% reminders.forEach(reminder => { %>
+                    <tr>
+                      <td>
+                        <strong><%= reminder.courseName %></strong>
+                        <br>
+                        <small class="text-muted">ID: <%= reminder.courseId %></small>
+                      </td>
+                      <td>
+                        <% if (reminder.courseType === 'InPersonAestheticTraining') { %>
+                          <span class="badge badge-warning">🏢 In-Person</span>
+                        <% } else if (reminder.courseType === 'OnlineLiveTraining') { %>
+                          <span class="badge badge-success">💻 Online Live</span>
+                        <% } else { %>
+                          <span class="badge badge-info"><%= reminder.courseType %></span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <%= new Date(reminder.reminderDate).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) %>
+                      </td>
+                      <td>
+                        <span class="badge badge-pill badge-primary">
+                          <%= reminder.userCount %> users
+                        </span>
+                      </td>
+                      <td>
+                        <% if (reminder.nextInvocation) { %>
+                          <small class="text-success">
+                            <%= new Date(reminder.nextInvocation).toLocaleString() %>
+                          </small>
+                        <% } else { %>
+                          <small class="text-muted">Not scheduled</small>
+                        <% } %>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-danger" 
+                                onclick="cancelReminder('<%= reminder.jobId %>', '<%= reminder.courseName %>')"
+                                title="Cancel this reminder">
+                          ❌ Cancel
+                        </button>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Info Section -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card border-info">
+            <div class="card-header bg-info text-white">
+              <h6 class="card-title mb-0">ℹ️ How Course Reminders Work</h6>
+            </div>
+            <div class="card-body">
+              <ul class="mb-0">
+                <li><strong>Automatic Scheduling:</strong> Reminders are automatically scheduled when courses are created</li>
+                <li><strong>24-Hour Notice:</strong> Emails are sent 24 hours before the course start time</li>
+                <li><strong>Enrolled Students Only:</strong> Only students with "registered" or "paid" status receive reminders</li>
+                <li><strong>Smart Filtering:</strong> Courses starting too soon (less than 24 hours) cannot have reminders scheduled</li>
+                <li><strong>Auto-Cleanup:</strong> Completed reminder jobs are automatically removed from the schedule</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+function scheduleAllReminders() {
+  if (confirm('This will schedule email reminders for all upcoming courses starting in the next month. Continue?')) {
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Scheduling...';
+    btn.disabled = true;
+    
+    // Create form and submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/course-reminders/schedule-all';
+    
+    // Add CSRF token if you have one
+    const csrfInput = document.querySelector('input[name="_token"]');
+    if (csrfInput) {
+      const tokenInput = document.createElement('input');
+      tokenInput.type = 'hidden';
+      tokenInput.name = '_token';
+      tokenInput.value = csrfInput.value;
+      form.appendChild(tokenInput);
+    }
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+function cancelReminder(jobId, courseName) {
+  if (confirm(`Cancel reminder for "${courseName}"?\n\nThis action cannot be undone.`)) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/course-reminders/cancel';
+    
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'jobId';
+    input.value = jobId;
+    form.appendChild(input);
+    
+    // Add CSRF token if you have one
+    const csrfInput = document.querySelector('input[name="_token"]');
+    if (csrfInput) {
+      const tokenInput = document.createElement('input');
+      tokenInput.type = 'hidden';
+      tokenInput.name = '_token';
+      tokenInput.value = csrfInput.value;
+      form.appendChild(tokenInput);
+    }
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+function refreshPage() {
+  window.location.reload();
+}
+
+// Auto-refresh every 30 seconds to show updated reminder status
+setInterval(() => {
+  fetch('/api/admin/course-reminders/status')
+    .then(response => response.json())
+    .then(data => {
+      // Update status indicators without full page reload
+      console.log('Reminder status updated:', data);
+    })
+    .catch(error => {
+      console.log('Failed to update reminder status:', error);
+    });
+}, 30000);
+
+// Show tooltips if Bootstrap is available
+$(document).ready(function() {
+  if (typeof $().tooltip === 'function') {
+    $('[title]').tooltip();
+  }
+});
+</script>
+
+<%- include('../../partials/footer') %>

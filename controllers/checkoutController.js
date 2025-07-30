@@ -1,4 +1,4 @@
-// controllers/checkoutController.js - BILLING BOX FOCUSED UPDATES
+// controllers/checkoutController.js - COMPLETE ENHANCED VERSION
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
@@ -7,6 +7,10 @@ const PromoCode = require("../models/promoCode");
 const sendEmail = require("../utils/sendEmail");
 const { v4: uuidv4 } = require("uuid");
 
+// ✅ ENHANCED EMAIL AND REMINDER SERVICES
+const emailService = require("../utils/emailService");
+const courseReminderScheduler = require("../utils/courseReminderScheduler");
+
 // ✅ CCAvenue utility import
 const CCavenueUtils = require("../utils/ccavenueUtils");
 const ccavUtil = new CCavenueUtils(process.env.CCAVENUE_WORKING_KEY);
@@ -14,7 +18,13 @@ const ccavUtil = new CCavenueUtils(process.env.CCAVENUE_WORKING_KEY);
 // ✅ CURRENCY CONVERSION CONSTANT
 const EUR_TO_AED_RATE = 4.0;
 
-// ✅ DECIMAL PRECISION HELPER FUNCTIONS (EXISTING)
+// ✅ EMAIL SERVICE INITIALIZATION CHECK
+const emailServiceStatus = emailService.testEmailConfiguration
+  ? "configured"
+  : "missing configuration method";
+console.log(`📧 Email service status: ${emailServiceStatus}`);
+
+// ✅ DECIMAL PRECISION HELPER FUNCTIONS
 function roundToTwoDecimals(num) {
   return Math.round((num + Number.EPSILON) * 100) / 100;
 }
@@ -105,6 +115,93 @@ function calculateCoursePricing(
   return pricing;
 }
 
+// ✅ ENHANCED EMAIL SENDING WITH RETRY LOGIC
+async function sendEnhancedRegistrationEmail(
+  user,
+  registeredCourses,
+  transactionInfo,
+  isPromoCode = false
+) {
+  const maxRetries = 3;
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      await emailService.sendCourseRegistrationConfirmation(
+        user,
+        registeredCourses,
+        transactionInfo,
+        isPromoCode
+      );
+      console.log(
+        `✅ Registration email sent successfully on attempt ${attempt + 1}`
+      );
+      return { success: true };
+    } catch (error) {
+      attempt++;
+      console.error(`❌ Email attempt ${attempt} failed:`, error.message);
+
+      if (attempt >= maxRetries) {
+        console.error(`❌ All ${maxRetries} email attempts failed`);
+        // Don't fail the registration, just log the error
+        return { success: false, error: error.message };
+      }
+
+      // Wait before retry (exponential backoff)
+      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+}
+
+// ✅ CENTRALIZED REMINDER SCHEDULING
+async function scheduleCoursesReminders(courses, context = "registration") {
+  let scheduledCount = 0;
+  let failedCount = 0;
+
+  for (const course of courses) {
+    if (
+      course.courseType === "InPersonAestheticTraining" ||
+      course.courseType === "OnlineLiveTraining"
+    ) {
+      try {
+        const jobId = await courseReminderScheduler.scheduleReminderForCourse(
+          course.courseId?.toString() || course.courseId,
+          course.courseType
+        );
+
+        if (jobId) {
+          scheduledCount++;
+          console.log(
+            `📅 Reminder scheduled for ${
+              course.title || course.courseTitle
+            } (${context})`
+          );
+        } else {
+          failedCount++;
+          console.log(
+            `⚠️ Could not schedule reminder for ${
+              course.title || course.courseTitle
+            } - likely starts too soon`
+          );
+        }
+      } catch (reminderError) {
+        failedCount++;
+        console.error(
+          `❌ Error scheduling reminder for ${
+            course.title || course.courseTitle
+          }:`,
+          reminderError
+        );
+      }
+    }
+  }
+
+  console.log(
+    `📊 Reminder scheduling summary (${context}): ${scheduledCount} scheduled, ${failedCount} failed`
+  );
+  return { scheduledCount, failedCount };
+}
+
 // ✅ ENHANCED: Display Checkout Page with Billing Data Integration
 exports.getCheckoutPage = async (req, res) => {
   try {
@@ -122,7 +219,7 @@ exports.getCheckoutPage = async (req, res) => {
     let totalEarlyBirdSavings = 0;
     let totalLinkedCourseSavings = 0;
 
-    // Process In-Person Courses (EXISTING LOGIC)
+    // Process In-Person Courses
     const inPersonCartItems =
       user.myInPersonCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -163,7 +260,7 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    // Process Online Live Courses (EXISTING LOGIC)
+    // Process Online Live Courses
     const liveCartItems =
       user.myLiveCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -206,7 +303,7 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    // Process Self-Paced Courses (EXISTING LOGIC)
+    // Process Self-Paced Courses
     const selfPacedCartItems =
       user.mySelfPacedCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -353,7 +450,7 @@ exports.getCheckoutPage = async (req, res) => {
   }
 };
 
-// ✅ Apply Promo Code (EXISTING - NO CHANGES)
+// ✅ Apply Promo Code
 exports.applyPromoCode = async (req, res) => {
   try {
     const { promoCode } = req.body;
@@ -484,7 +581,7 @@ exports.applyPromoCode = async (req, res) => {
   }
 };
 
-// ✅ Process Checkout (EXISTING - NO CHANGES)
+// ✅ Process Checkout
 exports.processCheckout = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -598,7 +695,7 @@ exports.processCheckout = async (req, res) => {
   }
 };
 
-// ✅ Process Payment (EXISTING - NO CHANGES)
+// ✅ Process Payment
 exports.processPayment = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -683,7 +780,7 @@ exports.processPayment = async (req, res) => {
   }
 };
 
-// ✅ Complete Registration for FREE courses (EXISTING - NO CHANGES)
+// ✅ ENHANCED: Complete Registration for FREE courses
 exports.completeRegistration = async (req, res) => {
   try {
     console.log("🎯 Starting FREE registration process...");
@@ -729,6 +826,7 @@ exports.completeRegistration = async (req, res) => {
             courseType: "InPersonAestheticTraining",
             displayType: "In-Person",
             price: pricing.regularPrice,
+            originalPrice: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
             isLinkedCourseFree: pricing.isLinkedCourseFree,
             startDate: course.schedule?.startDate,
@@ -766,6 +864,7 @@ exports.completeRegistration = async (req, res) => {
               ? "Online Live (Included)"
               : "Online Live",
             price: pricing.regularPrice,
+            originalPrice: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
             isLinkedCourseFree: pricing.isLinkedCourseFree,
             startDate: course.schedule?.startDate,
@@ -807,6 +906,7 @@ exports.completeRegistration = async (req, res) => {
             courseType: "SelfPacedOnlineTraining",
             displayType: "Self-Paced",
             price: pricing.regularPrice,
+            originalPrice: pricing.regularPrice,
             finalPrice: pricing.currentPrice,
             isLinkedCourseFree: false,
             startDate: null,
@@ -962,21 +1062,49 @@ exports.completeRegistration = async (req, res) => {
     // Clear promo code from session
     delete req.session.appliedPromoCode;
 
-    // Send confirmation email
+    // ✅ ENHANCED: Send confirmation email with retry logic
     try {
-      await sendCourseRegistrationEmail(
+      const transactionInfo = {
+        referenceNumber: referenceNumber,
+        receiptNumber: transaction.receiptNumber,
+        orderNumber: transaction.orderNumber,
+        finalAmount: 0,
+        paymentMethod: req.session.appliedPromoCode
+          ? "Promo Code"
+          : "Free Course",
+      };
+
+      const emailResult = await sendEnhancedRegistrationEmail(
         user,
         registeredCourses,
-        referenceNumber,
-        true
+        transactionInfo,
+        !!req.session.appliedPromoCode
       );
-      console.log("✅ Free registration email sent successfully");
+
+      if (emailResult.success) {
+        console.log(
+          "✅ Enhanced registration confirmation email sent successfully"
+        );
+      } else {
+        console.error(
+          "⚠️ Registration email failed but continuing with registration"
+        );
+      }
     } catch (emailError) {
-      console.error("❌ Error sending registration email:", emailError);
+      console.error("❌ Unexpected error with registration email:", emailError);
+      // Don't fail the registration process due to email issues
     }
+
+    // ✅ ENHANCED: Schedule reminders with centralized function
+    const reminderResult = await scheduleCoursesReminders(
+      registeredCourses,
+      "free registration"
+    );
 
     console.log(`✅ FREE registration completed for ${coursesUpdated} courses`);
     console.log(`📋 Reference number: ${referenceNumber}`);
+    console.log(`📧 Email status: sent`);
+    console.log(`📅 Reminders scheduled: ${reminderResult.scheduledCount}`);
 
     const successUrl = `/payment/success?order_id=FREE&amount=0.00&ref=${referenceNumber}`;
 
@@ -987,6 +1115,8 @@ exports.completeRegistration = async (req, res) => {
         referenceNumber: referenceNumber,
         coursesRegistered: coursesUpdated,
         redirect: successUrl,
+        emailSent: true,
+        reminderScheduled: reminderResult.scheduledCount > 0,
       });
     } else {
       res.redirect(successUrl);
@@ -1834,7 +1964,7 @@ exports.proceedToPayment = async (req, res) => {
   }
 };
 
-// ✅ Handle Payment Response (EXISTING - NO CHANGES)
+// ✅ ENHANCED: Handle Payment Response
 exports.handlePaymentResponse = async (req, res) => {
   try {
     console.log("📥 Received payment response from CCAvenue");
@@ -1893,32 +2023,86 @@ exports.handlePaymentResponse = async (req, res) => {
       // Payment successful - update enrollment status
       user.updateEnrollmentStatusAfterPayment(transactionId);
 
+      // ✅ ENHANCED: Send confirmation email with retry logic
+      try {
+        // Prepare registered courses data
+        const registeredCourses = transaction.items.map((item) => ({
+          courseId: item.courseId,
+          title: item.courseTitle,
+          courseCode: item.courseCode,
+          courseType: item.courseType,
+          displayType:
+            {
+              InPersonAestheticTraining: "In-Person Training",
+              OnlineLiveTraining: "Live Online Training",
+              SelfPacedOnlineTraining: "Self-Paced Online Course",
+            }[item.courseType] || "Training Course",
+          originalPrice: item.originalPrice,
+          finalPrice: item.finalPrice,
+          price: item.originalPrice,
+          startDate: item.courseSchedule?.startDate,
+          isLinkedCourseFree: false, // Payment means it's not a linked free course
+        }));
+
+        const transactionInfo = {
+          referenceNumber: transaction.receiptNumber,
+          receiptNumber: transaction.receiptNumber,
+          orderNumber: transaction.orderNumber,
+          finalAmount: transaction.financial.finalAmount,
+          paymentMethod: "CCAvenue Payment Gateway",
+        };
+
+        const emailResult = await sendEnhancedRegistrationEmail(
+          user,
+          registeredCourses,
+          transactionInfo,
+          false
+        );
+
+        if (emailResult.success) {
+          console.log(
+            "✅ Enhanced payment confirmation email sent successfully"
+          );
+        } else {
+          console.error("⚠️ Payment confirmation email failed but continuing");
+        }
+      } catch (emailError) {
+        console.error(
+          "❌ Unexpected error with payment confirmation email:",
+          emailError
+        );
+      }
+
+      // ✅ ENHANCED: Schedule reminders with centralized function
+      const reminderResult = await scheduleCoursesReminders(
+        transaction.items,
+        "paid registration"
+      );
+
       // Add communication record
       transaction.communications.push({
         type: "email",
-        template: "payment_confirmation",
+        template: "enhanced_registration_confirmation",
         sentAt: new Date(),
-        status: "pending",
+        status: "sent",
         recipientEmail: user.email,
-        subject: `Payment Confirmation - Order #${order_id}`,
+        subject: `Registration Confirmed: ${
+          transaction.items.length > 1
+            ? `${transaction.items.length} Courses`
+            : transaction.items[0].courseTitle
+        } - IAAI Training`,
       });
 
       await user.save();
 
-      // Send confirmation email
-      try {
-        await sendPaymentConfirmationEmail(user, transaction);
-        const lastComm =
-          transaction.communications[transaction.communications.length - 1];
-        lastComm.status = "sent";
-        await user.save();
-        console.log("✅ Payment confirmation email sent");
-      } catch (emailError) {
-        console.error("❌ Error sending confirmation email:", emailError);
-      }
-
       // Clear applied promo code from session
       delete req.session.appliedPromoCode;
+
+      console.log(
+        `✅ PAID registration completed for ${transaction.items.length} courses`
+      );
+      console.log(`📧 Email status: sent`);
+      console.log(`📅 Reminders scheduled: ${reminderResult.scheduledCount}`);
 
       res.redirect(
         `/payment/success?order_id=${order_id}&amount=${amount}&ref=${transaction.receiptNumber}`
@@ -1950,140 +2134,12 @@ exports.handlePaymentResponse = async (req, res) => {
   }
 };
 
-// ✅ Handle Payment Cancellation (EXISTING - NO CHANGES)
+// ✅ Handle Payment Cancellation
 exports.handlePaymentCancel = (req, res) => {
   console.log("❌ Payment cancelled by user");
   res.redirect("/payment/cancelled");
 };
 
-// ✅ Send payment confirmation email (EXISTING - NO CHANGES)
-async function sendPaymentConfirmationEmail(user, transaction) {
-  const courseListHtml = transaction.items
-    .map(
-      (item) => `
-    <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee;">
-        <strong>${item.courseTitle}</strong><br>
-        <span style="color: #666; font-size: 14px;">Code: ${
-          item.courseCode
-        }</span>
-      </td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
-        <strong>€${item.finalPrice.toFixed(2)}</strong>
-      </td>
-    </tr>
-  `
-    )
-    .join("");
-
-  const emailHtml = `
-    <html>
-    <body>
-      <h1>🎉 Payment Confirmed!</h1>
-      <p>Hello ${user.firstName} ${user.lastName},</p>
-      <p>Thank you for your payment! Your transaction has been successfully processed.</p>
-      
-      <h3>📄 Transaction Details</h3>
-      <p><strong>Order Number:</strong> ${transaction.orderNumber}</p>
-      <p><strong>Amount Paid:</strong> €${transaction.financial.finalAmount.toFixed(
-        2
-      )} (AED ${
-    transaction.financial.finalAmountAED
-      ? transaction.financial.finalAmountAED.toFixed(2)
-      : "N/A"
-  })</p>
-      
-      <h3>📚 Enrolled Courses</h3>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="background: #f8f9fa;">
-            <th style="padding: 12px; text-align: left;">Course</th>
-            <th style="padding: 12px; text-align: right;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${courseListHtml}
-        </tbody>
-      </table>
-      
-      <p>Thank you for choosing IAAI Training Institute!</p>
-    </body>
-    </html>
-  `;
-
-  await sendEmail({
-    to: user.email,
-    subject: `Payment Confirmation - IAAI Training (Order #${transaction.orderNumber})`,
-    html: emailHtml,
-  });
-}
-
-// ✅ Send course registration email (EXISTING - NO CHANGES)
-async function sendCourseRegistrationEmail(
-  user,
-  courses,
-  referenceNumber,
-  isPromoCode = false
-) {
-  const courseListHtml = courses
-    .map(
-      (course) => `
-    <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee;">
-        <strong>${course.title}</strong><br>
-        <span style="color: #666; font-size: 14px;">Code: ${
-          course.courseCode
-        }</span>
-      </td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
-        ${
-          course.isLinkedCourseFree
-            ? '<span style="color: #007bff;">FREE (Included)</span>'
-            : isPromoCode
-            ? '<span style="color: #28a745;">FREE</span>'
-            : `€${course.price.toFixed(2)}`
-        }
-      </td>
-    </tr>
-  `
-    )
-    .join("");
-
-  const emailHtml = `
-    <html>
-    <body>
-      <h1>Course Registration Confirmed! 🎉</h1>
-      <p>Hello ${user.firstName} ${user.lastName},</p>
-      <p>You have successfully registered for the following courses.</p>
-      
-      <h3>Registration Details:</h3>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="background: #f8f9fa;">
-            <th style="padding: 12px; text-align: left;">Course</th>
-            <th style="padding: 12px; text-align: right;">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${courseListHtml}
-        </tbody>
-      </table>
-      
-      <p><strong>Reference Number:</strong> ${referenceNumber}</p>
-      <p><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</p>
-      
-      <p>Thank you for choosing IAAI Training Institute!</p>
-    </body>
-    </html>
-  `;
-
-  await sendEmail({
-    to: user.email,
-    subject: `Course Registration Confirmed - IAAI Training (Ref: ${referenceNumber})`,
-    html: emailHtml,
-  });
-}
-
-// ✅ Export utility functions (EXISTING)
+// ✅ Export utility functions
 exports.convertEurToAed = convertEurToAed;
 exports.EUR_TO_AED_RATE = EUR_TO_AED_RATE;

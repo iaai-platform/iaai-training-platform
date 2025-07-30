@@ -480,6 +480,10 @@ app.use("/admin-courses/selfpaced", adminSelfPacedCoursesRoutes);
 const adminUserRoutes = require("./routes/adminUserRoutes");
 app.use("/", adminUserRoutes);
 
+// ADD THIS NEW ROUTE HERE:
+const courseReminderRoutes = require("./routes/admin/courseReminderRoutes");
+app.use("/", courseReminderRoutes);
+console.log("📧 Course reminder admin routes loaded");
 // Admin forms
 const adminFormsRoutes = require("./routes/adminFormsRoutes");
 app.use("/", adminFormsRoutes);
@@ -705,26 +709,72 @@ app.use((err, req, res, next) => {
 // ============================================
 // 15.5 GRACEFUL SHUTDOWN HANDLERS (ADD THIS SECTION)
 // ============================================
+// ============================================
+// 15.5 ENHANCED GRACEFUL SHUTDOWN HANDLERS
+// ============================================
 
 // Add graceful shutdown handling
 process.on("SIGINT", () => {
-  console.log("📧 Gracefully shutting down notification system...");
+  console.log(
+    "📧 Gracefully shutting down notification and reminder systems..."
+  );
 
-  const notificationController = require("./controllers/admin/onlinecourseNotificationController");
-  notificationController.shutdown();
+  // Shutdown existing notification controller
+  try {
+    const notificationController = require("./controllers/admin/onlinecourseNotificationController");
+    notificationController.shutdown();
+  } catch (error) {
+    console.log("⚠️ Notification controller not found or already shut down");
+  }
+
+  // Shutdown course reminder scheduler
+  try {
+    const courseReminderScheduler = require("./utils/courseReminderScheduler");
+    courseReminderScheduler.shutdown();
+  } catch (error) {
+    console.log("⚠️ Course reminder scheduler not found or already shut down");
+  }
+
+  // Shutdown email service
+  try {
+    const emailService = require("./utils/emailService");
+    emailService.shutdown();
+  } catch (error) {
+    console.log("⚠️ Email service not found or already shut down");
+  }
 
   process.exit(0);
 });
 
 process.on("SIGTERM", () => {
-  console.log("📧 Received SIGTERM, shutting down notification system...");
+  console.log("📧 Received SIGTERM, shutting down all services...");
 
-  const notificationController = require("./controllers/admin/onlinecourseNotificationController");
-  notificationController.shutdown();
+  // Shutdown existing notification controller
+  try {
+    const notificationController = require("./controllers/admin/onlinecourseNotificationController");
+    notificationController.shutdown();
+  } catch (error) {
+    console.log("⚠️ Notification controller not found or already shut down");
+  }
+
+  // Shutdown course reminder scheduler
+  try {
+    const courseReminderScheduler = require("./utils/courseReminderScheduler");
+    courseReminderScheduler.shutdown();
+  } catch (error) {
+    console.log("⚠️ Course reminder scheduler not found or already shut down");
+  }
+
+  // Shutdown email service
+  try {
+    const emailService = require("./utils/emailService");
+    emailService.shutdown();
+  } catch (error) {
+    console.log("⚠️ Email service not found or already shut down");
+  }
 
   process.exit(0);
 });
-
 // ============================================
 // 16. SERVER STARTUP
 // ============================================

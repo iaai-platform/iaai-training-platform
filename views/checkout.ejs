@@ -672,27 +672,89 @@ async function handleCheckout() {
       
       // ✅ SHOW REDIRECT MESSAGE
       showLoading(false);
-      document.body.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000;">
-          <div style="background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 500px;">
-            <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
-            <h3>Redirecting to Secure Payment Gateway</h3>
-            <p>Please wait while we redirect you to CCAvenue...</p>
-            <div style="margin: 20px 0;">
-              <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            </div>
-            <p style="color: #666; font-size: 14px;">
-              ✅ Your data is secure<br>
-              💳 Payment in AED currency<br>
-              🔄 This may take a few seconds
-            </p>
-          </div>
-        </div>
-        <style>
-          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        </style>
-      `;
+     // ✅ ADD: Set a maximum timeout of 10 seconds
+let redirectTimeout;
+let formSubmitted = false;
+
+document.body.innerHTML = `
+  <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000;">
+    <div style="background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 500px;">
+      <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+      <h3 id="redirectTitle">Redirecting to Secure Payment Gateway</h3>
+      <p id="redirectMessage">Please wait while we redirect you to CCAvenue...</p>
+      <div style="margin: 20px 0;">
+        <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      </div>
+      <p style="color: #666; font-size: 14px;">
+        ✅ Your data is secure<br>
+        💳 Payment in AED currency<br>
+        🔄 This may take a few seconds
+      </p>
       
+      <!-- ✅ ADD: Manual retry button (hidden initially) -->
+      <div id="retrySection" style="display: none; margin-top: 20px;">
+        <p style="color: #e74c3c; margin-bottom: 15px;">⚠️ Taking longer than expected...</p>
+        <button onclick="retryPayment()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+          🔄 Try Again
+        </button>
+        <button onclick="goBackToCheckout()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+          ← Back to Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+  <style>
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+`;
+
+// ✅ ADD: Timeout handler
+redirectTimeout = setTimeout(() => {
+  if (!formSubmitted) {
+    console.error('❌ Payment redirect timeout - showing retry options');
+    document.getElementById('redirectTitle').innerText = 'Connection Issue';
+    document.getElementById('redirectMessage').innerText = 'Unable to connect to payment gateway. Please try again.';
+    document.getElementById('retrySection').style.display = 'block';
+  }
+}, 10000); // 10 second timeout
+
+// ✅ ADD: Retry functions
+window.retryPayment = function() {
+  document.getElementById('redirectTitle').innerText = 'Redirecting to Secure Payment Gateway';
+  document.getElementById('redirectMessage').innerText = 'Please wait while we redirect you to CCAvenue...';
+  document.getElementById('retrySection').style.display = 'none';
+  
+  // Clear existing timeout
+  if (redirectTimeout) clearTimeout(redirectTimeout);
+  
+  // Try submitting again
+  setTimeout(() => {
+    try {
+      form.submit();
+      formSubmitted = true;
+      console.log('🔄 Retrying payment form submission');
+    } catch (error) {
+      console.error('❌ Retry failed:', error);
+      document.getElementById('redirectTitle').innerText = 'Submission Failed';
+      document.getElementById('redirectMessage').innerText = 'Unable to process payment. Please return to checkout.';
+      document.getElementById('retrySection').style.display = 'block';
+    }
+  }, 2000);
+  
+  // Set timeout again
+  redirectTimeout = setTimeout(() => {
+    if (!formSubmitted) {
+      document.getElementById('redirectTitle').innerText = 'Still Having Issues';
+      document.getElementById('redirectMessage').innerText = 'Please return to checkout and try again.';
+      document.getElementById('retrySection').style.display = 'block';
+    }
+  }, 10000);
+};
+
+window.goBackToCheckout = function() {
+  proceedingToPayment = false; // Reset flag
+  window.location.href = '/checkout';
+};
       // Submit form after short delay
       setTimeout(() => {
         form.submit();

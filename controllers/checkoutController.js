@@ -264,15 +264,16 @@ exports.getCheckoutPage = async (req, res) => {
     const totalOriginalPriceAED = convertEurToAed(totalOriginalPrice);
     const totalSavingsAED = convertEurToAed(totalSavings);
 
-    console.log("📌 Enhanced Cart Summary with Dual Currency:", {
+    // NEW (correct):
+    console.log("📍 Enhanced Cart Summary with Dual Currency:", {
       inPerson: inPersonCartItems.length,
       live: liveCartItems.length,
       selfPaced: selfPacedCartItems.length,
-      totalOriginal: `€${totalOriginalPrice} (AED ${totalOriginalPriceAED})`,
-      totalCurrent: `€${totalCurrentPrice} (AED ${totalPriceAED})`,
+      totalOriginal: `€${totalOriginalPrice} (AED ${totalOriginalPriceAED})`, // ✅ Fixed to €
+      totalCurrent: `€${totalCurrentPrice} (AED ${totalPriceAED})`, // ✅ Fixed to €
       earlyBirdSavings: totalEarlyBirdSavings,
       linkedCourseSavings: totalLinkedCourseSavings,
-      totalSavings: `€${totalSavings} (AED ${totalSavingsAED})`,
+      totalSavings: `€${totalSavings} (AED ${totalSavingsAED})`, // ✅ Fixed to €
       conversionRate: EUR_TO_AED_RATE,
     });
 

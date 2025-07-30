@@ -1348,6 +1348,8 @@
             
             if (result.success) {
               showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+              // ⭐ ADD ONLY THIS LINE:
+  setTimeout(() => window.location.href = '/orders', 3000);
               
               if (result.linkedCourseAdded) {
                 setTimeout(() => {

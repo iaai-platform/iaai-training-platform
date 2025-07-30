@@ -1766,6 +1766,8 @@
             
             if (result.success) {
               showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+              // ⭐ ADD ONLY THIS LINE:
+  setTimeout(() => window.location.href = '/orders', 3000);
               
               // Update button temporarily
               this.style.background = '#28a745';

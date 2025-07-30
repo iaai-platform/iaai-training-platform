@@ -1,94 +1,99 @@
 // utils/emailService.js
-const sendEmail = require('./sendEmail');
-const schedule = require('node-schedule');
-const User = require('../models/user');
+const sendEmail = require("./sendEmail");
+const schedule = require("node-schedule");
+const User = require("../models/user");
 
 class EmailService {
   constructor() {
     // Store scheduled jobs
     this.scheduledJobs = new Map();
-    
+
     // Check if we're in mock mode
-    this.mockMode = process.env.EMAIL_MODE === 'mock' || !process.env.EMAIL_USER;
-    
+    this.mockMode =
+      process.env.EMAIL_MODE === "mock" || !process.env.EMAIL_USER;
+
     if (this.mockMode) {
-      console.log('📧 Email service running in MOCK mode');
+      console.log("📧 Email service running in MOCK mode");
     }
   }
 
   // Existing methods with real implementation
   async sendUserApprovalEmail(user) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send approval email to:', user.email);
+      console.log("📧 [MOCK] Would send approval email to:", user.email);
       return { success: true };
     }
 
     try {
       const mailOptions = {
         to: user.email,
-        subject: 'Your IAAI Account Has Been Approved',
+        subject: "Your IAAI Account Has Been Approved",
         html: `
           <h2>Welcome to IAAI Training Institute!</h2>
           <p>Dear ${user.firstName},</p>
           <p>Your account has been approved. You can now log in and access all our courses.</p>
           <p>Thank you for joining us!</p>
           <p>Best regards,<br>IAAI Team</p>
-        `
+        `,
       };
 
       return await sendEmail(mailOptions);
     } catch (error) {
-      console.error('Error sending approval email:', error);
+      console.error("Error sending approval email:", error);
       return { success: false, error: error.message };
     }
   }
 
   async sendUserRejectionEmail(user, reason) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send rejection email to:', user.email);
+      console.log("📧 [MOCK] Would send rejection email to:", user.email);
       return { success: true };
     }
 
     try {
       const mailOptions = {
         to: user.email,
-        subject: 'IAAI Account Application Update',
+        subject: "IAAI Account Application Update",
         html: `
           <h2>Account Application Update</h2>
           <p>Dear ${user.firstName},</p>
           <p>We regret to inform you that your account application has not been approved at this time.</p>
-          ${reason ? `<p>Reason: ${reason}</p>` : ''}
+          ${reason ? `<p>Reason: ${reason}</p>` : ""}
           <p>If you have any questions, please contact our support team.</p>
           <p>Best regards,<br>IAAI Team</p>
-        `
+        `,
       };
 
       return await sendEmail(mailOptions);
     } catch (error) {
-      console.error('Error sending rejection email:', error);
+      console.error("Error sending rejection email:", error);
       return { success: false, error: error.message };
     }
   }
 
   async sendCourseRegistrationEmail(user, courses, paymentInfo) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send registration email to:', user.email);
+      console.log("📧 [MOCK] Would send registration email to:", user.email);
       return { success: true };
     }
 
     try {
-      const courseList = courses.map(course => `
+      const courseList = courses
+        .map(
+          (course) => `
         <li>
           <strong>${course.title}</strong><br>
           Course Code: ${course.courseCode}<br>
           Start Date: ${new Date(course.startDate).toLocaleDateString()}<br>
           Price: $${course.price}
         </li>
-      `).join('');
+      `
+        )
+        .join("");
 
       const mailOptions = {
         to: user.email,
-        subject: 'Course Registration Confirmation - IAAI',
+        subject: "Course Registration Confirmation - IAAI",
         html: `
           <h2>Registration Confirmed!</h2>
           <p>Dear ${user.firstName},</p>
@@ -100,19 +105,19 @@ class EmailService {
           <p>Payment Method: ${paymentInfo.paymentMethod}</p>
           <p>You can access your courses in your dashboard.</p>
           <p>Best regards,<br>IAAI Team</p>
-        `
+        `,
       };
 
       return await sendEmail(mailOptions);
     } catch (error) {
-      console.error('Error sending registration email:', error);
+      console.error("Error sending registration email:", error);
       return { success: false, error: error.message };
     }
   }
 
   async sendCertificateEarnedEmail(user, certificate, course) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send certificate email to:', user.email);
+      console.log("📧 [MOCK] Would send certificate email to:", user.email);
       return { success: true };
     }
 
@@ -123,39 +128,45 @@ class EmailService {
         html: `
           <h2>🎉 Congratulations!</h2>
           <p>Dear ${user.firstName},</p>
-          <p>You have successfully completed <strong>${course.title}</strong> and earned your certificate!</p>
+          <p>You have successfully completed <strong>${
+            course.title
+          }</strong> and earned your certificate!</p>
           <h3>Certificate Details:</h3>
           <ul>
             <li>Certificate ID: ${certificate.certificateId}</li>
             <li>Course: ${course.title}</li>
-            <li>Completion Date: ${new Date(certificate.certificateDetails.completionDate).toLocaleDateString()}</li>
-            <li>Verification Code: ${certificate.certificateDetails.verificationCode}</li>
+            <li>Completion Date: ${new Date(
+              certificate.certificateDetails.completionDate
+            ).toLocaleDateString()}</li>
+            <li>Verification Code: ${
+              certificate.certificateDetails.verificationCode
+            }</li>
           </ul>
           <p>You can download your certificate from your dashboard.</p>
           <p>Congratulations on your achievement!</p>
           <p>Best regards,<br>IAAI Team</p>
-        `
+        `,
       };
 
       return await sendEmail(mailOptions);
     } catch (error) {
-      console.error('Error sending certificate email:', error);
+      console.error("Error sending certificate email:", error);
       return { success: false, error: error.message };
     }
   }
 
   async sendPasswordResetEmail(user, resetToken) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send password reset to:', user.email);
+      console.log("📧 [MOCK] Would send password reset to:", user.email);
       return { success: true };
     }
 
     try {
       const resetUrl = `${process.env.BASE_URL}/reset-password/${resetToken}`;
-      
+
       const mailOptions = {
         to: user.email,
-        subject: 'Password Reset Request - IAAI',
+        subject: "Password Reset Request - IAAI",
         html: `
           <h2>Password Reset Request</h2>
           <p>Dear ${user.firstName},</p>
@@ -165,12 +176,12 @@ class EmailService {
           <p>This link will expire in 1 hour.</p>
           <p>If you didn't request this, please ignore this email.</p>
           <p>Best regards,<br>IAAI Team</p>
-        `
+        `,
       };
 
       return await sendEmail(mailOptions);
     } catch (error) {
-      console.error('Error sending password reset email:', error);
+      console.error("Error sending password reset email:", error);
       return { success: false, error: error.message };
     }
   }
@@ -181,19 +192,23 @@ class EmailService {
   scheduleNewCourseNotification(courseId, courseData, recipients) {
     const jobId = `new-course-${courseId}`;
     const sendTime = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now
-    
+
     console.log(`📧 Scheduling new course email for ${sendTime}`);
-    
+
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would schedule email to', recipients.length, 'recipients');
+      console.log(
+        "📧 [MOCK] Would schedule email to",
+        recipients.length,
+        "recipients"
+      );
       return jobId;
     }
-    
+
     const job = schedule.scheduleJob(sendTime, async () => {
       await this.sendNewCourseAnnouncement(courseData, recipients);
       this.scheduledJobs.delete(jobId);
     });
-    
+
     this.scheduledJobs.set(jobId, job);
     return jobId;
   }
@@ -202,7 +217,7 @@ class EmailService {
   cancelScheduledNotification(courseId) {
     const jobId = `new-course-${courseId}`;
     const job = this.scheduledJobs.get(jobId);
-    
+
     if (job) {
       job.cancel();
       this.scheduledJobs.delete(jobId);
@@ -213,7 +228,10 @@ class EmailService {
   // Send new course announcement (enhanced version)
   async sendNewCourseAnnouncement(course, recipients = null) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send course announcement for:', course.title);
+      console.log(
+        "📧 [MOCK] Would send course announcement for:",
+        course.title
+      );
       return { success: true };
     }
 
@@ -221,24 +239,25 @@ class EmailService {
       // If no recipients provided, get all subscribed users
       if (!recipients) {
         const users = await User.find(
-          { 
-            isConfirmed: true, 
-            'notificationSettings.courseUpdates': true 
+          {
+            isConfirmed: true,
+            "notificationSettings.courseUpdates": true,
           },
-          'email'
+          "email"
         );
-        recipients = users.map(u => u.email);
+        recipients = users.map((u) => u.email);
       }
 
-      const courseTypeLabel = {
-        'InPersonAestheticTraining': 'In-Person Training',
-        'OnlineLiveTraining': 'Live Online Training',
-        'SelfPacedOnlineTraining': 'Self-Paced Online Course'
-      }[course.courseType] || course.courseType;
+      const courseTypeLabel =
+        {
+          InPersonAestheticTraining: "In-Person Training",
+          OnlineLiveTraining: "Live Online Training",
+          SelfPacedOnlineTraining: "Self-Paced Online Course",
+        }[course.courseType] || course.courseType;
 
       const mailOptions = {
         to: process.env.EMAIL_FROM || process.env.EMAIL_USER, // Send to self
-        bcc: recipients.join(','), // BCC all recipients
+        bcc: recipients.join(","), // BCC all recipients
         subject: `New Course Available: ${course.title}`,
         html: `
           <!DOCTYPE html>
@@ -261,7 +280,9 @@ class EmailService {
                 <h1>🎓 New ${courseTypeLabel} Available!</h1>
               </div>
               <div class="content">
-                <span class="badge">${course.category || 'Professional Training'}</span>
+                <span class="badge">${
+                  course.category || "Professional Training"
+                }</span>
                 <h2>${course.title}</h2>
                 <p>${course.description}</p>
                 
@@ -274,11 +295,19 @@ class EmailService {
                     </tr>
                     <tr>
                       <td style="padding: 8px 0;"><strong>Start Date:</strong></td>
-                      <td>${new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                      <td>${new Date(course.startDate).toLocaleDateString(
+                        "en-US",
+                        {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}</td>
                     </tr>
                     <tr>
                       <td style="padding: 8px 0;"><strong>Duration:</strong></td>
-                      <td>${course.duration || 'See course details'}</td>
+                      <td>${course.duration || "See course details"}</td>
                     </tr>
                     <tr>
                       <td style="padding: 8px 0;"><strong>Instructor:</strong></td>
@@ -288,43 +317,70 @@ class EmailService {
                       <td style="padding: 8px 0;"><strong>Price:</strong></td>
                       <td>$${course.price}</td>
                     </tr>
-                    ${course.earlyBirdPrice ? `
+                    ${
+                      course.earlyBirdPrice
+                        ? `
                     <tr>
                       <td style="padding: 8px 0;"><strong>Early Bird Price:</strong></td>
                       <td style="color: #10b981; font-weight: bold;">$${course.earlyBirdPrice}</td>
                     </tr>
-                    ` : ''}
-                    ${course.location ? `
+                    `
+                        : ""
+                    }
+                    ${
+                      course.location
+                        ? `
                     <tr>
                       <td style="padding: 8px 0;"><strong>Location:</strong></td>
                       <td>${course.location}</td>
                     </tr>
-                    ` : ''}
-                    ${course.platform ? `
+                    `
+                        : ""
+                    }
+                    ${
+                      course.platform
+                        ? `
                     <tr>
                       <td style="padding: 8px 0;"><strong>Platform:</strong></td>
                       <td>${course.platform}</td>
                     </tr>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                     <tr>
                       <td style="padding: 8px 0;"><strong>Certificate:</strong></td>
-                      <td>${course.certificateProvided ? '✅ Certificate Provided' : 'No Certificate'}</td>
+                      <td>${
+                        course.certificateProvided
+                          ? "✅ Certificate Provided"
+                          : "No Certificate"
+                      }</td>
                     </tr>
                   </table>
                 </div>
                 
-                ${course.objectives && course.objectives.length > 0 ? `
+                ${
+                  course.objectives && course.objectives.length > 0
+                    ? `
                 <div style="margin: 20px 0;">
                   <h3>What You'll Learn:</h3>
                   <ul style="margin: 0; padding-left: 20px;">
-                    ${course.objectives.slice(0, 3).map(obj => `<li>${obj}</li>`).join('')}
-                    ${course.objectives.length > 3 ? '<li>And more...</li>' : ''}
+                    ${course.objectives
+                      .slice(0, 3)
+                      .map((obj) => `<li>${obj}</li>`)
+                      .join("")}
+                    ${
+                      course.objectives.length > 3 ? "<li>And more...</li>" : ""
+                    }
                   </ul>
                 </div>
-                ` : ''}
+                `
+                    : ""
+                }
                 
                 <center>
-                  <a href="${process.env.BASE_URL}/courses/${course._id}" class="button">View Course Details & Register</a>
+                  <a href="${process.env.BASE_URL}/courses/${
+          course._id
+        }" class="button">View Course Details & Register</a>
                 </center>
                 
                 <p style="text-align: center; color: #666; margin-top: 20px;">
@@ -333,12 +389,16 @@ class EmailService {
               </div>
               <div class="footer">
                 <p>You received this email because you're subscribed to course updates from IAAI Training Institute.</p>
-                <p><a href="${process.env.BASE_URL}/account/notifications">Update Preferences</a> | <a href="${process.env.BASE_URL}/unsubscribe">Unsubscribe</a></p>
+                <p><a href="${
+                  process.env.BASE_URL
+                }/account/notifications">Update Preferences</a> | <a href="${
+          process.env.BASE_URL
+        }/unsubscribe">Unsubscribe</a></p>
               </div>
             </div>
           </body>
           </html>
-        `
+        `,
       };
 
       // Send in batches if many recipients
@@ -346,9 +406,11 @@ class EmailService {
         const batchSize = 50;
         for (let i = 0; i < recipients.length; i += batchSize) {
           const batch = recipients.slice(i, i + batchSize);
-          mailOptions.bcc = batch.join(',');
+          mailOptions.bcc = batch.join(",");
           await sendEmail(mailOptions);
-          console.log(`✅ Sent new course email to batch ${Math.floor(i / batchSize) + 1}`);
+          console.log(
+            `✅ Sent new course email to batch ${Math.floor(i / batchSize) + 1}`
+          );
         }
       } else {
         await sendEmail(mailOptions);
@@ -356,7 +418,7 @@ class EmailService {
 
       return { success: true };
     } catch (error) {
-      console.error('Error sending course announcement:', error);
+      console.error("Error sending course announcement:", error);
       return { success: false, error: error.message };
     }
   }
@@ -364,7 +426,11 @@ class EmailService {
   // Send course update notification to registered students
   async sendCourseUpdateEmail(courseData, updateDetails, registeredStudents) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send update email to', registeredStudents.length, 'students');
+      console.log(
+        "📧 [MOCK] Would send update email to",
+        registeredStudents.length,
+        "students"
+      );
       return { success: true };
     }
 
@@ -413,16 +479,18 @@ class EmailService {
               </div>
             </body>
             </html>
-          `
+          `,
         };
 
         await sendEmail(mailOptions);
       }
-      
-      console.log(`✅ Sent update emails to ${registeredStudents.length} students`);
+
+      console.log(
+        `✅ Sent update emails to ${registeredStudents.length} students`
+      );
       return { success: true };
     } catch (error) {
-      console.error('Error sending update emails:', error);
+      console.error("Error sending update emails:", error);
       return { success: false, error: error.message };
     }
   }
@@ -430,7 +498,11 @@ class EmailService {
   // Send course cancellation notification
   async sendCourseCancellationEmail(courseData, registeredStudents) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send cancellation email to', registeredStudents.length, 'students');
+      console.log(
+        "📧 [MOCK] Would send cancellation email to",
+        registeredStudents.length,
+        "students"
+      );
       return { success: true };
     }
 
@@ -465,8 +537,12 @@ class EmailService {
                     <p>We regret to inform you that the following course has been cancelled:</p>
                     <ul style="margin: 10px 0;">
                       <li><strong>Course:</strong> ${courseData.title}</li>
-                      <li><strong>Course Code:</strong> ${courseData.courseCode}</li>
-                      <li><strong>Original Date:</strong> ${new Date(courseData.startDate).toLocaleDateString()}</li>
+                      <li><strong>Course Code:</strong> ${
+                        courseData.courseCode
+                      }</li>
+                      <li><strong>Original Date:</strong> ${new Date(
+                        courseData.startDate
+                      ).toLocaleDateString()}</li>
                     </ul>
                   </div>
                   
@@ -480,7 +556,9 @@ class EmailService {
                   <p>We sincerely apologize for any inconvenience caused.</p>
                   
                   <center>
-                    <a href="${process.env.BASE_URL}/contact" class="button">Contact Support</a>
+                    <a href="${
+                      process.env.BASE_URL
+                    }/contact" class="button">Contact Support</a>
                   </center>
                   
                   <p>Best regards,<br>IAAI Team</p>
@@ -488,16 +566,18 @@ class EmailService {
               </div>
             </body>
             </html>
-          `
+          `,
         };
 
         await sendEmail(mailOptions);
       }
-      
-      console.log(`✅ Sent cancellation emails to ${registeredStudents.length} students`);
+
+      console.log(
+        `✅ Sent cancellation emails to ${registeredStudents.length} students`
+      );
       return { success: true };
     } catch (error) {
-      console.error('Error sending cancellation emails:', error);
+      console.error("Error sending cancellation emails:", error);
       return { success: false, error: error.message };
     }
   }
@@ -505,13 +585,16 @@ class EmailService {
   // Send notification to instructors
   async sendInstructorNotification(courseData, instructorEmails) {
     if (this.mockMode) {
-      console.log('📧 [MOCK] Would send instructor notification to:', instructorEmails);
+      console.log(
+        "📧 [MOCK] Would send instructor notification to:",
+        instructorEmails
+      );
       return { success: true };
     }
 
     const jobId = `instructor-${courseData._id}-${Date.now()}`;
     const sendTime = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now
-    
+
     const job = schedule.scheduleJob(sendTime, async () => {
       try {
         for (const email of instructorEmails) {
@@ -546,30 +629,42 @@ class EmailService {
                       </tr>
                       <tr>
                         <td style="padding: 8px 0;"><strong>Start Date:</strong></td>
-                        <td>${new Date(courseData.startDate).toLocaleDateString()}</td>
+                        <td>${new Date(
+                          courseData.startDate
+                        ).toLocaleDateString()}</td>
                       </tr>
                       <tr>
                         <td style="padding: 8px 0;"><strong>Duration:</strong></td>
-                        <td>${courseData.duration || 'TBD'}</td>
+                        <td>${courseData.duration || "TBD"}</td>
                       </tr>
-                      ${courseData.location ? `
+                      ${
+                        courseData.location
+                          ? `
                       <tr>
                         <td style="padding: 8px 0;"><strong>Location:</strong></td>
                         <td>${courseData.location}</td>
                       </tr>
-                      ` : ''}
-                      ${courseData.platform ? `
+                      `
+                          : ""
+                      }
+                      ${
+                        courseData.platform
+                          ? `
                       <tr>
                         <td style="padding: 8px 0;"><strong>Platform:</strong></td>
                         <td>${courseData.platform}</td>
                       </tr>
-                      ` : ''}
+                      `
+                          : ""
+                      }
                     </table>
                     
                     <p>Please log in to your instructor portal to view complete course details and materials.</p>
                     
                     <center>
-                      <a href="${process.env.BASE_URL}/instructor/dashboard" class="button">View Course Details</a>
+                      <a href="${
+                        process.env.BASE_URL
+                      }/instructor/dashboard" class="button">View Course Details</a>
                     </center>
                     
                     <p>If you have any questions, please contact the admin team.</p>
@@ -578,19 +673,21 @@ class EmailService {
                 </div>
               </body>
               </html>
-            `
+            `,
           };
 
           await sendEmail(mailOptions);
         }
-        
-        console.log(`✅ Sent instructor notifications to ${instructorEmails.length} instructors`);
+
+        console.log(
+          `✅ Sent instructor notifications to ${instructorEmails.length} instructors`
+        );
         this.scheduledJobs.delete(jobId);
       } catch (error) {
-        console.error('Error sending instructor notifications:', error);
+        console.error("Error sending instructor notifications:", error);
       }
     });
-    
+
     this.scheduledJobs.set(jobId, job);
     return { success: true };
   }
@@ -598,61 +695,61 @@ class EmailService {
   // Test email configuration
   async testEmailConfiguration() {
     if (this.mockMode) {
-      return { 
-        success: true, 
-        message: 'Email service is in MOCK mode. Set EMAIL_USER and EMAIL_PASS in .env to enable real emails.' 
+      return {
+        success: true,
+        message:
+          "Email service is in MOCK mode. Set EMAIL_USER and EMAIL_PASS in .env to enable real emails.",
       };
     }
 
     try {
       const testEmail = {
         to: process.env.EMAIL_TEST_RECIPIENT || process.env.EMAIL_USER,
-        subject: 'IAAI Email Service Test',
+        subject: "IAAI Email Service Test",
         html: `
           <h2>Email Service Test</h2>
           <p>This is a test email from IAAI Training Institute.</p>
           <p>If you received this email, your email configuration is working correctly!</p>
           <p>Timestamp: ${new Date().toLocaleString()}</p>
-        `
+        `,
       };
 
       const result = await sendEmail(testEmail);
-      return { 
-        success: true, 
-        message: 'Test email sent successfully!',
-        details: result
+      return {
+        success: true,
+        message: "Test email sent successfully!",
+        details: result,
       };
     } catch (error) {
-      return { 
-        success: false, 
-        message: 'Email test failed',
-        error: error.message 
+      return {
+        success: false,
+        message: "Email test failed",
+        error: error.message,
       };
     }
   }
 
+  // Add these methods to your emailService.js
 
+  // Send course starting reminder (1 day before)
+  async sendCourseStartingReminder(user, course) {
+    if (this.mockMode) {
+      console.log(
+        "📧 [MOCK] Would send course starting reminder to:",
+        user.email
+      );
+      return { success: true };
+    }
 
+    try {
+      const startDate = new Date(course.startDate);
+      const isOnline =
+        course.courseType === "OnlineLiveTraining" || course.platform;
 
-
-  
-// Add these methods to your emailService.js
-
-// Send course starting reminder (1 day before)
-async sendCourseStartingReminder(user, course) {
-  if (this.mockMode) {
-    console.log('📧 [MOCK] Would send course starting reminder to:', user.email);
-    return { success: true };
-  }
-
-  try {
-    const startDate = new Date(course.startDate);
-    const isOnline = course.courseType === 'OnlineLiveTraining' || course.platform;
-    
-    const mailOptions = {
-      to: user.email,
-      subject: `Reminder: ${course.title} starts tomorrow!`,
-      html: `
+      const mailOptions = {
+        to: user.email,
+        subject: `Reminder: ${course.title} starts tomorrow!`,
+        html: `
         <!DOCTYPE html>
         <html>
         <head>
@@ -678,11 +775,16 @@ async sendCourseStartingReminder(user, course) {
               <div class="checklist">
                 <h3>📋 Pre-Course Checklist</h3>
                 <ul>
-                  ${isOnline ? 
-                    `<li>✅ Test your internet connection</li>
+                  ${
+                    isOnline
+                      ? `<li>✅ Test your internet connection</li>
                      <li>✅ Check your camera and microphone</li>
-                     <li>✅ Join link: <a href="${course.platform?.accessUrl || course.courseUrl}">${course.platform?.name || 'Course Platform'}</a></li>` :
-                    `<li>✅ Review the location: ${course.location || course.venue?.name}</li>
+                     <li>✅ Join link: <a href="${
+                       course.platform?.accessUrl || course.courseUrl
+                     }">${course.platform?.name || "Course Platform"}</a></li>`
+                      : `<li>✅ Review the location: ${
+                          course.location || course.venue?.name
+                        }</li>
                      <li>✅ Plan your travel route</li>
                      <li>✅ Bring required materials</li>`
                   }
@@ -694,18 +796,30 @@ async sendCourseStartingReminder(user, course) {
               <table style="width: 100%; margin: 20px 0;">
                 <tr>
                   <td style="padding: 8px 0;"><strong>Date:</strong></td>
-                  <td>${startDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                  <td>${startDate.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0;"><strong>Time:</strong></td>
-                  <td>${startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</td>
+                  <td>${startDate.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}</td>
                 </tr>
-                ${!isOnline ? `
+                ${
+                  !isOnline
+                    ? `
                 <tr>
                   <td style="padding: 8px 0;"><strong>Location:</strong></td>
                   <td>${course.location || course.venue?.name}</td>
                 </tr>
-                ` : ''}
+                `
+                    : ""
+                }
                 <tr>
                   <td style="padding: 8px 0;"><strong>Instructor:</strong></td>
                   <td>${course.instructor || course.instructorNames}</td>
@@ -713,7 +827,9 @@ async sendCourseStartingReminder(user, course) {
               </table>
               
               <center>
-                <a href="${process.env.BASE_URL}/library" class="button">Access My Courses</a>
+                <a href="${
+                  process.env.BASE_URL
+                }/library" class="button">Access My Courses</a>
               </center>
               
               <p>We're excited to see you tomorrow! If you have any questions, please don't hesitate to contact us.</p>
@@ -722,29 +838,29 @@ async sendCourseStartingReminder(user, course) {
           </div>
         </body>
         </html>
-      `
-    };
+      `,
+      };
 
-    await sendEmail(mailOptions);
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending course starting reminder:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-// Send custom course message
-async sendCustomCourseMessage(user, course, customMessage) {
-  if (this.mockMode) {
-    console.log('📧 [MOCK] Would send custom message to:', user.email);
-    return { success: true };
+      await sendEmail(mailOptions);
+      return { success: true };
+    } catch (error) {
+      console.error("Error sending course starting reminder:", error);
+      return { success: false, error: error.message };
+    }
   }
 
-  try {
-    const mailOptions = {
-      to: user.email,
-      subject: `Important Update: ${course.title}`,
-      html: `
+  // Send custom course message
+  async sendCustomCourseMessage(user, course, customMessage) {
+    if (this.mockMode) {
+      console.log("📧 [MOCK] Would send custom message to:", user.email);
+      return { success: true };
+    }
+
+    try {
+      const mailOptions = {
+        to: user.email,
+        subject: `Important Update: ${course.title}`,
+        html: `
         <!DOCTYPE html>
         <html>
         <head>
@@ -766,7 +882,7 @@ async sendCustomCourseMessage(user, course, customMessage) {
               <p>Dear ${user.firstName},</p>
               
               <div class="message-box">
-                ${customMessage.replace(/\n/g, '<br>')}
+                ${customMessage.replace(/\n/g, "<br>")}
               </div>
               
               <p>If you have any questions about this update, please feel free to contact us.</p>
@@ -775,29 +891,32 @@ async sendCustomCourseMessage(user, course, customMessage) {
           </div>
         </body>
         </html>
-      `
-    };
+      `,
+      };
 
-    await sendEmail(mailOptions);
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending custom course message:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-// Send certificate completion notification (1 day after course ends)
-async sendCertificateCompletionNotification(user, course) {
-  if (this.mockMode) {
-    console.log('📧 [MOCK] Would send certificate completion notification to:', user.email);
-    return { success: true };
+      await sendEmail(mailOptions);
+      return { success: true };
+    } catch (error) {
+      console.error("Error sending custom course message:", error);
+      return { success: false, error: error.message };
+    }
   }
 
-  try {
-    const mailOptions = {
-      to: user.email,
-      subject: `Course Completed: ${course.title} - Certificate Available`,
-      html: `
+  // Send certificate completion notification (1 day after course ends)
+  async sendCertificateCompletionNotification(user, course) {
+    if (this.mockMode) {
+      console.log(
+        "📧 [MOCK] Would send certificate completion notification to:",
+        user.email
+      );
+      return { success: true };
+    }
+
+    try {
+      const mailOptions = {
+        to: user.email,
+        subject: `Course Completed: ${course.title} - Certificate Available`,
+        html: `
         <!DOCTYPE html>
         <html>
         <head>
@@ -819,20 +938,30 @@ async sendCertificateCompletionNotification(user, course) {
               <p>Dear ${user.firstName},</p>
               <p>Congratulations on completing the course! We hope you found it valuable and informative.</p>
               
-              ${course.certificateProvided ? `
+              ${
+                course.certificateProvided
+                  ? `
                 <p><strong>🏆 Certificate Available:</strong> Your certificate is ready for download in your course library.</p>
-              ` : ''}
+              `
+                  : ""
+              }
               
               <h3>Next Steps:</h3>
               <ul>
                 <li>Access your course materials anytime in your library</li>
-                ${course.certificateProvided ? '<li>Download your certificate of completion</li>' : ''}
+                ${
+                  course.certificateProvided
+                    ? "<li>Download your certificate of completion</li>"
+                    : ""
+                }
                 <li>Leave a review to help other students</li>
                 <li>Explore our other courses to continue learning</li>
               </ul>
               
               <center>
-                <a href="${process.env.BASE_URL}/library" class="button">Access My Library</a>
+                <a href="${
+                  process.env.BASE_URL
+                }/library" class="button">Access My Library</a>
               </center>
               
               <p>Thank you for choosing IAAI Training Institute. We look forward to seeing you in future courses!</p>
@@ -841,83 +970,95 @@ async sendCertificateCompletionNotification(user, course) {
           </div>
         </body>
         </html>
-      `
-    };
+      `,
+      };
 
-    await sendEmail(mailOptions);
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending certificate completion notification:', error);
-    return { success: false, error: error.message };
+      await sendEmail(mailOptions);
+      return { success: true };
+    } catch (error) {
+      console.error(
+        "Error sending certificate completion notification:",
+        error
+      );
+      return { success: false, error: error.message };
+    }
   }
-}
 
-// Schedule post-course notification (1 day after course ends)
-schedulePostCourseNotification(courseId, courseData, recipients) {
-  const courseEndDate = new Date(courseData.endDate || courseData.startDate);
-  const notificationDate = new Date(courseEndDate.getTime() + 24 * 60 * 60 * 1000); // 1 day after
-  
-  const jobId = `post-course-${courseId}`;
-  
-  console.log(`📧 Scheduling post-course notification for ${notificationDate}`);
-  
-  if (this.mockMode) {
-    console.log('📧 [MOCK] Would schedule post-course notification');
+  // Schedule post-course notification (1 day after course ends)
+  schedulePostCourseNotification(courseId, courseData, recipients) {
+    const courseEndDate = new Date(courseData.endDate || courseData.startDate);
+    const notificationDate = new Date(
+      courseEndDate.getTime() + 24 * 60 * 60 * 1000
+    ); // 1 day after
+
+    const jobId = `post-course-${courseId}`;
+
+    console.log(
+      `📧 Scheduling post-course notification for ${notificationDate}`
+    );
+
+    if (this.mockMode) {
+      console.log("📧 [MOCK] Would schedule post-course notification");
+      return jobId;
+    }
+
+    const job = schedule.scheduleJob(notificationDate, async () => {
+      for (const recipient of recipients) {
+        await this.sendCertificateCompletionNotification(recipient, courseData);
+      }
+      this.scheduledJobs.delete(jobId);
+    });
+
+    this.scheduledJobs.set(jobId, job);
     return jobId;
   }
-  
-  const job = schedule.scheduleJob(notificationDate, async () => {
-    for (const recipient of recipients) {
-      await this.sendCertificateCompletionNotification(recipient, courseData);
-    }
-    this.scheduledJobs.delete(jobId);
-  });
-  
-  this.scheduledJobs.set(jobId, job);
-  return jobId;
-}
 
+  // Add this method to your emailService.js to send individual emails
 
-
-
-
-// Add this method to your emailService.js to send individual emails
-
-// Modified version that sends individual emails to each recipient
-// Enhanced sendNewCourseAnnouncement that handles both in-person and online courses
-async sendNewCourseAnnouncement(course, recipients = null) {
-  if (this.mockMode) {
-      console.log('📧 [MOCK] Would send course announcement for:', course.title);
+  // Modified version that sends individual emails to each recipient
+  // Enhanced sendNewCourseAnnouncement that handles both in-person and online courses
+  async sendNewCourseAnnouncement(course, recipients = null) {
+    if (this.mockMode) {
+      console.log(
+        "📧 [MOCK] Would send course announcement for:",
+        course.title
+      );
       return { success: true };
-  }
+    }
 
-  try {
+    try {
       // If no recipients provided, get all subscribed users
       if (!recipients) {
-          const users = await User.find(
-              { 
-                  isConfirmed: true, 
-                  'notificationSettings.courseUpdates': true 
-              },
-              'email firstName lastName'
-          );
-          recipients = users;
+        const users = await User.find(
+          {
+            isConfirmed: true,
+            "notificationSettings.courseUpdates": true,
+          },
+          "email firstName lastName"
+        );
+        recipients = users;
       }
 
       // Determine if it's an online course
-      const isOnlineCourse = course.courseType === 'OnlineLiveTraining' || course.platform;
-      
-      const courseTypeLabel = {
-          'InPersonAestheticTraining': 'In-Person Training',
-          'OnlineLiveTraining': 'Live Online Training',
-          'SelfPacedOnlineTraining': 'Self-Paced Online Course'
-      }[course.courseType] || course.courseType || 'Training Course';
+      const isOnlineCourse =
+        course.courseType === "OnlineLiveTraining" || course.platform;
+
+      const courseTypeLabel =
+        {
+          InPersonAestheticTraining: "In-Person Training",
+          OnlineLiveTraining: "Live Online Training",
+          SelfPacedOnlineTraining: "Self-Paced Online Course",
+        }[course.courseType] ||
+        course.courseType ||
+        "Training Course";
 
       const mailOptions = {
-          to: process.env.EMAIL_FROM || process.env.EMAIL_USER, // Send to self
-          bcc: recipients.map(r => typeof r === 'string' ? r : r.email).join(','), // BCC all recipients
-          subject: `New Course Available: ${course.title}`,
-          html: `
+        to: process.env.EMAIL_FROM || process.env.EMAIL_USER, // Send to self
+        bcc: recipients
+          .map((r) => (typeof r === "string" ? r : r.email))
+          .join(","), // BCC all recipients
+        subject: `New Course Available: ${course.title}`,
+        html: `
               <!DOCTYPE html>
               <html>
               <head>
@@ -940,8 +1081,16 @@ async sendNewCourseAnnouncement(course, recipients = null) {
                           <h1>🎓 New ${courseTypeLabel} Available!</h1>
                       </div>
                       <div class="content">
-                          <span class="badge">${course.category || 'Professional Training'}</span>
-                          ${isOnlineCourse ? `<span class="badge platform-badge">${course.platform || 'Online'}</span>` : ''}
+                          <span class="badge">${
+                            course.category || "Professional Training"
+                          }</span>
+                          ${
+                            isOnlineCourse
+                              ? `<span class="badge platform-badge">${
+                                  course.platform || "Online"
+                                }</span>`
+                              : ""
+                          }
                           
                           <h2>${course.title}</h2>
                           <p>${course.description}</p>
@@ -955,110 +1104,208 @@ async sendNewCourseAnnouncement(course, recipients = null) {
                                   </tr>
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Start Date:</strong></td>
-                                      <td>${new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                                      <td>${new Date(
+                                        course.startDate
+                                      ).toLocaleDateString("en-US", {
+                                        weekday: "long",
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                      })}</td>
                                   </tr>
-                                  ${isOnlineCourse && course.primaryTimezone ? `
+                                  ${
+                                    isOnlineCourse && course.primaryTimezone
+                                      ? `
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Timezone:</strong></td>
-                                      <td>${course.primaryTimezone} ${course.displayTimezones?.length > 0 ? `(Also shown in: ${course.displayTimezones.join(', ')})` : ''}</td>
+                                      <td>${course.primaryTimezone} ${
+                                          course.displayTimezones?.length > 0
+                                            ? `(Also shown in: ${course.displayTimezones.join(
+                                                ", "
+                                              )})`
+                                            : ""
+                                        }</td>
                                   </tr>
-                                  ` : ''}
+                                  `
+                                      : ""
+                                  }
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Duration:</strong></td>
-                                      <td>${course.duration || 'See course details'}</td>
+                                      <td>${
+                                        course.duration || "See course details"
+                                      }</td>
                                   </tr>
-                                  ${isOnlineCourse && course.pattern && course.pattern !== 'single' ? `
+                                  ${
+                                    isOnlineCourse &&
+                                    course.pattern &&
+                                    course.pattern !== "single"
+                                      ? `
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Schedule:</strong></td>
-                                      <td>${course.pattern.charAt(0).toUpperCase() + course.pattern.slice(1)} sessions</td>
+                                      <td>${
+                                        course.pattern.charAt(0).toUpperCase() +
+                                        course.pattern.slice(1)
+                                      } sessions</td>
                                   </tr>
-                                  ` : ''}
+                                  `
+                                      : ""
+                                  }
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Instructor:</strong></td>
                                       <td>${course.instructor}</td>
                                   </tr>
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Price:</strong></td>
-                                      <td>${course.currency === 'USD' ? '$' : course.currency}${course.price}</td>
+                                      <td>${
+                                        course.currency === "USD"
+                                          ? "$"
+                                          : course.currency
+                                      }${course.price}</td>
                                   </tr>
-                                  ${course.earlyBirdPrice ? `
+                                  ${
+                                    course.earlyBirdPrice
+                                      ? `
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Early Bird Price:</strong></td>
-                                      <td style="color: #10b981; font-weight: bold;">${course.currency === 'USD' ? '$' : course.currency}${course.earlyBirdPrice}</td>
+                                      <td style="color: #10b981; font-weight: bold;">${
+                                        course.currency === "USD"
+                                          ? "$"
+                                          : course.currency
+                                      }${course.earlyBirdPrice}</td>
                                   </tr>
-                                  ` : ''}
-                                  ${!isOnlineCourse && course.location ? `
+                                  `
+                                      : ""
+                                  }
+                                  ${
+                                    !isOnlineCourse && course.location
+                                      ? `
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Location:</strong></td>
                                       <td>${course.location}</td>
                                   </tr>
-                                  ` : ''}
-                                  ${isOnlineCourse && course.platform ? `
+                                  `
+                                      : ""
+                                  }
+                                  ${
+                                    isOnlineCourse && course.platform
+                                      ? `
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Platform:</strong></td>
                                       <td>${course.platform}</td>
                                   </tr>
-                                  ` : ''}
-                                  ${isOnlineCourse && course.recordingAvailable ? `
+                                  `
+                                      : ""
+                                  }
+                                  ${
+                                    isOnlineCourse && course.recordingAvailable
+                                      ? `
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Recording:</strong></td>
                                       <td>✅ Available for ${course.recordingDuration} days</td>
                                   </tr>
-                                  ` : ''}
+                                  `
+                                      : ""
+                                  }
                                   <tr>
                                       <td style="padding: 8px 0;"><strong>Certificate:</strong></td>
-                                      <td>${course.certificateProvided ? '✅ Certificate Provided' : 'No Certificate'}</td>
+                                      <td>${
+                                        course.certificateProvided
+                                          ? "✅ Certificate Provided"
+                                          : "No Certificate"
+                                      }</td>
                                   </tr>
                               </table>
                           </div>
                           
-                          ${isOnlineCourse && course.technicalRequirements ? `
+                          ${
+                            isOnlineCourse && course.technicalRequirements
+                              ? `
                           <div class="tech-req">
                               <h4>📋 Technical Requirements:</h4>
                               <ul style="margin: 0; padding-left: 20px;">
-                                  ${course.technicalRequirements.equipment?.camera ? `<li>Camera: ${course.technicalRequirements.equipment.camera}</li>` : ''}
-                                  ${course.technicalRequirements.equipment?.microphone ? `<li>Microphone: ${course.technicalRequirements.equipment.microphone}</li>` : ''}
-                                  ${course.technicalRequirements.internetSpeed?.recommended ? `<li>Internet: ${course.technicalRequirements.internetSpeed.recommended} (recommended)</li>` : ''}
-                                  ${course.technicalRequirements.requiredSoftware?.length > 0 ? `<li>Software: ${course.technicalRequirements.requiredSoftware.join(', ')}</li>` : ''}
+                                  ${
+                                    course.technicalRequirements.equipment
+                                      ?.camera
+                                      ? `<li>Camera: ${course.technicalRequirements.equipment.camera}</li>`
+                                      : ""
+                                  }
+                                  ${
+                                    course.technicalRequirements.equipment
+                                      ?.microphone
+                                      ? `<li>Microphone: ${course.technicalRequirements.equipment.microphone}</li>`
+                                      : ""
+                                  }
+                                  ${
+                                    course.technicalRequirements.internetSpeed
+                                      ?.recommended
+                                      ? `<li>Internet: ${course.technicalRequirements.internetSpeed.recommended} (recommended)</li>`
+                                      : ""
+                                  }
+                                  ${
+                                    course.technicalRequirements
+                                      .requiredSoftware?.length > 0
+                                      ? `<li>Software: ${course.technicalRequirements.requiredSoftware.join(
+                                          ", "
+                                        )}</li>`
+                                      : ""
+                                  }
                               </ul>
                           </div>
-                          ` : ''}
+                          `
+                              : ""
+                          }
                           
-                          ${course.objectives && course.objectives.length > 0 ? `
+                          ${
+                            course.objectives && course.objectives.length > 0
+                              ? `
                           <div style="margin: 20px 0;">
                               <h3>What You'll Learn:</h3>
                               <ul style="margin: 0; padding-left: 20px;">
-                                  ${course.objectives.slice(0, 3).map(obj => `<li>${obj}</li>`).join('')}
-                                  ${course.objectives.length > 3 ? '<li>And more...</li>' : ''}
+                                  ${course.objectives
+                                    .slice(0, 3)
+                                    .map((obj) => `<li>${obj}</li>`)
+                                    .join("")}
+                                  ${
+                                    course.objectives.length > 3
+                                      ? "<li>And more...</li>"
+                                      : ""
+                                  }
                               </ul>
                           </div>
-                          ` : ''}
+                          `
+                              : ""
+                          }
                           
-                          ${isOnlineCourse && course.interactionFeatures ? `
+                          ${
+                            isOnlineCourse && course.interactionFeatures
+                              ? `
                           <div style="margin: 20px 0;">
                               <h4>🚀 Interactive Features:</h4>
                               <p style="margin: 5px 0;">
                                   ${Object.entries(course.interactionFeatures)
-                                      .filter(([feature, enabled]) => enabled)
-                                      .map(([feature]) => {
-                                          const featureNames = {
-                                              polls: '📊 Live Polls',
-                                              quizzes: '❓ Interactive Quizzes',
-                                              breakoutRooms: '👥 Breakout Rooms',
-                                              qa: '💬 Q&A Sessions',
-                                              chat: '💭 Live Chat',
-                                              reactions: '😊 Reactions'
-                                          };
-                                          return featureNames[feature] || feature;
-                                      })
-                                      .join(' • ')
-                                  }
+                                    .filter(([feature, enabled]) => enabled)
+                                    .map(([feature]) => {
+                                      const featureNames = {
+                                        polls: "📊 Live Polls",
+                                        quizzes: "❓ Interactive Quizzes",
+                                        breakoutRooms: "👥 Breakout Rooms",
+                                        qa: "💬 Q&A Sessions",
+                                        chat: "💭 Live Chat",
+                                        reactions: "😊 Reactions",
+                                      };
+                                      return featureNames[feature] || feature;
+                                    })
+                                    .join(" • ")}
                               </p>
                           </div>
-                          ` : ''}
+                          `
+                              : ""
+                          }
                           
                           <center>
-                              <a href="${process.env.BASE_URL}/courses/${course._id}" class="button">View Course Details & Register</a>
+                              <a href="${process.env.BASE_URL}/courses/${
+          course._id
+        }" class="button">View Course Details & Register</a>
                           </center>
                           
                           <p style="text-align: center; color: #666; margin-top: 20px;">
@@ -1067,92 +1314,105 @@ async sendNewCourseAnnouncement(course, recipients = null) {
                       </div>
                       <div class="footer">
                           <p>You received this email because you're subscribed to course updates from IAAI Training Institute.</p>
-                          <p><a href="${process.env.BASE_URL}/account/notifications">Update Preferences</a> | <a href="${process.env.BASE_URL}/unsubscribe">Unsubscribe</a></p>
+                          <p><a href="${
+                            process.env.BASE_URL
+                          }/account/notifications">Update Preferences</a> | <a href="${
+          process.env.BASE_URL
+        }/unsubscribe">Unsubscribe</a></p>
                       </div>
                   </div>
               </body>
               </html>
-          `
+          `,
       };
 
       // Send in batches if many recipients
       if (recipients.length > 50) {
-          const batchSize = 50;
-          for (let i = 0; i < recipients.length; i += batchSize) {
-              const batch = recipients.slice(i, i + batchSize);
-              mailOptions.bcc = batch.map(r => typeof r === 'string' ? r : r.email).join(',');
-              await sendEmail(mailOptions);
-              console.log(`✅ Sent new course email to batch ${Math.floor(i / batchSize) + 1}`);
-          }
-      } else {
+        const batchSize = 50;
+        for (let i = 0; i < recipients.length; i += batchSize) {
+          const batch = recipients.slice(i, i + batchSize);
+          mailOptions.bcc = batch
+            .map((r) => (typeof r === "string" ? r : r.email))
+            .join(",");
           await sendEmail(mailOptions);
+          console.log(
+            `✅ Sent new course email to batch ${Math.floor(i / batchSize) + 1}`
+          );
+        }
+      } else {
+        await sendEmail(mailOptions);
       }
 
       return { success: true };
-  } catch (error) {
-      console.error('Error sending course announcement:', error);
+    } catch (error) {
+      console.error("Error sending course announcement:", error);
       return { success: false, error: error.message };
+    }
   }
-}
 
-// Add this configuration option to your emailService class
-configureBulkEmailMethod(method = 'bcc') {
-  // Options: 'bcc' (default), 'individual', 'batch'
-  this.bulkEmailMethod = method;
-  console.log(`📧 Bulk email method set to: ${method}`);
-}
+  // Add this configuration option to your emailService class
+  configureBulkEmailMethod(method = "bcc") {
+    // Options: 'bcc' (default), 'individual', 'batch'
+    this.bulkEmailMethod = method;
+    console.log(`📧 Bulk email method set to: ${method}`);
+  }
 
-// Modified sendNewCourseAnnouncement to support different methods
-async sendNewCourseAnnouncementFlexible(course, recipients = null) {
-  const method = this.bulkEmailMethod || 'bcc';
-  
-  switch (method) {
-      case 'individual':
-          return await this.sendNewCourseAnnouncementIndividual(course, recipients);
-          
-      case 'batch':
-          // Send in batches but still as individual emails
-          const batchSize = 10;
-          let allResults = { sent: 0, failed: 0, failedEmails: [] };
-          
-          for (let i = 0; i < recipients.length; i += batchSize) {
-              const batch = recipients.slice(i, i + batchSize);
-              const result = await this.sendNewCourseAnnouncementIndividual(course, batch);
-              allResults.sent += result.sent || 0;
-              allResults.failed += result.failed || 0;
-              allResults.failedEmails.push(...(result.failedEmails || []));
-              
-              // Longer delay between batches
-              if (i + batchSize < recipients.length) {
-                  console.log(`⏳ Waiting 5 seconds before next batch...`);
-                  await new Promise(resolve => setTimeout(resolve, 5000));
-              }
+  // Modified sendNewCourseAnnouncement to support different methods
+  async sendNewCourseAnnouncementFlexible(course, recipients = null) {
+    const method = this.bulkEmailMethod || "bcc";
+
+    switch (method) {
+      case "individual":
+        return await this.sendNewCourseAnnouncementIndividual(
+          course,
+          recipients
+        );
+
+      case "batch":
+        // Send in batches but still as individual emails
+        const batchSize = 10;
+        let allResults = { sent: 0, failed: 0, failedEmails: [] };
+
+        for (let i = 0; i < recipients.length; i += batchSize) {
+          const batch = recipients.slice(i, i + batchSize);
+          const result = await this.sendNewCourseAnnouncementIndividual(
+            course,
+            batch
+          );
+          allResults.sent += result.sent || 0;
+          allResults.failed += result.failed || 0;
+          allResults.failedEmails.push(...(result.failedEmails || []));
+
+          // Longer delay between batches
+          if (i + batchSize < recipients.length) {
+            console.log(`⏳ Waiting 5 seconds before next batch...`);
+            await new Promise((resolve) => setTimeout(resolve, 5000));
           }
-          
-          return allResults;
-          
-      case 'bcc':
+        }
+
+        return allResults;
+
+      case "bcc":
       default:
-          // Original BCC method
-          return await this.sendNewCourseAnnouncement(course, recipients);
+        // Original BCC method
+        return await this.sendNewCourseAnnouncement(course, recipients);
+    }
   }
-}
 
-
-// Add this method for sending tech check reminders (specific to online courses)
-async sendTechCheckReminder(user, course) {
-  if (this.mockMode) {
-      console.log('📧 [MOCK] Would send tech check reminder to:', user.email);
+  // Add this method for sending tech check reminders (specific to online courses)
+  async sendTechCheckReminder(user, course) {
+    if (this.mockMode) {
+      console.log("📧 [MOCK] Would send tech check reminder to:", user.email);
       return { success: true };
-  }
+    }
 
-  try {
+    try {
       const techCheckDate = new Date(course.technical?.techCheckDate);
-      
+
       const mailOptions = {
-          to: user.email,
-          subject: `Tech Check Reminder: ${course.title}`,
-          html: `
+        to: user.email,
+        subject: `Tech Check Reminder: ${course.title}`,
+        html: `
               <!DOCTYPE html>
               <html>
               <head>
@@ -1177,24 +1437,45 @@ async sendTechCheckReminder(user, course) {
                           
                           <div class="tech-box">
                               <h3>📅 Tech Check Details</h3>
-                              <p><strong>Date:</strong> ${techCheckDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                              <p><strong>Time:</strong> ${techCheckDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
-                              <p><strong>Platform:</strong> ${course.platform}</p>
-                              ${course.technical?.techCheckUrl ? `<p><strong>Join Link:</strong> <a href="${course.technical.techCheckUrl}">Click here to join</a></p>` : ''}
+                              <p><strong>Date:</strong> ${techCheckDate.toLocaleDateString(
+                                "en-US",
+                                {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )}</p>
+                              <p><strong>Time:</strong> ${techCheckDate.toLocaleTimeString(
+                                "en-US",
+                                { hour: "2-digit", minute: "2-digit" }
+                              )}</p>
+                              <p><strong>Platform:</strong> ${
+                                course.platform
+                              }</p>
+                              ${
+                                course.technical?.techCheckUrl
+                                  ? `<p><strong>Join Link:</strong> <a href="${course.technical.techCheckUrl}">Click here to join</a></p>`
+                                  : ""
+                              }
                           </div>
                           
                           <h3>📋 Please Check:</h3>
                           <ul>
-                              <li>✅ Your internet connection (${course.technicalRequirements?.internetSpeed?.recommended || 'stable connection'} recommended)</li>
+                              <li>✅ Your internet connection (${
+                                course.technicalRequirements?.internetSpeed
+                                  ?.recommended || "stable connection"
+                              } recommended)</li>
                               <li>✅ Camera and microphone are working</li>
                               <li>✅ You have installed any required software</li>
                               <li>✅ You can access the course platform</li>
                           </ul>
                           
                           <center>
-                              ${course.technical?.techCheckUrl ? 
-                                  `<a href="${course.technical.techCheckUrl}" class="button">Join Tech Check</a>` :
-                                  `<a href="${process.env.BASE_URL}/library" class="button">View Course Details</a>`
+                              ${
+                                course.technical?.techCheckUrl
+                                  ? `<a href="${course.technical.techCheckUrl}" class="button">Join Tech Check</a>`
+                                  : `<a href="${process.env.BASE_URL}/library" class="button">View Course Details</a>`
                               }
                           </center>
                           
@@ -1204,29 +1485,32 @@ async sendTechCheckReminder(user, course) {
                   </div>
               </body>
               </html>
-          `
+          `,
       };
 
       await sendEmail(mailOptions);
       return { success: true };
-  } catch (error) {
-      console.error('Error sending tech check reminder:', error);
+    } catch (error) {
+      console.error("Error sending tech check reminder:", error);
       return { success: false, error: error.message };
+    }
   }
-}
 
-// Add this method for post-course recording access notification
-async sendRecordingAvailableNotification(user, course) {
-  if (this.mockMode) {
-      console.log('📧 [MOCK] Would send recording notification to:', user.email);
+  // Add this method for post-course recording access notification
+  async sendRecordingAvailableNotification(user, course) {
+    if (this.mockMode) {
+      console.log(
+        "📧 [MOCK] Would send recording notification to:",
+        user.email
+      );
       return { success: true };
-  }
+    }
 
-  try {
+    try {
       const mailOptions = {
-          to: user.email,
-          subject: `Course Recording Available: ${course.title}`,
-          html: `
+        to: user.email,
+        subject: `Course Recording Available: ${course.title}`,
+        html: `
               <!DOCTYPE html>
               <html>
               <head>
@@ -1250,13 +1534,25 @@ async sendRecordingAvailableNotification(user, course) {
                           
                           <h3>📺 Recording Access:</h3>
                           <ul>
-                              <li>Available for ${course.recordingDuration || 90} days</li>
-                              ${course.recording?.autoTranscription ? '<li>✅ Includes automatic transcription</li>' : ''}
-                              ${course.recording?.availability?.downloadable ? '<li>✅ Download available</li>' : '<li>Streaming only (no download)</li>'}
+                              <li>Available for ${
+                                course.recordingDuration || 90
+                              } days</li>
+                              ${
+                                course.recording?.autoTranscription
+                                  ? "<li>✅ Includes automatic transcription</li>"
+                                  : ""
+                              }
+                              ${
+                                course.recording?.availability?.downloadable
+                                  ? "<li>✅ Download available</li>"
+                                  : "<li>Streaming only (no download)</li>"
+                              }
                           </ul>
                           
                           <center>
-                              <a href="${process.env.BASE_URL}/library" class="button">Access Recording</a>
+                              <a href="${
+                                process.env.BASE_URL
+                              }/library" class="button">Access Recording</a>
                           </center>
                           
                           <p>Don't forget to download any course materials before your access expires.</p>
@@ -1265,22 +1561,16 @@ async sendRecordingAvailableNotification(user, course) {
                   </div>
               </body>
               </html>
-          `
+          `,
       };
 
       await sendEmail(mailOptions);
       return { success: true };
-  } catch (error) {
-      console.error('Error sending recording notification:', error);
+    } catch (error) {
+      console.error("Error sending recording notification:", error);
       return { success: false, error: error.message };
+    }
   }
 }
-
-
-
-
-}
-
-
 
 module.exports = new EmailService();

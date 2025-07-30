@@ -934,7 +934,8 @@
                 <br><small style="color: #28a745;">Early: <%= course.currency || 'EUR' %><%= course.earlyBirdPrice %></small>
               <% } %>
             </td>
-              <span class="seats-count <%= course.availableSeats > 5 ? 'seats-good' : course.availableSeats > 0 ? 'seats-warning' : 'seats-danger' %>">
+            <td>
+            <span class="seats-count <%= course.availableSeats > 5 ? 'seats-good' : course.availableSeats > 0 ? 'seats-warning' : 'seats-danger' %>">
                 <%= course.availableSeats || 0 %>/<%= course.seatsAvailable || 20 %>
               </span>
             </td>
@@ -1204,6 +1205,8 @@
           
           if (result.success) {
             showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+            // ⭐ ADD ONLY THIS LINE:
+  setTimeout(() => window.location.href = '/orders', 3000);
           } else {
             showNotification('Error', result.message, 'error');
           }

@@ -68,7 +68,7 @@ const selfPacedCourseSchema = new mongoose.Schema(
         min: 0,
         default: 0, // Many might be free
       },
-      currency: { type: String, default: "USD" },
+      currency: { type: String, default: "EUR" },
 
       // Simple access duration
       accessDays: {

@@ -42,7 +42,7 @@
             <i class="fas fa-tag"></i>
             <div>
               <div class="savings-text">🎉 Early Bird Savings Applied!</div>
-              <div class="savings-amount">You're saving $<%= totalSavings %> total</div>
+              <div class="savings-amount">You're saving €<%= totalSavings %> total</div>
             </div>
           </div>
         <% } %>
@@ -117,19 +117,19 @@
         <!-- 🆕 Enhanced Price Display with Linked Course Free -->
         <div class="checkout-price-display">
           <% if (course.isLinkedCourseFree) { %>
-            <span class="original-price">$<%= course.originalPrice.toFixed(2) %></span>
+            <span class="original-price">€<%= course.originalPrice.toFixed(2) %></span>
             <strong class="current-price free-price">FREE</strong>
             <div class="savings-amount-item">
               <i class="fas fa-gift"></i> Included with In-Person Course
             </div>
           <% } else if (course.isEarlyBird && course.originalPrice) { %>
-            <span class="original-price">$<%= course.originalPrice.toFixed(2) %></span>
-            <strong class="current-price">$<%= course.price.toFixed(2) %></strong> USD
+            <span class="original-price">€<%= course.originalPrice.toFixed(2) %></span>
+            <strong class="current-price">€<%= course.price.toFixed(2) %></strong>
             <div class="savings-amount-item">
-              <i class="fas fa-tag"></i> Save $<%= course.earlyBirdSavings.toFixed(2) %>
+              <i class="fas fa-tag"></i> Save €<%= course.earlyBirdSavings.toFixed(2) %>
             </div>
           <% } else { %>
-            <strong class="current-price">$<%= course.price.toFixed(2) %></strong> USD
+            <strong class="current-price">€<%= course.price.toFixed(2) %></strong>
           <% } %>
         </div>
       </td>
@@ -166,44 +166,49 @@
             <% if (parseFloat(totalSavings) > 0) { %>
               <div class="price-row">
                 <span>Subtotal (Original Price):</span>
-                <span class="price-value">$<%= totalOriginalPrice %> USD</span>
+                <span class="price-value">€<%= totalOriginalPrice %></span>
               </div>
               <div class="price-row promo-applied">
                 <span>Early Bird Discount:</span>
-                <span class="price-value discount">-$<%= totalSavings %> USD</span>
+                <span class="price-value discount">-€<%= totalSavings %></span>
               </div>
             <% } else { %>
               <div class="price-row">
                 <span>Subtotal (<%= coursesInCart.length %> items):</span>
-                <span class="price-value">$<span id="originalPrice"><%= totalOriginalPrice || totalPrice.toFixed(2) %></span> USD</span>
+                <span class="price-value">€<span id="originalPrice"><%= totalOriginalPrice || totalPrice.toFixed(2) %></span></span>
               </div>
             <% } %>
             
             <div class="price-row promo-applied" id="discountRow" style="display: none;">
               <span>Promo Discount (<span id="discountPercent">0</span>%):</span>
-              <span class="price-value discount">-$<span id="discountAmount">0.00</span> USD</span>
+              <span class="price-value discount">-€<span id="discountAmount">0.00</span></span>
             </div>
             
             <div class="price-row" id="taxRow" style="display: none;">
               <span>Tax:</span>
-              <span class="price-value">$<span id="taxAmount">0.00</span> USD</span>
+              <span class="price-value">€<span id="taxAmount">0.00</span></span>
             </div>
             
             <div class="price-row total">
               <span>Total:</span>
-              <span class="price-value total-price">$<span id="discountedPrice"><%= totalPrice.toFixed(2) %></span> USD</span>
+              <span class="price-value total-price">€<span id="discountedPrice"><%= totalPrice.toFixed(2) %></span></span>
+            </div>
+            
+            <div class="price-row total-aed">
+              <span>Total (AED):</span>
+              <span class="price-value total-price-aed">AED <span id="discountedPriceAED"><%= (totalPrice * 4.0).toFixed(2) %></span></span>
             </div>
             
             <!-- Enhanced Savings Message -->
             <% if (parseFloat(totalSavings) > 0) { %>
               <div class="savings-message" style="display: block;">
                 <i class="fas fa-piggy-bank"></i>
-                You're saving $<%= totalSavings %> with Early Bird pricing!
+                You're saving €<%= totalSavings %> with Early Bird pricing!
               </div>
             <% } %>
             <div id="savingsMessage" class="savings-message" style="display: none;">
               <i class="fas fa-piggy-bank"></i>
-              You're saving $<span id="savingsAmount">0.00</span>!
+              You're saving €<span id="savingsAmount">0.00</span>!
             </div>
           </div>
          
@@ -327,6 +332,7 @@
       // 🔧 Initialize price variables from server data
       let currentDiscountedPrice = <%= totalPrice.toFixed(2) %>;  // Final price after early bird
       let originalPrice = <%= totalOriginalPrice || totalPrice.toFixed(2) %>;  // Original price before early bird
+      let eurToAedRate = <%= eurToAedRate || 4.0 %>; // Conversion rate from server
       let promoApplied = false;
       let promoDiscount = 0;
 
@@ -336,6 +342,9 @@
         console.log('💰 Checkout initialized:', {
           originalPrice: originalPrice,
           currentPrice: currentDiscountedPrice,
+          originalPriceAED: (originalPrice * eurToAedRate).toFixed(2),
+          currentPriceAED: (currentDiscountedPrice * eurToAedRate).toFixed(2),
+          eurToAedRate: eurToAedRate,
           cartItems: <%= coursesInCart ? coursesInCart.length : 0 %>
         });
       });
@@ -453,8 +462,9 @@
             const discountAmount = originalPrice - currentDiscountedPrice;
             promoDiscount = ((discountAmount / originalPrice) * 100).toFixed(0);
             
-            // Update UI
+            // Update UI with EUR and AED values
             document.getElementById('discountedPrice').innerText = result.newTotalPrice;
+            document.getElementById('discountedPriceAED').innerText = (parseFloat(result.newTotalPrice) * eurToAedRate).toFixed(2);
             document.getElementById('discountAmount').innerText = discountAmount.toFixed(2);
             document.getElementById('discountPercent').innerText = promoDiscount;
             document.getElementById('discountRow').style.display = 'flex';
@@ -497,9 +507,10 @@
       // ✅ Remove Promo Code
       function removePromoCode() {
         if (confirm('Remove promo code?')) {
-          // Reset prices
+          // Reset prices to original values
           currentDiscountedPrice = originalPrice;
           document.getElementById('discountedPrice').innerText = originalPrice.toFixed(2);
+          document.getElementById('discountedPriceAED').innerText = (originalPrice * eurToAedRate).toFixed(2);
           document.getElementById('discountRow').style.display = 'none';
           document.getElementById('savingsMessage').style.display = 'none';
           document.getElementById('activePromo').style.display = 'none';
@@ -553,7 +564,7 @@
       }
 
       // ✅ Handle Checkout with CCAvenue Integration
-     // ✅ Enhanced handleCheckout function with better $0 handling
+     // ✅ Enhanced handleCheckout function with better €0 handling
 async function handleCheckout() {
   const agreeTerms = document.getElementById('agreeTerms').checked;
   const proceedBtn = document.getElementById('proceedBtn');
@@ -577,12 +588,12 @@ async function handleCheckout() {
   showLoading(true);
 
   try {
-    console.log(`💰 Current price check: $${currentDiscountedPrice}`);
+    console.log(`💰 Current price check: €${currentDiscountedPrice}`);
     
-    // ✅ ENHANCED: More explicit $0 handling
+    // ✅ ENHANCED: More explicit €0 handling
     if (currentDiscountedPrice <= 0 || currentDiscountedPrice === 0) {
-      // ✅ FREE registration (100% discount or $0 courses)
-      console.log('🎯 Processing free registration - price is $0');
+      // ✅ FREE registration (100% discount or €0 courses)
+      console.log('🎯 Processing free registration - price is €0');
       
       const response = await fetch('/complete-registration', {
         method: 'POST',
@@ -601,7 +612,7 @@ async function handleCheckout() {
         proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
       }
     } else {
-      // ✅ ENHANCED: First check server-side if total is actually $0
+      // ✅ ENHANCED: First check server-side if total is actually €0
       console.log('💳 Checking final price on server before payment...');
       
       const checkResponse = await fetch('/checkout', {
@@ -610,9 +621,9 @@ async function handleCheckout() {
         body: JSON.stringify(checkoutData)
       });
 
-      // If redirected to complete-registration, it means server calculated $0
+      // If redirected to complete-registration, it means server calculated €0
       if (checkResponse.redirected && checkResponse.url.includes('/complete-registration')) {
-        console.log('🎯 Server determined price is $0, processing free registration');
+        console.log('🎯 Server determined price is €0, processing free registration');
         window.location.href = '/complete-registration';
         return;
       }
@@ -718,18 +729,31 @@ async function handleCheckout() {
         .btn-success {
           background: linear-gradient(135deg, #28a745, #20c997) !important;
         }
+        
+        .total-aed {
+          color: #666;
+          font-size: 0.95em;
+        }
+        
+        .total-price-aed {
+          color: #666 !important;
+          font-weight: 500;
+        }
       `;
       document.head.appendChild(style);
 
-      // ✅ Debug information
+      // ✅ Debug information with dual currency
       console.log('💰 Checkout Debug Info:', {
-        finalTotalPrice: <%= totalPrice.toFixed(2) %>,
-        originalTotalPrice: <%= totalOriginalPrice || totalPrice.toFixed(2) %>,
+        finalTotalPrice: '<%= totalPrice.toFixed(2) %> EUR',
+        finalTotalPriceAED: '<%= (totalPrice * (eurToAedRate || 4.0)).toFixed(2) %> AED',
+        originalTotalPrice: '<%= totalOriginalPrice || totalPrice.toFixed(2) %> EUR',
+        originalTotalPriceAED: '<%= ((totalOriginalPrice || totalPrice) * (eurToAedRate || 4.0)).toFixed(2) %> AED',
         coursesInCart: <%= coursesInCart ? coursesInCart.length : 0 %>,
         <% if (parseFloat(totalSavings) > 0) { %>
-        earlyBirdSavings: '<%= totalSavings %>',
+        earlyBirdSavings: '<%= totalSavings %> EUR (<%= totalSavingsAED %> AED)',
         <% } %>
-        hasEarlyBirdDiscounts: <%= hasEarlyBirdDiscounts ? 'true' : 'false' %>
+        hasEarlyBirdDiscounts: <%= hasEarlyBirdDiscounts ? 'true' : 'false' %>,
+        eurToAedRate: eurToAedRate
       });
     </script>
   </body>

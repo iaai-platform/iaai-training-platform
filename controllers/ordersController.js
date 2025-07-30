@@ -18,7 +18,7 @@ function calculateCoursePricing(
     currentPrice: 0,
     isEarlyBird: false,
     earlyBirdSavings: 0,
-    currency: "USD",
+    currency: "EUR",
     isLinkedCourseFree: isLinkedCourse,
   };
 
@@ -26,10 +26,10 @@ function calculateCoursePricing(
   if (isLinkedCourse) {
     if (course.enrollment) {
       pricing.regularPrice = course.enrollment.price || 0;
-      pricing.currency = course.enrollment.currency || "USD";
+      pricing.currency = course.enrollment.currency || "EUR";
     } else if (course.access) {
       pricing.regularPrice = course.access.price || 0;
-      pricing.currency = course.access.currency || "USD";
+      pricing.currency = course.access.currency || "EUR";
     }
     pricing.currentPrice = 0; // Free for linked courses
     return pricing;
@@ -39,7 +39,7 @@ function calculateCoursePricing(
   if (course.enrollment) {
     pricing.regularPrice = course.enrollment.price || 0;
     pricing.earlyBirdPrice = course.enrollment.earlyBirdPrice || null;
-    pricing.currency = course.enrollment.currency || "USD";
+    pricing.currency = course.enrollment.currency || "EUR";
 
     // Calculate early bird deadline and check eligibility
     if (
@@ -70,7 +70,7 @@ function calculateCoursePricing(
   else if (course.access) {
     pricing.regularPrice = course.access.price || 0;
     pricing.currentPrice = pricing.regularPrice;
-    pricing.currency = course.access.currency || "USD";
+    pricing.currency = course.access.currency || "EUR";
   }
 
   return pricing;

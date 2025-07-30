@@ -1067,7 +1067,7 @@ document
           },
           access: {
             price: parseFloat(formData.get("price")) || 0,
-            currency: "USD",
+            currency: "EUR",
             accessDays: parseInt(formData.get("accessDays")) || 365,
             totalEnrollments: 0,
           },

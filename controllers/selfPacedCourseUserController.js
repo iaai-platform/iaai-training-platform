@@ -224,7 +224,7 @@ exports.getCourseDetails = async (req, res) => {
         )}/self-paced-online-training/courses/${course._id}`,
         instructor: course.instructor?.name || "Expert Instructor",
         price: course.access?.price || 0,
-        currency: course.access?.currency || "USD",
+        currency: course.access?.currency || "EUR",
       },
     };
 

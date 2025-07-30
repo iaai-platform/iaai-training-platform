@@ -259,7 +259,7 @@ const userSchema = new mongoose.Schema(
           courseCode: { type: String },
           courseType: { type: String },
           originalPrice: { type: Number, default: 0 },
-          currency: { type: String, default: "USD" },
+          currency: { type: String, default: "EUR" },
           isLinkedCourse: { type: Boolean, default: false },
           isLinkedCourseFree: { type: Boolean, default: false },
         },
@@ -337,7 +337,7 @@ const userSchema = new mongoose.Schema(
           courseCode: { type: String },
           courseType: { type: String },
           originalPrice: { type: Number, default: 0 },
-          currency: { type: String, default: "USD" },
+          currency: { type: String, default: "EUR" },
           isLinkedCourse: { type: Boolean, default: false }, // ⭐ CRITICAL
           isLinkedCourseFree: { type: Boolean, default: false }, // ⭐ CRITICAL
         },
@@ -475,7 +475,7 @@ const userSchema = new mongoose.Schema(
           courseCode: { type: String },
           courseType: { type: String },
           originalPrice: { type: Number, default: 0 },
-          currency: { type: String, default: "USD" },
+          currency: { type: String, default: "EUR" },
           isLinkedCourse: { type: Boolean, default: false },
           isLinkedCourseFree: { type: Boolean, default: false },
         },
@@ -704,7 +704,7 @@ const userSchema = new mongoose.Schema(
           tax: { type: Number, default: 0 },
           processingFee: { type: Number, default: 0 },
           finalAmount: { type: Number, required: true }, // Amount actually charged
-          currency: { type: String, default: "USD" },
+          currency: { type: String, default: "EUR" },
         },
 
         // Discount Information
@@ -844,7 +844,7 @@ const userSchema = new mongoose.Schema(
     // PAYMENT PREFERENCES & SETTINGS
     // ========================================
     paymentPreferences: {
-      preferredCurrency: { type: String, default: "USD" },
+      preferredCurrency: { type: String, default: "EUR" },
       savedPaymentMethods: [
         {
           type: { type: String, enum: ["card", "bank", "wallet"] },
@@ -1664,15 +1664,21 @@ userSchema.methods.createPaymentTransaction = function (transactionData) {
     paymentMethod: transactionData.paymentMethod || "CCAvenue",
 
     // ✅ REQUIRED: Financial object with all required fields
+    // In paymentTransactions financial object, update to:
     financial: {
-      subtotal: transactionData.financial?.subtotal || 0, // ✅ REQUIRED
-      discountAmount: transactionData.financial?.discountAmount || 0,
-      earlyBirdSavings: transactionData.financial?.earlyBirdSavings || 0,
-      promoCodeDiscount: transactionData.financial?.promoCodeDiscount || 0,
-      tax: transactionData.financial?.tax || 0,
-      processingFee: transactionData.financial?.processingFee || 0,
-      finalAmount: transactionData.financial?.finalAmount || 0, // ✅ REQUIRED
-      currency: transactionData.financial?.currency || "USD",
+      subtotal: { type: Number, required: true }, // EUR amount
+      subtotalAED: { type: Number }, // ✅ ADD: AED equivalent
+      discountAmount: { type: Number, default: 0 }, // EUR
+      discountAmountAED: { type: Number, default: 0 }, // ✅ ADD: AED equivalent
+      earlyBirdSavings: { type: Number, default: 0 }, // EUR
+      promoCodeDiscount: { type: Number, default: 0 }, // EUR
+      tax: { type: Number, default: 0 },
+      processingFee: { type: Number, default: 0 },
+      finalAmount: { type: Number, required: true }, // EUR amount (business logic)
+      finalAmountAED: { type: Number }, // ✅ ADD: AED amount (sent to bank)
+      currency: { type: String, default: "EUR" }, // Base currency
+      currencyPaid: { type: String, default: "AED" }, // ✅ ADD: Currency actually paid to bank
+      exchangeRate: { type: Number, default: 4.0 }, // ✅ ADD: Rate used for conversion
     },
 
     // Discounts

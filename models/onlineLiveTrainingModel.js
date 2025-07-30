@@ -1419,7 +1419,7 @@ onlineLiveCourseSchema.methods.getPricingInfo = function () {
       this.isEarlyBirdActive && this.enrollment?.earlyBirdPrice
         ? this.enrollment.price - this.enrollment.earlyBirdPrice
         : 0,
-    currency: this.enrollment?.currency || "USD",
+    currency: this.enrollment?.currency || "EUR",
   };
 };
 

@@ -42,7 +42,7 @@ function createEnrollmentObject(
       baseEnrollment.enrollmentData.originalPrice =
         course.enrollment?.price || 0;
       baseEnrollment.enrollmentData.currency =
-        course.enrollment?.currency || "USD";
+        course.enrollment?.currency || "EUR";
       baseEnrollment.enrollmentData.isLinkedCourseFree = false; // ⭐ ALWAYS FALSE FOR IN-PERSON
       break;
 
@@ -60,13 +60,13 @@ function createEnrollmentObject(
         baseEnrollment.enrollmentData.isLinkedCourseFree = false; // ⭐ FALSE FOR REGULAR
       }
       baseEnrollment.enrollmentData.currency =
-        course.enrollment?.currency || "USD";
+        course.enrollment?.currency || "EUR";
       break;
 
     case "SelfPacedOnlineTraining":
       baseEnrollment.enrollmentData.paidAmount = course.access?.price || 0;
       baseEnrollment.enrollmentData.originalPrice = course.access?.price || 0;
-      baseEnrollment.enrollmentData.currency = course.access?.currency || "USD";
+      baseEnrollment.enrollmentData.currency = course.access?.currency || "EUR";
       baseEnrollment.enrollmentData.isLinkedCourseFree = false; // ⭐ ALWAYS FALSE FOR SELF-PACED
       break;
   }
@@ -281,8 +281,8 @@ exports.addToCart = async (req, res) => {
               : course.enrollment?.price || 0,
           currency:
             courseType === "SelfPacedOnlineTraining"
-              ? course.access?.currency || "USD"
-              : course.enrollment?.currency || "USD",
+              ? course.access?.currency || "EUR"
+              : course.enrollment?.currency || "EUR",
         },
       };
 
@@ -334,7 +334,7 @@ exports.addToCart = async (req, res) => {
             isLinkedCourse: true, // ⭐ CRITICAL: THIS IS A LINKED COURSE
             isLinkedCourseFree: true, // ⭐ CRITICAL: THIS COURSE IS FREE
             originalPrice: linkedCourse.enrollment?.price || 0,
-            currency: linkedCourse.enrollment?.currency || "USD",
+            currency: linkedCourse.enrollment?.currency || "EUR",
           },
         };
 

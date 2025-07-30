@@ -30,7 +30,7 @@
           <i class="fas fa-tag"></i>
           <div>
             <div class="savings-text">🎉 Early Bird Savings Applied!</div>
-            <div class="savings-amount">You're saving $<%= totalSavings %> total</div>
+            <div class="savings-amount">You're saving €<%= totalSavings %> total</div>
           </div>
         </div>
       <% } %>
@@ -101,7 +101,7 @@
                     <div class="price-display">
                       <% if (order.isLinkedCourseFree) { %>
                         <!-- Free linked course display -->
-                        <span class="original-price">$<%= (order.originalPrice || 0).toFixed(2) %></span>
+                        <span class="original-price">€<%= (order.originalPrice || 0).toFixed(2) %></span>
                         <br>
                         <strong class="free-price">FREE</strong>
                         <br>
@@ -110,16 +110,16 @@
                         </small>
                       <% } else if (order.isEarlyBird) { %>
                         <!-- Early bird pricing display -->
-                        <span class="original-price">$<%= (order.originalPrice || 0).toFixed(2) %></span>
+                        <span class="original-price">€<%= (order.originalPrice || 0).toFixed(2) %></span>
                         <br>
-                        <span class="current-price">$<%= (order.price || 0).toFixed(2) %></span>
+                        <span class="current-price">€<%= (order.price || 0).toFixed(2) %></span>
                         <br>
                         <span class="savings-amount-item">
-                          <i class="fas fa-tag"></i> Save $<%= ((order.originalPrice || 0) - (order.price || 0)).toFixed(2) %>
+                          <i class="fas fa-tag"></i> Save €<%= ((order.originalPrice || 0) - (order.price || 0)).toFixed(2) %>
                         </span>
                       <% } else { %>
                         <!-- Regular pricing display -->
-                        <span class="current-price">$<%= (order.price || 0).toFixed(2) %></span>
+                        <span class="current-price">€<%= (order.price || 0).toFixed(2) %></span>
                       <% } %>
                     </div>
                   </td>
@@ -211,16 +211,16 @@
             <% if (parseFloat(totalSavings) > 0) { %>
               <div class="total-row">
                 <span class="total-label">Subtotal (Original Price):</span>
-                <span class="total-amount">$<%= totalOriginalPrice %></span>
+                <span class="total-amount">€<%= totalOriginalPrice %></span>
               </div>
               <div class="total-row">
                 <span class="total-label">Early Bird Discount:</span>
-                <span class="total-amount savings-highlight">-$<%= totalSavings %></span>
+                <span class="total-amount savings-highlight">-€<%= totalSavings %></span>
               </div>
             <% } %>
             <div class="total-row final-total">
               <span class="total-label">Total Amount:</span>
-              <span class="total-amount price-amount">$<%= totalAmount %></span>
+              <span class="total-amount price-amount">€<%= totalAmount %></span>
             </div>
           </div>
 

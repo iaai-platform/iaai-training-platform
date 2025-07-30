@@ -563,8 +563,26 @@
         document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
       }
 
-      // ✅ Handle Checkout with CCAvenue Integration
-     // ✅ Enhanced handleCheckout function with better €0 handling
+    // Replace the existing beforeunload code in checkout.ejs with this:
+
+// Track if user is proceeding to payment
+let proceedingToPayment = false;
+
+// ✅ Updated: Only prevent navigation if NOT proceeding to payment
+window.addEventListener('beforeunload', function (e) {
+  // Don't show warning if user is proceeding to payment
+  if (proceedingToPayment) {
+    return;
+  }
+  
+  // Only show warning if there are items in cart
+  if (document.querySelectorAll('.checkout-table tbody tr').length > 0) {
+    e.preventDefault();
+    e.returnValue = 'You have items in your cart. Are you sure you want to leave?';
+  }
+});
+
+// ✅ Update handleCheckout function to set the flag
 async function handleCheckout() {
   const agreeTerms = document.getElementById('agreeTerms').checked;
   const proceedBtn = document.getElementById('proceedBtn');
@@ -573,6 +591,9 @@ async function handleCheckout() {
     alert('⚠️ Please agree to the Terms and Conditions to proceed.');
     return;
   }
+
+  // ✅ SET FLAG: User is proceeding to payment
+  proceedingToPayment = true;
 
   // Collect additional data
   const checkoutData = {
@@ -590,9 +611,8 @@ async function handleCheckout() {
   try {
     console.log(`💰 Current price check: €${currentDiscountedPrice}`);
     
-    // ✅ ENHANCED: More explicit €0 handling
     if (currentDiscountedPrice <= 0 || currentDiscountedPrice === 0) {
-      // ✅ FREE registration (100% discount or €0 courses)
+      // FREE registration
       console.log('🎯 Processing free registration - price is €0');
       
       const response = await fetch('/complete-registration', {
@@ -607,29 +627,32 @@ async function handleCheckout() {
         console.log('✅ Free registration successful, redirecting to success page');
         window.location.href = `/payment/success?order_id=FREE&amount=0.00&ref=${result.referenceNumber}`;
       } else {
+        // ✅ RESET FLAG on error
+        proceedingToPayment = false;
         alert('❌ Error completing registration: ' + (result.message || 'Please try again.'));
         proceedBtn.disabled = false;
         proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
       }
     } else {
-      // ✅ ENHANCED: First check server-side if total is actually €0
-      console.log('💳 Checking final price on server before payment...');
+      // Payment required
+      console.log('💳 Processing payment with CCAvenue...');
       
-      const checkResponse = await fetch('/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(checkoutData)
-      });
-
-      // If redirected to complete-registration, it means server calculated €0
-      if (checkResponse.redirected && checkResponse.url.includes('/complete-registration')) {
-        console.log('🎯 Server determined price is €0, processing free registration');
-        window.location.href = '/complete-registration';
+      // ✅ SHOW USER-FRIENDLY MESSAGE before redirect
+      const confirmPayment = confirm(
+        '🔒 You will now be redirected to CCAvenue secure payment gateway to complete your payment.\n\n' +
+        '✅ Your cart data is saved safely.\n' +
+        '💳 Payment will be processed in AED currency.\n\n' +
+        'Click OK to proceed to payment gateway.'
+      );
+      
+      if (!confirmPayment) {
+        // ✅ RESET FLAG if user cancels
+        proceedingToPayment = false;
+        proceedBtn.disabled = false;
+        proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
+        showLoading(false);
         return;
       }
-
-      // Otherwise proceed with CCAvenue payment
-      console.log('💳 Processing payment with CCAvenue...');
       
       // Create a form and submit to initiate payment
       const form = document.createElement('form');
@@ -646,10 +669,39 @@ async function handleCheckout() {
       });
       
       document.body.appendChild(form);
-      form.submit();
+      
+      // ✅ SHOW REDIRECT MESSAGE
+      showLoading(false);
+      document.body.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000;">
+          <div style="background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 500px;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+            <h3>Redirecting to Secure Payment Gateway</h3>
+            <p>Please wait while we redirect you to CCAvenue...</p>
+            <div style="margin: 20px 0;">
+              <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            </div>
+            <p style="color: #666; font-size: 14px;">
+              ✅ Your data is secure<br>
+              💳 Payment in AED currency<br>
+              🔄 This may take a few seconds
+            </p>
+          </div>
+        </div>
+        <style>
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+      `;
+      
+      // Submit form after short delay
+      setTimeout(() => {
+        form.submit();
+      }, 2000);
     }
   } catch (error) {
     console.error('Error during checkout:', error);
+    // ✅ RESET FLAG on error
+    proceedingToPayment = false;
     alert('❌ Error processing checkout. Please try again.');
     proceedBtn.disabled = false;
     proceedBtn.innerHTML = currentDiscountedPrice <= 0 ? 
@@ -659,14 +711,6 @@ async function handleCheckout() {
     showLoading(false);
   }
 }
-      //.......
-      // ✅ Prevent accidental navigation
-      window.addEventListener('beforeunload', function (e) {
-        if (document.querySelectorAll('.checkout-table tbody tr').length > 0) {
-          e.preventDefault();
-          e.returnValue = '';
-        }
-      });
 
       // ✅ Add CSS animations
       const style = document.createElement('style');

@@ -36,7 +36,7 @@
           </div>
         </div>
 
-        <!-- 🆕 Early Bird Savings Banner (only show if there are savings) -->
+        <!-- Early Bird Savings Banner -->
         <% if (hasEarlyBirdDiscounts) { %>
           <div class="savings-banner">
             <i class="fas fa-tag"></i>
@@ -69,14 +69,14 @@
                       <div class="course-title-cell">
                         <%= course.title %>
                         
-                        <!-- ⭐ NEW: Linked Course Badge -->
+                        <!-- Linked Course Badge -->
                         <% if (course.isLinkedCourseFree) { %>
                           <span class="course-badge linked-free">
                             <i class="fas fa-link"></i> Included Free
                           </span>
                         <% } %>
                         
-                        <!-- 🆕 Early Bird Badge -->
+                        <!-- Early Bird Badge -->
                         <% if (course.isEarlyBird) { %>
                           <span class="early-bird-badge">
                             <i class="fas fa-clock"></i> Early Bird
@@ -112,7 +112,7 @@
                       <% } %>
                     </td>
                     <td class="price-cell">
-                      <!-- 🆕 Enhanced Price Display with Linked Course Free -->
+                      <!-- Enhanced Price Display -->
                       <div class="checkout-price-display">
                         <% if (course.isLinkedCourseFree) { %>
                           <span class="original-price">€<%= course.originalPrice.toFixed(2) %></span>
@@ -133,7 +133,7 @@
                     </td>
                     <td>
                       <div class="action-buttons">
-                        <!-- ⭐ Disable actions for linked free courses -->
+                        <!-- Disable actions for linked free courses -->
                         <% if (!course.isLinkedCourseFree) { %>
                           <button class="btn-icon btn-wishlist" 
                                   onclick="moveToWishlist('<%= course.courseId %>', '<%= course.courseType %>')"
@@ -158,7 +158,7 @@
             </table>
           </div>
 
-          <!-- 🆕 Enhanced Price Summary with Early Bird Breakdown -->
+          <!-- Enhanced Price Summary -->
           <div class="price-summary">
             <% if (parseFloat(totalSavings) > 0) { %>
               <div class="price-row">
@@ -209,7 +209,7 @@
             </div>
           </div>
          
-          <!-- ✅ Promo Code Section -->
+          <!-- Promo Code Section -->
           <div class="promo-section">
             <h3><i class="fas fa-tag"></i> Have a Promo Code?</h3>
             <div class="promo-input-group">
@@ -230,7 +230,7 @@
             </div>
           </div>
 
-          <!-- ✅ Additional Options -->
+          <!-- Additional Options -->
           <div class="additional-options">
             <h3><i class="fas fa-cog"></i> Additional Options</h3>
             
@@ -258,7 +258,7 @@
             </div>
           </div>
 
-          <!-- ✅ Terms and Conditions -->
+          <!-- Terms and Conditions -->
           <div class="terms-container">
             <label class="checkbox-container">
               <input type="checkbox" id="agreeTerms" required onchange="validateCheckout()">
@@ -272,7 +272,7 @@
             </label>
           </div>
 
-          <!-- ✅ Action Buttons -->
+          <!-- Action Buttons -->
           <div class="checkout-actions">
             <button type="button" class="btn-secondary" onclick="window.location.href='/training-programs'">
               <i class="fas fa-arrow-left"></i> Continue Shopping
@@ -326,14 +326,14 @@
     </div>
 
     <script>
-      // 🔧 Initialize price variables from server data
+      // Initialize price variables from server data
       let currentDiscountedPrice = <%= totalPrice.toFixed(2) %>;
       let originalPrice = <%= totalOriginalPrice || totalPrice.toFixed(2) %>;
       let eurToAedRate = <%= eurToAedRate || 4.0 %>;
       let promoApplied = false;
       let promoDiscount = 0;
 
-      // ✅ Initialize on page load
+      // Initialize on page load
       document.addEventListener('DOMContentLoaded', function() {
         validateCheckout();
         console.log('💰 Checkout initialized:', {
@@ -346,14 +346,14 @@
         });
       });
 
-      // ✅ Validate checkout button state
+      // Validate checkout button state
       function validateCheckout() {
         const agreeTerms = document.getElementById('agreeTerms').checked;
         const proceedBtn = document.getElementById('proceedBtn');
         proceedBtn.disabled = !agreeTerms;
       }
 
-      // ✅ Remove from Cart
+      // Remove from Cart
       async function removeFromCart(courseId, courseType) {
         if (!confirm('Are you sure you want to remove this course from your cart?')) {
           return;
@@ -371,7 +371,6 @@
           const result = await response.json();
 
           if (result.success) {
-            // Animate row removal
             const row = document.querySelector(`tr[data-course-id="${courseId}"]`);
             if (row) {
               row.style.animation = 'fadeOut 0.5s';
@@ -392,12 +391,11 @@
         }
       }
 
-      // ✅ Move to Wishlist
+      // Move to Wishlist
       async function moveToWishlist(courseId, courseType) {
         showLoading(true);
 
         try {
-          // First add to wishlist
           const wishlistResponse = await fetch('/add-to-wishlist', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -407,7 +405,6 @@
           const wishlistResult = await wishlistResponse.json();
 
           if (wishlistResult.success) {
-            // Then remove from cart
             const removeResponse = await fetch('/remove-from-cart', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -431,7 +428,7 @@
         }
       }
 
-      // ✅ Apply Promo Code
+      // Apply Promo Code
       document.getElementById('applyPromoBtn').addEventListener('click', async () => {
         const promoCode = document.getElementById('promoCode').value.trim();
         const button = document.getElementById('applyPromoBtn');
@@ -441,7 +438,6 @@
           return;
         }
 
-        // Disable button during processing
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying...';
 
@@ -479,13 +475,11 @@
             promoApplied = true;
             
             if (result.completeRegistration) {
-              // ✅ 100% discount - Change button to "Complete Registration"
               const proceedBtn = document.getElementById('proceedBtn');
               proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
               proceedBtn.classList.add('btn-success');
               showMessage('🎉 Promo code applied! Your courses are now FREE!', 'success');
             } else {
-              // ✅ Partial discount
               showMessage('✅ Promo code applied successfully!', 'success');
             }
           } else {
@@ -501,10 +495,9 @@
         }
       });
 
-      // ✅ Remove Promo Code
+      // Remove Promo Code
       function removePromoCode() {
         if (confirm('Remove promo code?')) {
-          // Reset prices to original values
           currentDiscountedPrice = originalPrice;
           document.getElementById('discountedPrice').innerText = originalPrice.toFixed(2);
           document.getElementById('discountedPriceAED').innerText = (originalPrice * eurToAedRate).toFixed(2);
@@ -512,12 +505,10 @@
           document.getElementById('savingsMessage').style.display = 'none';
           document.getElementById('activePromo').style.display = 'none';
           
-          // Re-enable promo input
           document.getElementById('promoCode').disabled = false;
           document.getElementById('promoCode').value = '';
           document.getElementById('applyPromoBtn').style.display = 'inline-flex';
           
-          // Reset button
           const proceedBtn = document.getElementById('proceedBtn');
           proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
           proceedBtn.classList.remove('btn-success');
@@ -527,19 +518,19 @@
         }
       }
 
-      // ✅ Toggle Gift Options
+      // Toggle Gift Options
       function toggleGiftOptions() {
         const giftDetails = document.getElementById('giftDetails');
         giftDetails.style.display = document.getElementById('giftOption').checked ? 'block' : 'none';
       }
 
-      // ✅ Toggle Notes
+      // Toggle Notes
       function toggleNotes() {
         const orderNotes = document.getElementById('orderNotes');
         orderNotes.style.display = document.getElementById('addNotes').checked ? 'block' : 'none';
       }
 
-      // ✅ Show message
+      // Show message
       function showMessage(message, type) {
         const messageDiv = document.getElementById('promoMessage');
         messageDiv.className = `promo-message ${type}`;
@@ -549,13 +540,12 @@
         `;
         messageDiv.style.display = 'block';
         
-        // Auto-hide after 5 seconds
         setTimeout(() => {
           messageDiv.style.display = 'none';
         }, 5000);
       }
 
-      // ✅ Show/Hide Loading
+      // Show/Hide Loading
       function showLoading(show) {
         document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
       }
@@ -563,21 +553,19 @@
       // Track if user is proceeding to payment
       let proceedingToPayment = false;
 
-      // ✅ Only prevent navigation if NOT proceeding to payment
+      // Only prevent navigation if NOT proceeding to payment
       window.addEventListener('beforeunload', function (e) {
-        // Don't show warning if user is proceeding to payment
         if (proceedingToPayment) {
           return;
         }
         
-        // Only show warning if there are items in cart
         if (document.querySelectorAll('.checkout-table tbody tr').length > 0) {
           e.preventDefault();
           e.returnValue = 'You have items in your cart. Are you sure you want to leave?';
         }
       });
 
-      // ✅ FIXED: Main checkout handler - this will redirect to CCAvenue
+      // ✅ FIXED: Main checkout handler with proper XMLHttpRequest handling
       async function handleCheckout() {
         const agreeTerms = document.getElementById('agreeTerms').checked;
         const proceedBtn = document.getElementById('proceedBtn');
@@ -587,7 +575,7 @@
           return;
         }
 
-        // ✅ SET FLAG: User is proceeding to payment
+        // SET FLAG: User is proceeding to payment
         proceedingToPayment = true;
 
         // Collect additional data
@@ -622,17 +610,15 @@
               console.log('✅ Free registration successful, redirecting to success page');
               window.location.href = `/payment/success?order_id=FREE&amount=0.00&ref=${result.referenceNumber}`;
             } else {
-              // ✅ RESET FLAG on error
               proceedingToPayment = false;
               alert('❌ Error completing registration: ' + (result.message || 'Please try again.'));
               proceedBtn.disabled = false;
               proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
             }
           } else {
-            // Payment required - this will redirect to CCAvenue
+            // Payment required - redirect to CCAvenue
             console.log('💳 Processing payment with CCAvenue...');
             
-            // ✅ User confirmation before redirecting to payment gateway
             const confirmPayment = confirm(
               '🔒 You will now be redirected to CCAvenue secure payment gateway.\n\n' +
               '✅ Your cart data is saved safely.\n' +
@@ -642,7 +628,6 @@
             );
             
             if (!confirmPayment) {
-              // ✅ RESET FLAG if user cancels
               proceedingToPayment = false;
               proceedBtn.disabled = false;
               proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
@@ -650,126 +635,66 @@
               return;
             }
             
-            // ✅ CRITICAL: This form submission will redirect to CCAvenue
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/payment/initiate'; // ✅ CORRECT ROUTE
-            
-            // Add checkout data as hidden inputs
+            // ✅ CRITICAL FIX: Use XMLHttpRequest for proper redirect handling
+            const formData = new FormData();
             Object.keys(checkoutData).forEach(key => {
-              const input = document.createElement('input');
-              input.type = 'hidden';
-              input.name = key;
-              input.value = checkoutData[key] || '';
-              form.appendChild(input);
+              formData.append(key, checkoutData[key] || '');
             });
-            
-            document.body.appendChild(form);
-            
-            // Show redirect message and submit form
-            showLoading(false);
-            
-            // ✅ Enhanced redirect message with timeout handling
-            let redirectTimeout;
-            let formSubmitted = false;
 
-            document.body.innerHTML = `
-              <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000;">
-                <div style="background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 500px;">
-                  <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
-                  <h3 id="redirectTitle">Redirecting to CCAvenue Payment Gateway</h3>
-                  <p id="redirectMessage">Please wait while we securely redirect you to complete your payment...</p>
-                  <div style="margin: 20px 0;">
-                    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                  </div>
-                  <p style="color: #666; font-size: 14px;">
-                    ✅ Your order is secure<br>
-                    💳 Payment amount: AED ${(currentDiscountedPrice * eurToAedRate).toFixed(2)}<br>
-                    🔄 This may take a few seconds
-                  </p>
+            console.log('🚀 Submitting payment initiation request...');
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/payment/initiate', true);
+            
+            xhr.onreadystatechange = function() {
+              if (xhr.readyState === 4) {
+                console.log('📥 Payment initiation response received:', xhr.status);
+                
+                if (xhr.status === 200) {
+                  // Success - the response should contain the CCAvenue redirect form
+                  console.log('✅ Payment form received, redirecting...');
                   
-                  <div id="retrySection" style="display: none; margin-top: 20px;">
-                    <p style="color: #e74c3c; margin-bottom: 15px;">⚠️ Taking longer than expected...</p>
-                    <button onclick="retryPayment()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                      🔄 Try Again
-                    </button>
-                    <button onclick="goBackToCheckout()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-left: 10px;">
-                      ← Back to Checkout
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <style>
-                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-              </style>
-            `;
-
-            // Set up timeout handling
-            redirectTimeout = setTimeout(() => {
-              if (!formSubmitted) {
-                console.error('❌ Payment redirect timeout - showing retry options');
-                document.getElementById('redirectTitle').innerText = 'Connection Issue';
-                document.getElementById('redirectMessage').innerText = 'Unable to connect to payment gateway. Please try again.';
-                document.getElementById('retrySection').style.display = 'block';
-              }
-            }, 10000); // 10 second timeout
-
-            // Retry functions
-            window.retryPayment = function() {
-              document.getElementById('redirectTitle').innerText = 'Redirecting to CCAvenue Payment Gateway';
-              document.getElementById('redirectMessage').innerText = 'Please wait while we securely redirect you...';
-              document.getElementById('retrySection').style.display = 'none';
-              
-              if (redirectTimeout) clearTimeout(redirectTimeout);
-              
-              setTimeout(() => {
-                try {
-                  form.submit();
-                  formSubmitted = true;
-                  console.log('🔄 Retrying payment form submission');
-                } catch (error) {
-                  console.error('❌ Retry failed:', error);
-                  document.getElementById('redirectTitle').innerText = 'Submission Failed';
-                  document.getElementById('redirectMessage').innerText = 'Unable to process payment. Please return to checkout.';
-                  document.getElementById('retrySection').style.display = 'block';
+                  // Hide loading and replace page content with CCAvenue form
+                  showLoading(false);
+                  document.open();
+                  document.write(xhr.responseText);
+                  document.close();
+                } else {
+                  console.error('❌ Payment initiation failed:', xhr.status, xhr.responseText);
+                  proceedingToPayment = false;
+                  alert('❌ Payment initiation failed. Please try again.');
+                  proceedBtn.disabled = false;
+                  proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
+                  showLoading(false);
                 }
-              }, 2000);
-            };
-
-            window.goBackToCheckout = function() {
-              proceedingToPayment = false;
-              window.location.href = '/checkout';
-            };
-
-            // ✅ Submit form to CCAvenue after delay
-            setTimeout(() => {
-              try {
-                console.log('🚀 Submitting to CCAvenue via /payment/initiate');
-                form.submit();
-                formSubmitted = true;
-              } catch (error) {
-                console.error('❌ Form submission failed:', error);
-                alert('Failed to redirect to payment gateway. Please try again.');
-                proceedingToPayment = false;
-                window.location.reload();
               }
-            }, 2000);
+            };
+
+            xhr.onerror = function() {
+              console.error('❌ Network error during payment initiation');
+              proceedingToPayment = false;
+              alert('❌ Network error. Please check your connection and try again.');
+              proceedBtn.disabled = false;
+              proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
+              showLoading(false);
+            };
+
+            // Send the request
+            xhr.send(formData);
           }
         } catch (error) {
           console.error('Error during checkout:', error);
-          // ✅ RESET FLAG on error
           proceedingToPayment = false;
           alert('❌ Error processing checkout. Please try again.');
           proceedBtn.disabled = false;
           proceedBtn.innerHTML = currentDiscountedPrice <= 0 ? 
             '<i class="fas fa-check-circle"></i> Complete Registration (FREE)' : 
             '<i class="fas fa-credit-card"></i> Proceed to Payment';
-        } finally {
           showLoading(false);
         }
       }
 
-      // ✅ Add CSS animations
+      // Add CSS animations
       const style = document.createElement('style');
       style.textContent = `
         @keyframes fadeOut {
@@ -843,7 +768,7 @@
       `;
       document.head.appendChild(style);
 
-      // ✅ Debug information
+      // Debug information
       console.log('💰 Checkout Debug Info:', {
         finalTotalPrice: '<%= totalPrice.toFixed(2) %> EUR',
         finalTotalPriceAED: '<%= (totalPrice * (eurToAedRate || 4.0)).toFixed(2) %> AED',

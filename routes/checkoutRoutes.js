@@ -1,4 +1,4 @@
-// routes/checkoutRoutes.js - Updated with proper free course handling
+// routes/checkoutRoutes.js - FULLY CORRECTED VERSION
 const express = require("express");
 const router = express.Router();
 const checkoutController = require("../controllers/checkoutController");
@@ -40,7 +40,7 @@ router.get(
 // CCAVENUE PAYMENT ROUTES (Only for paid courses)
 // ========================================
 
-// ✅ Initiate CCAvenue payment (only called for paid courses)
+// ✅ CRITICAL FIX: Initiate CCAvenue payment (only called for paid courses)
 router.post(
   "/payment/initiate",
   isAuthenticated,
@@ -58,7 +58,6 @@ router.post("/payment/cancel", checkoutController.handlePaymentCancel);
 // SUCCESS/RESULT PAGES
 // ========================================
 
-// ✅ UNIFIED SUCCESS PAGE - handles both free and paid courses
 // ✅ UNIFIED SUCCESS PAGE - handles both free and paid courses with session recovery
 router.get("/payment/success", async (req, res) => {
   const { order_id, amount, ref, userId } = req.query;

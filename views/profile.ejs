@@ -84,7 +84,7 @@
             gap: 10px;
             font-size: 1.4rem;
         }
-        .certificate-note {
+        .billing-note {
             background: #e7f3ff;
             border: 1px solid #b3d9ff;
             border-radius: 8px;
@@ -94,20 +94,20 @@
             align-items: flex-start;
             gap: 10px;
         }
-        .certificate-note i {
+        .billing-note i {
             color: #007bff;
             font-size: 1.2rem;
             margin-top: 2px;
         }
-        .certificate-note-text {
+        .billing-note-text {
             flex: 1;
         }
-        .certificate-note-text h4 {
+        .billing-note-text h4 {
             margin: 0 0 5px 0;
             color: #007bff;
             font-size: 1rem;
         }
-        .certificate-note-text p {
+        .billing-note-text p {
             margin: 0;
             color: #495057;
             font-size: 0.9rem;
@@ -173,6 +173,13 @@
         .checkbox-item input[type="checkbox"] {
             width: auto;
             margin: 0;
+        }
+        .delivery-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
         }
         .file-upload-area {
             border: 2px dashed #ddd;
@@ -373,14 +380,226 @@
             </form>
         </div>
 
+        <!-- NEW: Billing & Address Information Section -->
+        <div class="form-section">
+            <h2><i class="fas fa-address-card"></i> Billing & Address Information</h2>
+            
+            <!-- Billing Note -->
+            <div class="billing-note">
+                <i class="fas fa-credit-card"></i>
+                <div class="billing-note-text">
+                    <h4>Payment & Certificate Delivery</h4>
+                    <p>This information is required for course payments and certificate delivery. Complete your billing address for smooth transactions.</p>
+                </div>
+            </div>
+
+            <form id="addressBillingForm">
+                <!-- Billing Address -->
+                <h3 style="margin-bottom: 15px; color: #007bff;"><i class="fas fa-home"></i> Billing Address</h3>
+                
+                <div class="form-group">
+                    <label>Address <span class="required">*</span>:</label>
+                    <input type="text" name="address" value="<%= user.addressInfo?.address || '' %>" placeholder="Street address" required>
+                </div>
+
+                <div class="form-row">
+                    <div>
+                        <label>City <span class="required">*</span>:</label>
+                        <input type="text" name="city" value="<%= user.addressInfo?.city || '' %>" required>
+                    </div>
+                    <div>
+                        <label>State/Province:</label>
+                        <input type="text" name="state" value="<%= user.addressInfo?.state || '' %>">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div>
+                        <label>ZIP/Postal Code:</label>
+                        <input type="text" name="zipCode" value="<%= user.addressInfo?.zipCode || '' %>">
+                    </div>
+                    <div>
+                        <label>Country <span class="required">*</span>:</label>
+                        <select name="country" required>
+                            <option value="">Select Country</option>
+                            <option value="United States" <%= user.addressInfo?.country === 'United States' ? 'selected' : '' %>>United States</option>
+                            <option value="Canada" <%= user.addressInfo?.country === 'Canada' ? 'selected' : '' %>>Canada</option>
+                            <option value="United Kingdom" <%= user.addressInfo?.country === 'United Kingdom' ? 'selected' : '' %>>United Kingdom</option>
+                            <option value="United Arab Emirates" <%= user.addressInfo?.country === 'United Arab Emirates' ? 'selected' : '' %>>United Arab Emirates</option>
+                            <option value="Australia" <%= user.addressInfo?.country === 'Australia' ? 'selected' : '' %>>Australia</option>
+                            <option value="Germany" <%= user.addressInfo?.country === 'Germany' ? 'selected' : '' %>>Germany</option>
+                            <option value="France" <%= user.addressInfo?.country === 'France' ? 'selected' : '' %>>France</option>
+                            <option value="India" <%= user.addressInfo?.country === 'India' ? 'selected' : '' %>>India</option>
+                            <option value="Other" <%= user.addressInfo?.country === 'Other' ? 'selected' : '' %>>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Alternative Phone Number:</label>
+                    <input type="text" name="alternativePhone" value="<%= user.addressInfo?.alternativePhone || '' %>" placeholder="Alternative contact number">
+                </div>
+
+                <!-- Delivery Preferences -->
+                <h3 style="margin: 30px 0 15px 0; color: #007bff;"><i class="fas fa-shipping-fast"></i> Delivery Preferences</h3>
+                
+                <div class="form-group">
+                    <label>Preferred Delivery Method:</label>
+                    <select name="preferredDeliveryMethod">
+                        <option value="email" <%= user.deliveryInfo?.preferredDeliveryMethod === 'email' ? 'selected' : '' %>>Email (Digital certificates)</option>
+                        <option value="postal" <%= user.deliveryInfo?.preferredDeliveryMethod === 'postal' ? 'selected' : '' %>>Postal Mail</option>
+                        <option value="pickup" <%= user.deliveryInfo?.preferredDeliveryMethod === 'pickup' ? 'selected' : '' %>>Pickup</option>
+                        <option value="digital_only" <%= user.deliveryInfo?.preferredDeliveryMethod === 'digital_only' ? 'selected' : '' %>>Digital Only</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="useDifferentDeliveryAddress" <%= user.deliveryInfo?.useDifferentDeliveryAddress ? 'checked' : '' %>>
+                        Use different delivery address
+                    </label>
+                </div>
+
+                <!-- Different Delivery Address Section -->
+                <div id="deliveryAddressSection" class="delivery-section" style="display: <%= user.deliveryInfo?.useDifferentDeliveryAddress ? 'block' : 'none' %>;">
+                    <h4 style="margin-bottom: 15px;"><i class="fas fa-truck"></i> Delivery Address</h4>
+                    
+                    <div class="form-group">
+                        <label>Recipient Name:</label>
+                        <input type="text" name="deliveryRecipientName" value="<%= user.deliveryInfo?.deliveryAddress?.recipientName || '' %>">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Delivery Address:</label>
+                        <input type="text" name="deliveryAddress" value="<%= user.deliveryInfo?.deliveryAddress?.address || '' %>">
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>City:</label>
+                            <input type="text" name="deliveryCity" value="<%= user.deliveryInfo?.deliveryAddress?.city || '' %>">
+                        </div>
+                        <div>
+                            <label>State/Province:</label>
+                            <input type="text" name="deliveryState" value="<%= user.deliveryInfo?.deliveryAddress?.state || '' %>">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>ZIP/Postal Code:</label>
+                            <input type="text" name="deliveryZipCode" value="<%= user.deliveryInfo?.deliveryAddress?.zipCode || '' %>">
+                        </div>
+                        <div>
+                            <label>Country:</label>
+                            <input type="text" name="deliveryCountry" value="<%= user.deliveryInfo?.deliveryAddress?.country || '' %>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Delivery Phone:</label>
+                        <input type="text" name="deliveryPhone" value="<%= user.deliveryInfo?.deliveryAddress?.phone || '' %>">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Delivery Notes:</label>
+                    <textarea name="deliveryNotes" placeholder="Special delivery instructions"><%= user.deliveryInfo?.deliveryNotes || '' %></textarea>
+                </div>
+
+                <!-- Payment Preferences -->
+                <h3 style="margin: 30px 0 15px 0; color: #007bff;"><i class="fas fa-credit-card"></i> Payment Preferences</h3>
+
+                <div class="form-row">
+                    <div>
+                        <label>Preferred Currency:</label>
+                        <select name="preferredCurrency" disabled style="background-color: #f8f9fa;">
+                            <option value="AED" selected>AED (UAE Dirham) - Only Available Currency</option>
+                        </select>
+                        <small class="password-hint">Currently, only AED payments are supported</small>
+                    </div>
+                    <div>
+                        <label>Preferred Payment Methods <span class="required">*</span>:</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="preferredPaymentMethods" value="credit_card" <%= user.paymentPreferences?.preferredPaymentMethods?.includes('credit_card') ? 'checked' : '' %>>
+                                <label>Credit Card</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="preferredPaymentMethods" value="debit_card" <%= user.paymentPreferences?.preferredPaymentMethods?.includes('debit_card') ? 'checked' : '' %>>
+                                <label>Debit Card</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="preferredPaymentMethods" value="net_banking" <%= user.paymentPreferences?.preferredPaymentMethods?.includes('net_banking') ? 'checked' : '' %>>
+                                <label>Net Banking</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="preferredPaymentMethods" value="wallet" <%= user.paymentPreferences?.preferredPaymentMethods?.includes('wallet') ? 'checked' : '' %>>
+                                <label>Digital Wallet</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="preferredPaymentMethods" value="upi" <%= user.paymentPreferences?.preferredPaymentMethods?.includes('upi') ? 'checked' : '' %>>
+                                <label>UPI</label>
+                            </div>
+                        </div>
+                        <small class="password-hint">Select your preferred payment methods (at least one required)</small>
+                    </div>
+                </div>
+                <!-- Tax Information -->
+                <h4 style="margin: 20px 0 10px 0;"><i class="fas fa-file-invoice"></i> Tax Information (Optional)</h4>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="hasTaxId" <%= user.paymentPreferences?.taxInfo?.hasTaxId ? 'checked' : '' %>>
+                        I have a Tax ID/VAT number (for business customers or tax exemptions)
+                    </label>
+                </div>
+                
+                <div id="taxFields" style="display: <%= user.paymentPreferences?.taxInfo?.hasTaxId ? 'block' : 'none' %>;">
+                    <div class="form-row">
+                        <div>
+                            <label>Tax ID/VAT Number:</label>
+                            <input type="text" name="taxId" value="<%= user.paymentPreferences?.taxInfo?.taxId || '' %>" placeholder="Enter your tax identification number">
+                        </div>
+                        <div>
+                            <label>Tax Type:</label>
+                            <select name="taxType">
+                                <option value="">Select Type</option>
+                                <option value="vat" <%= user.paymentPreferences?.taxInfo?.taxType === 'vat' ? 'selected' : '' %>>VAT (Value Added Tax)</option>
+                                <option value="gst" <%= user.paymentPreferences?.taxInfo?.taxType === 'gst' ? 'selected' : '' %>>GST (Goods and Services Tax)</option>
+                                <option value="ssn" <%= user.paymentPreferences?.taxInfo?.taxType === 'ssn' ? 'selected' : '' %>>SSN (Social Security Number)</option>
+                                <option value="other" <%= user.paymentPreferences?.taxInfo?.taxType === 'other' ? 'selected' : '' %>>Other Tax ID</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="isBusinessCustomer" <%= user.paymentPreferences?.taxInfo?.isBusinessCustomer ? 'checked' : '' %>>
+                            This is a business/corporate account (for company purchases and invoicing)
+                        </label>
+                    </div>
+                </div>
+                <!-- ✅ ADD form validation message -->
+<div id="paymentValidationMessage" style="display: none; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin-top: 10px;">
+    <i class="fas fa-exclamation-triangle" style="color: #856404;"></i>
+    <strong>Please select at least one preferred payment method.</strong>
+</div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Save Billing & Address Information
+                </button>
+            </form>
+        </div>
+
         <!-- Detailed Information Section -->
         <div class="form-section">
             <h2><i class="fas fa-graduation-cap"></i> Detailed Information</h2>
             
             <!-- Certificate Note -->
-            <div class="certificate-note">
+            <div class="billing-note">
                 <i class="fas fa-certificate"></i>
-                <div class="certificate-note-text">
+                <div class="billing-note-text">
                     <h4>Certificate Eligibility</h4>
                     <p>This information is required if you need to receive certificates for courses you register for. Complete your professional profile and upload identification documents to unlock certificate features.</p>
                 </div>
@@ -544,71 +763,18 @@
         <div class="form-section">
             <h2><i class="fas fa-upload"></i> Document Upload</h2>
             
-            <!-- 1️⃣ ID Document Upload Area -->
-            <div class="form-group">
-                <label>Passport or ID Document <span class="required">*</span>:</label>
-                <p class="password-hint">Required for certificate application. Upload a clear image of your passport or government-issued ID.</p>
-                
-                <!-- ID Document Upload Box -->
-                <div class="file-upload-area" onclick="document.getElementById('idDocumentInput').click();">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #007bff; margin-bottom: 10px;"></i>
-                    <p><%= user.profileData?.identificationDocument?.url ? 'Click to replace your ID document' : 'Click to upload your ID document' %></p>
-                    <div class="file-info">Supported formats: JPG, PNG, PDF (Max 5MB)</div>
-                    <input type="file" id="idDocumentInput" name="idDocument" accept=".jpg,.jpeg,.png,.pdf">
-                </div>
-
-                <!-- ID Document Preview Bar -->
-                <% if (user.profileData?.identificationDocument?.url) { %>
-                    <div id="idDocumentPreview" class="document-preview" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div class="document-thumbnail" style="width: 60px; height: 60px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
-                                <% if (user.profileData.identificationDocument.mimeType && user.profileData.identificationDocument.mimeType.includes('pdf')) { %>
-                                    <i class="fas fa-file-pdf" style="font-size: 24px; color: #dc3545;"></i>
-                                <% } else { %>
-                                    <img src="<%= user.profileData.identificationDocument.url %>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" alt="ID Document">
-                                <% } %>
-                            </div>
-                            <div style="flex: 1;">
-                                <p style="margin: 0; font-weight: 500; color: #002147;">
-                                    <i class="fas fa-id-card" style="margin-right: 8px; color: #007bff;"></i>
-                                    <%= user.profileData.identificationDocument.originalName || 'ID Document' %>
-                                </p>
-                                <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #6c757d;">
-                                    Uploaded: <%= user.profileData.identificationDocument.uploadDate ? new Date(user.profileData.identificationDocument.uploadDate).toLocaleDateString() : 'Unknown' %>
-                                </p>
-                                <span class="verification-status status-<%= user.profileData.identificationDocument.verificationStatus %>">
-                                    <i class="fas fa-<%= user.profileData.identificationDocument.verificationStatus === 'verified' ? 'check' : user.profileData.identificationDocument.verificationStatus === 'pending' ? 'clock' : 'times' %>"></i>
-                                    <%= user.profileData.identificationDocument.verificationStatus.charAt(0).toUpperCase() + user.profileData.identificationDocument.verificationStatus.slice(1).replace('_', ' ') %>
-                                </span>
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <% if (user.profileData.identificationDocument.mimeType && !user.profileData.identificationDocument.mimeType.includes('pdf')) { %>
-                                    <button type="button" class="btn-icon" onclick="viewDocument('<%= user.profileData.identificationDocument.url %>')" style="background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="View Document">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                <% } %>
-                                <button type="button" class="btn-icon btn-danger" onclick="deleteDocument('id')" style="background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="Delete ID Document">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                <% } %>
-            </div>
-
-            <!-- 2️⃣ Profile Picture Upload Area -->
+            <!-- Profile Picture Upload -->
             <div class="form-group">
                 <label>Profile Picture:</label>
                 <p class="password-hint">Upload a professional photo for your profile.</p>
                 
-                <!-- Profile Picture Upload Box -->
                 <div class="file-upload-area" onclick="document.getElementById('profilePictureInputSection').click();">
                     <i class="fas fa-camera" style="font-size: 2rem; color: #007bff; margin-bottom: 10px;"></i>
                     <p><%= user.profileData?.profilePicture?.url ? 'Click to replace your profile picture' : 'Click to upload your profile picture' %></p>
                     <div class="file-info">Supported formats: JPG, PNG (Max 2MB)</div>
                 </div>
 
-                <!-- Profile Picture Preview Bar -->
+                <!-- Profile Picture Preview -->
                 <% if (user.profileData?.profilePicture?.url) { %>
                     <div id="profilePicturePreview" class="document-preview" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
                         <div style="display: flex; align-items: center; gap: 15px;">
@@ -638,6 +804,56 @@
                         </div>
                     </div>
                 <% } %>
+
+                <!-- ID Document Upload -->
+                <div class="form-group">
+                    <label>Passport or ID Document <span class="required">*</span>:</label>
+                    <p class="password-hint">Required for certificate application. Upload a clear image of your passport or government-issued ID.</p>
+                    
+                    <div class="file-upload-area" onclick="document.getElementById('idDocumentInput').click();">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #007bff; margin-bottom: 10px;"></i>
+                        <p><%= user.profileData?.identificationDocument?.url ? 'Click to replace your ID document' : 'Click to upload your ID document' %></p>
+                        <div class="file-info">Supported formats: JPG, PNG, PDF (Max 5MB)</div>
+                    </div>
+
+                    <!-- ID Document Preview -->
+                    <% if (user.profileData?.identificationDocument?.url) { %>
+                        <div id="idDocumentPreview" class="document-preview" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="document-thumbnail" style="width: 60px; height: 60px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                                    <% if (user.profileData.identificationDocument.mimeType && user.profileData.identificationDocument.mimeType.includes('pdf')) { %>
+                                        <i class="fas fa-file-pdf" style="font-size: 24px; color: #dc3545;"></i>
+                                    <% } else { %>
+                                        <img src="<%= user.profileData.identificationDocument.url %>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" alt="ID Document">
+                                    <% } %>
+                                </div>
+                                <div style="flex: 1;">
+                                    <p style="margin: 0; font-weight: 500; color: #002147;">
+                                        <i class="fas fa-id-card" style="margin-right: 8px; color: #007bff;"></i>
+                                        <%= user.profileData.identificationDocument.originalName || 'ID Document' %>
+                                    </p>
+                                    <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #6c757d;">
+                                        Uploaded: <%= user.profileData.identificationDocument.uploadDate ? new Date(user.profileData.identificationDocument.uploadDate).toLocaleDateString() : 'Unknown' %>
+                                    </p>
+                                    <span class="verification-status status-<%= user.profileData.identificationDocument.verificationStatus %>">
+                                        <i class="fas fa-<%= user.profileData.identificationDocument.verificationStatus === 'verified' ? 'check' : user.profileData.identificationDocument.verificationStatus === 'pending' ? 'clock' : 'times' %>"></i>
+                                        <%= user.profileData.identificationDocument.verificationStatus.charAt(0).toUpperCase() + user.profileData.identificationDocument.verificationStatus.slice(1).replace('_', ' ') %>
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <% if (user.profileData.identificationDocument.mimeType && !user.profileData.identificationDocument.mimeType.includes('pdf')) { %>
+                                        <button type="button" class="btn-icon" onclick="viewDocument('<%= user.profileData.identificationDocument.url %>')" style="background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="View Document">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    <% } %>
+                                    <button type="button" class="btn-icon btn-danger" onclick="deleteDocument('id')" style="background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="Delete ID Document">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
             </div>
         </div>
 
@@ -709,6 +925,87 @@
             }
         });
 
+       // ✅ UPDATE your addressBillingForm submission handler with this:
+
+document.getElementById('addressBillingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // ✅ MISSING: Validate payment methods
+    const paymentMethodCheckboxes = document.querySelectorAll('input[name="preferredPaymentMethods"]:checked');
+    const validationMessage = document.getElementById('paymentValidationMessage');
+    
+    if (paymentMethodCheckboxes.length === 0) {
+        validationMessage.style.display = 'block';
+        validationMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showNotification('Please select at least one preferred payment method', 'error');
+        return;
+    } else {
+        validationMessage.style.display = 'none';
+    }
+    
+    const formData = new FormData(e.target);
+    
+    // ✅ MISSING: Handle preferred payment methods checkboxes properly
+    const preferredPaymentMethods = [];
+    const paymentCheckboxes = formData.getAll('preferredPaymentMethods');
+    paymentCheckboxes.forEach(method => preferredPaymentMethods.push(method));
+    
+    // Convert FormData to object
+    const data = Object.fromEntries(formData);
+    
+    // ✅ MISSING: Ensure these boolean fields are properly set
+    data.preferredPaymentMethods = preferredPaymentMethods;
+    data.useDifferentDeliveryAddress = document.querySelector('input[name="useDifferentDeliveryAddress"]').checked;
+    data.hasTaxId = document.querySelector('input[name="hasTaxId"]').checked;
+    data.isBusinessCustomer = document.querySelector('input[name="isBusinessCustomer"]').checked;
+    data.preferredCurrency = 'AED'; // ✅ Force AED since it's the only option
+
+    // ✅ MISSING: Debug logging
+    console.log('💳 Submitting payment data:', {
+        preferredPaymentMethods: data.preferredPaymentMethods,
+        hasTaxId: data.hasTaxId,
+        taxId: data.taxId,
+        taxType: data.taxType,
+        isBusinessCustomer: data.isBusinessCustomer,
+        preferredCurrency: data.preferredCurrency
+    });
+
+    try {
+        const response = await fetch('/update-address-billing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification(result.message, 'success');
+            if (result.completionPercentage) {
+                const progressFill = document.querySelector('.progress-fill');
+                const completionBadge = document.querySelector('.completion-badge');
+                
+                // Update progress bar
+                progressFill.style.width = `${result.completionPercentage}%`;
+                
+                // Update completion badge
+                const badgeClass = result.completionPercentage >= 90 ? 'completion-full' : 
+                                 result.completionPercentage >= 70 ? 'completion-high' : 
+                                 result.completionPercentage >= 40 ? 'completion-medium' : 'completion-low';
+                
+                completionBadge.className = `completion-badge ${badgeClass}`;
+                completionBadge.innerHTML = `<i class="fas fa-chart-pie"></i> Profile ${result.completionPercentage}% Complete`;
+            }
+        } else {
+            showNotification(result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error updating address & billing info:', error);
+        showNotification('Error updating address & billing information', 'error');
+    }
+});
+
+
         // Update Detailed Information
         document.getElementById('detailedInfoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -776,13 +1073,23 @@
             }
         });
 
-        // Handle license checkbox
+        // Handle checkboxes for different sections
         document.querySelector('input[name="hasLicense"]').addEventListener('change', function() {
             const licenseFields = document.getElementById('licenseFields');
             licenseFields.style.display = this.checked ? 'block' : 'none';
         });
 
-        // Handle file uploads - Completely separate systems
+        document.querySelector('input[name="useDifferentDeliveryAddress"]').addEventListener('change', function() {
+            const deliverySection = document.getElementById('deliveryAddressSection');
+            deliverySection.style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.querySelector('input[name="hasTaxId"]').addEventListener('change', function() {
+            const taxFields = document.getElementById('taxFields');
+            taxFields.style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Handle file uploads
         document.getElementById('idDocumentInput').addEventListener('change', function(event) {
             handleFileUpload(event, 'id');
         });
@@ -798,9 +1105,6 @@
         function handleFileUpload(event, uploadType) {
             const file = event.target.files[0];
             if (!file) return;
-
-            console.log(`📤 Starting ${uploadType} upload:`, file.name);
-            console.log(`📤 Upload type being sent:`, uploadType);
 
             // Validate file type based on upload type
             if (uploadType === 'profile') {
@@ -825,48 +1129,30 @@
                 }
             }
 
-            // CRITICAL: Create FormData and append both file and type
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('type', uploadType);  // This is the key line!
+            formData.append('type', uploadType);
 
-            console.log(`📤 FormData created with:`);
-            console.log(`📤 - file:`, file.name);
-            console.log(`📤 - type:`, uploadType);
-
-            // Debug: Log FormData contents
-            for (let pair of formData.entries()) {
-                console.log(`📤 FormData contains: ${pair[0]} = ${pair[1]}`);
-            }
-
-            // Show loading notification
             showNotification(`Uploading ${uploadType === 'id' ? 'ID document' : 'profile picture'}...`, 'info');
 
             fetch(`/upload-document?type=${uploadType}`, {
                 method: 'POST',
-                body: formData  // Don't set Content-Type header, let browser handle it
+                body: formData
             })
             .then(response => response.json())
             .then(result => {
-                console.log(`📤 Upload response for ${uploadType}:`, result);
-                
                 if (result.success) {
                     showNotification(result.message, 'success');
-                    // Refresh page to show updated document status
-                    setTimeout(() => {
-                        console.log(`🔄 Refreshing page to show ${uploadType} preview`);
-                        location.reload();
-                    }, 1500);
+                    setTimeout(() => location.reload(), 1500);
                 } else {
                     showNotification(result.message, 'error');
                 }
             })
             .catch(error => {
-                console.error(`❌ Error uploading ${uploadType}:`, error);
+                console.error(`Error uploading ${uploadType}:`, error);
                 showNotification(`Error uploading ${uploadType === 'id' ? 'ID document' : 'profile picture'}`, 'error');
             })
             .finally(() => {
-                // Clear the file input
                 event.target.value = '';
             });
         }
@@ -876,15 +1162,13 @@
             window.open(url, '_blank');
         }
 
-        // Delete document function - Enhanced with specific messaging
+        // Delete document function
         function deleteDocument(type) {
             const documentType = type === 'id' ? 'ID document' : 'profile picture';
             
             if (!confirm(`Are you sure you want to delete your ${documentType}? This action cannot be undone.`)) {
                 return;
             }
-
-            console.log(`🗑️ Deleting ${type} document`);
 
             fetch('/delete-document', {
                 method: 'DELETE',
@@ -893,21 +1177,15 @@
             })
             .then(response => response.json())
             .then(result => {
-                console.log(`🗑️ Delete response for ${type}:`, result);
-                
                 if (result.success) {
                     showNotification(result.message, 'success');
-                    // Refresh page to hide the deleted document preview
-                    setTimeout(() => {
-                        console.log(`🔄 Refreshing page to hide ${type} preview`);
-                        location.reload();
-                    }, 1500);
+                    setTimeout(() => location.reload(), 1500);
                 } else {
                     showNotification(result.message, 'error');
                 }
             })
             .catch(error => {
-                console.error(`❌ Error deleting ${type}:`, error);
+                console.error(`Error deleting ${type}:`, error);
                 showNotification(`Error deleting ${documentType}`, 'error');
             });
         }

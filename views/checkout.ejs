@@ -8,12 +8,198 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+      .billing-info-section {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 25px;
+        margin: 20px 0;
+        position: relative;
+      }
+      
+      .billing-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 20px;
+        cursor: pointer;
+        user-select: none;
+      }
+      
+      .billing-header h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: #2c3e50;
+      }
+      
+      .billing-toggle {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #007bff;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+      
+      .billing-toggle.expanded {
+        transform: rotate(180deg);
+      }
+      
+      .billing-form {
+        display: none;
+        animation: slideDown 0.3s ease;
+      }
+      
+      .billing-form.show {
+        display: block;
+      }
+      
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+      
+      .form-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .form-group label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+      
+      .form-group label .required {
+        color: #dc3545;
+        margin-left: 3px;
+      }
+      
+      .form-control {
+        padding: 12px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      }
+      
+      .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+      
+      .form-control.is-invalid {
+        border-color: #dc3545;
+      }
+      
+      .invalid-feedback {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+      }
+      
+      .billing-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #dee2e6;
+      }
+      
+      .btn-save-profile {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.3s ease;
+      }
+      
+      .btn-save-profile:hover {
+        background: #218838;
+      }
+      
+      .btn-save-profile:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+      }
+      
+      .completion-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+        font-size: 13px;
+        color: #6c757d;
+      }
+      
+      .completion-status.complete {
+        color: #28a745;
+      }
+      
+      .completion-status.incomplete {
+        color: #ffc107;
+      }
+      
+      .billing-summary {
+        background: #e3f2fd;
+        border: 1px solid #bbdefb;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 15px;
+      }
+      
+      .billing-summary h4 {
+        margin: 0 0 10px 0;
+        color: #1976d2;
+        font-size: 16px;
+      }
+      
+      .billing-summary p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #424242;
+      }
+      
+      @media (max-width: 768px) {
+        .form-row {
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .billing-actions {
+          flex-direction: column;
+        }
+        
+        .completion-status {
+          margin-left: 0;
+          margin-top: 10px;
+        }
+      }
+    </style>
   </head>
   
   <body>
     <%- include('partials/header') %>
 
-    <!-- ✅ Enhanced Checkout Section -->
+    <!-- Enhanced Checkout Section -->
     <section id="checkout">
       <div class="checkout-container">
         <h1><i class="fas fa-shopping-cart"></i> Your Cart</h1>
@@ -156,6 +342,198 @@
                 <% }) %>
               </tbody>
             </table>
+          </div>
+
+          <!-- NEW: Billing Information Section -->
+          <div class="billing-info-section">
+            <div class="billing-header" onclick="toggleBillingForm()">
+              <h3>
+                <i class="fas fa-credit-card"></i> 
+                Billing Information
+              </h3>
+              <div class="completion-status" id="billingCompletionStatus">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Click to add billing details</span>
+              </div>
+              <button type="button" class="billing-toggle" id="billingToggle">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+            </div>
+            
+            <div class="billing-form" id="billingForm">
+              <form id="billingDataForm">
+                <!-- Personal Information -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing_title">Title</label>
+                    <select class="form-control" id="billing_title" name="title">
+                      <option value="">Select Title</option>
+                      <option value="Mr.">Mr.</option>
+                      <option value="Mrs.">Mrs.</option>
+                      <option value="Ms.">Ms.</option>
+                      <option value="Dr.">Dr.</option>
+                      <option value="Prof.">Prof.</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="billing_first_name">First Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="billing_first_name" name="firstName" required>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="billing_last_name">Last Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="billing_last_name" name="lastName" required>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing_email">Email <span class="required">*</span></label>
+                    <input type="email" class="form-control" id="billing_email" name="email" required>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="billing_phone">Phone Number <span class="required">*</span></label>
+                    <input type="tel" class="form-control" id="billing_phone" name="phoneNumber" required>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing_address">Address <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="billing_address" name="address" required>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing_city">City <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="billing_city" name="city" required>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="billing_state">State/Province</label>
+                    <input type="text" class="form-control" id="billing_state" name="state">
+                  </div>
+                  <div class="form-group">
+                    <label for="billing_zip">ZIP/Postal Code</label>
+                    <input type="text" class="form-control" id="billing_zip" name="zipCode">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing_country">Country <span class="required">*</span></label>
+                    <select class="form-control" id="billing_country" name="country" required>
+                      <option value="">Select Country</option>
+                      <option value="United States">United States</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Canada">Canada</option>
+                      <option value="Australia">Australia</option>
+                      <option value="Germany">Germany</option>
+                      <option value="France">France</option>
+                      <option value="Italy">Italy</option>
+                      <option value="Spain">Spain</option>
+                      <option value="Netherlands">Netherlands</option>
+                      <option value="Belgium">Belgium</option>
+                      <option value="Switzerland">Switzerland</option>
+                      <option value="Austria">Austria</option>
+                      <option value="Sweden">Sweden</option>
+                      <option value="Norway">Norway</option>
+                      <option value="Denmark">Denmark</option>
+                      <option value="United Arab Emirates">United Arab Emirates</option>
+                      <option value="Saudi Arabia">Saudi Arabia</option>
+                      <option value="Qatar">Qatar</option>
+                      <option value="Kuwait">Kuwait</option>
+                      <option value="Bahrain">Bahrain</option>
+                      <option value="Oman">Oman</option>
+                      <option value="India">India</option>
+                      <option value="Pakistan">Pakistan</option>
+                      <option value="Bangladesh">Bangladesh</option>
+                      <option value="Sri Lanka">Sri Lanka</option>
+                      <option value="Singapore">Singapore</option>
+                      <option value="Malaysia">Malaysia</option>
+                      <option value="Thailand">Thailand</option>
+                      <option value="Philippines">Philippines</option>
+                      <option value="Indonesia">Indonesia</option>
+                      <option value="Vietnam">Vietnam</option>
+                      <option value="South Korea">South Korea</option>
+                      <option value="Japan">Japan</option>
+                      <option value="China">China</option>
+                      <option value="Hong Kong">Hong Kong</option>
+                      <option value="Taiwan">Taiwan</option>
+                      <option value="Brazil">Brazil</option>
+                      <option value="Mexico">Mexico</option>
+                      <option value="Argentina">Argentina</option>
+                      <option value="Colombia">Colombia</option>
+                      <option value="Chile">Chile</option>
+                      <option value="Peru">Peru</option>
+                      <option value="Venezuela">Venezuela</option>
+                      <option value="South Africa">South Africa</option>
+                      <option value="Egypt">Egypt</option>
+                      <option value="Morocco">Morocco</option>
+                      <option value="Nigeria">Nigeria</option>
+                      <option value="Kenya">Kenya</option>
+                      <option value="Ghana">Ghana</option>
+                      <option value="Tunisia">Tunisia</option>
+                      <option value="Algeria">Algeria</option>
+                      <option value="Jordan">Jordan</option>
+                      <option value="Lebanon">Lebanon</option>
+                      <option value="Iraq">Iraq</option>
+                      <option value="Iran">Iran</option>
+                      <option value="Israel">Israel</option>
+                      <option value="Turkey">Turkey</option>
+                      <option value="Russia">Russia</option>
+                      <option value="Poland">Poland</option>
+                      <option value="Czech Republic">Czech Republic</option>
+                      <option value="Hungary">Hungary</option>
+                      <option value="Romania">Romania</option>
+                      <option value="Bulgaria">Bulgaria</option>
+                      <option value="Croatia">Croatia</option>
+                      <option value="Serbia">Serbia</option>
+                      <option value="Greece">Greece</option>
+                      <option value="Cyprus">Cyprus</option>
+                      <option value="Malta">Malta</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                </div>
+
+                <!-- Alternative Phone (Optional) -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing_alt_phone">Alternative Phone (Optional)</label>
+                    <input type="tel" class="form-control" id="billing_alt_phone" name="alternativePhone">
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="billing-actions">
+                  <button type="button" class="btn-save-profile" id="saveBillingBtn" onclick="saveBillingToProfile()">
+                    <i class="fas fa-save"></i>
+                    Save to Profile
+                  </button>
+                  <div class="completion-status" id="formValidationStatus">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Fill required fields to enable payment</span>
+                  </div>
+                </div>
+              </form>
+
+              <!-- Billing Summary (shown when data is complete) -->
+              <div class="billing-summary" id="billingSummary" style="display: none;">
+                <h4><i class="fas fa-check-circle"></i> Billing Information Ready</h4>
+                <div id="billingSummaryContent">
+                  <!-- Summary will be populated here -->
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Enhanced Price Summary -->
@@ -332,10 +710,31 @@
       let eurToAedRate = <%= eurToAedRate || 4.0 %>;
       let promoApplied = false;
       let promoDiscount = 0;
+      
+      // Billing data management
+      let billingData = {};
+      let isBillingComplete = false;
 
-      // Initialize on page load
+      // Initialize on page load - ENHANCED VERSION
       document.addEventListener('DOMContentLoaded', function() {
         validateCheckout();
+        loadUserBillingData();
+        
+        // Add a test button for debugging (remove in production)
+        console.log('🔧 Checkout page loaded. Testing API connectivity...');
+        
+        // Test API connectivity
+        fetch('/api/user/billing-info')
+          .then(response => {
+            console.log('🔗 API Test Result:', response.status, response.ok ? 'OK' : 'ERROR');
+            if (!response.ok) {
+              console.error('❌ API route not accessible. Check route mounting in app.js');
+            }
+          })
+          .catch(error => {
+            console.error('❌ API connection test failed:', error);
+          });
+        
         console.log('💰 Checkout initialized:', {
           originalPrice: originalPrice,
           currentPrice: currentDiscountedPrice,
@@ -346,11 +745,296 @@
         });
       });
 
+      // Load user billing data from server - ENHANCED VERSION
+      async function loadUserBillingData() {
+        try {
+          console.log('🔄 Loading user billing data...');
+          
+          const response = await fetch('/api/user/billing-info', {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          console.log('📥 Billing data response status:', response.status);
+          
+          if (response.status === 404) {
+            console.warn('⚠️ Billing API route not found - check if routes are mounted correctly');
+            console.log('💡 Expected route: /api/user/billing-info');
+            return;
+          }
+          
+          if (response.ok) {
+            const userData = await response.json();
+            console.log('✅ User billing data loaded:', userData);
+            populateBillingForm(userData);
+            updateBillingStatus();
+          } else {
+            console.error('❌ Failed to load billing data:', response.status, response.statusText);
+          }
+        } catch (error) {
+          console.error('❌ Error loading user billing data:', error);
+          console.log('💡 This might indicate the API routes are not properly mounted in app.js');
+        }
+      }
+
+      // Populate billing form with user data
+      function populateBillingForm(userData) {
+        // Basic info
+        if (userData.professionalInfo?.title) {
+          document.getElementById('billing_title').value = userData.professionalInfo.title;
+        }
+        if (userData.firstName) {
+          document.getElementById('billing_first_name').value = userData.firstName;
+        }
+        if (userData.lastName) {
+          document.getElementById('billing_last_name').value = userData.lastName;
+        }
+        if (userData.email) {
+          document.getElementById('billing_email').value = userData.email;
+        }
+        if (userData.phoneNumber) {
+          document.getElementById('billing_phone').value = userData.phoneNumber;
+        }
+
+        // Address info
+        if (userData.addressInfo) {
+          const addr = userData.addressInfo;
+          if (addr.address) document.getElementById('billing_address').value = addr.address;
+          if (addr.city) document.getElementById('billing_city').value = addr.city;
+          if (addr.state) document.getElementById('billing_state').value = addr.state;
+          if (addr.zipCode) document.getElementById('billing_zip').value = addr.zipCode;
+          if (addr.country) document.getElementById('billing_country').value = addr.country;
+          if (addr.alternativePhone) document.getElementById('billing_alt_phone').value = addr.alternativePhone;
+        } else if (userData.country) {
+          document.getElementById('billing_country').value = userData.country;
+        }
+
+        // Update billing data object
+        updateBillingDataFromForm();
+        validateBillingForm();
+      }
+
+      // Toggle billing form
+      function toggleBillingForm() {
+        const form = document.getElementById('billingForm');
+        const toggle = document.getElementById('billingToggle');
+        
+        if (form.classList.contains('show')) {
+          form.classList.remove('show');
+          toggle.classList.remove('expanded');
+        } else {
+          form.classList.add('show');
+          toggle.classList.add('expanded');
+        }
+      }
+
+      // Update billing data from form
+      function updateBillingDataFromForm() {
+        billingData = {
+          title: document.getElementById('billing_title').value,
+          firstName: document.getElementById('billing_first_name').value,
+          lastName: document.getElementById('billing_last_name').value,
+          email: document.getElementById('billing_email').value,
+          phoneNumber: document.getElementById('billing_phone').value,
+          address: document.getElementById('billing_address').value,
+          city: document.getElementById('billing_city').value,
+          state: document.getElementById('billing_state').value,
+          zipCode: document.getElementById('billing_zip').value,
+          country: document.getElementById('billing_country').value,
+          alternativePhone: document.getElementById('billing_alt_phone').value
+        };
+      }
+
+      // Validate billing form - FIXED VERSION
+      function validateBillingForm() {
+        updateBillingDataFromForm();
+        
+        const requiredFields = ['firstName', 'lastName', 'email', 'phoneNumber', 'address', 'city', 'country'];
+        const missingFields = [];
+        
+        requiredFields.forEach(field => {
+          const element = document.getElementById('billing_' + (field === 'phoneNumber' ? 'phone' : field));
+          const value = billingData[field];
+          
+          if (element) {
+            // Find the error div - it should be the next sibling with class 'invalid-feedback'
+            let errorDiv = element.nextElementSibling;
+            if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+              // If not found, look for it more carefully
+              errorDiv = element.parentNode.querySelector('.invalid-feedback');
+            }
+            
+            if (!value || value.trim() === '') {
+              element.classList.add('is-invalid');
+              if (errorDiv) {
+                errorDiv.textContent = 'This field is required';
+              }
+              missingFields.push(field);
+            } else {
+              element.classList.remove('is-invalid');
+              if (errorDiv) {
+                errorDiv.textContent = '';
+              }
+            }
+          }
+        });
+
+        // Email validation
+        if (billingData.email && !isValidEmail(billingData.email)) {
+          const emailField = document.getElementById('billing_email');
+          if (emailField) {
+            let errorDiv = emailField.nextElementSibling;
+            if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+              errorDiv = emailField.parentNode.querySelector('.invalid-feedback');
+            }
+            
+            emailField.classList.add('is-invalid');
+            if (errorDiv) {
+              errorDiv.textContent = 'Please enter a valid email address';
+            }
+            missingFields.push('email');
+          }
+        }
+
+        isBillingComplete = missingFields.length === 0;
+        updateBillingStatus();
+        validateCheckout();
+        
+        if (isBillingComplete) {
+          updateBillingSummary();
+        }
+
+        return isBillingComplete;
+      }
+
+      // Email validation helper
+      function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      }
+
+      // Update billing status display
+      function updateBillingStatus() {
+        const statusElement = document.getElementById('billingCompletionStatus');
+        
+        if (isBillingComplete) {
+          statusElement.innerHTML = '<i class="fas fa-check-circle"></i><span>Billing information complete</span>';
+          statusElement.className = 'completion-status complete';
+        } else {
+          statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Please complete billing information</span>';
+          statusElement.className = 'completion-status incomplete';
+        }
+      }
+
+      // Update billing summary
+      function updateBillingSummary() {
+        if (!isBillingComplete) {
+          document.getElementById('billingSummary').style.display = 'none';
+          return;
+        }
+
+        const summary = document.getElementById('billingSummaryContent');
+        const fullName = `${billingData.title ? billingData.title + ' ' : ''}${billingData.firstName} ${billingData.lastName}`.trim();
+        
+        summary.innerHTML = `
+          <p><strong>Name:</strong> ${fullName}</p>
+          <p><strong>Email:</strong> ${billingData.email}</p>
+          <p><strong>Phone:</strong> ${billingData.phoneNumber}</p>
+          <p><strong>Address:</strong> ${billingData.address}, ${billingData.city}${billingData.state ? ', ' + billingData.state : ''} ${billingData.zipCode || ''}</p>
+          <p><strong>Country:</strong> ${billingData.country}</p>
+        `;
+        
+        document.getElementById('billingSummary').style.display = 'block';
+      }
+
+      // Save billing information to user profile - ENHANCED VERSION
+      async function saveBillingToProfile() {
+        console.log('🔄 Starting save to profile...');
+        
+        if (!validateBillingForm()) {
+          showMessage('Please fill in all required fields before saving.', 'error');
+          return;
+        }
+
+        const saveBtn = document.getElementById('saveBillingBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        try {
+          console.log('📤 Sending billing data to server:', billingData);
+          
+          const response = await fetch('/api/user/update-billing-info', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(billingData)
+          });
+
+          console.log('📥 Server response status:', response.status);
+          
+          // Check if response is JSON
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Server did not return JSON response');
+          }
+
+          const result = await response.json();
+          console.log('📥 Server response data:', result);
+          
+          if (result.success) {
+            showMessage('✅ Billing information saved to your profile!', 'success');
+            
+            // Update the billing status display
+            isBillingComplete = true;
+            updateBillingStatus();
+            validateCheckout();
+            
+            // Update profile completion if provided
+            if (result.profileCompletionPercentage) {
+              console.log('📊 Profile completion updated:', result.profileCompletionPercentage + '%');
+            }
+          } else {
+            showMessage('❌ Error saving billing information: ' + result.message, 'error');
+          }
+        } catch (error) {
+          console.error('❌ Error saving billing info:', error);
+          showMessage('❌ Error saving billing information. Please try again. Error: ' + error.message, 'error');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fas fa-save"></i> Save to Profile';
+        }
+      }
+
+      // Add event listeners to form fields
+      document.getElementById('billingDataForm').addEventListener('input', function(e) {
+        validateBillingForm();
+      });
+
+      document.getElementById('billingDataForm').addEventListener('change', function(e) {
+        validateBillingForm();
+      });
+
       // Validate checkout button state
       function validateCheckout() {
         const agreeTerms = document.getElementById('agreeTerms').checked;
         const proceedBtn = document.getElementById('proceedBtn');
-        proceedBtn.disabled = !agreeTerms;
+        
+        // Enable button only if terms are agreed AND billing is complete
+        proceedBtn.disabled = !(agreeTerms && isBillingComplete);
+        
+        // Update button text based on billing status
+        if (!isBillingComplete) {
+          proceedBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Complete Billing Info First';
+        } else if (currentDiscountedPrice <= 0) {
+          proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
+        } else {
+          proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
+        }
       }
 
       // Remove from Cart
@@ -482,6 +1166,8 @@
             } else {
               showMessage('✅ Promo code applied successfully!', 'success');
             }
+            
+            validateCheckout();
           } else {
             showMessage(result.message, 'error');
             button.disabled = false;
@@ -510,10 +1196,10 @@
           document.getElementById('applyPromoBtn').style.display = 'inline-flex';
           
           const proceedBtn = document.getElementById('proceedBtn');
-          proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
           proceedBtn.classList.remove('btn-success');
           
           promoApplied = false;
+          validateCheckout();
           showMessage('Promo code removed', 'info');
         }
       }
@@ -565,7 +1251,7 @@
         }
       });
 
-      // ✅ FIXED: Main checkout handler with proper XMLHttpRequest handling
+      // Main checkout handler with billing data
       async function handleCheckout() {
         const agreeTerms = document.getElementById('agreeTerms').checked;
         const proceedBtn = document.getElementById('proceedBtn');
@@ -575,15 +1261,28 @@
           return;
         }
 
+        if (!isBillingComplete) {
+          alert('⚠️ Please complete all required billing information first.');
+          // Auto-expand billing form if not complete
+          if (!document.getElementById('billingForm').classList.contains('show')) {
+            toggleBillingForm();
+          }
+          return;
+        }
+
         // SET FLAG: User is proceeding to payment
         proceedingToPayment = true;
 
-        // Collect additional data
+        // Collect all checkout data including billing
         const checkoutData = {
+          // Gift options
           isGift: document.getElementById('giftOption').checked,
           giftRecipientEmail: document.getElementById('giftRecipientEmail')?.value,
           giftMessage: document.getElementById('giftMessage')?.value,
-          orderNotes: document.getElementById('notesText')?.value
+          orderNotes: document.getElementById('notesText')?.value,
+          
+          // Billing information for CCAvenue
+          billingInfo: billingData
         };
 
         // Disable button during processing
@@ -593,6 +1292,7 @@
 
         try {
           console.log(`💰 Current price check: €${currentDiscountedPrice}`);
+          console.log('📋 Checkout data:', checkoutData);
           
           if (currentDiscountedPrice <= 0 || currentDiscountedPrice === 0) {
             // FREE registration
@@ -635,10 +1335,14 @@
               return;
             }
             
-            // ✅ CRITICAL FIX: Use XMLHttpRequest for proper redirect handling
+            // Use XMLHttpRequest for proper redirect handling
             const formData = new FormData();
             Object.keys(checkoutData).forEach(key => {
-              formData.append(key, checkoutData[key] || '');
+              if (typeof checkoutData[key] === 'object') {
+                formData.append(key, JSON.stringify(checkoutData[key]));
+              } else {
+                formData.append(key, checkoutData[key] || '');
+              }
             });
 
             console.log('🚀 Submitting payment initiation request...');
@@ -693,80 +1397,6 @@
           showLoading(false);
         }
       }
-
-      // Add CSS animations
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes fadeOut {
-          from { opacity: 1; transform: translateX(0); }
-          to { opacity: 0; transform: translateX(-100px); }
-        }
-        
-        .loading-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.7);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 9999;
-        }
-        
-        .spinner {
-          text-align: center;
-          color: white;
-        }
-        
-        .spinner i {
-          font-size: 48px;
-          margin-bottom: 20px;
-        }
-        
-        .promo-message {
-          padding: 10px 15px;
-          border-radius: 5px;
-          margin: 10px 0;
-          display: none;
-          align-items: center;
-          gap: 10px;
-        }
-        
-        .promo-message.success {
-          background: #d4edda;
-          color: #155724;
-          border: 1px solid #c3e6cb;
-        }
-        
-        .promo-message.error {
-          background: #f8d7da;
-          color: #721c24;
-          border: 1px solid #f5c6cb;
-        }
-        
-        .promo-message.info {
-          background: #d1ecf1;
-          color: #0c5460;
-          border: 1px solid #bee5eb;
-        }
-        
-        .btn-success {
-          background: linear-gradient(135deg, #28a745, #20c997) !important;
-        }
-        
-        .total-aed {
-          color: #666;
-          font-size: 0.95em;
-        }
-        
-        .total-price-aed {
-          color: #666 !important;
-          font-weight: 500;
-        }
-      `;
-      document.head.appendChild(style);
 
       // Debug information
       console.log('💰 Checkout Debug Info:', {

@@ -18,6 +18,186 @@ const userSchema = new mongoose.Schema(
     country: { type: String },
 
     // ========================================
+    // 🆕 ENHANCED ADDRESS & BILLING INFORMATION
+    // Critical for CCAvenue payment processing
+    // ========================================
+    addressInfo: {
+      // Primary Address (Billing)
+      address: {
+        type: String,
+        trim: true,
+        maxlength: 255,
+        default: null,
+      },
+      city: {
+        type: String,
+        trim: true,
+        maxlength: 50,
+        default: null,
+      },
+      state: {
+        type: String,
+        trim: true,
+        maxlength: 50,
+        default: null,
+      },
+      zipCode: {
+        type: String,
+        trim: true,
+        maxlength: 10,
+        default: null,
+      },
+      country: {
+        type: String,
+        trim: true,
+        maxlength: 50,
+        default: null,
+      },
+
+      // ✅ NEW: Alternative phone number for billing
+      alternativePhone: {
+        type: String,
+        trim: true,
+        maxlength: 20,
+        default: null,
+      },
+
+      // Address completion status
+      isComplete: {
+        type: Boolean,
+        default: false,
+      },
+      lastUpdated: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+
+    // ========================================
+    // 🆕 DELIVERY INFORMATION (for physical products/certificates)
+    // ========================================
+    deliveryInfo: {
+      // Use different delivery address?
+      useDifferentDeliveryAddress: {
+        type: Boolean,
+        default: false,
+      },
+
+      // Delivery Address (only if different from billing)
+      deliveryAddress: {
+        recipientName: {
+          type: String,
+          trim: true,
+          maxlength: 100,
+          default: null,
+        },
+        address: {
+          type: String,
+          trim: true,
+          maxlength: 255,
+          default: null,
+        },
+        city: {
+          type: String,
+          trim: true,
+          maxlength: 50,
+          default: null,
+        },
+        state: {
+          type: String,
+          trim: true,
+          maxlength: 50,
+          default: null,
+        },
+        zipCode: {
+          type: String,
+          trim: true,
+          maxlength: 10,
+          default: null,
+        },
+        country: {
+          type: String,
+          trim: true,
+          maxlength: 50,
+          default: null,
+        },
+        phone: {
+          type: String,
+          trim: true,
+          maxlength: 20,
+          default: null,
+        },
+      },
+
+      // Delivery preferences
+      deliveryNotes: {
+        type: String,
+        trim: true,
+        maxlength: 500,
+        default: null,
+      },
+
+      // For digital products
+      preferredDeliveryMethod: {
+        type: String,
+        enum: ["email", "postal", "pickup", "digital_only"],
+        default: "email",
+      },
+    },
+
+    // ========================================
+    // 🆕 ENHANCED PAYMENT PREFERENCES
+    // ========================================
+    paymentPreferences: {
+      // Preferred currency for display
+      preferredCurrency: {
+        type: String,
+        enum: ["EUR", "USD", "AED", "INR", "GBP"],
+        default: "EUR",
+      },
+
+      // Preferred payment methods
+      preferredPaymentMethods: [
+        {
+          type: String,
+          enum: ["credit_card", "debit_card", "net_banking", "wallet", "upi"],
+        },
+      ],
+
+      // Saved payment method preferences
+      savedPaymentMethods: [
+        {
+          type: { type: String, enum: ["card", "bank", "wallet"] },
+          last4: String,
+          brand: String,
+          expiryMonth: Number,
+          expiryYear: Number,
+          isDefault: { type: Boolean, default: false },
+          addedAt: { type: Date, default: Date.now },
+        },
+      ],
+
+      // Default billing address reference
+      defaultBillingAddress: {
+        type: String,
+        enum: ["profile", "custom"],
+        default: "profile",
+      },
+
+      // Tax information (for business users)
+      taxInfo: {
+        hasTaxId: { type: Boolean, default: false },
+        taxId: { type: String, trim: true, default: null },
+        taxType: {
+          type: String,
+          enum: ["vat", "gst", "ssn", "other"],
+          default: null,
+        },
+        isBusinessCustomer: { type: Boolean, default: false },
+      },
+    },
+
+    // ========================================
     // NEW: ENHANCED PROFESSIONAL INFORMATION
     // ========================================
     professionalInfo: {
@@ -202,9 +382,11 @@ const userSchema = new mongoose.Schema(
       // Profile completion tracking
       completionStatus: {
         basicInfo: { type: Boolean, default: false },
+        addressInfo: { type: Boolean, default: false },
         professionalInfo: { type: Boolean, default: false },
         profilePicture: { type: Boolean, default: false },
         identificationDocument: { type: Boolean, default: false },
+        paymentReady: { type: Boolean, default: false },
         overallPercentage: { type: Number, default: 0 },
         lastUpdated: { type: Date, default: Date.now },
       },
@@ -977,41 +1159,88 @@ userSchema.index(
 );
 userSchema.index({ "paymentTransactions.paymentStatus": 1 });
 userSchema.index({ "paymentTransactions.createdAt": -1 });
+// 🆕 New indexes for address and payment info
+userSchema.index({ "addressInfo.country": 1 });
+userSchema.index({ "addressInfo.isComplete": 1 });
+userSchema.index({ "paymentPreferences.preferredCurrency": 1 });
 
 // ========================================
 // VIRTUAL FIELDS
 // ========================================
 //new
 // Full name with title (for display purposes)
+
 userSchema.virtual("fullName").get(function () {
   const title = this.professionalInfo?.title || "";
   const firstName = this.firstName || "";
   const lastName = this.lastName || "";
-
   return `${title} ${firstName} ${lastName}`.trim();
 });
 
-// Display name without title (for casual display)
+// Display name without title
 userSchema.virtual("displayName").get(function () {
   return `${this.firstName} ${this.lastName}`.trim();
 });
 
-// Profile completion percentage (calculated, not stored)
+// 🆕 Payment readiness check
+userSchema.virtual("isPaymentReady").get(function () {
+  return !!(
+    this.firstName &&
+    this.lastName &&
+    this.email &&
+    this.phoneNumber &&
+    (this.addressInfo?.address || this.country) &&
+    (this.addressInfo?.city || this.addressInfo?.country)
+  );
+});
+
+// 🆕 Complete billing address virtual
+userSchema.virtual("completeBillingAddress").get(function () {
+  return {
+    name: this.fullName,
+    email: this.email,
+    phone: this.phoneNumber || this.addressInfo?.alternativePhone,
+    address: this.addressInfo?.address || "Address not provided",
+    city: this.addressInfo?.city || "City not provided",
+    state: this.addressInfo?.state || "State not provided",
+    country:
+      this.addressInfo?.country || this.country || "Country not provided",
+    zip: this.addressInfo?.zipCode || "00000",
+  };
+});
+
+// 🆕 Enhanced profile completion calculation
 userSchema.virtual("profileCompletionPercentage").get(function () {
   let completion = 0;
   const weights = {
-    basicInfo: 25, // firstName, lastName, email, phone
-    professionalInfo: 40, // fieldOfStudy, experience, specialty (OPTIONAL - filled later)
-    profilePicture: 15, // profile picture upload (OPTIONAL - filled later)
-    identification: 20, // ID/passport upload (OPTIONAL - filled later)
+    basicInfo: 20, // firstName, lastName, email
+    contactInfo: 15, // phone, basic address
+    addressInfo: 20, // complete address information
+    professionalInfo: 25, // professional details
+    profilePicture: 10, // profile picture
+    identification: 10, // ID verification
   };
 
-  // Basic info completion (required at signup)
+  // Basic info completion
   if (this.firstName && this.lastName && this.email) {
     completion += weights.basicInfo;
   }
 
-  // Professional info completion (OPTIONAL - user fills later)
+  // Contact info completion
+  if (this.phoneNumber && (this.country || this.addressInfo?.country)) {
+    completion += weights.contactInfo;
+  }
+
+  // Address info completion
+  if (
+    this.addressInfo?.address &&
+    this.addressInfo?.city &&
+    this.addressInfo?.country
+  ) {
+    completion += weights.addressInfo;
+  }
+
+  // Professional info completion
   if (
     this.professionalInfo?.fieldOfStudy &&
     this.professionalInfo?.aestheticsExperience
@@ -1019,12 +1248,12 @@ userSchema.virtual("profileCompletionPercentage").get(function () {
     completion += weights.professionalInfo;
   }
 
-  // Profile picture completion (OPTIONAL - user fills later)
+  // Profile picture completion
   if (this.profileData?.profilePicture?.url) {
     completion += weights.profilePicture;
   }
 
-  // ID document completion (OPTIONAL - user fills later)
+  // ID document completion
   if (this.profileData?.identificationDocument?.url) {
     completion += weights.identification;
   }
@@ -1131,7 +1360,64 @@ userSchema.virtual("enrolledCourses").get(async function () {
 // INSTANCE METHODS
 // ========================================
 //new
-// Update profile completion status
+userSchema.methods.updateAddressInfo = function (addressData) {
+  if (!this.addressInfo) {
+    this.addressInfo = {};
+  }
+
+  Object.keys(addressData).forEach((key) => {
+    if (addressData[key] !== undefined && addressData[key] !== null) {
+      this.addressInfo[key] = addressData[key];
+    }
+  });
+
+  // Check if address is complete
+  this.addressInfo.isComplete = !!(
+    this.addressInfo.address &&
+    this.addressInfo.city &&
+    this.addressInfo.country
+  );
+
+  this.addressInfo.lastUpdated = new Date();
+
+  // Update profile completion
+  this.updateProfileCompletion();
+  return this.save();
+};
+
+// Get CCAvenue-ready billing data
+userSchema.methods.getCCAvenueReadyData = function () {
+  const billingData = this.completeBillingAddress;
+
+  return {
+    // Mandatory fields
+    billing_name: billingData.name.substring(0, 50),
+    billing_email: billingData.email,
+    billing_tel: billingData.phone?.substring(0, 20) || "0000000000",
+    billing_address: billingData.address.substring(0, 255),
+    billing_city: billingData.city.substring(0, 50),
+    billing_state: billingData.state.substring(0, 50),
+    billing_zip: billingData.zip.substring(0, 10),
+    billing_country: billingData.country.substring(0, 50),
+
+    // Delivery (same as billing for digital products)
+    delivery_name: billingData.name.substring(0, 50),
+    delivery_address: billingData.address.substring(0, 255),
+    delivery_city: billingData.city.substring(0, 50),
+    delivery_state: billingData.state.substring(0, 50),
+    delivery_zip: billingData.zip.substring(0, 10),
+    delivery_country: billingData.country.substring(0, 50),
+    delivery_tel: billingData.phone?.substring(0, 20) || "0000000000",
+
+    // Additional
+    customer_identifier: this.email,
+    delivery_cust_notes:
+      this.deliveryInfo?.deliveryNotes ||
+      "Digital course enrollment - no physical delivery required",
+  };
+};
+
+// Enhanced profile completion update
 userSchema.methods.updateProfileCompletion = function () {
   if (!this.profileData) {
     this.profileData = {};
@@ -1143,29 +1429,21 @@ userSchema.methods.updateProfileCompletion = function () {
 
   const completion = this.profileData.completionStatus;
 
-  // Check basic info completion
-  completion.basicInfo = !!(
-    this.firstName &&
-    this.lastName &&
-    this.email &&
-    this.phoneNumber &&
-    this.country
+  // Check various completion aspects
+  completion.basicInfo = !!(this.firstName && this.lastName && this.email);
+  completion.addressInfo = !!(
+    this.addressInfo?.address &&
+    this.addressInfo?.city &&
+    this.addressInfo?.country
   );
-
-  // Check professional info completion
   completion.professionalInfo = !!(
     this.professionalInfo?.fieldOfStudy &&
     this.professionalInfo?.aestheticsExperience
   );
-
-  // Check profile picture
   completion.profilePicture = !!this.profileData?.profilePicture?.url;
-
-  // Check ID document
   completion.identificationDocument =
     !!this.profileData?.identificationDocument?.url;
-
-  // Calculate overall percentage
+  completion.paymentReady = this.isPaymentReady;
   completion.overallPercentage = this.profileCompletionPercentage;
   completion.lastUpdated = new Date();
 

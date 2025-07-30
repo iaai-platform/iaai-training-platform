@@ -1,4 +1,4 @@
-// controllers/profileController.js - Final Complete Version with All Debugging
+// controllers/profileController.js - Complete Enhanced Version with Address/Billing
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const multer = require("multer");
@@ -20,7 +20,7 @@ console.log("☁️ Cloudinary configured:", {
   api_secret: process.env.CLOUDINARY_API_SECRET ? "✅ SET" : "❌ MISSING",
 });
 
-// ✅ 1️⃣ Fetch User Profile - Enhanced with Professional Info
+// ✅ 1️⃣ Fetch User Profile - Enhanced with Address/Billing Info
 exports.getProfilePage = async (req, res) => {
   try {
     console.log("🔍 Fetching user profile...");
@@ -32,10 +32,6 @@ exports.getProfilePage = async (req, res) => {
     }
 
     console.log("👤 User found:", user.email);
-    console.log(
-      "📊 Profile completion:",
-      user.profileCompletionPercentage || 25
-    );
 
     // Calculate virtual fields manually for display
     const profileCompletionPercentage = calculateProfileCompletion(user);
@@ -87,7 +83,167 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// ✅ 3️⃣ Update Detailed Professional Information
+// ✅ 3️⃣ NEW: Update Address & Billing Information - COMPLETE VERSION
+exports.updateAddressBilling = async (req, res) => {
+  try {
+    console.log("🔧 Updating address & billing information...");
+    console.log("📥 Request body:", req.body);
+
+    const {
+      // Address Information
+      address,
+      city,
+      state,
+      zipCode,
+      country,
+      alternativePhone,
+
+      // Delivery Information
+      useDifferentDeliveryAddress,
+      deliveryRecipientName,
+      deliveryAddress,
+      deliveryCity,
+      deliveryState,
+      deliveryZipCode,
+      deliveryCountry,
+      deliveryPhone,
+      deliveryNotes,
+      preferredDeliveryMethod,
+
+      // Payment Preferences
+      preferredCurrency,
+      preferredPaymentMethods,
+      hasTaxId,
+      taxId,
+      taxType,
+      isBusinessCustomer,
+    } = req.body;
+
+    // ✅ Handle preferred payment methods array properly
+    const paymentMethods = [];
+    if (preferredPaymentMethods) {
+      if (Array.isArray(preferredPaymentMethods)) {
+        paymentMethods.push(...preferredPaymentMethods);
+      } else {
+        paymentMethods.push(preferredPaymentMethods);
+      }
+    }
+
+    console.log("💳 Payment methods to save:", paymentMethods);
+    console.log("🏛️ Tax info to save:", {
+      hasTaxId: hasTaxId === "true",
+      taxId: taxId,
+      taxType: taxType,
+      isBusinessCustomer: isBusinessCustomer === "true",
+    });
+
+    // ✅ Build complete update object with ALL required fields
+    const updateData = {};
+
+    // Update Address Information
+    updateData["addressInfo.address"] = address || "";
+    updateData["addressInfo.city"] = city || "";
+    updateData["addressInfo.state"] = state || "";
+    updateData["addressInfo.zipCode"] = zipCode || "";
+    updateData["addressInfo.country"] = country || "";
+    updateData["addressInfo.alternativePhone"] = alternativePhone || "";
+    updateData["addressInfo.isComplete"] = !!(address && city && country);
+    updateData["addressInfo.lastUpdated"] = new Date();
+
+    // Update Delivery Information
+    updateData["deliveryInfo.useDifferentDeliveryAddress"] =
+      useDifferentDeliveryAddress === "true";
+    updateData["deliveryInfo.deliveryNotes"] = deliveryNotes || "";
+    updateData["deliveryInfo.preferredDeliveryMethod"] =
+      preferredDeliveryMethod || "email";
+
+    // ✅ Handle delivery address fields
+    if (useDifferentDeliveryAddress === "true") {
+      updateData["deliveryInfo.deliveryAddress.recipientName"] =
+        deliveryRecipientName || "";
+      updateData["deliveryInfo.deliveryAddress.address"] =
+        deliveryAddress || "";
+      updateData["deliveryInfo.deliveryAddress.city"] = deliveryCity || "";
+      updateData["deliveryInfo.deliveryAddress.state"] = deliveryState || "";
+      updateData["deliveryInfo.deliveryAddress.zipCode"] =
+        deliveryZipCode || "";
+      updateData["deliveryInfo.deliveryAddress.country"] =
+        deliveryCountry || "";
+      updateData["deliveryInfo.deliveryAddress.phone"] = deliveryPhone || "";
+    } else {
+      // Clear delivery address if not using different address
+      updateData["deliveryInfo.deliveryAddress.recipientName"] = null;
+      updateData["deliveryInfo.deliveryAddress.address"] = null;
+      updateData["deliveryInfo.deliveryAddress.city"] = null;
+      updateData["deliveryInfo.deliveryAddress.state"] = null;
+      updateData["deliveryInfo.deliveryAddress.zipCode"] = null;
+      updateData["deliveryInfo.deliveryAddress.country"] = null;
+      updateData["deliveryInfo.deliveryAddress.phone"] = null;
+    }
+
+    // ✅ COMPLETE: Update Payment Preferences
+    updateData["paymentPreferences.preferredCurrency"] = "AED"; // Force AED since it's the only option
+    updateData["paymentPreferences.preferredPaymentMethods"] = paymentMethods;
+    updateData["paymentPreferences.defaultBillingAddress"] = "profile";
+
+    // ✅ COMPLETE: Update Tax Information
+    updateData["paymentPreferences.taxInfo.hasTaxId"] = hasTaxId === "true";
+    updateData["paymentPreferences.taxInfo.taxId"] =
+      hasTaxId === "true" ? taxId || null : null;
+    updateData["paymentPreferences.taxInfo.taxType"] =
+      hasTaxId === "true" ? taxType || null : null;
+    updateData["paymentPreferences.taxInfo.isBusinessCustomer"] =
+      isBusinessCustomer === "true";
+
+    console.log(
+      "📝 Complete update data:",
+      JSON.stringify(updateData, null, 2)
+    );
+
+    // ✅ Use findByIdAndUpdate to avoid full document validation
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updateData },
+      {
+        new: true,
+        runValidators: false, // ✅ CRITICAL: Skip validation to avoid paymentTransactions issues
+        lean: true,
+      }
+    );
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const completionPercentage = calculateProfileCompletion(updatedUser);
+
+    console.log(
+      "✅ Address & billing information updated successfully for:",
+      req.user.email
+    );
+    console.log("📊 Profile completion:", completionPercentage + "%");
+    console.log(
+      "💳 Final payment preferences:",
+      updatedUser.paymentPreferences
+    );
+
+    res.json({
+      success: true,
+      message: "✅ Address & billing information updated successfully!",
+      completionPercentage: completionPercentage,
+    });
+  } catch (err) {
+    console.error("❌ Error updating address & billing info:", err);
+    res.status(500).json({
+      success: false,
+      message: "❌ Error updating address & billing information",
+    });
+  }
+};
+
+// ✅ 4️⃣ Update Detailed Professional Information
 exports.updateDetailedInfo = async (req, res) => {
   try {
     console.log("🔧 Updating detailed professional information...");
@@ -172,7 +328,7 @@ exports.updateDetailedInfo = async (req, res) => {
   }
 };
 
-// ✅ 4️⃣ Update User Password
+// ✅ 5️⃣ Update User Password
 exports.updatePassword = async (req, res) => {
   try {
     console.log("🔐 Updating user password...");
@@ -213,7 +369,7 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-// ✅ 5️⃣ Cloudinary Storage Configuration - FINAL VERSION
+// ✅ Cloudinary Storage Configuration
 const profilePictureStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -232,101 +388,37 @@ const idDocumentStorage = new CloudinaryStorage({
   params: {
     folder: "iaai-platform/user-documents/id-documents",
     allowed_formats: ["jpg", "jpeg", "png", "pdf"],
-    resource_type: "auto", // Handles both images and PDFs
+    resource_type: "auto",
     public_id: (req, file) => `user-${req.user._id}-id-${Date.now()}`,
   },
 });
 
-console.log("📁 Cloudinary storage configurations created:");
-console.log(
-  "📸 Profile pictures → iaai-platform/user-documents/profile-pictures"
-);
-console.log("📄 ID documents → iaai-platform/user-documents/id-documents");
-
-// ✅ Multer Configuration for Different File Types
 const profileUpload = multer({
   storage: profilePictureStorage,
-  limits: {
-    fileSize: 2 * 1024 * 1024, // 2MB for profile pictures
-  },
+  limits: { fileSize: 2 * 1024 * 1024 },
 });
 
 const documentUpload = multer({
   storage: idDocumentStorage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB for ID documents
-  },
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-console.log("📤 Multer upload configurations created:");
-console.log("📸 profileUpload → 2MB limit, profile-pictures folder");
-console.log("📄 documentUpload → 5MB limit, id-documents folder");
-
-// ✅ 6️⃣ Handle Document Upload to Cloudinary - FIXED VERSION
+// ✅ 6️⃣ Handle Document Upload to Cloudinary
 exports.uploadDocument = async (req, res) => {
   try {
-    console.log("=".repeat(60));
-    console.log("📤 STARTING DOCUMENT UPLOAD TO CLOUDINARY");
-    console.log("=".repeat(60));
-
-    console.log("📥 Initial request body:", req.body);
-    console.log("📥 Initial request query:", req.query);
-
-    // FIRST: Try to determine upload type from URL or query parameters
-    // Since we need to know which multer to use BEFORE processing
     let uploadType = req.query.type || req.body.type;
 
-    if (!uploadType) {
-      // If no type specified, try to guess from the input field name or other clues
-      console.log("⚠️ No upload type specified, checking for clues...");
-      return res.status(400).json({
-        success: false,
-        message:
-          "❌ Upload type must be specified. Add '?type=profile' or '?type=id' to the URL",
-      });
-    }
-
-    console.log("📤 Upload type detected:", uploadType);
-    console.log(
-      "📤 Upload type is valid:",
-      ["profile", "id"].includes(uploadType)
-    );
-
-    // Validate upload type
-    if (!["profile", "id"].includes(uploadType)) {
-      console.log("❌ INVALID UPLOAD TYPE:", uploadType);
+    if (!uploadType || !["profile", "id"].includes(uploadType)) {
       return res.status(400).json({
         success: false,
         message: "❌ Invalid upload type. Must be 'id' or 'profile'",
       });
     }
 
-    // CRITICAL: Choose the correct storage based on upload type
-    let upload;
-    let expectedFolder;
-
-    if (uploadType === "profile") {
-      upload = profileUpload;
-      expectedFolder = "iaai-platform/user-documents/profile-pictures";
-      console.log("📸 USING PROFILE UPLOAD STORAGE");
-      console.log("📸 Expected folder:", expectedFolder);
-    } else if (uploadType === "id") {
-      upload = documentUpload;
-      expectedFolder = "iaai-platform/user-documents/id-documents";
-      console.log("📄 USING ID DOCUMENT UPLOAD STORAGE");
-      console.log("📄 Expected folder:", expectedFolder);
-    }
-
-    console.log("🔧 About to call upload.single('file')...");
+    let upload = uploadType === "profile" ? profileUpload : documentUpload;
 
     upload.single("file")(req, res, async (err) => {
-      console.log("🔧 Inside multer callback...");
-      console.log("📥 After multer - Request body:", req.body);
-      console.log("📥 After multer - File present:", !!req.file);
-
       if (err) {
-        console.error("❌ CLOUDINARY UPLOAD ERROR:", err);
-        console.error("❌ Error details:", err.message);
         return res.status(400).json({
           success: false,
           message: "❌ " + err.message,
@@ -334,60 +426,10 @@ exports.uploadDocument = async (req, res) => {
       }
 
       if (!req.file) {
-        console.error("❌ NO FILE IN REQUEST AFTER MULTER");
-        console.error("❌ Request body after multer:", req.body);
-        console.error(
-          "❌ This usually means the file input name doesn't match 'file'"
-        );
         return res.status(400).json({
           success: false,
-          message: "❌ No file uploaded - check file input name",
+          message: "❌ No file uploaded",
         });
-      }
-
-      console.log("✅ FILE UPLOADED SUCCESSFULLY!");
-      console.log(
-        "🔍 Complete req.file object:",
-        JSON.stringify(req.file, null, 2)
-      );
-
-      // Safe logging with null checks
-      const safePublicId = req.file.public_id || "undefined";
-      const safePath = req.file.path || req.file.secure_url || "undefined";
-      const safeOriginalname = req.file.originalname || "undefined";
-      const safeSize = req.file.size || req.file.bytes || "undefined";
-      const safeMimetype = req.file.mimetype || "undefined";
-
-      console.log("☁️ Cloudinary response:", {
-        path: safePath,
-        public_id: safePublicId,
-        folder:
-          safePublicId !== "undefined"
-            ? safePublicId.split("/").slice(0, -1).join("/")
-            : "undefined",
-        originalname: safeOriginalname,
-        size: safeSize,
-        mimetype: safeMimetype,
-      });
-
-      console.log("✅ File uploaded to Cloudinary:", safePath);
-      console.log("☁️ Cloudinary public_id:", safePublicId);
-      console.log("🎯 Expected folder:", expectedFolder);
-
-      // Safe folder extraction
-      const actualFolder =
-        safePublicId !== "undefined"
-          ? safePublicId.split("/").slice(0, -1).join("/")
-          : "unknown";
-      console.log("🎯 Actual folder from public_id:", actualFolder);
-
-      // Check if file went to correct folder
-      if (actualFolder === expectedFolder) {
-        console.log("✅ FILE WENT TO CORRECT FOLDER!");
-      } else {
-        console.log("❌ FILE WENT TO WRONG FOLDER!");
-        console.log("❌ Expected:", expectedFolder);
-        console.log("❌ Actual:", actualFolder);
       }
 
       const user = await User.findById(req.user._id);
@@ -397,11 +439,7 @@ exports.uploadDocument = async (req, res) => {
           .json({ success: false, message: "User not found" });
       }
 
-      // Initialize profileData if it doesn't exist
-      if (!user.profileData) {
-        user.profileData = {};
-        console.log("🔧 Initialized user.profileData");
-      }
+      if (!user.profileData) user.profileData = {};
 
       const fileData = {
         filename: req.file.filename || "unknown",
@@ -410,68 +448,39 @@ exports.uploadDocument = async (req, res) => {
         uploadDate: new Date(),
         fileSize: req.file.bytes || req.file.size || 0,
         mimeType: req.file.mimetype || req.file.format || "unknown",
-        cloudinaryPublicId: req.file.filename || "unknown", // This should be saved!
+        cloudinaryPublicId: req.file.filename || "unknown",
       };
 
-      console.log("💾 File data to store (with cloudinaryPublicId):", fileData);
-      console.log("🔍 cloudinaryPublicId value:", req.file.filename);
-
-      // Store in separate fields to avoid conflicts
       if (uploadType === "id") {
-        const documentData = {
+        user.profileData.identificationDocument = {
           ...fileData,
-          documentType: "passport", // Default
+          documentType: "passport",
           verificationStatus: "pending",
         };
-        user.profileData.identificationDocument = documentData;
-        console.log("📄 ✅ ID DOCUMENT STORED IN DATABASE");
-        console.log("📄 Stored in: user.profileData.identificationDocument");
-        console.log(
-          "📄 Document data being saved:",
-          JSON.stringify(documentData, null, 2)
-        );
-        console.log("📄 Document URL:", req.file.path);
       } else if (uploadType === "profile") {
         user.profileData.profilePicture = fileData;
-        console.log("📸 ✅ PROFILE PICTURE STORED IN DATABASE");
-        console.log("📸 Stored in: user.profileData.profilePicture");
-        console.log(
-          "📸 Picture data being saved:",
-          JSON.stringify(fileData, null, 2)
-        );
-        console.log("📸 Picture URL:", req.file.path);
       }
 
-      // Update profile completion
       if (typeof user.updateProfileCompletion === "function") {
         user.updateProfileCompletion();
-        console.log("📊 Profile completion updated");
       }
 
       await user.save();
-      console.log("💾 User data saved to database");
 
       const message =
         uploadType === "id"
-          ? "✅ ID document uploaded successfully! It will be reviewed for verification."
+          ? "✅ ID document uploaded successfully!"
           : "✅ Profile picture uploaded successfully!";
-
-      console.log("=".repeat(60));
-      console.log("✅ UPLOAD COMPLETED SUCCESSFULLY");
-      console.log("=".repeat(60));
 
       res.json({
         success: true,
         message: message,
-        fileUrl: req.file.path, // Return Cloudinary URL
-        uploadType: uploadType, // Return type for frontend handling
-        actualFolder: actualFolder, // For debugging
-        expectedFolder: expectedFolder, // For debugging
+        fileUrl: req.file.path,
+        uploadType: uploadType,
       });
     });
   } catch (err) {
-    console.error("❌ CRITICAL ERROR IN UPLOAD DOCUMENT:", err);
-    console.error("❌ Stack trace:", err.stack);
+    console.error("❌ Error in upload document:", err);
     res
       .status(500)
       .json({ success: false, message: "❌ Error uploading document" });
@@ -481,9 +490,7 @@ exports.uploadDocument = async (req, res) => {
 // ✅ 7️⃣ Delete Document from Cloudinary
 exports.deleteDocument = async (req, res) => {
   try {
-    console.log("🗑️ STARTING DOCUMENT DELETION");
-    const { type } = req.body; // 'profile' or 'id'
-    console.log("🗑️ Delete type:", type);
+    const { type } = req.body;
 
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -492,84 +499,41 @@ exports.deleteDocument = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    console.log(
-      "🔍 User profileData:",
-      JSON.stringify(user.profileData, null, 2)
-    );
-
     let publicId = null;
     let documentName = "";
 
-    if (type === "profile") {
-      console.log("🔍 Checking for profile picture...");
-      console.log(
-        "🔍 Profile picture exists:",
-        !!user.profileData?.profilePicture
-      );
-      console.log("🔍 Profile picture data:", user.profileData?.profilePicture);
-
-      if (user.profileData?.profilePicture) {
-        // Try cloudinaryPublicId first, then fallback to filename
-        publicId =
-          user.profileData.profilePicture.cloudinaryPublicId ||
-          user.profileData.profilePicture.filename;
-        documentName = "Profile Picture";
-        user.profileData.profilePicture = undefined;
-        console.log("🗑️ Deleting profile picture with publicId:", publicId);
-      } else {
-        console.log("❌ Profile picture not found");
-      }
-    } else if (type === "id") {
-      console.log("🔍 Checking for ID document...");
-      console.log(
-        "🔍 ID document exists:",
-        !!user.profileData?.identificationDocument
-      );
-      console.log(
-        "🔍 ID document data:",
-        user.profileData?.identificationDocument
-      );
-
-      if (user.profileData?.identificationDocument) {
-        // Try cloudinaryPublicId first, then fallback to filename
-        publicId =
-          user.profileData.identificationDocument.cloudinaryPublicId ||
-          user.profileData.identificationDocument.filename;
-        documentName = "ID Document";
-        user.profileData.identificationDocument = undefined;
-        console.log("🗑️ Deleting ID document with publicId:", publicId);
-      } else {
-        console.log("❌ ID document not found");
-      }
+    if (type === "profile" && user.profileData?.profilePicture) {
+      publicId =
+        user.profileData.profilePicture.cloudinaryPublicId ||
+        user.profileData.profilePicture.filename;
+      documentName = "Profile Picture";
+      user.profileData.profilePicture = undefined;
+    } else if (type === "id" && user.profileData?.identificationDocument) {
+      publicId =
+        user.profileData.identificationDocument.cloudinaryPublicId ||
+        user.profileData.identificationDocument.filename;
+      documentName = "ID Document";
+      user.profileData.identificationDocument = undefined;
     }
 
     if (!publicId) {
-      console.log("❌ No publicId found for deletion:", type);
       return res.status(404).json({
         success: false,
-        message: `❌ ${
-          type === "profile" ? "Profile picture" : "ID document"
-        } not found`,
+        message: `❌ ${documentName} not found`,
       });
     }
 
     try {
-      // Delete from Cloudinary
-      console.log("🗑️ Attempting to delete from Cloudinary:", publicId);
       const deleteResult = await cloudinary.uploader.destroy(publicId);
       console.log("🗑️ Cloudinary deletion result:", deleteResult);
-      console.log("🗑️ ✅ Deleted from Cloudinary:", publicId);
     } catch (cloudinaryError) {
       console.error("❌ Error deleting from Cloudinary:", cloudinaryError);
-      // Continue anyway to remove from database
     }
 
-    // Update profile completion
     if (typeof user.updateProfileCompletion === "function") {
       user.updateProfileCompletion();
     }
     await user.save();
-    console.log("💾 User data updated after deletion");
 
     res.json({
       success: true,
@@ -602,6 +566,9 @@ exports.getProfileData = async (req, res) => {
         country: user.country,
         profession: user.profession,
       },
+      addressInfo: user.addressInfo || {},
+      deliveryInfo: user.deliveryInfo || {},
+      paymentPreferences: user.paymentPreferences || {},
       professionalInfo: user.professionalInfo || {},
       profileData: user.profileData || {},
       completionPercentage: calculateProfileCompletion(user),
@@ -620,15 +587,26 @@ exports.getProfileData = async (req, res) => {
 function calculateProfileCompletion(user) {
   let completion = 0;
   const weights = {
-    basicInfo: 25, // firstName, lastName, email
-    professionalInfo: 40, // fieldOfStudy, experience, specialty
-    profilePicture: 15, // profile picture upload
-    identification: 20, // ID/passport upload
+    basicInfo: 20, // firstName, lastName, email
+    addressInfo: 25, // address, city, country
+    professionalInfo: 30, // fieldOfStudy, experience, specialty
+    profilePicture: 10, // profile picture upload
+    identification: 15, // ID/passport upload
   };
 
-  // Basic info completion (required at signup)
+  // Basic info completion
   if (user.firstName && user.lastName && user.email) {
     completion += weights.basicInfo;
+  }
+
+  // Address info completion (including payment preferences)
+  if (
+    user.addressInfo?.address &&
+    user.addressInfo?.city &&
+    user.addressInfo?.country &&
+    user.paymentPreferences?.preferredPaymentMethods?.length > 0
+  ) {
+    completion += weights.addressInfo;
   }
 
   // Professional info completion
@@ -652,4 +630,6 @@ function calculateProfileCompletion(user) {
   return Math.round(completion);
 }
 
-console.log("✅ Profile Controller fully loaded with all functions");
+console.log(
+  "✅ Complete Enhanced Profile Controller loaded with address/billing support"
+);

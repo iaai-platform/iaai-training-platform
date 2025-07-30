@@ -288,6 +288,14 @@ exports.getCheckoutPage = async (req, res) => {
       hasEarlyBirdDiscounts: totalSavings > 0,
       eurToAedRate: EUR_TO_AED_RATE, // ✅ Pass conversion rate to template
       user,
+      // ✅ ADD THESE CCAvenue variables:
+      ccavenueAccessCode: process.env.CCAVENUE_ACCESS_CODE,
+      ccavenueMerchantId: process.env.CCAVENUE_MERCHANT_ID,
+      ccavenueWorkingKey: process.env.CCAVENUE_WORKING_KEY, // DON'T expose this to frontend!
+      // Better approach - just pass a flag:
+      paymentGatewayConfigured: !!(
+        process.env.CCAVENUE_ACCESS_CODE && process.env.CCAVENUE_MERCHANT_ID
+      ),
       successMessage: "",
     });
   } catch (err) {
@@ -1226,8 +1234,8 @@ exports.proceedToPayment = async (req, res) => {
       currency: "AED", // ✅ CHANGED FROM EUR TO AED
 
       // ✅ FIXED: Use domain without www to match your actual domain
-      redirect_url: "https://iaa-i.com/payment/response",
-      cancel_url: "https://iaa-i.com/payment/cancel",
+      redirect_url: `${req.protocol}://${req.get("host")}/payment/response`,
+      cancel_url: `${req.protocol}://${req.get("host")}/payment/cancel`,
 
       // ✅ REQUIRED: Language parameter
       language: "EN",

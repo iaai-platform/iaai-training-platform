@@ -1269,7 +1269,6 @@ exports.proceedToPayment = async (req, res) => {
 
       // ✅ INTEGRATION PARAMETERS
       integration_type: "iframe_normal",
-      payment_option: "OPTCRDC,OPTNBK,OPTCASHC,OPTMOBP",
 
       // ✅ ADDITIONAL VALIDATION FIELDS
       tid: Date.now().toString(),

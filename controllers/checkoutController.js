@@ -1234,8 +1234,8 @@ exports.proceedToPayment = async (req, res) => {
       currency: "AED", // ✅ CHANGED FROM EUR TO AED
 
       // ✅ FIXED: Use domain without www to match your actual domain
-      redirect_url: `${req.protocol}://${req.get("host")}/payment/response`,
-      cancel_url: `${req.protocol}://${req.get("host")}/payment/cancel`,
+      redirect_url: "https://iaa-i.com/payment/response",
+      cancel_url: "https://iaa-i.com/payment/cancel",
 
       // ✅ REQUIRED: Language parameter
       language: "EN",

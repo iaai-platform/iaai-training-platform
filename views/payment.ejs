@@ -66,6 +66,13 @@
             border: 3px solid #28a745;
         }
         
+        .dual-currency {
+            font-size: 16px;
+            color: #666;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        
         .btn {
             padding: 15px 30px;
             border: none;
@@ -104,6 +111,16 @@
             border-radius: 15px;
             font-size: 12px;
         }
+        
+        .currency-note {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #0d47a1;
+        }
     </style>
 </head>
 <body>
@@ -128,7 +145,7 @@
                             <% if (course.isLinkedCourseFree) { %>
                                 <span style="color: #28a745; font-weight: bold;">FREE</span>
                             <% } else { %>
-                                <strong>$<%= course.price.toFixed(2) %></strong>
+                                <strong>€<%= course.price.toFixed(2) %></strong>
                             <% } %>
                         </div>
                     </div>
@@ -137,7 +154,15 @@
             </div>
             
             <div class="total-amount">
-                Total: $<%= totalPrice.toFixed(2) %> EUR
+                Total: €<%= totalPrice.toFixed(2) %>
+                <div class="dual-currency">
+                    (AED <%= (totalPrice * 4.0).toFixed(2) %>)
+                </div>
+            </div>
+            
+            <div class="currency-note">
+                <i class="fas fa-info-circle"></i>
+                <strong>Payment Currency:</strong> Your payment will be processed in AED (United Arab Emirates Dirham) through our secure payment gateway.
             </div>
             
             <% if (totalPrice > 0) { %>

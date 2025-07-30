@@ -929,7 +929,7 @@
               </span>
             </td>
             <td class="price-badge">
-              <%= course.currency || 'EUR' %><%= course.price || 0 %>
+              <%= course.currency || '€' %><%= course.price || 0 %>
               <% if (course.hasEarlyBird && course.earlyBirdPrice) { %>
                 <br><small style="color: #28a745;">Early: <%= course.currency || 'EUR' %><%= course.earlyBirdPrice %></small>
               <% } %>
@@ -1064,7 +1064,7 @@
           
           <div class="course-card-footer">
             <div class="course-card-price">
-              <%= course.currency || 'EUR' %><%= course.price || 0 %>
+              <%= course.currency || '€' %><%= course.price || 0 %>
             </div>
             <div class="course-card-actions">
               <button class="btn-icon btn-details tooltip" data-tooltip="View Details" 

@@ -1465,7 +1465,6 @@ exports.proceedToPayment = async (req, res) => {
         .map((item) => item.courseTitle)
         .join(", ")
         .substring(0, 200)}`,
-      promo_code: req.session.appliedPromoCode || "",
 
       // INTEGRATION PARAMETERS
       integration_type: "iframe_normal",

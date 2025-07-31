@@ -474,7 +474,12 @@ class EmailService {
   // ============================================
 
   // Course reminder email method
-  async sendCourseStartingReminder(user, course, courseType, enrollment) {
+  async sendCourseStartingReminderEnhanced(
+    user,
+    course,
+    courseType,
+    enrollment
+  ) {
     if (this.mockMode) {
       console.log(
         "📧 [MOCK] Would send course starting reminder to:",
@@ -487,78 +492,61 @@ class EmailService {
       const startDate = new Date(
         course.schedule?.startDate || course.startDate
       );
-      const isOnline = courseType === "OnlineLiveTraining" || course.platform;
+      const isOnline = courseType === "OnlineLiveTraining";
 
-      // Generate course-specific information
-      const courseInfo = this.generateCourseReminderInfo(
-        course,
-        courseType,
-        isOnline
-      );
+      // Generate course-specific content
+      const courseTitle = course.basic?.title || course.title;
+      const courseCode = course.basic?.courseCode || course.courseCode;
+
+      // Calculate time until course starts
+      const now = new Date();
+      const timeUntilStart = startDate.getTime() - now.getTime();
+      const hoursUntilStart = Math.ceil(timeUntilStart / (1000 * 60 * 60));
 
       const mailOptions = {
         to: user.email,
-        subject: `Reminder: ${
-          course.basic?.title || course.title
-        } starts tomorrow!`,
+        subject: `${
+          hoursUntilStart <= 24 ? "Starting Tomorrow" : "Starting Soon"
+        }: ${courseTitle}`,
         html: `
           <!DOCTYPE html>
           <html>
           <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Course Starting Tomorrow</title>
             <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; margin: 0; padding: 0; background-color: #f9fafb; }
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
               .container { max-width: 650px; margin: 0 auto; background: #ffffff; }
               .header { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 40px 30px; text-align: center; }
               .content { padding: 40px 30px; }
-              .course-details { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 30px 0; }
-              .checklist { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 30px 0; }
-              .checklist-item { padding: 8px 0; font-size: 15px; color: #374151; }
-              .button { display: inline-block; padding: 14px 28px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 8px; }
-              .urgent-box { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
-              .footer { background: #f8fafc; padding: 30px; text-align: center; font-size: 14px; color: #6b7280; border-top: 1px solid #e5e7eb; }
               .countdown { background: #dc2626; color: white; padding: 12px 20px; border-radius: 25px; font-weight: bold; display: inline-block; margin: 10px 0; }
-              .info-table { width: 100%; border-collapse: collapse; }
-              .info-table td { padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
-              .info-table td:first-child { font-weight: 600; color: #374151; width: 140px; }
-              .tech-req { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
-              .location-box { background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+              .course-details { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 30px 0; }
+              .button { display: inline-block; padding: 14px 28px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 8px; }
+              .checklist { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 30px 0; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <div class="countdown">⏰ STARTS TOMORROW</div>
-                <h1 style="margin: 16px 0 8px 0; font-size: 28px;">Course Reminder</h1>
-                <p style="margin: 0; font-size: 18px; opacity: 0.9;">${
-                  course.basic?.title || course.title
-                }</p>
+                <div class="countdown">
+                  ⏰ ${
+                    hoursUntilStart <= 24
+                      ? "STARTS TOMORROW"
+                      : `STARTS IN ${Math.ceil(hoursUntilStart / 24)} DAYS`
+                  }
+                </div>
+                <h1>Course Reminder</h1>
+                <p style="margin: 0; font-size: 18px; opacity: 0.9;">${courseTitle}</p>
               </div>
               
               <div class="content">
-                <h2 style="color: #1f2937; margin-bottom: 8px;">Dear ${
-                  user.firstName
-                },</h2>
+                <h2>Dear ${user.firstName},</h2>
                 
-                <div class="urgent-box">
-                  <h3 style="margin: 0 0 8px 0; color: #92400e;">📅 Your course starts tomorrow!</h3>
-                  <p style="margin: 0; color: #92400e; font-weight: 500;">
-                    We're excited to see you at <strong>${
-                      course.basic?.title || course.title
-                    }</strong>
-                  </p>
-                </div>
-
+                <p>This is your reminder that <strong>${courseTitle}</strong> is starting soon!</p>
+  
                 <div class="course-details">
-                  <h3 style="margin: 0 0 20px 0; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
-                    📋 Course Information
-                  </h3>
-                  
-                  <table class="info-table">
+                  <h3>📋 Course Information</h3>
+                  <table style="width: 100%; border-collapse: collapse;">
                     <tr>
-                      <td>📅 Date:</td>
+                      <td style="padding: 12px 0; width: 140px; font-weight: 600;">📅 Date:</td>
                       <td>${startDate.toLocaleDateString("en-US", {
                         weekday: "long",
                         year: "numeric",
@@ -567,72 +555,97 @@ class EmailService {
                       })}</td>
                     </tr>
                     <tr>
-                      <td>🕐 Time:</td>
+                      <td style="padding: 12px 0; font-weight: 600;">🕐 Time:</td>
                       <td>${startDate.toLocaleTimeString("en-US", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}</td>
                     </tr>
-                    ${
-                      course.schedule?.duration
-                        ? `
                     <tr>
-                      <td>⏱️ Duration:</td>
-                      <td>${course.schedule.duration}</td>
-                    </tr>
-                    `
-                        : ""
-                    }
-                    <tr>
-                      <td>👨‍🏫 Instructor:</td>
-                      <td>${courseInfo.instructorName}</td>
+                      <td style="padding: 12px 0; font-weight: 600;">📚 Course Code:</td>
+                      <td><strong>${courseCode || "N/A"}</strong></td>
                     </tr>
                     <tr>
-                      <td>📚 Course Code:</td>
-                      <td><strong>${
-                        course.basic?.courseCode || course.courseCode || "N/A"
-                      }</strong></td>
+                      <td style="padding: 12px 0; font-weight: 600;">👨‍🏫 Type:</td>
+                      <td>${
+                        isOnline ? "Online Live Training" : "In-Person Training"
+                      }</td>
                     </tr>
-                    ${
-                      isOnline && course.schedule?.timezone
-                        ? `
-                    <tr>
-                      <td>🌍 Timezone:</td>
-                      <td>${course.schedule.timezone}</td>
-                    </tr>
-                    `
-                        : ""
-                    }
                   </table>
                 </div>
-
+  
                 ${
                   isOnline
-                    ? this.generateOnlineReminderContent(course)
-                    : this.generateInPersonReminderContent(course)
-                }
-
-                <div class="checklist">
-                  <h3 style="margin: 0 0 20px 0; color: #1f2937;">✅ Pre-Course Checklist</h3>
-                  ${courseInfo.checklistItems
-                    .map(
-                      (item) => `<div class="checklist-item">• ${item}</div>`
-                    )
-                    .join("")}
-                </div>
-
-                ${
-                  courseInfo.specialInstructions
                     ? `
-                <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 20px; margin: 30px 0;">
-                  <h4 style="margin: 0 0 12px 0; color: #92400e;">⚠️ Important Instructions</h4>
-                  <div style="color: #92400e;">${courseInfo.specialInstructions}</div>
-                </div>
+                  <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+                    <h4 style="margin: 0 0 16px 0; color: #1e40af;">💻 Online Session Information</h4>
+                    <p><strong>Platform:</strong> ${
+                      course.platform?.name || "Details will be provided"
+                    }</p>
+                    ${
+                      course.platform?.accessUrl
+                        ? `<p><strong>Join Link:</strong> <a href="${course.platform.accessUrl}" style="color: #1e40af;">Click here to join</a></p>`
+                        : "<p><strong>Join Link:</strong> Will be sent 30 minutes before session</p>"
+                    }
+                  </div>
                 `
-                    : ""
+                    : `
+                  <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+                    <h4 style="margin: 0 0 16px 0; color: #065f46;">🏢 Venue Information</h4>
+                    <p><strong>Location:</strong> ${
+                      course.venue?.name || "Details in your course materials"
+                    }</p>
+                    ${
+                      course.venue?.address
+                        ? `<p><strong>Address:</strong> ${course.venue.address}</p>`
+                        : ""
+                    }
+                    <p><strong>Arrival:</strong> Please arrive 15-20 minutes early</p>
+                  </div>
+                `
                 }
-
-                <div style="text-align: center; margin: 40px 0;">
+  
+                <div class="checklist">
+                  <h3>✅ Final Preparation Checklist</h3>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    ${
+                      isOnline
+                        ? `
+                      <div>
+                        <h4>Technical:</h4>
+                        <ul>
+                          <li>☐ Internet connection tested</li>
+                          <li>☐ Camera and mic working</li>
+                          <li>☐ Platform software ready</li>
+                          <li>☐ Quiet space prepared</li>
+                        </ul>
+                      </div>
+                    `
+                        : `
+                      <div>
+                        <h4>Travel & Arrival:</h4>
+                        <ul>
+                          <li>☐ Route planned</li>
+                          <li>☐ Travel time calculated</li>
+                          <li>☐ ID and materials ready</li>
+                          <li>☐ Appropriate attire chosen</li>
+                        </ul>
+                      </div>
+                    `
+                    }
+                    <div>
+                      <h4>Learning Preparation:</h4>
+                      <ul>
+                        <li>☐ Course materials reviewed</li>
+                        <li>☐ Questions prepared</li>
+                        <li>☐ Notebook and pen ready</li>
+                        <li>☐ Positive mindset activated!</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+  
+                <center>
                   <a href="${
                     process.env.BASE_URL
                   }/library" class="button">View Course Details</a>
@@ -641,34 +654,27 @@ class EmailService {
                       ? `<a href="${course.platform.accessUrl}" class="button" style="background: #10b981;">Join Online Session</a>`
                       : ""
                   }
-                </div>
-
-                <div style="border-top: 1px solid #e5e7eb; padding-top: 30px; margin-top: 40px;">
-                  <h4 style="color: #374151; margin-bottom: 16px;">📞 Need Help?</h4>
-                  <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
-                    If you have any questions or concerns before the course starts:
-                    <br>📧 Email: <a href="mailto:support@iaai-institute.com" style="color: #f59e0b;">support@iaai-institute.com</a>
-                    <br>📱 Emergency contact: Available in your course materials
-                    <br>🌐 Support: <a href="${
-                      process.env.BASE_URL
-                    }/contact-us" style="color: #f59e0b;">Contact Us</a>
-                  </p>
-                </div>
-
+                </center>
+  
                 <div style="background: #f0f9ff; border-radius: 8px; padding: 20px; margin: 30px 0; text-align: center;">
                   <p style="margin: 0; color: #1e40af; font-weight: 600;">
-                    🌟 We look forward to seeing you tomorrow! Come prepared to learn and grow.
+                    🌟 We're excited to see you ${
+                      hoursUntilStart <= 24 ? "tomorrow" : "soon"
+                    }! Come ready to learn and grow.
                   </p>
                 </div>
-              </div>
-
-              <div class="footer">
-                <p style="margin: 0 0 8px 0;"><strong>IAAI Training Institute</strong></p>
-                <p style="margin: 0 0 16px 0;">Professional Aesthetic Training Excellence</p>
-                <p style="margin: 0; font-size: 12px;">
-                  This is an automated reminder email. If you need to make changes to your registration,
-                  <br>please contact our support team as soon as possible.
-                </p>
+  
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 30px; margin-top: 40px;">
+                  <h4>📞 Need Help?</h4>
+                  <p style="font-size: 14px;">
+                    📧 Email: <a href="mailto:support@iaai-institute.com">support@iaai-institute.com</a><br>
+                    🌐 Support: <a href="${
+                      process.env.BASE_URL
+                    }/contact-us">Contact Us</a>
+                  </p>
+                </div>
+  
+                <p>Best regards,<br>IAAI Training Institute</p>
               </div>
             </div>
           </body>
@@ -677,15 +683,12 @@ class EmailService {
       };
 
       await sendEmail(mailOptions);
-
       console.log(
-        `✅ Course reminder email sent to ${user.email} for ${
-          course.basic?.title || course.title
-        }`
+        `✅ Course starting reminder sent to ${user.email} for ${courseTitle}`
       );
       return { success: true };
     } catch (error) {
-      console.error("❌ Error sending course reminder email:", error);
+      console.error("❌ Error sending course starting reminder:", error);
       return { success: false, error: error.message };
     }
   }
@@ -1684,7 +1687,143 @@ class EmailService {
     return jobId;
   }
 
-  // Send tech check reminder (specific to online courses)
+  // ============================================
+  // MISSING PREPARATION REMINDER METHOD
+  // ============================================
+  async sendPreparationReminder(user, course, courseType) {
+    if (this.mockMode) {
+      console.log("📧 [MOCK] Would send preparation reminder to:", user.email);
+      return { success: true };
+    }
+
+    try {
+      const startDate = new Date(
+        course.schedule?.startDate || course.startDate
+      );
+      const isOnline = courseType === "OnlineLiveTraining";
+
+      const mailOptions = {
+        to: user.email,
+        subject: `Preparation Instructions: ${
+          course.basic?.title || course.title
+        }`,
+        html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 650px; margin: 0 auto; background: #ffffff; }
+            .header { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 40px 30px; text-align: center; }
+            .content { padding: 40px 30px; }
+            .prep-section { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+            .checklist { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 30px 0; }
+            .button { display: inline-block; padding: 14px 28px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📚 Course Preparation</h1>
+              <p style="margin: 0; font-size: 18px; opacity: 0.9;">${
+                course.basic?.title || course.title
+              }</p>
+            </div>
+            
+            <div class="content">
+              <h2>Dear ${user.firstName},</h2>
+              <p>Your course starts on ${startDate.toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}. Please review these preparation instructions:</p>
+
+              <div class="prep-section">
+                <h3>📋 Pre-Course Requirements</h3>
+                ${
+                  isOnline
+                    ? `
+                  <h4>🖥️ Technical Preparation:</h4>
+                  <ul>
+                    <li>Test your internet connection (minimum 10 Mbps recommended)</li>
+                    <li>Ensure your camera and microphone are working</li>
+                    <li>Download and test the platform software</li>
+                    <li>Find a quiet, well-lit space for the session</li>
+                  </ul>
+                `
+                    : `
+                  <h4>🏢 In-Person Preparation:</h4>
+                  <ul>
+                    <li>Plan your route to the venue in advance</li>
+                    <li>Bring required identification</li>
+                    <li>Arrive 15-20 minutes early for registration</li>
+                    <li>Dress according to course requirements</li>
+                  </ul>
+                `
+                }
+                
+                <h4>📚 Study Materials:</h4>
+                <ul>
+                  <li>Review any pre-course materials in your library</li>
+                  <li>Prepare questions you'd like to ask</li>
+                  <li>Bring notebook and pen for notes</li>
+                </ul>
+              </div>
+
+              <div class="checklist">
+                <h3>✅ Final Checklist</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                  <div>
+                    <h4>Before the Course:</h4>
+                    <ul style="list-style: none; padding: 0;">
+                      <li>☐ Materials reviewed</li>
+                      <li>☐ ${
+                        isOnline ? "Technology tested" : "Route planned"
+                      }</li>
+                      <li>☐ Questions prepared</li>
+                      <li>☐ Supplies ready</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4>Course Day:</h4>
+                    <ul style="list-style: none; padding: 0;">
+                      <li>☐ ${
+                        isOnline ? "Platform opened" : "Left for venue"
+                      }</li>
+                      <li>☐ Materials at hand</li>
+                      <li>☐ Ready to learn!</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <center>
+                <a href="${
+                  process.env.BASE_URL
+                }/library" class="button">Access Course Materials</a>
+              </center>
+
+              <p>We're looking forward to seeing you in the course. If you have any questions, please don't hesitate to contact us.</p>
+              <p>Best regards,<br>IAAI Team</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      };
+
+      await sendEmail(mailOptions);
+      return { success: true };
+    } catch (error) {
+      console.error("Error sending preparation reminder:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================
+  // ENHANCED TECH CHECK REMINDER (if existing one needs improvement)
+  // ============================================
   async sendTechCheckReminder(user, course) {
     if (this.mockMode) {
       console.log("📧 [MOCK] Would send tech check reminder to:", user.email);
@@ -1692,85 +1831,131 @@ class EmailService {
     }
 
     try {
-      const techCheckDate = new Date(course.technical?.techCheckDate);
+      // Calculate tech check date (usually 2-3 days before course)
+      const courseStart = new Date(
+        course.schedule?.startDate || course.startDate
+      );
+      const techCheckDate = new Date(
+        courseStart.getTime() - 2 * 24 * 60 * 60 * 1000
+      ); // 2 days before
 
       const mailOptions = {
         to: user.email,
-        subject: `Tech Check Reminder: ${course.title}`,
+        subject: `Technical Check Required: ${
+          course.basic?.title || course.title
+        }`,
         html: `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <style>
-                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                        .header { background: #f59e0b; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
-                        .button { display: inline-block; padding: 12px 30px; background: #f59e0b; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-                        .tech-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border: 2px solid #e5e7eb; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="header">
-                            <h1>🖥️ Tech Check Reminder</h1>
-                        </div>
-                        <div class="content">
-                            <h2>${course.title}</h2>
-                            <p>Dear ${user.firstName},</p>
-                            <p>Your technical check session is scheduled for:</p>
-                            
-                            <div class="tech-box">
-                                <h3>📅 Tech Check Details</h3>
-                                <p><strong>Date:</strong> ${techCheckDate.toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    weekday: "long",
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                  }
-                                )}</p>
-                                <p><strong>Time:</strong> ${techCheckDate.toLocaleTimeString(
-                                  "en-US",
-                                  { hour: "2-digit", minute: "2-digit" }
-                                )}</p>
-                                <p><strong>Platform:</strong> ${
-                                  course.platform
-                                }</p>
-                                ${
-                                  course.technical?.techCheckUrl
-                                    ? `<p><strong>Join Link:</strong> <a href="${course.technical.techCheckUrl}">Click here to join</a></p>`
-                                    : ""
-                                }
-                            </div>
-                            
-                            <h3>📋 Please Check:</h3>
-                            <ul>
-                                <li>✅ Your internet connection (${
-                                  course.technicalRequirements?.internetSpeed
-                                    ?.recommended || "stable connection"
-                                } recommended)</li>
-                                <li>✅ Camera and microphone are working</li>
-                                <li>✅ You have installed any required software</li>
-                                <li>✅ You can access the course platform</li>
-                            </ul>
-                            
-                            <center>
-                                ${
-                                  course.technical?.techCheckUrl
-                                    ? `<a href="${course.technical.techCheckUrl}" class="button">Join Tech Check</a>`
-                                    : `<a href="${process.env.BASE_URL}/library" class="button">View Course Details</a>`
-                                }
-                            </center>
-                            
-                            <p>This tech check ensures you're ready for the course and helps resolve any technical issues in advance.</p>
-                            <p>Best regards,<br>IAAI Team</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `,
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 650px; margin: 0 auto; background: #ffffff; }
+            .header { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 40px 30px; text-align: center; }
+            .content { padding: 40px 30px; }
+            .tech-box { background: #ecfdf5; border: 2px solid #10b981; border-radius: 12px; padding: 24px; margin: 30px 0; }
+            .requirements { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 30px 0; }
+            .button { display: inline-block; padding: 14px 28px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+            .urgent { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔧 Technical Check Required</h1>
+              <p style="margin: 0; font-size: 18px; opacity: 0.9;">Online Course Preparation</p>
+            </div>
+            
+            <div class="content">
+              <h2>Dear ${user.firstName},</h2>
+              
+              <div class="urgent">
+                <h3>⚠️ Action Required</h3>
+                <p>Your online course <strong>${
+                  course.basic?.title || course.title
+                }</strong> starts soon. Please complete your technical check to ensure a smooth learning experience.</p>
+              </div>
+
+              <div class="tech-box">
+                <h3>🖥️ Technical Check Session</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; width: 140px;"><strong>Recommended Date:</strong></td>
+                    <td>${techCheckDate.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0;"><strong>Platform:</strong></td>
+                    <td>${course.platform?.name || "Will be provided"}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0;"><strong>Course Start:</strong></td>
+                    <td>${courseStart.toLocaleDateString()}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="requirements">
+                <h3>✅ Technical Requirements Check</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                  <div>
+                    <h4>Internet & Hardware:</h4>
+                    <ul>
+                      <li>☐ Stable internet (10+ Mbps)</li>
+                      <li>☐ Working camera</li>
+                      <li>☐ Clear microphone</li>
+                      <li>☐ Speakers or headphones</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4>Software & Environment:</h4>
+                    <ul>
+                      <li>☐ Platform software installed</li>
+                      <li>☐ Browser updated</li>
+                      <li>☐ Quiet space prepared</li>
+                      <li>☐ Good lighting setup</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <h3>🚀 How to Complete Tech Check:</h3>
+              <ol>
+                <li><strong>Test Connection:</strong> Run an internet speed test</li>
+                <li><strong>Check Equipment:</strong> Test your camera and microphone</li>
+                <li><strong>Platform Test:</strong> Join a test session if available</li>
+                <li><strong>Environment:</strong> Ensure you have a suitable learning space</li>
+              </ol>
+
+              <center>
+                ${
+                  course.platform?.testUrl
+                    ? `<a href="${course.platform.testUrl}" class="button">Start Technical Check</a>`
+                    : `<a href="${process.env.BASE_URL}/library" class="button">Access Course Platform</a>`
+                }
+              </center>
+
+              <div style="background: #f0f9ff; border-radius: 8px; padding: 20px; margin: 30px 0;">
+                <h4>🆘 Need Help?</h4>
+                <p>If you encounter any technical issues:</p>
+                <ul>
+                  <li>📧 Email: <a href="mailto:tech-support@iaai-institute.com">tech-support@iaai-institute.com</a></li>
+                  <li>📞 Technical Support: Available during business hours</li>
+                  <li>💬 Live Chat: Available on our website</li>
+                </ul>
+              </div>
+
+              <p>Completing this check ensures you'll be ready to focus on learning when the course begins!</p>
+              <p>Best regards,<br>IAAI Technical Team</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
       };
 
       await sendEmail(mailOptions);

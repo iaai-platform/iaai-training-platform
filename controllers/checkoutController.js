@@ -1096,10 +1096,107 @@ exports.completeRegistration = async (req, res) => {
     }
 
     // ✅ ENHANCED: Schedule reminders with centralized function
-    const reminderResult = await scheduleCoursesReminders(
-      registeredCourses,
-      "free registration"
-    );
+    // ✅ ENHANCED: Centralized reminder scheduling with improved error handling and logging
+    async function scheduleCoursesReminders(courses, context = "registration") {
+      let scheduledCount = 0;
+      let failedCount = 0;
+      const schedulingResults = [];
+
+      console.log(
+        `📅 Starting reminder scheduling for ${courses.length} courses (${context})`
+      );
+
+      for (const course of courses) {
+        // Only schedule reminders for courses that support them
+        if (
+          course.courseType === "InPersonAestheticTraining" ||
+          course.courseType === "OnlineLiveTraining"
+        ) {
+          try {
+            const courseId = course.courseId?.toString() || course.courseId;
+            const courseTitle =
+              course.title || course.courseTitle || "Unknown Course";
+
+            console.log(
+              `📅 Attempting to schedule reminder for: ${courseTitle} (${course.courseType})`
+            );
+
+            // Use the enhanced scheduler method
+            const jobId =
+              await courseReminderScheduler.scheduleReminderForCourse(
+                courseId,
+                course.courseType
+              );
+
+            if (jobId) {
+              scheduledCount++;
+              schedulingResults.push({
+                courseId,
+                courseTitle,
+                courseType: course.courseType,
+                status: "scheduled",
+                jobId,
+                context,
+              });
+
+              console.log(
+                `✅ Reminder scheduled for ${courseTitle} with job ID: ${jobId}`
+              );
+            } else {
+              failedCount++;
+              schedulingResults.push({
+                courseId,
+                courseTitle,
+                courseType: course.courseType,
+                status: "failed",
+                reason: "Course starts too soon or no enrolled students",
+                context,
+              });
+
+              console.log(
+                `⚠️ Could not schedule reminder for ${courseTitle} - likely starts too soon or no students enrolled`
+              );
+            }
+          } catch (reminderError) {
+            failedCount++;
+            schedulingResults.push({
+              courseId: course.courseId,
+              courseTitle: course.title || course.courseTitle,
+              courseType: course.courseType,
+              status: "error",
+              error: reminderError.message,
+              context,
+            });
+
+            console.error(
+              `❌ Error scheduling reminder for ${
+                course.title || course.courseTitle
+              }:`,
+              reminderError
+            );
+          }
+        } else {
+          // Self-paced courses don't need reminders
+          console.log(
+            `ℹ️ Skipping reminder for ${course.title || course.courseTitle} (${
+              course.courseType
+            }) - not supported`
+          );
+        }
+      }
+
+      console.log(`📊 Reminder scheduling summary (${context}):`);
+      console.log(`  ✅ Scheduled: ${scheduledCount}`);
+      console.log(`  ❌ Failed: ${failedCount}`);
+      console.log(`  📋 Total processed: ${courses.length}`);
+
+      return {
+        scheduledCount,
+        failedCount,
+        totalProcessed: courses.length,
+        results: schedulingResults,
+      };
+    }
 
     console.log(`✅ FREE registration completed for ${coursesUpdated} courses`);
     console.log(`📋 Reference number: ${referenceNumber}`);

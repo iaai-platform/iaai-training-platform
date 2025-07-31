@@ -488,6 +488,43 @@ const inPersonCourseSchema = new mongoose.Schema(
     },
 
     // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    REMINDER TRACKING (OPTIONAL)                     │
+    // └─────────────────────────────────────────────────────────────────────┘
+    reminderSettings: {
+      enabled: { type: Boolean, default: true },
+      automaticReminders: { type: Boolean, default: true },
+      reminderDays: { type: Number, default: 1 }, // Days before course to send reminder
+      customReminderMessage: String,
+      lastReminderSent: Date,
+      reminderHistory: [
+        {
+          type: {
+            type: String,
+            enum: ["course-starting", "preparation", "tech-check", "custom"],
+            default: "course-starting",
+          },
+          sentAt: { type: Date, default: Date.now },
+          recipientCount: { type: Number, default: 0 },
+          successCount: { type: Number, default: 0 },
+          failureCount: { type: Number, default: 0 },
+          message: String, // For custom messages
+          sentBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Admin who scheduled it
+        },
+      ],
+    },
+
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                EMAIL TEMPLATES & CUSTOMIZATION                      │
+    // └─────────────────────────────────────────────────────────────────────┘
+    emailCustomization: {
+      customReminderSubject: String,
+      customReminderContent: String,
+      includeInstructorContact: { type: Boolean, default: true },
+      includeVenueDetails: { type: Boolean, default: true }, // For in-person courses
+      includeTechnicalRequirements: { type: Boolean, default: true }, // For online courses
+      brandingEnabled: { type: Boolean, default: true },
+    },
+    // ┌─────────────────────────────────────────────────────────────────────┐
     // │                        METADATA                                     │
     // └─────────────────────────────────────────────────────────────────────┘
     metadata: {
@@ -498,6 +535,7 @@ const inPersonCourseSchema = new mongoose.Schema(
       notes: String,
       isTemplate: { type: Boolean, default: false },
       templateName: String,
+      reminderHistory: [Object],
     },
   },
   {
@@ -1502,6 +1540,49 @@ inPersonCourseSchema.statics.searchCourses = function (searchTerm) {
   });
 };
 
+// ============================================
+// MINIMAL ADDITIONS TO YOUR EXISTING COURSE MODELS
+// Add these 2 methods to BOTH InPersonAestheticTraining and OnlineLiveTraining schemas
+// ============================================
+
+// Add this AFTER your existing virtual fields, BEFORE module.exports
+
+// ✅ Method 1: Check if course is eligible for reminders
+inPersonCourseSchema.methods.isReminderEligible = function () {
+  const now = new Date();
+  const startDate = new Date(this.schedule?.startDate);
+  const status = this.basic?.status;
+
+  return (
+    startDate > now &&
+    ["open", "full", "in-progress"].includes(status) &&
+    this.enrollment?.currentEnrollment > 0
+  );
+};
+
+// ✅ Method 2: Add reminder to course history (optional tracking)
+inPersonCourseSchema.methods.addReminderToHistory = function (reminderData) {
+  // Create reminderHistory array if it doesn't exist
+  if (!this.metadata) this.metadata = {};
+  if (!this.metadata.reminderHistory) this.metadata.reminderHistory = [];
+
+  // Add new reminder record
+  this.metadata.reminderHistory.push({
+    type: reminderData.type || "course-starting",
+    sentAt: new Date(),
+    recipientCount: reminderData.recipientCount || 0,
+    successCount: reminderData.successCount || 0,
+    failureCount: reminderData.failureCount || 0,
+    sentBy: reminderData.sentBy,
+  });
+
+  // Keep only last 10 records to prevent bloat
+  if (this.metadata.reminderHistory.length > 10) {
+    this.metadata.reminderHistory = this.metadata.reminderHistory.slice(-10);
+  }
+
+  return this.save({ validateBeforeSave: false });
+};
 // ████████████████████████████████████████████████████████████████████████████████
 // ██                                                                            ██
 // ██                              EXPORT MODEL                                 ██

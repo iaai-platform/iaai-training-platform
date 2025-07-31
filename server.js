@@ -482,7 +482,7 @@ app.use("/", adminUserRoutes);
 
 // ADD THIS NEW ROUTE HERE:
 const courseReminderRoutes = require("./routes/admin/courseReminderRoutes");
-app.use("/", courseReminderRoutes);
+app.use("/admin", courseReminderRoutes);
 console.log("📧 Course reminder admin routes loaded");
 // Admin forms
 const adminFormsRoutes = require("./routes/adminFormsRoutes");

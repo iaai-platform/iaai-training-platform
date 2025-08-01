@@ -27,9 +27,19 @@ const nodemailer = require("nodemailer");
 const methodOverride = require("method-override");
 const passport = require("passport");
 const passportConfig = require("./config/passportConfig");
+const ContactUs = require("./models/contactUsModel"); // ✅ ADD THIS LINE
+const SupportTeam = require("./models/SupportTeam"); // ✅ ADD THIS LINE
 
 // Models
 const User = require("./models/user");
+
+// ============================================
+// SUPPORT TEAM ASSIGNMENT SERVICE
+// ============================================
+const {
+  SupportAssignmentService,
+  AssignmentScheduler,
+} = require("./services/supportAssignment");
 
 require("dotenv").config();
 // ============================================
@@ -607,6 +617,14 @@ const customerSupportRoutes = require("./routes/customerSupportRoute");
 app.use("/", contactUsRoutes);
 app.use("/", customerSupportRoutes);
 
+// ✅ ADD THIS SECTION HERE (after contactUsRoutes)
+// ============================================
+// 13.1 SUPPORT TEAM MANAGEMENT ROUTES (NEW)
+// ============================================
+const supportTeamRoutes = require("./routes/supportTeamRoutes");
+app.use("/api/support", supportTeamRoutes);
+console.log("🤝 Support team management routes loaded");
+
 // News and updates
 const latestNewsRoutes = require("./routes/latestNewsRoutes");
 app.use("/", latestNewsRoutes);
@@ -799,4 +817,20 @@ app.listen(PORT, () => {
   📹 Admin Self-Paced Courses:
      - Manage courses: http://localhost:${PORT}/admin/selfpaced/manage
   `);
+
+  // ✅ ADD THIS SECTION HERE (after the server starts listening)
+  // ============================================
+  // INITIALIZE SUPPORT ASSIGNMENT AUTOMATION
+  // ============================================
+  try {
+    AssignmentScheduler.setupAutomatedAssignment();
+    console.log(
+      "🤖 Support team assignment automation initialized successfully"
+    );
+  } catch (error) {
+    console.error(
+      "❌ Failed to initialize support assignment automation:",
+      error
+    );
+  }
 });

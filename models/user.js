@@ -396,9 +396,66 @@ const userSchema = new mongoose.Schema(
     isConfirmed: { type: Boolean, default: false },
     role: {
       type: String,
-      enum: ["user", "admin", "instructor"],
+      enum: ["user", "admin", "instructor", "support"],
       default: "user",
     },
+
+    // ADD THIS NEW SECTION RIGHT AFTER THE ROLE FIELD:
+    // ┌─────────────────────────────────────────────────────────────────────┐
+    // │                    🤝 SUPPORT TEAM INTEGRATION                      │
+    // └─────────────────────────────────────────────────────────────────────┘
+    originatedFromSupport: {
+      // Reference to the SupportTeam who handled this user
+      supportTeamId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SupportTeam",
+        default: null,
+      },
+
+      // Reference to the specific case in SupportTeam model
+      caseId: {
+        type: String,
+        default: null,
+      },
+
+      // When the user was transferred from support to user model
+      transferDate: {
+        type: Date,
+        default: null,
+      },
+
+      // Name of support staff who handled the transfer
+      supportStaffName: {
+        type: String,
+        default: null,
+      },
+
+      // Original contact form ID if applicable
+      originalContactId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ContactUs",
+        default: null,
+      },
+
+      // Support journey metrics
+      supportJourney: {
+        // How many days from first contact to registration
+        daysFromContactToRegistration: { type: Number, default: 0 },
+
+        // Total interactions with support team
+        totalSupportInteractions: { type: Number, default: 0 },
+
+        // Original lead source
+        originalLeadSource: { type: String, default: null },
+
+        // Conversion value attributed to support team
+        attributedRevenue: { type: Number, default: 0 },
+
+        // Support team conversion notes
+        conversionNotes: { type: String, default: null },
+      },
+    },
+
     resetPasswordToken: String,
     resetPasswordExpires: Date,
 
@@ -1164,6 +1221,25 @@ userSchema.index({ "addressInfo.country": 1 });
 userSchema.index({ "addressInfo.isComplete": 1 });
 userSchema.index({ "paymentPreferences.preferredCurrency": 1 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// ║                                INDEXES                                     ║
+// ║                     Add these to your existing indexes                     ║
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ADD THESE INDEXES TO YOUR EXISTING USER SCHEMA INDEXES SECTION:
+
+userSchema.index({ "originatedFromSupport.supportTeamId": 1 });
+userSchema.index({ "originatedFromSupport.caseId": 1 });
+userSchema.index({ "originatedFromSupport.transferDate": -1 });
+userSchema.index({
+  "originatedFromSupport.supportJourney.attributedRevenue": -1,
+});
+
+// Compound index for support analytics
+userSchema.index({
+  "originatedFromSupport.supportTeamId": 1,
+  "originatedFromSupport.transferDate": -1,
+});
 // ========================================
 // VIRTUAL FIELDS
 // ========================================
@@ -1910,6 +1986,142 @@ userSchema.statics.getNotificationRecipients = function (
   // No additional filters needed - these should go to all confirmed users
 
   return this.find(filter).select("email firstName lastName");
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ║                            ADDITIONAL METHODS                              ║
+// ║                   Add these to User schema methods section                 ║
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ADD THESE METHODS TO YOUR EXISTING USER SCHEMA METHODS (around line 2500+)
+
+/**
+ * 📊 Check if user originated from support team
+ */
+userSchema.methods.isFromSupportTeam = function () {
+  return !!this.originatedFromSupport?.supportTeamId;
+};
+
+/**
+ * 🤝 Link user to support team case
+ */
+userSchema.methods.linkToSupportCase = function (supportData) {
+  this.originatedFromSupport = {
+    supportTeamId: supportData.supportTeamId,
+    caseId: supportData.caseId,
+    transferDate: new Date(),
+    supportStaffName: supportData.supportStaffName,
+    originalContactId: supportData.originalContactId,
+    supportJourney: {
+      daysFromContactToRegistration: supportData.daysFromContact || 0,
+      totalSupportInteractions: supportData.totalInteractions || 0,
+      originalLeadSource: supportData.originalLeadSource,
+      conversionNotes: supportData.conversionNotes,
+    },
+  };
+
+  return this.save();
+};
+
+/**
+ * 💰 Update support attribution revenue
+ */
+userSchema.methods.updateSupportAttribution = function (revenue, notes = null) {
+  if (this.originatedFromSupport?.supportTeamId) {
+    this.originatedFromSupport.supportJourney.attributedRevenue += revenue;
+    if (notes) {
+      this.originatedFromSupport.supportJourney.conversionNotes = notes;
+    }
+    return this.save();
+  }
+  return Promise.resolve(this);
+};
+
+/**
+ * 📈 Get support team performance data for this user
+ */
+userSchema.methods.getSupportAttribution = function () {
+  if (!this.isFromSupportTeam()) {
+    return null;
+  }
+
+  return {
+    supportTeamId: this.originatedFromSupport.supportTeamId,
+    supportStaffName: this.originatedFromSupport.supportStaffName,
+    caseId: this.originatedFromSupport.caseId,
+    transferDate: this.originatedFromSupport.transferDate,
+    daysToConversion:
+      this.originatedFromSupport.supportJourney.daysFromContactToRegistration,
+    totalInteractions:
+      this.originatedFromSupport.supportJourney.totalSupportInteractions,
+    attributedRevenue:
+      this.originatedFromSupport.supportJourney.attributedRevenue,
+    originalSource:
+      this.originatedFromSupport.supportJourney.originalLeadSource,
+  };
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ║                              STATIC METHODS                                ║
+// ║                    Add these to User schema statics section                ║
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * 📊 Get support team performance analytics
+ */
+userSchema.statics.getSupportTeamAnalytics = function (
+  supportTeamId = null,
+  dateRange = {}
+) {
+  const matchStage = {
+    "originatedFromSupport.supportTeamId": { $exists: true },
+  };
+
+  if (supportTeamId) {
+    matchStage["originatedFromSupport.supportTeamId"] = supportTeamId;
+  }
+
+  if (dateRange.start || dateRange.end) {
+    matchStage["originatedFromSupport.transferDate"] = {};
+    if (dateRange.start)
+      matchStage["originatedFromSupport.transferDate"].$gte = new Date(
+        dateRange.start
+      );
+    if (dateRange.end)
+      matchStage["originatedFromSupport.transferDate"].$lte = new Date(
+        dateRange.end
+      );
+  }
+
+  return this.aggregate([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: "$originatedFromSupport.supportTeamId",
+        supportStaffName: { $first: "$originatedFromSupport.supportStaffName" },
+        totalUsers: { $sum: 1 },
+        totalRevenue: {
+          $sum: "$originatedFromSupport.supportJourney.attributedRevenue",
+        },
+        avgDaysToConversion: {
+          $avg: "$originatedFromSupport.supportJourney.daysFromContactToRegistration",
+        },
+        avgInteractions: {
+          $avg: "$originatedFromSupport.supportJourney.totalSupportInteractions",
+        },
+      },
+    },
+    { $sort: { totalRevenue: -1 } },
+  ]);
+};
+
+/**
+ * 🔍 Find users from specific support team
+ */
+userSchema.statics.findBySupportTeam = function (supportTeamId) {
+  return this.find({
+    "originatedFromSupport.supportTeamId": supportTeamId,
+  }).sort({ "originatedFromSupport.transferDate": -1 });
 };
 
 // ========================================

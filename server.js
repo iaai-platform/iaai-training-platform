@@ -169,6 +169,11 @@ app.use("/", signupRoutes);
 app.use("/", authRoutes);
 app.use("/", emailTestRoutes);
 
+// new
+const anatomyCourseRoutes = require("./routes/anatomyCourseRegistrationRoutes");
+app.use("/", anatomyCourseRoutes);
+console.log("🧠 Free Anatomy Course registration routes loaded");
+
 // Logout route
 app.get("/logout", (req, res) => {
   req.logout((err) => {

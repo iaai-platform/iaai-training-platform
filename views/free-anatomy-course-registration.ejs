@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Anatomy Unlocked Course - IAAI Training Institute</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+      background: linear-gradient(135deg, #002147 0%, #001633 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 80px 0;
+    }
+    
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(184, 134, 11, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 20s ease-in-out infinite;
+    }
+    
+    .hero-section::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(184, 134, 11, 0.05) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 25s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-30px) rotate(180deg); }
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+    
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+    
+    .hero-subtitle {
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 30px;
+    }
+    
+    .company-intro {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 40px;
+    }
+    
+    .company-intro h2 {
+      color: #b8860b;
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+    
+    .company-intro p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    
+    /* Main Content */
+    .main-content {
+      max-width: 1200px;
+      margin: -40px auto 60px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 10;
+    }
+    
+    /* Course Overview Section */
+    .course-overview {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .course-overview::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(180deg, #b8860b 0%, #002147 100%);
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .section-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .section-icon i {
+      color: white;
+      font-size: 20px;
+    }
+    
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #002147;
+    }
+    
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+    
+    .course-card {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 25px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .course-card:hover {
+      background: white;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px);
+    }
+    
+    .course-type {
+      background: #10b981;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 15px;
+    }
+    
+    .course-card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #002147;
+      margin-bottom: 10px;
+    }
+    
+    .course-card p {
+      color: #555;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    
+    /* Featured Course Section */
+    .featured-course {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 2px solid #0ea5e9;
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .featured-course::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    
+    .featured-badge {
+      background: #dc2626;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    
+    .course-details-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+    
+    .course-info h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #002147;
+      margin-bottom: 15px;
+    }
+    
+    .course-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 25px;
+      font-size: 14px;
+      color: #555;
+    }
+    
+    .meta-item i {
+      color: #0ea5e9;
+    }
+    
+    .course-description {
+      font-size: 16px;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 25px;
+    }
+    
+    .course-highlights {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    
+    .course-highlights h4 {
+      color: #002147;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .course-highlights ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .course-highlights li {
+      position: relative;
+      padding-left: 25px;
+      margin-bottom: 10px;
+      color: #555;
+      font-size: 15px;
+    }
+    
+    .course-highlights li::before {
+      content: '\f00c';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 0;
+      top: 2px;
+      color: #10b981;
+      font-size: 14px;
+    }
+    
+    .course-actions {
+      text-align: center;
+    }
+    
+    .course-price {
+      font-size: 48px;
+      font-weight: 700;
+      color: #10b981;
+      margin-bottom: 10px;
+    }
+    
+    .course-price-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    
+    .btn-details {
+      display: inline-block;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-details:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(14, 165, 233, 0.3);
+    }
+    
+    /* Registration Form Section */
+    .registration-section {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .registration-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+    }
+    
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .form-intro {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .form-intro h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #002147;
+      margin-bottom: 15px;
+    }
+    
+    .form-intro p {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    .registration-form {
+      display: grid;
+      gap: 25px;
+    }
+    
+    .form-group {
+      position: relative;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #002147;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+    
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      background: white;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .required {
+      color: #dc2626;
+    }
+    
+    .password-strength {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .submit-section {
+      text-align: center;
+      margin-top: 30px;
+    }
+    
+    .btn-submit {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 18px 40px;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-submit:hover::before {
+      left: 100%;
+    }
+    
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .login-link {
+      margin-top: 25px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .login-link a {
+      color: #10b981;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Loading State */
+    .btn-loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    .btn-loading i {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Success/Error Messages */
+    .message {
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      font-weight: 500;
+      display: none;
+    }
+    
+    .message.success {
+      background: #d1fae5;
+      border: 2px solid #10b981;
+      color: #065f46;
+    }
+    
+    .message.error {
+      background: #fee2e2;
+      border: 2px solid #ef4444;
+      color: #991b1b;
+    }
+    
+    .message i {
+      margin-right: 10px;
+    }
+    
+    .success-actions {
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .success-actions a {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #10b981;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      margin: 0 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .success-actions a:hover {
+      background: #059669;
+      transform: translateY(-2px);
+    }
+    
+    /* Information Box */
+    .info-box {
+      background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+      border: 2px solid #f97316;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 30px 0;
+    }
+    
+    .info-box h4 {
+      color: #9a3412;
+      margin-bottom: 15px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .info-box p {
+      color: #9a3412;
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 32px;
+      }
+      
+      .course-details-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .courses-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .course-overview,
+      .featured-course,
+      .registration-section {
+        padding: 25px 20px;
+      }
+      
+      .main-content {
+        padding: 0 15px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 28px;
+      }
+      
+      .course-info h2 {
+        font-size: 24px;
+      }
+      
+      .course-price {
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Start Your Aesthetic Medicine Journey</h1>
+      <p class="hero-subtitle">Join thousands of healthcare professionals advancing their careers with IAAI</p>
+      
+      <!-- Company Introduction -->
+      <div class="company-intro">
+        <h2>About IAAI Training Institute</h2>
+        <p>The International Aesthetic Academic Institution (IAAI) is a leading provider of professional aesthetic medicine training worldwide. We offer comprehensive programs designed for healthcare professionals who want to excel in the rapidly growing field of aesthetic medicine. Our expert instructors, cutting-edge curriculum, and hands-on approach ensure you receive the highest quality education to advance your career.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Online Live Courses Overview -->
+    <div class="course-overview">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-video"></i>
+        </div>
+        <h2 class="section-title">Our Online Live Training Programs</h2>
+      </div>
+      
+      <p style="font-size: 16px; color: #555; margin-bottom: 30px; line-height: 1.8;">
+        Experience interactive learning from anywhere in the world with our live online training sessions. Connect with expert instructors and fellow professionals in real-time, participate in Q&A sessions, and receive personalized feedback—all from the comfort of your preferred location.
+      </p>
+      
+      <div class="courses-grid">
+        <div class="course-card">
+          <span class="course-type">BEGINNER FRIENDLY</span>
+          <h3>Botox & Neurotoxin Training</h3>
+          <p>Master the fundamentals of neurotoxin injections with our comprehensive live training program covering safety, technique, and patient care.</p>
+        </div>
+        
+        <div class="course-card">
+          <span class="course-type">INTERMEDIATE</span>
+          <h3>Dermal Filler Masterclass</h3>
+          <p>Advanced techniques for facial contouring and volume restoration using the latest dermal filler products and injection methods.</p>
+        </div>
+        
+        <div class="course-card">
+          <span class="course-type">SPECIALIZED</span>
+          <h3>Chemical Peel Protocols</h3>
+          <p>Learn professional chemical peel applications, skin assessment, and post-treatment care for optimal patient outcomes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured Free Course -->
+    <div class="featured-course" id="free-course-section">
+      <div class="featured-badge">
+        <i class="fas fa-gift"></i> FREE COURSE AVAILABLE
+      </div>
+      
+      <div class="course-details-grid">
+        <div class="course-info">
+          <h2 id="course-title">Free Anatomy Unlocked Course</h2>
+          
+          <div class="course-meta" id="course-meta">
+            <!-- Course meta will be populated by JavaScript -->
+          </div>
+          
+          <p class="course-description" id="course-description">
+            <!-- Course description will be populated by JavaScript -->
+          </p>
+          
+          <div class="course-highlights">
+            <h4>What You'll Learn:</h4>
+            <ul id="course-objectives">
+              <!-- Objectives will be populated by JavaScript -->
+            </ul>
+          </div>
+        </div>
+        
+        <div class="course-actions">
+          <div class="course-price">FREE</div>
+          <div class="course-price-label">Limited Time Offer</div>
+          <a href="https://iaa-i.com/online-live-training/courses/6884c082935e6577ad62ed93" 
+             class="btn-details" target="_blank">
+            <i class="fas fa-external-link-alt"></i> View Full Course Details
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="registration-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <h2 class="section-title">Register for Free Anatomy Course</h2>
+      </div>
+      
+      <div class="form-container">
+        <div class="form-intro">
+          <h2>Create Your Account & Enroll</h2>
+          <p>Complete the form below to create your IAAI account and automatically enroll in our Free Anatomy Unlocked Course. This is your first step towards mastering aesthetic medicine!</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div id="successMessage" class="message success">
+          <i class="fas fa-check-circle"></i>
+          <div id="successText"></div>
+          <div class="success-actions" id="successActions"></div>
+        </div>
+        
+        <div id="errorMessage" class="message error">
+          <i class="fas fa-exclamation-circle"></i>
+          <div id="errorText"></div>
+        </div>
+
+        <form id="registrationForm" class="registration-form">
+          <h3 style="color: #002147; margin-bottom: 20px; font-size: 20px;">Personal Information</h3>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name <span class="required">*</span></label>
+              <input type="text" id="firstName" name="firstName" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="lastName">Last Name <span class="required">*</span></label>
+              <input type="text" id="lastName" name="lastName" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="password">Password <span class="required">*</span></label>
+              <input type="password" id="password" name="password" required minlength="6">
+              <div class="password-strength">
+                Password must be at least 6 characters long
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+              <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phoneNumber">Phone Number</label>
+              <input type="tel" id="phoneNumber" name="phoneNumber">
+            </div>
+            
+            <div class="form-group">
+              <label for="profession">Profession</label>
+              <select id="profession" name="profession">
+                <option value="">Select your profession</option>
+                <option value="Doctor (MD, DO, OB/GYN)">Doctor (MD, DO, OB/GYN)</option>
+                <option value="Dentist (DDS, DMD, BDS)">Dentist (DDS, DMD, BDS)</option>
+                <option value="Physician Assistant (PA)">Physician Assistant (PA)</option>
+                <option value="Nurse Practitioner (NP)">Nurse Practitioner (NP)</option>
+                <option value="Registered Nurse (RN)">Registered Nurse (RN)</option>
+                <option value="Licensed Practical Nurse (LPN)">Licensed Practical Nurse (LPN)</option>
+                <option value="Medical Assistant">Medical Assistant</option>
+                <option value="Pharmacist">Pharmacist</option>
+                <option value="Physical Therapist">Physical Therapist</option>
+                <option value="Occupational Therapist">Occupational Therapist</option>
+                <option value="Medical Student">Medical Student</option>
+                <option value="Nursing Student">Nursing Student</option>
+                <option value="Other Healthcare Professional">Other Healthcare Professional</option>
+                <option value="Non-Healthcare Professional">Non-Healthcare Professional</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input type="text" id="country" name="country">
+            </div>
+            
+            <div class="form-group">
+              <label for="role">Account Type</label>
+              <select id="role" name="role">
+                <option value="user">Student</option>
+                <option value="instructor">Instructor</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> Important Information</h4>
+            <p>By submitting this form, you will create a new IAAI account and be automatically enrolled in our Free Anatomy Unlocked Course. You'll receive email confirmation with your login details and course access information. If you already have an account, the course will be added to your existing profile.</p>
+          </div>
+          
+          <div class="submit-section">
+            <button type="submit" class="btn-submit">
+              <i class="fas fa-user-plus"></i> Create Account & Enroll
+            </button>
+          </div>
+        </form>
+        
+        <div class="login-link">
+          <p>Already have an account? <a href="https://iaa-i.com/login">Login here</a> to access your courses.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Course data will be populated by the server
+    const courseData = <%- JSON.stringify(course) %>;
+    
+    // Populate course information
+    function populateCourseInfo() {
+      if (courseData) {
+        // Update course title
+        document.getElementById('course-title').textContent = courseData.basic?.title || courseData.title || 'Free Anatomy Unlocked Course';
+        
+        // Update course description
+        document.getElementById('course-description').textContent = courseData.basic?.description || courseData.description || 'Learn essential facial anatomy for safe aesthetic injections';
+        
+        // Update course meta information
+        const metaContainer = document.getElementById('course-meta');
+        const startDate = courseData.schedule?.startDate || courseData.startDate;
+        const instructor = courseData.instructors?.primary?.name || courseData.instructor || 'Expert Instructor';
+        
+        metaContainer.innerHTML = `
+          <div class="meta-item">
+            <i class="fas fa-calendar"></i>
+            <span>${startDate ? new Date(startDate).toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }) : 'Date to be announced'}</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-user-tie"></i>
+            <span>${instructor}</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-clock"></i>
+            <span>${courseData.schedule?.duration || courseData.duration || '1 hour'}</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-laptop"></i>
+            <span>${courseData.platform?.name || 'Online Platform'}</span>
+          </div>
+        `;
+        
+        // Update course objectives
+        const objectivesContainer = document.getElementById('course-objectives');
+        const objectives = courseData.content?.objectives || courseData.objectives || [
+          'Master facial anatomy related to aesthetic injections',
+          'Identify facial danger zones to avoid complications',
+          'Understand the five anatomical layers of the face',
+          'Learn safe injection depths and surface anatomy markers'
+        ];
+        
+        objectivesContainer.innerHTML = objectives.slice(0, 4).map(objective => 
+          `<li>${objective}</li>`
+        ).join('');
+      }
+    }
+    
+    // Initialize course information
+    populateCourseInfo();
+    
+    // Form submission handling
+    document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.querySelector('.btn-submit');
+      const successMsg = document.getElementById('successMessage');
+      const errorMsg = document.getElementById('errorMessage');
+      
+      // Hide previous messages
+      successMsg.style.display = 'none';
+      errorMsg.style.display = 'none';
+      
+      // Validate passwords match
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (password !== confirmPassword) {
+        document.getElementById('errorText').textContent = 'Passwords do not match. Please check and try again.';
+        errorMsg.style.display = 'block';
+        errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      
+      // Set loading state
+      submitBtn.classList.add('btn-loading');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+      
+      try {
+        // Collect form data
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Submit to server
+        const response = await fetch('/register-anatomy-course', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Show success message
+          document.getElementById('successText').innerHTML = `
+            <h4 style="margin: 0 0 10px 0; color: #065f46;">🎉 Registration Successful!</h4>
+            <p style="margin: 0 0 10px 0;">${result.message}</p>
+            <p style="margin: 0; font-size: 14px;">
+              ${result.isNewUser ? 
+                'Your account has been created and you\'ve been enrolled in the Free Anatomy Unlocked Course. Check your email for confirmation details.' : 
+                'The Free Anatomy Unlocked Course has been added to your existing account. You can access it immediately from your library.'
+              }
+            </p>
+          `;
+          
+          document.getElementById('successActions').innerHTML = `
+            <a href="https://iaa-i.com/login">
+              <i class="fas fa-sign-in-alt"></i> Login to Your Account
+            </a>
+            <a href="https://iaa-i.com/library">
+              <i class="fas fa-book-open"></i> Access Course Library
+            </a>
+          `;
+          
+          successMsg.style.display = 'block';
+          successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Hide form
+          document.getElementById('registrationForm').style.display = 'none';
+          
+        } else {
+          // Show error message
+          document.getElementById('errorText').textContent = result.message || 'Registration failed. Please try again.';
+          errorMsg.style.display = 'block';
+          errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+      } catch (error) {
+        console.error('Registration error:', error);
+        document.getElementById('errorText').textContent = 'An error occurred. Please check your connection and try again.';
+        errorMsg.style.display = 'block';
+        errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } finally {
+        // Reset button state
+        submitBtn.classList.remove('btn-loading');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account & Enroll';
+      }
+    });
+
+    // Password validation
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = this.value;
+      const strengthDiv = this.parentNode.querySelector('.password-strength') || 
+                          this.parentNode.appendChild(document.createElement('div'));
+      
+      strengthDiv.className = 'password-strength';
+      
+      if (confirmPassword && password !== confirmPassword) {
+        strengthDiv.textContent = 'Passwords do not match';
+        strengthDiv.style.color = '#dc2626';
+      } else if (confirmPassword && password === confirmPassword) {
+        strengthDiv.textContent = 'Passwords match ✓';
+        strengthDiv.style.color = '#10b981';
+      } else {
+        strengthDiv.textContent = '';
+      }
+    });
+
+    // Smooth scroll for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    console.log('📚 Free Anatomy Course Registration Page Loaded');
+    console.log('🎯 Course ID: 6884c082935e6577ad62ed93');
+  </script>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

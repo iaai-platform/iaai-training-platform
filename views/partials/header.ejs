@@ -1,176 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>International Aesthetic Academic Institution (IAAI)</title>
+<header>
+    <div class="logo">
+        <img src="/images/image0.jpeg" alt="IAAI Logo">
+    </div>
     
-    <!-- ============================================ -->
-    <!-- FAVICON SETUP - LOCAL UPLOADS FOLDER -->
-    <!-- ============================================ -->
-    <!-- Standard Favicon -->
-    <link rel="icon" href="/uploads/icons/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/uploads/icons/favicon.ico" type="image/x-icon">
-    
-    <!-- PNG Favicons -->
-    <link rel="icon" type="image/png" sizes="96x96" href="/uploads/icons/favicon-96x96.png">
-    <link rel="icon" type="image/svg+xml" href="/uploads/icons/favicon.svg">
-    
-    <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/icons/apple-icon-180x180.png">
-    
-    <!-- Android Icon -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/uploads/icons/android-icon-192x192.png">
-    
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#007bff">
-    
-    <!-- Open Graph Meta Tags for Social Media -->
-    <meta property="og:title" content="International Aesthetic Academic Institution (IAAI)">
-    <meta property="og:description" content="Professional aesthetic training courses including injectables, skincare, and facial contouring techniques. Join IAAI for world-class aesthetic education.">
-    <meta property="og:image" content="https://iaa-i.com/uploads/icons/og-image-1200x630.png">
-    <meta property="og:url" content="https://iaa-i.com">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="IAAI - International Aesthetic Academic Institution">
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="International Aesthetic Academic Institution (IAAI)">
-    <meta name="twitter:description" content="Professional aesthetic training courses including injectables, skincare, and facial contouring techniques.">
-    <meta property="twitter:image" content="https://iaa-i.com/uploads/icons/twitter-card-1200x600.png">
-    
-    <!-- Schema.org structured data for search engines -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "EducationalOrganization",
-      "name": "International Aesthetic Academic Institution",
-      "alternateName": "IAAI",
-      "url": "https://iaa-i.com",
-      "logo": "https://iaa-i.com/uploads/icons/logo-512x512.png",
-      "description": "Professional aesthetic training institution offering comprehensive courses in aesthetic medicine, injectables, and beauty treatments",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "United States"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "availableLanguage": "English"
-      },
-      "sameAs": [
-        "https://facebook.com/your-iaai-page",
-        "https://instagram.com/your-iaai-handle",
-        "https://linkedin.com/company/iaai"
-      ],
-      "offers": {
-        "@type": "AggregateOffer",
-        "priceCurrency": "USD",
-        "availability": "https://schema.org/InStock"
-      }
-    }
-    </script>
-    
-    <!-- ============================================ -->
-    <!-- EXISTING STYLESHEETS - KEEP AS IS -->
-    <!-- ============================================ -->
-    <link rel="stylesheet" href="/css/header.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <!-- ✅ Header Section -->
-    <header>
-        <div class="logo">
-            <img src="/images/image0.jpeg" alt="IAAI Logo">
-        </div>
+    <nav class="navbar" id="mobile-nav">
+        <a href="/">Home</a>
         
-        <!-- 🆕 Mobile Menu Toggle Button -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle">
-            <i class="fas fa-bars"></i>
-        </button>
-        
-        <nav class="navbar" id="navbar">
-            <a href="/">Home</a>
-            
-            <!-- 🆕 UPDATED: "About Us" with Enhanced Dropdown -->
-            <div class="program-menu-trigger">
-                <a href="/about-us">About Us</a>
-                <i class="fas fa-chevron-down"></i>
-                <div class="program-menu">
-                    <a href="/about-us">About IAAI</a>
-                    <a href="/mission-vision">Mission & Vision</a>
-                    <a href="/why-iaai">Why Choose IAAI</a>
-                    <a href="/training-centres">Our Training Centres & Instructors</a>
-                </div>
-            </div>
-            
-            <!-- ✅ "All Courses" with Enhanced Dropdown -->
-            <div class="program-menu-trigger">
-                <a href="/all-courses">All Courses</a>
-                <i class="fas fa-chevron-down"></i>
-                <div class="program-menu">
-                    <a href="/hands-on-surgical-courses">Hands-On Surgical & Non-Surgical Courses</a>
-                    <a href="/comprehensive-training-programs">Comprehensive Training Programs</a>
-                    <a href="/specialized-training-programs">Specialized Training Programs</a>
-                    <a href="/interactive-webinar-programs">Interactive Webinar Programs</a>
-                </div>
-            </div>
-            
-            <!-- ✅ "All Programs" with Enhanced Dropdown -->
-            <div class="program-menu-trigger">
-                <a href="/training-programs">All Programs</a>
-                <i class="fas fa-chevron-down"></i>
-                <div class="program-menu">
-                    <a href="/in-person-aesthetic-training">In-Person Aesthetic Training</a>
-                    <a href="/online-live-training">Online Live Training</a>
-                    <a href="/self-paced-online-training">Self-Paced Online Training</a>
-                    <a href="/on-demand-courses">On-Demand Courses</a>
-                    <a href="/in-company-courses">In-Company Courses</a>
-                    <a href="/mentorship-program">Mentorship Program</a>
-                    <a href="/advanced-aesthetic-techniques">Advanced Aesthetic Techniques</a>
-                    <a href="/corporate-aesthetic-training">Corporate Aesthetic Training</a>
-                </div>
-            </div>
-            
-           <!-- ✅ "Instructors" with Updated Links -->
-           <div class="instructors-menu-trigger">
-            <a href="/our-instructors">Instructors</a>
+        <div class="program-menu-trigger">
+            <a href="/about-us">About Us</a>
             <i class="fas fa-chevron-down"></i>
-            <div class="instructors-menu">
-                <a href="/our-instructors">Our Expert Instructors</a>
-                <a href="/new-trainers-required">Join Our Team</a>
+            <div class="program-menu">
+                <a href="/about-us">About IAAI</a>
+                <a href="/mission-vision">Mission & Vision</a>
+                <a href="/why-iaai">Why Choose IAAI</a>
+                <a href="/training-centres">Our Training Centres & Instructors</a>
             </div>
         </div>
-            
-            <!-- ✅ "My Library" - Updated with Enhanced Dropdown -->
-            <% if (user) { %>
-                <div class="program-menu-trigger">
-                    <a href="/library">My Library</a>
-                    <i class="fas fa-chevron-down"></i>
-                    <div class="program-menu">
-                        <a href="/library/self-paced">Self-Paced Courses</a>
-                        <a href="/library/live">Live Online Courses</a>
-                        <a href="/library/in-person">In-Person Courses</a>
-                    </div>
-                </div>
-            <% } %>
-            
-            <a href="/NewsDetails">News</a>
-            <a href="/contact-us">Contact us</a>
-        </nav>
         
-        <!-- ✅ Search Bar -->
+        <div class="program-menu-trigger">
+            <a href="/all-courses">All Courses</a>
+            <i class="fas fa-chevron-down"></i>
+            <div class="program-menu">
+                <a href="/hands-on-surgical-courses">Hands-On Surgical & Non-Surgical Courses</a>
+                <a href="/comprehensive-training-programs">Comprehensive Training Programs</a>
+                <a href="/specialized-training-programs">Specialized Training Programs</a>
+                <a href="/interactive-webinar-programs">Interactive Webinar Programs</a>
+            </div>
+        </div>
+        
+        <div class="program-menu-trigger">
+            <a href="/training-programs">All Programs</a>
+            <i class="fas fa-chevron-down"></i>
+            <div class="program-menu">
+                <a href="/in-person-aesthetic-training">In-Person Aesthetic Training</a>
+                <a href="/online-live-training">Online Live Training</a>
+                <a href="/self-paced-online-training">Self-Paced Online Training</a>
+                <a href="/on-demand-courses">On-Demand Courses</a>
+                <a href="/in-company-courses">In-Company Courses</a>
+                <a href="/mentorship-program">Mentorship Program</a>
+                <a href="/advanced-aesthetic-techniques">Advanced Aesthetic Techniques</a>
+                <a href="/corporate-aesthetic-training">Corporate Aesthetic Training</a>
+            </div>
+        </div>
+        
+       <div class="instructors-menu-trigger">
+        <a href="/our-instructors">Instructors</a>
+        <i class="fas fa-chevron-down"></i>
+        <div class="instructors-menu">
+            <a href="/our-instructors">Our Expert Instructors</a>
+            <a href="/new-trainers-required">Join Our Team</a>
+        </div>
+      </div>
+        
+      <% if (user) { %>
+          <div class="program-menu-trigger">
+              <a href="/library">My Library</a>
+              <i class="fas fa-chevron-down"></i>
+              <div class="program-menu">
+                  <a href="/library/self-paced">Self-Paced Courses</a>
+                  <a href="/library/live">Live Online Courses</a>
+                  <a href="/library/in-person">In-Person Courses</a>
+              </div>
+          </div>
+      <% } %>
+        
+        <a href="/NewsDetails">News</a>
+        <a href="/contact-us">Contact us</a>
+        
         <div class="search-bar">
             <input type="text" placeholder="Search...">
         </div>
         
-        <!-- ✅ Profile Dropdown - UPDATED WITH PROFILE PICTURE -->
-        <div class="login-register">
+        <div class="login-register mobile-only">
             <% if (user) { %>
                 <div class="profile-dropdown">
                     <button class="profile-icon">
@@ -193,94 +94,39 @@
                 <button onclick="location.href='/login'">Login/Register</button>
             <% } %>
         </div>
-    </header>
-</body>
+    </nav>
+    
+    <div class="header-right-section">
+        <div class="search-bar desktop-only">
+            <input type="text" placeholder="Search...">
+        </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Search functionality
-        const searchInput = document.querySelector('.search-bar input');
+        <div class="login-register desktop-only">
+            <% if (user) { %>
+                <div class="profile-dropdown">
+                    <button class="profile-icon">
+                        <% if (user.profileData?.profilePicture?.url) { %>
+                            <img src="<%= user.profileData.profilePicture.url %>" alt="Profile" class="profile-picture">
+                        <% } else { %>
+                            <i class="fas fa-user-circle"></i>
+                        <% } %>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="/dashboard">My Account</a>
+                        <a href="/my-courses">My Courses</a>
+                        <a href="/wishlist">Wishlist</a>
+                        <a href="/orders">Your Orders</a>
+                        <a href="/profile">Profile</a>
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <button onclick="location.href='/login'">Login/Register</button>
+            <% } %>
+        </div>
         
-        if (searchInput) {
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    const query = searchInput.value.trim();
-                    if (query) {
-                        window.location.href = `/search?q=${encodeURIComponent(query)}`;
-                    }
-                }
-            });
-        }
-
-        // Mobile menu toggle functionality
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const navbar = document.getElementById('navbar');
-        const menuIcon = mobileMenuToggle.querySelector('i');
-
-        mobileMenuToggle.addEventListener('click', function() {
-            navbar.classList.toggle('active');
-            
-            // Toggle between hamburger and X icon
-            if (navbar.classList.contains('active')) {
-                menuIcon.classList.remove('fa-bars');
-                menuIcon.classList.add('fa-times');
-            } else {
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
-            }
-        });
-
-        // Mobile dropdown functionality
-        const programMenuTriggers = document.querySelectorAll('.program-menu-trigger, .instructors-menu-trigger');
-        
-        programMenuTriggers.forEach(trigger => {
-            const chevron = trigger.querySelector('i');
-            
-            trigger.addEventListener('click', function(e) {
-                // Only handle clicks on mobile (when menu toggle is visible)
-                if (window.innerWidth <= 768) {
-                    e.preventDefault();
-                    
-                    // Close other open dropdowns
-                    programMenuTriggers.forEach(otherTrigger => {
-                        if (otherTrigger !== trigger) {
-                            otherTrigger.classList.remove('active');
-                        }
-                    });
-                    
-                    // Toggle current dropdown
-                    trigger.classList.toggle('active');
-                }
-            });
-        });
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('header')) {
-                navbar.classList.remove('active');
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
-                
-                // Close all mobile dropdowns
-                programMenuTriggers.forEach(trigger => {
-                    trigger.classList.remove('active');
-                });
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-                navbar.classList.remove('active');
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
-                
-                // Remove active class from mobile dropdowns
-                programMenuTriggers.forEach(trigger => {
-                    trigger.classList.remove('active');
-                });
-            }
-        });
-    });
-</script>
-</html>
+        <div class="mobile-menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+</header>

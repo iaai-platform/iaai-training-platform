@@ -1,16 +1,17 @@
 /* ============================================================
-   ✅ HEADER STYLING - Standalone File with High Specificity
+   ✅ HEADER STYLING - Based on Original with Instructors Menu Added
 ============================================================ */
 header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  background-color: #E2E2E2 !important;
-  border-bottom: 3px solid #b8860b !important;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1) !important;
-  padding: 15px 20px !important;
-  position: relative !important;
-  font-family: 'Montserrat', sans-serif !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #E2E2E2; /* Clean white background */
+  border-bottom: 3px solid #b8860b; /* Gold accent */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  padding: 15px 20px;
+  position: relative;
+  font-family: 'Montserrat', sans-serif; /* ✅ Modern & clean font */
+  z-index: 1000; /* Ensure header is always on top */
 }
 
 /* ✅ Logo Styling */
@@ -19,45 +20,33 @@ header {
   width: auto;
 }
 
-/* ✅ Mobile Menu Toggle Button */
-header .mobile-menu-toggle {
-  display: none !important;
-  background: none !important;
-  border: none !important;
-  font-size: 24px !important;
-  color: #0C2340 !important;
-  cursor: pointer !important;
-  padding: 5px !important;
-  order: 2 !important;
-}
-
-/* ✅ Navbar - High Specificity */
-header .navbar {
-  display: flex !important;
-  padding-left: 20px !important;
-  gap: 10px !important;
-  list-style: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  height: 100% !important;
-  align-items: center !important;
-  font-family: 'Montserrat', sans-serif !important;
-  background-color: transparent !important;
+/* ============================================================
+ ✅ NAVIGATION (DESKTOP)
+============================================================ */
+.navbar {
+  display: flex;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  align-items: center;
+  font-family: 'Montserrat', sans-serif;
+  transition: transform 0.3s ease-in-out;
 }
 
 /* ✅ Navbar Links */
 .navbar a {
-  color: #0C2340;
+  color: #0C2340; /* Dark text for readability */
   text-decoration: none;
   padding: 10px 15px;
   font-size: 16px;
-  font-weight: 500;
-  text-transform: uppercase;
+  font-weight: 500; /* Medium weight */
+  text-transform: uppercase; /* Premium feel */
   transition: color 0.3s ease-in-out;
 }
 
 .navbar a:hover {
-  color: #b8860b;
+  color: #b8860b; /* Gold hover effect */
 }
 
 /* ✅ "All Programs" and "Instructors" Dropdown */
@@ -98,6 +87,7 @@ header .navbar {
   background-color: rgba(184, 134, 11, 0.1);
   color: #b8860b;
   border-radius: 8px;
+  transform: none; /* Remove the scale effect */
 }
 
 .program-menu-trigger:hover i,
@@ -202,7 +192,7 @@ header .navbar {
   outline: none;
 }
 
-/* ✅ Profile Dropdown */
+/* ✅ Profile Dropdown - UPDATED with smaller icon size */
 .profile-dropdown {
   position: relative;
   display: inline-block;
@@ -214,28 +204,30 @@ header .navbar {
   border: none;
   cursor: pointer;
   color: #333;
-  font-size: 14px;
-  padding: 6px;
+  font-size: 14px; /* ✅ SMALLER: 16px → 14px */
+  padding: 6px; /* ✅ SMALLER: 8px → 6px */
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 4px; /* ✅ SMALLER: 6px → 4px */
   transition: color 0.3s ease-in-out;
 }
 
+/* Profile picture styling - KEPT original size */
 .profile-picture {
-  width: 32px;
-  height: 32px;
+  width: 32px; /* ✅ KEPT original 32px size */
+  height: 32px; /* ✅ KEPT original 32px size */
   border-radius: 80%;
   object-fit: cover;
   border: 2px solid #b8860b;
 }
 
+/* Fallback icon styling (when no profile picture) - REDUCED to fit within profile picture container */
 .profile-icon i {
-  font-size: 28px;
+  font-size: 28px; /* ✅ REDUCED from 32px to 28px to fit better within the 32px container */
   color: #b80b0b;
 }
 
-/* ✅ Dropdown Content */
+/* ✅ Dropdown Content - FIXED to match original pattern */
 .dropdown-content {
   display: none;
   position: absolute;
@@ -267,6 +259,7 @@ header .navbar {
   background-color: #f1f1f1;
 }
 
+/* FIXED: Use exact same pattern as your original program-menu */
 .profile-dropdown:hover .dropdown-content,
 .dropdown-content:hover {
   display: block;
@@ -275,12 +268,12 @@ header .navbar {
   transform: translateY(0);
 }
 
-/* ✅ Login/Register Container */
+/* ✅ Login/Register Container - FIXED alignment */
 .login-register {
   display: flex;
   align-items: center;
-  margin-left: 10px;
-  margin-right: 0;
+  margin-left: 10px; /* Align with search bar */
+  margin-right: 0; /* Closer to page margin */
 }
 
 /* ✅ Login/Register Button Styling */
@@ -305,253 +298,136 @@ header .navbar {
 }
 
 /* ============================================================
-   📱 MOBILE RESPONSIVE ENHANCEMENTS
+ ✅ MOBILE RESPONSIVE STYLING (Max-width 1024px)
 ============================================================ */
-
-/* ✅ Tablet View (768px - 1024px) */
-@media (max-width: 1024px) {
-  .search-bar input {
-    width: 150px;
-  }
-  
-  .navbar {
-    gap: 8px;
-    padding-left: 15px;
-  }
-  
-  .navbar a,
-  .program-menu-trigger,
-  .instructors-menu-trigger {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
+/* Hide mobile menu toggle on desktop */
+.mobile-menu-toggle {
+  display: none;
 }
 
-/* ✅ Mobile View (Up to 768px) */
-@media (max-width: 768px) {
-  header {
-    padding: 10px 15px;
-    flex-wrap: wrap;
-    position: relative;
-  }
-
-  /* Show mobile menu toggle */
+@media (max-width: 1024px) {
+  /* ==================================
+     Hamburger Menu Toggle
+  ================================== */
   .mobile-menu-toggle {
-    display: block;
+      display: block;
+      cursor: pointer;
+      font-size: 24px;
+      color: #0C2340;
+      z-index: 1001; /* Ensure it's above the overlay */
   }
 
-  /* Hide desktop navbar by default on mobile */
+  /* ==================================
+     Header Layout
+  ================================== */
+  header {
+      padding: 10px 20px;
+  }
+
+  .header-right-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+  }
+
+  /* ==================================
+     Main Navigation (Mobile)
+  ================================== */
   .navbar {
-    display: none !important;
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-    flex-direction: column !important;
-    padding: 20px !important;
-    gap: 0 !important;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3) !important;
-    border-top: 3px solid #b8860b !important;
-    border-bottom: 2px solid #b8860b !important;
-    border-left: 1px solid #ddd !important;
-    border-right: 1px solid #ddd !important;
-    z-index: 1000 !important;
-  }
-
-  /* Force white background override */
-  @media (max-width: 768px) {
-    .navbar {
-      background: #ffffff !important;
-      background-color: #ffffff !important;
-    }
-    
-    .navbar::before {
-      content: '';
-      position: absolute;
+      position: fixed;
       top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #ffffff !important;
-      z-index: -1;
-    }
+      right: -100%;
+      width: 80%;
+      max-width: 350px;
+      height: 100vh;
+      background-color: #E2E2E2;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 80px 20px 20px;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      z-index: 999;
+      transition: right 0.4s ease-in-out;
+      overflow-y: auto; /* Enable scrolling for long menus */
   }
 
-  /* Show navbar when active */
   .navbar.active {
-    display: flex !important;
-    background-color: #ffffff !important;
-    background: #ffffff !important;
+      right: 0;
   }
 
-  /* Mobile navbar links */
   .navbar a {
-    padding: 15px 0;
-    border-bottom: 1px solid #e0e0e0;
-    width: 100%;
-    text-align: left;
-    font-size: 16px;
-    color: #0C2340 !important;
-    font-weight: 500;
-    background-color: transparent !important;
+      width: 100%;
+      padding: 15px 10px;
+      font-size: 18px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
-
+  
   .navbar a:hover {
-    background-color: #f8f9fa !important;
-    color: #b8860b !important;
+      background-color: rgba(184, 134, 11, 0.1);
   }
 
-  .navbar a:last-child {
-    border-bottom: none;
-  }
-
-  /* Mobile dropdown triggers */
+  /* ==================================
+     Mobile-specific Dropdown Styling
+  ================================== */
   .program-menu-trigger,
   .instructors-menu-trigger {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 15px 0;
-    border-bottom: 1px solid #e0e0e0;
-    width: 100%;
-    background-color: transparent !important;
+      width: 100%;
+      display: block; /* Make sure the container takes up full width */
+      padding: 15px 10px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 0; /* Remove rounded corners for full-width links */
+      gap: 10px;
   }
-
+  
   .program-menu-trigger a,
   .instructors-menu-trigger a {
-    color: #0C2340 !important;
-    font-weight: 500 !important;
-    font-size: 16px !important;
+      display: inline;
+      padding: 0;
+      border: none;
   }
 
-  /* Mobile dropdown menus */
-  .program-menu,
-  .instructors-menu {
-    position: static;
-    display: block;
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    box-shadow: none;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-    margin-top: 10px;
-    width: 100%;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
+  .program-menu-trigger:hover,
+  .instructors-menu-trigger:hover {
+      background-color: transparent;
   }
-
+  
   .program-menu-trigger.active .program-menu,
   .instructors-menu-trigger.active .instructors-menu {
-    max-height: 500px;
+      display: block;
+      position: static; /* Position normally within the flow */
+      width: 100%;
+      min-width: auto;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      border-radius: 0;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
   }
 
   .program-menu a,
   .instructors-menu a {
-    padding: 12px 15px !important;
-    font-size: 14px !important;
-    border-bottom: 1px solid #e0e0e0;
-    color: #0C2340 !important;
-    font-weight: 400 !important;
-    background-color: transparent !important;
+      padding-left: 30px !important; /* Indent sub-menu items */
+      border: none !important;
+      font-size: 16px !important;
   }
 
   .program-menu a:hover,
   .instructors-menu a:hover {
-    background-color: #ffffff !important;
-    color: #b8860b !important;
-    border-radius: 4px;
-    transform: none !important;
+      background: none !important;
+      color: #b8860b !important;
+      transform: none;
   }
-
-  /* Hide search bar on small mobile */
+  
+  /* ==================================
+     Other Mobile Elements
+  ================================== */
   .search-bar {
-    display: none;
+      display: none; /* Hide search bar on mobile for cleaner layout */
   }
 
-  /* Mobile profile and login adjustments */
   .login-register {
-    margin-left: auto;
-    order: 3;
-  }
-
-  .login-register button {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .profile-dropdown .dropdown-content {
-    right: 0;
-    min-width: 180px;
-  }
-
-  /* Logo adjustments for mobile */
-  .logo img {
-    height: 50px;
-  }
-}
-
-/* ✅ Small Mobile View (Up to 480px) */
-@media (max-width: 480px) {
-  header {
-    padding: 8px 10px;
-  }
-
-  .logo img {
-    height: 45px;
-  }
-
-  .login-register button {
-    padding: 5px 10px;
-    font-size: 11px;
-    border-radius: 20px;
-  }
-
-  .profile-picture {
-    width: 28px;
-    height: 28px;
-  }
-
-  .profile-icon i {
-    font-size: 24px;
-  }
-
-  .program-menu a,
-  .instructors-menu a {
-    padding: 8px 12px !important;
-    font-size: 13px !important;
-  }
-
-  .navbar a {
-    padding: 12px 0;
-    font-size: 15px;
-  }
-}
-
-/* ✅ Very Small Mobile (Up to 360px) */
-@media (max-width: 360px) {
-  header {
-    padding: 6px 8px;
-  }
-
-  .logo img {
-    height: 40px;
-  }
-
-  .login-register button {
-    padding: 4px 8px;
-    font-size: 10px;
-  }
-
-  .navbar {
-    padding: 15px;
-  }
-
-  .program-menu-trigger,
-  .instructors-menu-trigger {
-    padding: 12px 0;
+      margin-left: 0;
   }
 }

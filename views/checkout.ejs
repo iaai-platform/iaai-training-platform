@@ -16,6 +16,7 @@
         padding: 25px;
         margin: 20px 0;
         position: relative;
+        transition: all 0.3s ease;
       }
       
       .billing-header {
@@ -176,6 +177,39 @@
         margin: 5px 0;
         font-size: 14px;
         color: #424242;
+      }
+
+      /* ✅ NEW: Free Course Banner Styles */
+      .free-course-banner {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+        animation: slideInDown 0.5s ease;
+      }
+
+      .free-course-banner h3 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+      }
+
+      .free-course-banner p {
+        margin: 0;
+        font-size: 16px;
+        opacity: 0.95;
+      }
+
+      @keyframes slideInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       
       @media (max-width: 768px) {
@@ -344,8 +378,8 @@
             </table>
           </div>
 
-          <!-- NEW: Billing Information Section -->
-          <div class="billing-info-section">
+          <!-- ✅ UPDATED: Billing Information Section (conditionally displayed) -->
+          <div class="billing-info-section" id="billingSection">
             <div class="billing-header" onclick="toggleBillingForm()">
               <h3>
                 <i class="fas fa-credit-card"></i> 
@@ -720,7 +754,9 @@
         validateCheckout();
         loadUserBillingData();
         
-        // Add a test button for debugging (remove in production)
+        // ✅ NEW: Update billing section visibility on load
+        setTimeout(updateBillingSectionVisibility, 1000);
+        
         console.log('🔧 Checkout page loaded. Testing API connectivity...');
         
         // Test API connectivity
@@ -741,9 +777,65 @@
           originalPriceAED: (originalPrice * eurToAedRate).toFixed(2),
           currentPriceAED: (currentDiscountedPrice * eurToAedRate).toFixed(2),
           eurToAedRate: eurToAedRate,
-          cartItems: <%= coursesInCart ? coursesInCart.length : 0 %>
+          cartItems: <%= coursesInCart ? coursesInCart.length : 0 %>,
+          isFree: currentDiscountedPrice <= 0
         });
       });
+
+      // ✅ NEW: Function to update billing section visibility based on price
+      function updateBillingSectionVisibility() {
+        const billingSection = document.getElementById('billingSection');
+        const isFree = currentDiscountedPrice <= 0;
+        
+        if (isFree) {
+          // Hide billing section for free courses
+          billingSection.style.display = 'none';
+          console.log('🎁 Free course detected - billing section hidden');
+          
+          // Force billing complete for free courses
+          isBillingComplete = true;
+          
+          // Update checkout validation
+          validateCheckout();
+          
+          // Show a friendly message
+          const checkoutContainer = document.querySelector('.checkout-container');
+          let freeMessage = document.getElementById('freeCourseBanner');
+          
+          if (!freeMessage) {
+            freeMessage = document.createElement('div');
+            freeMessage.id = 'freeCourseBanner';
+            freeMessage.className = 'free-course-banner';
+            freeMessage.innerHTML = `
+              <h3><i class="fas fa-gift"></i> Free Course Registration</h3>
+              <p>No payment required! Complete your registration by agreeing to the terms below.</p>
+            `;
+            
+            // Insert after progress indicator
+            const progressIndicator = document.querySelector('.checkout-progress');
+            if (progressIndicator) {
+              progressIndicator.after(freeMessage);
+            } else {
+              const firstChild = checkoutContainer.children[1]; // After h1
+              checkoutContainer.insertBefore(freeMessage, firstChild.nextSibling);
+            }
+          }
+        } else {
+          // Show billing section for paid courses
+          billingSection.style.display = 'block';
+          console.log('💳 Paid course detected - billing section visible');
+          
+          // Remove free course banner if it exists
+          const freeMessage = document.getElementById('freeCourseBanner');
+          if (freeMessage) {
+            freeMessage.remove();
+          }
+          
+          // Reset billing validation for paid courses
+          isBillingComplete = false;
+          validateBillingForm();
+        }
+      }
 
       // Load user billing data from server - ENHANCED VERSION
       async function loadUserBillingData() {
@@ -1019,21 +1111,30 @@
         validateBillingForm();
       });
 
-      // Validate checkout button state
+      // ✅ UPDATED: Validate checkout button state (with free course support)
       function validateCheckout() {
         const agreeTerms = document.getElementById('agreeTerms').checked;
         const proceedBtn = document.getElementById('proceedBtn');
         
-        // Enable button only if terms are agreed AND billing is complete
-        proceedBtn.disabled = !(agreeTerms && isBillingComplete);
+        // ✅ NEW: Skip billing validation if course is FREE
+        const isFree = currentDiscountedPrice <= 0;
         
-        // Update button text based on billing status
-        if (!isBillingComplete) {
-          proceedBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Complete Billing Info First';
-        } else if (currentDiscountedPrice <= 0) {
+        // Enable button if terms are agreed AND (course is free OR billing is complete)
+        proceedBtn.disabled = !(agreeTerms && (isFree || isBillingComplete));
+        
+        // Update button text based on price and billing status
+        if (isFree) {
           proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
+          proceedBtn.classList.add('btn-success');
+          proceedBtn.classList.remove('btn-primary');
+        } else if (!isBillingComplete) {
+          proceedBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Complete Billing Info First';
+          proceedBtn.classList.remove('btn-success');
+          proceedBtn.classList.add('btn-primary');
         } else {
           proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
+          proceedBtn.classList.remove('btn-success');
+          proceedBtn.classList.add('btn-primary');
         }
       }
 
@@ -1158,10 +1259,10 @@
             
             promoApplied = true;
             
+            // ✅ NEW: Update billing section visibility after promo
+            updateBillingSectionVisibility();
+            
             if (result.completeRegistration) {
-              const proceedBtn = document.getElementById('proceedBtn');
-              proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
-              proceedBtn.classList.add('btn-success');
               showMessage('🎉 Promo code applied! Your courses are now FREE!', 'success');
             } else {
               showMessage('✅ Promo code applied successfully!', 'success');
@@ -1181,7 +1282,7 @@
         }
       });
 
-      // Remove Promo Code
+      // ✅ UPDATED: Remove Promo Code (with billing section update)
       function removePromoCode() {
         if (confirm('Remove promo code?')) {
           currentDiscountedPrice = originalPrice;
@@ -1195,10 +1296,11 @@
           document.getElementById('promoCode').value = '';
           document.getElementById('applyPromoBtn').style.display = 'inline-flex';
           
-          const proceedBtn = document.getElementById('proceedBtn');
-          proceedBtn.classList.remove('btn-success');
-          
           promoApplied = false;
+          
+          // ✅ NEW: Update billing section visibility after promo removal
+          updateBillingSectionVisibility();
+          
           validateCheckout();
           showMessage('Promo code removed', 'info');
         }
@@ -1251,7 +1353,7 @@
         }
       });
 
-      // Main checkout handler with billing data
+      // ✅ UPDATED: Main checkout handler with billing data (free course support)
       async function handleCheckout() {
         const agreeTerms = document.getElementById('agreeTerms').checked;
         const proceedBtn = document.getElementById('proceedBtn');
@@ -1261,28 +1363,36 @@
           return;
         }
 
-        if (!isBillingComplete) {
-          alert('⚠️ Please complete all required billing information first.');
-          // Auto-expand billing form if not complete
-          if (!document.getElementById('billingForm').classList.contains('show')) {
-            toggleBillingForm();
+        // ✅ NEW: Only validate billing if payment is required
+        const isFree = currentDiscountedPrice <= 0;
+        
+        if (!isFree) {
+          // Only check billing for paid courses
+          if (!validateBillingForm()) {
+            alert('⚠️ Please complete all required billing information first.');
+            if (!document.getElementById('billingForm').classList.contains('show')) {
+              toggleBillingForm();
+            }
+            document.querySelector('.billing-info-section').scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+            return;
           }
-          return;
         }
 
         // SET FLAG: User is proceeding to payment
         proceedingToPayment = true;
 
-        // Collect all checkout data including billing
+        // ✅ NEW: Collect checkout data - only include billing for paid courses
         const checkoutData = {
-          // Gift options
           isGift: document.getElementById('giftOption').checked,
           giftRecipientEmail: document.getElementById('giftRecipientEmail')?.value,
           giftMessage: document.getElementById('giftMessage')?.value,
           orderNotes: document.getElementById('notesText')?.value,
           
-          // Billing information for CCAvenue
-          billingInfo: billingData
+          // ✅ Only include billing info if payment is required
+          billingInfo: isFree ? {} : billingData
         };
 
         // Disable button during processing
@@ -1291,12 +1401,12 @@
         showLoading(true);
 
         try {
-          console.log(`💰 Current price check: €${currentDiscountedPrice}`);
+          console.log(`💰 Price check: €${currentDiscountedPrice} (Free: ${isFree})`);
           console.log('📋 Checkout data:', checkoutData);
           
-          if (currentDiscountedPrice <= 0 || currentDiscountedPrice === 0) {
-            // FREE registration
-            console.log('🎯 Processing free registration - price is €0');
+          if (isFree) {
+            // FREE registration - no billing needed
+            console.log('🎯 Processing free registration - no billing validation needed');
             
             const response = await fetch('/complete-registration', {
               method: 'POST',
@@ -1307,7 +1417,7 @@
             const result = await response.json();
             
             if (result.success) {
-              console.log('✅ Free registration successful, redirecting to success page');
+              console.log('✅ Free registration successful');
               window.location.href = `/payment/success?order_id=FREE&amount=0.00&ref=${result.referenceNumber}`;
             } else {
               proceedingToPayment = false;
@@ -1316,8 +1426,8 @@
               proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
             }
           } else {
-            // Payment required - redirect to CCAvenue
-            console.log('💳 Processing payment with CCAvenue...');
+            // Payment required - full billing validation
+            console.log('💳 Processing payment - billing validation required');
             
             const confirmPayment = confirm(
               '🔒 You will now be redirected to CCAvenue secure payment gateway.\n\n' +
@@ -1345,7 +1455,7 @@
               }
             });
 
-            console.log('🚀 Submitting payment initiation request...');
+            console.log('🚀 Submitting payment initiation request with validated billing...');
             
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/payment/initiate', true);
@@ -1355,14 +1465,35 @@
                 console.log('📥 Payment initiation response received:', xhr.status);
                 
                 if (xhr.status === 200) {
-                  // Success - the response should contain the CCAvenue redirect form
                   console.log('✅ Payment form received, redirecting...');
-                  
-                  // Hide loading and replace page content with CCAvenue form
                   showLoading(false);
                   document.open();
                   document.write(xhr.responseText);
                   document.close();
+                } else if (xhr.status === 400) {
+                  // Handle billing validation errors from server
+                  try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    if (errorResponse.requiresCompleteBilling) {
+                      proceedingToPayment = false;
+                      alert(`❌ ${errorResponse.message}\n\nPlease complete your billing information and try again.`);
+                      // Auto-expand billing form
+                      if (!document.getElementById('billingForm').classList.contains('show')) {
+                        toggleBillingForm();
+                      }
+                      document.querySelector('.billing-info-section').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                      });
+                    } else {
+                      alert(`❌ ${errorResponse.message || 'Payment validation failed'}`);
+                    }
+                  } catch (e) {
+                    alert('❌ Payment validation failed. Please check your billing information.');
+                  }
+                  proceedBtn.disabled = false;
+                  proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
+                  showLoading(false);
                 } else {
                   console.error('❌ Payment initiation failed:', xhr.status, xhr.responseText);
                   proceedingToPayment = false;
@@ -1391,7 +1522,7 @@
           proceedingToPayment = false;
           alert('❌ Error processing checkout. Please try again.');
           proceedBtn.disabled = false;
-          proceedBtn.innerHTML = currentDiscountedPrice <= 0 ? 
+          proceedBtn.innerHTML = isFree ? 
             '<i class="fas fa-check-circle"></i> Complete Registration (FREE)' : 
             '<i class="fas fa-credit-card"></i> Proceed to Payment';
           showLoading(false);

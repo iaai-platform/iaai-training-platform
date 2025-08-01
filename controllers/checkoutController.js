@@ -673,6 +673,14 @@ exports.processCheckout = async (req, res) => {
         );
         finalPrice = promoResult.finalPrice;
 
+        // ✅ NEW: If course is FREE, redirect to free registration (no billing needed)
+        if (finalPrice <= 0) {
+          console.log(
+            "🎯 Course is FREE - redirecting to complete registration (no billing required)"
+          );
+          return res.redirect("/complete-registration");
+        }
+
         console.log(
           `🏷️ Promo applied: ${appliedPromo}, Final price: €${finalPrice} (AED ${convertEurToAed(
             finalPrice

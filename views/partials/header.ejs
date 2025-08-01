@@ -78,7 +78,7 @@
             
             <div class="program-menu-trigger">
                 <a href="/about-us">About Us</a>
-                <i class="fas fa-chevron-down"></i>
+                <span><i class="fas fa-chevron-down"></i></span>
                 <div class="program-menu">
                     <a href="/about-us">About IAAI</a>
                     <a href="/mission-vision">Mission & Vision</a>
@@ -89,7 +89,7 @@
             
             <div class="program-menu-trigger">
                 <a href="/all-courses">All Courses</a>
-                <i class="fas fa-chevron-down"></i>
+                <span><i class="fas fa-chevron-down"></i></span>
                 <div class="program-menu">
                     <a href="/hands-on-surgical-courses">Hands-On Surgical & Non-Surgical Courses</a>
                     <a href="/comprehensive-training-programs">Comprehensive Training Programs</a>
@@ -100,7 +100,7 @@
             
             <div class="program-menu-trigger">
                 <a href="/training-programs">All Programs</a>
-                <i class="fas fa-chevron-down"></i>
+                <span><i class="fas fa-chevron-down"></i></span>
                 <div class="program-menu">
                     <a href="/in-person-aesthetic-training">In-Person Aesthetic Training</a>
                     <a href="/online-live-training">Online Live Training</a>
@@ -115,7 +115,7 @@
             
            <div class="instructors-menu-trigger">
             <a href="/our-instructors">Instructors</a>
-            <i class="fas fa-chevron-down"></i>
+            <span><i class="fas fa-chevron-down"></i></span>
             <div class="instructors-menu">
                 <a href="/our-instructors">Our Expert Instructors</a>
                 <a href="/new-trainers-required">Join Our Team</a>
@@ -125,7 +125,7 @@
             <% if (user) { %>
                 <div class="program-menu-trigger">
                     <a href="/library">My Library</a>
-                    <i class="fas fa-chevron-down"></i>
+                    <span><i class="fas fa-chevron-down"></i></span>
                     <div class="program-menu">
                         <a href="/library/self-paced">Self-Paced Courses</a>
                         <a href="/library/live">Live Online Courses</a>
@@ -240,19 +240,19 @@
             // Mobile dropdown toggle
             if (dropdownTriggers) {
                 dropdownTriggers.forEach(trigger => {
-                    trigger.addEventListener('click', function(e) {
-                        // Prevent the link from navigating on mobile
-                        if (window.innerWidth <= 1024) {
-                            e.preventDefault();
-                            this.classList.toggle('active');
+                    const toggleArea = trigger.querySelector('span'); // Target the span containing the icon
+                    if (toggleArea) {
+                        toggleArea.addEventListener('click', function(e) {
+                            e.preventDefault(); // Prevent the icon's click from triggering a navigation
+                            trigger.classList.toggle('active');
                             // Close other dropdowns
                             dropdownTriggers.forEach(otherTrigger => {
-                                if (otherTrigger !== this) {
+                                if (otherTrigger !== trigger) {
                                     otherTrigger.classList.remove('active');
                                 }
                             });
-                        }
-                    });
+                        });
+                    }
                 });
             }
         });

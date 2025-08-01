@@ -305,7 +305,27 @@ header {
   display: none;
 }
 
+/* Helper class to show desktop-only elements on larger screens */
+.desktop-only {
+  display: block;
+}
+
+/* Helper class to hide mobile-only elements on larger screens */
+.mobile-only {
+  display: none;
+}
+
 @media (max-width: 1024px) {
+  /* Hide desktop-only elements */
+  .desktop-only {
+      display: none;
+  }
+
+  /* Show mobile-only elements */
+  .mobile-only {
+      display: block;
+  }
+
   /* ==================================
      Hamburger Menu Toggle
   ================================== */
@@ -372,11 +392,19 @@ header {
   .program-menu-trigger,
   .instructors-menu-trigger {
       width: 100%;
-      display: block; /* Make sure the container takes up full width */
+      display: flex; /* Changed from block to flex for alignment */
+      align-items: center;
+      justify-content: space-between;
       padding: 15px 10px;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 0; /* Remove rounded corners for full-width links */
+      border-radius: 0;
       gap: 10px;
+  }
+
+  .program-menu-trigger.active,
+  .instructors-menu-trigger.active {
+      background-color: rgba(184, 134, 11, 0.1);
+      color: #b8860b;
   }
   
   .program-menu-trigger a,
@@ -390,11 +418,11 @@ header {
   .instructors-menu-trigger:hover {
       background-color: transparent;
   }
-  
+
   .program-menu-trigger.active .program-menu,
   .instructors-menu-trigger.active .instructors-menu {
       display: block;
-      position: static; /* Position normally within the flow */
+      position: static;
       width: 100%;
       min-width: auto;
       border: none;
@@ -412,22 +440,37 @@ header {
       border: none !important;
       font-size: 16px !important;
   }
-
+  
   .program-menu a:hover,
   .instructors-menu a:hover {
       background: none !important;
       color: #b8860b !important;
       transform: none;
   }
-  
+
   /* ==================================
      Other Mobile Elements
   ================================== */
-  .search-bar {
-      display: none; /* Hide search bar on mobile for cleaner layout */
+  .search-bar.mobile-only {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 
-  .login-register {
-      margin-left: 0;
+  .search-bar.mobile-only input {
+      width: 100%;
+  }
+
+  .login-register.mobile-only {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+  }
+
+  .login-register.mobile-only button {
+      width: 100%;
+      padding: 12px 15px;
   }
 }

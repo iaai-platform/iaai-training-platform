@@ -245,6 +245,12 @@
                         if (window.innerWidth <= 1024) {
                             e.preventDefault();
                             this.classList.toggle('active');
+                            // Close other dropdowns
+                            dropdownTriggers.forEach(otherTrigger => {
+                                if (otherTrigger !== this) {
+                                    otherTrigger.classList.remove('active');
+                                }
+                            });
                         }
                     });
                 });

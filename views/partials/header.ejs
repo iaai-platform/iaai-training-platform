@@ -89,7 +89,12 @@
             <img src="/images/image0.jpeg" alt="IAAI Logo">
         </div>
         
-        <nav class="navbar">
+        <!-- 🆕 Mobile Menu Toggle Button -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <nav class="navbar" id="navbar">
             <a href="/">Home</a>
             
             <!-- 🆕 UPDATED: "About Us" with Enhanced Dropdown -->
@@ -193,6 +198,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Search functionality
         const searchInput = document.querySelector('.search-bar input');
         
         if (searchInput) {
@@ -205,6 +211,76 @@
                 }
             });
         }
+
+        // Mobile menu toggle functionality
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navbar = document.getElementById('navbar');
+        const menuIcon = mobileMenuToggle.querySelector('i');
+
+        mobileMenuToggle.addEventListener('click', function() {
+            navbar.classList.toggle('active');
+            
+            // Toggle between hamburger and X icon
+            if (navbar.classList.contains('active')) {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-times');
+            } else {
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        });
+
+        // Mobile dropdown functionality
+        const programMenuTriggers = document.querySelectorAll('.program-menu-trigger, .instructors-menu-trigger');
+        
+        programMenuTriggers.forEach(trigger => {
+            const chevron = trigger.querySelector('i');
+            
+            trigger.addEventListener('click', function(e) {
+                // Only handle clicks on mobile (when menu toggle is visible)
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    
+                    // Close other open dropdowns
+                    programMenuTriggers.forEach(otherTrigger => {
+                        if (otherTrigger !== trigger) {
+                            otherTrigger.classList.remove('active');
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    trigger.classList.toggle('active');
+                }
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('header')) {
+                navbar.classList.remove('active');
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+                
+                // Close all mobile dropdowns
+                programMenuTriggers.forEach(trigger => {
+                    trigger.classList.remove('active');
+                });
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                navbar.classList.remove('active');
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+                
+                // Remove active class from mobile dropdowns
+                programMenuTriggers.forEach(trigger => {
+                    trigger.classList.remove('active');
+                });
+            }
+        });
     });
 </script>
 </html>

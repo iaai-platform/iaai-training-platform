@@ -1,22 +1,34 @@
 /* ============================================================
-   ✅ HEADER STYLING - Based on Original with Instructors Menu Added
+   ✅ HEADER STYLING - Enhanced Mobile-Responsive Version
 ============================================================ */
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #E2E2E2; /* Clean white background */
-  border-bottom: 3px solid #b8860b; /* Gold accent */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  background-color: #E2E2E2;
+  border-bottom: 3px solid #b8860b;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   padding: 15px 20px;
   position: relative;
-  font-family: 'Montserrat', sans-serif; /* ✅ Modern & clean font */
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* ✅ Logo Styling */
 .logo img {
   height: 60px;
   width: auto;
+}
+
+/* ✅ Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #0C2340;
+  cursor: pointer;
+  padding: 5px;
+  order: 2;
 }
 
 /* ✅ Navbar */
@@ -34,17 +46,17 @@ header {
 
 /* ✅ Navbar Links */
 .navbar a {
-  color: #0C2340; /* Dark text for readability */
+  color: #0C2340;
   text-decoration: none;
   padding: 10px 15px;
   font-size: 16px;
-  font-weight: 500; /* Medium weight */
-  text-transform: uppercase; /* Premium feel */
+  font-weight: 500;
+  text-transform: uppercase;
   transition: color 0.3s ease-in-out;
 }
 
 .navbar a:hover {
-  color: #b8860b; /* Gold hover effect */
+  color: #b8860b;
 }
 
 /* ✅ "All Programs" and "Instructors" Dropdown */
@@ -85,7 +97,6 @@ header {
   background-color: rgba(184, 134, 11, 0.1);
   color: #b8860b;
   border-radius: 8px;
-  transform: none; /* Remove the scale effect */
 }
 
 .program-menu-trigger:hover i,
@@ -190,7 +201,7 @@ header {
   outline: none;
 }
 
-/* ✅ Profile Dropdown - UPDATED with smaller icon size */
+/* ✅ Profile Dropdown */
 .profile-dropdown {
   position: relative;
   display: inline-block;
@@ -202,30 +213,28 @@ header {
   border: none;
   cursor: pointer;
   color: #333;
-  font-size: 14px;        /* ✅ SMALLER: 16px → 14px */
-  padding: 6px;           /* ✅ SMALLER: 8px → 6px */
+  font-size: 14px;
+  padding: 6px;
   display: flex;
   align-items: center;
-  gap: 4px;               /* ✅ SMALLER: 6px → 4px */
+  gap: 4px;
   transition: color 0.3s ease-in-out;
 }
 
-/* Profile picture styling - KEPT original size */
 .profile-picture {
-  width: 32px; /* ✅ KEPT original 32px size */
-  height: 32px; /* ✅ KEPT original 32px size */
+  width: 32px;
+  height: 32px;
   border-radius: 80%;
   object-fit: cover;
   border: 2px solid #b8860b;
 }
 
-/* Fallback icon styling (when no profile picture) - REDUCED to fit within profile picture container */
 .profile-icon i {
-  font-size: 28px; /* ✅ REDUCED from 32px to 28px to fit better within the 32px container */
+  font-size: 28px;
   color: #b80b0b;
 }
 
-/* ✅ Dropdown Content - FIXED to match original pattern */
+/* ✅ Dropdown Content */
 .dropdown-content {
   display: none;
   position: absolute;
@@ -257,7 +266,6 @@ header {
   background-color: #f1f1f1;
 }
 
-/* FIXED: Use exact same pattern as your original program-menu */
 .profile-dropdown:hover .dropdown-content,
 .dropdown-content:hover {
   display: block;
@@ -266,12 +274,12 @@ header {
   transform: translateY(0);
 }
 
-/* ✅ Login/Register Container - FIXED alignment */
+/* ✅ Login/Register Container */
 .login-register {
   display: flex;
   align-items: center;
-  margin-left: 10px; /* Align with search bar */
-  margin-right: 0;   /* Closer to page margin */
+  margin-left: 10px;
+  margin-right: 0;
 }
 
 /* ✅ Login/Register Button Styling */
@@ -295,26 +303,202 @@ header {
   box-shadow: 0 6px 20px rgba(184, 134, 11, 0.5);
 }
 
-/* ✅ Mobile Responsive */
-@media (max-width: 768px) {
-  header {
-      flex-direction: column;
-      align-items: center;
-  }
+/* ============================================================
+   📱 MOBILE RESPONSIVE ENHANCEMENTS
+============================================================ */
 
-  .navbar {
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-  }
-
+/* ✅ Tablet View (768px - 1024px) */
+@media (max-width: 1024px) {
   .search-bar input {
-      width: 100%;
+    width: 150px;
   }
-
-  .dropdown-content {
-      right: auto;
-      left: 0;
+  
+  .navbar {
+    gap: 8px;
+    padding-left: 15px;
+  }
+  
+  .navbar a,
+  .program-menu-trigger,
+  .instructors-menu-trigger {
+    padding: 8px 12px;
+    font-size: 14px;
   }
 }
 
+/* ✅ Mobile View (Up to 768px) */
+@media (max-width: 768px) {
+  header {
+    padding: 10px 15px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  /* Show mobile menu toggle */
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  /* Hide desktop navbar by default on mobile */
+  .navbar {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #E2E2E2;
+    flex-direction: column;
+    padding: 20px;
+    gap: 0;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-top: 2px solid #b8860b;
+    z-index: 999;
+  }
+
+  /* Show navbar when active */
+  .navbar.active {
+    display: flex;
+  }
+
+  /* Mobile navbar links */
+  .navbar a {
+    padding: 15px 0;
+    border-bottom: 1px solid #d0d0d0;
+    width: 100%;
+    text-align: left;
+    font-size: 16px;
+  }
+
+  .navbar a:last-child {
+    border-bottom: none;
+  }
+
+  /* Mobile dropdown triggers */
+  .program-menu-trigger,
+  .instructors-menu-trigger {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px 0;
+    border-bottom: 1px solid #d0d0d0;
+    width: 100%;
+  }
+
+  /* Mobile dropdown menus */
+  .program-menu,
+  .instructors-menu {
+    position: static;
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    background: #f8f8f8;
+    margin-top: 10px;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .program-menu-trigger.active .program-menu,
+  .instructors-menu-trigger.active .instructors-menu {
+    max-height: 500px;
+  }
+
+  .program-menu a,
+  .instructors-menu a {
+    padding: 10px 15px !important;
+    font-size: 14px !important;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  /* Hide search bar on small mobile */
+  .search-bar {
+    display: none;
+  }
+
+  /* Mobile profile and login adjustments */
+  .login-register {
+    margin-left: auto;
+    order: 3;
+  }
+
+  .login-register button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .profile-dropdown .dropdown-content {
+    right: 0;
+    min-width: 180px;
+  }
+
+  /* Logo adjustments for mobile */
+  .logo img {
+    height: 50px;
+  }
+}
+
+/* ✅ Small Mobile View (Up to 480px) */
+@media (max-width: 480px) {
+  header {
+    padding: 8px 10px;
+  }
+
+  .logo img {
+    height: 45px;
+  }
+
+  .login-register button {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 20px;
+  }
+
+  .profile-picture {
+    width: 28px;
+    height: 28px;
+  }
+
+  .profile-icon i {
+    font-size: 24px;
+  }
+
+  .program-menu a,
+  .instructors-menu a {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .navbar a {
+    padding: 12px 0;
+    font-size: 15px;
+  }
+}
+
+/* ✅ Very Small Mobile (Up to 360px) */
+@media (max-width: 360px) {
+  header {
+    padding: 6px 8px;
+  }
+
+  .logo img {
+    height: 40px;
+  }
+
+  .login-register button {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .navbar {
+    padding: 15px;
+  }
+
+  .program-menu-trigger,
+  .instructors-menu-trigger {
+    padding: 12px 0;
+  }
+}

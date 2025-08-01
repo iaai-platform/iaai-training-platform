@@ -346,13 +346,14 @@ header {
     top: 100%;
     left: 0;
     right: 0;
-    background-color: #E2E2E2;
+    background-color: #ffffff;
     flex-direction: column;
     padding: 20px;
     gap: 0;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    border-top: 2px solid #b8860b;
-    z-index: 999;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+    border-top: 3px solid #b8860b;
+    border-bottom: 2px solid #b8860b;
+    z-index: 1000;
   }
 
   /* Show navbar when active */
@@ -363,10 +364,18 @@ header {
   /* Mobile navbar links */
   .navbar a {
     padding: 15px 0;
-    border-bottom: 1px solid #d0d0d0;
+    border-bottom: 1px solid #e0e0e0;
     width: 100%;
     text-align: left;
     font-size: 16px;
+    color: #0C2340 !important;
+    font-weight: 500;
+    background-color: transparent !important;
+  }
+
+  .navbar a:hover {
+    background-color: #f8f9fa !important;
+    color: #b8860b !important;
   }
 
   .navbar a:last-child {
@@ -379,8 +388,16 @@ header {
     flex-direction: column;
     align-items: flex-start;
     padding: 15px 0;
-    border-bottom: 1px solid #d0d0d0;
+    border-bottom: 1px solid #e0e0e0;
     width: 100%;
+    background-color: transparent !important;
+  }
+
+  .program-menu-trigger a,
+  .instructors-menu-trigger a {
+    color: #0C2340 !important;
+    font-weight: 500 !important;
+    font-size: 16px !important;
   }
 
   /* Mobile dropdown menus */
@@ -392,9 +409,9 @@ header {
     visibility: visible;
     transform: none;
     box-shadow: none;
-    border: none;
-    border-radius: 0;
-    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f8f9fa;
     margin-top: 10px;
     width: 100%;
     max-height: 0;
@@ -409,9 +426,20 @@ header {
 
   .program-menu a,
   .instructors-menu a {
-    padding: 10px 15px !important;
+    padding: 12px 15px !important;
     font-size: 14px !important;
     border-bottom: 1px solid #e0e0e0;
+    color: #0C2340 !important;
+    font-weight: 400 !important;
+    background-color: transparent !important;
+  }
+
+  .program-menu a:hover,
+  .instructors-menu a:hover {
+    background-color: #ffffff !important;
+    color: #b8860b !important;
+    border-radius: 4px;
+    transform: none !important;
   }
 
   /* Hide search bar on small mobile */

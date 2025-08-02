@@ -203,6 +203,7 @@ async function scheduleCoursesReminders(courses, context = "registration") {
 }
 
 // ✅ ENHANCED: Display Checkout Page with Billing Data Integration
+// ✅ ENHANCED: Display Checkout Page with Billing Data Integration - COMPLETE VERSION
 exports.getCheckoutPage = async (req, res) => {
   try {
     console.log("🔍 Loading checkout page with billing integration...");
@@ -219,7 +220,7 @@ exports.getCheckoutPage = async (req, res) => {
     let totalEarlyBirdSavings = 0;
     let totalLinkedCourseSavings = 0;
 
-    // Process In-Person Courses
+    // ✅ FIXED: Process In-Person Courses with correct pricing
     const inPersonCartItems =
       user.myInPersonCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -237,11 +238,16 @@ exports.getCheckoutPage = async (req, res) => {
           isLinkedCourse
         );
 
+        // ⭐ FIX: Use paidAmount for correct price including certificate fees
+        const finalPrice = isLinkedCourse
+          ? 0
+          : item.enrollmentData.paidAmount || pricing.currentPrice;
+
         coursesInCart.push({
           courseId: item.courseId,
           title: course.basic?.title || "Untitled Course",
           courseCode: course.basic?.courseCode || "N/A",
-          price: pricing.currentPrice,
+          price: finalPrice, // ✅ NOW USES CORRECT PRICE
           originalPrice: pricing.regularPrice,
           isEarlyBird: pricing.isEarlyBird,
           earlyBirdSavings: pricing.earlyBirdSavings,
@@ -249,10 +255,17 @@ exports.getCheckoutPage = async (req, res) => {
           courseType: "InPersonAestheticTraining",
           displayType: "In-Person",
           startDate: course.schedule?.startDate || null,
+          // ⭐ ADD: Certificate and enrollment type fields
+          enrollmentType: item.enrollmentData.enrollmentType || "paid_regular",
+          certificateRequested:
+            item.enrollmentData.certificateRequested || false,
+          certificateFee: item.enrollmentData.certificateFee || 0,
+          isFreeWithCertificate:
+            item.enrollmentData.enrollmentType === "free_with_certificate",
         });
 
         totalOriginalPrice += pricing.regularPrice;
-        totalCurrentPrice += pricing.currentPrice;
+        totalCurrentPrice += finalPrice; // ✅ NOW USES CORRECT PRICE
         totalEarlyBirdSavings += pricing.earlyBirdSavings;
         if (pricing.isLinkedCourseFree) {
           totalLinkedCourseSavings += pricing.regularPrice;
@@ -260,7 +273,7 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    // Process Online Live Courses
+    // ✅ FIXED: Process Online Live Courses with correct pricing
     const liveCartItems =
       user.myLiveCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -276,11 +289,27 @@ exports.getCheckoutPage = async (req, res) => {
           isLinkedCourse
         );
 
+        // ⭐ FIX: Use paidAmount for correct price including certificate fees
+        const finalPrice = isLinkedCourse
+          ? 0
+          : item.enrollmentData.paidAmount || pricing.currentPrice;
+
+        console.log(`💰 Online course pricing debug:`, {
+          courseTitle: course.basic?.title,
+          originalPrice: pricing.regularPrice,
+          currentPrice: pricing.currentPrice,
+          paidAmount: item.enrollmentData.paidAmount,
+          finalPrice: finalPrice,
+          certificateFee: item.enrollmentData.certificateFee,
+          enrollmentType: item.enrollmentData.enrollmentType,
+          isLinkedCourse: isLinkedCourse,
+        });
+
         coursesInCart.push({
           courseId: item.courseId,
           title: course.basic?.title || "Untitled Course",
           courseCode: course.basic?.courseCode || "N/A",
-          price: pricing.currentPrice,
+          price: finalPrice, // ✅ NOW USES CORRECT PRICE
           originalPrice: pricing.regularPrice,
           isEarlyBird: pricing.isEarlyBird && !isLinkedCourse,
           earlyBirdSavings: isLinkedCourse ? 0 : pricing.earlyBirdSavings,
@@ -290,10 +319,19 @@ exports.getCheckoutPage = async (req, res) => {
             ? "Online Live (Included)"
             : "Online Live",
           startDate: course.schedule?.startDate || null,
+          // ⭐ ADD: Certificate and enrollment type fields
+          enrollmentType:
+            item.enrollmentData.enrollmentType ||
+            (isLinkedCourse ? "linked_free" : "free_no_certificate"),
+          certificateRequested:
+            item.enrollmentData.certificateRequested || false,
+          certificateFee: item.enrollmentData.certificateFee || 0,
+          isFreeWithCertificate:
+            item.enrollmentData.enrollmentType === "free_with_certificate",
         });
 
         totalOriginalPrice += pricing.regularPrice;
-        totalCurrentPrice += pricing.currentPrice;
+        totalCurrentPrice += finalPrice; // ✅ NOW USES CORRECT PRICE
         if (!isLinkedCourse) {
           totalEarlyBirdSavings += pricing.earlyBirdSavings;
         }
@@ -303,7 +341,7 @@ exports.getCheckoutPage = async (req, res) => {
       }
     }
 
-    // Process Self-Paced Courses
+    // ✅ FIXED: Process Self-Paced Courses with correct pricing
     const selfPacedCartItems =
       user.mySelfPacedCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -319,11 +357,15 @@ exports.getCheckoutPage = async (req, res) => {
           item.enrollmentData.registrationDate
         );
 
+        // ⭐ FIX: Use paidAmount for correct price
+        const finalPrice =
+          item.enrollmentData.paidAmount || pricing.currentPrice;
+
         coursesInCart.push({
           courseId: item.courseId,
           title: course.basic?.title || "Untitled Course",
           courseCode: course.basic?.courseCode || "N/A",
-          price: pricing.currentPrice,
+          price: finalPrice, // ✅ NOW USES CORRECT PRICE
           originalPrice: pricing.regularPrice,
           isEarlyBird: false,
           earlyBirdSavings: 0,
@@ -331,10 +373,15 @@ exports.getCheckoutPage = async (req, res) => {
           courseType: "SelfPacedOnlineTraining",
           displayType: "Self-Paced",
           startDate: null,
+          // ⭐ ADD: Certificate and enrollment type fields
+          enrollmentType: item.enrollmentData.enrollmentType || "paid_regular",
+          certificateRequested: false,
+          certificateFee: 0,
+          isFreeWithCertificate: false,
         });
 
         totalOriginalPrice += pricing.regularPrice;
-        totalCurrentPrice += pricing.currentPrice;
+        totalCurrentPrice += finalPrice; // ✅ NOW USES CORRECT PRICE
       }
     }
 
@@ -410,12 +457,31 @@ exports.getCheckoutPage = async (req, res) => {
       }
     });
 
+    // ✅ ENHANCED LOGGING: Debug pricing calculations
+    console.log("💰 Detailed Pricing Debug:", {
+      coursesInCart: coursesInCart.length,
+      courseDetails: coursesInCart.map((course) => ({
+        title: course.title,
+        price: course.price,
+        originalPrice: course.originalPrice,
+        enrollmentType: course.enrollmentType,
+        certificateFee: course.certificateFee,
+      })),
+      totals: {
+        originalPrice: totalOriginalPrice,
+        currentPrice: totalCurrentPrice,
+        earlyBirdSavings: totalEarlyBirdSavings,
+        linkedCourseSavings: totalLinkedCourseSavings,
+        totalSavings: totalSavings,
+      },
+    });
+
     console.log("📍 Enhanced Cart Summary with Billing Integration:", {
       inPerson: inPersonCartItems.length,
       live: liveCartItems.length,
       selfPaced: selfPacedCartItems.length,
       totalOriginal: `€${totalOriginalPrice} (AED ${totalOriginalPriceAED})`,
-      totalCurrent: `€${totalCurrentPrice} (AED ${totalPriceAED})`,
+      totalCurrent: `€${totalCurrentPrice} (AED ${totalPriceAED})`, // ✅ NOW SHOWS CORRECT AMOUNT
       totalSavings: `€${totalSavings} (AED ${totalSavingsAED})`,
       billingComplete: billingBoxStatus.isComplete,
       missingBillingFields: billingBoxStatus.missingFields,
@@ -425,7 +491,7 @@ exports.getCheckoutPage = async (req, res) => {
     res.render("checkout", {
       // Existing checkout data
       coursesInCart,
-      totalPrice: totalCurrentPrice,
+      totalPrice: totalCurrentPrice, // ✅ NOW USES CORRECT PRICE
       totalPriceAED: totalPriceAED,
       totalOriginalPrice: totalOriginalPrice,
       totalOriginalPriceAED: totalOriginalPriceAED,
@@ -449,7 +515,6 @@ exports.getCheckoutPage = async (req, res) => {
     res.status(500).send("Error loading checkout page");
   }
 };
-
 // ✅ Apply Promo Code
 exports.applyPromoCode = async (req, res) => {
   try {
@@ -1207,24 +1272,17 @@ exports.proceedToPayment = async (req, res) => {
     console.log("📋 Raw request body:", req.body);
 
     if (req.body.billingInfo) {
-      // Parse billing info if it's a JSON string (from form submission)
       if (typeof req.body.billingInfo === "string") {
         try {
           billingInfo = JSON.parse(req.body.billingInfo);
         } catch (e) {
-          console.log("📋 Billing info is not JSON string, using as object");
           billingInfo = req.body.billingInfo;
         }
       } else {
         billingInfo = req.body.billingInfo;
       }
-      console.log(
-        "📋 Parsed billing info from request:",
-        Object.keys(billingInfo)
-      );
     } else {
-      // If no billing info provided, try to get from user profile
-      console.log("⚠️ No billing info in request, checking user profile...");
+      // Fallback to user profile data
       billingInfo = {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
@@ -1238,7 +1296,40 @@ exports.proceedToPayment = async (req, res) => {
         alternativePhone: user.addressInfo?.alternativePhone || "",
         title: user.professionalInfo?.title || "",
       };
-      console.log("📋 Using billing info from user profile");
+    }
+    // ✅ SKIP billing validation if final amount is 0 (free courses)
+    if (finalAmountEUR > 0) {
+      // Only validate billing for paid courses
+      const requiredBillingFields = [
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "address",
+        "city",
+        "country",
+      ];
+      const missingBillingFields = [];
+
+      requiredBillingFields.forEach((field) => {
+        const value = billingInfo[field];
+        if (!value || value.toString().trim() === "") {
+          missingBillingFields.push(field);
+        }
+      });
+
+      if (missingBillingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Billing information incomplete. Missing: ${missingBillingFields.join(
+            ", "
+          )}`,
+          missingFields: missingBillingFields,
+          requiresCompleteBilling: true,
+        });
+      }
+    } else {
+      console.log("🎁 Free course - skipping billing validation");
     }
 
     // ✅ NEW: Comprehensive billing validation for CCAvenue
@@ -2160,6 +2251,110 @@ exports.handlePaymentResponse = async (req, res) => {
 exports.handlePaymentCancel = (req, res) => {
   console.log("❌ Payment cancelled by user");
   res.redirect("/payment/cancelled");
+};
+
+//new
+// ✅ NEW: API route for getting user billing info
+exports.getUserBillingInfo = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select(
+      "firstName lastName email phoneNumber country addressInfo professionalInfo"
+    );
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      phoneNumber: user.phoneNumber || "",
+      country: user.country || "",
+      addressInfo: user.addressInfo || {},
+      professionalInfo: user.professionalInfo || {},
+    });
+  } catch (error) {
+    console.error("❌ Error fetching user billing info:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// ✅ NEW: API route for updating user billing info
+exports.updateUserBillingInfo = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      address,
+      city,
+      state,
+      zipCode,
+      country,
+      alternativePhone,
+      title,
+    } = req.body;
+
+    // Update basic info
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (country) user.country = country;
+
+    // Update professional info
+    if (!user.professionalInfo) user.professionalInfo = {};
+    if (title) user.professionalInfo.title = title;
+
+    // Update address info
+    if (!user.addressInfo) user.addressInfo = {};
+    if (address) user.addressInfo.address = address;
+    if (city) user.addressInfo.city = city;
+    if (state) user.addressInfo.state = state;
+    if (zipCode) user.addressInfo.zipCode = zipCode;
+    if (country) user.addressInfo.country = country;
+    if (alternativePhone) user.addressInfo.alternativePhone = alternativePhone;
+
+    // Check completion status
+    const requiredFields = [
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      address,
+      city,
+      country,
+    ];
+    const isComplete = requiredFields.every(
+      (field) => field && field.trim() !== ""
+    );
+    user.addressInfo.isComplete = isComplete;
+    user.addressInfo.lastUpdated = new Date();
+
+    await user.save({ validateBeforeSave: false });
+
+    res.json({
+      success: true,
+      message: "Billing information updated successfully",
+      isComplete: isComplete,
+    });
+  } catch (error) {
+    console.error("❌ Error updating user billing info:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 };
 
 // ✅ Export utility functions

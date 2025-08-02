@@ -705,3 +705,80 @@ input[type="checkbox"] {
     color: #666;
   }
 }
+
+/* ✅ MINIMAL CSS: Add these styles to your orders.css or in a <style> tag */
+
+/* Certificate-related styles */
+.certificate-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+  margin-top: 5px;
+}
+
+.certificate-price {
+  color: #17a2b8;
+  font-weight: 700;
+}
+
+.certificate-fee-info {
+  color: #17a2b8;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.certificate-breakdown {
+  color: #17a2b8;
+  font-weight: 500;
+}
+
+.free-course-info {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.certificate-fees .total-label {
+  color: #17a2b8;
+  font-weight: 600;
+}
+
+.certificate-amount {
+  color: #17a2b8;
+  font-weight: 700;
+}
+
+.certificate-summary {
+  background: #e8f7fa;
+  border: 1px solid #b2ebf2;
+  border-radius: 5px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #17a2b8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.certificate-count {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Course type badge variations */
+.course-type-badge.online-live-certificate {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+}
+
+.course-type-badge.online-live-free {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+}

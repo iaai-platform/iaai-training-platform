@@ -540,6 +540,8 @@ const userSchema = new mongoose.Schema(
     ],
 
     // 2. Online Live Course Enrollments
+    // ✅ COMPLETE FIX: Replace the entire myLiveCourses section in your User model
+
     myLiveCourses: [
       {
         // Reference to course
@@ -549,7 +551,7 @@ const userSchema = new mongoose.Schema(
           ref: "OnlineLiveTraining",
         },
 
-        // User-specific enrollment data
+        // ⭐ ENHANCED: Complete enrollment data with certificate logic
         enrollmentData: {
           status: {
             type: String,
@@ -564,40 +566,112 @@ const userSchema = new mongoose.Schema(
             default: "cart",
           },
           registrationDate: { type: Date, default: Date.now },
-          paidAmount: Number,
+
+          // ⭐ CRITICAL: This reflects the ACTUAL amount user will pay
+          paidAmount: {
+            type: Number,
+            default: 0,
+          }, // €0 for free course, €10 for certificate, full price for paid course
+
           paymentTransactionId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "PaymentTransaction",
           },
           promoCodeUsed: String,
-          //new
-          certificateRequested: { type: Boolean, default: false },
-          certificateFee: { type: Number, default: 0 },
-          // ⭐ ADD THESE FIELDS:
+
+          // ⭐ CERTIFICATE LOGIC FIELDS
+          certificateRequested: {
+            type: Boolean,
+            default: false,
+          }, // User wants certificate?
+          certificateFee: {
+            type: Number,
+            default: 0,
+          }, // €10 for free courses, €0 for paid courses (included)
+
+          // ⭐ COURSE INFORMATION
           courseName: { type: String },
           courseCode: { type: String },
-          courseType: { type: String },
-          originalPrice: { type: Number, default: 0 },
+          courseType: { type: String, default: "OnlineLiveTraining" },
+          originalPrice: {
+            type: Number,
+            default: 0,
+          }, // Course price from course model (could be €0)
           currency: { type: String, default: "EUR" },
-          isLinkedCourse: { type: Boolean, default: false }, // ⭐ CRITICAL
-          isLinkedCourseFree: { type: Boolean, default: false }, // ⭐ CRITICAL
+
+          // ⭐ LINKED COURSE FLAGS
+          isLinkedCourse: {
+            type: Boolean,
+            default: false,
+          }, // Is this linked to in-person course?
+          isLinkedCourseFree: {
+            type: Boolean,
+            default: false,
+          }, // Is this FREE because it's linked?
+
+          // ⭐ NEW: ENROLLMENT TYPE for clear classification
+          enrollmentType: {
+            type: String,
+            enum: [
+              "free_no_certificate", // Free course, no certificate (€0)
+              "free_with_certificate", // Free course + certificate (€10)
+              "paid_regular", // Paid course at regular price
+              "paid_early_bird", // Paid course at early bird price
+              "linked_free", // Free because linked to in-person
+            ],
+            default: function () {
+              // Auto-calculate based on other fields
+              if (this.isLinkedCourseFree) return "linked_free";
+              if (this.originalPrice === 0) {
+                return this.certificateRequested
+                  ? "free_with_certificate"
+                  : "free_no_certificate";
+              }
+              return this.earlyBirdApplied ? "paid_early_bird" : "paid_regular";
+            },
+          },
+
+          // ⭐ PRICING BREAKDOWN for transparency
+          pricingBreakdown: {
+            baseCoursePrice: { type: Number, default: 0 }, // Course price (€0 for free)
+            certificatePrice: { type: Number, default: 0 }, // Certificate fee (€10 for free courses)
+            earlyBirdDiscount: { type: Number, default: 0 }, // Early bird savings
+            finalPrice: { type: Number, default: 0 }, // Total amount to pay
+
+            // Flags for quick reference
+            isFreeBase: { type: Boolean, default: false }, // Base course is free?
+            certificateIncluded: { type: Boolean, default: false }, // Certificate included in price?
+            payingForCertificateOnly: { type: Boolean, default: false }, // Only paying for certificate?
+          },
+
+          // ⭐ EARLY BIRD PRICING (for paid courses)
+          earlyBirdApplied: { type: Boolean, default: false },
+          earlyBirdSavings: { type: Number, default: 0 },
+          earlyBirdDeadline: { type: Date },
+
+          // ⭐ ACCESS & EXPIRY
+          accessGrantedDate: { type: Date },
+          expiryDate: { type: Date },
+
+          // ⭐ PAYMENT TRACKING
+          paymentMethod: { type: String }, // "free", "certificate_fee", "full_payment"
+          paymentDate: { type: Date },
+          paymentNotes: { type: String }, // Additional context
         },
 
-        // User's progress/interaction
+        // ⭐ EXISTING: User progress (UNCHANGED)
         userProgress: {
           sessionsAttended: [
             {
-              sessionId: mongoose.Schema.Types.ObjectId, // Reference to course.schedule.sessions
+              sessionId: mongoose.Schema.Types.ObjectId,
               sessionDate: Date,
               joinTime: Date,
               leaveTime: Date,
-              duration: Number, // minutes
+              duration: Number,
               attendancePercentage: Number,
             },
           ],
           overallAttendancePercentage: { type: Number, default: 0 },
-
-          // Recording access tracking
           recordingsWatched: [
             {
               recordingId: mongoose.Schema.Types.ObjectId,
@@ -605,8 +679,6 @@ const userSchema = new mongoose.Schema(
               watchCount: { type: Number, default: 0 },
             },
           ],
-
-          // Assessments
           assessmentAttempts: [
             {
               attemptDate: Date,
@@ -615,7 +687,6 @@ const userSchema = new mongoose.Schema(
             },
           ],
           bestAssessmentScore: Number,
-
           courseStatus: {
             type: String,
             enum: ["not-started", "in-progress", "completed"],
@@ -624,7 +695,7 @@ const userSchema = new mongoose.Schema(
           completionDate: Date,
         },
 
-        //assesssment
+        // ⭐ EXISTING: Assessment data (UNCHANGED)
         assessmentAttempts: [
           {
             attemptNumber: Number,
@@ -652,7 +723,6 @@ const userSchema = new mongoose.Schema(
           },
         ],
 
-        // Assessment summary fields
         assessmentCompleted: { type: Boolean, default: false },
         assessmentScore: { type: Number, default: 0 },
         bestAssessmentScore: { type: Number, default: 0 },
@@ -670,7 +740,6 @@ const userSchema = new mongoose.Schema(
           },
         ],
 
-        // Downloaded materials tracking
         downloadedMaterials: [
           {
             materialId: mongoose.Schema.Types.ObjectId,
@@ -678,10 +747,17 @@ const userSchema = new mongoose.Schema(
           },
         ],
 
-        // Certificate reference
-        certificateId: { type: String },
+        // ⭐ ENHANCED: Certificate tracking
+        certificate: {
+          certificateRequested: { type: Boolean, default: false },
+          certificateEarned: { type: Boolean, default: false },
+          certificateFeePaid: { type: Number, default: 0 },
+          certificateIssuedDate: { type: Date },
+          certificateId: { type: String },
+          certificateUrl: { type: String },
+          verificationCode: { type: String },
+        },
 
-        // User's notes
         userNotes: String,
         notificationsEnabled: { type: Boolean, default: true },
       },
@@ -1990,6 +2066,288 @@ userSchema.statics.getNotificationRecipients = function (
   return this.find(filter).select("email firstName lastName");
 };
 
+//new
+// ✅ ENHANCED: User Model Methods for Certificate Logic
+
+// Add these methods to the User schema
+
+/**
+ * ⭐ NEW: Update live course enrollment with certificate logic
+ */
+userSchema.methods.updateLiveCourseEnrollment = function (courseId, updates) {
+  const enrollment = this.myLiveCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  // Update basic enrollment data
+  Object.keys(updates).forEach((key) => {
+    if (updates[key] !== undefined) {
+      enrollment.enrollmentData[key] = updates[key];
+    }
+  });
+
+  // ⭐ CRITICAL: Update certificate pricing logic
+  this.calculateLiveCoursePricing(enrollment, updates);
+
+  return this.save();
+};
+
+/**
+ * ⭐ NEW: Calculate pricing for live course enrollment
+ */
+userSchema.methods.calculateLiveCoursePricing = function (
+  enrollment,
+  updates = {}
+) {
+  const enrollmentData = enrollment.enrollmentData;
+
+  // Get base course information
+  const originalCoursePrice = enrollmentData.originalPrice || 0;
+  const isLinkedCourse = enrollmentData.isLinkedCourseFree || false;
+  const certificateRequested =
+    updates.certificateRequested !== undefined
+      ? updates.certificateRequested
+      : enrollmentData.certificateRequested || false;
+
+  // Initialize certificate pricing breakdown
+  if (!enrollmentData.certificatePricing) {
+    enrollmentData.certificatePricing = {};
+  }
+
+  const pricing = enrollmentData.certificatePricing;
+  pricing.originalCoursePrice = originalCoursePrice;
+  pricing.isFreeBase = originalCoursePrice === 0;
+
+  // ⭐ CRITICAL: Calculate based on course type and certificate request
+  if (isLinkedCourse) {
+    // Linked courses are always free, no certificates
+    pricing.certificatePrice = 0;
+    pricing.finalPrice = 0;
+    pricing.certificateOnly = false;
+    enrollmentData.paidAmount = 0;
+    enrollmentData.certificateRequested = false;
+    enrollmentData.certificateFee = 0;
+    enrollmentData.accessDetails.enrollmentType = "linked_free";
+    enrollmentData.paymentDetails.paymentReason = "linked_course_free";
+  } else if (originalCoursePrice === 0) {
+    // Free course logic
+    if (certificateRequested) {
+      // Free course + certificate = €10
+      pricing.certificatePrice = 10;
+      pricing.finalPrice = 10;
+      pricing.certificateOnly = true;
+      enrollmentData.paidAmount = 10;
+      enrollmentData.certificateRequested = true;
+      enrollmentData.certificateFee = 10;
+      enrollmentData.accessDetails.enrollmentType = "free_with_certificate";
+      enrollmentData.paymentDetails.paymentReason = "certificate_fee";
+      enrollmentData.paymentDetails.baseAmount = 0;
+      enrollmentData.paymentDetails.certificateAmount = 10;
+      enrollmentData.paymentDetails.totalPaid = 10;
+    } else {
+      // Free course, no certificate = €0
+      pricing.certificatePrice = 0;
+      pricing.finalPrice = 0;
+      pricing.certificateOnly = false;
+      enrollmentData.paidAmount = 0;
+      enrollmentData.certificateRequested = false;
+      enrollmentData.certificateFee = 0;
+      enrollmentData.accessDetails.enrollmentType = "free_no_certificate";
+      enrollmentData.paymentDetails.paymentReason = "free_course";
+      enrollmentData.paymentDetails.baseAmount = 0;
+      enrollmentData.paymentDetails.certificateAmount = 0;
+      enrollmentData.paymentDetails.totalPaid = 0;
+    }
+  } else {
+    // Paid course logic
+    const isEarlyBird = enrollmentData.earlyBirdApplied || false;
+    const earlyBirdPrice = isEarlyBird
+      ? originalCoursePrice - (enrollmentData.earlyBirdSavings || 0)
+      : originalCoursePrice;
+
+    pricing.certificatePrice = 0; // Included in paid courses
+    pricing.finalPrice = earlyBirdPrice;
+    pricing.certificateOnly = false;
+    enrollmentData.paidAmount = earlyBirdPrice;
+    enrollmentData.certificateRequested = true; // Automatically included
+    enrollmentData.certificateFee = 0; // Included in course price
+    enrollmentData.accessDetails.enrollmentType = isEarlyBird
+      ? "paid_early_bird"
+      : "paid_regular";
+    enrollmentData.paymentDetails.paymentReason = isEarlyBird
+      ? "early_bird_discount"
+      : "full_course_fee";
+    enrollmentData.paymentDetails.baseAmount = earlyBirdPrice;
+    enrollmentData.paymentDetails.certificateAmount = 0;
+    enrollmentData.paymentDetails.totalPaid = earlyBirdPrice;
+  }
+
+  // Update access details
+  enrollmentData.accessDetails.accessGrantedDate = new Date();
+  enrollmentData.accessDetails.certificateEligible = true;
+
+  console.log(`💰 Live course pricing calculated:`, {
+    courseId: enrollment.courseId,
+    originalPrice: originalCoursePrice,
+    certificateRequested: certificateRequested,
+    finalPrice: pricing.finalPrice,
+    enrollmentType: enrollmentData.accessDetails.enrollmentType,
+    paymentReason: enrollmentData.paymentDetails.paymentReason,
+  });
+
+  return pricing;
+};
+
+/**
+ * ⭐ NEW: Get live course enrollment summary
+ */
+userSchema.methods.getLiveCourseEnrollmentSummary = function (courseId) {
+  const enrollment = this.myLiveCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    return null;
+  }
+
+  const data = enrollment.enrollmentData;
+  const pricing = data.certificatePricing || {};
+
+  return {
+    courseId: enrollment.courseId,
+    status: data.status,
+    enrollmentType: data.accessDetails?.enrollmentType || "unknown",
+
+    // Pricing breakdown
+    originalCoursePrice: pricing.originalCoursePrice || data.originalPrice || 0,
+    certificateFee: data.certificateFee || 0,
+    totalPaid: data.paidAmount || 0,
+
+    // Certificate info
+    certificateRequested: data.certificateRequested || false,
+    certificateIncluded:
+      data.accessDetails?.enrollmentType?.includes("paid") || false,
+    certificateEligible: data.accessDetails?.certificateEligible || false,
+
+    // Course type
+    isLinkedCourseFree: data.isLinkedCourseFree || false,
+    isFreeBase: pricing.isFreeBase || false,
+    isPaidCourse: (pricing.originalCoursePrice || 0) > 0,
+
+    // Payment details
+    paymentReason: data.paymentDetails?.paymentReason || "unknown",
+    paymentBreakdown: {
+      baseAmount: data.paymentDetails?.baseAmount || 0,
+      certificateAmount: data.paymentDetails?.certificateAmount || 0,
+      totalPaid: data.paymentDetails?.totalPaid || 0,
+    },
+  };
+};
+
+/**
+ * ⭐ NEW: Create live course enrollment with certificate logic
+ */
+userSchema.methods.createLiveCourseEnrollment = function (
+  courseData,
+  options = {}
+) {
+  const {
+    courseId,
+    courseName,
+    courseCode,
+    originalPrice = 0,
+    currency = "EUR",
+    certificateRequested = false,
+    isLinkedCourseFree = false,
+    earlyBirdApplied = false,
+    earlyBirdSavings = 0,
+    status = "cart",
+  } = courseData;
+
+  // Create base enrollment structure
+  const enrollment = {
+    courseId: courseId,
+    enrollmentData: {
+      status: status,
+      registrationDate: new Date(),
+      courseName: courseName,
+      courseCode: courseCode,
+      courseType: "OnlineLiveTraining",
+      originalPrice: originalPrice,
+      currency: currency,
+      isLinkedCourse: isLinkedCourseFree,
+      isLinkedCourseFree: isLinkedCourseFree,
+      certificateRequested: certificateRequested,
+      certificateFee: 0, // Will be calculated
+      paidAmount: 0, // Will be calculated
+      earlyBirdApplied: earlyBirdApplied,
+      earlyBirdSavings: earlyBirdSavings,
+
+      // Initialize pricing structure
+      certificatePricing: {
+        originalCoursePrice: originalPrice,
+        certificatePrice: 0,
+        finalPrice: 0,
+        isFreeBase: originalPrice === 0,
+        certificateOnly: false,
+      },
+
+      // Initialize access details
+      accessDetails: {
+        enrollmentType: "unknown", // Will be calculated
+        certificateEligible: true,
+      },
+
+      // Initialize payment details
+      paymentDetails: {
+        baseAmount: 0,
+        certificateAmount: 0,
+        totalPaid: 0,
+        paymentReason: "unknown",
+      },
+    },
+  };
+
+  // Add to user's live courses
+  if (!this.myLiveCourses) {
+    this.myLiveCourses = [];
+  }
+  this.myLiveCourses.push(enrollment);
+
+  // Calculate pricing based on certificate logic
+  this.calculateLiveCoursePricing(enrollment);
+
+  console.log(`✅ Live course enrollment created:`, {
+    courseId: courseId,
+    enrollmentType: enrollment.enrollmentData.accessDetails.enrollmentType,
+    finalPrice: enrollment.enrollmentData.certificatePricing.finalPrice,
+    certificateRequested: certificateRequested,
+  });
+
+  return enrollment;
+};
+
+/**
+ * ⭐ NEW: Bulk get cart items with proper certificate pricing
+ */
+userSchema.methods.getLiveCourseCartItems = function () {
+  return this.myLiveCourses
+    .filter((enrollment) => enrollment.enrollmentData.status === "cart")
+    .map((enrollment) => {
+      const summary = this.getLiveCourseEnrollmentSummary(enrollment.courseId);
+      return {
+        ...summary,
+        enrollmentId: enrollment._id,
+        addedDate: enrollment.enrollmentData.registrationDate,
+        title: enrollment.enrollmentData.courseName,
+        courseCode: enrollment.enrollmentData.courseCode,
+      };
+    });
+};
 // ═══════════════════════════════════════════════════════════════════════════════
 // ║                            ADDITIONAL METHODS                              ║
 // ║                   Add these to User schema methods section                 ║

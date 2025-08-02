@@ -289,33 +289,66 @@
                       <div class="course-title-cell">
                         <%= course.title %>
                         
-                        <!-- Linked Course Badge -->
-                        <% if (course.isLinkedCourseFree) { %>
+                        <!-- ⭐ NEW: Certificate Badge (highest priority) -->
+                        <% if (course.enrollmentType === "free_with_certificate") { %>
+                          <span class="course-badge certificate-requested">
+                            <i class="fas fa-certificate"></i> Certificate €<%= (course.certificateFee || 10).toFixed(2) %>
+                          </span>
+                        <% } %>
+                        
+                        <!-- ⭐ ENHANCED: Linked Course Badge -->
+                        <% if (course.enrollmentType === "linked_free") { %>
                           <span class="course-badge linked-free">
                             <i class="fas fa-link"></i> Included Free
                           </span>
                         <% } %>
                         
-                        <!-- Early Bird Badge -->
-                        <% if (course.isEarlyBird) { %>
+                        <!-- ⭐ ENHANCED: Early Bird Badge -->
+                        <% if (course.enrollmentType === "paid_early_bird") { %>
                           <span class="early-bird-badge">
                             <i class="fas fa-clock"></i> Early Bird
                           </span>
                         <% } %>
                         
-                        <!-- Course Type Badges -->
+                        <!-- ⭐ ENHANCED: Course Type Badges with enrollment type awareness -->
                         <% if (course.courseType === 'SelfPacedOnlineTraining' || course.displayType === 'Self-Paced') { %>
                           <span class="course-badge self-paced">Self-Paced</span>
+                          
                         <% } else if (course.courseType === 'OnlineLiveTraining' || course.displayType === 'Online Live') { %>
-                          <span class="course-badge online-live">
-                            <% if (course.isLinkedCourseFree) { %>
+                          <span class="course-badge online-live <%= course.enrollmentType === 'free_with_certificate' ? 'with-certificate' : course.enrollmentType === 'linked_free' ? 'linked' : '' %>">
+                            <% if (course.enrollmentType === "linked_free") { %>
                               Live Online (Included)
+                            <% } else if (course.enrollmentType === "free_with_certificate") { %>
+                              Live Online + Certificate
+                            <% } else if (course.enrollmentType === "free_no_certificate") { %>
+                              Live Online (Free)
                             <% } else { %>
                               Live Online
                             <% } %>
                           </span>
+                          
                         <% } else { %>
                           <span class="course-badge in-person">In-Person</span>
+                        <% } %>
+                      
+                        <!-- ⭐ NEW: Certificate breakdown for free courses -->
+                        <% if (course.enrollmentType === "free_with_certificate") { %>
+                          <div class="certificate-breakdown">
+                            <small>
+                              <i class="fas fa-info-circle"></i> 
+                              Course: Free + Certificate Fee: €<%= (course.certificateFee || 10).toFixed(2) %>
+                            </small>
+                          </div>
+                        <% } %>
+                        
+                        <!-- ⭐ NEW: Free course indicator -->
+                        <% if (course.enrollmentType === "free_no_certificate") { %>
+                          <div class="free-course-indicator">
+                            <small>
+                              <i class="fas fa-gift"></i> 
+                              This course is completely free
+                            </small>
+                          </div>
                         <% } %>
                       </div>
                     </td>

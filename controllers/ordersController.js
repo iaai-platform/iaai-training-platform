@@ -174,6 +174,15 @@ exports.getCartPage = async (req, res) => {
             location: `${course.venue?.city || "TBD"}, ${
               course.venue?.country || "TBD"
             }`,
+            // ⭐ NEW: Certificate and enrollment type fields
+            enrollmentType:
+              enrollment.enrollmentData.enrollmentType || "paid_regular",
+            certificateRequested:
+              enrollment.enrollmentData.certificateRequested || false,
+            certificateFee: enrollment.enrollmentData.certificateFee || 0,
+            isFreeWithCertificate:
+              enrollment.enrollmentData.enrollmentType ===
+              "free_with_certificate",
             hasLinkedCourse: !!course.linkedCourse?.onlineCourseId,
             linkedCourseTitle:
               course.linkedCourse?.onlineCourseId?.basic?.title,
@@ -215,6 +224,7 @@ exports.getCartPage = async (req, res) => {
           console.log(`💰 Calculated pricing:`, {
             originalPrice: pricing.regularPrice,
             currentPrice: pricing.currentPrice,
+            paidAmount: enrollment.enrollmentData.paidAmount,
             isLinkedCourseFree: pricing.isLinkedCourseFree,
           });
 
@@ -223,7 +233,10 @@ exports.getCartPage = async (req, res) => {
             enrollmentId: enrollment._id.toString(),
             title: course.basic?.title || "Untitled Course",
             courseCode: course.basic?.courseCode || "N/A",
-            price: pricing.currentPrice, // ⭐ Should be 0 for linked courses
+            // ⭐ FIX: Use paidAmount for correct price including certificate fees
+            price: isLinkedCourse
+              ? 0
+              : enrollment.enrollmentData.paidAmount || pricing.currentPrice,
             originalPrice: pricing.regularPrice,
             isEarlyBird: pricing.isEarlyBird && !isLinkedCourse,
             earlyBirdSavings: isLinkedCourse ? 0 : pricing.earlyBirdSavings,
@@ -237,6 +250,16 @@ exports.getCartPage = async (req, res) => {
             addedDate: registrationDate,
             startDate: course.schedule?.startDate,
             location: "Online",
+            // ⭐ NEW: Certificate and enrollment type fields
+            enrollmentType:
+              enrollment.enrollmentData.enrollmentType ||
+              (isLinkedCourse ? "linked_free" : "free_no_certificate"),
+            certificateRequested:
+              enrollment.enrollmentData.certificateRequested || false,
+            certificateFee: enrollment.enrollmentData.certificateFee || 0,
+            isFreeWithCertificate:
+              enrollment.enrollmentData.enrollmentType ===
+              "free_with_certificate",
             isLinkedToInPerson: isLinkedCourse,
             linkedCourseRelationship: isLinkedCourse ? "prerequisite" : null,
           });
@@ -272,6 +295,12 @@ exports.getCartPage = async (req, res) => {
             addedDate: registrationDate,
             startDate: null,
             location: "Online - Self-Paced",
+            // ⭐ NEW: Certificate and enrollment type fields
+            enrollmentType:
+              enrollment.enrollmentData.enrollmentType || "paid_regular",
+            certificateRequested: false,
+            certificateFee: 0,
+            isFreeWithCertificate: false,
             accessDays: course.access?.accessDays,
             totalVideos: course.videos?.length || 0,
           });

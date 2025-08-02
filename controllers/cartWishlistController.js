@@ -4,6 +4,31 @@ const InPersonAestheticTraining = require("../models/InPersonAestheticTraining")
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 
+// Add this helper function at the top of the file
+function determineEnrollmentType(
+  courseType,
+  originalPrice,
+  isLinkedCourse,
+  certificateRequested,
+  earlyBirdApplied = false
+) {
+  if (isLinkedCourse) {
+    return "linked_free";
+  }
+
+  if (courseType === "OnlineLiveTraining" && originalPrice === 0) {
+    return certificateRequested
+      ? "free_with_certificate"
+      : "free_no_certificate";
+  }
+
+  if (originalPrice > 0) {
+    return earlyBirdApplied ? "paid_early_bird" : "paid_regular";
+  }
+
+  return "free_no_certificate";
+}
+
 // ✅ ENHANCED: Helper function to create enrollment object with linked course support
 // ✅ FIXED: Keep this function but make it work properly
 // ✅ ENHANCED: Helper function to create enrollment object with certificate support
@@ -22,68 +47,77 @@ function createEnrollmentObject(
     wantsCertificate: wantsCertificate,
   });
 
+  // Initialize pricing variables
+  let originalPrice = 0;
+  let finalPrice = 0;
+  let certificateRequested = false;
+  let certificateFee = 0;
+
+  // Set initial pricing based on course type
+  if (courseType === "SelfPacedOnlineTraining") {
+    originalPrice = course.access?.price || 0;
+    finalPrice = originalPrice;
+  } else {
+    originalPrice = course.enrollment?.price || 0;
+    finalPrice = originalPrice;
+  }
+
+  // Handle certificate for free online live courses
+  if (
+    courseType === "OnlineLiveTraining" &&
+    originalPrice === 0 &&
+    wantsCertificate === true &&
+    !isLinkedCourse
+  ) {
+    finalPrice = 10;
+    certificateRequested = true;
+    certificateFee = 10;
+    console.log("💰 Certificate fee added: €10");
+  }
+
   const baseEnrollment = {
     courseId: course._id,
     enrollmentData: {
       status: status,
       registrationDate: new Date(),
-      paidAmount: 0,
+      paidAmount: isLinkedCourse ? 0 : finalPrice,
       paymentTransactionId: null,
       promoCodeUsed: null,
       courseName: course.basic?.title || course.title || "Untitled Course",
       courseCode: course.basic?.courseCode || "N/A",
       courseType: courseType,
-      isLinkedCourse: isLinkedCourse, // ⭐ SAVE THIS FLAG
-      originalPrice: 0,
+      isLinkedCourse: isLinkedCourse,
+      isLinkedCourseFree: isLinkedCourse,
+      originalPrice: originalPrice,
+      currency:
+        courseType === "SelfPacedOnlineTraining"
+          ? course.access?.currency || "EUR"
+          : course.enrollment?.currency || "EUR",
 
-      // ⭐ NEW: Certificate fields
-      certificateRequested: false,
-      certificateFee: 0,
+      // Certificate fields
+      certificateRequested: isLinkedCourse ? false : certificateRequested,
+      certificateFee: isLinkedCourse ? 0 : certificateFee,
+      enrollmentType: determineEnrollmentType(
+        courseType,
+        originalPrice,
+        isLinkedCourse,
+        certificateRequested
+      ),
+
+      // ⭐ ADD: Pricing breakdown
+      pricingBreakdown: {
+        baseCoursePrice: originalPrice,
+        certificatePrice: isLinkedCourse ? 0 : certificateFee,
+        earlyBirdDiscount: 0,
+        finalPrice: isLinkedCourse ? 0 : finalPrice,
+        isFreeBase: originalPrice === 0,
+        certificateIncluded: originalPrice > 0,
+        payingForCertificateOnly: originalPrice === 0 && certificateFee > 0,
+      },
+      earlyBirdApplied: false,
+      earlyBirdSavings: 0,
     },
   };
-
-  // Set price and type-specific fields
-  switch (courseType) {
-    case "InPersonAestheticTraining":
-      baseEnrollment.enrollmentData.paidAmount = course.enrollment?.price || 0;
-      baseEnrollment.enrollmentData.originalPrice =
-        course.enrollment?.price || 0;
-      baseEnrollment.enrollmentData.currency =
-        course.enrollment?.currency || "EUR";
-      baseEnrollment.enrollmentData.isLinkedCourseFree = false; // ⭐ ALWAYS FALSE FOR IN-PERSON
-      break;
-
-    case "OnlineLiveTraining":
-      const originalPrice = course.enrollment?.price || 0;
-
-      if (isLinkedCourse) {
-        baseEnrollment.enrollmentData.paidAmount = 0;
-        baseEnrollment.enrollmentData.originalPrice = originalPrice;
-        baseEnrollment.enrollmentData.isLinkedCourseFree = true; // ⭐ TRUE FOR LINKED
-      } else {
-        // ⭐ NEW: Handle certificate for free courses
-        if (originalPrice === 0 && wantsCertificate === true) {
-          baseEnrollment.enrollmentData.paidAmount = 10;
-          baseEnrollment.enrollmentData.certificateRequested = true;
-          baseEnrollment.enrollmentData.certificateFee = 10;
-          console.log("💰 Certificate fee added: €10");
-        } else {
-          baseEnrollment.enrollmentData.paidAmount = originalPrice;
-        }
-        baseEnrollment.enrollmentData.originalPrice = originalPrice;
-        baseEnrollment.enrollmentData.isLinkedCourseFree = false; // ⭐ FALSE FOR REGULAR
-      }
-      baseEnrollment.enrollmentData.currency =
-        course.enrollment?.currency || "EUR";
-      break;
-
-    case "SelfPacedOnlineTraining":
-      baseEnrollment.enrollmentData.paidAmount = course.access?.price || 0;
-      baseEnrollment.enrollmentData.originalPrice = course.access?.price || 0;
-      baseEnrollment.enrollmentData.currency = course.access?.currency || "EUR";
-      baseEnrollment.enrollmentData.isLinkedCourseFree = false; // ⭐ ALWAYS FALSE FOR SELF-PACED
-      break;
-  }
 
   console.log("✅ Created enrollment object:", {
     courseId: baseEnrollment.courseId,
@@ -308,6 +342,30 @@ exports.addToCart = async (req, res) => {
         existingIndex
       ].enrollmentData.originalPrice = originalPrice;
 
+      // ⭐ ADD THIS NEW SECTION RIGHT HERE:
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.pricingBreakdown = {
+        baseCoursePrice: originalPrice,
+        certificatePrice:
+          user[courseMapping.userField][existingIndex].enrollmentData
+            .certificateFee,
+        earlyBirdDiscount: 0,
+        finalPrice: finalPrice,
+        isFreeBase: originalPrice === 0,
+        certificateIncluded: originalPrice > 0,
+        payingForCertificateOnly:
+          originalPrice === 0 &&
+          user[courseMapping.userField][existingIndex].enrollmentData
+            .certificateFee > 0,
+      };
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.earlyBirdApplied = false;
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.earlyBirdSavings = 0;
+
       addedCourses.push(course.basic?.title || course.title);
     } else {
       // ⭐ CRITICAL FIX: Create new enrollment MANUALLY with all required fields
@@ -359,6 +417,25 @@ exports.addToCart = async (req, res) => {
           // ⭐ NEW: Certificate fields
           certificateRequested: certificateRequested,
           certificateFee: certificateFee,
+          enrollmentType: determineEnrollmentType(
+            courseType,
+            originalPrice,
+            false,
+            certificateRequested
+          ),
+
+          // ⭐ FIX: Add correct pricingBreakdown
+          pricingBreakdown: {
+            baseCoursePrice: originalPrice,
+            certificatePrice: certificateFee,
+            earlyBirdDiscount: 0,
+            finalPrice: finalPrice,
+            isFreeBase: originalPrice === 0,
+            certificateIncluded: originalPrice > 0, // true for paid courses
+            payingForCertificateOnly: originalPrice === 0 && certificateFee > 0,
+          },
+          earlyBirdApplied: false,
+          earlyBirdSavings: 0,
         },
       };
 
@@ -418,6 +495,7 @@ exports.addToCart = async (req, res) => {
             // ⭐ NEW: Certificate fields for linked courses (always false)
             certificateRequested: false,
             certificateFee: 0,
+            enrollmentType: "linked_free",
           },
         };
 
@@ -462,6 +540,13 @@ exports.addToCart = async (req, res) => {
       } courses added to cart: ${addedCourses.join(" and ")}`;
     }
 
+    // ⭐ FIX: Define the missing responseEnrollmentType variable
+    const responseEnrollmentType = determineEnrollmentType(
+      courseType,
+      course.enrollment?.price || course.access?.price || 0,
+      false, // main course is not linked
+      wantsCertificate === true
+    );
     // ⭐ NEW: Add certificate info to response
     const certificateAdded =
       wantsCertificate === true &&
@@ -476,6 +561,7 @@ exports.addToCart = async (req, res) => {
       coursesAdded: addedCourses,
       certificateAdded: certificateAdded,
       certificateFee: certificateAdded ? 10 : 0,
+      enrollmentType: responseEnrollmentType,
     });
   } catch (error) {
     console.error("❌ Error adding to cart:", error);
@@ -734,6 +820,39 @@ exports.addToWishlist = async (req, res) => {
       user[courseMapping.userField][
         existingIndex
       ].enrollmentData.originalPrice = originalPrice;
+      // ⭐ ADD THIS LINE:
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.enrollmentType = determineEnrollmentType(
+        courseType,
+        originalPrice,
+        false,
+        wantsCertificate === true
+      );
+
+      // ⭐ ADD THIS NEW SECTION RIGHT HERE:
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.pricingBreakdown = {
+        baseCoursePrice: originalPrice,
+        certificatePrice:
+          user[courseMapping.userField][existingIndex].enrollmentData
+            .certificateFee,
+        earlyBirdDiscount: 0,
+        finalPrice: finalPrice,
+        isFreeBase: originalPrice === 0,
+        certificateIncluded: originalPrice > 0,
+        payingForCertificateOnly:
+          originalPrice === 0 &&
+          user[courseMapping.userField][existingIndex].enrollmentData
+            .certificateFee > 0,
+      };
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.earlyBirdApplied = false;
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.earlyBirdSavings = 0;
     } else {
       // ⭐ UPDATED: Use enhanced createEnrollmentObject with certificate support
       const newEnrollment = createEnrollmentObject(

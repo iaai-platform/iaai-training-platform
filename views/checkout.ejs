@@ -227,7 +227,26 @@
           margin-top: 10px;
         }
       }
-    </style>
+    
+      // Add this CSS to your existing <style> section:
+.btn-warning {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800 !important;
+  border-color: #d39e00 !important;
+  color: #212529 !important;
+}
+
+.btn-warning:disabled {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #212529 !important;
+  opacity: 0.65;
+}</style>
   </head>
   
   <body>
@@ -784,92 +803,109 @@
 
       // Initialize on page load - ENHANCED VERSION
       document.addEventListener('DOMContentLoaded', function() {
-        validateCheckout();
-        loadUserBillingData();
-        
-        // ✅ NEW: Update billing section visibility on load
-        setTimeout(updateBillingSectionVisibility, 1000);
-        
-        console.log('🔧 Checkout page loaded. Testing API connectivity...');
-        
-        // Test API connectivity
-        fetch('/api/user/billing-info')
-          .then(response => {
-            console.log('🔗 API Test Result:', response.status, response.ok ? 'OK' : 'ERROR');
-            if (!response.ok) {
-              console.error('❌ API route not accessible. Check route mounting in app.js');
-            }
-          })
-          .catch(error => {
-            console.error('❌ API connection test failed:', error);
-          });
-        
-        console.log('💰 Checkout initialized:', {
-          originalPrice: originalPrice,
-          currentPrice: currentDiscountedPrice,
-          originalPriceAED: (originalPrice * eurToAedRate).toFixed(2),
-          currentPriceAED: (currentDiscountedPrice * eurToAedRate).toFixed(2),
-          eurToAedRate: eurToAedRate,
-          cartItems: <%= coursesInCart ? coursesInCart.length : 0 %>,
-          isFree: currentDiscountedPrice <= 0
-        });
-      });
-
+  console.log('🚀 DOM Content Loaded - initializing checkout...');
+  
+  // Initialize checkout validation first
+  validateCheckout();
+  
+  // Load user billing data
+  loadUserBillingData();
+  
+  // ⭐ FIX: Update billing section visibility after a short delay
+  setTimeout(() => {
+    updateBillingSectionVisibility();
+    // ⭐ FIX: Force validation after visibility update
+    setTimeout(validateCheckout, 100);
+  }, 500);
+  
+  console.log('🔧 Checkout page loaded. Testing API connectivity...');
+  
+  // Test API connectivity
+  fetch('/api/user/billing-info')
+    .then(response => {
+      console.log('🔗 API Test Result:', response.status, response.ok ? 'OK' : 'ERROR');
+      if (!response.ok) {
+        console.error('❌ API route not accessible. Check route mounting in app.js');
+      }
+    })
+    .catch(error => {
+      console.error('❌ API connection test failed:', error);
+    });
+  
+  console.log('💰 Checkout initialized:', {
+    originalPrice: originalPrice,
+    currentPrice: currentDiscountedPrice,
+    originalPriceAED: (originalPrice * eurToAedRate).toFixed(2),
+    currentPriceAED: (currentDiscountedPrice * eurToAedRate).toFixed(2),
+    eurToAedRate: eurToAedRate,
+    cartItems: <%= coursesInCart ? coursesInCart.length : 0 %>,
+    isFree: currentDiscountedPrice <= 0
+  });
+});
       // ✅ NEW: Function to update billing section visibility based on price
       function updateBillingSectionVisibility() {
-        const billingSection = document.getElementById('billingSection');
-        const isFree = currentDiscountedPrice <= 0;
-        
-        if (isFree) {
-          // Hide billing section for free courses
-          billingSection.style.display = 'none';
-          console.log('🎁 Free course detected - billing section hidden');
-          
-          // Force billing complete for free courses
-          isBillingComplete = true;
-          
-          // Update checkout validation
-          validateCheckout();
-          
-          // Show a friendly message
-          const checkoutContainer = document.querySelector('.checkout-container');
-          let freeMessage = document.getElementById('freeCourseBanner');
-          
-          if (!freeMessage) {
-            freeMessage = document.createElement('div');
-            freeMessage.id = 'freeCourseBanner';
-            freeMessage.className = 'free-course-banner';
-            freeMessage.innerHTML = `
-              <h3><i class="fas fa-gift"></i> Free Course Registration</h3>
-              <p>No payment required! Complete your registration by agreeing to the terms below.</p>
-            `;
-            
-            // Insert after progress indicator
-            const progressIndicator = document.querySelector('.checkout-progress');
-            if (progressIndicator) {
-              progressIndicator.after(freeMessage);
-            } else {
-              const firstChild = checkoutContainer.children[1]; // After h1
-              checkoutContainer.insertBefore(freeMessage, firstChild.nextSibling);
-            }
-          }
-        } else {
-          // Show billing section for paid courses
-          billingSection.style.display = 'block';
-          console.log('💳 Paid course detected - billing section visible');
-          
-          // Remove free course banner if it exists
-          const freeMessage = document.getElementById('freeCourseBanner');
-          if (freeMessage) {
-            freeMessage.remove();
-          }
-          
-          // Reset billing validation for paid courses
-          isBillingComplete = false;
-          validateBillingForm();
-        }
+  const billingSection = document.getElementById('billingSection');
+  const isFree = currentDiscountedPrice <= 0;
+  
+  console.log('💰 Updating billing section visibility:', {
+    currentPrice: currentDiscountedPrice,
+    isFree: isFree,
+    billingComplete: isBillingComplete
+  });
+  
+  if (isFree) {
+    // Hide billing section for free courses
+    billingSection.style.display = 'none';
+    console.log('🎁 Free course detected - billing section hidden');
+    
+    // Force billing complete for free courses
+    isBillingComplete = true;
+    
+    // Update checkout validation
+    validateCheckout();
+    
+    // Show a friendly message
+    const checkoutContainer = document.querySelector('.checkout-container');
+    let freeMessage = document.getElementById('freeCourseBanner');
+    
+    if (!freeMessage) {
+      freeMessage = document.createElement('div');
+      freeMessage.id = 'freeCourseBanner';
+      freeMessage.className = 'free-course-banner';
+      freeMessage.innerHTML = `
+        <h3><i class="fas fa-gift"></i> Free Course Registration</h3>
+        <p>No payment required! Complete your registration by agreeing to the terms below.</p>
+      `;
+      
+      // Insert after progress indicator
+      const progressIndicator = document.querySelector('.checkout-progress');
+      if (progressIndicator) {
+        progressIndicator.after(freeMessage);
+      } else {
+        const firstChild = checkoutContainer.children[1]; // After h1
+        checkoutContainer.insertBefore(freeMessage, firstChild.nextSibling);
       }
-
+    }
+  } else {
+    // Show billing section for paid courses
+    billingSection.style.display = 'block';
+    console.log('💳 Paid course detected - billing section visible');
+    
+    // Remove free course banner if it exists
+    const freeMessage = document.getElementById('freeCourseBanner');
+    if (freeMessage) {
+      freeMessage.remove();
+    }
+    
+    // ⭐ FIX: Reset billing validation for paid courses ONLY if not already complete
+    if (!isBillingComplete) {
+      validateBillingForm(); // This will properly check form completion
+    }
+    
+    // ⭐ FIX: Always call validateCheckout to update button state
+    validateCheckout();
+  }
+}
       // Load user billing data from server - ENHANCED VERSION
       async function loadUserBillingData() {
         try {
@@ -975,66 +1011,78 @@
 
       // Validate billing form - FIXED VERSION
       function validateBillingForm() {
-        updateBillingDataFromForm();
-        
-        const requiredFields = ['firstName', 'lastName', 'email', 'phoneNumber', 'address', 'city', 'country'];
-        const missingFields = [];
-        
-        requiredFields.forEach(field => {
-          const element = document.getElementById('billing_' + (field === 'phoneNumber' ? 'phone' : field));
-          const value = billingData[field];
-          
-          if (element) {
-            // Find the error div - it should be the next sibling with class 'invalid-feedback'
-            let errorDiv = element.nextElementSibling;
-            if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
-              // If not found, look for it more carefully
-              errorDiv = element.parentNode.querySelector('.invalid-feedback');
-            }
-            
-            if (!value || value.trim() === '') {
-              element.classList.add('is-invalid');
-              if (errorDiv) {
-                errorDiv.textContent = 'This field is required';
-              }
-              missingFields.push(field);
-            } else {
-              element.classList.remove('is-invalid');
-              if (errorDiv) {
-                errorDiv.textContent = '';
-              }
-            }
-          }
-        });
-
-        // Email validation
-        if (billingData.email && !isValidEmail(billingData.email)) {
-          const emailField = document.getElementById('billing_email');
-          if (emailField) {
-            let errorDiv = emailField.nextElementSibling;
-            if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
-              errorDiv = emailField.parentNode.querySelector('.invalid-feedback');
-            }
-            
-            emailField.classList.add('is-invalid');
-            if (errorDiv) {
-              errorDiv.textContent = 'Please enter a valid email address';
-            }
-            missingFields.push('email');
-          }
-        }
-
-        isBillingComplete = missingFields.length === 0;
-        updateBillingStatus();
-        validateCheckout();
-        
-        if (isBillingComplete) {
-          updateBillingSummary();
-        }
-
-        return isBillingComplete;
+  // ⭐ FIX: Don't validate if course is free
+  const isFree = currentDiscountedPrice <= 0;
+  if (isFree) {
+    isBillingComplete = true;
+    return true;
+  }
+  
+  updateBillingDataFromForm();
+  
+  const requiredFields = ['firstName', 'lastName', 'email', 'phoneNumber', 'address', 'city', 'country'];
+  const missingFields = [];
+  
+  requiredFields.forEach(field => {
+    const element = document.getElementById('billing_' + (field === 'phoneNumber' ? 'phone' : field));
+    const value = billingData[field];
+    
+    if (element) {
+      // Find the error div
+      let errorDiv = element.nextElementSibling;
+      if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+        errorDiv = element.parentNode.querySelector('.invalid-feedback');
       }
+      
+      if (!value || value.trim() === '') {
+        element.classList.add('is-invalid');
+        if (errorDiv) {
+          errorDiv.textContent = 'This field is required';
+        }
+        missingFields.push(field);
+      } else {
+        element.classList.remove('is-invalid');
+        if (errorDiv) {
+          errorDiv.textContent = '';
+        }
+      }
+    }
+  });
 
+  // Email validation
+  if (billingData.email && !isValidEmail(billingData.email)) {
+    const emailField = document.getElementById('billing_email');
+    if (emailField) {
+      let errorDiv = emailField.nextElementSibling;
+      if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+        errorDiv = emailField.parentNode.querySelector('.invalid-feedback');
+      }
+      
+      emailField.classList.add('is-invalid');
+      if (errorDiv) {
+        errorDiv.textContent = 'Please enter a valid email address';
+      }
+      missingFields.push('email');
+    }
+  }
+
+  isBillingComplete = missingFields.length === 0;
+  
+  console.log('📋 Billing validation result:', {
+    missingFields: missingFields,
+    isComplete: isBillingComplete,
+    isFree: isFree
+  });
+  
+  updateBillingStatus();
+  validateCheckout(); // ⭐ FIX: Always update checkout validation
+  
+  if (isBillingComplete) {
+    updateBillingSummary();
+  }
+
+  return isBillingComplete;
+}
       // Email validation helper
       function isValidEmail(email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1146,31 +1194,58 @@
 
       // ✅ UPDATED: Validate checkout button state (with free course support)
       function validateCheckout() {
-        const agreeTerms = document.getElementById('agreeTerms').checked;
-        const proceedBtn = document.getElementById('proceedBtn');
-        
-        // ✅ NEW: Skip billing validation if course is FREE
-        const isFree = currentDiscountedPrice <= 0;
-        
-        // Enable button if terms are agreed AND (course is free OR billing is complete)
-        proceedBtn.disabled = !(agreeTerms && (isFree || isBillingComplete));
-        
-        // Update button text based on price and billing status
-        if (isFree) {
-          proceedBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
-          proceedBtn.classList.add('btn-success');
-          proceedBtn.classList.remove('btn-primary');
-        } else if (!isBillingComplete) {
-          proceedBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Complete Billing Info First';
-          proceedBtn.classList.remove('btn-success');
-          proceedBtn.classList.add('btn-primary');
-        } else {
-          proceedBtn.innerHTML = '<i class="fas fa-credit-card"></i> Proceed to Payment';
-          proceedBtn.classList.remove('btn-success');
-          proceedBtn.classList.add('btn-primary');
-        }
-      }
-
+  const agreeTerms = document.getElementById('agreeTerms').checked;
+  const proceedBtn = document.getElementById('proceedBtn');
+  const isFree = currentDiscountedPrice <= 0;
+  
+  console.log('🔍 Validating checkout:', {
+    agreeTerms: agreeTerms,
+    isFree: isFree,
+    isBillingComplete: isBillingComplete,
+    currentPrice: currentDiscountedPrice
+  });
+  
+  // ⭐ FIX: More explicit button state logic
+  let buttonEnabled = false;
+  let buttonText = '';
+  let buttonClass = 'btn-primary';
+  
+  if (!agreeTerms) {
+    // Terms not agreed
+    buttonEnabled = false;
+    buttonText = '<i class="fas fa-exclamation-triangle"></i> Please agree to Terms & Conditions';
+    buttonClass = 'btn-primary';
+  } else if (isFree) {
+    // Free course - only need terms
+    buttonEnabled = true;
+    buttonText = '<i class="fas fa-check-circle"></i> Complete Registration (FREE)';
+    buttonClass = 'btn-success';
+  } else if (!isBillingComplete) {
+    // Paid course but billing incomplete
+    buttonEnabled = false;
+    buttonText = '<i class="fas fa-exclamation-triangle"></i> Complete Billing Info First';
+    buttonClass = 'btn-warning';
+  } else {
+    // Paid course with complete billing
+    buttonEnabled = true;
+    buttonText = '<i class="fas fa-credit-card"></i> Proceed to Payment';
+    buttonClass = 'btn-primary';
+  }
+  
+  // Apply button state
+  proceedBtn.disabled = !buttonEnabled;
+  proceedBtn.innerHTML = buttonText;
+  
+  // Update button classes
+  proceedBtn.classList.remove('btn-primary', 'btn-success', 'btn-warning');
+  proceedBtn.classList.add(buttonClass);
+  
+  console.log('✅ Button updated:', {
+    enabled: buttonEnabled,
+    text: buttonText.replace(/<[^>]*>/g, ''), // Remove HTML tags for logging
+    class: buttonClass
+  });
+}
       // Remove from Cart
       async function removeFromCart(courseId, courseType) {
         if (!confirm('Are you sure you want to remove this course from your cart?')) {

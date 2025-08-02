@@ -340,6 +340,57 @@
 
     <% } %>
 
+
+<!-- ADD THIS SECTION after the instructor section, around line 250+ -->
+<% if (user && user.role === 'support') { %>
+
+  <div class="section-divider support-section">
+    <h2><i class="fas fa-headset"></i> Support Dashboard</h2>
+    <p>Manage your assigned cases and customer interactions</p>
+  </div>
+
+  <div class="dashboard-grid support-grid">
+
+    <div class="dashboard-card support-card">
+      <div class="card-icon support">
+        <i class="fas fa-folder-open"></i>
+      </div>
+      <h3>My Cases</h3>
+      <p>View and manage all your assigned customer cases.</p>
+      <a href="/support/dashboard" class="card-btn">Manage Cases</a>
+    </div>
+
+    <div class="dashboard-card support-card">
+      <div class="card-icon support">
+        <i class="fas fa-phone"></i>
+      </div>
+      <h3>Follow-up Center</h3>
+      <p>Track follow-ups and schedule next actions.</p>
+      <a href="/support/dashboard?filter=overdue" class="card-btn">View Follow-ups</a>
+    </div>
+
+    <div class="dashboard-card support-card">
+      <div class="card-icon support">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <h3>My Performance</h3>
+      <p>View your conversion rates and performance metrics.</p>
+      <a href="/support/performance" class="card-btn">View Performance</a>
+    </div>
+
+    <div class="dashboard-card support-card">
+      <div class="card-icon support">
+        <i class="fas fa-star"></i>
+      </div>
+      <h3>High Priority</h3>
+      <p>Urgent cases requiring immediate attention.</p>
+      <a href="/support/dashboard?filter=high-priority" class="card-btn">View Priority Cases</a>
+    </div>
+
+  </div>
+
+<% } %>
+
     <% if (user && user.role === 'instructor') { %>
 
       <div class="section-divider instructor-section">
@@ -387,6 +438,8 @@
           <p>Update your personal and professional details as an instructor.</p>
           <a href="/instructor/me/edit" class="card-btn">Edit Details</a>
         </div>
+
+
 
       </div>
 

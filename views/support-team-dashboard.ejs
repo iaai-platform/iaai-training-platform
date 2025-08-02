@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support Team Management - IAAI Admin</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .support-dashboard {
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .support-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .support-header h1 {
+      margin: 0 0 10px 0;
+      font-size: 2.5rem;
+    }
+
+    .support-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #667eea;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-icon {
+      float: right;
+      font-size: 2rem;
+      color: #667eea;
+      opacity: 0.3;
+    }
+
+    .action-section {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      padding: 15px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .btn-info {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .data-table th {
+      background: #667eea;
+      color: white;
+      padding: 15px;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .data-table td {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .status-active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .close {
+      font-size: 2rem;
+      cursor: pointer;
+      color: #aaa;
+    }
+
+    .close:hover {
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      background: white;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .loading i {
+      font-size: 2rem;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+
+    .alert-danger {
+      background: #f8d7da;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+
+    .alert-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border-color: #bee5eb;
+    }
+
+    .breadcrumb {
+      background: transparent;
+      padding: 15px 0;
+      margin-bottom: 20px;
+    }
+
+    .breadcrumb a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .performance-meter {
+      width: 100%;
+      height: 10px;
+      background: #e9ecef;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .performance-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+      transition: width 0.3s ease;
+    }
+
+    .workload-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .workload-low { background: #28a745; }
+    .workload-medium { background: #ffc107; }
+    .workload-high { background: #fd7e14; }
+    .workload-critical { background: #dc3545; }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+      
+      .support-header h1 {
+        font-size: 2rem;
+      }
+      
+      .modal-content {
+        margin: 10% auto;
+        width: 95%;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body class="dashboard-body">
+  <!-- Include your header partial here -->
+  <!-- <%- include('partials/header') %> -->
+  
+  <nav class="breadcrumb">
+    <a href="/">Home</a> > <a href="/dashboard">Dashboard</a> > Support Team Management
+  </nav>
+
+  <div class="support-dashboard">
+    
+    <!-- Header Section -->
+    <div class="support-header">
+      <h1><i class="fas fa-headset"></i> Support Team Management</h1>
+      <p>Manage support staff, assign cases, and monitor performance</p>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-value" id="totalStaff">-</div>
+        <div class="stat-label">Total Staff</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-folder-open"></i></div>
+        <div class="stat-value" id="activeCases">-</div>
+        <div class="stat-label">Active Cases</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+        <div class="stat-value" id="pendingFollowUps">-</div>
+        <div class="stat-label">Pending Follow-ups</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+        <div class="stat-value" id="avgConversion">-</div>
+        <div class="stat-label">Avg Conversion Rate</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="action-section">
+      <h2 class="section-title">
+        <i class="fas fa-bolt"></i>
+        Quick Actions
+      </h2>
+      
+      <div class="action-buttons">
+        <button class="action-btn btn-primary" onclick="openAddStaffModal()">
+          <i class="fas fa-user-plus"></i>
+          Add Support Staff
+        </button>
+        
+        <button class="action-btn btn-success" onclick="assignContactsManually()">
+          <i class="fas fa-hand-point-right"></i>
+          Assign Contacts
+        </button>
+        
+        <button class="action-btn btn-warning" onclick="rebalanceWorkload()">
+          <i class="fas fa-balance-scale"></i>
+          Rebalance Workload
+        </button>
+        
+        <button class="action-btn btn-info" onclick="viewPerformanceReport()">
+          <i class="fas fa-chart-bar"></i>
+          Performance Report
+        </button>
+        
+        <button class="action-btn btn-danger" onclick="viewPendingContacts()">
+          <i class="fas fa-exclamation-triangle"></i>
+          Pending Contacts
+        </button>
+        
+        <a href="/api/support/contacts" class="action-btn btn-info" target="_blank">
+          <i class="fas fa-list"></i>
+          View All Contacts
+        </a>
+      </div>
+    </div>
+
+    <!-- Support Team Table -->
+    <div class="action-section">
+      <h2 class="section-title">
+        <i class="fas fa-users-cog"></i>
+        Support Team Members
+        <button class="action-btn btn-primary" onclick="refreshTeamData()" style="margin-left: auto; padding: 8px 15px;">
+          <i class="fas fa-sync-alt"></i>
+          Refresh
+        </button>
+      </h2>
+      
+      <div id="teamTableContainer">
+        <div class="loading">
+          <i class="fas fa-spinner"></i>
+          <p>Loading support team data...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts Management -->
+    <div class="action-section">
+      <h2 class="section-title">
+        <i class="fas fa-envelope-open-text"></i>
+        Contact Management
+      </h2>
+      
+      <div class="action-buttons">
+        <button class="action-btn btn-info" onclick="viewUnassignedContacts()">
+          <i class="fas fa-inbox"></i>
+          Unassigned Contacts
+        </button>
+        
+        <button class="action-btn btn-warning" onclick="viewHighPriorityContacts()">
+          <i class="fas fa-star"></i>
+          High Priority
+        </button>
+        
+        <button class="action-btn btn-success" onclick="createTestContact()">
+          <i class="fas fa-plus-circle"></i>
+          Create Test Contact
+        </button>
+        
+        <button class="action-btn btn-primary" onclick="viewContactAnalytics()">
+          <i class="fas fa-analytics"></i>
+          Contact Analytics
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Add Staff Modal -->
+  <div id="addStaffModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Support Staff Member</h2>
+        <span class="close" onclick="closeAddStaffModal()">&times;</span>
+      </div>
+      
+      <form id="addStaffForm">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" class="form-control" id="staffName" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" class="form-control" id="staffEmail" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-control" id="staffPhone">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Department</label>
+          <select class="form-select" id="staffDepartment">
+            <option value="sales">Sales</option>
+            <option value="customer-service">Customer Service</option>
+            <option value="technical">Technical</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Maximum Cases Allowed</label>
+          <input type="number" class="form-control" id="maxCases" value="20" min="1" max="50">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Languages</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="lang-english" value="English" checked>
+              <label for="lang-english">English</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="lang-arabic" value="Arabic">
+              <label for="lang-arabic">Arabic</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="lang-turkish" value="Turkish">
+              <label for="lang-turkish">Turkish</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="lang-spanish" value="Spanish">
+              <label for="lang-spanish">Spanish</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Specializations</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="spec-medical" value="Medical" checked>
+              <label for="spec-medical">Medical</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="spec-aesthetic" value="Aesthetic" checked>
+              <label for="spec-aesthetic">Aesthetic</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="spec-business" value="Business">
+              <label for="spec-business">Business</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="spec-technical" value="Technical">
+              <label for="spec-technical">Technical</label>
+            </div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px;">
+          <button type="button" class="action-btn btn-secondary" onclick="closeAddStaffModal()">Cancel</button>
+          <button type="submit" class="action-btn btn-primary">Add Staff Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Results Modal -->
+  <div id="resultsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="resultsTitle">Results</h2>
+        <span class="close" onclick="closeResultsModal()">&times;</span>
+      </div>
+      <div id="resultsContent">
+        <!-- Dynamic content will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Include your footer partial here -->
+  <!-- <%- include('partials/footer') %> -->
+
+  <script>
+    // Global variables
+    let supportTeamData = [];
+    let workloadStats = [];
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      loadDashboardData();
+    });
+
+    // Load all dashboard data
+    async function loadDashboardData() {
+      try {
+        await Promise.all([
+          loadWorkloadStats(),
+          loadTeamMembers()
+        ]);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        showAlert('Error loading dashboard data', 'danger');
+      }
+    }
+
+    // Load workload statistics
+    async function loadWorkloadStats() {
+      try {
+        const response = await fetch('/api/support/workload-stats');
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+          const stats = result.data[0];
+          updateStatsDisplay(stats);
+          workloadStats = result.data;
+        } else {
+          updateStatsDisplay({
+            totalStaff: 0,
+            totalActiveCases: 0,
+            totalPendingFollowUps: 0,
+            avgConversionRate: 0
+          });
+        }
+      } catch (error) {
+        console.error('Error loading workload stats:', error);
+        updateStatsDisplay({
+          totalStaff: 'Error',
+          totalActiveCases: 'Error',
+          totalPendingFollowUps: 'Error',
+          avgConversionRate: 'Error'
+        });
+      }
+    }
+
+    // Update statistics display
+    function updateStatsDisplay(stats) {
+      document.getElementById('totalStaff').textContent = stats.totalStaff || 0;
+      document.getElementById('activeCases').textContent = stats.totalActiveCases || 0;
+      document.getElementById('pendingFollowUps').textContent = stats.totalPendingFollowUps || 0;
+      document.getElementById('avgConversion').textContent = 
+        (stats.avgConversionRate || 0).toFixed(1) + '%';
+    }
+
+    // Load team members
+    async function loadTeamMembers() {
+      try {
+        const response = await fetch('/api/support/team-members');
+        const result = await response.json();
+        
+        if (result.success) {
+          supportTeamData = result.data;
+          renderTeamTable(result.data);
+        } else {
+          renderTeamTable([]);
+        }
+      } catch (error) {
+        console.error('Error loading team members:', error);
+        document.getElementById('teamTableContainer').innerHTML = 
+          '<div class="alert alert-danger">Error loading team members</div>';
+      }
+    }
+
+    // Render team table
+    function renderTeamTable(teamData) {
+      const container = document.getElementById('teamTableContainer');
+      
+      if (teamData.length === 0) {
+        container.innerHTML = `
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            No support team members found. Click "Add Support Staff" to get started.
+          </div>
+        `;
+        return;
+      }
+
+      let tableHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Support ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Active Cases</th>
+              <th>Capacity</th>
+              <th>Performance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      teamData.forEach(member => {
+        const workloadPercentage = member.supportInfo.capabilities.maxCasesAllowed > 0 
+          ? Math.round((getActiveCases(member) / member.supportInfo.capabilities.maxCasesAllowed) * 100)
+          : 0;
+        
+        const workloadClass = getWorkloadClass(workloadPercentage);
+        const statusClass = member.supportInfo.supportStatus === 'active' ? 'status-active' : 'status-inactive';
+
+        tableHTML += `
+          <tr>
+            <td><strong>${member.supportInfo.supportId}</strong></td>
+            <td>${member.supportInfo.supportName}</td>
+            <td>${member.supportInfo.supportEmail}</td>
+            <td><span class="status-badge ${statusClass}">${member.supportInfo.supportStatus}</span></td>
+            <td>${getActiveCases(member)}</td>
+            <td>
+              <span class="workload-indicator ${workloadClass}"></span>
+              ${workloadPercentage}% (${getActiveCases(member)}/${member.supportInfo.capabilities.maxCasesAllowed})
+            </td>
+            <td>
+              <div class="performance-meter">
+                <div class="performance-fill" style="width: ${member.supportInfo.performance.conversionRate}%"></div>
+              </div>
+              ${member.supportInfo.performance.conversionRate}%
+            </td>
+            <td>
+              <button class="action-btn btn-info" onclick="viewMemberDetails('${member._id}')" style="padding: 5px 10px; margin: 2px;">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn btn-warning" onclick="editMember('${member._id}')" style="padding: 5px 10px; margin: 2px;">
+                <i class="fas fa-edit"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tableHTML += `
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    // Helper functions
+    function getActiveCases(member) {
+      // This would need to be calculated based on the actual case data
+      // For now, return 0 as placeholder
+      return 0;
+    }
+
+    function getWorkloadClass(percentage) {
+      if (percentage < 50) return 'workload-low';
+      if (percentage < 75) return 'workload-medium';
+      if (percentage < 90) return 'workload-high';
+      return 'workload-critical';
+    }
+
+    // Modal functions
+    function openAddStaffModal() {
+      document.getElementById('addStaffModal').style.display = 'block';
+    }
+
+    function closeAddStaffModal() {
+      document.getElementById('addStaffModal').style.display = 'none';
+      document.getElementById('addStaffForm').reset();
+    }
+
+    function closeResultsModal() {
+      document.getElementById('resultsModal').style.display = 'none';
+    }
+
+    // Show results modal
+    function showResults(title, content) {
+      document.getElementById('resultsTitle').textContent = title;
+      document.getElementById('resultsContent').innerHTML = content;
+      document.getElementById('resultsModal').style.display = 'block';
+    }
+
+    // Add staff form submission
+    document.getElementById('addStaffForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('staffName').value,
+        email: document.getElementById('staffEmail').value,
+        phone: document.getElementById('staffPhone').value,
+        department: document.getElementById('staffDepartment').value,
+        maxCases: parseInt(document.getElementById('maxCases').value),
+        languages: getCheckedValues('lang-'),
+        specializations: getCheckedValues('spec-')
+      };
+
+      try {
+        const response = await fetch('/api/support/create-test-member', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showAlert('Support staff member added successfully!', 'success');
+          closeAddStaffModal();
+          refreshTeamData();
+        } else {
+          showAlert('Error adding staff member: ' + result.error, 'danger');
+        }
+      } catch (error) {
+        showAlert('Network error: ' + error.message, 'danger');
+      }
+    });
+
+    // Helper function to get checked checkbox values
+    function getCheckedValues(prefix) {
+      const checkboxes = document.querySelectorAll(`input[type="checkbox"][id^="${prefix}"]:checked`);
+      return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    // Action functions
+    async function assignContactsManually() {
+      try {
+        const response = await fetch('/api/support/assign-contacts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ batchSize: 10 })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          showResults('Assignment Results', `
+            <div class="alert alert-success">
+              <h4>Assignment Completed Successfully</h4>
+              <p><strong>Assigned:</strong> ${result.assigned} contacts</p>
+              <p><strong>Total Processed:</strong> ${result.total} contacts</p>
+              ${result.assignmentDetails ? `
+                <h5>Assignment Details:</h5>
+                <ul>
+                  ${result.assignmentDetails.map(detail => 
+                    `<li>${detail.contactEmail} → ${detail.assignedTo}</li>`
+                  ).join('')}
+                </ul>
+              ` : ''}
+            </div>
+          `);
+          refreshTeamData();
+        } else {
+          showResults('Assignment Failed', `
+            <div class="alert alert-danger">
+              <p>${result.message}</p>
+            </div>
+          `);
+        }
+      } catch (error) {
+        showAlert('Error assigning contacts: ' + error.message, 'danger');
+      }
+    }
+
+    async function rebalanceWorkload() {
+      try {
+        const response = await fetch('/api/support/rebalance', {
+          method: 'POST'
+        });
+
+        const result = await response.json();
+        
+        showResults('Workload Rebalancing', `
+          <div class="alert alert-info">
+            <h4>Rebalancing Results</h4>
+            <p><strong>Cases Rebalanced:</strong> ${result.rebalanced || 0}</p>
+            ${result.rebalanced > 0 ? 
+              '<p>Workload has been redistributed among team members.</p>' : 
+              '<p>No rebalancing was necessary. Workload is already well distributed.</p>'
+            }
+          </div>
+        `);
+        
+        refreshTeamData();
+      } catch (error) {
+        showAlert('Error rebalancing workload: ' + error.message, 'danger');
+      }
+    }
+
+    async function viewPerformanceReport() {
+      // This would generate a detailed performance report
+      showResults('Performance Report', `
+        <div class="alert alert-info">
+          <h4>Team Performance Summary</h4>
+          <p>Detailed performance analytics coming soon...</p>
+          <ul>
+            <li>Total Active Staff: ${document.getElementById('totalStaff').textContent}</li>
+            <li>Active Cases: ${document.getElementById('activeCases').textContent}</li>
+            <li>Pending Follow-ups: ${document.getElementById('pendingFollowUps').textContent}</li>
+            <li>Average Conversion Rate: ${document.getElementById('avgConversion').textContent}</li>
+          </ul>
+        </div>
+      `);
+    }
+
+    async function viewPendingContacts() {
+      try {
+        const response = await fetch('/api/support/contacts');
+        const result = await response.json();
+        
+        if (result.success) {
+          const pendingContacts = result.data.filter(contact => contact.assignmentStatus === 'pending');
+          
+          let content = `
+            <div class="alert alert-info">
+              <h4>Pending Contacts (${pendingContacts.length})</h4>
+          `;
+          
+          if (pendingContacts.length > 0) {
+            content += `
+              <table class="data-table" style="margin-top: 15px;">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Priority Score</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            pendingContacts.slice(0, 10).forEach(contact => {
+              content += `
+                <tr>
+                  <td>${contact.name}</td>
+                  <td>${contact.email}</td>
+                  <td>${contact.priorityScore}</td>
+                  <td>${new Date(contact.date).toLocaleDateString()}</td>
+                </tr>
+              `;
+            });
+            
+            content += `
+                </tbody>
+              </table>
+            `;
+            
+            if (pendingContacts.length > 10) {
+              content += `<p style="margin-top: 10px;"><em>Showing first 10 of ${pendingContacts.length} pending contacts.</em></p>`;
+            }
+          } else {
+            content += '<p>No pending contacts found.</p>';
+          }
+          
+          content += '</div>';
+          
+          showResults('Pending Contacts', content);
+        }
+      } catch (error) {
+        showAlert('Error loading pending contacts: ' + error.message, 'danger');
+      }
+    }
+
+    async function createTestContact() {
+      try {
+        const response = await fetch('/api/support/create-test-contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: 'Dr. Test User ' + Date.now(),
+            email: `test${Date.now()}@example.com`,
+            medicalSpecialty: 'Doctor (MD, DO, OB/GYN)',
+            priorityScore: Math.floor(Math.random() * 40) + 60
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          showAlert('Test contact created successfully!', 'success');
+        } else {
+          showAlert('Error creating test contact: ' + result.error, 'danger');
+        }
+      } catch (error) {
+        showAlert('Error creating test contact: ' + error.message, 'danger');
+      }
+    }
+
+    // Utility functions
+    async function refreshTeamData() {
+      await loadDashboardData();
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        ${message}
+      `;
+      
+      document.querySelector('.support-dashboard').insertBefore(alertDiv, document.querySelector('.stats-grid'));
+      
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 5000);
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+    }
+
+    // Additional placeholder functions
+    function viewUnassignedContacts() {
+      showAlert('Feature coming soon: Unassigned Contacts View', 'info');
+    }
+
+    function viewHighPriorityContacts() {
+      showAlert('Feature coming soon: High Priority Contacts View', 'info');
+    }
+
+    function viewContactAnalytics() {
+      showAlert('Feature coming soon: Contact Analytics Dashboard', 'info');
+    }
+
+    function viewMemberDetails(memberId) {
+      showAlert('Feature coming soon: Member Details View', 'info');
+    }
+
+    function editMember(memberId) {
+      showAlert('Feature coming soon: Edit Member Form', 'info');
+    }
+  </script>
+</body>
+
+</html>

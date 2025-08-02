@@ -2826,7 +2826,7 @@ class AdminOnlineCoursesManager {
               </td>
               <td>
                   <div class="price-info">
-                      <div class="price-main">$${price}</div>
+                      <div class="price-main">€${price}</div>
                   </div>
               </td>
               <td>
@@ -2911,7 +2911,7 @@ class AdminOnlineCoursesManager {
                       <div><i class="fas fa-laptop"></i> ${platformName}</div>
                       <div><i class="fas fa-user"></i> ${instructorName}</div>
                       <div><i class="fas fa-users"></i> ${currentEnrollment} / ${seatsAvailable} enrolled</div>
-                      <div><i class="fas fa-dollar-sign"></i> $${price}</div>
+                      <div><i class="fas fa-dollar-sign"></i> €${price}</div>
                   </div>
                   <div class="course-card-actions">
                       <button class="action-btn edit-btn" onclick="adminOnlineCourses.editCourse('${course._id}')">
@@ -6632,7 +6632,7 @@ class AdminOnlineCoursesManager {
     );
     this.setFormValue(
       "enrollment[currency]",
-      safeValue(course.enrollment?.currency, "USD")
+      safeValue(course.enrollment?.currency, "EUR")
     );
     this.setFormValue(
       "enrollment[seatsAvailable]",

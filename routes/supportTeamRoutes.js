@@ -134,13 +134,30 @@ router.get("/team-members", async (req, res) => {
 router.post("/create-test-member", async (req, res) => {
   try {
     const SupportTeam = require("../models/supportTeam");
+    const User = require("../models/user");
 
+    // First, create a User account for the support team member
+    const supportUser = new User({
+      firstName: req.body.name ? req.body.name.split(" ")[0] : "John",
+      lastName: req.body.name
+        ? req.body.name.split(" ").slice(1).join(" ") || "Doe"
+        : "Doe",
+      email: req.body.email || `test${Date.now()}@iaai.com`,
+      password: "$2a$10$dummy.hash.for.test.user.account.only", // Dummy hash for test
+      role: "support",
+      isConfirmed: true,
+    });
+
+    const savedUser = await supportUser.save();
+
+    // Now create the SupportTeam entry linked to the User
     const testMember = new SupportTeam({
       supportInfo: {
         supportId: `SUP${Date.now()}`,
         supportName: req.body.name || "Test Support Member",
         supportEmail: req.body.email || `test${Date.now()}@iaai.com`,
         supportStatus: "active",
+        linkedUserId: savedUser._id, // ✅ Required field
         capabilities: {
           languages: ["English"],
           specializations: ["Medical", "Aesthetic"],
@@ -162,8 +179,15 @@ router.post("/create-test-member", async (req, res) => {
 
     res.json({
       success: true,
-      data: testMember,
-      message: "Test support team member created successfully",
+      data: {
+        supportTeam: testMember,
+        linkedUser: {
+          id: savedUser._id,
+          email: savedUser.email,
+          role: savedUser.role,
+        },
+      },
+      message: "Test support team member and linked user created successfully",
     });
   } catch (error) {
     console.error("Create test member error:", error);

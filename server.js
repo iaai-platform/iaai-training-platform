@@ -555,6 +555,28 @@ if (!fs.existsSync(thumbnailsDir)) {
 console.log("📸 Serving self-paced course thumbnails from:", thumbnailsDir);
 
 // ============================================
+// SUPPORT STAFF ROUTES (NEW)
+// ============================================
+
+// Support staff dashboard (only for users with 'support' role)
+app.get("/support/dashboard", (req, res) => {
+  if (req.isAuthenticated() && req.user.role === "support") {
+    res.render("support-staff-dashboard", {
+      user: req.user,
+      title: "Support Dashboard - Case Management",
+    });
+  } else {
+    req.flash("error_message", "Support staff access required.");
+    res.redirect("/login");
+  }
+});
+
+// Support staff API routes for case management
+const supportStaffRoutes = require("./routes/supportStaffRoutes");
+app.use("/api/support-staff", supportStaffRoutes);
+
+console.log("🤝 Support staff dashboard routes loaded");
+// ============================================
 // 11. USER FEATURES ROUTES
 // ============================================
 

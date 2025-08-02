@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Admin User Management Styles */
+        /* ============================================================
+           ✅ 1. Base Styling & Reset
+           ============================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -18,18 +20,34 @@
 
         body {
             font-family: 'Montserrat', sans-serif;
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: #333;
             line-height: 1.6;
+            min-height: 100vh;
         }
 
-        /* Admin Header */
+        /* ============================================================
+           ✅ 2. Enhanced Admin Header
+           ============================================================ */
         .admin-header {
             background: linear-gradient(135deg, #dc3545, #c82333);
             color: white;
-            padding: 30px;
+            padding: 35px 30px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(220,53,69,0.2);
+            box-shadow: 0 8px 25px rgba(220,53,69,0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="25" r="1" fill="white" opacity="0.05"/><circle cx="25" cy="75" r="1" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            pointer-events: none;
         }
 
         .admin-header-content {
@@ -40,25 +58,37 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .admin-header h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .admin-header p {
+            margin-top: 8px;
+            opacity: 0.9;
+            font-size: 1.1rem;
         }
 
         .admin-header .breadcrumb {
-            background: rgba(255,255,255,0.1);
-            padding: 10px 15px;
-            border-radius: 25px;
-            font-size: 0.9rem;
+            background: rgba(255,255,255,0.15);
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .admin-header .breadcrumb a {
             color: white;
             text-decoration: none;
             opacity: 0.8;
+            transition: opacity 0.3s ease;
         }
 
         .admin-header .breadcrumb a:hover {
@@ -66,405 +96,938 @@
             text-decoration: underline;
         }
 
-        /* Container */
+        /* ============================================================
+           ✅ 3. Enhanced Container & Layout
+           ============================================================ */
         .admin-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        /* Revenue Summary Card */
+        /* ============================================================
+           ✅ 4. Enhanced Revenue Summary
+           ============================================================ */
         .revenue-summary {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
-            padding: 30px;
-            border-radius: 15px;
+            padding: 35px;
+            border-radius: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+            box-shadow: 0 10px 30px rgba(40,167,69,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .revenue-summary::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
         }
 
         .revenue-summary h2 {
-            margin-bottom: 20px;
-            font-size: 1.5rem;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            position: relative;
+            z-index: 1;
         }
 
         .revenue-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .revenue-stat {
             text-align: center;
-            padding: 15px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
+            padding: 20px 15px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .revenue-stat:hover {
+            transform: translateY(-5px);
         }
 
         .revenue-stat .value {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .revenue-stat .label {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             opacity: 0.9;
+            font-weight: 500;
         }
 
-        /* Stats Cards */
+        /* ============================================================
+           ✅ 5. Enhanced Stats Grid
+           ============================================================ */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
         }
 
         .stat-card {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             text-align: center;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
         }
 
         .stat-number {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
             color: #007bff;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 4px rgba(0,123,255,0.1);
         }
 
         .stat-label {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
 
-        /* Analytics Button */
+        /* ============================================================
+           ✅ 6. Enhanced Analytics Button
+           ============================================================ */
         .analytics-btn {
-            background: #17a2b8;
+            background: linear-gradient(135deg, #17a2b8, #138496);
             color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 15px 30px;
+            border-radius: 12px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 25px;
             transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 6px 20px rgba(23,162,184,0.3);
+            border: none;
+            cursor: pointer;
         }
 
         .analytics-btn:hover {
-            background: #138496;
+            background: linear-gradient(135deg, #138496, #117a8b);
             text-decoration: none;
             color: white;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(23,162,184,0.4);
         }
 
-        /* Search and Filter Bar */
+        /* ============================================================
+           ✅ 7. Enhanced Filter Bar
+           ============================================================ */
         .filter-bar {
             background: white;
-            padding: 20px;
-            border-radius: 15px;
+            padding: 25px;
+            border-radius: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             display: flex;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
             flex-wrap: wrap;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .search-box {
             flex: 1;
             min-width: 300px;
-            padding: 12px 20px;
+            padding: 15px 20px;
             border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
         }
 
         .search-box:focus {
             outline: none;
             border-color: #007bff;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
         }
 
         .filter-select {
-            padding: 12px 20px;
+            padding: 15px 20px;
             border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #f8f9fa;
             cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
         }
 
-        /* Table Container */
+        .filter-select:focus {
+            outline: none;
+            border-color: #007bff;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        /* ============================================================
+           ✅ 8. Enhanced Table Container
+           ============================================================ */
         .table-container {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             overflow: hidden;
             margin-bottom: 30px;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .table-header {
-            background: #f8f9fa;
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            border-bottom: 2px solid #dee2e6;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .table-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #333;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* Users Table */
+        /* ============================================================
+           ✅ 9. Enhanced Users Table - Desktop
+           ============================================================ */
+        .table-scroll-wrapper {
+            overflow-x: auto;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 5px;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 5px;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+        }
+
         .users-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+            min-width: 1300px;
         }
 
         .users-table th {
-            background: #f8f9fa;
-            padding: 15px;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px 16px;
             text-align: left;
             font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #e9ecef;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
         .users-table td {
-            padding: 15px;
-            border-bottom: 1px solid #f8f9fa;
-            vertical-align: top;
+            padding: 18px 16px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+            background: white;
+            transition: all 0.3s ease;
         }
 
-        .users-table tr:hover {
-            background: #f8f9ff;
+        .users-table tr:hover td {
+            background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
+            transform: scale(1.001);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
-        /* User Info */
+        .users-table tr:nth-child(even) td {
+            background: #fafbfc;
+        }
+
+        .users-table tr:nth-child(even):hover td {
+            background: linear-gradient(135deg, #f0f4ff, #e0ebff);
+        }
+
+        /* Column-specific widths */
+        .users-table th:nth-child(1), .users-table td:nth-child(1) { min-width: 200px; }
+        .users-table th:nth-child(2), .users-table td:nth-child(2) { min-width: 220px; }
+        .users-table th:nth-child(3), .users-table td:nth-child(3) { min-width: 130px; }
+        .users-table th:nth-child(4), .users-table td:nth-child(4) { min-width: 280px; }
+        .users-table th:nth-child(5), .users-table td:nth-child(5) { min-width: 140px; text-align: center; }
+        .users-table th:nth-child(6), .users-table td:nth-child(6) { min-width: 110px; text-align: center; }
+        .users-table th:nth-child(7), .users-table td:nth-child(7) { min-width: 200px; text-align: center; }
+
+        /* ============================================================
+           ✅ 10. Enhanced User Info Components
+           ============================================================ */
         .user-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+            flex-shrink: 0;
+            border: 3px solid rgba(255,255,255,0.9);
+        }
+
+        .user-info div {
+            min-width: 0;
+        }
+
+        .user-info strong {
+            display: block;
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
             font-weight: 600;
         }
 
-        /* Payment Info */
+        .user-info small {
+            color: #6c757d;
+            font-size: 12px;
+            text-transform: capitalize;
+            font-weight: 500;
+            background: #f8f9fa;
+            padding: 2px 8px;
+            border-radius: 8px;
+        }
+
+        /* ============================================================
+           ✅ 11. Enhanced Payment Info
+           ============================================================ */
         .payment-info {
             text-align: center;
         }
 
         .payment-amount {
-            font-weight: 600;
+            font-weight: 700;
             color: #28a745;
-            font-size: 1.1rem;
+            font-size: 17px;
+            display: block;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 2px rgba(40,167,69,0.1);
         }
 
         .payment-count {
-            font-size: 0.85rem;
+            font-size: 11px;
             color: #6c757d;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            font-weight: 500;
         }
 
-        /* Course Pills */
+        /* ============================================================
+           ✅ 12. Enhanced Course Pills
+           ============================================================ */
         .course-pills {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
+            max-width: 260px;
+            margin-bottom: 6px;
         }
 
         .course-pill {
             display: inline-block;
             padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 500;
+            border-radius: 18px;
+            font-size: 11px;
+            font-weight: 600;
             white-space: nowrap;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-pill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .course-pill:hover::before {
+            left: 100%;
+        }
+
+        .course-pill:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
 
         .course-pill.in-person {
-            background: #e3f2fd;
-            color: #1976d2;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #1565c0;
+            border-color: #90caf9;
         }
 
         .course-pill.online-live {
-            background: #f3e5f5;
-            color: #7b1fa2;
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            color: #6a1b9a;
+            border-color: #ce93d8;
         }
 
         .course-pill.self-paced {
-            background: #e8f5e9;
-            color: #388e3c;
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            color: #2e7d32;
+            border-color: #a5d6a7;
         }
 
-        /* Status Badges */
+        /* ============================================================
+           ✅ 13. Enhanced Status Badges
+           ============================================================ */
         .status-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            border: 2px solid transparent;
         }
 
         .status-confirmed {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
             color: #155724;
+            border-color: #b8dabd;
         }
 
         .status-pending {
-            background: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
             color: #856404;
+            border-color: #f0d072;
         }
 
-        /* Wishlist */
-        .wishlist-count {
-            background: #ffc107;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        /* Action Buttons */
+        /* ============================================================
+           ✅ 14. Enhanced Action Buttons
+           ============================================================ */
         .action-btns {
             display: flex;
             gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 8px 16px;
+            padding: 10px 14px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             text-decoration: none;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            gap: 6px;
+            min-width: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
         }
 
         .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 8px 12px;
+            font-size: 11px;
         }
 
         .btn-primary {
-            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0056b3;
         }
 
         .btn-info {
-            background: #17a2b8;
+            background: linear-gradient(135deg, #17a2b8, #138496);
             color: white;
-        }
-
-        .btn-info:hover {
-            background: #138496;
         }
 
         .btn-success {
-            background: #28a745;
+            background: linear-gradient(135deg, #28a745, #218838);
             color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
         }
 
         .btn-danger {
-            background: #dc3545;
+            background: linear-gradient(135deg, #dc3545, #c82333);
             color: white;
         }
 
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
         .btn-warning {
-            background: #ffc107;
+            background: linear-gradient(135deg, #ffc107, #e0a800);
             color: #212529;
         }
 
-        .btn-warning:hover {
-            background: #e0a800;
+        /* ============================================================
+           ✅ 15. Mobile Card Layout (≤768px)
+           ============================================================ */
+        .mobile-user-cards {
+            display: none;
+            padding: 15px;
         }
 
-        /* Empty State */
+        .user-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+
+        .user-card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+
+        .user-card .user-avatar {
+            width: 55px;
+            height: 55px;
+            font-size: 20px;
+        }
+
+        .user-card-info h4 {
+            margin: 0 0 6px 0;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .user-card-info .role {
+            color: #6c757d;
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: 600;
+            background: #f8f9fa;
+            padding: 3px 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .user-card-details {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .detail-value {
+            flex: 2;
+            text-align: right;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .mobile-course-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        .mobile-course-pills .course-pill {
+            font-size: 10px;
+            padding: 4px 10px;
+        }
+
+        .mobile-payment-info {
+            text-align: right;
+        }
+
+        .mobile-payment-info .payment-amount {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .mobile-payment-info .payment-count {
+            font-size: 11px;
+        }
+
+        .mobile-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding-top: 20px;
+            border-top: 2px solid #f1f3f4;
+        }
+
+        .mobile-actions .btn {
+            flex: 1;
+            min-width: 90px;
+            padding: 12px 10px;
+            font-size: 12px;
+        }
+
+        .mobile-status {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        /* ============================================================
+           ✅ 16. Empty State
+           ============================================================ */
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
             color: #6c757d;
         }
 
         .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            font-size: 5rem;
+            margin-bottom: 25px;
+            opacity: 0.4;
+            color: #007bff;
         }
 
-        /* Responsive */
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* ============================================================
+           ✅ 17. Responsive Design
+           ============================================================ */
+
+        /* Mobile (≤768px) */
         @media (max-width: 768px) {
+            .admin-header {
+                padding: 25px 20px;
+            }
+
             .admin-header-content {
                 flex-direction: column;
                 text-align: center;
+                gap: 15px;
+            }
+
+            .admin-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .admin-container {
+                padding: 0 15px;
+            }
+
+            .revenue-summary {
+                padding: 25px 20px;
+            }
+
+            .revenue-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
             }
 
             .filter-bar {
                 flex-direction: column;
+                padding: 20px;
+                gap: 15px;
             }
 
             .search-box {
                 min-width: 100%;
+                margin-bottom: 5px;
             }
 
+            .filter-select {
+                min-width: 100%;
+            }
+
+            .table-scroll-wrapper,
             .users-table {
-                font-size: 12px;
+                display: none;
+            }
+
+            .mobile-user-cards {
+                display: block;
+            }
+
+            .table-header {
+                padding: 20px;
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .table-title {
+                font-size: 1.2rem;
+                justify-content: center;
+            }
+        }
+
+        /* Tablet (769px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .users-table {
+                font-size: 13px;
+                min-width: 1100px;
             }
 
             .users-table th,
             .users-table td {
-                padding: 10px 8px;
+                padding: 16px 14px;
+            }
+
+            .user-info strong {
+                max-width: 130px;
+                font-size: 15px;
             }
 
             .course-pills {
-                max-width: 200px;
+                max-width: 220px;
             }
+
+            .mobile-user-cards {
+                display: none;
+            }
+        }
+
+        /* Large Desktop (1200px+) */
+        @media (min-width: 1200px) {
+            .users-table {
+                font-size: 15px;
+                min-width: 1400px;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 20px 18px;
+            }
+
+            .user-avatar {
+                width: 55px;
+                height: 55px;
+                font-size: 20px;
+            }
+
+            .user-info strong {
+                max-width: 170px;
+                font-size: 17px;
+            }
+
+            .course-pills {
+                max-width: 300px;
+            }
+
+            .btn {
+                padding: 12px 18px;
+                font-size: 13px;
+            }
+        }
+
+        /* ============================================================
+           ✅ 18. Print Styles
+           ============================================================ */
+        @media print {
+            .action-btns,
+            .filter-bar,
+            .analytics-btn,
+            .admin-header {
+                display: none !important;
+            }
+
+            .table-container {
+                box-shadow: none;
+                border: 2px solid #ddd;
+            }
+
+            .users-table th {
+                background: #f8f9fa !important;
+                color: #333 !important;
+                -webkit-print-color-adjust: exact;
+            }
+
+            body {
+                background: white !important;
+            }
+        }
+
+        /* ============================================================
+           ✅ 19. Additional Enhancements
+           ============================================================ */
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        /* Loading Animation */
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200px 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Smooth transitions for all interactive elements */
+        * {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Focus styles for accessibility */
+        *:focus {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
+        }
+
+        /* Selection styles */
+        ::selection {
+            background: #007bff;
+            color: white;
         }
     </style>
 </head>
 
 <body>
     <%- include('partials/header') %>
-    <!-- Admin Header -->
+    
+    <!-- Enhanced Admin Header -->
     <div class="admin-header">
         <div class="admin-header-content">
             <div>
@@ -480,7 +1043,7 @@
     </div>
 
     <div class="admin-container">
-        <!-- Revenue Summary -->
+        <!-- Enhanced Revenue Summary -->
         <% if (overallStats) { %>
         <div class="revenue-summary">
             <h2><i class="fas fa-chart-line"></i> Financial Overview</h2>
@@ -509,12 +1072,12 @@
         </div>
         <% } %>
 
-        <!-- Analytics Button -->
+        <!-- Enhanced Analytics Button -->
         <a href="/admin/payment-analytics" class="analytics-btn">
             <i class="fas fa-chart-bar"></i> View Detailed Analytics
         </a>
 
-        <!-- Statistics -->
+        <!-- Enhanced Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number"><%= users.length %></div>
@@ -534,9 +1097,9 @@
             </div>
         </div>
 
-        <!-- Search and Filter -->
+        <!-- Enhanced Search and Filter -->
         <div class="filter-bar">
-            <input type="text" class="search-box" id="searchBox" placeholder="Search by name, email, or phone...">
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search by name, email, or phone...">
             <select class="filter-select" id="roleFilter">
                 <option value="">All Roles</option>
                 <option value="user">Users</option>
@@ -555,7 +1118,7 @@
             </select>
         </div>
 
-        <!-- Users Table -->
+        <!-- Enhanced Users Table Container -->
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">
@@ -567,113 +1130,225 @@
             </div>
 
             <% if (users.length > 0) { %>
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Contact</th>
-                            <th>Location</th>
-                            <th>Courses</th>
-                            <th>Total Spent</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                        <% users.forEach(user => { %>
-                            <tr data-user-id="<%= user._id %>" 
-                                data-role="<%= user.role %>" 
-                                data-status="<%= user.isConfirmed ? 'confirmed' : 'pending' %>"
-                                data-payment="<%= user.totalSpent > 0 ? 'paying' : 'free' %>">
-                                
-                                <!-- User Info -->
-                                <td>
-                                    <div class="user-info">
-                                        <div class="user-avatar">
-                                            <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+                <!-- Desktop Table View -->
+                <div class="table-scroll-wrapper">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-user"></i> User</th>
+                                <th><i class="fas fa-envelope"></i> Contact</th>
+                                <th><i class="fas fa-map-marker-alt"></i> Location</th>
+                                <th><i class="fas fa-graduation-cap"></i> Courses</th>
+                                <th><i class="fas fa-dollar-sign"></i> Total Spent</th>
+                                <th><i class="fas fa-check-circle"></i> Status</th>
+                                <th><i class="fas fa-cogs"></i> Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <% users.forEach(user => { %>
+                                <tr data-user-id="<%= user._id %>" 
+                                    data-role="<%= user.role %>" 
+                                    data-status="<%= user.isConfirmed ? 'confirmed' : 'pending' %>"
+                                    data-payment="<%= user.totalSpent > 0 ? 'paying' : 'free' %>">
+                                    
+                                    <!-- Enhanced User Info -->
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-avatar">
+                                                <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+                                            </div>
+                                            <div>
+                                                <strong><%= user.firstName %> <%= user.lastName %></strong>
+                                                <small class="text-muted"><%= user.role %></small>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <strong><%= user.firstName %> <%= user.lastName %></strong>
-                                            <br>
-                                            <small class="text-muted"><%= user.role %></small>
+                                    </td>
+
+                                    <!-- Enhanced Contact -->
+                                    <td>
+                                        <div style="line-height: 1.4;">
+                                            <strong><%= user.email %></strong><br>
+                                            <small class="text-muted">
+                                                <i class="fas fa-phone" style="width: 12px;"></i> 
+                                                <%= user.phoneNumber || 'No phone' %>
+                                            </small>
                                         </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                                <!-- Contact -->
-                                <td>
-                                    <%= user.email %><br>
-                                    <small><%= user.phoneNumber || 'No phone' %></small>
-                                </td>
+                                    <!-- Enhanced Location -->
+                                    <td>
+                                        <span style="color: #495057; font-weight: 500;">
+                                            <%= user.country || 'Not specified' %>
+                                        </span>
+                                    </td>
 
-                                <!-- Location -->
-                                <td><%= user.country || 'Not specified' %></td>
+                                    <!-- Enhanced Courses -->
+                                    <td>
+                                        <% if (user.myCourses && user.myCourses.length > 0) { %>
+                                            <div class="course-pills">
+                                                <% user.myCourses.slice(0, 3).forEach(course => { %>
+                                                    <span class="course-pill <%= course.courseType.toLowerCase().replace(' ', '-') %>" 
+                                                          title="<%= course.courseTitle || course.title %> - <%= course.status %>">
+                                                        <%= course.courseCode %>
+                                                    </span>
+                                                <% }) %>
+                                                <% if (user.myCourses.length > 3) { %>
+                                                    <span class="course-pill" style="background: linear-gradient(135deg, #e0e0e0, #d0d0d0); color: #666;">
+                                                        +<%= user.myCourses.length - 3 %>
+                                                    </span>
+                                                <% } %>
+                                            </div>
+                                            <small class="text-muted" style="font-size: 11px;">
+                                                <i class="fas fa-shopping-cart"></i> <%= user.coursesPurchased || 0 %> purchased, 
+                                                <i class="fas fa-heart"></i> <%= user.myWishlist ? user.myWishlist.length : 0 %> wishlist
+                                            </small>
+                                        <% } else { %>
+                                            <span class="text-muted" style="font-style: italic;">
+                                                <i class="fas fa-minus-circle"></i> No courses
+                                            </span>
+                                        <% } %>
+                                    </td>
 
-                                <!-- Courses -->
-                                <td>
-                                    <% if (user.myCourses && user.myCourses.length > 0) { %>
-                                        <div class="course-pills">
-                                            <% user.myCourses.slice(0, 3).forEach(course => { %>
-                                                <span class="course-pill <%= course.courseType.toLowerCase().replace(' ', '-') %>" 
-                                                      title="<%= course.courseTitle || course.title %> - <%= course.status %>">
+                                    <!-- Enhanced Payment Info -->
+                                    <td class="payment-info">
+                                        <div class="payment-amount">$<%= user.totalSpent.toFixed(2) %></div>
+                                        <div class="payment-count">
+                                            <i class="fas fa-receipt"></i> 
+                                            <%= user.paymentTransactions ? user.paymentTransactions.length : 0 %> transactions
+                                        </div>
+                                    </td>
+
+                                    <!-- Enhanced Status -->
+                                    <td>
+                                        <span class="status-badge status-<%= user.isConfirmed ? 'confirmed' : 'pending' %>">
+                                            <% if (user.isConfirmed) { %>
+                                                <i class="fas fa-check-circle"></i> Confirmed
+                                            <% } else { %>
+                                                <i class="fas fa-clock"></i> Pending
+                                            <% } %>
+                                        </span>
+                                    </td>
+
+                                    <!-- Enhanced Actions -->
+                                    <td>
+                                        <div class="action-btns">
+                                            <button class="btn btn-info btn-sm" onclick="viewUserDetails('<%= user._id %>')" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <% if (!user.isConfirmed) { %>
+                                                <button class="btn btn-success btn-sm" onclick="approveUser('<%= user._id %>')" title="Approve User">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            <% } %>
+                                            <% if (user.totalSpent > 0) { %>
+                                                <button class="btn btn-warning btn-sm" onclick="viewUserTransactions('<%= user._id %>')" title="View Transactions">
+                                                    <i class="fas fa-receipt"></i>
+                                                </button>
+                                            <% } %>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteUser('<%= user._id %>', '<%= user.firstName %> <%= user.lastName %>')" title="Delete User">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="mobile-user-cards" id="mobileUserCards">
+                    <% users.forEach(user => { %>
+                        <div class="user-card" data-user-id="<%= user._id %>" 
+                             data-role="<%= user.role %>" 
+                             data-status="<%= user.isConfirmed ? 'confirmed' : 'pending' %>"
+                             data-payment="<%= user.totalSpent > 0 ? 'paying' : 'free' %>">
+                            
+                            <div class="user-card-header">
+                                <div class="user-avatar">
+                                    <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+                                </div>
+                                <div class="user-card-info">
+                                    <h4><%= user.firstName %> <%= user.lastName %></h4>
+                                    <div class="role"><%= user.role %></div>
+                                </div>
+                                <div class="mobile-status">
+                                    <span class="status-badge status-<%= user.isConfirmed ? 'confirmed' : 'pending' %>">
+                                        <% if (user.isConfirmed) { %>
+                                            <i class="fas fa-check-circle"></i> Confirmed
+                                        <% } else { %>
+                                            <i class="fas fa-clock"></i> Pending
+                                        <% } %>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="user-card-details">
+                                <div class="detail-row">
+                                    <div class="detail-label"><i class="fas fa-envelope"></i> Email:</div>
+                                    <div class="detail-value"><%= user.email %></div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label"><i class="fas fa-phone"></i> Phone:</div>
+                                    <div class="detail-value"><%= user.phoneNumber || 'No phone' %></div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Location:</div>
+                                    <div class="detail-value"><%= user.country || 'Not specified' %></div>
+                                </div>
+                                <% if (user.myCourses && user.myCourses.length > 0) { %>
+                                <div class="detail-row">
+                                    <div class="detail-label"><i class="fas fa-graduation-cap"></i> Courses:</div>
+                                    <div class="detail-value">
+                                        <div class="mobile-course-pills">
+                                            <% user.myCourses.slice(0, 4).forEach(course => { %>
+                                                <span class="course-pill <%= course.courseType.toLowerCase().replace(' ', '-') %>">
                                                     <%= course.courseCode %>
                                                 </span>
                                             <% }) %>
-                                            <% if (user.myCourses.length > 3) { %>
+                                            <% if (user.myCourses.length > 4) { %>
                                                 <span class="course-pill" style="background: #e0e0e0; color: #666;">
-                                                    +<%= user.myCourses.length - 3 %>
+                                                    +<%= user.myCourses.length - 4 %>
                                                 </span>
                                             <% } %>
                                         </div>
-                                        <small class="text-muted">
-                                            <%= user.coursesPurchased || 0 %> purchased, 
-                                            <%= user.myWishlist ? user.myWishlist.length : 0 %> wishlist
-                                        </small>
-                                    <% } else { %>
-                                        <span class="text-muted">No courses</span>
-                                    <% } %>
-                                </td>
-
-                                <!-- Payment Info -->
-                                <td class="payment-info">
-                                    <div class="payment-amount">$<%= user.totalSpent.toFixed(2) %></div>
-                                    <div class="payment-count">
-                                        <%= user.paymentTransactions ? user.paymentTransactions.length : 0 %> transactions
                                     </div>
-                                </td>
-
-                                <!-- Status -->
-                                <td>
-                                    <span class="status-badge status-<%= user.isConfirmed ? 'confirmed' : 'pending' %>">
-                                        <%= user.isConfirmed ? 'Confirmed' : 'Pending' %>
-                                    </span>
-                                </td>
-
-                                <!-- Actions -->
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="btn btn-info btn-sm" onclick="viewUserDetails('<%= user._id %>')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <% if (!user.isConfirmed) { %>
-                                            <button class="btn btn-success btn-sm" onclick="approveUser('<%= user._id %>')">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        <% } %>
-                                        <% if (user.totalSpent > 0) { %>
-                                            <button class="btn btn-warning btn-sm" onclick="viewUserTransactions('<%= user._id %>')">
-                                                <i class="fas fa-receipt"></i>
-                                            </button>
-                                        <% } %>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteUser('<%= user._id %>', '<%= user.firstName %> <%= user.lastName %>')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                </div>
+                                <% } %>
+                                <div class="detail-row">
+                                    <div class="detail-label"><i class="fas fa-dollar-sign"></i> Total Spent:</div>
+                                    <div class="detail-value">
+                                        <div class="mobile-payment-info">
+                                            <div class="payment-amount">$<%= user.totalSpent.toFixed(2) %></div>
+                                            <div class="payment-count">
+                                                <%= user.paymentTransactions ? user.paymentTransactions.length : 0 %> transactions
+                                            </div>
+                                        </div>
                                     </div>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                                </div>
+                            </div>
+                            
+                            <div class="mobile-actions">
+                                <button class="btn btn-info btn-sm" onclick="viewUserDetails('<%= user._id %>')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <% if (!user.isConfirmed) { %>
+                                    <button class="btn btn-success btn-sm" onclick="approveUser('<%= user._id %>')">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                <% } %>
+                                <% if (user.totalSpent > 0) { %>
+                                    <button class="btn btn-warning btn-sm" onclick="viewUserTransactions('<%= user._id %>')">
+                                        <i class="fas fa-receipt"></i> Bills
+                                    </button>
+                                <% } %>
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser('<%= user._id %>', '<%= user.firstName %> <%= user.lastName %>')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
             <% } else { %>
                 <div class="empty-state">
                     <i class="fas fa-users"></i>
@@ -685,7 +1360,7 @@
     </div>
 
     <script>
-        // Search and Filter functionality
+        // Enhanced Search and Filter functionality
         document.getElementById('searchBox').addEventListener('input', filterUsers);
         document.getElementById('roleFilter').addEventListener('change', filterUsers);
         document.getElementById('statusFilter').addEventListener('change', filterUsers);
@@ -697,9 +1372,9 @@
             const statusFilter = document.getElementById('statusFilter').value;
             const paymentFilter = document.getElementById('paymentFilter').value;
             
-            const rows = document.querySelectorAll('#usersTableBody tr');
-            
-            rows.forEach(row => {
+            // Filter desktop table rows
+            const tableRows = document.querySelectorAll('#usersTableBody tr');
+            tableRows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 const role = row.dataset.role;
                 const status = row.dataset.status;
@@ -712,7 +1387,42 @@
                 
                 row.style.display = matchesSearch && matchesRole && matchesStatus && matchesPayment ? '' : 'none';
             });
+
+            // Filter mobile cards
+            const mobileCards = document.querySelectorAll('.user-card');
+            mobileCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const role = card.dataset.role;
+                const status = card.dataset.status;
+                const payment = card.dataset.payment;
+                
+                const matchesSearch = text.includes(searchTerm);
+                const matchesRole = !roleFilter || role === roleFilter;
+                const matchesStatus = !statusFilter || status === statusFilter;
+                const matchesPayment = !paymentFilter || payment === paymentFilter;
+                
+                card.style.display = matchesSearch && matchesRole && matchesStatus && matchesPayment ? '' : 'none';
+            });
         }
+
+        // Enhanced responsive view handling
+        function handleResponsiveView() {
+            const isMobile = window.innerWidth <= 768;
+            const mobileCards = document.querySelector('.mobile-user-cards');
+            const desktopTable = document.querySelector('.table-scroll-wrapper');
+            
+            if (isMobile) {
+                if (mobileCards) mobileCards.style.display = 'block';
+                if (desktopTable) desktopTable.style.display = 'none';
+            } else {
+                if (mobileCards) mobileCards.style.display = 'none';
+                if (desktopTable) desktopTable.style.display = 'block';
+            }
+        }
+
+        // Run on load and resize
+        window.addEventListener('load', handleResponsiveView);
+        window.addEventListener('resize', handleResponsiveView);
 
         // View user details
         function viewUserDetails(userId) {
@@ -733,7 +1443,10 @@
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, approve!'
+                confirmButtonText: 'Yes, approve!',
+                customClass: {
+                    popup: 'swal-enhanced'
+                }
             });
 
             if (result.isConfirmed) {
@@ -756,7 +1469,8 @@
                             icon: 'success',
                             title: 'User Approved!',
                             text: data.message,
-                            timer: 2000
+                            timer: 2000,
+                            timerProgressBar: true
                         });
                         setTimeout(() => location.reload(), 2000);
                     } else {
@@ -777,7 +1491,10 @@
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete!'
+                confirmButtonText: 'Yes, delete!',
+                customClass: {
+                    popup: 'swal-enhanced'
+                }
             });
 
             if (result.isConfirmed) {
@@ -800,7 +1517,8 @@
                             icon: 'success',
                             title: 'User Deleted!',
                             text: data.message,
-                            timer: 2000
+                            timer: 2000,
+                            timerProgressBar: true
                         });
                         setTimeout(() => location.reload(), 2000);
                     } else {
@@ -816,6 +1534,37 @@
         function exportUsers() {
             window.location.href = '/admin/users/export?format=csv';
         }
+
+        // Enhanced loading states
+        function showLoading() {
+            document.body.style.cursor = 'wait';
+        }
+
+        function hideLoading() {
+            document.body.style.cursor = 'default';
+        }
+
+        // Add loading states to async functions
+        const originalApproveUser = approveUser;
+        const originalDeleteUser = deleteUser;
+
+        approveUser = async function(userId) {
+            showLoading();
+            try {
+                await originalApproveUser(userId);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        deleteUser = async function(userId, userName) {
+            showLoading();
+            try {
+                await originalDeleteUser(userId, userName);
+            } finally {
+                hideLoading();
+            }
+        };
     </script>
 
     <%- include('partials/footer') %>

@@ -361,6 +361,47 @@
       background: #f8d7da;
     }
     
+    /* Certificate Interest Column Styles */
+    .certificate-interest {
+      text-align: center;
+      padding: 10px;
+    }
+    
+    .certificate-select {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 80px;
+    }
+    
+    .certificate-select:focus {
+      outline: none;
+      border-color: #b8860b;
+    }
+    
+    .certificate-badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .certificate-included {
+      background: #d4f4dd;
+      color: #2e7d3e;
+    }
+    
+    .certificate-not-available {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
     /* Action Buttons */
     .action-buttons {
       display: flex;
@@ -584,6 +625,34 @@
       font-size: 13px;
     }
     
+    /* Certificate Selection in Grid View */
+    .course-card-certificate {
+      margin: 10px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .certificate-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .certificate-option label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .certificate-price-update {
+      font-size: 12px;
+      color: #666;
+      font-style: italic;
+    }
+    
     .course-card-footer {
       border-top: 1px solid #f0f0f0;
       padding-top: 20px;
@@ -773,7 +842,6 @@
 <body>
   <%- include('partials/header') %>
 
-
 <!-- Add this style to your online-live-training.ejs -->
 <style>
   /* Placeholder for missing images */
@@ -797,7 +865,6 @@
     display: none;
   }
 </style>
-
 
   <!-- Enhanced Breadcrumb -->
   <nav class="breadcrumb">
@@ -877,10 +944,11 @@
         <tr>
           <th style="width: 5%">#</th>
           <th style="width: 10%">Code</th>
-          <th style="width: 22%">Course Title</th>
+          <th style="width: 20%">Course Title</th>
           <th style="width: 12%">Start Date</th>
           <th style="width: 10%">Duration</th>
           <th style="width: 10%">Platform</th>
+          <th style="width: 8%">Certificate</th>
           <th style="width: 8%">Price</th>
           <th style="width: 8%">Seats</th>
           <th style="width: 8%">Status</th>
@@ -928,8 +996,26 @@
                 <%= course.platform || 'Zoom' %>
               </span>
             </td>
-            <td class="price-badge">
-              <%= course.currency === 'EUR' ? '€' : (course.currency || '€') %><%= course.price || 0 %>
+            <td class="certificate-interest">
+              <% if ((course.price || 0) === 0) { %>
+                <!-- Free course: Show certificate selection dropdown -->
+                <select class="certificate-select" data-course-id="<%= course._id %>">
+                  <option value="no">No</option>
+                  <option value="yes">Yes (+€10)</option>
+                </select>
+              <% } else { %>
+                <!-- Paid course: Show certificate availability status -->
+                <% if (course.certificateProvided !== false) { %>
+                  <span class="certificate-badge certificate-included">Included</span>
+                <% } else { %>
+                  <span class="certificate-badge certificate-not-available">Not Available</span>
+                <% } %>
+              <% } %>
+            </td>
+            <td class="price-badge" data-original-price="<%= course.price || 0 %>">
+              <span class="price-display">
+                <%= course.currency === 'EUR' ? '€' : (course.currency || '€') %><%= course.price || 0 %>
+              </span>
               <% if (course.hasEarlyBird && course.earlyBirdPrice) { %>
                 <br>
                 <small style="color: #28a745;">
@@ -972,7 +1058,8 @@
                           data-course-type="OnlineLiveTraining"
                           data-price="<%= course.price || 0 %>"
                           data-course-code="<%= course.courseCode || 'N/A' %>"
-                          data-course-title="<%= course.title || 'Untitled Course' %>">
+                          data-course-title="<%= course.title || 'Untitled Course' %>"
+                          data-wants-certificate="no">
                     <i class="fas fa-heart"></i>
                   </button>
                   
@@ -983,6 +1070,7 @@
                           data-price="<%= course.price || 0 %>"
                           data-course-code="<%= course.courseCode || 'N/A' %>"
                           data-course-title="<%= course.title || 'Untitled Course' %>"
+                          data-wants-certificate="no"
                           <%= (course.availableSeats <= 0 || statusText !== 'Open to Register') ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' %>>
                     <i class="fas fa-shopping-cart"></i>
                   </button>
@@ -1065,9 +1153,27 @@
             </div>
           </div>
           
+          <!-- Certificate Option for Free Courses in Grid View -->
+          <% if ((course.price || 0) === 0) { %>
+          <div class="course-card-certificate">
+            <div class="certificate-option">
+              <label>Certificate Interest:</label>
+              <select class="certificate-select" data-course-id="<%= course._id %>">
+                <option value="no">No</option>
+                <option value="yes">Yes (+€10)</option>
+              </select>
+            </div>
+            <div class="certificate-price-update">
+              Selecting certificate will add €10 to course price
+            </div>
+          </div>
+          <% } %>
+          
           <div class="course-card-footer">
-            <div class="course-card-price">
-              <%= course.currency || '€' %><%= course.price || 0 %>
+            <div class="course-card-price" data-original-price="<%= course.price || 0 %>">
+              <span class="price-display">
+                <%= course.currency || '€' %><%= course.price || 0 %>
+              </span>
             </div>
             <div class="course-card-actions">
               <button class="btn-icon btn-details tooltip" data-tooltip="View Details" 
@@ -1082,7 +1188,8 @@
                         data-course-type="OnlineLiveTraining"
                         data-price="<%= course.price || 0 %>"
                         data-course-code="<%= course.courseCode || 'N/A' %>"
-                        data-course-title="<%= course.title || 'Untitled Course' %>">
+                        data-course-title="<%= course.title || 'Untitled Course' %>"
+                        data-wants-certificate="no">
                   <i class="fas fa-heart"></i>
                 </button>
                 
@@ -1093,6 +1200,7 @@
                         data-price="<%= course.price || 0 %>"
                         data-course-code="<%= course.courseCode || 'N/A' %>"
                         data-course-title="<%= course.title || 'Untitled Course' %>"
+                        data-wants-certificate="no"
                         <%= (course.availableSeats <= 0) ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' %>>
                   <i class="fas fa-shopping-cart"></i>
                 </button>
@@ -1126,7 +1234,6 @@
 
   <!-- Notification Container -->
   <div id="notificationContainer"></div>
-<!-- Replace ONLY the <script> section in your online-live-training.ejs with this simpler version -->
 
   <script>
     // Simple notification function
@@ -1186,6 +1293,36 @@
       }
     }
 
+    // Certificate selection handling
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle certificate selection changes
+      document.querySelectorAll('.certificate-select').forEach(select => {
+        select.addEventListener('change', function() {
+          const courseId = this.getAttribute('data-course-id');
+          const wantsCertificate = this.value === 'yes';
+          const row = this.closest('tr') || this.closest('.course-card');
+          
+          // Update price display
+          const priceElement = row.querySelector('.price-display');
+          const originalPrice = parseFloat(row.querySelector('[data-original-price]').getAttribute('data-original-price')) || 0;
+          
+          if (wantsCertificate && originalPrice === 0) {
+            priceElement.textContent = '€10';
+          } else {
+            priceElement.textContent = '€' + originalPrice;
+          }
+          
+          // Update all action buttons in this row/card
+          const actionButtons = row.querySelectorAll('.add-to-cart-btn, .add-to-wishlist-btn');
+          actionButtons.forEach(button => {
+            button.setAttribute('data-wants-certificate', this.value);
+            const newPrice = wantsCertificate && originalPrice === 0 ? 10 : originalPrice;
+            button.setAttribute('data-price', newPrice);
+          });
+        });
+      });
+    });
+
     // Add to Cart
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
       button.addEventListener('click', async function(e) {
@@ -1194,6 +1331,7 @@
         const courseId = this.getAttribute('data-course-id');
         const courseType = this.getAttribute('data-course-type');
         const courseTitle = this.getAttribute('data-course-title');
+        const wantsCertificate = this.getAttribute('data-wants-certificate') === 'yes';
         
         setButtonLoading(this, true);
         
@@ -1201,15 +1339,18 @@
           const response = await fetch('/add-to-cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseId, courseType })
+            body: JSON.stringify({ 
+              courseId, 
+              courseType,
+              wantsCertificate: wantsCertificate
+            })
           });
           
           const result = await response.json();
           
           if (result.success) {
             showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
-            // ⭐ ADD ONLY THIS LINE:
-  setTimeout(() => window.location.href = '/orders', 3000);
+            setTimeout(() => window.location.href = '/orders', 3000);
           } else {
             showNotification('Error', result.message, 'error');
           }
@@ -1230,6 +1371,7 @@
         const courseId = this.getAttribute('data-course-id');
         const courseType = this.getAttribute('data-course-type');
         const courseTitle = this.getAttribute('data-course-title');
+        const wantsCertificate = this.getAttribute('data-wants-certificate') === 'yes';
         
         setButtonLoading(this, true);
         
@@ -1237,7 +1379,11 @@
           const response = await fetch('/add-to-wishlist', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseId, courseType })
+            body: JSON.stringify({ 
+              courseId, 
+              courseType,
+              wantsCertificate: wantsCertificate
+            })
           });
           
           const result = await response.json();

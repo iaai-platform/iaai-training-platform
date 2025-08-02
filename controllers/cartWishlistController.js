@@ -95,7 +95,7 @@ exports.addToCart = async (req, res) => {
       });
     }
 
-    const { courseId, courseType } = req.body;
+    const { courseId, courseType, wantsCertificate } = req.body;
 
     if (!courseId || !courseType) {
       console.log("❌ Missing required fields:", { courseId, courseType });
@@ -172,6 +172,22 @@ exports.addToCart = async (req, res) => {
         });
       }
     } else if (courseType === "OnlineLiveTraining") {
+      if (courseType === "OnlineLiveTraining") {
+        // Check if it's a free course with certificate request
+        if (course.enrollment?.price === 0 && wantsCertificate === true) {
+          baseEnrollment.enrollmentData.paidAmount = 10;
+          baseEnrollment.enrollmentData.originalPrice = 0;
+          baseEnrollment.enrollmentData.certificateRequested = true;
+          baseEnrollment.enrollmentData.certificateFee = 10;
+        } else {
+          baseEnrollment.enrollmentData.paidAmount =
+            course.enrollment?.price || 0;
+          baseEnrollment.enrollmentData.originalPrice =
+            course.enrollment?.price || 0;
+          baseEnrollment.enrollmentData.certificateRequested = false;
+          baseEnrollment.enrollmentData.certificateFee = 0;
+        }
+      }
       if (course.basic?.status === "cancelled") {
         return res.status(400).json({
           success: false,
@@ -517,7 +533,7 @@ exports.addToWishlist = async (req, res) => {
       });
     }
 
-    const { courseId, courseType } = req.body;
+    const { courseId, courseType, wantsCertificate } = req.body;
 
     if (!courseId || !courseType) {
       return res.status(400).json({
@@ -638,7 +654,7 @@ exports.addToWishlist = async (req, res) => {
 // ✅ Remove from Wishlist (unchanged)
 exports.removeFromWishlist = async (req, res) => {
   try {
-    const { courseId, courseType } = req.body;
+    const { courseId, courseType, wantsCertificate } = req.body;
     const User = require("../models/user");
 
     if (!courseId || !courseType) {

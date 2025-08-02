@@ -570,7 +570,9 @@ const userSchema = new mongoose.Schema(
             ref: "PaymentTransaction",
           },
           promoCodeUsed: String,
-
+          //new
+          certificateRequested: { type: Boolean, default: false },
+          certificateFee: { type: Number, default: 0 },
           // ⭐ ADD THESE FIELDS:
           courseName: { type: String },
           courseCode: { type: String },

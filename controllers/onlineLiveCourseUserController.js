@@ -119,6 +119,9 @@ exports.getOnlineLiveTraining = async (req, res) => {
         transformedCourse.displayStatus = "Open to Register";
       }
 
+      transformedCourse.certificateProvided =
+        course.certification?.enabled !== false;
+
       // Additional display fields
       transformedCourse.hasEarlyBird =
         transformedCourse.earlyBirdPrice &&

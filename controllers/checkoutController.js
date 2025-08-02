@@ -1223,6 +1223,7 @@ exports.completeRegistration = async (req, res) => {
 };
 
 // ✅ ENHANCED: Payment Processing with Billing Information Box Integration
+// ✅ FIXED: proceedToPayment with proper variable scope
 exports.proceedToPayment = async (req, res) => {
   try {
     // Environment Variables Validation
@@ -1266,164 +1267,7 @@ exports.proceedToPayment = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // ✅ NEW: Extract and validate billing information from the billing box
-    let billingInfo = {};
-
     console.log("📋 Raw request body:", req.body);
-
-    if (req.body.billingInfo) {
-      if (typeof req.body.billingInfo === "string") {
-        try {
-          billingInfo = JSON.parse(req.body.billingInfo);
-        } catch (e) {
-          billingInfo = req.body.billingInfo;
-        }
-      } else {
-        billingInfo = req.body.billingInfo;
-      }
-    } else {
-      // Fallback to user profile data
-      billingInfo = {
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        phoneNumber: user.phoneNumber || "",
-        address: user.addressInfo?.address || "",
-        city: user.addressInfo?.city || "",
-        state: user.addressInfo?.state || "",
-        zipCode: user.addressInfo?.zipCode || "",
-        country: user.addressInfo?.country || user.country || "",
-        alternativePhone: user.addressInfo?.alternativePhone || "",
-        title: user.professionalInfo?.title || "",
-      };
-    }
-    // ✅ SKIP billing validation if final amount is 0 (free courses)
-    if (finalAmountEUR > 0) {
-      // Only validate billing for paid courses
-      const requiredBillingFields = [
-        "firstName",
-        "lastName",
-        "email",
-        "phoneNumber",
-        "address",
-        "city",
-        "country",
-      ];
-      const missingBillingFields = [];
-
-      requiredBillingFields.forEach((field) => {
-        const value = billingInfo[field];
-        if (!value || value.toString().trim() === "") {
-          missingBillingFields.push(field);
-        }
-      });
-
-      if (missingBillingFields.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: `Billing information incomplete. Missing: ${missingBillingFields.join(
-            ", "
-          )}`,
-          missingFields: missingBillingFields,
-          requiresCompleteBilling: true,
-        });
-      }
-    } else {
-      console.log("🎁 Free course - skipping billing validation");
-    }
-
-    // ✅ NEW: Comprehensive billing validation for CCAvenue
-    const requiredBillingFields = [
-      "firstName",
-      "lastName",
-      "email",
-      "phoneNumber",
-      "address",
-      "city",
-      "country",
-    ];
-    const missingBillingFields = [];
-    const invalidBillingFields = [];
-
-    requiredBillingFields.forEach((field) => {
-      const value = billingInfo[field];
-      if (!value || value.toString().trim() === "") {
-        missingBillingFields.push(field);
-      } else if (
-        field === "email" &&
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-      ) {
-        invalidBillingFields.push("email (invalid format)");
-      } else if (field === "phoneNumber" && value.toString().length < 10) {
-        invalidBillingFields.push("phoneNumber (too short)");
-      }
-    });
-
-    if (missingBillingFields.length > 0 || invalidBillingFields.length > 0) {
-      console.error("❌ Billing validation failed:", {
-        missing: missingBillingFields,
-        invalid: invalidBillingFields,
-      });
-
-      return res.status(400).json({
-        success: false,
-        message: `Billing information validation failed. Missing: ${missingBillingFields.join(
-          ", "
-        )}. Invalid: ${invalidBillingFields.join(", ")}`,
-        missingFields: missingBillingFields,
-        invalidFields: invalidBillingFields,
-        requiresCompleteBilling: true,
-      });
-    }
-
-    console.log("✅ Billing information validated successfully for CCAvenue");
-
-    // ✅ NEW: Prepare CCAvenue-compatible billing data with proper field lengths
-    const ccavenueBillingData = {
-      // Required billing fields - truncated to CCAvenue limits
-      billing_name: `${billingInfo.firstName} ${billingInfo.lastName}`
-        .trim()
-        .substring(0, 50),
-      billing_email: billingInfo.email.substring(0, 50),
-      billing_tel: billingInfo.phoneNumber.toString().substring(0, 20),
-      billing_address: billingInfo.address.substring(0, 255),
-      billing_city: billingInfo.city.substring(0, 50),
-      billing_state: billingInfo.state
-        ? billingInfo.state.substring(0, 50)
-        : "Not provided",
-      billing_zip: billingInfo.zipCode
-        ? billingInfo.zipCode.substring(0, 10)
-        : "00000",
-      billing_country: billingInfo.country.substring(0, 50),
-
-      // Delivery information (same as billing for digital products)
-      delivery_name: `${billingInfo.firstName} ${billingInfo.lastName}`
-        .trim()
-        .substring(0, 50),
-      delivery_address: billingInfo.address.substring(0, 255),
-      delivery_city: billingInfo.city.substring(0, 50),
-      delivery_state: billingInfo.state
-        ? billingInfo.state.substring(0, 50)
-        : "Not provided",
-      delivery_zip: billingInfo.zipCode
-        ? billingInfo.zipCode.substring(0, 10)
-        : "00000",
-      delivery_country: billingInfo.country.substring(0, 50),
-      delivery_tel: billingInfo.alternativePhone
-        ? billingInfo.alternativePhone.substring(0, 20)
-        : billingInfo.phoneNumber.toString().substring(0, 20),
-
-      // Additional required fields
-      customer_identifier: billingInfo.email,
-    };
-
-    console.log("🔧 CCAvenue billing data prepared from billing box:", {
-      billing_name: ccavenueBillingData.billing_name,
-      billing_email: ccavenueBillingData.billing_email,
-      billing_country: ccavenueBillingData.billing_country,
-      billing_city: ccavenueBillingData.billing_city,
-      fieldCount: Object.keys(ccavenueBillingData).length,
-    });
 
     const cartItems = [];
     let totalOriginalPrice = 0;
@@ -1526,20 +1370,149 @@ exports.proceedToPayment = async (req, res) => {
       }
     }
 
-    // Convert EUR to AED for CCAvenue payment
+    // ⭐ FIX: CALCULATE finalAmountEUR HERE (BEFORE using it anywhere)
     const finalAmountEUR = roundToTwoDecimals(
       Math.max(0, totalCurrentPrice - promoCodeDiscount)
     );
     const finalAmount = convertEurToAed(finalAmountEUR);
+
     console.log(
-      `💰 Final amount for CCAvenue: AED ${finalAmount} (EUR ${finalAmountEUR})`
+      `💰 Final amount calculated: EUR ${finalAmountEUR} -> AED ${finalAmount}`
     );
 
-    // If final amount is 0, redirect to free registration
+    // ✅ NOW you can use finalAmountEUR safely - Check if free first
     if (finalAmountEUR <= 0) {
       console.log("🎯 Final amount is €0, redirecting to free registration");
       return res.redirect("/complete-registration");
     }
+
+    // ✅ Extract and validate billing information from the billing box
+    let billingInfo = {};
+
+    if (req.body.billingInfo) {
+      if (typeof req.body.billingInfo === "string") {
+        try {
+          billingInfo = JSON.parse(req.body.billingInfo);
+        } catch (e) {
+          billingInfo = req.body.billingInfo;
+        }
+      } else {
+        billingInfo = req.body.billingInfo;
+      }
+    } else {
+      // Fallback to user profile data
+      billingInfo = {
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+        address: user.addressInfo?.address || "",
+        city: user.addressInfo?.city || "",
+        state: user.addressInfo?.state || "",
+        zipCode: user.addressInfo?.zipCode || "",
+        country: user.addressInfo?.country || user.country || "",
+        alternativePhone: user.addressInfo?.alternativePhone || "",
+        title: user.professionalInfo?.title || "",
+      };
+    }
+
+    // ✅ Only validate billing for paid courses (finalAmountEUR > 0)
+    if (finalAmountEUR > 0) {
+      // Only validate billing for paid courses
+      const requiredBillingFields = [
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "address",
+        "city",
+        "country",
+      ];
+      const missingBillingFields = [];
+      const invalidBillingFields = [];
+
+      requiredBillingFields.forEach((field) => {
+        const value = billingInfo[field];
+        if (!value || value.toString().trim() === "") {
+          missingBillingFields.push(field);
+        } else if (
+          field === "email" &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        ) {
+          invalidBillingFields.push("email (invalid format)");
+        } else if (field === "phoneNumber" && value.toString().length < 10) {
+          invalidBillingFields.push("phoneNumber (too short)");
+        }
+      });
+
+      if (missingBillingFields.length > 0 || invalidBillingFields.length > 0) {
+        console.error("❌ Billing validation failed:", {
+          missing: missingBillingFields,
+          invalid: invalidBillingFields,
+        });
+
+        return res.status(400).json({
+          success: false,
+          message: `Billing information validation failed. Missing: ${missingBillingFields.join(
+            ", "
+          )}. Invalid: ${invalidBillingFields.join(", ")}`,
+          missingFields: missingBillingFields,
+          invalidFields: invalidBillingFields,
+          requiresCompleteBilling: true,
+        });
+      }
+
+      console.log("✅ Billing information validated successfully for CCAvenue");
+    } else {
+      console.log("🎁 Free course - skipping billing validation");
+    }
+
+    // ✅ Prepare CCAvenue-compatible billing data with proper field lengths
+    const ccavenueBillingData = {
+      // Required billing fields - truncated to CCAvenue limits
+      billing_name: `${billingInfo.firstName} ${billingInfo.lastName}`
+        .trim()
+        .substring(0, 50),
+      billing_email: billingInfo.email.substring(0, 50),
+      billing_tel: billingInfo.phoneNumber.toString().substring(0, 20),
+      billing_address: billingInfo.address.substring(0, 255),
+      billing_city: billingInfo.city.substring(0, 50),
+      billing_state: billingInfo.state
+        ? billingInfo.state.substring(0, 50)
+        : "Not provided",
+      billing_zip: billingInfo.zipCode
+        ? billingInfo.zipCode.substring(0, 10)
+        : "00000",
+      billing_country: billingInfo.country.substring(0, 50),
+
+      // Delivery information (same as billing for digital products)
+      delivery_name: `${billingInfo.firstName} ${billingInfo.lastName}`
+        .trim()
+        .substring(0, 50),
+      delivery_address: billingInfo.address.substring(0, 255),
+      delivery_city: billingInfo.city.substring(0, 50),
+      delivery_state: billingInfo.state
+        ? billingInfo.state.substring(0, 50)
+        : "Not provided",
+      delivery_zip: billingInfo.zipCode
+        ? billingInfo.zipCode.substring(0, 10)
+        : "00000",
+      delivery_country: billingInfo.country.substring(0, 50),
+      delivery_tel: billingInfo.alternativePhone
+        ? billingInfo.alternativePhone.substring(0, 20)
+        : billingInfo.phoneNumber.toString().substring(0, 20),
+
+      // Additional required fields
+      customer_identifier: billingInfo.email,
+    };
+
+    console.log("🔧 CCAvenue billing data prepared from billing box:", {
+      billing_name: ccavenueBillingData.billing_name,
+      billing_email: ccavenueBillingData.billing_email,
+      billing_country: ccavenueBillingData.billing_country,
+      billing_city: ccavenueBillingData.billing_city,
+      fieldCount: Object.keys(ccavenueBillingData).length,
+    });
 
     // Create transaction IDs (EXISTING LOGIC)
     const transactionId = `TXN_${Date.now()}_${Math.random()

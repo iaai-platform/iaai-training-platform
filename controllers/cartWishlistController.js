@@ -6,17 +6,20 @@ const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel"
 
 // ✅ ENHANCED: Helper function to create enrollment object with linked course support
 // ✅ FIXED: Keep this function but make it work properly
+// ✅ ENHANCED: Helper function to create enrollment object with certificate support
 function createEnrollmentObject(
   courseType,
   course,
   status = "cart",
-  isLinkedCourse = false
+  isLinkedCourse = false,
+  wantsCertificate = false
 ) {
   console.log("🏗️ Creating enrollment object:", {
     courseType,
     status,
     courseId: course._id,
     isLinkedCourse: isLinkedCourse,
+    wantsCertificate: wantsCertificate,
   });
 
   const baseEnrollment = {
@@ -32,6 +35,10 @@ function createEnrollmentObject(
       courseType: courseType,
       isLinkedCourse: isLinkedCourse, // ⭐ SAVE THIS FLAG
       originalPrice: 0,
+
+      // ⭐ NEW: Certificate fields
+      certificateRequested: false,
+      certificateFee: 0,
     },
   };
 
@@ -47,16 +54,23 @@ function createEnrollmentObject(
       break;
 
     case "OnlineLiveTraining":
+      const originalPrice = course.enrollment?.price || 0;
+
       if (isLinkedCourse) {
         baseEnrollment.enrollmentData.paidAmount = 0;
-        baseEnrollment.enrollmentData.originalPrice =
-          course.enrollment?.price || 0;
+        baseEnrollment.enrollmentData.originalPrice = originalPrice;
         baseEnrollment.enrollmentData.isLinkedCourseFree = true; // ⭐ TRUE FOR LINKED
       } else {
-        baseEnrollment.enrollmentData.paidAmount =
-          course.enrollment?.price || 0;
-        baseEnrollment.enrollmentData.originalPrice =
-          course.enrollment?.price || 0;
+        // ⭐ NEW: Handle certificate for free courses
+        if (originalPrice === 0 && wantsCertificate === true) {
+          baseEnrollment.enrollmentData.paidAmount = 10;
+          baseEnrollment.enrollmentData.certificateRequested = true;
+          baseEnrollment.enrollmentData.certificateFee = 10;
+          console.log("💰 Certificate fee added: €10");
+        } else {
+          baseEnrollment.enrollmentData.paidAmount = originalPrice;
+        }
+        baseEnrollment.enrollmentData.originalPrice = originalPrice;
         baseEnrollment.enrollmentData.isLinkedCourseFree = false; // ⭐ FALSE FOR REGULAR
       }
       baseEnrollment.enrollmentData.currency =
@@ -75,6 +89,9 @@ function createEnrollmentObject(
     courseId: baseEnrollment.courseId,
     status: baseEnrollment.enrollmentData.status,
     price: baseEnrollment.enrollmentData.paidAmount,
+    originalPrice: baseEnrollment.enrollmentData.originalPrice,
+    certificateRequested: baseEnrollment.enrollmentData.certificateRequested,
+    certificateFee: baseEnrollment.enrollmentData.certificateFee,
     isLinkedCourseFree: baseEnrollment.enrollmentData.isLinkedCourseFree,
   });
 
@@ -82,6 +99,7 @@ function createEnrollmentObject(
 }
 
 // ✅ ENHANCED: Add to Cart with full linked course support
+// ✅ COMPLETE FIX: Replace the entire addToCart method in cartWishlistController.js
 // ✅ COMPLETE FIX: Replace the entire addToCart method in cartWishlistController.js
 exports.addToCart = async (req, res) => {
   try {
@@ -155,6 +173,7 @@ exports.addToCart = async (req, res) => {
           ? course.access?.price
           : course.enrollment?.price,
       hasLinkedCourse: !!course.linkedCourse?.onlineCourseId,
+      wantsCertificate: wantsCertificate,
     });
 
     // Validate course availability (keep existing validation)
@@ -172,22 +191,6 @@ exports.addToCart = async (req, res) => {
         });
       }
     } else if (courseType === "OnlineLiveTraining") {
-      if (courseType === "OnlineLiveTraining") {
-        // Check if it's a free course with certificate request
-        if (course.enrollment?.price === 0 && wantsCertificate === true) {
-          baseEnrollment.enrollmentData.paidAmount = 10;
-          baseEnrollment.enrollmentData.originalPrice = 0;
-          baseEnrollment.enrollmentData.certificateRequested = true;
-          baseEnrollment.enrollmentData.certificateFee = 10;
-        } else {
-          baseEnrollment.enrollmentData.paidAmount =
-            course.enrollment?.price || 0;
-          baseEnrollment.enrollmentData.originalPrice =
-            course.enrollment?.price || 0;
-          baseEnrollment.enrollmentData.certificateRequested = false;
-          baseEnrollment.enrollmentData.certificateFee = 0;
-        }
-      }
       if (course.basic?.status === "cancelled") {
         return res.status(400).json({
           success: false,
@@ -264,26 +267,82 @@ exports.addToCart = async (req, res) => {
         existingIndex
       ].enrollmentData.registrationDate = new Date();
 
+      // ⭐ CRITICAL: Handle certificate pricing for existing enrollment
+      let finalPrice = 0;
+      let originalPrice = 0;
+
       if (courseType === "SelfPacedOnlineTraining") {
-        user[courseMapping.userField][existingIndex].enrollmentData.paidAmount =
-          course.access?.price || 0;
+        originalPrice = course.access?.price || 0;
+        finalPrice = originalPrice;
       } else {
-        user[courseMapping.userField][existingIndex].enrollmentData.paidAmount =
-          course.enrollment?.price || 0;
+        originalPrice = course.enrollment?.price || 0;
+        finalPrice = originalPrice;
       }
+
+      // ⭐ NEW: Certificate handling for free courses
+      if (
+        courseType === "OnlineLiveTraining" &&
+        originalPrice === 0 &&
+        wantsCertificate === true
+      ) {
+        finalPrice = 10;
+        user[courseMapping.userField][
+          existingIndex
+        ].enrollmentData.certificateRequested = true;
+        user[courseMapping.userField][
+          existingIndex
+        ].enrollmentData.certificateFee = 10;
+        console.log("💰 Certificate fee added for free course: €10");
+      } else {
+        user[courseMapping.userField][
+          existingIndex
+        ].enrollmentData.certificateRequested = false;
+        user[courseMapping.userField][
+          existingIndex
+        ].enrollmentData.certificateFee = 0;
+      }
+
+      user[courseMapping.userField][existingIndex].enrollmentData.paidAmount =
+        finalPrice;
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.originalPrice = originalPrice;
 
       addedCourses.push(course.basic?.title || course.title);
     } else {
       // ⭐ CRITICAL FIX: Create new enrollment MANUALLY with all required fields
+      let finalPrice = 0;
+      let originalPrice = 0;
+
+      if (courseType === "SelfPacedOnlineTraining") {
+        originalPrice = course.access?.price || 0;
+        finalPrice = originalPrice;
+      } else {
+        originalPrice = course.enrollment?.price || 0;
+        finalPrice = originalPrice;
+      }
+
+      // ⭐ NEW: Certificate handling for free courses
+      let certificateRequested = false;
+      let certificateFee = 0;
+
+      if (
+        courseType === "OnlineLiveTraining" &&
+        originalPrice === 0 &&
+        wantsCertificate === true
+      ) {
+        finalPrice = 10;
+        certificateRequested = true;
+        certificateFee = 10;
+        console.log("💰 Certificate fee added for free course: €10");
+      }
+
       const newEnrollment = {
         courseId: course._id,
         enrollmentData: {
           status: "cart",
           registrationDate: new Date(),
-          paidAmount:
-            courseType === "SelfPacedOnlineTraining"
-              ? course.access?.price || 0
-              : course.enrollment?.price || 0,
+          paidAmount: finalPrice,
           paymentTransactionId: null,
           promoCodeUsed: null,
           courseName: course.basic?.title || course.title || "Untitled Course",
@@ -291,14 +350,15 @@ exports.addToCart = async (req, res) => {
           courseType: courseType,
           isLinkedCourse: false, // ⭐ MAIN COURSE IS NOT LINKED
           isLinkedCourseFree: false, // ⭐ MAIN COURSE IS NOT FREE
-          originalPrice:
-            courseType === "SelfPacedOnlineTraining"
-              ? course.access?.price || 0
-              : course.enrollment?.price || 0,
+          originalPrice: originalPrice,
           currency:
             courseType === "SelfPacedOnlineTraining"
               ? course.access?.currency || "EUR"
               : course.enrollment?.currency || "EUR",
+
+          // ⭐ NEW: Certificate fields
+          certificateRequested: certificateRequested,
+          certificateFee: certificateFee,
         },
       };
 
@@ -309,6 +369,9 @@ exports.addToCart = async (req, res) => {
         courseId: newEnrollment.courseId,
         status: newEnrollment.enrollmentData.status,
         price: newEnrollment.enrollmentData.paidAmount,
+        originalPrice: newEnrollment.enrollmentData.originalPrice,
+        certificateRequested: newEnrollment.enrollmentData.certificateRequested,
+        certificateFee: newEnrollment.enrollmentData.certificateFee,
         isLinkedCourseFree: newEnrollment.enrollmentData.isLinkedCourseFree,
       });
     }
@@ -351,6 +414,10 @@ exports.addToCart = async (req, res) => {
             isLinkedCourseFree: true, // ⭐ CRITICAL: THIS COURSE IS FREE
             originalPrice: linkedCourse.enrollment?.price || 0,
             currency: linkedCourse.enrollment?.currency || "EUR",
+
+            // ⭐ NEW: Certificate fields for linked courses (always false)
+            certificateRequested: false,
+            certificateFee: 0,
           },
         };
 
@@ -395,12 +462,20 @@ exports.addToCart = async (req, res) => {
       } courses added to cart: ${addedCourses.join(" and ")}`;
     }
 
+    // ⭐ NEW: Add certificate info to response
+    const certificateAdded =
+      wantsCertificate === true &&
+      courseType === "OnlineLiveTraining" &&
+      (course.enrollment?.price || 0) === 0;
+
     res.json({
       success: true,
       message: message,
       courseTitle: course.basic?.title || course.title || "Course",
       linkedCourseAdded: addedCourses.length > 1,
       coursesAdded: addedCourses,
+      certificateAdded: certificateAdded,
+      certificateFee: certificateAdded ? 10 : 0,
     });
   } catch (error) {
     console.error("❌ Error adding to cart:", error);
@@ -522,6 +597,7 @@ exports.removeFromCart = async (req, res) => {
 };
 
 // ✅ Add to Wishlist (unchanged)
+// ✅ Add to Wishlist (updated with certificate support)
 exports.addToWishlist = async (req, res) => {
   try {
     console.log("❤️ Add to wishlist request received");
@@ -619,18 +695,53 @@ exports.addToWishlist = async (req, res) => {
         existingIndex
       ].enrollmentData.registrationDate = new Date();
 
+      // ⭐ NEW: Handle certificate pricing for wishlist
+      let finalPrice = 0;
+      let originalPrice = 0;
+
       if (courseType === "SelfPacedOnlineTraining") {
-        user[courseMapping.userField][existingIndex].enrollmentData.paidAmount =
-          course.access?.price || 0;
+        originalPrice = course.access?.price || 0;
+        finalPrice = originalPrice;
       } else {
-        user[courseMapping.userField][existingIndex].enrollmentData.paidAmount =
-          course.enrollment?.price || 0;
+        originalPrice = course.enrollment?.price || 0;
+        finalPrice = originalPrice;
       }
+
+      // Certificate handling for free online live courses
+      if (
+        courseType === "OnlineLiveTraining" &&
+        originalPrice === 0 &&
+        wantsCertificate === true
+      ) {
+        finalPrice = 10;
+        user[courseMapping.userField][
+          existingIndex
+        ].enrollmentData.certificateRequested = true;
+        user[courseMapping.userField][
+          existingIndex
+        ].enrollmentData.certificateFee = 10;
+      } else {
+        user[courseMapping.userField][
+          existingIndex
+        ].enrollmentData.certificateRequested = false;
+        user[courseMapping.userField][
+          existingIndex
+        ].enrollmentData.certificateFee = 0;
+      }
+
+      user[courseMapping.userField][existingIndex].enrollmentData.paidAmount =
+        finalPrice;
+      user[courseMapping.userField][
+        existingIndex
+      ].enrollmentData.originalPrice = originalPrice;
     } else {
+      // ⭐ UPDATED: Use enhanced createEnrollmentObject with certificate support
       const newEnrollment = createEnrollmentObject(
         courseType,
         course,
-        "wishlist"
+        "wishlist",
+        false, // not linked course
+        wantsCertificate === true // certificate preference
       );
       user[courseMapping.userField].push(newEnrollment);
     }

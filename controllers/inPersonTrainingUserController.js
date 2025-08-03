@@ -1,4 +1,4 @@
-// controllers/inPersonTrainingUserController.js - FIXED VERSION
+// controllers/inPersonTrainingUserController.js - COMPLETE FINAL VERSION
 
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
 const User = require("../models/user");
@@ -189,7 +189,7 @@ exports.getInPersonAestheticTraining = async (req, res) => {
   }
 };
 
-// 🔧 FIXED: Enhanced getCourseDetails with proper expired course handling
+// 🔧 COMPLETE: Enhanced getCourseDetails with ALL features restored
 exports.getCourseDetails = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -262,7 +262,7 @@ exports.getCourseDetails = async (req, res) => {
 
     console.log("✅ Course found:", course.basic?.title);
 
-    // Initialize the enhanced course object
+    // Step 2: Initialize the enhanced course object
     let courseWithFullDetails = { ...course };
     courseWithFullDetails.basic.status = currentStatus;
     courseWithFullDetails.canEnroll =
@@ -270,20 +270,149 @@ exports.getCourseDetails = async (req, res) => {
       (course.enrollment?.currentEnrollment || 0) <
         (course.enrollment?.seatsAvailable || 0);
 
-    // [Rest of your existing instructor and certification processing logic...]
-    // ... instructor processing
-    // ... certification body processing
-    // ... related courses
-    // ... enhancements
+    // ✅ RESTORED: Step 3: Fetch instructor details
+    const instructorIds = [];
 
-    // For now, let's keep it simple and add the essential data
+    // Collect primary instructor ID
+    if (course.instructors?.primary?.instructorId) {
+      instructorIds.push(course.instructors.primary.instructorId);
+      console.log(
+        "📌 Primary instructor ID:",
+        course.instructors.primary.instructorId
+      );
+    }
+
+    // Collect additional instructor IDs
+    if (
+      course.instructors?.additional &&
+      course.instructors.additional.length > 0
+    ) {
+      course.instructors.additional.forEach((inst) => {
+        if (inst.instructorId) {
+          instructorIds.push(inst.instructorId);
+        }
+      });
+      console.log("📌 Additional instructor IDs:", instructorIds.length - 1);
+    }
+
+    // Initialize instructor details
     courseWithFullDetails.instructorDetails = {
       primary: null,
       additional: [],
     };
 
+    if (instructorIds.length > 0) {
+      console.log(
+        "🔍 Fetching instructor details for",
+        instructorIds.length,
+        "instructors"
+      );
+
+      const instructors = await Instructor.find({
+        _id: { $in: instructorIds },
+      }).lean();
+
+      console.log("✅ Found", instructors.length, "instructors");
+
+      // Map primary instructor
+      if (course.instructors?.primary?.instructorId) {
+        const primaryInstructor = instructors.find(
+          (inst) =>
+            inst._id.toString() ===
+            course.instructors.primary.instructorId.toString()
+        );
+
+        if (primaryInstructor) {
+          courseWithFullDetails.instructorDetails.primary = {
+            ...primaryInstructor,
+            role: course.instructors.primary.role || "Lead Instructor",
+          };
+          console.log(
+            "✅ Primary instructor found:",
+            primaryInstructor.firstName,
+            primaryInstructor.lastName
+          );
+        } else {
+          console.log("⚠️ Primary instructor not found in database");
+        }
+      }
+
+      // Map additional instructors
+      if (
+        course.instructors?.additional &&
+        course.instructors.additional.length > 0
+      ) {
+        courseWithFullDetails.instructorDetails.additional =
+          course.instructors.additional
+            .map((add) => {
+              const instructor = instructors.find(
+                (inst) => inst._id.toString() === add.instructorId.toString()
+              );
+              if (instructor) {
+                return {
+                  ...instructor,
+                  role: add.role || "Co-Instructor",
+                };
+              }
+              return null;
+            })
+            .filter(Boolean);
+
+        console.log(
+          "✅ Additional instructors mapped:",
+          courseWithFullDetails.instructorDetails.additional.length
+        );
+      }
+    } else {
+      console.log("⚠️ No instructor IDs found in course");
+    }
+
+    // ✅ RESTORED: Step 4: Fetch certification body details
     courseWithFullDetails.certificationBodyDetails = null;
-    courseWithFullDetails.relatedCourses = [];
+
+    if (course.certification?.issuingAuthorityId) {
+      console.log(
+        "📌 Certification body ID:",
+        course.certification.issuingAuthorityId
+      );
+
+      try {
+        const certBody = await CertificationBody.findById(
+          course.certification.issuingAuthorityId
+        ).lean();
+
+        if (certBody) {
+          courseWithFullDetails.certificationBodyDetails = certBody;
+          console.log("✅ Certification body found:", certBody.companyName);
+        } else {
+          console.log("⚠️ Certification body not found in database");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching certification body:", error);
+      }
+    } else {
+      console.log("ℹ️ No certification body linked to this course");
+    }
+
+    // ✅ RESTORED: Step 5: Get related courses
+    const relatedCourses = await InPersonAestheticTraining.find({
+      _id: { $ne: courseId },
+      "basic.status": "open",
+      "schedule.startDate": { $gte: new Date() },
+      $or: [
+        { "basic.category": course.basic?.category },
+        { "venue.city": course.venue?.city },
+      ],
+    })
+      .limit(4)
+      .select("basic schedule enrollment venue")
+      .sort({ "schedule.startDate": 1 })
+      .lean();
+
+    courseWithFullDetails.relatedCourses = relatedCourses;
+    console.log("✅ Found", relatedCourses.length, "related courses");
+
+    // ✅ RESTORED: Step 6: Add computed properties (enhancements)
     courseWithFullDetails.enhancements = {
       availableSeats:
         (course.enrollment?.seatsAvailable || 0) -
@@ -312,14 +441,54 @@ exports.getCourseDetails = async (req, res) => {
       ),
     };
 
-    courseWithFullDetails.instructorNames =
-      course.instructorNames || "Expert Instructors";
+    // ✅ RESTORED: Step 7: Generate instructor names for display
+    courseWithFullDetails.instructorNames = (() => {
+      const names = [];
 
+      if (courseWithFullDetails.instructorDetails.primary) {
+        const primary = courseWithFullDetails.instructorDetails.primary;
+        names.push(
+          primary.fullName || `${primary.firstName} ${primary.lastName}`
+        );
+      }
+
+      if (
+        courseWithFullDetails.instructorDetails.additional &&
+        courseWithFullDetails.instructorDetails.additional.length > 0
+      ) {
+        courseWithFullDetails.instructorDetails.additional.forEach((inst) => {
+          names.push(inst.fullName || `${inst.firstName} ${inst.lastName}`);
+        });
+      }
+
+      return names.length > 0 ? names.join(", ") : "Expert Instructors";
+    })();
+
+    console.log("✅ Instructor names:", courseWithFullDetails.instructorNames);
+
+    // ✅ RESTORED: Step 8: Debug logging
+    console.log("📊 Final data check:");
     console.log(
-      "✅ Course details prepared for:",
-      courseWithFullDetails.basic?.title
+      "- Has primary instructor details:",
+      !!courseWithFullDetails.instructorDetails.primary
     );
+    console.log(
+      "- Additional instructors count:",
+      courseWithFullDetails.instructorDetails.additional.length
+    );
+    console.log(
+      "- Has certification body details:",
+      !!courseWithFullDetails.certificationBodyDetails
+    );
+    console.log("- Current status:", currentStatus);
+    console.log("- Can enroll:", courseWithFullDetails.canEnroll);
+    console.log(
+      "- Available seats:",
+      courseWithFullDetails.enhancements.availableSeats
+    );
+    console.log("- Related courses:", relatedCourses.length);
 
+    // Step 9: Render the view
     res.render("inpersoncourses", {
       course: courseWithFullDetails,
       user: req.user || null,

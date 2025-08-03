@@ -1,15 +1,12 @@
-// controllers/userController.js - Complete Updated Version with Anti-Spam Improvements
+// controllers/userController.js - Optimized Version with Background Email Processing
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const passport = require("passport");
-const nodemailer = require("nodemailer");
-const axios = require("axios");
 
 // ============================================
 // EMAIL CONFIGURATION HELPER
 // ============================================
 function createEmailTransporter() {
-  // Return a mock transporter that uses Gmail SMTP
   return {
     verify: async () => {
       console.log(
@@ -25,7 +22,46 @@ function createEmailTransporter() {
 }
 
 // ============================================
-// REGISTER/SIGNUP USER
+// BACKGROUND EMAIL QUEUE HELPER
+// ============================================
+function sendEmailInBackground(emailOptions, emailType = "notification") {
+  // Use setImmediate to defer email sending to next tick
+  setImmediate(async () => {
+    try {
+      console.log(`📧 Sending ${emailType} email in background...`);
+      const transporter = createEmailTransporter();
+      await transporter.sendMail(emailOptions);
+      console.log(`📧 ${emailType} email sent successfully in background`);
+    } catch (emailError) {
+      console.error(`📧 Background ${emailType} email failed:`, emailError);
+      // Log error but don't throw - email failure shouldn't affect user experience
+
+      // Optional: You could log this to a database or external service for monitoring
+      // await logEmailFailure(emailType, emailOptions.to, emailError);
+    }
+  });
+}
+
+// Alternative using setTimeout for even more deferred execution
+function sendEmailWithDelay(
+  emailOptions,
+  emailType = "notification",
+  delay = 100
+) {
+  setTimeout(async () => {
+    try {
+      console.log(`📧 Sending ${emailType} email after ${delay}ms delay...`);
+      const transporter = createEmailTransporter();
+      await transporter.sendMail(emailOptions);
+      console.log(`📧 ${emailType} email sent successfully after delay`);
+    } catch (emailError) {
+      console.error(`📧 Delayed ${emailType} email failed:`, emailError);
+    }
+  }, delay);
+}
+
+// ============================================
+// REGISTER/SIGNUP USER - OPTIMIZED VERSION
 // ============================================
 exports.registerUser = async (req, res) => {
   console.log("📝 Signup route hit!");
@@ -123,199 +159,187 @@ exports.registerUser = async (req, res) => {
     console.log("✅ User saved successfully! ID:", newUser._id);
 
     // ============================================
-    // ADMIN EMAIL NOTIFICATION
+    // IMMEDIATE SUCCESS RESPONSE TO USER
     // ============================================
-    try {
-      console.log("📧 Sending admin notification email...");
-
-      // Create email transporter with Gmail SMTP
-      const transporter = createEmailTransporter();
-
-      // Email content for admin notification
-      const mailOptions = {
-        from: {
-          name: "IAAI Training Institute",
-          address:
-            process.env.ADMIN_EMAIL ||
-            process.env.EMAIL_FROM ||
-            "info@iaa-i.com",
-        },
-        to: process.env.CONFIRM_EMAIL || "info@iaa-i.com",
-        subject: `New User Registration - ${
-          role === "instructor" ? "Instructor" : "Student"
-        } Application`,
-        headers: {
-          "X-Entity-ID": "IAAI-Training-Institute",
-          "X-Mailer": "IAAI Training Platform",
-        },
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
-              .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-              .header { background-color: #667eea; color: white; padding: 30px 20px; text-align: center; }
-              .content { padding: 30px 25px; }
-              .user-info { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
-              .role-badge { 
-                display: inline-block; 
-                padding: 6px 16px; 
-                border-radius: 20px; 
-                font-size: 12px; 
-                font-weight: bold;
-                margin-top: 10px;
-                ${
-                  role === "instructor"
-                    ? "background-color: #e3f2fd; color: #1976d2;"
-                    : "background-color: #f3e5f5; color: #7b1fa2;"
-                }
-              }
-              .action-button {
-                display: inline-block;
-                padding: 15px 25px;
-                background-color: #667eea;
-                color: white;
-                text-decoration: none;
-                border-radius: 6px;
-                font-weight: 600;
-                margin: 10px 5px;
-              }
-              .footer { background: #f8f9fa; color: #666; font-size: 14px; text-align: center; padding: 20px; border-top: 1px solid #eee; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h2 style="margin: 0;">New User Registration</h2>
-                <span class="role-badge">${
-                  role === "instructor" ? "👨‍🏫 INSTRUCTOR" : "🎓 STUDENT"
-                }</span>
-              </div>
-              
-              <div class="content">
-                <p>A new user has registered on the IAAI Training Platform and requires your approval.</p>
-                
-                <div class="user-info">
-                  <h3 style="margin-top: 0;">User Information:</h3>
-                  <p><strong>Name:</strong> ${firstName} ${lastName}</p>
-                  <p><strong>Email:</strong> ${email}</p>
-                  <p><strong>Phone:</strong> ${
-                    phoneNumber || "Not provided"
-                  }</p>
-                  <p><strong>Profession:</strong> ${
-                    profession || "Not provided"
-                  }</p>
-                  <p><strong>Country:</strong> ${country || "Not provided"}</p>
-                  <p><strong>Role:</strong> ${role}</p>
-                  
-                  ${
-                    role === "instructor"
-                      ? `
-                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
-                    <h4>Instructor Details:</h4>
-                    <p><strong>Experience:</strong> ${
-                      experience || "Not provided"
-                    }</p>
-                    <p><strong>Expertise:</strong> ${
-                      expertise || "Not provided"
-                    }</p>
-                    <p><strong>CV/Resume:</strong> ${cv || "Not provided"}</p>
-                  `
-                      : ""
-                  }
-                </div>
-                
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${
-                    process.env.BASE_URL || "https://www.iaa-i.com"
-                  }/confirm-user/${encodeURIComponent(
-          email
-        )}" class="action-button">
-                    ✅ Approve Account
-                  </a>
-                  <a href="${
-                    process.env.BASE_URL || "https://www.iaa-i.com"
-                  }/admin/users" class="action-button" style="background-color: #6c757d;">
-                    👥 Manage Users
-                  </a>
-                </div>
-                
-                <p style="color: #666; font-size: 14px;">
-                  <strong>Next Steps:</strong><br>
-                  1. Review the user information above<br>
-                  2. Click "Approve Account" to confirm the registration<br>
-                  3. The user will receive a confirmation email automatically
-                </p>
-              </div>
-              
-              <div class="footer">
-                <p><strong>IAAI Training Institute</strong><br>
-                Professional Aesthetic Training<br>
-                ${process.env.BASE_URL || "https://www.iaa-i.com"}</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `,
-        text: `
-          New User Registration - ${
-            role === "instructor" ? "Instructor" : "Student"
-          } Application
-          
-          A new user has registered and requires approval:
-          
-          Name: ${firstName} ${lastName}
-          Email: ${email}
-          Phone: ${phoneNumber || "Not provided"}
-          Profession: ${profession || "Not provided"}
-          Country: ${country || "Not provided"}
-          Role: ${role}
-          
-          ${
-            role === "instructor"
-              ? `
-          Instructor Details:
-          Experience: ${experience || "Not provided"}
-          Expertise: ${expertise || "Not provided"}  
-          CV: ${cv || "Not provided"}
-          `
-              : ""
-          }
-          
-          Approve at: ${
-            process.env.BASE_URL || "https://www.iaa-i.com"
-          }/confirm-user/${encodeURIComponent(email)}
-        `,
-      };
-
-      // Send email
-      await transporter.sendMail(mailOptions);
-      console.log(
-        "📧 Admin notification email sent successfully to:",
-        process.env.CONFIRM_EMAIL || "info@iaa-i.com"
-      );
-    } catch (emailError) {
-      console.error("📧 Error sending admin notification email:", emailError);
-      // Log specific error details for debugging
-      if (emailError.code) {
-        console.error("📧 Email error code:", emailError.code);
-      }
-      if (emailError.response) {
-        console.error("📧 Email server response:", emailError.response);
-      }
-      // Continue with registration even if email fails (don't block user registration)
-    }
-
-    // Flash success message and redirect
-    console.log("🎉 Setting success flash message...");
+    console.log("🎉 Setting success flash message (before email)...");
     req.flash(
       "success_message",
       "Your request for creating an account has been received. We will review and get back to you within 24 hours. Please check your spam/junk folder for our emails."
     );
-    console.log("✅ Success message set, redirecting to /signup...");
+
+    // Prepare email options for background sending
+    const adminEmailOptions = {
+      from: {
+        name: "IAAI Training Institute",
+        address:
+          process.env.ADMIN_EMAIL || process.env.EMAIL_FROM || "info@iaa-i.com",
+      },
+      to: process.env.CONFIRM_EMAIL || "info@iaa-i.com",
+      subject: `New User Registration - ${
+        role === "instructor" ? "Instructor" : "Student"
+      } Application`,
+      headers: {
+        "X-Entity-ID": "IAAI-Training-Institute",
+        "X-Mailer": "IAAI Training Platform",
+      },
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+            .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .header { background-color: #667eea; color: white; padding: 30px 20px; text-align: center; }
+            .content { padding: 30px 25px; }
+            .user-info { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
+            .role-badge { 
+              display: inline-block; 
+              padding: 6px 16px; 
+              border-radius: 20px; 
+              font-size: 12px; 
+              font-weight: bold;
+              margin-top: 10px;
+              ${
+                role === "instructor"
+                  ? "background-color: #e3f2fd; color: #1976d2;"
+                  : "background-color: #f3e5f5; color: #7b1fa2;"
+              }
+            }
+            .action-button {
+              display: inline-block;
+              padding: 15px 25px;
+              background-color: #667eea;
+              color: white;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+              margin: 10px 5px;
+            }
+            .footer { background: #f8f9fa; color: #666; font-size: 14px; text-align: center; padding: 20px; border-top: 1px solid #eee; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h2 style="margin: 0;">New User Registration</h2>
+              <span class="role-badge">${
+                role === "instructor" ? "👨‍🏫 INSTRUCTOR" : "🎓 STUDENT"
+              }</span>
+            </div>
+            
+            <div class="content">
+              <p>A new user has registered on the IAAI Training Platform and requires your approval.</p>
+              
+              <div class="user-info">
+                <h3 style="margin-top: 0;">User Information:</h3>
+                <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Phone:</strong> ${phoneNumber || "Not provided"}</p>
+                <p><strong>Profession:</strong> ${
+                  profession || "Not provided"
+                }</p>
+                <p><strong>Country:</strong> ${country || "Not provided"}</p>
+                <p><strong>Role:</strong> ${role}</p>
+                
+                ${
+                  role === "instructor"
+                    ? `
+                  <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
+                  <h4>Instructor Details:</h4>
+                  <p><strong>Experience:</strong> ${
+                    experience || "Not provided"
+                  }</p>
+                  <p><strong>Expertise:</strong> ${
+                    expertise || "Not provided"
+                  }</p>
+                  <p><strong>CV/Resume:</strong> ${cv || "Not provided"}</p>
+                `
+                    : ""
+                }
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${
+                  process.env.BASE_URL || "https://www.iaa-i.com"
+                }/confirm-user/${encodeURIComponent(
+        email
+      )}" class="action-button">
+                  ✅ Approve Account
+                </a>
+                <a href="${
+                  process.env.BASE_URL || "https://www.iaa-i.com"
+                }/admin/users" class="action-button" style="background-color: #6c757d;">
+                  👥 Manage Users
+                </a>
+              </div>
+              
+              <p style="color: #666; font-size: 14px;">
+                <strong>Next Steps:</strong><br>
+                1. Review the user information above<br>
+                2. Click "Approve Account" to confirm the registration<br>
+                3. The user will receive a confirmation email automatically
+              </p>
+            </div>
+            
+            <div class="footer">
+              <p><strong>IAAI Training Institute</strong><br>
+              Professional Aesthetic Training<br>
+              ${process.env.BASE_URL || "https://www.iaa-i.com"}</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        New User Registration - ${
+          role === "instructor" ? "Instructor" : "Student"
+        } Application
+        
+        A new user has registered and requires approval:
+        
+        Name: ${firstName} ${lastName}
+        Email: ${email}
+        Phone: ${phoneNumber || "Not provided"}
+        Profession: ${profession || "Not provided"}
+        Country: ${country || "Not provided"}
+        Role: ${role}
+        
+        ${
+          role === "instructor"
+            ? `
+        Instructor Details:
+        Experience: ${experience || "Not provided"}
+        Expertise: ${expertise || "Not provided"}  
+        CV: ${cv || "Not provided"}
+        `
+            : ""
+        }
+        
+        Approve at: ${
+          process.env.BASE_URL || "https://www.iaa-i.com"
+        }/confirm-user/${encodeURIComponent(email)}
+      `,
+    };
+
+    // ============================================
+    // SEND EMAIL IN BACKGROUND (NON-BLOCKING)
+    // ============================================
+    console.log(
+      "📧 Queuing admin notification email for background processing..."
+    );
+
+    // Option 1: Use setImmediate (executes after current event loop)
+    sendEmailInBackground(adminEmailOptions, "admin-notification");
+
+    // Option 2: Use setTimeout with small delay (alternative approach)
+    // sendEmailWithDelay(adminEmailOptions, "admin-notification", 100);
+
+    // Respond immediately to user (email is now processing in background)
+    console.log(
+      "✅ Responding to user immediately while email processes in background"
+    );
     res.redirect("/signup");
   } catch (err) {
     console.error("💥 Error registering user:", err);
@@ -340,7 +364,7 @@ exports.registerUser = async (req, res) => {
 };
 
 // ============================================
-// CONFIRM USER ACCOUNT
+// CONFIRM USER ACCOUNT - OPTIMIZED VERSION
 // ============================================
 exports.confirmUser = async (req, res) => {
   const { email } = req.params;
@@ -408,215 +432,175 @@ exports.confirmUser = async (req, res) => {
 
     console.log("✅ Account confirmed successfully");
 
-    // ============================================
-    // USER CONFIRMATION EMAIL (ANTI-SPAM OPTIMIZED)
-    // ============================================
-    try {
-      console.log("📧 Sending user confirmation email...");
-
-      // Create email transporter
-      const transporter = createEmailTransporter();
-
-      const mailOptions = {
-        from: {
-          name: "IAAI Training Institute",
-          address:
-            process.env.ADMIN_EMAIL ||
-            process.env.EMAIL_FROM ||
-            "info@iaa-i.com",
-        },
-        to: email,
-        subject: "Welcome to IAAI Training - Account Approved",
-        // Add anti-spam headers
-        headers: {
-          "List-Unsubscribe": `<${process.env.BASE_URL}/unsubscribe>`,
-          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-          "X-Entity-ID": "IAAI-Training-Institute",
-          "X-Mailer": "IAAI Training Platform",
-        },
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Welcome to IAAI Training</title>
-            <style>
-              body { 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                line-height: 1.6; 
-                color: #333; 
-                margin: 0; 
-                padding: 0;
-                background-color: #f4f4f4;
-              }
-              .container { 
-                max-width: 600px; 
-                margin: 20px auto; 
-                background: white;
-                border-radius: 8px;
-                overflow: hidden;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-              }
-              .header { 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                color: white; 
-                padding: 30px 20px; 
-                text-align: center; 
-              }
-              .content { 
-                padding: 30px 25px; 
-              }
-              .welcome-box { 
-                background-color: #f8f9fa; 
-                padding: 20px; 
-                border-radius: 8px; 
-                margin: 20px 0; 
-                border-left: 4px solid #667eea;
-              }
-              .login-button {
-                display: inline-block;
-                padding: 15px 30px;
-                background: #667eea;
-                color: white;
-                text-decoration: none;
-                border-radius: 6px;
-                font-weight: 600;
-                margin: 20px 0;
-                text-align: center;
-              }
-              .footer { 
-                background: #f8f9fa;
-                color: #666; 
-                font-size: 14px; 
-                text-align: center; 
-                padding: 20px;
-                border-top: 1px solid #eee;
-              }
-              .company-info {
-                margin-top: 20px;
-                padding-top: 20px;
-                border-top: 1px solid #eee;
-                font-size: 12px;
-                color: #888;
-              }
-              ul { margin: 15px 0; padding-left: 20px; }
-              li { margin: 8px 0; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1 style="margin: 0;">Welcome to IAAI Training!</h1>
-                <p style="margin: 10px 0 0 0;">Your account has been approved</p>
-              </div>
-              
-              <div class="content">
-                <p>Dear ${user.firstName},</p>
-                
-                <div class="welcome-box">
-                  <h3 style="margin-top: 0;">Account Successfully Approved</h3>
-                  <p>Congratulations! Your account has been reviewed and approved by our team. You now have full access to the IAAI Training Platform.</p>
-                </div>
-                
-                <h3>What's Next?</h3>
-                <ul>
-                  <li>Log in to your account using your email and password</li>
-                  <li>Browse our comprehensive training programs</li>
-                  <li>Enroll in courses that match your interests</li>
-                  <li>Track your learning progress</li>
-                  ${
-                    user.role === "instructor"
-                      ? "<li>Access instructor tools and resources</li>"
-                      : ""
-                  }
-                </ul>
-                
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${
-                    process.env.BASE_URL || "https://www.iaa-i.com"
-                  }/login" class="login-button">
-                    Login to Your Account
-                  </a>
-                </div>
-                
-                <p>If you have any questions or need assistance, please contact our support team.</p>
-                
-                <p>Best regards,<br>
-                <strong>IAAI Training Institute</strong></p>
-                
-                <div class="company-info">
-                  <p><strong>IAAI Training Institute</strong><br>
-                  Professional Aesthetic Training<br>
-                  Email: ${process.env.ADMIN_EMAIL || "info@iaa-i.com"}<br>
-                  Website: ${
-                    process.env.BASE_URL || "https://www.iaa-i.com"
-                  }</p>
-                </div>
-              </div>
-              
-              <div class="footer">
-                <p>This email was sent to ${email} because you created an account with IAAI Training Institute.</p>
-                <p>If you did not create this account, please ignore this email.</p>
-                <p><a href="${
-                  process.env.BASE_URL || "https://www.iaa-i.com"
-                }/unsubscribe" style="color: #667eea;">Unsubscribe</a> | 
-                   <a href="${
-                     process.env.BASE_URL || "https://www.iaa-i.com"
-                   }/contact" style="color: #667eea;">Contact Us</a></p>
-              </div>
+    // Prepare welcome email for background sending
+    const welcomeEmailOptions = {
+      from: {
+        name: "IAAI Training Institute",
+        address:
+          process.env.ADMIN_EMAIL || process.env.EMAIL_FROM || "info@iaa-i.com",
+      },
+      to: email,
+      subject: "Welcome to IAAI Training - Account Approved",
+      headers: {
+        "List-Unsubscribe": `<${process.env.BASE_URL}/unsubscribe>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        "X-Entity-ID": "IAAI-Training-Institute",
+        "X-Mailer": "IAAI Training Platform",
+      },
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Welcome to IAAI Training</title>
+          <style>
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              line-height: 1.6; 
+              color: #333; 
+              margin: 0; 
+              padding: 0;
+              background-color: #f4f4f4;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 20px auto; 
+              background: white;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            .header { 
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+              color: white; 
+              padding: 30px 20px; 
+              text-align: center; 
+            }
+            .content { padding: 30px 25px; }
+            .welcome-box { 
+              background-color: #f8f9fa; 
+              padding: 20px; 
+              border-radius: 8px; 
+              margin: 20px 0; 
+              border-left: 4px solid #667eea;
+            }
+            .login-button {
+              display: inline-block;
+              padding: 15px 30px;
+              background: #667eea;
+              color: white;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+              margin: 20px 0;
+              text-align: center;
+            }
+            .footer { 
+              background: #f8f9fa;
+              color: #666; 
+              font-size: 14px; 
+              text-align: center; 
+              padding: 20px;
+              border-top: 1px solid #eee;
+            }
+            ul { margin: 15px 0; padding-left: 20px; }
+            li { margin: 8px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0;">Welcome to IAAI Training!</h1>
+              <p style="margin: 10px 0 0 0;">Your account has been approved</p>
             </div>
-          </body>
-          </html>
-        `,
-        // Add plain text version to avoid spam filters
-        text: `
-          Welcome to IAAI Training Institute!
-          
-          Dear ${user.firstName},
-          
-          Your account has been approved and is now active.
-          
-          You can now log in at: ${
-            process.env.BASE_URL || "https://www.iaa-i.com"
-          }/login
-          
-          What's next:
-          - Log in using your email and password
-          - Browse our training programs
-          - Enroll in courses
-          - Track your progress
-          ${
-            user.role === "instructor"
-              ? "- Access instructor tools and resources"
-              : ""
-          }
-          
-          If you have questions, contact our support team.
-          
-          Best regards,
-          IAAI Training Institute
-          
-          Email: ${process.env.ADMIN_EMAIL || "info@iaa-i.com"}
-          Website: ${process.env.BASE_URL || "https://www.iaa-i.com"}
-        `,
-      };
+            
+            <div class="content">
+              <p>Dear ${user.firstName},</p>
+              
+              <div class="welcome-box">
+                <h3 style="margin-top: 0;">Account Successfully Approved</h3>
+                <p>Congratulations! Your account has been reviewed and approved by our team. You now have full access to the IAAI Training Platform.</p>
+              </div>
+              
+              <h3>What's Next?</h3>
+              <ul>
+                <li>Log in to your account using your email and password</li>
+                <li>Browse our comprehensive training programs</li>
+                <li>Enroll in courses that match your interests</li>
+                <li>Track your learning progress</li>
+                ${
+                  user.role === "instructor"
+                    ? "<li>Access instructor tools and resources</li>"
+                    : ""
+                }
+              </ul>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${
+                  process.env.BASE_URL || "https://www.iaa-i.com"
+                }/login" class="login-button">
+                  Login to Your Account
+                </a>
+              </div>
+              
+              <p>If you have any questions or need assistance, please contact our support team.</p>
+              
+              <p>Best regards,<br>
+              <strong>IAAI Training Institute</strong></p>
+            </div>
+            
+            <div class="footer">
+              <p>This email was sent to ${email} because you created an account with IAAI Training Institute.</p>
+              <p>If you did not create this account, please ignore this email.</p>
+              <p><a href="${
+                process.env.BASE_URL || "https://www.iaa-i.com"
+              }/unsubscribe" style="color: #667eea;">Unsubscribe</a> | 
+                 <a href="${
+                   process.env.BASE_URL || "https://www.iaa-i.com"
+                 }/contact" style="color: #667eea;">Contact Us</a></p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        Welcome to IAAI Training Institute!
+        
+        Dear ${user.firstName},
+        
+        Your account has been approved and is now active.
+        
+        You can now log in at: ${
+          process.env.BASE_URL || "https://www.iaa-i.com"
+        }/login
+        
+        What's next:
+        - Log in using your email and password
+        - Browse our training programs
+        - Enroll in courses
+        - Track your progress
+        ${
+          user.role === "instructor"
+            ? "- Access instructor tools and resources"
+            : ""
+        }
+        
+        If you have questions, contact our support team.
+        
+        Best regards,
+        IAAI Training Institute
+        
+        Email: ${process.env.ADMIN_EMAIL || "info@iaa-i.com"}
+        Website: ${process.env.BASE_URL || "https://www.iaa-i.com"}
+      `,
+    };
 
-      await transporter.sendMail(mailOptions);
-      console.log("📧 User confirmation email sent successfully to:", email);
-    } catch (emailError) {
-      console.error("📧 Error sending user confirmation email:", emailError);
-      // Log specific error details for debugging
-      if (emailError.code) {
-        console.error("📧 Email error code:", emailError.code);
-      }
-      if (emailError.response) {
-        console.error("📧 Email server response:", emailError.response);
-      }
-      // Continue with confirmation even if email fails
-    }
+    // Send welcome email in background
+    console.log("📧 Queuing welcome email for background processing...");
+    sendEmailInBackground(welcomeEmailOptions, "welcome");
 
-    // Send response to admin
+    // Send immediate response to admin
     res.send(`
       <html>
         <head>
@@ -632,7 +616,7 @@ exports.confirmUser = async (req, res) => {
           <div class="container">
             <h2 class="success">✅ Account Confirmed Successfully!</h2>
             <p>The user <strong>${email}</strong> has been approved and can now access the platform.</p>
-            <p>A welcome email has been sent to the user automatically.</p>
+            <p>A welcome email is being sent to the user in the background.</p>
             <a href="${
               process.env.BASE_URL || "https://www.iaa-i.com"
             }/admin/users" class="btn">👥 Back to User Management</a>
@@ -670,12 +654,8 @@ exports.confirmUser = async (req, res) => {
   }
 };
 
-// Alternative method name for backward compatibility
+// Rest of your existing methods remain the same...
 exports.signupUser = exports.registerUser;
-
-// ============================================
-// LOGIN FUNCTIONALITY
-// ============================================
 exports.loginUser = (req, res, next) => {
   console.log("🔐 Login attempt for:", req.body.email);
 
@@ -711,7 +691,6 @@ exports.loginUser = (req, res, next) => {
     });
   })(req, res, next);
 };
-
 // ============================================
 // GET USER PROFILE
 // ============================================

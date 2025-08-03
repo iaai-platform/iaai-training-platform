@@ -711,6 +711,83 @@ inPersonCourseSchema.virtual("certificationStrategy").get(function () {
   return this.linkedCourse.certificateIssuingRule || "inperson-only";
 });
 
+inPersonCourseSchema.pre("save", function (next) {
+  // Only update status if it's not manually set to cancelled
+  if (this.basic?.status !== "cancelled") {
+    const now = new Date();
+    const startDate = this.schedule?.startDate
+      ? new Date(this.schedule.startDate)
+      : null;
+    const endDate = this.schedule?.endDate
+      ? new Date(this.schedule.endDate)
+      : null;
+
+    // Auto-update status based on dates
+    if (endDate && now > endDate) {
+      this.basic.status = "completed";
+    } else if (startDate && now >= startDate && (!endDate || now <= endDate)) {
+      this.basic.status = "in-progress";
+    } else if (
+      this.enrollment?.currentEnrollment >= this.enrollment?.seatsAvailable
+    ) {
+      this.basic.status = "full";
+    } else if (startDate && now < startDate) {
+      this.basic.status = "open";
+    }
+  }
+
+  next();
+});
+
+//new
+// 3. ADD THESE VIRTUAL FIELDS (add these after your existing virtual fields)
+inPersonCourseSchema.virtual("isExpired").get(function () {
+  const now = new Date();
+  const endDate = this.schedule?.endDate
+    ? new Date(this.schedule.endDate)
+    : null;
+  const startDate = this.schedule?.startDate
+    ? new Date(this.schedule.startDate)
+    : null;
+
+  if (endDate) {
+    return now > endDate;
+  }
+
+  if (startDate) {
+    const oneDayAfter = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
+    return now > oneDayAfter;
+  }
+
+  return false;
+});
+
+inPersonCourseSchema.virtual("currentStatus").get(function () {
+  if (this.basic?.status === "cancelled") return "cancelled";
+  if (this.isExpired) return "completed";
+
+  const now = new Date();
+  const startDate = this.schedule?.startDate
+    ? new Date(this.schedule.startDate)
+    : null;
+  const endDate = this.schedule?.endDate
+    ? new Date(this.schedule.endDate)
+    : null;
+
+  if (startDate && now >= startDate && (!endDate || now <= endDate)) {
+    return "in-progress";
+  }
+
+  if (startDate && now < startDate) {
+    if (this.enrollment?.currentEnrollment >= this.enrollment?.seatsAvailable) {
+      return "full";
+    }
+    return "open";
+  }
+
+  return this.basic?.status || "draft";
+});
+
 // ════════════════════════════════════════════════════════════════════════════════
 // ║                               MIDDLEWARE                                     ║
 // ║                        Automatic Data Synchronization                       ║
@@ -1488,6 +1565,63 @@ inPersonCourseSchema.statics.getLinkedCourseCompletionStatus = async function (
   }
 };
 
+// 2. ADD THIS STATIC METHOD (add this after your existing static methods)
+inPersonCourseSchema.statics.updateAllStatuses = async function () {
+  const now = new Date();
+
+  try {
+    // Update completed courses
+    await this.updateMany(
+      {
+        "basic.status": { $ne: "cancelled" },
+        "schedule.endDate": { $lt: now },
+      },
+      { "basic.status": "completed" }
+    );
+
+    // Update in-progress courses
+    await this.updateMany(
+      {
+        "basic.status": { $ne: "cancelled" },
+        "schedule.startDate": { $lte: now },
+        $or: [
+          { "schedule.endDate": { $gte: now } },
+          { "schedule.endDate": { $exists: false } },
+        ],
+      },
+      { "basic.status": "in-progress" }
+    );
+
+    // Update full courses
+    await this.updateMany(
+      {
+        "basic.status": { $nin: ["cancelled", "completed", "in-progress"] },
+        "schedule.startDate": { $gt: now },
+        $expr: {
+          $gte: ["$enrollment.currentEnrollment", "$enrollment.seatsAvailable"],
+        },
+      },
+      { "basic.status": "full" }
+    );
+
+    // Update open courses
+    await this.updateMany(
+      {
+        "basic.status": { $nin: ["cancelled", "completed", "in-progress"] },
+        "schedule.startDate": { $gt: now },
+        $expr: {
+          $lt: ["$enrollment.currentEnrollment", "$enrollment.seatsAvailable"],
+        },
+      },
+      { "basic.status": "open" }
+    );
+
+    console.log("✅ Course statuses updated successfully");
+  } catch (error) {
+    console.error("❌ Error updating course statuses:", error);
+    throw error;
+  }
+};
 // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 // ┃                      🔍 QUERY HELPER METHODS                        ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛

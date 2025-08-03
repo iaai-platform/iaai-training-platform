@@ -473,7 +473,7 @@ const userSchema = new mongoose.Schema(
           ref: "InPersonAestheticTraining",
         },
 
-        // User-specific enrollment data only
+        // User-specific enrollment data
         enrollmentData: {
           status: {
             type: String,
@@ -518,20 +518,168 @@ const userSchema = new mongoose.Schema(
             },
           ],
           overallAttendancePercentage: { type: Number, default: 0 },
-          assessmentScore: Number,
-          assessmentCompleted: { type: Boolean, default: false },
+
+          // Enhanced assessment attempts (detailed tracking)
+          assessmentAttempts: [
+            {
+              attemptNumber: Number,
+              attemptDate: Date,
+              assessmentType: {
+                type: String,
+                enum: ["written", "practical", "combined"],
+                default: "combined",
+              },
+
+              // Detailed scoring breakdown
+              scores: {
+                practicalScore: { type: Number, min: 0, max: 100 },
+                theoryScore: { type: Number, min: 0, max: 100 },
+                totalScore: { type: Number, min: 0, max: 100 },
+                maxPossibleScore: { type: Number, default: 100 },
+              },
+
+              passed: { type: Boolean, default: false },
+
+              // Question-by-question tracking
+              answers: [
+                {
+                  questionIndex: Number,
+                  questionText: String, // Cached for records
+                  userAnswer: mongoose.Schema.Types.Mixed,
+                  correctAnswer: mongoose.Schema.Types.Mixed,
+                  isCorrect: Boolean,
+                  points: Number,
+                  earnedPoints: Number,
+                  category: { type: String, enum: ["theory", "practical"] },
+                },
+              ],
+
+              // Assessment metadata
+              timeSpent: { type: Number, default: 0 }, // minutes
+              instructorNotes: String,
+              instructorId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Instructor",
+              },
+              retakeAllowed: { type: Boolean, default: true },
+
+              // Practical assessment details
+              practicalDetails: {
+                proceduresCompleted: [String],
+                skillsAssessed: [String],
+                equipmentUsed: [String],
+                safetyCompliance: { type: Boolean, default: true },
+              },
+            },
+          ],
+
           courseStatus: {
             type: String,
-            enum: ["not-started", "in-progress", "completed"],
+            enum: [
+              "not-started",
+              "in-progress",
+              "completed",
+              "failed-attendance",
+              "failed-assessment",
+            ],
             default: "not-started",
           },
           completionDate: Date,
         },
 
+        // Assessment summary (for quick access - matches controller expectations)
+        assessmentCompleted: { type: Boolean, default: false },
+        assessmentScore: { type: Number, default: 0 }, // Latest/current score
+        bestAssessmentScore: { type: Number, default: 0 },
+        lastAssessmentDate: Date,
+        practicalAssessmentPassed: { type: Boolean, default: false },
+        theoryAssessmentPassed: { type: Boolean, default: false },
+        totalAttempts: { type: Number, default: 0 },
+        maxAttempts: { type: Number, default: 3 }, // Maximum allowed attempts
+        currentAttempts: { type: Number, default: 0 },
+
+        // Materials tracking
+        courseMaterials: {
+          // Downloaded materials tracking
+          downloadedMaterials: [
+            {
+              materialId: { type: String, required: true }, // course.media.documents[index]
+              materialName: String,
+              materialType: {
+                type: String,
+                enum: ["pdf", "video", "presentation", "document", "image"],
+                default: "document",
+              },
+              materialCategory: {
+                type: String,
+                enum: [
+                  "course-handout",
+                  "practical-guide",
+                  "reference",
+                  "certificate",
+                  "other",
+                ],
+                default: "course-handout",
+              },
+              downloadDate: { type: Date, default: Date.now },
+              downloadCount: { type: Number, default: 1 },
+              lastAccessed: Date,
+              fileSize: Number, // bytes
+              originalUrl: String, // course material URL
+            },
+          ],
+
+          // Instructor shared notes
+          sharedNotes: [
+            {
+              noteId: {
+                type: mongoose.Schema.Types.ObjectId,
+                default: () => new mongoose.Types.ObjectId(),
+              },
+              title: String,
+              content: String,
+              sharedBy: String, // instructor name
+              sharedByInstructorId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Instructor",
+              },
+              sharedDate: { type: Date, default: Date.now },
+              category: {
+                type: String,
+                enum: [
+                  "lecture",
+                  "practical",
+                  "assignment",
+                  "general",
+                  "homework",
+                ],
+                default: "general",
+              },
+              isPublic: { type: Boolean, default: true },
+              attachments: [String], // URLs to attached files
+            },
+          ],
+
+          // User's personal notes
+          personalNotes: {
+            content: String,
+            lastUpdated: Date,
+            wordCount: { type: Number, default: 0 },
+          },
+
+          // Material access summary
+          materialSummary: {
+            totalDownloads: { type: Number, default: 0 },
+            uniqueMaterialsAccessed: { type: Number, default: 0 },
+            lastMaterialAccess: Date,
+            favoriteCategory: String,
+          },
+        },
+
         // Certificate reference (if earned)
         certificateId: { type: String },
 
-        // User's personal notes
+        // User's personal notes (general course notes)
         userNotes: String,
 
         // Notifications preferences for this course
@@ -665,12 +813,109 @@ const userSchema = new mongoose.Schema(
             {
               sessionId: mongoose.Schema.Types.ObjectId,
               sessionDate: Date,
-              joinTime: Date,
-              leaveTime: Date,
-              duration: Number,
-              attendancePercentage: Number,
+              sessionName: String, // Cached session title
+
+              // ✅ ENHANCED: Detailed time tracking
+              timeTracking: {
+                joinTime: Date,
+                leaveTime: Date,
+                totalDuration: Number, // Total session duration (minutes)
+                userDuration: Number, // User's attendance duration (minutes)
+                attendancePercentage: { type: Number, default: 0 }, // User's % of session
+                reconnections: { type: Number, default: 0 }, // How many times user rejoined
+                lastActivity: Date, // Last interaction timestamp
+              },
+
+              // ✅ NEW: Attendance confirmation system
+              attendanceConfirmation: {
+                isConfirmed: { type: Boolean, default: false },
+                confirmationMethod: {
+                  type: String,
+                  enum: [
+                    "auto-duration",
+                    "manual-instructor",
+                    "quiz-completion",
+                    "interaction-based",
+                  ],
+                  default: "auto-duration",
+                },
+                confirmationDate: Date,
+                confirmedBy: String, // instructor name or 'system'
+                confirmedByInstructorId: {
+                  type: mongoose.Schema.Types.ObjectId,
+                  ref: "Instructor",
+                },
+
+                // Confirmation criteria
+                meetsMinimumDuration: { type: Boolean, default: false }, // ≥80% of session
+                meetsInteractionRequirement: { type: Boolean, default: false }, // participated in activities
+                hasValidReason: { type: Boolean, default: false }, // if absent with excuse
+
+                // Override options for instructors
+                manualOverride: {
+                  isOverridden: { type: Boolean, default: false },
+                  overrideReason: String,
+                  overriddenBy: String,
+                  overrideDate: Date,
+                },
+              },
+
+              // ✅ NEW: Session engagement tracking
+              engagement: {
+                chatMessages: { type: Number, default: 0 },
+                questionsAsked: { type: Number, default: 0 },
+                pollsParticipated: { type: Number, default: 0 },
+                screenInteractions: { type: Number, default: 0 },
+                cameraOnDuration: { type: Number, default: 0 }, // minutes
+                micActiveTime: { type: Number, default: 0 }, // minutes
+                engagementScore: { type: Number, default: 0 }, // 0-100 calculated score
+              },
+
+              // Session status
+              status: {
+                type: String,
+                enum: ["attended", "partial", "absent", "excused", "late"],
+                default: "attended",
+              },
+
+              // Technical issues tracking
+              technicalIssues: [
+                {
+                  issueType: {
+                    type: String,
+                    enum: ["connection", "audio", "video", "platform"],
+                  },
+                  reportedAt: Date,
+                  resolvedAt: Date,
+                  impactOnAttendance: Boolean,
+                },
+              ],
             },
           ],
+
+          // ✅ NEW: Overall attendance requirements and tracking
+          attendanceRequirements: {
+            // Course-level requirements
+            minimumSessionsRequired: { type: Number, default: 0 }, // Set by course/instructor
+            minimumAttendancePercentage: { type: Number, default: 80 }, // % of total course duration
+
+            // Current status
+            sessionsConfirmed: { type: Number, default: 0 },
+            totalSessionsAvailable: { type: Number, default: 0 },
+            confirmedAttendancePercentage: { type: Number, default: 0 },
+
+            // Eligibility flags
+            meetsSessionRequirement: { type: Boolean, default: false },
+            meetsPercentageRequirement: { type: Boolean, default: false },
+            meetsOverallRequirement: { type: Boolean, default: false },
+
+            // Tracking
+            lastCalculated: { type: Date, default: Date.now },
+            excusedAbsences: { type: Number, default: 0 },
+            unexcusedAbsences: { type: Number, default: 0 },
+          },
+
+          // ✅ EXISTING: Keep all existing fields
           overallAttendancePercentage: { type: Number, default: 0 },
           recordingsWatched: [
             {
@@ -679,49 +924,24 @@ const userSchema = new mongoose.Schema(
               watchCount: { type: Number, default: 0 },
             },
           ],
+
+          // Keep existing assessment fields...
           assessmentAttempts: [
-            {
-              attemptDate: Date,
-              score: Number,
-              passed: Boolean,
-            },
+            /* existing */
           ],
           bestAssessmentScore: Number,
           courseStatus: {
             type: String,
-            enum: ["not-started", "in-progress", "completed"],
+            enum: [
+              "not-started",
+              "in-progress",
+              "completed",
+              "failed-attendance",
+            ],
             default: "not-started",
           },
           completionDate: Date,
         },
-
-        // ⭐ EXISTING: Assessment data (UNCHANGED)
-        assessmentAttempts: [
-          {
-            attemptNumber: Number,
-            attemptDate: Date,
-            score: Number,
-            passed: Boolean,
-            answers: [
-              {
-                questionIndex: Number,
-                userAnswer: Number,
-                isCorrect: Boolean,
-              },
-            ],
-            detailedResults: [
-              {
-                questionIndex: Number,
-                question: String,
-                userAnswer: Number,
-                correctAnswer: Number,
-                isCorrect: Boolean,
-                points: Number,
-                earnedPoints: Number,
-              },
-            ],
-          },
-        ],
 
         assessmentCompleted: { type: Boolean, default: false },
         assessmentScore: { type: Number, default: 0 },
@@ -2695,4 +2915,1213 @@ userSchema.methods.updateEnrollmentStatusAfterPayment = function (
   }
 };
 
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 2: ADD HELPER METHODS TO USER MODEL                │
+// │                    Location: Before module.exports                         │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// ADD these methods to userSchema.methods (before module.exports):
+
+// ✅ METHOD 1: Track material downloads
+userSchema.methods.trackMaterialDownload = function (courseId, materialData) {
+  const enrollment = this.myInPersonCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  // Initialize materials if not exists
+  if (!enrollment.courseMaterials) {
+    enrollment.courseMaterials = {
+      downloadedMaterials: [],
+      sharedNotes: [],
+      materialSummary: { totalDownloads: 0, uniqueMaterialsAccessed: 0 },
+    };
+  }
+
+  // Find existing download record
+  const existing = enrollment.courseMaterials.downloadedMaterials.find(
+    (m) => m.materialId === materialData.materialId
+  );
+
+  if (existing) {
+    // Update existing record
+    existing.downloadCount++;
+    existing.lastAccessed = new Date();
+    enrollment.courseMaterials.materialSummary.totalDownloads++;
+  } else {
+    // Create new download record
+    enrollment.courseMaterials.downloadedMaterials.push({
+      materialId: materialData.materialId,
+      materialName: materialData.name,
+      materialType: materialData.type || "document",
+      materialCategory: materialData.category || "course-handout",
+      downloadDate: new Date(),
+      downloadCount: 1,
+      lastAccessed: new Date(),
+      fileSize: materialData.fileSize || 0,
+      originalUrl: materialData.url,
+    });
+
+    enrollment.courseMaterials.materialSummary.totalDownloads++;
+    enrollment.courseMaterials.materialSummary.uniqueMaterialsAccessed =
+      enrollment.courseMaterials.downloadedMaterials.length;
+  }
+
+  // Update summary
+  enrollment.courseMaterials.materialSummary.lastMaterialAccess = new Date();
+
+  return this.save();
+};
+
+// ✅ METHOD 2: Record enhanced assessment
+userSchema.methods.recordInPersonAssessment = function (
+  courseId,
+  assessmentData
+) {
+  const enrollment = this.myInPersonCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  // Initialize assessment attempts if not exists
+  if (!enrollment.userProgress.assessmentAttempts) {
+    enrollment.userProgress.assessmentAttempts = [];
+  }
+
+  // Create new attempt
+  const attempt = {
+    attemptNumber: enrollment.userProgress.assessmentAttempts.length + 1,
+    attemptDate: new Date(),
+    assessmentType: assessmentData.type || "combined",
+
+    scores: {
+      practicalScore: assessmentData.practicalScore || 0,
+      theoryScore: assessmentData.theoryScore || 0,
+      totalScore: assessmentData.totalScore,
+      maxPossibleScore: assessmentData.maxPossibleScore || 100,
+    },
+
+    passed: assessmentData.totalScore >= 70,
+    answers: assessmentData.answers || [],
+    timeSpent: assessmentData.timeSpent || 0,
+    instructorNotes: assessmentData.instructorNotes || "",
+    instructorId: assessmentData.instructorId,
+
+    practicalDetails: {
+      proceduresCompleted: assessmentData.proceduresCompleted || [],
+      skillsAssessed: assessmentData.skillsAssessed || [],
+      equipmentUsed: assessmentData.equipmentUsed || [],
+      safetyCompliance: assessmentData.safetyCompliance !== false,
+    },
+  };
+
+  enrollment.userProgress.assessmentAttempts.push(attempt);
+  enrollment.userProgress.totalAttempts =
+    enrollment.userProgress.assessmentAttempts.length;
+
+  // Update best score and completion status
+  enrollment.userProgress.bestAssessmentScore = Math.max(
+    enrollment.userProgress.bestAssessmentScore || 0,
+    assessmentData.totalScore
+  );
+
+  if (attempt.passed) {
+    enrollment.userProgress.assessmentCompleted = true;
+    enrollment.userProgress.practicalAssessmentPassed =
+      assessmentData.practicalScore >= 70;
+    enrollment.userProgress.theoryAssessmentPassed =
+      assessmentData.theoryScore >= 70;
+    enrollment.userProgress.lastAssessmentDate = new Date();
+
+    // Update course status if attendance is also sufficient
+    if (enrollment.userProgress.overallAttendancePercentage >= 80) {
+      enrollment.userProgress.courseStatus = "completed";
+      enrollment.userProgress.completionDate = new Date();
+    }
+  } else {
+    // Check if this was the final attempt
+    const maxAttempts = 3; // or get from course settings
+    if (enrollment.userProgress.totalAttempts >= maxAttempts) {
+      enrollment.userProgress.courseStatus = "failed-assessment";
+    }
+  }
+
+  return this.save();
+};
+
+// ✅ METHOD 3: Add instructor shared notes
+userSchema.methods.addInstructorNote = function (courseId, noteData) {
+  const enrollment = this.myInPersonCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  if (!enrollment.courseMaterials) {
+    enrollment.courseMaterials = { downloadedMaterials: [], sharedNotes: [] };
+  }
+
+  enrollment.courseMaterials.sharedNotes.push({
+    title: noteData.title,
+    content: noteData.content,
+    sharedBy: noteData.instructorName,
+    sharedByInstructorId: noteData.instructorId,
+    category: noteData.category || "general",
+    isPublic: noteData.isPublic !== false,
+    attachments: noteData.attachments || [],
+  });
+
+  return this.save();
+};
+
+// ✅ METHOD 4: Update personal notes
+userSchema.methods.updatePersonalNotes = function (courseId, notesContent) {
+  const enrollment = this.myInPersonCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  if (!enrollment.courseMaterials) {
+    enrollment.courseMaterials = { downloadedMaterials: [], sharedNotes: [] };
+  }
+
+  enrollment.courseMaterials.personalNotes = {
+    content: notesContent,
+    lastUpdated: new Date(),
+    wordCount: notesContent ? notesContent.split(/\s+/).length : 0,
+  };
+
+  return this.save();
+};
+
+// ✅ METHOD 5: Get course completion status
+userSchema.methods.getInPersonCourseStatus = function (courseId) {
+  const enrollment = this.myInPersonCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    return null;
+  }
+
+  const attendanceOk =
+    enrollment.userProgress.overallAttendancePercentage >= 80;
+  const assessmentOk = enrollment.userProgress.assessmentCompleted;
+
+  return {
+    courseId: courseId,
+    enrollmentStatus: enrollment.enrollmentData.status,
+    courseStatus: enrollment.userProgress.courseStatus,
+
+    attendance: {
+      percentage: enrollment.userProgress.overallAttendancePercentage,
+      required: 80,
+      meets: attendanceOk,
+    },
+
+    assessment: {
+      completed: enrollment.userProgress.assessmentCompleted,
+      bestScore: enrollment.userProgress.bestAssessmentScore,
+      totalAttempts: enrollment.userProgress.totalAttempts || 0,
+      practicalPassed: enrollment.userProgress.practicalAssessmentPassed,
+      theoryPassed: enrollment.userProgress.theoryAssessmentPassed,
+      meets: assessmentOk,
+    },
+
+    materials: {
+      totalDownloads:
+        enrollment.courseMaterials?.materialSummary?.totalDownloads || 0,
+      uniqueMaterials:
+        enrollment.courseMaterials?.materialSummary?.uniqueMaterialsAccessed ||
+        0,
+      hasPersonalNotes: !!enrollment.courseMaterials?.personalNotes?.content,
+    },
+
+    completion: {
+      eligible: attendanceOk && assessmentOk,
+      completionDate: enrollment.userProgress.completionDate,
+    },
+  };
+};
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 3: CONTROLLER METHODS                              │
+// │                    Add these to your course controller                     │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// ✅ CONTROLLER 1: Download course material
+const downloadCourseMaterial = async (req, res) => {
+  try {
+    const { courseId, materialId } = req.params;
+    const userId = req.user.id;
+
+    // Get course and material info
+    const course = await InPersonAestheticTraining.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+
+    // Find material in course (this depends on your course structure)
+    let material = null;
+    let materialIndex = -1;
+
+    // Check documents array
+    if (course.media?.documents) {
+      materialIndex = course.media.documents.findIndex((doc) =>
+        doc.includes(materialId)
+      );
+      if (materialIndex !== -1) {
+        material = {
+          id: materialId,
+          name: `Course Document ${materialIndex + 1}`,
+          type: "document",
+          url: course.media.documents[materialIndex],
+        };
+      }
+    }
+
+    if (!material) {
+      return res.status(404).json({ error: "Material not found" });
+    }
+
+    // Get user and track download
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if user is enrolled
+    const enrollment = user.myInPersonCourses.find(
+      (e) =>
+        e.courseId.toString() === courseId &&
+        ["paid", "registered", "completed"].includes(e.enrollmentData.status)
+    );
+
+    if (!enrollment) {
+      return res.status(403).json({ error: "Not enrolled in this course" });
+    }
+
+    // Track the download
+    await user.trackMaterialDownload(courseId, {
+      materialId: materialId,
+      name: material.name,
+      type: material.type,
+      category: "course-handout",
+      url: material.url,
+      fileSize: 0, // You can get this from file system if needed
+    });
+
+    res.json({
+      success: true,
+      message: "Download tracked successfully",
+      material: material,
+      downloadUrl: material.url,
+    });
+  } catch (error) {
+    console.error("Error tracking material download:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ✅ CONTROLLER 2: Submit assessment
+const submitInPersonAssessment = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user.id;
+    const {
+      assessmentType,
+      answers,
+      practicalScore,
+      theoryScore,
+      totalScore,
+      timeSpent,
+      proceduresCompleted,
+      skillsAssessed,
+      equipmentUsed,
+    } = req.body;
+
+    // Get user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check enrollment
+    const enrollment = user.myInPersonCourses.find(
+      (e) =>
+        e.courseId.toString() === courseId &&
+        ["paid", "registered"].includes(e.enrollmentData.status)
+    );
+
+    if (!enrollment) {
+      return res.status(403).json({ error: "Not enrolled in this course" });
+    }
+
+    // Record assessment
+    await user.recordInPersonAssessment(courseId, {
+      type: assessmentType,
+      practicalScore: practicalScore,
+      theoryScore: theoryScore,
+      totalScore: totalScore,
+      answers: answers,
+      timeSpent: timeSpent,
+      instructorId: req.body.instructorId,
+      proceduresCompleted: proceduresCompleted,
+      skillsAssessed: skillsAssessed,
+      equipmentUsed: equipmentUsed,
+      safetyCompliance: req.body.safetyCompliance,
+    });
+
+    // Get updated status
+    const status = user.getInPersonCourseStatus(courseId);
+
+    res.json({
+      success: true,
+      message: "Assessment submitted successfully",
+      passed: totalScore >= 70,
+      score: totalScore,
+      status: status,
+    });
+  } catch (error) {
+    console.error("Error submitting assessment:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ✅ CONTROLLER 3: Get course progress
+const getInPersonCourseProgress = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const status = user.getInPersonCourseStatus(courseId);
+    if (!status) {
+      return res.status(404).json({ error: "Course enrollment not found" });
+    }
+
+    res.json({
+      success: true,
+      progress: status,
+    });
+  } catch (error) {
+    console.error("Error getting course progress:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ✅ CONTROLLER 4: Update personal notes
+const updatePersonalNotes = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { notes } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await user.updatePersonalNotes(courseId, notes);
+
+    res.json({
+      success: true,
+      message: "Notes updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating notes:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 4: ROUTE DEFINITIONS                               │
+// │                    Add these to your routes file                           │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// Add these routes to your course routes file:
+/*
+// Material downloads
+router.get('/in-person/:courseId/materials/:materialId/download', 
+  authenticate, downloadCourseMaterial);
+
+// Assessment submission
+router.post('/in-person/:courseId/assessment/submit', 
+  authenticate, submitInPersonAssessment);
+
+// Course progress
+router.get('/in-person/:courseId/progress', 
+  authenticate, getInPersonCourseProgress);
+
+// Personal notes
+router.put('/in-person/:courseId/notes', 
+  authenticate, updatePersonalNotes);
+*/
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 5: FRONTEND USAGE EXAMPLES                         │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// ✅ FRONTEND 1: Download material
+const downloadMaterial = async (courseId, materialId) => {
+  try {
+    const response = await fetch(
+      `/api/courses/in-person/${courseId}/materials/${materialId}/download`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Open download URL
+      window.open(data.downloadUrl, "_blank");
+      console.log("Download tracked:", data.material);
+    }
+  } catch (error) {
+    console.error("Download error:", error);
+  }
+};
+
+// ✅ FRONTEND 2: Submit assessment
+const submitAssessment = async (courseId, assessmentData) => {
+  try {
+    const response = await fetch(
+      `/api/courses/in-person/${courseId}/assessment/submit`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(assessmentData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      console.log("Assessment result:", data);
+      return data;
+    }
+  } catch (error) {
+    console.error("Assessment submission error:", error);
+  }
+};
+
+// ✅ FRONTEND 3: Get progress
+const getCourseProgress = async (courseId) => {
+  try {
+    const response = await fetch(
+      `/api/courses/in-person/${courseId}/progress`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      return data.progress;
+    }
+  } catch (error) {
+    console.error("Progress fetch error:", error);
+  }
+};
+
+//new for online live
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 2: ADD HELPER METHODS TO USER MODEL                │
+// │                    Location: Before module.exports                         │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// ✅ METHOD 1: Track live session attendance
+userSchema.methods.trackLiveSessionAttendance = function (
+  courseId,
+  sessionData
+) {
+  const enrollment = this.myLiveCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  // Find existing session or create new
+  let sessionRecord = enrollment.userProgress.sessionsAttended.find(
+    (s) => s.sessionId.toString() === sessionData.sessionId.toString()
+  );
+
+  if (!sessionRecord) {
+    // Create new session record
+    sessionRecord = {
+      sessionId: sessionData.sessionId,
+      sessionDate: sessionData.sessionDate,
+      sessionName: sessionData.sessionName || "Live Session",
+      timeTracking: {
+        totalDuration: sessionData.totalDuration || 0,
+        userDuration: 0,
+        attendancePercentage: 0,
+        reconnections: 0,
+      },
+      attendanceConfirmation: {
+        isConfirmed: false,
+        meetsMinimumDuration: false,
+        meetsInteractionRequirement: false,
+      },
+      engagement: {
+        chatMessages: 0,
+        questionsAsked: 0,
+        pollsParticipated: 0,
+        screenInteractions: 0,
+        engagementScore: 0,
+      },
+      status: "attended",
+      technicalIssues: [],
+    };
+    enrollment.userProgress.sessionsAttended.push(sessionRecord);
+  }
+
+  // Update time tracking
+  if (sessionData.joinTime)
+    sessionRecord.timeTracking.joinTime = sessionData.joinTime;
+  if (sessionData.leaveTime)
+    sessionRecord.timeTracking.leaveTime = sessionData.leaveTime;
+
+  // Calculate attendance duration and percentage
+  if (
+    sessionRecord.timeTracking.joinTime &&
+    sessionRecord.timeTracking.leaveTime
+  ) {
+    const attendedMs =
+      sessionRecord.timeTracking.leaveTime -
+      sessionRecord.timeTracking.joinTime;
+    sessionRecord.timeTracking.userDuration = Math.round(
+      attendedMs / (1000 * 60)
+    ); // minutes
+
+    if (sessionRecord.timeTracking.totalDuration > 0) {
+      sessionRecord.timeTracking.attendancePercentage = Math.round(
+        (sessionRecord.timeTracking.userDuration /
+          sessionRecord.timeTracking.totalDuration) *
+          100
+      );
+    }
+  }
+
+  // Update engagement if provided
+  if (sessionData.engagement) {
+    Object.keys(sessionData.engagement).forEach((key) => {
+      if (sessionRecord.engagement[key] !== undefined) {
+        sessionRecord.engagement[key] = sessionData.engagement[key];
+      }
+    });
+  }
+
+  // Update last activity
+  sessionRecord.timeTracking.lastActivity = new Date();
+
+  return this.save();
+};
+
+// ✅ METHOD 2: Confirm attendance for a session
+userSchema.methods.confirmLiveAttendance = function (
+  courseId,
+  sessionId,
+  confirmationData
+) {
+  const enrollment = this.myLiveCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  const sessionRecord = enrollment.userProgress.sessionsAttended.find(
+    (s) => s.sessionId.toString() === sessionId.toString()
+  );
+
+  if (!sessionRecord) {
+    throw new Error("Session record not found");
+  }
+
+  // Update confirmation details
+  sessionRecord.attendanceConfirmation.isConfirmed = true;
+  sessionRecord.attendanceConfirmation.confirmationDate = new Date();
+  sessionRecord.attendanceConfirmation.confirmationMethod =
+    confirmationData.method || "manual-instructor";
+  sessionRecord.attendanceConfirmation.confirmedBy =
+    confirmationData.confirmedBy || "instructor";
+
+  if (confirmationData.instructorId) {
+    sessionRecord.attendanceConfirmation.confirmedByInstructorId =
+      confirmationData.instructorId;
+  }
+
+  // Check confirmation criteria
+  sessionRecord.attendanceConfirmation.meetsMinimumDuration =
+    sessionRecord.timeTracking.attendancePercentage >= 80;
+
+  sessionRecord.attendanceConfirmation.meetsInteractionRequirement =
+    sessionRecord.engagement.engagementScore >= 50; // threshold for interaction
+
+  // Handle manual override if provided
+  if (confirmationData.manualOverride) {
+    sessionRecord.attendanceConfirmation.manualOverride = {
+      isOverridden: true,
+      overrideReason: confirmationData.manualOverride.reason,
+      overriddenBy: confirmationData.confirmedBy,
+      overrideDate: new Date(),
+    };
+  }
+
+  // Update session status based on attendance
+  if (
+    sessionRecord.attendanceConfirmation.meetsMinimumDuration ||
+    sessionRecord.attendanceConfirmation.manualOverride.isOverridden
+  ) {
+    sessionRecord.status = "attended";
+  } else if (sessionRecord.timeTracking.attendancePercentage > 50) {
+    sessionRecord.status = "partial";
+  } else {
+    sessionRecord.status = confirmationData.hasValidReason
+      ? "excused"
+      : "absent";
+  }
+
+  // Recalculate overall attendance requirements
+  this.calculateLiveAttendanceRequirements(courseId);
+
+  return this.save();
+};
+
+// ✅ METHOD 3: Calculate overall attendance requirements
+userSchema.methods.calculateLiveAttendanceRequirements = function (courseId) {
+  const enrollment = this.myLiveCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  const requirements = enrollment.userProgress.attendanceRequirements;
+  const sessions = enrollment.userProgress.sessionsAttended;
+
+  // Count confirmed sessions
+  requirements.sessionsConfirmed = sessions.filter(
+    (s) =>
+      s.attendanceConfirmation.isConfirmed &&
+      (s.status === "attended" || s.status === "excused")
+  ).length;
+
+  requirements.totalSessionsAvailable = sessions.length;
+
+  // Calculate confirmed attendance percentage
+  if (requirements.totalSessionsAvailable > 0) {
+    requirements.confirmedAttendancePercentage = Math.round(
+      (requirements.sessionsConfirmed / requirements.totalSessionsAvailable) *
+        100
+    );
+  }
+
+  // Check if requirements are met
+  requirements.meetsSessionRequirement =
+    requirements.sessionsConfirmed >= requirements.minimumSessionsRequired;
+
+  requirements.meetsPercentageRequirement =
+    requirements.confirmedAttendancePercentage >=
+    requirements.minimumAttendancePercentage;
+
+  requirements.meetsOverallRequirement =
+    requirements.meetsSessionRequirement &&
+    requirements.meetsPercentageRequirement;
+
+  // Count excused vs unexcused absences
+  requirements.excusedAbsences = sessions.filter(
+    (s) => s.status === "excused"
+  ).length;
+  requirements.unexcusedAbsences = sessions.filter(
+    (s) => s.status === "absent"
+  ).length;
+
+  requirements.lastCalculated = new Date();
+
+  // Update overall course status
+  if (
+    requirements.meetsOverallRequirement &&
+    enrollment.userProgress.bestAssessmentScore >= 70
+  ) {
+    enrollment.userProgress.courseStatus = "completed";
+    enrollment.userProgress.completionDate = new Date();
+  } else if (
+    !requirements.meetsOverallRequirement &&
+    requirements.totalSessionsAvailable >= requirements.minimumSessionsRequired
+  ) {
+    enrollment.userProgress.courseStatus = "failed-attendance";
+  }
+
+  return this;
+};
+
+// ✅ METHOD 4: Set attendance requirements for course
+userSchema.methods.setLiveAttendanceRequirements = function (
+  courseId,
+  requirements
+) {
+  const enrollment = this.myLiveCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  if (!enrollment.userProgress.attendanceRequirements) {
+    enrollment.userProgress.attendanceRequirements = {};
+  }
+
+  // Update requirements
+  if (requirements.minimumSessions !== undefined) {
+    enrollment.userProgress.attendanceRequirements.minimumSessionsRequired =
+      requirements.minimumSessions;
+  }
+
+  if (requirements.minimumPercentage !== undefined) {
+    enrollment.userProgress.attendanceRequirements.minimumAttendancePercentage =
+      requirements.minimumPercentage;
+  }
+
+  // Recalculate with new requirements
+  this.calculateLiveAttendanceRequirements(courseId);
+
+  return this.save();
+};
+
+// ✅ METHOD 5: Get live course attendance status
+userSchema.methods.getLiveAttendanceStatus = function (courseId) {
+  const enrollment = this.myLiveCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    return null;
+  }
+
+  const requirements = enrollment.userProgress.attendanceRequirements;
+  const sessions = enrollment.userProgress.sessionsAttended;
+
+  return {
+    courseId: courseId,
+
+    requirements: {
+      minimumSessions: requirements.minimumSessionsRequired,
+      minimumPercentage: requirements.minimumAttendancePercentage,
+    },
+
+    current: {
+      totalSessions: requirements.totalSessionsAvailable,
+      confirmedSessions: requirements.sessionsConfirmed,
+      attendancePercentage: requirements.confirmedAttendancePercentage,
+      excusedAbsences: requirements.excusedAbsences,
+      unexcusedAbsences: requirements.unexcusedAbsences,
+    },
+
+    eligibility: {
+      meetsSessionRequirement: requirements.meetsSessionRequirement,
+      meetsPercentageRequirement: requirements.meetsPercentageRequirement,
+      meetsOverallRequirement: requirements.meetsOverallRequirement,
+      canGetCertificate:
+        requirements.meetsOverallRequirement &&
+        enrollment.userProgress.bestAssessmentScore >= 70,
+    },
+
+    sessions: sessions.map((s) => ({
+      sessionId: s.sessionId,
+      sessionName: s.sessionName,
+      date: s.sessionDate,
+      attendance: {
+        duration: s.timeTracking.userDuration,
+        percentage: s.timeTracking.attendancePercentage,
+        confirmed: s.attendanceConfirmation.isConfirmed,
+        status: s.status,
+      },
+      engagement: {
+        score: s.engagement.engagementScore,
+        interactions:
+          s.engagement.chatMessages +
+          s.engagement.questionsAsked +
+          s.engagement.pollsParticipated,
+      },
+    })),
+  };
+};
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 3: CONTROLLER METHODS                              │
+// │                    Add these to your course controller                     │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// ✅ CONTROLLER 1: Track session attendance (called during/after live session)
+const trackLiveSessionAttendance = async (req, res) => {
+  try {
+    const { courseId, sessionId } = req.params;
+    const userId = req.user.id;
+    const { joinTime, leaveTime, totalDuration, sessionName, engagement } =
+      req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await user.trackLiveSessionAttendance(courseId, {
+      sessionId,
+      sessionDate: new Date(),
+      sessionName,
+      joinTime: new Date(joinTime),
+      leaveTime: new Date(leaveTime),
+      totalDuration,
+      engagement,
+    });
+
+    res.json({
+      success: true,
+      message: "Session attendance tracked successfully",
+    });
+  } catch (error) {
+    console.error("Error tracking live session attendance:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ✅ CONTROLLER 2: Confirm attendance (instructor action)
+const confirmLiveAttendance = async (req, res) => {
+  try {
+    const { courseId, sessionId } = req.params;
+    const { userId } = req.body; // User being confirmed
+    const { method, hasValidReason, manualOverride } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await user.confirmLiveAttendance(courseId, sessionId, {
+      method: method || "manual-instructor",
+      confirmedBy: req.user.name, // Instructor name
+      instructorId: req.user.id,
+      hasValidReason,
+      manualOverride,
+    });
+
+    // Get updated status
+    const status = user.getLiveAttendanceStatus(courseId);
+
+    res.json({
+      success: true,
+      message: "Attendance confirmed successfully",
+      status: status,
+    });
+  } catch (error) {
+    console.error("Error confirming live attendance:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ✅ CONTROLLER 3: Get attendance status
+const getLiveAttendanceStatus = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const status = user.getLiveAttendanceStatus(courseId);
+    if (!status) {
+      return res.status(404).json({ error: "Course enrollment not found" });
+    }
+
+    res.json({
+      success: true,
+      attendance: status,
+    });
+  } catch (error) {
+    console.error("Error getting live attendance status:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ✅ CONTROLLER 4: Set course attendance requirements (instructor/admin action)
+const setAttendanceRequirements = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { minimumSessions, minimumPercentage, userIds } = req.body;
+
+    // If userIds provided, update specific users; otherwise update all enrolled users
+    const usersToUpdate = userIds || [];
+
+    if (usersToUpdate.length === 0) {
+      // Get all enrolled users
+      const enrolledUsers = await User.find({
+        "myLiveCourses.courseId": courseId,
+        "myLiveCourses.enrollmentData.status": { $in: ["paid", "registered"] },
+      });
+
+      usersToUpdate.push(...enrolledUsers.map((u) => u._id));
+    }
+
+    // Update requirements for each user
+    for (const userId of usersToUpdate) {
+      const user = await User.findById(userId);
+      if (user) {
+        await user.setLiveAttendanceRequirements(courseId, {
+          minimumSessions,
+          minimumPercentage,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Attendance requirements updated for ${usersToUpdate.length} users`,
+      requirements: {
+        minimumSessions,
+        minimumPercentage,
+      },
+    });
+  } catch (error) {
+    console.error("Error setting attendance requirements:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 4: ROUTE DEFINITIONS                               │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+/*
+// Add these routes to your course routes file:
+
+// Track session attendance (during/after live session)
+router.post('/online-live/:courseId/sessions/:sessionId/attendance', 
+  authenticate, trackLiveSessionAttendance);
+
+// Confirm attendance (instructor action)
+router.post('/online-live/:courseId/sessions/:sessionId/confirm-attendance', 
+  authenticate, requireInstructorRole, confirmLiveAttendance);
+
+// Get attendance status
+router.get('/online-live/:courseId/attendance-status', 
+  authenticate, getLiveAttendanceStatus);
+
+// Set attendance requirements (admin/instructor action)
+router.put('/online-live/:courseId/attendance-requirements', 
+  authenticate, requireInstructorRole, setAttendanceRequirements);
+*/
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 5: FRONTEND INTEGRATION EXAMPLES                   │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// ✅ FRONTEND 1: Track attendance during live session
+const trackSessionAttendance = async (courseId, sessionId, attendanceData) => {
+  try {
+    const response = await fetch(
+      `/api/courses/online-live/${courseId}/sessions/${sessionId}/attendance`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          joinTime: attendanceData.joinTime,
+          leaveTime: attendanceData.leaveTime,
+          totalDuration: attendanceData.totalDuration,
+          sessionName: attendanceData.sessionName,
+          engagement: {
+            chatMessages: attendanceData.chatCount,
+            questionsAsked: attendanceData.questionCount,
+            pollsParticipated: attendanceData.pollCount,
+            engagementScore: attendanceData.engagementScore,
+          },
+        }),
+      }
+    );
+
+    const data = await response.json();
+    console.log("Attendance tracked:", data);
+  } catch (error) {
+    console.error("Error tracking attendance:", error);
+  }
+};
+
+// ✅ FRONTEND 2: Instructor confirms student attendance
+const confirmStudentAttendance = async (
+  courseId,
+  sessionId,
+  userId,
+  confirmationData
+) => {
+  try {
+    const response = await fetch(
+      `/api/courses/online-live/${courseId}/sessions/${sessionId}/confirm-attendance`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${instructorToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+          method: "manual-instructor",
+          hasValidReason: confirmationData.hasExcuse,
+          manualOverride: confirmationData.forceConfirm
+            ? {
+                reason: confirmationData.overrideReason,
+              }
+            : null,
+        }),
+      }
+    );
+
+    const data = await response.json();
+    console.log("Attendance confirmed:", data);
+    return data.status;
+  } catch (error) {
+    console.error("Error confirming attendance:", error);
+  }
+};
+
+// ✅ FRONTEND 3: Get student attendance dashboard
+const getAttendanceDashboard = async (courseId) => {
+  try {
+    const response = await fetch(
+      `/api/courses/online-live/${courseId}/attendance-status`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      return data.attendance; // Use for dashboard display
+    }
+  } catch (error) {
+    console.error("Error getting attendance status:", error);
+  }
+};
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                    STEP 6: AUTOMATIC ATTENDANCE TRACKING                   │
+// │                    Integration with video conferencing platforms           │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// ✅ ZOOM WEBHOOK EXAMPLE: Auto-track attendance from Zoom
+const handleZoomWebhook = async (req, res) => {
+  try {
+    const { event, payload } = req.body;
+
+    if (
+      event === "meeting.participant_joined" ||
+      event === "meeting.participant_left"
+    ) {
+      const { meeting, participant } = payload.object;
+
+      // Find user by email or meeting participant ID
+      const user = await User.findOne({ email: participant.email });
+      if (!user) return res.status(200).send("OK");
+
+      // Find course by meeting ID (you'll need to store this mapping)
+      const courseId = await getCourseIdFromMeetingId(meeting.id);
+      const sessionId = meeting.id; // or use a separate session tracking system
+
+      if (event === "meeting.participant_joined") {
+        await user.trackLiveSessionAttendance(courseId, {
+          sessionId: sessionId,
+          sessionDate: new Date(),
+          sessionName: meeting.topic,
+          joinTime: new Date(participant.join_time),
+          totalDuration: meeting.duration,
+          engagement: {
+            chatMessages: 0, // Will be updated separately
+            questionsAsked: 0,
+            pollsParticipated: 0,
+          },
+        });
+      } else if (event === "meeting.participant_left") {
+        await user.trackLiveSessionAttendance(courseId, {
+          sessionId: sessionId,
+          leaveTime: new Date(participant.leave_time),
+        });
+
+        // Auto-confirm attendance if meets duration requirement
+        const sessionRecord = user.myLiveCourses
+          .find((e) => e.courseId.toString() === courseId)
+          ?.userProgress.sessionsAttended.find(
+            (s) => s.sessionId.toString() === sessionId
+          );
+
+        if (
+          sessionRecord &&
+          sessionRecord.timeTracking.attendancePercentage >= 80
+        ) {
+          await user.confirmLiveAttendance(courseId, sessionId, {
+            method: "auto-duration",
+            confirmedBy: "system",
+          });
+        }
+      }
+    }
+
+    res.status(200).send("OK");
+  } catch (error) {
+    console.error("Zoom webhook error:", error);
+    res.status(500).send("Error");
+  }
+};
+
+// Helper function to map meeting IDs to course IDs
+const getCourseIdFromMeetingId = async (meetingId) => {
+  // This depends on how you store the mapping
+  // Could be in course model, separate collection, etc.
+  const course = await OnlineLiveTraining.findOne({
+    "platform.meetingId": meetingId,
+  });
+  return course?._id;
+};
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+//
 module.exports = mongoose.models.User || mongoose.model("User", userSchema);

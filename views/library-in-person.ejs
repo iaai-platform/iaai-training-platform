@@ -285,14 +285,14 @@
                       <div style="color: #28a745; font-weight: 600;">
                         <i class="fas fa-check-circle"></i> Assessment Passed
                         <span style="float: right; font-weight: normal;">
-                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore %>%)
+                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
                         </span>
                       </div>
                     <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
                       <div style="color: #dc3545; font-weight: 600;">
                         <i class="fas fa-times-circle"></i> Assessment Not Passed
                         <span style="float: right; font-weight: normal;">
-                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore %>%)
+                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
                         </span>
                       </div>
                       <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
@@ -302,7 +302,7 @@
                       <div style="color: #ffc107; font-weight: 600;">
                         <i class="fas fa-clock"></i> Assessment Pending
                         <span style="float: right; font-weight: normal;">
-                          Required: <%= course.passingScore %>%
+                          Required: <%= course.passingScore || 70 %>%
                         </span>
                       </div>
                       <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
@@ -709,15 +709,11 @@
               <div class="course-actions">
                 <% if (course.canViewCertificate && course.hasCertificate) { %>
                   <!-- Certificate is available -->
-                  <a href="/certificates/view/<%= course.certificateId %>" 
-                     class="cta-btn btn-certificate">
+                  <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
                     <i class="fas fa-certificate"></i> View Certificate
                   </a>
                   <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
                     <i class="fas fa-download"></i> Download PDF
-                  </button>
-                  <button onclick="shareCertificate('<%= course.certificateId %>', '<%= course.title %>')" class="cta-btn btn-outline-primary">
-                    <i class="fas fa-share-alt"></i> Share
                   </button>
                 <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
                   <!-- All requirements met - can generate certificate -->
@@ -727,19 +723,6 @@
                           data-course-title="<%= course.title %>">
                     <i class="fas fa-trophy"></i> Generate Certificate
                   </button>
-                <% } else if (course.courseEnded && course.attendanceConfirmed) { %>
-                  <!-- Course ended, attendance confirmed - check assessment -->
-                  <% if (course.assessmentRequired && !course.assessmentCompleted) { %>
-                    <a href="/library/in-person/assessment/<%= course.courseId %>" 
-                       class="cta-btn btn-warning">
-                      <i class="fas fa-clipboard-check"></i> Take Assessment
-                    </a>
-                  <% } else if (course.assessmentRequired && course.assessmentCompleted && !course.assessmentPassed) { %>
-                    <a href="/library/in-person/assessment/<%= course.courseId %>" 
-                       class="cta-btn btn-warning">
-                      <i class="fas fa-redo"></i> Retake Assessment
-                    </a>
-                  <% } %>
                 <% } else if (course.courseEnded && !course.attendanceConfirmed) { %>
                   <!-- Course ended but attendance not confirmed -->
                   <button class="cta-btn btn-confirm-attendance" 
@@ -747,6 +730,16 @@
                           data-course-type="<%= course.courseType %>">
                     <i class="fas fa-check"></i> Confirm Attendance
                   </button>
+                <% } else if (course.assessmentRequired && course.attendanceConfirmed && !course.assessmentCompleted) { %>
+                  <!-- Attendance confirmed, assessment not taken -->
+                  <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+                    <i class="fas fa-clipboard-check"></i> Take Assessment
+                  </a>
+                <% } else if (course.assessmentRequired && !course.assessmentPassed && course.canRetake) { %>
+                  <!-- Assessment failed but can retake -->
+                  <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+                    <i class="fas fa-redo"></i> Retake Assessment
+                  </a>
                 <% } else { %>
                   <!-- Course not started or ongoing -->
                   <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
@@ -763,13 +756,6 @@
                 <a href="/in-person/courses/<%= course.courseId %>" class="cta-btn btn-secondary">
                   <i class="fas fa-info-circle"></i> Course Details
                 </a>
-                
-                <!-- NEW: Link to Online Component -->
-                <% if (course.linkedCourse && course.linkedCourse.isLinked && course.linkedCourse.linkedCourseId) { %>
-                  <a href="/online-live-training/courses/<%= course.linkedCourse.linkedCourseId %>" class="cta-btn btn-outline-info">
-                    <i class="fas fa-laptop"></i> View Online Component
-                  </a>
-                <% } %>
               </div>
             </div>
           </div>

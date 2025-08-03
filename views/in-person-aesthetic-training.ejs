@@ -6,957 +6,7 @@
   <title>In-Person Aesthetic Training - Luxury Medical Training</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  
-  <style>
-    /* Reset and Base Styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    /* Table Container */
-    .table-container {
-      max-width: 1400px;
-      margin: 0 auto 60px;
-      padding: 0 20px;
-      overflow-x: auto;
-    }
-    
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    
-    /* Breadcrumb Styling */
-    .breadcrumb {
-      margin: 0;
-      padding: 20px 5%;
-      background: linear-gradient(to right, rgba(0, 33, 71, 0.05), rgba(184, 134, 11, 0.05));
-      font-size: 14px;
-      backdrop-filter: blur(10px);
-    }
-    
-    .breadcrumb a {
-      color: #002147;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-    
-    .breadcrumb a::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background-color: #b8860b;
-      transition: width 0.3s ease;
-    }
-    
-    .breadcrumb a:hover::after {
-      width: 100%;
-    }
-    
-    .breadcrumb span {
-      color: #b8860b;
-      font-weight: 600;
-    }
-    
-    /* Hero Section */
-    #hero {
-      background: linear-gradient(135deg, #002147 0%, #001633 100%);
-      position: relative;
-      overflow: hidden;
-      padding: 80px 0;
-    }
-    
-    #hero::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -10%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(184, 134, 11, 0.1) 0%, transparent 70%);
-      border-radius: 50%;
-    }
-    
-    #hero::after {
-      content: '';
-      position: absolute;
-      bottom: -30%;
-      left: -5%;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(184, 134, 11, 0.08) 0%, transparent 70%);
-      border-radius: 50%;
-    }
-    
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    
-    .hero-content h1 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 48px;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 20px;
-      animation: fadeInUp 0.8s ease-out;
-    }
-    
-    .hero-content p {
-      font-size: 18px;
-      color: rgba(255, 255, 255, 0.9);
-      line-height: 1.8;
-      max-width: 800px;
-      margin: 0 auto;
-      animation: fadeInUp 0.8s ease-out 0.2s both;
-    }
-    
-    /* Search and Filter Bar */
-    .filter-bar {
-      background: white;
-      padding: 25px;
-      margin: -40px auto 40px;
-      max-width: 1200px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      position: relative;
-      z-index: 10;
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    
-    .search-box {
-      flex: 1;
-      min-width: 250px;
-      position: relative;
-    }
-    
-    .search-box input {
-      width: 100%;
-      padding: 12px 45px 12px 20px;
-      border: 2px solid #e0e0e0;
-      border-radius: 50px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-    
-    .search-box input:focus {
-      outline: none;
-      border-color: #b8860b;
-    }
-    
-    .search-box i {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #999;
-    }
-    
-    .filter-dropdown {
-      min-width: 180px;
-    }
-    
-    .filter-dropdown select {
-      width: 100%;
-      padding: 12px 20px;
-      border: 2px solid #e0e0e0;
-      border-radius: 50px;
-      font-size: 14px;
-      background: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .filter-dropdown select:focus {
-      outline: none;
-      border-color: #b8860b;
-    }
-    
-    /* View Toggle Buttons */
-    .view-toggle {
-      max-width: 1400px;
-      margin: 20px auto;
-      padding: 0 20px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-    
-    .view-btn {
-      padding: 12px 30px;
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 50px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #666;
-    }
-    
-    .view-btn:hover {
-      border-color: #b8860b;
-      color: #b8860b;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .view-btn.active {
-      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
-      color: white;
-      border-color: #b8860b;
-    }
-    
-    /* Calendar View Styles */
-    .calendar-container {
-      max-width: 1400px;
-      margin: 0 auto 60px;
-      padding: 0 20px;
-      display: none;
-    }
-    
-    .calendar-header {
-      background: white;
-      border-radius: 12px 12px 0 0;
-      padding: 25px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .calendar-nav {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    
-    .calendar-nav button {
-      background: #f0f0f0;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .calendar-nav button:hover {
-      background: #b8860b;
-      color: white;
-      transform: scale(1.1);
-    }
-    
-    .calendar-nav h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 24px;
-      color: #002147;
-      margin: 0;
-      min-width: 200px;
-      text-align: center;
-    }
-    
-    .calendar-view-options {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .calendar-view-btn {
-      padding: 8px 20px;
-      background: white;
-      border: 1px solid #e0e0e0;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 14px;
-    }
-    
-    .calendar-view-btn.active {
-      background: #002147;
-      color: white;
-      border-color: #002147;
-    }
-    
-    /* Calendar Grid */
-    .calendar-grid {
-      background: white;
-      border-radius: 0 0 12px 12px;
-      padding: 20px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    }
-    
-    .calendar-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    
-    .weekday {
-      text-align: center;
-      font-weight: 600;
-      color: #666;
-      padding: 15px 0;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    
-    .calendar-days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-    }
-    
-    .calendar-day {
-      min-height: 120px;
-      background: #f9f9f9;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 10px;
-      position: relative;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    
-    .calendar-day:hover {
-      background: #fff;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
-    }
-    
-    .calendar-day.other-month {
-      background: #fafafa;
-      opacity: 0.5;
-    }
-    
-    .calendar-day.today {
-      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4ff 100%);
-      border-color: #002147;
-    }
-    
-    .calendar-day.has-course {
-      background: linear-gradient(135deg, #fef9f0 0%, #fdf5e8 100%);
-      border-color: #b8860b;
-    }
-    
-    .day-number {
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-    
-    .day-courses {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin-top: 10px;
-    }
-    
-    .course-badge {
-      background: #b8860b;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 15px;
-      font-size: 11px;
-      font-weight: 500;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .course-badge:hover {
-      background: #9a7209;
-      transform: scale(1.05);
-    }
-    
-    .course-badge.full {
-      background: #dc3545;
-    }
-    
-    .course-badge.limited {
-      background: #ffc107;
-      color: #333;
-    }
-    
-    /* Month View - Responsive Grid */
-    .month-view-grid {
-      display: none;
-    }
-    
-    /* Year View */
-    .year-view-grid {
-      display: none;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 30px;
-      padding: 30px;
-    }
-    
-    .year-month {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-    }
-    
-    .year-month h4 {
-      font-family: 'Playfair Display', serif;
-      color: #002147;
-      margin-bottom: 15px;
-      text-align: center;
-      font-size: 18px;
-    }
-    
-    .year-month-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
-    
-    .year-weekday {
-      text-align: center;
-      font-size: 10px;
-      color: #999;
-      font-weight: 600;
-      padding: 5px 0;
-    }
-    
-    .year-day {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      border-radius: 4px;
-      background: #f9f9f9;
-      position: relative;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .year-day:hover {
-      background: #e0e0e0;
-    }
-    
-    .year-day.has-course {
-      background: #b8860b;
-      color: white;
-      font-weight: 600;
-    }
-    
-    .year-day.today {
-      border: 2px solid #002147;
-    }
-    
-    /* Course Details Modal */
-    .course-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      padding: 20px;
-    }
-    
-    .course-modal.show {
-      display: flex;
-    }
-    
-    .modal-content {
-      background: white;
-      border-radius: 12px;
-      max-width: 600px;
-      width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
-      position: relative;
-      animation: modalSlideIn 0.3s ease-out;
-    }
-    
-    @keyframes modalSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .modal-header {
-      background: linear-gradient(135deg, #002147 0%, #003366 100%);
-      color: white;
-      padding: 25px;
-      border-radius: 12px 12px 0 0;
-      position: relative;
-    }
-    
-    .modal-close {
-      position: absolute;
-      right: 20px;
-      top: 20px;
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-    
-    .modal-close:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: rotate(90deg);
-    }
-    
-    .modal-body {
-      padding: 30px;
-    }
-    
-    .modal-course-info {
-      display: grid;
-      gap: 20px;
-    }
-    
-    .modal-info-row {
-      display: grid;
-      grid-template-columns: 150px 1fr;
-      gap: 15px;
-      padding: 15px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .modal-info-row:last-child {
-      border-bottom: none;
-    }
-    
-    .modal-label {
-      font-weight: 600;
-      color: #666;
-    }
-    
-    .modal-actions {
-      display: flex;
-      gap: 15px;
-      margin-top: 25px;
-    }
-    
-    .modal-btn {
-      flex: 1;
-      padding: 12px 25px;
-      border-radius: 50px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .modal-btn-primary {
-      background: linear-gradient(135deg, #b8860b 0%, #9a7209 100%);
-      color: white;
-    }
-    
-    .modal-btn-secondary {
-      background: white;
-      color: #002147;
-      border: 2px solid #002147;
-    }
-    
-    .modal-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-    
-    /* Modern Table Styling */
-    .courses-table {
-      width: 100%;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    }
-    
-    .courses-table thead {
-      background: linear-gradient(135deg, #002147 0%, #003366 100%);
-    }
-    
-    .courses-table th {
-      padding: 20px 15px;
-      text-align: left;
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      position: relative;
-    }
-    
-    .courses-table th::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(to right, transparent, #b8860b, transparent);
-    }
-    
-    .courses-table tbody tr {
-      transition: all 0.3s ease;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .courses-table tbody tr:hover {
-      background-color: #fefdfb;
-      transform: scale(1.01);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    }
-    
-    .courses-table td {
-      padding: 20px 15px;
-      font-size: 14px;
-    }
-    
-    /* Course Title Cell */
-    .course-title {
-      font-weight: 600;
-      color: #002147;
-    }
-    
-    /* Date Badge */
-    .date-badge {
-      display: inline-block;
-      padding: 6px 12px;
-      background: #f0f7ff;
-      color: #002147;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-    }
-    
-    /* Price Badge */
-    .price-badge {
-      font-weight: 700;
-      color: #b8860b;
-      font-size: 16px;
-    }
-    
-    /* Status Badges */
-    .status-badge {
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: inline-block;
-    }
-    
-    .status-open {
-      background: #d4f4dd;
-      color: #2e7d3e;
-    }
-    
-    .status-limited {
-      background: #fff3cd;
-      color: #856404;
-    }
-    
-    .status-closed {
-      background: #f8d7da;
-      color: #721c24;
-    }
-    
-    /* Seats Count Badge */
-    .seats-count {
-      font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 14px;
-    }
-    
-    .seats-good {
-      color: #2e7d3e;
-      background: #d4f4dd;
-    }
-    
-    .seats-warning {
-      color: #856404;
-      background: #fff3cd;
-    }
-    
-    .seats-danger {
-      color: #721c24;
-      background: #f8d7da;
-    }
-    
-    /* Action Buttons */
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    
-    .btn-icon {
-      width: 38px;
-      height: 38px;
-      border: none;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn-icon::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-    
-    .btn-icon:hover::before {
-      width: 50px;
-      height: 50px;
-    }
-    
-    .btn-details {
-      background: #002147;
-      color: white;
-    }
-    
-    .btn-details:hover {
-      background: #003366;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 33, 71, 0.3);
-    }
-    
-    .btn-wishlist {
-      background: #fff;
-      color: #e74c3c;
-      border: 2px solid #e74c3c;
-    }
-    
-    .btn-wishlist:hover {
-      background: #e74c3c;
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-    }
-    
-    .btn-cart {
-      background: #b8860b;
-      color: white;
-    }
-    
-    .btn-cart:hover {
-      background: #9a7209;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
-    }
-    
-    /* Tooltips */
-    .tooltip {
-      position: relative;
-    }
-    
-    .tooltip::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      margin-bottom: 5px;
-    }
-    
-    .tooltip:hover::after {
-      opacity: 1;
-    }
-    
-    /* Notification Styles */
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: -400px;
-      max-width: 400px;
-      padding: 20px 25px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      z-index: 1000;
-    }
-    
-    .notification.show {
-      right: 20px;
-    }
-    
-    .notification-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .notification.success .notification-icon {
-      background: #d4f4dd;
-      color: #2e7d3e;
-    }
-    
-    .notification.error .notification-icon {
-      background: #f8d7da;
-      color: #721c24;
-    }
-    
-    .notification.warning .notification-icon {
-      background: #fff3cd;
-      color: #856404;
-    }
-    
-    .notification-content h4 {
-      margin: 0 0 5px;
-      font-size: 16px;
-      font-weight: 600;
-    }
-    
-    .notification-content p {
-      margin: 0;
-      font-size: 14px;
-      color: #666;
-    }
-    
-    /* Loading States */
-    .btn-loading {
-      pointer-events: none;
-      opacity: 0.7;
-    }
-    
-    .btn-loading i {
-      animation: spin 1s linear infinite;
-    }
-    
-    /* Animations */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .hero-content h1 {
-        font-size: 32px;
-      }
-      
-      .filter-bar {
-        flex-direction: column;
-        gap: 15px;
-      }
-      
-      .search-box, .filter-dropdown {
-        width: 100%;
-      }
-      
-      .table-container {
-        padding: 0 10px;
-      }
-      
-      .courses-table {
-        font-size: 12px;
-      }
-      
-      .courses-table th,
-      .courses-table td {
-        padding: 12px 8px;
-      }
-      
-      .action-buttons {
-        flex-direction: column;
-        gap: 5px;
-      }
-      
-      .btn-icon {
-        width: 32px;
-        height: 32px;
-      }
-      
-      .notification {
-        left: 10px;
-        right: 10px;
-        max-width: none;
-      }
-      
-      .notification.show {
-        right: 10px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/css/inpersonlist.css">
 </head>
 
 <body>
@@ -1022,138 +72,272 @@
     </button>
   </div>
 
-  <!-- Enhanced Courses Table -->
-  <div class="table-container" id="tableView">
-    <table class="courses-table" id="coursesTable">
-      <thead>
-        <tr>
-          <th style="width: 5%">#</th>
-          <th style="width: 10%">Code</th>
-          <th style="width: 20%">Course Title</th>
-          <th style="width: 12%">Start Date</th>
-          <th style="width: 12%">End Date</th>
-          <th style="width: 10%">Duration</th>
-          <th style="width: 8%">Price</th>
-          <th style="width: 10%">Venue</th>
-          <th style="width: 8%">Seats</th>
-          <th style="width: 8%">Status</th>
-          <th style="width: 15%">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% courses.forEach((course, index) => { %>
-          <tr data-course-id="<%= course._id %>" 
-              data-status="<%= course.basic?.status || 'draft' %>"
-              data-date="<%= course.schedule?.startDate %>"
-              data-price="<%= course.enrollment?.price || 0 %>">
-            <td><%= index + 1 %></td>
-            <td><strong><%= course.basic?.courseCode || 'N/A' %></strong></td>
-            <td class="course-title">
-              <%= course.basic?.title || 'Untitled Course' %>
-              <% if (course.instructorNames) { %>
-                <br><small style="color: #666;">Instructor: <%= course.instructorNames %></small>
-              <% } %>
-            </td>
-            <td>
-              <span class="date-badge">
-                <i class="far fa-calendar"></i> 
-                <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %>
-              </span>
-            </td>
-            <td>
-              <% if (course.schedule?.endDate) { %>
-                <span class="date-badge">
-                  <%= new Date(course.schedule.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
-                </span>
-              <% } else { %>
-                <span style="color: #999;">-</span>
-              <% } %>
-            </td>
-            <td><%= course.schedule?.duration || 'TBD' %></td>
-            <td class="price-badge">
-              <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment?.price || 0 %>
-              <% if (course.enrollment?.earlyBirdPrice) { %>
-                <br><small style="color: #28a745;">Early: <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment.earlyBirdPrice %></small>
-              <% } %>
-            </td>
-            <td>
-              <i class="fas fa-map-marker-alt" style="color: #b8860b;"></i> 
-              <%= course.venue?.name || 'TBD' %>
-            </td>
-            <td>
-              <span class="seats-count <%= course.enrollment?.seatsAvailable > 5 ? 'seats-good' : course.enrollment?.seatsAvailable > 0 ? 'seats-warning' : 'seats-danger' %>">
-                <%= course.enrollment?.seatsAvailable || 0 %>
-              </span>
-            </td>
-            <td>
-              <% 
-                const status = course.basic?.status || 'draft';
-                let statusClass = 'status-closed';
-                let statusText = status.charAt(0).toUpperCase() + status.slice(1);
-                
-                if (status === 'open' && course.enrollment?.seatsAvailable > 5) {
-                  statusClass = 'status-open';
-                  statusText = 'Open';
-                } else if (status === 'open' && course.enrollment?.seatsAvailable <= 5 && course.enrollment?.seatsAvailable > 0) {
-                  statusClass = 'status-limited';
-                  statusText = 'Limited';
-                } else if (status === 'full' || course.enrollment?.seatsAvailable <= 0) {
-                  statusClass = 'status-closed';
-                  statusText = 'Full';
-                }
-              %>
-              <span class="status-badge <%= statusClass %>"><%= statusText %></span>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="btn-icon btn-details tooltip" data-tooltip="View Details" 
-                        onclick="window.location.href='/in-person/courses/<%= course._id %>'">
-                  <i class="fas fa-info-circle"></i>
-                </button>
-                
-                <% if (user) { %>
-                  <button class="btn-icon btn-wishlist tooltip add-to-wishlist-btn" 
-                          data-tooltip="Add to Wishlist"
-                          data-course-id="<%= course._id %>" 
-                          data-course-type="InPersonAestheticTraining"
-                          data-price="<%= course.enrollment?.price || 0 %>"
-                          data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
-                          data-course-title="<%= course.basic?.title || 'Untitled Course' %>">
-                    <i class="fas fa-heart"></i>
-                  </button>
-                  
-                  <button class="btn-icon btn-cart tooltip add-to-cart-btn" 
-                          data-tooltip="Add to Cart"
-                          data-course-id="<%= course._id %>" 
-                          data-course-type="InPersonAestheticTraining"
-                          data-price="<%= course.enrollment?.price || 0 %>"
-                          data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
-                          data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
-                          <%= (course.enrollment?.seatsAvailable <= 0 || status !== 'open') ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' %>>
-                    <i class="fas fa-shopping-cart"></i>
-                  </button>
-                <% } else { %>
-                  <button class="btn-icon btn-wishlist tooltip" 
-                          data-tooltip="Login to add to wishlist"
-                          onclick="showLoginRequired()">
-                    <i class="fas fa-heart"></i>
-                  </button>
-                  
-                  <button class="btn-icon btn-cart tooltip" 
-                          data-tooltip="Login to add to cart"
-                          onclick="showLoginRequired()">
-                    <i class="fas fa-shopping-cart"></i>
-                  </button>
-                <% } %>
-              </div>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+  <!-- User Instructions -->
+  <div class="user-instructions" id="userInstructions">
+    <div class="instructions-content">
+      <h3><i class="fas fa-info-circle"></i> How to Register</h3>
+      <p>
+        <strong>Quick Actions:</strong> 
+        Use the action buttons to <span class="highlight">view details</span>, 
+        add to <span class="highlight">wishlist <i class="fas fa-heart"></i></span>, 
+        or <span class="highlight">add to cart <i class="fas fa-shopping-cart"></i></span>. 
+        Adding to cart will redirect you to the order page automatically.
+      </p>
+    </div>
   </div>
 
-  <!-- Calendar View -->
+  <!-- Table View Container -->
+  <div class="table-view-container" id="tableView">
+    
+    <!-- Upcoming Courses Section -->
+    <div class="table-section" id="upcomingSection">
+      <div class="section-header">
+        <h2><i class="fas fa-calendar-check"></i> Upcoming Courses</h2>
+        <p>Current and future training opportunities</p>
+      </div>
+      
+      <div class="table-container" id="upcomingTableContainer">
+        <table class="courses-table" id="upcomingCoursesTable">
+          <thead class="sticky-header">
+            <tr>
+              <th style="width: 5%">#</th>
+              <th style="width: 10%">Code</th>
+              <th style="width: 20%">Course Title</th>
+              <th style="width: 12%">Start Date</th>
+              <th style="width: 12%">End Date</th>
+              <th style="width: 10%">Duration</th>
+              <th style="width: 8%">Price</th>
+              <th style="width: 10%">Venue</th>
+              <th style="width: 8%">Seats</th>
+              <th style="width: 8%">Status</th>
+              <th style="width: 15%">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (typeof upcomingCourses !== 'undefined' && upcomingCourses.length > 0) { %>
+              <% upcomingCourses.forEach((course, index) => { %>
+                <tr data-course-id="<%= course._id %>" 
+                    data-status="<%= course.basic?.status || 'draft' %>"
+                    data-date="<%= course.schedule?.startDate %>"
+                    data-price="<%= course.enrollment?.price || 0 %>">
+                  <td><%= index + 1 %></td>
+                  <td><strong><%= course.basic?.courseCode || 'N/A' %></strong></td>
+                  <td class="course-title">
+                    <%= course.basic?.title || 'Untitled Course' %>
+                    <% if (course.instructorNames) { %>
+                      <br><small style="color: #666;">Instructor: <%= course.instructorNames %></small>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="date-badge">
+                      <i class="far fa-calendar"></i> 
+                      <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (course.schedule?.endDate) { %>
+                      <span class="date-badge">
+                        <%= new Date(course.schedule.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                      </span>
+                    <% } else { %>
+                      <span style="color: #999;">-</span>
+                    <% } %>
+                  </td>
+                  <td><%= course.schedule?.duration || 'TBD' %></td>
+                  <td class="price-badge">
+                    <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment?.price || 0 %>
+                    <% if (course.enrollment?.earlyBirdPrice) { %>
+                      <br><small style="color: #28a745;">Early: <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment.earlyBirdPrice %></small>
+                    <% } %>
+                  </td>
+                  <td>
+                    <i class="fas fa-map-marker-alt" style="color: #b8860b;"></i> 
+                    <%= course.venue?.name || 'TBD' %>
+                  </td>
+                  <td>
+                    <span class="seats-count <%= course.enrollment?.seatsAvailable > 5 ? 'seats-good' : course.enrollment?.seatsAvailable > 0 ? 'seats-warning' : 'seats-danger' %>">
+                      <%= course.enrollment?.seatsAvailable || 0 %>
+                    </span>
+                  </td>
+                  <td>
+                    <% 
+                      const status = course.basic?.status || 'draft';
+                      let statusClass = 'status-closed';
+                      let statusText = status.charAt(0).toUpperCase() + status.slice(1);
+                      
+                      if (status === 'open' && course.enrollment?.seatsAvailable > 5) {
+                        statusClass = 'status-open';
+                        statusText = 'Open';
+                      } else if (status === 'open' && course.enrollment?.seatsAvailable <= 5 && course.enrollment?.seatsAvailable > 0) {
+                        statusClass = 'status-limited';
+                        statusText = 'Limited';
+                      } else if (status === 'full' || course.enrollment?.seatsAvailable <= 0) {
+                        statusClass = 'status-closed';
+                        statusText = 'Full';
+                      }
+                    %>
+                    <span class="status-badge <%= statusClass %>"><%= statusText %></span>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="btn-icon btn-details tooltip" data-tooltip="View Details" 
+                              onclick="window.location.href='/in-person/courses/<%= course._id %>'">
+                        <i class="fas fa-info-circle"></i>
+                      </button>
+                      
+                      <% if (user) { %>
+                        <button class="btn-icon btn-wishlist tooltip add-to-wishlist-btn" 
+                                data-tooltip="Add to Wishlist"
+                                data-course-id="<%= course._id %>" 
+                                data-course-type="InPersonAestheticTraining"
+                                data-price="<%= course.enrollment?.price || 0 %>"
+                                data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                                data-course-title="<%= course.basic?.title || 'Untitled Course' %>">
+                          <i class="fas fa-heart"></i>
+                        </button>
+                        
+                        <button class="btn-icon btn-cart tooltip add-to-cart-btn" 
+                                data-tooltip="Add to Cart"
+                                data-course-id="<%= course._id %>" 
+                                data-course-type="InPersonAestheticTraining"
+                                data-price="<%= course.enrollment?.price || 0 %>"
+                                data-course-code="<%= course.basic?.courseCode || 'N/A' %>"
+                                data-course-title="<%= course.basic?.title || 'Untitled Course' %>"
+                                <%= (course.enrollment?.seatsAvailable <= 0 || status !== 'open') ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' %>>
+                          <i class="fas fa-shopping-cart"></i>
+                        </button>
+                      <% } else { %>
+                        <button class="btn-icon btn-wishlist tooltip" 
+                                data-tooltip="Login to add to wishlist"
+                                onclick="showLoginRequired()">
+                          <i class="fas fa-heart"></i>
+                        </button>
+                        
+                        <button class="btn-icon btn-cart tooltip" 
+                                data-tooltip="Login to add to cart"
+                                onclick="showLoginRequired()">
+                          <i class="fas fa-shopping-cart"></i>
+                        </button>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="11" class="no-courses">
+                  <div class="no-courses-message">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No Upcoming Courses Available</h3>
+                    <p>Check back later for new training opportunities or browse our expired courses below.</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Expired/Historical Courses Section -->
+    <div class="table-section" id="historySection">
+      <div class="section-header">
+        <h2><i class="fas fa-history"></i> Course History & Expertise</h2>
+        <p>Showcasing our training experience and capabilities</p>
+      </div>
+      
+      <div class="table-container" id="historyTableContainer">
+        <table class="courses-table" id="historyCoursesTable">
+          <thead class="sticky-header">
+            <tr>
+              <th style="width: 5%">#</th>
+              <th style="width: 10%">Code</th>
+              <th style="width: 20%">Course Title</th>
+              <th style="width: 12%">Start Date</th>
+              <th style="width: 12%">End Date</th>
+              <th style="width: 10%">Duration</th>
+              <th style="width: 8%">Price</th>
+              <th style="width: 10%">Venue</th>
+              <th style="width: 8%">Capacity</th>
+              <th style="width: 8%">Status</th>
+              <th style="width: 15%">Info</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (typeof expiredCourses !== 'undefined' && expiredCourses.length > 0) { %>
+              <% expiredCourses.forEach((course, index) => { %>
+                <tr data-course-id="<%= course._id %>" class="expired-course">
+                  <td><%= index + 1 %></td>
+                  <td><strong><%= course.basic?.courseCode || 'N/A' %></strong></td>
+                  <td class="course-title">
+                    <%= course.basic?.title || 'Untitled Course' %>
+                    <% if (course.instructorNames) { %>
+                      <br><small style="color: #666;">Instructor: <%= course.instructorNames %></small>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="date-badge expired">
+                      <i class="far fa-calendar"></i> 
+                      <%= course.schedule?.startDate ? new Date(course.schedule.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (course.schedule?.endDate) { %>
+                      <span class="date-badge expired">
+                        <%= new Date(course.schedule.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                      </span>
+                    <% } else { %>
+                      <span style="color: #999;">-</span>
+                    <% } %>
+                  </td>
+                  <td><%= course.schedule?.duration || 'TBD' %></td>
+                  <td class="price-badge expired">
+                    <%= getCurrencySymbol(course.enrollment?.currency || 'EUR') %><%= course.enrollment?.price || 0 %>
+                  </td>
+                  <td>
+                    <i class="fas fa-map-marker-alt" style="color: #666;"></i> 
+                    <%= course.venue?.name || 'TBD' %>
+                  </td>
+                  <td>
+                    <span class="seats-count expired">
+                      <%= course.enrollment?.seatsAvailable || 0 %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-badge status-completed">Completed</span>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="btn-icon btn-info tooltip" data-tooltip="Course Information" 
+                              onclick="showCourseInfo('<%= course._id %>')">
+                        <i class="fas fa-info-circle"></i>
+                      </button>
+                      <button class="btn-icon btn-archive tooltip" data-tooltip="View Archive" 
+                              onclick="window.location.href='/in-person/courses/<%= course._id %>/archive'">
+                        <i class="fas fa-archive"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="11" class="no-courses">
+                  <div class="no-courses-message">
+                    <i class="fas fa-archive"></i>
+                    <h3>No Historical Courses Found</h3>
+                    <p>This institution is building its training portfolio.</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Calendar View -->
   <div class="calendar-container" id="calendarView">
     <div class="calendar-header">
       <div class="calendar-nav">
@@ -1161,9 +345,25 @@
         <h3 id="currentMonth">December 2024</h3>
         <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
       </div>
-      <div class="calendar-view-options">
-        <button class="calendar-view-btn active" id="monthViewBtn">Month</button>
-        <button class="calendar-view-btn" id="yearViewBtn">Year</button>
+      <div class="calendar-controls">
+        <div class="calendar-view-options">
+          <button class="calendar-view-btn active" id="monthViewBtn">Month</button>
+          <button class="calendar-view-btn" id="yearViewBtn">Year</button>
+        </div>
+        <div class="calendar-legend">
+          <div class="legend-item">
+            <div class="legend-color available"></div>
+            <span>Available</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color limited"></div>
+            <span>Limited</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color full"></div>
+            <span>Full</span>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -1187,9 +387,28 @@
     <div class="year-view-grid" id="yearView">
       <!-- Year view months will be generated by JavaScript -->
     </div>
+
+    <!-- Course Summary Panel -->
+    <div class="course-summary-panel" id="courseSummaryPanel">
+      <h4><i class="fas fa-calendar-day"></i> Courses Overview</h4>
+      <div class="summary-stats">
+        <div class="stat-item">
+          <div class="stat-number" id="totalCoursesCount">0</div>
+          <div class="stat-label">Total Courses</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="availableCoursesCount">0</div>
+          <div class="stat-label">Available</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="currentMonthCount">0</div>
+          <div class="stat-label">This Month</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Course Details Modal -->
+  <!-- Enhanced Course Details Modal -->
   <div class="course-modal" id="courseModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1220,19 +439,82 @@
     </div>
   </div>
 
+  <!-- Course Info Modal for Expired Courses -->
+  <div class="course-modal" id="courseInfoModal">
+    <div class="modal-content">
+      <div class="modal-header archive-header">
+        <h3 id="infoModalCourseTitle">Course Information</h3>
+        <button class="modal-close" onclick="closeCourseInfoModal()">
+          <i class="fas fa-times" style="color: white;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="archive-badge">
+          <i class="fas fa-archive"></i> Archived Course
+        </div>
+        <div class="modal-course-info" id="infoModalCourseInfo">
+          <!-- Course info will be populated by JavaScript -->
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-secondary" onclick="closeCourseInfoModal()">
+            <i class="fas fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Notification Container -->
   <div id="notificationContainer"></div>
 
   <script>
     // ========================================
-    // GLOBAL VARIABLES (DECLARE ONCE)
+    // GLOBAL VARIABLES
     // ========================================
     const courses = <%- JSON.stringify(courses) %>;
+    const upcomingCoursesData = <%- JSON.stringify(upcomingCourses || []) %>;
+    const expiredCoursesData = <%- JSON.stringify(expiredCourses || []) %>;
     let currentDate = new Date();
     let currentView = 'month';
-  
+
     // ========================================
-    // ENHANCED NOTIFICATION SYSTEM
+    // INITIALIZE COURSE CATEGORIZATION
+    // ========================================
+    function categorizeCourses() {
+      // Use server-provided arrays if available
+      if (typeof upcomingCoursesData !== 'undefined' && typeof expiredCoursesData !== 'undefined') {
+        console.log(`📊 Using server-categorized courses: ${upcomingCoursesData.length} upcoming, ${expiredCoursesData.length} expired`);
+        return;
+      }
+
+      // Fallback to client-side categorization
+      const now = new Date();
+      upcomingCourses = [];
+      expiredCourses = [];
+
+      courses.forEach(course => {
+        const startDate = course.schedule?.startDate ? new Date(course.schedule.startDate) : null;
+        const endDate = course.schedule?.endDate ? new Date(course.schedule.endDate) : null;
+        
+        let isExpired = false;
+        if (endDate && now > endDate) {
+          isExpired = true;
+        } else if (!endDate && startDate && now > new Date(startDate.getTime() + 24 * 60 * 60 * 1000)) {
+          isExpired = true;
+        }
+
+        if (isExpired) {
+          expiredCourses.push(course);
+        } else {
+          upcomingCourses.push(course);
+        }
+      });
+
+      console.log(`📊 Client-categorized courses: ${upcomingCourses.length} upcoming, ${expiredCourses.length} expired`);
+    }
+
+    // ========================================
+    // NOTIFICATION SYSTEM
     // ========================================
     function showNotification(title, message, type = 'success') {
       console.log(`📢 Notification: ${type.toUpperCase()} - ${title}: ${message}`);
@@ -1264,10 +546,8 @@
       
       container.appendChild(notification);
       
-      // Show notification with animation
       setTimeout(() => notification.classList.add('show'), 10);
       
-      // Auto remove after 5 seconds
       setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => {
@@ -1277,7 +557,7 @@
         }, 500);
       }, 5000);
     }
-  
+
     // ========================================
     // LOGIN REQUIRED HANDLER
     // ========================================
@@ -1288,9 +568,9 @@
         window.location.href = '/login';
       }, 2000);
     }
-  
+
     // ========================================
-    // BUTTON LOADING STATE MANAGEMENT
+    // BUTTON LOADING STATE
     // ========================================
     function setButtonLoading(button, loading) {
       if (loading) {
@@ -1313,7 +593,7 @@
         }
       }
     }
-  
+
     // ========================================
     // SEARCH AND FILTER FUNCTIONALITY
     // ========================================
@@ -1325,8 +605,16 @@
       const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
       const statusFilterValue = statusFilter ? statusFilter.value : '';
       const dateFilterValue = dateFilter ? dateFilter.value : '';
-      const rows = document.querySelectorAll('#coursesTable tbody tr');
       
+      // Filter upcoming courses
+      const upcomingRows = document.querySelectorAll('#upcomingCoursesTable tbody tr:not(.no-courses)');
+      filterTableRows(upcomingRows, searchTerm, statusFilterValue, dateFilterValue);
+      
+      // Update row numbers for upcoming courses
+      updateRowNumbers('#upcomingCoursesTable');
+    }
+
+    function filterTableRows(rows, searchTerm, statusFilterValue, dateFilterValue) {
       rows.forEach(row => {
         const text = row.textContent.toLowerCase();
         const status = row.getAttribute('data-status');
@@ -1377,14 +665,32 @@
         row.style.display = showRow ? '' : 'none';
       });
     }
-  
+
+    function updateRowNumbers(tableSelector) {
+      const visibleRows = document.querySelectorAll(`${tableSelector} tbody tr:not([style*="display: none"]):not(.no-courses)`);
+      visibleRows.forEach((row, index) => {
+        const firstCell = row.querySelector('td:first-child');
+        if (firstCell) {
+          firstCell.textContent = index + 1;
+        }
+      });
+    }
+
     function sortCourses() {
       const sortBy = document.getElementById('sortBy');
       const sortByValue = sortBy ? sortBy.value : '';
-      const tbody = document.querySelector('#coursesTable tbody');
+      
+      if (!sortByValue) return;
+      
+      // Sort upcoming courses
+      sortTable('#upcomingCoursesTable', sortByValue);
+    }
+
+    function sortTable(tableSelector, sortByValue) {
+      const tbody = document.querySelector(`${tableSelector} tbody`);
       if (!tbody) return;
       
-      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const rows = Array.from(tbody.querySelectorAll('tr:not(.no-courses)'));
       
       rows.sort((a, b) => {
         switch(sortByValue) {
@@ -1401,20 +707,12 @@
         }
       });
       
-      // Re-append sorted rows
       rows.forEach(row => tbody.appendChild(row));
-      
-      // Update row numbers
-      rows.forEach((row, index) => {
-        const firstCell = row.querySelector('td:first-child');
-        if (firstCell) {
-          firstCell.textContent = index + 1;
-        }
-      });
+      updateRowNumbers(tableSelector);
     }
-  
+
     // ========================================
-    // CALENDAR FUNCTIONALITY
+    // ENHANCED CALENDAR FUNCTIONALITY
     // ========================================
     function renderMonthView() {
       const year = currentDate.getFullYear();
@@ -1455,8 +753,11 @@
         const dayDiv = createDayElement(day, true, new Date(year, month + 1, day));
         calendarDays.appendChild(dayDiv);
       }
+
+      // Update summary statistics
+      updateCalendarSummary();
     }
-  
+
     function createDayElement(day, isOtherMonth, date) {
       const dayDiv = document.createElement('div');
       dayDiv.className = 'calendar-day';
@@ -1474,24 +775,29 @@
       dayNumber.textContent = day;
       dayDiv.appendChild(dayNumber);
       
-      // Check for courses on this date
+      // Check for courses on this date (only upcoming courses)
       const dayCoursesDiv = document.createElement('div');
       dayCoursesDiv.className = 'day-courses';
       
-      const dayCourses = courses.filter(course => {
+      const dayCourses = upcomingCoursesData.filter(course => {
         const courseDate = new Date(course.schedule?.startDate);
         return courseDate.toDateString() === date.toDateString();
       });
       
       if (dayCourses.length > 0) {
         dayDiv.classList.add('has-course');
+        
         dayCourses.forEach(course => {
           const courseBadge = document.createElement('div');
           courseBadge.className = 'course-badge';
           
-          if (course.enrollment?.seatsAvailable <= 0) {
+          // Determine badge style based on availability
+          const status = course.basic?.status;
+          const seatsAvailable = course.enrollment?.seatsAvailable || 0;
+          
+          if (status !== 'open' || seatsAvailable <= 0) {
             courseBadge.classList.add('full');
-          } else if (course.enrollment?.seatsAvailable <= 5) {
+          } else if (seatsAvailable <= 5) {
             courseBadge.classList.add('limited');
           }
           
@@ -1499,12 +805,44 @@
           courseBadge.onclick = () => showCourseModal(course);
           dayCoursesDiv.appendChild(courseBadge);
         });
+        
+        // Show count if multiple courses
+        if (dayCourses.length > 1) {
+          const countBadge = document.createElement('div');
+          countBadge.className = 'course-count-badge';
+          countBadge.textContent = `+${dayCourses.length - 1} more`;
+          dayCoursesDiv.appendChild(countBadge);
+        }
       }
       
       dayDiv.appendChild(dayCoursesDiv);
       return dayDiv;
     }
-  
+
+    function updateCalendarSummary() {
+      const totalCourses = upcomingCoursesData.length;
+      const availableCourses = upcomingCoursesData.filter(course => 
+        course.basic?.status === 'open' && (course.enrollment?.seatsAvailable || 0) > 0
+      ).length;
+      
+      // Count courses in current calendar month
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth();
+      const currentMonthCourses = upcomingCoursesData.filter(course => {
+        const courseDate = new Date(course.schedule?.startDate);
+        return courseDate.getFullYear() === currentYear && courseDate.getMonth() === currentMonth;
+      }).length;
+      
+      // Update summary display
+      const totalCoursesEl = document.getElementById('totalCoursesCount');
+      const availableCoursesEl = document.getElementById('availableCoursesCount');
+      const currentMonthEl = document.getElementById('currentMonthCount');
+      
+      if (totalCoursesEl) totalCoursesEl.textContent = totalCourses;
+      if (availableCoursesEl) availableCoursesEl.textContent = availableCourses;
+      if (currentMonthEl) currentMonthEl.textContent = currentMonthCourses;
+    }
+
     function renderYearView() {
       const year = currentDate.getFullYear();
       const currentMonthEl = document.getElementById('currentMonth');
@@ -1561,8 +899,8 @@
             dayDiv.classList.add('today');
           }
           
-          // Check for courses
-          const hasCourse = courses.some(course => {
+          // Check for courses (only upcoming)
+          const hasCourse = upcomingCoursesData.some(course => {
             const courseDate = new Date(course.schedule?.startDate);
             return courseDate.toDateString() === date.toDateString();
           });
@@ -1583,10 +921,13 @@
         monthDiv.appendChild(monthGrid);
         yearViewGrid.appendChild(monthDiv);
       }
+
+      // Update summary for year view
+      updateCalendarSummary();
     }
-  
+
     // ========================================
-    // MODAL FUNCTIONALITY - FIXED VERSION
+    // MODAL FUNCTIONALITY
     // ========================================
     function showCourseModal(course) {
       const modal = document.getElementById('courseModal');
@@ -1596,31 +937,10 @@
         modalTitle.textContent = course.basic?.title || course.title;
       }
       
-      // Currency symbol function for JavaScript
-      const getCurrencySymbolJS = (currency) => {
-        const symbols = {
-          'USD': '$',
-          'EUR': '€',
-          'GBP': '£',
-          'JPY': '¥',
-          'CAD': 'C$',
-          'AUD': 'A$',
-          'CHF': 'CHF',
-          'SEK': 'kr',
-          'NOK': 'kr',
-          'DKK': 'kr',
-          'TRY': '₺',
-          'AED': 'د.إ',
-          'SAR': 'ر.س'
-        };
-        return symbols[currency] || '€';
-      };
-      
       const courseInfo = document.getElementById('modalCourseInfo');
       if (courseInfo) {
-        const currency = course.enrollment?.currency || 'EUR';
-        const currencySymbol = getCurrencySymbolJS(currency);
-        const price = course.enrollment?.price || course.price || 0;
+        const startDate = new Date(course.schedule?.startDate || course.startDate);
+        const endDate = course.schedule?.endDate || course.endDate;
         
         courseInfo.innerHTML = `
           <div class="modal-info-row">
@@ -1628,14 +948,25 @@
             <div>${course.basic?.courseCode || course.courseCode}</div>
           </div>
           <div class="modal-info-row">
-            <div class="modal-label">Date</div>
-            <div>${new Date(course.schedule?.startDate || course.startDate).toLocaleDateString('en-US', { 
+            <div class="modal-label">Start Date</div>
+            <div>${startDate.toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
               month: 'long', 
               day: 'numeric' 
             })}</div>
           </div>
+          ${endDate ? `
+          <div class="modal-info-row">
+            <div class="modal-label">End Date</div>
+            <div>${new Date(endDate).toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</div>
+          </div>
+          ` : ''}
           <div class="modal-info-row">
             <div class="modal-label">Duration</div>
             <div>${course.schedule?.duration || course.duration || 'TBD'}</div>
@@ -1651,12 +982,13 @@
           <div class="modal-info-row">
             <div class="modal-label">Price</div>
             <div style="font-weight: 700; color: #b8860b;">
-              ${currencySymbol}${price}
+              ${course.enrollment?.currency || 'EUR'} ${course.enrollment?.price || course.price || 0}
+              ${course.enrollment?.earlyBirdPrice ? `<br><small style="color: #28a745;">Early Bird: ${course.enrollment.currency || 'EUR'} ${course.enrollment.earlyBirdPrice}</small>` : ''}
             </div>
           </div>
           <div class="modal-info-row">
             <div class="modal-label">Seats Available</div>
-            <div>${course.enrollment?.seatsAvailable || course.seatsAvailable || 0} / ${course.enrollment?.maxEnrollment || course.maxEnrollment || 20}</div>
+            <div>${course.enrollment?.seatsAvailable || course.seatsAvailable || 0}</div>
           </div>
         `;
       }
@@ -1694,6 +1026,11 @@
             if (result.success) {
               showNotification('Added to Cart', `"${course.basic?.title || course.title}" has been added to your cart`, 'success');
               closeModal();
+              
+              // Redirect to cart page
+              setTimeout(() => {
+                window.location.href = '/cart';
+              }, 1500);
             } else {
               showNotification('Unable to Add', result.message, 'warning');
             }
@@ -1711,14 +1048,84 @@
         modal.classList.add('show');
       }
     }
-  
+
+    function showCourseInfo(courseId) {
+      const course = [...upcomingCoursesData, ...expiredCoursesData].find(c => c._id === courseId);
+      if (!course) return;
+      
+      const modal = document.getElementById('courseInfoModal');
+      const modalTitle = document.getElementById('infoModalCourseTitle');
+      const courseInfo = document.getElementById('infoModalCourseInfo');
+      
+      if (modalTitle) {
+        modalTitle.textContent = course.basic?.title || 'Course Information';
+      }
+      
+      if (courseInfo) {
+        const startDate = new Date(course.schedule?.startDate);
+        const endDate = course.schedule?.endDate ? new Date(course.schedule.endDate) : null;
+        
+        courseInfo.innerHTML = `
+          <div class="modal-info-row">
+            <div class="modal-label">Course Code</div>
+            <div>${course.basic?.courseCode || 'N/A'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Description</div>
+            <div>${course.basic?.description || 'No description available'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Completion Date</div>
+            <div>${endDate ? endDate.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }) : startDate.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Duration</div>
+            <div>${course.schedule?.duration || 'TBD'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Location</div>
+            <div>${course.venue?.name || 'TBD'}, ${course.venue?.city || ''}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Instructor(s)</div>
+            <div>${course.instructorNames || 'Expert Instructors'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Course Capacity</div>
+            <div>${course.enrollment?.seatsAvailable || 0} participants</div>
+          </div>
+        `;
+      }
+      
+      if (modal) {
+        modal.classList.add('show');
+      }
+    }
+
     function closeModal() {
       const modal = document.getElementById('courseModal');
       if (modal) {
         modal.classList.remove('show');
       }
     }
-  
+
+    function closeCourseInfoModal() {
+      const modal = document.getElementById('courseInfoModal');
+      if (modal) {
+        modal.classList.remove('show');
+      }
+    }
+
     // ========================================
     // CART AND WISHLIST FUNCTIONALITY
     // ========================================
@@ -1766,17 +1173,11 @@
             
             if (result.success) {
               showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
-              // ⭐ ADD ONLY THIS LINE:
-  setTimeout(() => window.location.href = '/orders', 3000);
               
-              // Update button temporarily
-              this.style.background = '#28a745';
-              this.querySelector('i').className = 'fas fa-check';
-              
+              // Redirect to cart page after a short delay
               setTimeout(() => {
-                this.style.background = '';
-                this.querySelector('i').className = 'fas fa-shopping-cart';
-              }, 3000);
+                window.location.href = '/cart';
+              }, 1500);
             } else {
               showNotification('Error', result.message, 'error');
             }
@@ -1788,7 +1189,7 @@
           }
         });
       });
-  
+
       // Add to Wishlist functionality
       document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
         button.addEventListener('click', async function(e) {
@@ -1847,12 +1248,15 @@
         });
       });
     }
-  
+
     // ========================================
     // INITIALIZATION
     // ========================================
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Initializing page...');
+      console.log('🚀 Initializing enhanced page...');
+      
+      // Initialize course categorization
+      categorizeCourses();
       
       // Initialize cart and wishlist
       initializeCartWishlist();
@@ -1955,10 +1359,20 @@
       
       // Initialize modal close functionality
       const courseModal = document.getElementById('courseModal');
+      const courseInfoModal = document.getElementById('courseInfoModal');
+      
       if (courseModal) {
         courseModal.addEventListener('click', function(e) {
           if (e.target === this) {
             closeModal();
+          }
+        });
+      }
+      
+      if (courseInfoModal) {
+        courseInfoModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeCourseInfoModal();
           }
         });
       }
@@ -1970,7 +1384,9 @@
       }
       
       // Debug information
-      console.log('📊 Page loaded with', courses.length, 'courses');
+      console.log('📊 Page loaded with', courses.length, 'total courses');
+      console.log('📅 Upcoming courses:', upcomingCoursesData.length);
+      console.log('📚 Historical courses:', expiredCoursesData.length);
       console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
       console.log('🛒 Cart buttons found:', document.querySelectorAll('.add-to-cart-btn').length);
       console.log('❤️ Wishlist buttons found:', document.querySelectorAll('.add-to-wishlist-btn').length);

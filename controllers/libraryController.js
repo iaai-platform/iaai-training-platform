@@ -1203,7 +1203,6 @@ exports.getInPersonLibrary = async (req, res) => {
         model: "InPersonAestheticTraining",
         select:
           "basic schedule venue instructors media materials assessment certification",
-        // Removed problematic nested population
       })
       .lean();
 
@@ -1225,35 +1224,39 @@ exports.getInPersonLibrary = async (req, res) => {
             const course = enrollment.courseId;
 
             if (course) {
-              // ✅ SAFE: Assume no linked courses for now
-              const isLinkedToOnline = false;
-
               // Check if course has ended
-              const courseEnded =
-                new Date(course.schedule.endDate || course.schedule.startDate) <
-                new Date();
+              const courseEnded = new Date(
+                course.schedule.endDate || course.schedule.startDate
+              );
+              new Date();
 
-              // Check attendance and assessment status
+              // Check attendance status
               const attendanceConfirmed =
                 enrollment.userProgress?.attendanceRecords?.length > 0 ||
                 enrollment.userProgress?.courseStatus === "completed";
 
-              // Check if assessment is required and completed
+              // Assessment logic
               const assessmentRequired =
                 course.assessment?.required &&
                 course.assessment?.type !== "none";
               const assessmentCompleted =
-                enrollment.userProgress?.assessmentCompleted || false;
+                enrollment.assessmentCompleted || false;
               const assessmentScore =
-                enrollment.userProgress?.assessmentScore ||
-                enrollment.userProgress?.bestAssessmentScore ||
+                enrollment.assessmentScore ||
+                enrollment.bestAssessmentScore ||
                 null;
               const assessmentPassed =
                 assessmentScore &&
                 assessmentScore >= (course.assessment?.passingScore || 70);
+              const currentAttempts =
+                enrollment.currentAttempts || enrollment.totalAttempts || 0;
+              const maxAttempts = enrollment.maxAttempts || 3;
+              const canRetake =
+                !assessmentPassed && currentAttempts < maxAttempts;
 
-              // ✅ SAFE: Basic certificate eligibility (no linked course logic)
+              // Certificate eligibility
               const canGetCertificate =
+                courseEnded &&
                 attendanceConfirmed &&
                 (!assessmentRequired ||
                   (assessmentCompleted && assessmentPassed));
@@ -1270,6 +1273,7 @@ exports.getInPersonLibrary = async (req, res) => {
               const canViewCertificate = canGetCertificate || hasCertificate;
 
               console.log(`📊 In-Person Course: ${course.basic.title}`, {
+                courseEnded,
                 attendanceConfirmed,
                 assessmentRequired,
                 assessmentPassed,
@@ -1298,25 +1302,19 @@ exports.getInPersonLibrary = async (req, res) => {
                 attendanceConfirmed: attendanceConfirmed,
                 attendanceDate: enrollment.userProgress?.completionDate,
 
-                // Assessment fields
+                // Assessment information
                 assessmentRequired: assessmentRequired,
                 assessmentType: course.assessment?.type,
                 assessmentCompleted: assessmentCompleted,
                 assessmentScore: assessmentScore,
                 assessmentPassed: assessmentPassed,
                 passingScore: course.assessment?.passingScore || 70,
+                currentAttempts: currentAttempts,
+                maxAttempts: maxAttempts,
+                lastAssessmentDate: enrollment.lastAssessmentDate,
+                canRetake: canRetake,
 
-                // Assessment attempt tracking
-                currentAttempts:
-                  enrollment.userProgress?.assessmentAttempts || 0,
-                maxAttempts: (course.assessment?.retakesAllowed || 0) + 1,
-                lastAssessmentDate: enrollment.userProgress?.lastAssessmentDate,
-                canRetake:
-                  !assessmentPassed &&
-                  (enrollment.userProgress?.assessmentAttempts || 0) <
-                    (course.assessment?.retakesAllowed || 0) + 1,
-
-                // ✅ SAFE: Basic linked course object (no population)
+                // Linked course object (safe - no population)
                 linkedCourse: {
                   isLinked: false,
                   linkedCourseType: null,
@@ -1331,14 +1329,14 @@ exports.getInPersonLibrary = async (req, res) => {
                   isFollowUp: false,
                 },
 
-                // Certificate eligibility
+                // Certificate status
                 canViewCertificate: canViewCertificate,
                 canGetCertificate: canGetCertificate,
                 hasCertificate: hasCertificate,
                 certificateId: certificateId,
                 certificateMessage: null,
 
-                // Certificate requirements status
+                // Certificate requirements summary
                 certificateRequirements: {
                   attendanceConfirmed: attendanceConfirmed,
                   assessmentRequired: assessmentRequired,

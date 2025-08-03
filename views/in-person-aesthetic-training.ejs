@@ -124,10 +124,20 @@
                   <td><strong><%= course.basic?.courseCode || 'N/A' %></strong></td>
                   <td class="course-title">
                     <%= course.basic?.title || 'Untitled Course' %>
+                    
+                    <!-- ✅ ADD THIS: Simple linked course indicator -->
+                    <% if (course.linkedCourse?.onlineCourseId) { %>
+                      <div class="linked-course-indicator">
+                        <i class="fas fa-link"></i>
+                        <span>Linked Course</span>
+                      </div>
+                    <% } %>
+                    
                     <% if (course.instructorNames) { %>
                       <br><small style="color: #666;">Instructor: <%= course.instructorNames %></small>
                     <% } %>
                   </td>
+                  
                   <td>
                     <span class="date-badge">
                       <i class="far fa-calendar"></i> 

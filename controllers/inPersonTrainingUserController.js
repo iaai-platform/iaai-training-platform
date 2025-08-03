@@ -190,6 +190,7 @@ exports.getInPersonAestheticTraining = async (req, res) => {
 };
 
 // 🔧 COMPLETE: Enhanced getCourseDetails with ALL features restored
+
 exports.getCourseDetails = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -412,7 +413,7 @@ exports.getCourseDetails = async (req, res) => {
     courseWithFullDetails.relatedCourses = relatedCourses;
     console.log("✅ Found", relatedCourses.length, "related courses");
 
-    // ✅ RESTORED: Step 6: Add computed properties (enhancements)
+    // ✅ FIXED: Step 6: Add computed properties (enhancements) - MUST BE BEFORE linked course fetch
     courseWithFullDetails.enhancements = {
       availableSeats:
         (course.enrollment?.seatsAvailable || 0) -
@@ -440,6 +441,92 @@ exports.getCourseDetails = async (req, res) => {
         new Date() < new Date(course.schedule.registrationDeadline)
       ),
     };
+
+    // ✅ NEW: Step 6.5: Fetch linked online course details (AFTER enhancements)
+    courseWithFullDetails.linkedCourseDetails = null;
+
+    if (course.linkedCourse?.onlineCourseId) {
+      console.log(
+        "🔗 Fetching linked online course:",
+        course.linkedCourse.onlineCourseId
+      );
+
+      try {
+        const OnlineLiveTraining = require("../models/OnlineLiveTrainingModel");
+
+        const linkedOnlineCourse = await OnlineLiveTraining.findById(
+          course.linkedCourse.onlineCourseId
+        )
+          .select(
+            "basic schedule enrollment venue instructors certification linkedToInPerson"
+          )
+          .lean();
+
+        if (linkedOnlineCourse) {
+          courseWithFullDetails.linkedCourseDetails = {
+            ...linkedOnlineCourse,
+
+            // Add computed fields for template compatibility
+            title: linkedOnlineCourse.basic?.title || "Linked Online Course",
+            courseCode: linkedOnlineCourse.basic?.courseCode || "N/A",
+            startDate: linkedOnlineCourse.schedule?.startDate,
+            endDate: linkedOnlineCourse.schedule?.endDate,
+            duration: linkedOnlineCourse.schedule?.duration || "TBD",
+            price: linkedOnlineCourse.enrollment?.price || 0,
+            currency: linkedOnlineCourse.enrollment?.currency || "EUR",
+            status: linkedOnlineCourse.basic?.status || "draft",
+
+            // Relationship info from in-person course
+            relationship: course.linkedCourse.relationship || "prerequisite",
+            isRequired: course.linkedCourse.isRequired || false,
+            completionRequired: course.linkedCourse.completionRequired || false,
+            isFree: course.linkedCourse.isFree || false,
+            customPrice: course.linkedCourse.customPrice || 0,
+            certificateIssuingRule:
+              course.linkedCourse.certificateIssuingRule || "inperson-only",
+
+            // Display properties
+            displayRelationship:
+              course.linkedCourse.relationship === "prerequisite"
+                ? "Required Prerequisite"
+                : course.linkedCourse.relationship === "supplementary"
+                ? "Supplementary Course"
+                : course.linkedCourse.relationship === "follow-up"
+                ? "Follow-up Course"
+                : "Related Course",
+
+            effectivePrice: course.linkedCourse.isFree
+              ? 0
+              : course.linkedCourse.customPrice > 0
+              ? course.linkedCourse.customPrice
+              : linkedOnlineCourse.enrollment?.price || 0,
+
+            priceStatus: course.linkedCourse.isFree
+              ? "Included Free"
+              : course.linkedCourse.customPrice > 0
+              ? "Special Price"
+              : "Regular Price",
+          };
+
+          console.log(
+            "✅ Linked online course found:",
+            linkedOnlineCourse.basic?.title
+          );
+          console.log("🔗 Relationship:", course.linkedCourse.relationship);
+          console.log("🆓 Is Free:", course.linkedCourse.isFree);
+          console.log(
+            "💰 Effective Price:",
+            courseWithFullDetails.linkedCourseDetails.effectivePrice
+          );
+        } else {
+          console.log("⚠️ Linked online course not found in database");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching linked online course:", error);
+      }
+    } else {
+      console.log("ℹ️ No linked online course for this in-person course");
+    }
 
     // ✅ RESTORED: Step 7: Generate instructor names for display
     courseWithFullDetails.instructorNames = (() => {
@@ -479,6 +566,10 @@ exports.getCourseDetails = async (req, res) => {
     console.log(
       "- Has certification body details:",
       !!courseWithFullDetails.certificationBodyDetails
+    );
+    console.log(
+      "- Has linked online course:",
+      !!courseWithFullDetails.linkedCourseDetails
     );
     console.log("- Current status:", currentStatus);
     console.log("- Can enroll:", courseWithFullDetails.canEnroll);

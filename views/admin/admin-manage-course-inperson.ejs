@@ -67,10 +67,10 @@
             </div>
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-euro-sign"></i>
                 </div>
                 <div class="stat-content">
-                    <h3 id="totalRevenue">$0</h3>
+                    <h3 id="totalRevenue">€0</h3>
                     <p>Revenue</p>
                 </div>
             </div>
@@ -353,7 +353,7 @@
     <h3>Pricing & Enrollment</h3>
     <div class="form-grid">
         <div class="form-group">
-            <label for="price">Price (USD) *</label>
+            <label for="price">Price (EUR) *</label>
             <input type="number" id="price" name="enrollment[price]" required min="0" step="0.01">
         </div>
         <div class="form-group">
@@ -370,8 +370,8 @@
         <div class="form-group">
             <label for="currency">Currency</label>
             <select id="currency" name="enrollment[currency]">
+                <option value="EUR" selected>EUR</option>
                 <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
                 <option value="TRY">TRY</option>
                 <option value="GBP">GBP</option>
             </select>
@@ -396,15 +396,15 @@
         <div class="pricing-summary">
             <div class="price-item">
                 <span class="price-label">Regular Price:</span>
-                <span class="price-value" id="regularPricePreview">$0</span>
+                <span class="price-value" id="regularPricePreview">€0</span>
             </div>
             <div class="price-item early-bird">
                 <span class="price-label">Early Bird Price:</span>
-                <span class="price-value" id="earlyBirdPricePreview">$0</span>
+                <span class="price-value" id="earlyBirdPricePreview">€0</span>
             </div>
             <div class="price-item savings">
                 <span class="price-label">Savings:</span>
-                <span class="price-value" id="savingsPreview">$0</span>
+                <span class="price-value" id="savingsPreview">€0</span>
             </div>
             <div class="deadline-info">
                 <span class="deadline-label">Early Bird Deadline:</span>
@@ -1457,8 +1457,6 @@
         <p>Processing...</p>
     </div>
 </div>
-
-
 
 <!-- Main Scripts -->
 <script src="/js/admin-courses.js"></script>

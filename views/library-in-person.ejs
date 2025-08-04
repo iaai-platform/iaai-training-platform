@@ -363,75 +363,98 @@
                   <h4><i class="fas fa-folder-open"></i> Course Materials</h4>
                   <div class="video-list">
                     
-                    <!-- Documents -->
-                    <% if (hasDocuments) { %>
-                      <% course.media.documents.forEach((docUrl, index) => { %>
-                        <% 
-                          // Extract filename from URL for display
-                          let fileName = 'Document ' + (index + 1);
-                          let fileExt = 'pdf';
-                          
-                          try {
-                            if (docUrl.includes('fl_attachment:')) {
-                              // Extract filename from attachment parameter
-                              const attachMatch = docUrl.match(/fl_attachment:([^\/]+)/);
-                              if (attachMatch) {
-                                fileName = decodeURIComponent(attachMatch[1]);
-                                fileExt = fileName.split('.').pop().toLowerCase();
-                              }
-                            } else {
-                              // Fallback: try to extract from URL
-                              const urlParts = docUrl.split('/');
-                              const lastPart = urlParts[urlParts.length - 1];
-                              if (lastPart && lastPart.length > 0) {
-                                fileName = lastPart.includes('.') ? lastPart : lastPart + '.pdf';
-                                fileExt = fileName.split('.').pop().toLowerCase();
-                              }
-                            }
-                          } catch (e) {
-                            console.log('Error extracting filename:', e);
-                          }
-                          
-                          // Determine file type for icon
-                          let icon = 'fa-file-pdf';
-                          let fileType = 'PDF Document';
-                          let bgColor = '#dc3545';
-                          
-                          if (['doc', 'docx'].includes(fileExt)) {
-                            icon = 'fa-file-word';
-                            fileType = 'Word Document';
-                            bgColor = '#0066cc';
-                          } else if (['ppt', 'pptx'].includes(fileExt)) {
-                            icon = 'fa-file-powerpoint';
-                            fileType = 'Presentation';
-                            bgColor = '#dc3545';
-                          } else if (['xls', 'xlsx'].includes(fileExt)) {
-                            icon = 'fa-file-excel';
-                            fileType = 'Spreadsheet';
-                            bgColor = '#28a745';
-                          }
-                        %>
-                        <div class="video-item">
-                          <div class="video-number" style="background: <%= bgColor %>;">
-                            <i class="fas <%= icon %>"></i>
-                          </div>
-                          <div class="video-info">
-                            <div class="video-title"><%= fileName %></div>
-                            <div class="video-meta">
-                              <i class="fas <%= icon %>"></i> <%= fileType %>
-                            </div>
-                          </div>
-                          <div class="video-actions">
-                            <a href="<%= docUrl %>" target="_blank" class="video-action action-watch">
-                              <i class="fas fa-eye"></i> View
-                            </a>
-                            <a href="<%= docUrl %>" download="<%= fileName %>" class="video-action action-exam">
-                              <i class="fas fa-download"></i> Download
-                            </a>
-                          </div>
-                        </div>
-                      <% }) %>
-                    <% } %>
+<!-- FIXED Documents Section -->
+<% if (hasDocuments) { %>
+  <% course.media.documents.forEach((docUrl, index) => { %>
+    <% 
+      // ✅ FIXED: Improved filename extraction
+      let fileName = 'Document ' + (index + 1);
+      let fileExt = 'pdf';
+      
+      try {
+        if (docUrl.includes('fl_attachment:')) {
+          // Extract filename from attachment parameter
+          const attachMatch = docUrl.match(/fl_attachment:([^\/]+)/);
+          if (attachMatch) {
+            fileName = decodeURIComponent(attachMatch[1]);
+            fileExt = fileName.split('.').pop().toLowerCase();
+          }
+        } else if (docUrl.includes('cloudinary.com')) {
+          // Extract from Cloudinary URL structure
+          const urlParts = docUrl.split('/');
+          const fileWithExt = urlParts[urlParts.length - 1];
+          if (fileWithExt && fileWithExt.includes('.')) {
+            fileName = fileWithExt;
+            fileExt = fileName.split('.').pop().toLowerCase();
+          } else {
+            // Try to get from v{version}/ part
+            const versionIndex = urlParts.findIndex(part => part.startsWith('v'));
+            if (versionIndex !== -1 && urlParts[versionIndex + 1]) {
+              const pathAfterVersion = urlParts.slice(versionIndex + 1).join('/');
+              // Remove folder paths and get filename
+              const cleanFileName = pathAfterVersion.split('/').pop();
+              if (cleanFileName) {
+                fileName = cleanFileName;
+                fileExt = fileName.split('.').pop().toLowerCase() || 'pdf';
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Error extracting filename:', e);
+      }
+      
+      // ✅ FIXED: Create clean download URL
+      let downloadUrl = docUrl;
+      let viewUrl = docUrl;
+      
+      // For Cloudinary files with fl_attachment, create a clean view URL
+      if (docUrl.includes('fl_attachment:')) {
+        viewUrl = docUrl.replace(/\/fl_attachment:[^\/]+\//, '/');
+      }
+      
+      // Determine file type for icon
+      let icon = 'fa-file-pdf';
+      let fileType = 'PDF Document';
+      let bgColor = '#dc3545';
+      
+      if (['doc', 'docx'].includes(fileExt)) {
+        icon = 'fa-file-word';
+        fileType = 'Word Document';
+        bgColor = '#0066cc';
+      } else if (['ppt', 'pptx'].includes(fileExt)) {
+        icon = 'fa-file-powerpoint';
+        fileType = 'Presentation';
+        bgColor = '#dc3545';
+      } else if (['xls', 'xlsx'].includes(fileExt)) {
+        icon = 'fa-file-excel';
+        fileType = 'Spreadsheet';
+        bgColor = '#28a745';
+      }
+    %>
+    <div class="video-item">
+      <div class="video-number" style="background: <%= bgColor %>;">
+        <i class="fas <%= icon %>"></i>
+      </div>
+      <div class="video-info">
+        <div class="video-title"><%= fileName %></div>
+        <div class="video-meta">
+          <i class="fas <%= icon %>"></i> <%= fileType %>
+        </div>
+      </div>
+      <div class="video-actions">
+        <!-- ✅ FIXED: Use clean view URL for viewing -->
+        <a href="<%= viewUrl %>" target="_blank" class="video-action action-watch" rel="noopener noreferrer">
+          <i class="fas fa-eye"></i> View
+        </a>
+        <!-- ✅ FIXED: Use original URL with attachment for download -->
+        <a href="<%= downloadUrl %>" target="_blank" class="video-action action-exam" rel="noopener noreferrer">
+          <i class="fas fa-download"></i> Download
+        </a>
+      </div>
+    </div>
+  <% }) %>
+<% } %>
                     
                     <!-- Videos -->
                     <% if (hasVideos) { %>

@@ -113,6 +113,13 @@ router.post(
   LibraryController.confirmAttendance
 );
 
+// Online Live Assessment Results
+router.get(
+  "/library/online-live/assessment/:courseId/results",
+  isAuthenticated,
+  LibraryController.getOnlineLiveAssessmentResults
+);
+
 // ========================================
 // IN-PERSON COURSE ROUTES (LibraryController)
 // ========================================
@@ -140,6 +147,81 @@ router.post(
   LibraryController.confirmAttendance
 );
 
+// ========================================
+// ASSESSMENT RESULTS ROUTES (FIXED)
+// ========================================
+
+// In-Person Assessment Results
+router.get(
+  "/library/in-person/assessment/:courseId/results",
+  isAuthenticated,
+  LibraryController.getInPersonAssessmentResults
+);
+
+// Online Live Assessment Results (THIS WAS MISSING!)
+router.get(
+  "/library/online-live/assessment/:courseId/results",
+  isAuthenticated,
+  LibraryController.getOnlineLiveAssessmentResults
+);
+
+// Generic assessment results route (determines course type automatically)
+router.get(
+  "/library/assessment/:courseId/results",
+  isAuthenticated,
+  async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const userId = req.user._id;
+
+      const User = require("../models/user");
+      const user = await User.findById(userId).select(
+        "myInPersonCourses myLiveCourses"
+      );
+
+      if (!user) {
+        return res.status(404).render("error", {
+          message: "User not found",
+          user: req.user,
+        });
+      }
+
+      // Check if it's an in-person course
+      const inPersonEnrollment = user.myInPersonCourses?.find(
+        (c) => c.courseId.toString() === courseId
+      );
+
+      if (inPersonEnrollment) {
+        return res.redirect(
+          `/library/in-person/assessment/${courseId}/results`
+        );
+      }
+
+      // Check if it's a live online course
+      const liveEnrollment = user.myLiveCourses?.find(
+        (c) => c.courseId.toString() === courseId
+      );
+
+      if (liveEnrollment) {
+        return res.redirect(
+          `/library/online-live/assessment/${courseId}/results`
+        );
+      }
+
+      // Course not found in any enrollment
+      return res.status(404).render("error", {
+        message: "Course enrollment not found",
+        user: req.user,
+      });
+    } catch (error) {
+      console.error("Error in generic assessment results route:", error);
+      res.status(500).render("error", {
+        message: "Error loading assessment results",
+        user: req.user,
+      });
+    }
+  }
+);
 // ========================================
 // GENERAL ATTENDANCE ROUTES (for backward compatibility)
 // ========================================

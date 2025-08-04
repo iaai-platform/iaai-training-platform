@@ -317,12 +317,40 @@ const inPersonCourseSchema = new mongoose.Schema(
         max: 100,
       },
       retakesAllowed: { type: Number, default: 1 },
+
+      // 🔄 Admin creates questions exactly as before
       questions: [
         {
           question: { type: String, required: true },
           answers: [{ type: String, required: true }],
           correctAnswer: { type: Number, required: true },
           points: { type: Number, default: 1 },
+        },
+      ],
+
+      // ✅ Results tracking for user responses
+      results: [
+        {
+          userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
+          attemptNumber: { type: Number, default: 1 },
+          responses: [
+            {
+              questionIndex: { type: Number, required: true }, // Index in questions array
+              selectedAnswer: { type: Number, required: true }, // Index of selected answer
+              isCorrect: { type: Boolean, required: true },
+              pointsEarned: { type: Number, default: 0 },
+            },
+          ],
+          totalScore: { type: Number, default: 0 },
+          totalPossibleScore: { type: Number, default: 0 },
+          percentage: { type: Number, default: 0 },
+          passed: { type: Boolean, default: false },
+          submittedAt: { type: Date, default: Date.now },
+          timeSpent: { type: Number, default: 0 }, // in minutes
         },
       ],
     },
@@ -1221,6 +1249,7 @@ inPersonCourseSchema.methods.canIssueCertificate = async function (userId) {
 /**
  * 📊 Check basic certificate eligibility for a user
  */
+// ✅ REPLACE: Enhanced certificate eligibility check
 inPersonCourseSchema.methods.isCertificateEligible = function (userId) {
   if (!this.certification.enabled) return false;
 
@@ -1230,8 +1259,7 @@ inPersonCourseSchema.methods.isCertificateEligible = function (userId) {
 
   let meetsAssessment = true;
   if (this.assessment.required) {
-    // Implementation depends on how you store user assessment results
-    meetsAssessment = true; // Placeholder
+    meetsAssessment = this.hasUserPassedAssessment(userId);
   }
 
   return meetsAttendance && meetsAssessment;
@@ -1283,6 +1311,114 @@ inPersonCourseSchema.methods.getPriceOnDate = function (date) {
     return this.enrollment?.earlyBirdPrice || this.enrollment?.price || 0;
   }
   return this.enrollment?.price || 0;
+};
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃                   📝 MINIMAL ASSESSMENT METHODS                     ┃
+// ┃                 Add these to your existing schema                   ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+// ✅ ADD: Submit assessment results (main method needed)
+inPersonCourseSchema.methods.submitAssessmentResults = function (
+  userId,
+  userAnswers,
+  timeSpent = 0
+) {
+  if (!this.assessment.required || !this.assessment.questions.length) {
+    throw new Error("Assessment not available");
+  }
+
+  // Check if user has remaining attempts
+  const userResults = this.assessment.results.filter(
+    (r) => r.userId.toString() === userId.toString()
+  );
+
+  const maxAttempts = (this.assessment.retakesAllowed || 0) + 1;
+  if (userResults.length >= maxAttempts) {
+    throw new Error("Maximum attempts exceeded");
+  }
+
+  const responses = [];
+  let totalScore = 0;
+  let totalPossibleScore = 0;
+
+  // Process each question
+  this.assessment.questions.forEach((question, questionIndex) => {
+    const userAnswer = userAnswers[questionIndex];
+    const isCorrect = userAnswer === question.correctAnswer;
+    const pointsEarned = isCorrect ? question.points || 1 : 0;
+
+    responses.push({
+      questionIndex: questionIndex,
+      selectedAnswer: userAnswer,
+      isCorrect: isCorrect,
+      pointsEarned: pointsEarned,
+    });
+
+    totalScore += pointsEarned;
+    totalPossibleScore += question.points || 1;
+  });
+
+  const percentage =
+    totalPossibleScore > 0
+      ? Math.round((totalScore / totalPossibleScore) * 100)
+      : 0;
+  const passed = percentage >= (this.assessment.passingScore || 70);
+
+  // Add result to assessment results array
+  const result = {
+    userId: userId,
+    attemptNumber: userResults.length + 1,
+    responses: responses,
+    totalScore: totalScore,
+    totalPossibleScore: totalPossibleScore,
+    percentage: percentage,
+    passed: passed,
+    completedAt: new Date(),
+    timeSpent: timeSpent,
+  };
+
+  this.assessment.results.push(result);
+
+  return this.save().then(() => result);
+};
+
+// ✅ ADD: Get user's latest assessment result
+inPersonCourseSchema.methods.getUserLatestAssessmentResult = function (userId) {
+  const userResults = this.assessment.results.filter(
+    (r) => r.userId.toString() === userId.toString()
+  );
+
+  if (userResults.length === 0) return null;
+
+  // Return the latest attempt
+  return userResults.sort((a, b) => b.attemptNumber - a.attemptNumber)[0];
+};
+
+// ✅ ADD: Check if user passed assessment
+inPersonCourseSchema.methods.hasUserPassedAssessment = function (userId) {
+  const userResults = this.assessment.results.filter(
+    (r) => r.userId.toString() === userId.toString()
+  );
+
+  return userResults.some((result) => result.passed);
+};
+
+// ✅ ADD: Get user's assessment attempts count
+inPersonCourseSchema.methods.getUserAssessmentAttempts = function (userId) {
+  return this.assessment.results.filter(
+    (r) => r.userId.toString() === userId.toString()
+  ).length;
+};
+
+// ✅ ADD: Check if user can take assessment
+inPersonCourseSchema.methods.canUserTakeAssessment = function (userId) {
+  if (!this.assessment.required) return false;
+
+  const attempts = this.getUserAssessmentAttempts(userId);
+  const maxAttempts = this.assessment.retakesAllowed + 1;
+
+  return attempts < maxAttempts;
 };
 
 // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓

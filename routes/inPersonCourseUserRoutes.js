@@ -1,14 +1,22 @@
-// routes/inPersonCourseUserRoutes.js - FIXED VERSION
+// routes/inPersonCourseUserRoutes.js - CORRECTED VERSION
 
 const express = require("express");
 const router = express.Router();
 
-// Import the controllers
+// Import the controllers - FIXED IMPORTS
 const {
   getInPersonAestheticTraining,
   getCourseDetails,
-  getCourseArchive, // NEW: Archive controller
+  getCourseArchive,
 } = require("../controllers/inPersonTrainingUserController");
+
+// ✅ CORRECTED: Import library functions from libraryController
+const {
+  getInPersonLibrary,
+  confirmAttendance,
+  getInPersonAssessment,
+  submitInPersonAssessment,
+} = require("../controllers/libraryController");
 
 // ROUTE LOGGING (for debugging)
 router.use((req, res, next) => {
@@ -35,6 +43,25 @@ router.get("/in-person/courses/:courseId", getCourseDetails);
 // NEW: Route for archived/historical course information
 // GET /in-person/courses/:courseId/archive
 router.get("/in-person/courses/:courseId/archive", getCourseArchive);
+
+// ============================================
+// LIBRARY ROUTES (Require authentication)
+// ============================================
+
+// GET /library/in-person - In-person courses library
+router.get("/library/in-person", getInPersonLibrary);
+
+// POST /library/confirm-attendance/:courseId - Confirm attendance
+router.post("/library/confirm-attendance/:courseId", confirmAttendance);
+
+// GET /library/in-person/assessment/:courseId - Get assessment page
+router.get("/library/in-person/assessment/:courseId", getInPersonAssessment);
+
+// POST /library/in-person/assessment/:courseId - Submit assessment
+router.post(
+  "/library/in-person/assessment/:courseId",
+  submitInPersonAssessment
+);
 
 // Optional: API endpoint for debugging course data
 router.get("/api/in-person/debug", async (req, res) => {

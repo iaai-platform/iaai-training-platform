@@ -3,6 +3,7 @@ const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
+const mongoose = require("mongoose");
 
 // ============================================
 // ✅ ENHANCED TIMEZONE UTILITY FUNCTIONS
@@ -1187,29 +1188,37 @@ exports.getLiveLibrary = async (req, res) => {
 };
 
 /**
- * ✅ COMPLETE: Get In-Person Library with Full Linked Course Support
+ * ✅ COMPLETE: Get In-Person Library with Fixed Assessment Integration
+ * Updated to properly read assessment results from course model
  */
 exports.getInPersonLibrary = async (req, res) => {
   try {
     console.log(
-      "📚 Loading in-person course library (safe mode) for user:",
+      "📚 Loading in-person course library (FIXED assessment reading) for user:",
       req.user.email
     );
 
-    // ✅ SAFE: Basic population without nested linked course population
+    // ✅ ENHANCED: Include assessment results in population
     const user = await User.findById(req.user._id)
       .populate({
         path: "myInPersonCourses.courseId",
         model: "InPersonAestheticTraining",
         select:
-          "basic schedule venue instructors media materials assessment certification",
+          "basic schedule venue instructors media materials assessment certification linkedCourse",
+        // ✅ CRITICAL: Ensure assessment results are populated
+        options: { lean: false }, // Don't use lean to ensure we get full objects
       })
-      .lean();
+      .exec();
 
     if (!user) {
       console.error("❌ User not found");
       return res.redirect("/login");
     }
+
+    console.log(`👤 User: ${user.email}`);
+    console.log(
+      `📚 Total in-person enrollments: ${user.myInPersonCourses?.length || 0}`
+    );
 
     const inPersonCourses = [];
 
@@ -1217,6 +1226,12 @@ exports.getInPersonLibrary = async (req, res) => {
     if (user.myInPersonCourses && user.myInPersonCourses.length > 0) {
       for (const enrollment of user.myInPersonCourses) {
         try {
+          console.log(`🔄 Processing enrollment:`, {
+            courseId: enrollment.courseId?._id?.toString() || "NO ID",
+            status: enrollment.enrollmentData?.status,
+            hasUserProgress: !!enrollment.userProgress,
+          });
+
           if (
             enrollment.enrollmentData.status === "paid" ||
             enrollment.enrollmentData.status === "registered"
@@ -1224,42 +1239,232 @@ exports.getInPersonLibrary = async (req, res) => {
             const course = enrollment.courseId;
 
             if (course) {
+              console.log(`✅ Processing course: ${course.basic.title}`);
+
+              // ✅ DEBUGGING: Log course assessment structure
+              console.log("🔍 Course assessment structure:", {
+                hasAssessment: !!course.assessment,
+                assessmentRequired: course.assessment?.required,
+                assessmentType: course.assessment?.type,
+                hasResults: !!course.assessment?.results,
+                resultsCount: course.assessment?.results?.length || 0,
+              });
+
               // Check if course has ended
-              const courseEnded = new Date(
+              const now = new Date();
+              const courseEndDate = new Date(
                 course.schedule.endDate || course.schedule.startDate
               );
-              new Date();
+              const courseStartDate = new Date(course.schedule.startDate);
+
+              // Course has ended if current date is after the end date
+              const courseEnded = courseEndDate < now;
+
+              // Course is currently running (started but not ended)
+              const courseInProgress =
+                courseStartDate <= now && courseEndDate >= now;
+
+              // Course hasn't started yet
+              const courseNotStarted = courseStartDate > now;
+
+              console.log("📅 Course Date Status:", {
+                now: now.toISOString(),
+                startDate: courseStartDate.toISOString(),
+                endDate: courseEndDate.toISOString(),
+                courseEnded,
+                courseInProgress,
+                courseNotStarted,
+              });
 
               // Check attendance status
               const attendanceConfirmed =
                 enrollment.userProgress?.attendanceRecords?.length > 0 ||
                 enrollment.userProgress?.courseStatus === "completed";
 
-              // Assessment logic
+              // ✅ NEW: Grace period logic
+              const gracePeriodDays = 7;
+              const gracePeriodEnd = new Date(
+                courseEndDate.getTime() + gracePeriodDays * 24 * 60 * 60 * 1000
+              );
+              const canConfirmAttendance =
+                !attendanceConfirmed &&
+                (courseInProgress || (courseEnded && now <= gracePeriodEnd));
+
+              // ✅ COMPLETELY FIXED: Assessment logic using populated course data
               const assessmentRequired =
                 course.assessment?.required &&
                 course.assessment?.type !== "none";
-              const assessmentCompleted =
-                enrollment.assessmentCompleted || false;
-              const assessmentScore =
-                enrollment.assessmentScore ||
-                enrollment.bestAssessmentScore ||
-                null;
-              const assessmentPassed =
-                assessmentScore &&
-                assessmentScore >= (course.assessment?.passingScore || 70);
-              const currentAttempts =
-                enrollment.currentAttempts || enrollment.totalAttempts || 0;
-              const maxAttempts = enrollment.maxAttempts || 3;
-              const canRetake =
-                !assessmentPassed && currentAttempts < maxAttempts;
 
-              // Certificate eligibility
-              const canGetCertificate =
-                courseEnded &&
-                attendanceConfirmed &&
-                (!assessmentRequired ||
-                  (assessmentCompleted && assessmentPassed));
+              let assessmentCompleted = false;
+              let assessmentScore = null;
+              let assessmentPassed = false;
+              let lastAssessmentDate = null;
+              let currentAttempts = 0;
+              let hasAttempted = false;
+
+              if (assessmentRequired) {
+                console.log(
+                  "🔍 Reading assessment results from POPULATED course data for:",
+                  course.basic.title
+                );
+
+                // ✅ FIXED: Use populated course data directly (no additional DB query needed)
+                if (
+                  course.assessment?.results &&
+                  Array.isArray(course.assessment.results)
+                ) {
+                  const userResults = course.assessment.results.filter(
+                    (result) =>
+                      result.userId.toString() === req.user._id.toString()
+                  );
+
+                  console.log(
+                    `📊 Found ${userResults.length} assessment attempts in course results`
+                  );
+
+                  currentAttempts = userResults.length;
+                  hasAttempted = currentAttempts > 0;
+
+                  if (userResults.length > 0) {
+                    // Sort by attempt number to get latest
+                    const sortedResults = userResults.sort(
+                      (a, b) => (b.attemptNumber || 0) - (a.attemptNumber || 0)
+                    );
+                    const latestResult = sortedResults[0];
+
+                    assessmentCompleted = true;
+                    assessmentScore = latestResult.percentage;
+                    assessmentPassed = latestResult.passed;
+                    // ✅ FIXED: Use correct field name from your database
+                    lastAssessmentDate =
+                      latestResult.submittedAt || latestResult.completedAt;
+
+                    console.log(
+                      "✅ Assessment result from populated course data:",
+                      {
+                        score: assessmentScore,
+                        passed: assessmentPassed,
+                        attemptNumber: latestResult.attemptNumber,
+                        submittedAt: lastAssessmentDate,
+                        totalResults: userResults.length,
+                      }
+                    );
+                  } else {
+                    console.log(
+                      "📊 No assessment results found for this user in course model"
+                    );
+                  }
+                } else {
+                  console.log(
+                    "⚠️ No assessment.results array found in populated course data"
+                  );
+                  console.log(
+                    "🔍 Course assessment object:",
+                    course.assessment
+                  );
+                }
+
+                // ✅ FALLBACK: If no results found in course model, try user model
+                if (!hasAttempted) {
+                  console.log(
+                    "🔄 No results in course model - checking user model fallbacks"
+                  );
+
+                  // Fallback 1: User assessment history
+                  const userAssessmentHistory =
+                    enrollment.userProgress?.assessmentHistory || [];
+                  if (userAssessmentHistory.length > 0) {
+                    console.log(
+                      "📊 Using user model assessmentHistory fallback"
+                    );
+                    const latestUserAttempt =
+                      userAssessmentHistory[userAssessmentHistory.length - 1];
+
+                    assessmentCompleted = true;
+                    assessmentScore = latestUserAttempt.score;
+                    assessmentPassed = latestUserAttempt.passed;
+                    lastAssessmentDate = latestUserAttempt.date;
+                    currentAttempts = userAssessmentHistory.length;
+                    hasAttempted = true;
+                  }
+                  // Fallback 2: Legacy fields
+                  else if (
+                    enrollment.userProgress?.assessmentCompleted ||
+                    enrollment.userProgress?.assessmentScore
+                  ) {
+                    console.log("📊 Using legacy user model fields fallback");
+                    const legacyCompleted =
+                      enrollment.userProgress.assessmentCompleted || false;
+                    const legacyScore =
+                      enrollment.userProgress.assessmentScore || null;
+
+                    assessmentCompleted = legacyCompleted;
+                    assessmentScore = legacyScore;
+                    assessmentPassed =
+                      legacyScore &&
+                      legacyScore >= (course.assessment?.passingScore || 70);
+                    lastAssessmentDate =
+                      enrollment.userProgress.lastAssessmentDate;
+                    currentAttempts = legacyCompleted ? 1 : 0;
+                    hasAttempted = legacyCompleted;
+                  }
+                }
+              }
+
+              const maxAttempts = (course.assessment?.retakesAllowed || 0) + 1;
+              const canRetake =
+                assessmentRequired &&
+                !assessmentPassed &&
+                currentAttempts < maxAttempts;
+
+              console.log("🎯 FINAL Assessment Status:", {
+                assessmentRequired,
+                assessmentCompleted,
+                assessmentScore,
+                assessmentPassed,
+                currentAttempts,
+                maxAttempts,
+                canRetake,
+                hasAttempted,
+                lastAssessmentDate,
+              });
+
+              // ✅ ENHANCED: Certificate eligibility with detailed reasoning
+              let canGetCertificate = false;
+              let certificateEligibilityReason = "";
+
+              if (!course.certification?.enabled) {
+                certificateEligibilityReason =
+                  "Certification not enabled for this course";
+              } else if (!courseEnded) {
+                certificateEligibilityReason = "Course must be completed first";
+              } else if (!attendanceConfirmed) {
+                certificateEligibilityReason = "Attendance must be confirmed";
+              } else if (
+                assessmentRequired &&
+                (!assessmentCompleted || !assessmentPassed)
+              ) {
+                if (!assessmentCompleted) {
+                  certificateEligibilityReason = "Assessment must be completed";
+                } else {
+                  certificateEligibilityReason = `Assessment must be passed (current score: ${assessmentScore}%, required: ${
+                    course.assessment?.passingScore || 70
+                  }%)`;
+                }
+              } else {
+                canGetCertificate = true;
+                certificateEligibilityReason = "All requirements met";
+              }
+
+              console.log("🎓 Certificate eligibility:", {
+                canGetCertificate,
+                reason: certificateEligibilityReason,
+                certificationEnabled: course.certification?.enabled,
+                courseEnded,
+                attendanceConfirmed,
+                assessmentRequired,
+                assessmentPassed,
+              });
 
               // Check if user already has a certificate for this course
               const existingCertificate = user.myCertificates?.find(
@@ -1276,12 +1481,19 @@ exports.getInPersonLibrary = async (req, res) => {
                 courseEnded,
                 attendanceConfirmed,
                 assessmentRequired,
+                assessmentCompleted,
                 assessmentPassed,
+                assessmentScore,
+                currentAttempts,
+                hasAttempted,
+                certificationEnabled: course.certification?.enabled,
                 canGetCertificate,
                 hasCertificate,
                 canViewCertificate,
+                certificateEligibilityReason,
               });
 
+              // ✅ ENHANCED: Build comprehensive course object
               inPersonCourses.push({
                 courseId: course._id,
                 title: course.basic?.title || "Untitled Course",
@@ -1299,10 +1511,14 @@ exports.getInPersonLibrary = async (req, res) => {
 
                 // Course status flags
                 courseEnded: courseEnded,
+                courseInProgress: courseInProgress,
+                courseNotStarted: courseNotStarted,
                 attendanceConfirmed: attendanceConfirmed,
+                canConfirmAttendance: canConfirmAttendance,
+                attendanceGracePeriodEnd: gracePeriodEnd,
                 attendanceDate: enrollment.userProgress?.completionDate,
 
-                // Assessment information
+                // ✅ FIXED: Assessment information with correct data source
                 assessmentRequired: assessmentRequired,
                 assessmentType: course.assessment?.type,
                 assessmentCompleted: assessmentCompleted,
@@ -1311,38 +1527,70 @@ exports.getInPersonLibrary = async (req, res) => {
                 passingScore: course.assessment?.passingScore || 70,
                 currentAttempts: currentAttempts,
                 maxAttempts: maxAttempts,
-                lastAssessmentDate: enrollment.lastAssessmentDate,
+                lastAssessmentDate: lastAssessmentDate,
                 canRetake: canRetake,
+                hasAttempted: hasAttempted,
 
-                // Linked course object (safe - no population)
+                // ✅ ENHANCED: Certification information with eligibility reasoning
+                certificationEnabled: course.certification?.enabled || false,
+                certificateEligibilityReason: certificateEligibilityReason,
+
+                // ✅ ENHANCED: Linked course object (basic support)
                 linkedCourse: {
-                  isLinked: false,
-                  linkedCourseType: null,
-                  linkedCourseId: null,
-                  linkedCourseTitle: null,
-                  linkedCourseCode: null,
-                  linkType: null,
+                  isLinked: !!course.linkedCourse?.onlineCourseId,
+                  linkedCourseType: course.linkedCourse?.onlineCourseId
+                    ? "OnlineLiveTraining"
+                    : null,
+                  linkedCourseId: course.linkedCourse?.onlineCourseId || null,
+                  linkedCourseTitle: null, // Would need population to get this
+                  linkedCourseCode: null, // Would need population to get this
+                  linkType: course.linkedCourse?.relationship || null,
+                  isRequired: course.linkedCourse?.isRequired || false,
+                  completionRequired:
+                    course.linkedCourse?.completionRequired || false,
+                  certificateIssuingRule:
+                    course.linkedCourse?.certificateIssuingRule || null,
                   linkedCoursePlatform: null,
                   linkedCourseStartDate: null,
-                  isPrerequisite: false,
-                  isSupplementary: false,
-                  isFollowUp: false,
+                  isPrerequisite:
+                    course.linkedCourse?.relationship === "prerequisite",
+                  isSupplementary:
+                    course.linkedCourse?.relationship === "supplementary",
+                  isFollowUp: course.linkedCourse?.relationship === "follow-up",
                 },
 
-                // Certificate status
+                // ✅ UPDATED: Certificate status with proper checks and reasoning
                 canViewCertificate: canViewCertificate,
                 canGetCertificate: canGetCertificate,
                 hasCertificate: hasCertificate,
                 certificateId: certificateId,
-                certificateMessage: null,
+                certificateMessage: certificateEligibilityReason,
 
-                // Certificate requirements summary
+                // ✅ ENHANCED: Certificate requirements summary with detailed breakdown
                 certificateRequirements: {
+                  courseEnded: courseEnded,
                   attendanceConfirmed: attendanceConfirmed,
                   assessmentRequired: assessmentRequired,
+                  assessmentCompleted: assessmentCompleted,
                   assessmentPassed: assessmentPassed || !assessmentRequired,
+                  certificationEnabled: course.certification?.enabled || false,
                   allRequirementsMet: canGetCertificate,
-                  isLinkedToOnline: false,
+                  isLinkedToOnline: !!course.linkedCourse?.onlineCourseId,
+                  linkedCourseRequired:
+                    course.linkedCourse?.isRequired || false,
+                  missingRequirements: [
+                    !courseEnded && "Course must be completed",
+                    !attendanceConfirmed && "Attendance must be confirmed",
+                    assessmentRequired &&
+                      !assessmentCompleted &&
+                      "Assessment must be taken",
+                    assessmentRequired &&
+                      assessmentCompleted &&
+                      !assessmentPassed &&
+                      "Assessment must be passed",
+                    !course.certification?.enabled &&
+                      "Certification not enabled",
+                  ].filter(Boolean),
                 },
 
                 // Course materials and resources
@@ -1350,12 +1598,166 @@ exports.getInPersonLibrary = async (req, res) => {
                 media: course.media || {},
                 resources: course.media?.links || [],
                 providedMaterials: course.inclusions?.materials,
+
+                // ✅ ENHANCED: Detailed assessment progress tracking
+                assessmentProgress: {
+                  required: assessmentRequired,
+                  available: courseEnded || courseInProgress,
+                  canTake:
+                    assessmentRequired &&
+                    attendanceConfirmed &&
+                    (courseEnded || courseInProgress) &&
+                    currentAttempts < maxAttempts,
+                  status: assessmentRequired
+                    ? !hasAttempted
+                      ? "not-started"
+                      : assessmentPassed
+                      ? "passed"
+                      : canRetake
+                      ? "failed-can-retry"
+                      : "failed-no-retries"
+                    : "not-required",
+                  attemptsUsed: currentAttempts,
+                  attemptsRemaining: Math.max(0, maxAttempts - currentAttempts),
+                  nextAttemptNumber: currentAttempts + 1,
+                  scoreHistory: [], // Could be populated from course.assessment.results if needed
+                  bestScore: assessmentScore,
+                  locked:
+                    !attendanceConfirmed || (!courseEnded && !courseInProgress),
+                  lockReason: !attendanceConfirmed
+                    ? "Confirm attendance first"
+                    : !courseEnded && !courseInProgress
+                    ? "Course not started or completed"
+                    : null,
+                },
+
+                // ✅ ENHANCED: Action recommendations based on current state
+                recommendedActions: (() => {
+                  const actions = [];
+
+                  if (courseNotStarted) {
+                    actions.push({
+                      type: "info",
+                      title: "Course Upcoming",
+                      description: `Course starts ${new Date(
+                        course.schedule.startDate
+                      ).toLocaleDateString()}`,
+                      action: null,
+                      urgent: false,
+                    });
+                  } else if (courseInProgress && !attendanceConfirmed) {
+                    actions.push({
+                      type: "attendance",
+                      title: "Confirm Attendance",
+                      description:
+                        "Course is in progress - confirm your attendance now",
+                      action: "confirm-attendance",
+                      urgent: true,
+                    });
+                  } else if (
+                    courseEnded &&
+                    !attendanceConfirmed &&
+                    canConfirmAttendance
+                  ) {
+                    actions.push({
+                      type: "attendance",
+                      title: "Confirm Attendance (Grace Period)",
+                      description: `Confirm attendance before ${gracePeriodEnd.toLocaleDateString()}`,
+                      action: "confirm-attendance",
+                      urgent: true,
+                    });
+                  } else if (
+                    courseEnded &&
+                    !attendanceConfirmed &&
+                    !canConfirmAttendance
+                  ) {
+                    actions.push({
+                      type: "support",
+                      title: "Contact Support",
+                      description:
+                        "Grace period expired - contact support for assistance",
+                      action: "contact-support",
+                      urgent: false,
+                    });
+                  } else if (
+                    attendanceConfirmed &&
+                    assessmentRequired &&
+                    !assessmentCompleted
+                  ) {
+                    actions.push({
+                      type: "assessment",
+                      title: "Take Assessment",
+                      description:
+                        "Complete the required assessment to finish the course",
+                      action: "take-assessment",
+                      urgent: true,
+                    });
+                  } else if (
+                    attendanceConfirmed &&
+                    assessmentRequired &&
+                    assessmentCompleted &&
+                    !assessmentPassed &&
+                    canRetake
+                  ) {
+                    actions.push({
+                      type: "assessment",
+                      title: "Retake Assessment",
+                      description: `Score: ${assessmentScore}% (need ${
+                        course.assessment?.passingScore || 70
+                      }%) - ${
+                        maxAttempts - currentAttempts
+                      } attempts remaining`,
+                      action: "retake-assessment",
+                      urgent: true,
+                    });
+                  } else if (
+                    attendanceConfirmed &&
+                    assessmentRequired &&
+                    assessmentCompleted &&
+                    !assessmentPassed &&
+                    !canRetake
+                  ) {
+                    actions.push({
+                      type: "support",
+                      title: "Assessment Attempts Exhausted",
+                      description: "Contact support for additional attempts",
+                      action: "contact-support",
+                      urgent: false,
+                    });
+                  } else if (canGetCertificate && !hasCertificate) {
+                    actions.push({
+                      type: "certificate",
+                      title: "Generate Certificate",
+                      description:
+                        "All requirements met - generate your certificate now",
+                      action: "generate-certificate",
+                      urgent: false,
+                    });
+                  } else if (hasCertificate) {
+                    actions.push({
+                      type: "certificate",
+                      title: "View Certificate",
+                      description: "Your certificate is ready",
+                      action: "view-certificate",
+                      urgent: false,
+                    });
+                  }
+
+                  return actions;
+                })(),
               });
+            } else {
+              console.log(`⚠️ Course data missing for enrollment`);
             }
+          } else {
+            console.log(
+              `⚠️ Skipping course - invalid status: ${enrollment.enrollmentData?.status}`
+            );
           }
         } catch (courseError) {
           console.error(`❌ Error loading in-person course:`, {
             error: courseError.message,
+            stack: courseError.stack,
             courseId: enrollment.courseId?._id || "Unknown",
             userId: user._id,
           });
@@ -1364,12 +1766,27 @@ exports.getInPersonLibrary = async (req, res) => {
       }
     }
 
-    // Sort by start date
-    inPersonCourses.sort(
-      (a, b) => new Date(a.startDate) - new Date(b.startDate)
-    );
+    // ✅ ENHANCED: Sort courses by priority and relevance
+    inPersonCourses.sort((a, b) => {
+      // Priority 1: Courses needing urgent action
+      const aUrgent = a.recommendedActions.some((action) => action.urgent);
+      const bUrgent = b.recommendedActions.some((action) => action.urgent);
+      if (aUrgent && !bUrgent) return -1;
+      if (!aUrgent && bUrgent) return 1;
 
-    // Calculate statistics
+      // Priority 2: In progress courses
+      if (a.courseInProgress && !b.courseInProgress) return -1;
+      if (!a.courseInProgress && b.courseInProgress) return 1;
+
+      // Priority 3: Recently ended courses
+      if (a.courseEnded && !b.courseEnded) return -1;
+      if (!a.courseEnded && b.courseEnded) return 1;
+
+      // Priority 4: By start date (newest first)
+      return new Date(b.startDate) - new Date(a.startDate);
+    });
+
+    // ✅ ENHANCED: Calculate comprehensive statistics
     const totalCourses = inPersonCourses.length;
     const attendedCourses = inPersonCourses.filter(
       (course) => course.attendanceConfirmed
@@ -1380,6 +1797,9 @@ exports.getInPersonLibrary = async (req, res) => {
     const upcomingCourses = inPersonCourses.filter(
       (course) => new Date(course.startDate) > new Date()
     ).length;
+    const inProgressCourses = inPersonCourses.filter(
+      (course) => course.courseInProgress
+    ).length;
 
     // Certificate statistics
     const certificatesAvailable = inPersonCourses.filter(
@@ -1389,28 +1809,111 @@ exports.getInPersonLibrary = async (req, res) => {
       (course) => course.canGetCertificate && !course.hasCertificate
     ).length;
 
-    console.log(`📊 In-Person Library Statistics (Safe Mode):`, {
+    // ✅ ENHANCED: Assessment statistics
+    const coursesWithAssessments = inPersonCourses.filter(
+      (c) => c.assessmentRequired
+    ).length;
+    const assessmentsPassed = inPersonCourses.filter(
+      (c) => c.assessmentPassed
+    ).length;
+    const assessmentsPending = inPersonCourses.filter(
+      (c) => c.assessmentRequired && !c.assessmentCompleted
+    ).length;
+    const assessmentsFailed = inPersonCourses.filter(
+      (c) =>
+        c.assessmentRequired && c.assessmentCompleted && !c.assessmentPassed
+    ).length;
+
+    // ✅ ENHANCED: Linked course statistics
+    const linkedCourses = inPersonCourses.filter(
+      (c) => c.linkedCourse.isLinked
+    ).length;
+
+    // ✅ ENHANCED: Urgent actions summary
+    const urgentActions = inPersonCourses.reduce((total, course) => {
+      return (
+        total +
+        course.recommendedActions.filter((action) => action.urgent).length
+      );
+    }, 0);
+
+    // ✅ ENHANCED: Certification eligibility summary
+    const coursesWithCertificationEnabled = inPersonCourses.filter(
+      (c) => c.certificationEnabled
+    ).length;
+
+    console.log(`📊 In-Person Library Statistics (COMPLETELY FIXED):`, {
       totalCourses,
       attendedCourses,
       completedCourses,
       certificatesAvailable,
       certificatesReady,
+      coursesWithAssessments,
+      assessmentsPassed,
+      assessmentsPending,
+      assessmentsFailed,
+      coursesWithCertificationEnabled,
+      linkedCourses,
+      urgentActions,
+      inProgressCourses,
+      upcomingCourses,
     });
 
+    // ✅ ENHANCED: Render with comprehensive data
     res.render("library-in-person", {
       user: req.user,
       myCourses: inPersonCourses,
+
+      // Basic statistics
       totalCourses: totalCourses,
       attendedCourses: attendedCourses,
       completedCourses: completedCourses,
       upcomingCourses: upcomingCourses,
+      inProgressCourses: inProgressCourses,
       certificatesAvailable: certificatesAvailable,
       certificatesReady: certificatesReady,
-      linkedCourses: 0, // Safe value
+
+      // ✅ ENHANCED: Assessment statistics for UI
+      assessmentStats: {
+        total: coursesWithAssessments,
+        passed: assessmentsPassed,
+        pending: assessmentsPending,
+        failed: assessmentsFailed,
+        passRate:
+          coursesWithAssessments > 0
+            ? Math.round((assessmentsPassed / coursesWithAssessments) * 100)
+            : 0,
+      },
+
+      // ✅ ENHANCED: Action items for dashboard
+      actionItems: {
+        urgent: urgentActions,
+        certificatesReady: certificatesReady,
+        assessmentsPending: assessmentsPending,
+        attendanceNeeded: inPersonCourses.filter(
+          (c) => c.canConfirmAttendance && !c.attendanceConfirmed
+        ).length,
+      },
+
+      // ✅ ENHANCED: Feature flags for UI
+      features: {
+        showAssessmentStats: coursesWithAssessments > 0,
+        showCertificationStats: coursesWithCertificationEnabled > 0,
+        showUrgentActions: urgentActions > 0,
+        showProgressTracking: totalCourses > 0,
+        enableAdvancedFiltering: totalCourses > 3,
+        showLinkedCourseInfo: linkedCourses > 0,
+      },
+
+      linkedCourses: linkedCourses,
       title: "Your Library - In-Person Courses",
+      pageType: "in-person-library",
+      lastUpdated: new Date(),
+      dataVersion: "completely-fixed-v3.0",
     });
   } catch (error) {
     console.error("❌ Error in getInPersonLibrary:", error);
+    console.error("❌ Error stack:", error.stack);
     req.flash(
       "error_message",
       "Error loading your in-person courses. Please try again."
@@ -2031,6 +2534,9 @@ exports.getOnlineLiveAssessment = async (req, res) => {
       hasConfirmedAttendance: hasConfirmedAttendance,
       attendedSessions: attendedSessions,
       totalSessions: totalSessions,
+      // ✅ ADD: Explicit course type for the view
+      courseType: "OnlineLiveTraining",
+      courseTypeForUrl: "online-live",
 
       title: `Assessment - ${course.basic.title}`,
     });
@@ -2046,10 +2552,13 @@ exports.getOnlineLiveAssessment = async (req, res) => {
 /**
  * ✅ COMPLETE: In-Person Assessment Submission with Enhanced Error Handling
  */
+/**
+ * ✅ CLEAN: In-Person Assessment Submission - No assessmentAttempts field
+ */
 exports.submitInPersonAssessment = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { answers } = req.body;
+    const { answers, timeSpent } = req.body; // timeSpent in minutes
     const userId = req.user._id;
 
     console.log(
@@ -2057,13 +2566,15 @@ exports.submitInPersonAssessment = async (req, res) => {
       courseId
     );
 
+    // ✅ FIX: Get the course document (not just user enrollment)
     const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
     const course = await InPersonAestheticTraining.findById(courseId);
 
     if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Course not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
     }
 
     if (!course.assessment?.required || course.assessment?.type === "none") {
@@ -2073,6 +2584,7 @@ exports.submitInPersonAssessment = async (req, res) => {
       });
     }
 
+    // ✅ FIX: Verify user enrollment
     const user = await User.findById(userId);
     const enrollment = user.myInPersonCourses.find(
       (c) => c.courseId.toString() === courseId
@@ -2085,102 +2597,130 @@ exports.submitInPersonAssessment = async (req, res) => {
       });
     }
 
-    // Initialize userProgress if needed
-    if (!enrollment.userProgress) {
-      enrollment.userProgress = {};
-    }
+    // ✅ FIX: Check attendance requirement
+    const attendanceConfirmed =
+      enrollment.userProgress?.attendanceRecords?.length > 0 ||
+      enrollment.userProgress?.courseStatus === "completed";
 
-    // Check retake attempts
-    const currentAttempts = enrollment.userProgress.assessmentAttempts || 0;
-    const maxAttempts = (course.assessment.retakesAllowed || 0) + 1; // Initial attempt + retakes
-
-    if (
-      enrollment.userProgress.assessmentCompleted &&
-      currentAttempts >= maxAttempts
-    ) {
+    if (!attendanceConfirmed) {
       return res.status(400).json({
         success: false,
-        message: "You have exceeded the maximum number of attempts",
+        message: "Please confirm your attendance before taking the assessment",
       });
     }
 
-    // Calculate score and build detailed results
-    let correctAnswers = 0;
-    let totalPoints = 0;
-    const questions = course.assessment.questions || [];
-    const detailedResults = [];
+    // ✅ CRITICAL FIX: Use the course model's method instead of manual saving
+    try {
+      // Convert answers object to array format expected by model
+      const answersArray = [];
+      const questions = course.assessment.questions || [];
 
-    questions.forEach((question, index) => {
-      const userAnswer = answers[index];
-      const points = question.points || 1;
-      totalPoints += points;
+      questions.forEach((question, index) => {
+        const userAnswer = answers[index];
+        if (userAnswer !== undefined) {
+          answersArray[index] = parseInt(userAnswer);
+        }
+      });
 
-      const isCorrect =
-        userAnswer !== undefined &&
-        parseInt(userAnswer) === question.correctAnswer;
-      if (isCorrect) {
-        correctAnswers += points;
+      console.log("🔧 Using course model submitAssessmentResults method");
+
+      // ✅ FIX: Call the model method that saves to course.assessment.results[]
+      const result = await course.submitAssessmentResults(
+        userId,
+        answersArray,
+        timeSpent || 0
+      );
+
+      console.log("✅ Assessment saved to course model:", {
+        userId: userId,
+        attemptNumber: result.attemptNumber,
+        score: result.percentage,
+        passed: result.passed,
+      });
+
+      // ✅ ALSO UPDATE: User's enrollment for quick access (optional)
+      if (!enrollment.userProgress) {
+        enrollment.userProgress = {};
       }
 
-      detailedResults.push({
-        questionIndex: index,
-        question: question.question,
-        userAnswer: userAnswer !== undefined ? parseInt(userAnswer) : null,
-        correctAnswer: question.correctAnswer,
-        isCorrect: isCorrect,
-        points: points,
-        earnedPoints: isCorrect ? points : 0,
-        answers: question.answers,
+      // Update user's assessment summary (for UI display purposes)
+      enrollment.userProgress.assessmentCompleted = result.passed;
+      enrollment.userProgress.assessmentScore = result.percentage;
+      enrollment.userProgress.lastAssessmentDate = new Date();
+
+      await user.save();
+      console.log("✅ User enrollment updated with summary");
+
+      // ✅ ENHANCED: Return detailed response
+      res.json({
+        success: true,
+        passed: result.passed,
+        score: result.percentage,
+        totalScore: result.totalScore,
+        totalPossibleScore: result.totalPossibleScore,
+        passingScore: course.assessment.passingScore || 70,
+        attemptNumber: result.attemptNumber,
+
+        // Attempt information
+        currentAttempts: result.attemptNumber,
+        maxAttempts: (course.assessment.retakesAllowed || 0) + 1,
+        canRetake:
+          !result.passed &&
+          result.attemptNumber < (course.assessment.retakesAllowed || 0) + 1,
+
+        // Detailed results
+        responses: result.responses,
+        detailedResults: result.responses.map((response, index) => {
+          const question = questions[index];
+          return {
+            questionIndex: response.questionIndex,
+            question: question?.question || "",
+            userAnswer: response.selectedAnswer,
+            correctAnswer: question?.correctAnswer,
+            isCorrect: response.isCorrect,
+            points: question?.points || 1,
+            earnedPoints: response.pointsEarned,
+            answers: question?.answers || [],
+          };
+        }),
+
+        // Messages
+        message: result.passed
+          ? `Congratulations! You passed with ${result.percentage}%`
+          : `You scored ${result.percentage}%. You need ${
+              course.assessment.passingScore || 70
+            }% to pass.`,
+
+        // Next steps based on linked course logic
+        nextSteps: result.passed
+          ? [
+              "Your assessment has been completed successfully",
+              "Return to your library to generate your certificate",
+              "Share your achievement with your network",
+            ]
+          : [
+              "Review the questions you missed",
+              "Study the course materials again",
+              result.attemptNumber < (course.assessment.retakesAllowed || 0) + 1
+                ? "You can retake the assessment"
+                : "Contact support for additional attempts",
+            ],
       });
-    });
+    } catch (modelError) {
+      console.error("❌ Error using course model method:", modelError);
 
-    const score =
-      totalPoints > 0 ? Math.round((correctAnswers / totalPoints) * 100) : 0;
-    const passed = score >= (course.assessment.passingScore || 70);
-
-    // Update user progress
-    enrollment.userProgress.assessmentCompleted = passed;
-    enrollment.userProgress.assessmentScore = score;
-    enrollment.userProgress.assessmentAttempts = currentAttempts + 1;
-    enrollment.userProgress.lastAssessmentDate = new Date();
-
-    // Store assessment details
-    if (!enrollment.userProgress.assessmentHistory) {
-      enrollment.userProgress.assessmentHistory = [];
+      // ✅ FALLBACK: If model method fails, save directly to user
+      return res.status(500).json({
+        success: false,
+        message: "Error saving assessment results",
+        error:
+          process.env.NODE_ENV === "development"
+            ? modelError.message
+            : undefined,
+      });
     }
-
-    enrollment.userProgress.assessmentHistory.push({
-      attemptNumber: currentAttempts + 1,
-      date: new Date(),
-      score: score,
-      passed: passed,
-      answers: answers,
-      totalQuestions: questions.length,
-      correctAnswers: correctAnswers,
-      detailedResults: detailedResults, // Store detailed results for review
-    });
-
-    await user.save();
-
-    console.log(
-      `✅ In-person assessment submitted successfully. Score: ${score}%, Passed: ${passed}`
-    );
-
-    res.json({
-      success: true,
-      passed: passed,
-      score: score,
-      message: passed
-        ? `Congratulations! You passed with ${score}%`
-        : `You scored ${score}%. You need ${course.assessment.passingScore}% to pass.`,
-      canRetake: !passed && currentAttempts + 1 < maxAttempts,
-      attemptsRemaining: Math.max(0, maxAttempts - (currentAttempts + 1)),
-      totalAttempts: maxAttempts,
-      detailedResults: detailedResults,
-      passingScore: course.assessment.passingScore || 70,
-    });
   } catch (error) {
-    console.error("❌ Error submitting in-person assessment:", error);
+    console.error("❌ Error in submitInPersonAssessment:", error);
     res.status(500).json({
       success: false,
       message: "Error processing assessment submission",
@@ -2192,14 +2732,19 @@ exports.submitInPersonAssessment = async (req, res) => {
 /**
  * ✅ COMPLETE: Get In-Person Assessment with Enhanced Validation
  */
+/**
+/**
+ * ✅ FIXED: Get In-Person Assessment with Correct Data Structure
+ */
 exports.getInPersonAssessment = async (req, res) => {
   try {
     const { courseId } = req.params;
     const userId = req.user._id;
 
+    // ✅ FIX: Get course with assessment data
     const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
     const course = await InPersonAestheticTraining.findById(courseId).select(
-      "basic assessment schedule venue"
+      "basic assessment schedule venue certification"
     );
 
     if (!course) {
@@ -2214,6 +2759,7 @@ exports.getInPersonAssessment = async (req, res) => {
       return res.redirect(`/library/in-person`);
     }
 
+    // ✅ FIX: Get user enrollment
     const user = await User.findById(userId);
     const enrollment = user.myInPersonCourses.find(
       (c) => c.courseId.toString() === courseId
@@ -2226,18 +2772,24 @@ exports.getInPersonAssessment = async (req, res) => {
       });
     }
 
-    // Check if course has ended
-    const courseEnded =
-      new Date(course.schedule.endDate || course.schedule.startDate) <
-      new Date();
-    if (!courseEnded) {
+    // ✅ FIX: Check course timing and attendance
+    const now = new Date();
+    const courseEndDate = new Date(
+      course.schedule.endDate || course.schedule.startDate
+    );
+    const courseStartDate = new Date(course.schedule.startDate);
+
+    const courseEnded = courseEndDate < now;
+    const courseInProgress = courseStartDate <= now && courseEndDate >= now;
+    const courseNotStarted = courseStartDate > now;
+
+    if (courseNotStarted) {
       return res.status(400).render("error", {
-        message: "Assessment is only available after the course has ended",
+        message: "Assessment is only available during or after the course.",
         user: req.user,
       });
     }
 
-    // Check if attendance has been confirmed
     const attendanceConfirmed =
       enrollment.userProgress?.attendanceRecords?.length > 0 ||
       enrollment.userProgress?.courseStatus === "completed";
@@ -2249,34 +2801,68 @@ exports.getInPersonAssessment = async (req, res) => {
       });
     }
 
-    // Get user's assessment history
-    const assessmentHistory = enrollment.userProgress?.assessmentHistory || [];
-    const currentAttempts = enrollment.userProgress?.assessmentAttempts || 0;
-    const maxAttempts = (course.assessment.retakesAllowed || 0) + 1; // Initial attempt + retakes
-    const canTakeAssessment = currentAttempts < maxAttempts;
-    const hasPassedAssessment =
-      enrollment.userProgress?.assessmentCompleted || false;
+    // ✅ CRITICAL FIX: Get assessment history from COURSE MODEL
+    const userAssessmentResults =
+      course.assessment.results?.filter(
+        (result) => result.userId.toString() === userId.toString()
+      ) || [];
 
-    console.log(`🔍 In-Person Assessment Status Check:`, {
+    const currentAttempts = userAssessmentResults.length;
+    const maxAttempts = (course.assessment.retakesAllowed || 0) + 1;
+    const canTakeAssessment = currentAttempts < maxAttempts;
+
+    // ✅ FIX: Get latest result from course model
+    const latestResult =
+      userAssessmentResults.length > 0
+        ? userAssessmentResults[userAssessmentResults.length - 1]
+        : null;
+
+    const hasPassedAssessment = latestResult ? latestResult.passed : false;
+    const assessmentScore = latestResult ? latestResult.percentage : null;
+    const assessmentCompleted = !!latestResult;
+
+    console.log(`🔍 In-Person Assessment Status (Using Course Model):`, {
       courseId,
       userId,
-      courseEnded,
       attendanceConfirmed,
       currentAttempts,
       maxAttempts,
       canTakeAssessment,
       hasPassedAssessment,
+      assessmentScore,
+      assessmentCompleted,
+      totalResultsInCourse: course.assessment.results?.length || 0,
+      userResultsFound: userAssessmentResults.length,
     });
 
     res.render("in-person-assessment", {
       user: req.user,
       course: course,
       assessment: course.assessment,
-      assessmentHistory: assessmentHistory,
+
+      // ✅ FIX: Use course model data
+      assessmentHistory: userAssessmentResults.map((result) => ({
+        attemptNumber: result.attemptNumber,
+        score: result.percentage,
+        passed: result.passed,
+        date: result.completedAt,
+        totalQuestions: result.responses?.length || 0,
+        correctAnswers:
+          result.responses?.filter((r) => r.isCorrect).length || 0,
+      })),
+
       currentAttempts: currentAttempts,
       maxAttempts: maxAttempts,
       canTakeAssessment: canTakeAssessment,
       hasPassedAssessment: hasPassedAssessment,
+      assessmentCompleted: assessmentCompleted,
+      assessmentScore: assessmentScore,
+      attendanceConfirmed: attendanceConfirmed,
+
+      // ✅ ADD: Explicit course type for the view
+      courseType: "InPersonAestheticTraining",
+      courseTypeForUrl: "in-person",
+
       title: `Assessment - ${course.basic.title}`,
     });
   } catch (error) {
@@ -2288,6 +2874,249 @@ exports.getInPersonAssessment = async (req, res) => {
   }
 };
 
+//new
+
+/**
+ * ✅ FIXED: Get In-Person Assessment Results
+ */
+exports.getInPersonAssessmentResults = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user._id;
+
+    console.log("📊 Loading in-person assessment results for:", courseId);
+
+    // ✅ FIX: Require the User model at the top of controller
+    const User = require("../models/user");
+    const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
+
+    const course = await InPersonAestheticTraining.findById(courseId).select(
+      "basic assessment schedule venue certification"
+    );
+
+    if (!course) {
+      console.log("❌ Course not found in database:", courseId);
+      return res.status(404).render("error", {
+        message: "Course not found",
+        user: req.user,
+      });
+    }
+
+    if (!course.assessment?.required || course.assessment?.type === "none") {
+      console.log("❌ Course does not have assessment:", courseId);
+      req.flash("info_message", "This course does not have an assessment.");
+      return res.redirect(`/library/in-person`);
+    }
+
+    // Get user enrollment
+    const user = await User.findById(userId);
+    const enrollment = user.myInPersonCourses.find(
+      (c) => c.courseId.toString() === courseId
+    );
+
+    if (!enrollment) {
+      console.log("❌ User not enrolled in course:", courseId);
+      return res.status(404).render("error", {
+        message: "You are not enrolled in this course",
+        user: req.user,
+      });
+    }
+
+    // Get assessment results from course model
+    const userAssessmentResults =
+      course.assessment.results?.filter(
+        (result) => result.userId.toString() === userId.toString()
+      ) || [];
+
+    console.log(`📊 Found ${userAssessmentResults.length} assessment results`);
+
+    if (userAssessmentResults.length === 0) {
+      req.flash(
+        "info_message",
+        "No assessment results found. Please take the assessment first."
+      );
+      return res.redirect(`/library/in-person/assessment/${courseId}`);
+    }
+
+    // Format results for display
+    const assessmentHistory = userAssessmentResults
+      .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
+      .map((result) => {
+        const questions = course.assessment.questions || [];
+
+        return {
+          attemptNumber: result.attemptNumber,
+          score: result.percentage,
+          passed: result.passed,
+          date: result.completedAt,
+          totalQuestions: questions.length,
+          correctAnswers:
+            result.responses?.filter((r) => r.isCorrect).length || 0,
+          timeSpent: result.timeSpent || null,
+          detailedResults:
+            result.responses?.map((response, index) => {
+              const question = questions[index];
+              return {
+                questionIndex: index,
+                question: question?.question || "",
+                userAnswer: response.selectedAnswer,
+                correctAnswer: question?.correctAnswer,
+                isCorrect: response.isCorrect,
+                points: question?.points || 1,
+                earnedPoints: response.pointsEarned || 0,
+                answers: question?.answers || [],
+              };
+            }) || [],
+        };
+      });
+
+    // Check if user can retake
+    const latestResult =
+      userAssessmentResults[userAssessmentResults.length - 1];
+    const hasPassedAssessment = latestResult ? latestResult.passed : false;
+    const canRetake =
+      !hasPassedAssessment &&
+      userAssessmentResults.length <
+        (course.assessment.retakesAllowed || 0) + 1;
+
+    // Check certificate availability
+    const existingCertificate = user.myCertificates?.find(
+      (cert) =>
+        cert.courseId.toString() === courseId &&
+        cert.courseType === "InPersonAestheticTraining"
+    );
+    const canViewCertificate = hasPassedAssessment && !!existingCertificate;
+
+    console.log("✅ Assessment results loaded successfully");
+
+    res.render("assessment-results", {
+      user: req.user,
+      course: course,
+      assessmentHistory: assessmentHistory,
+      passingScore: course.assessment.passingScore || 70,
+      canRetake: canRetake,
+      canViewCertificate: canViewCertificate,
+      assessmentUrl: `/library/in-person/assessment/${courseId}`,
+      certificateUrl: canViewCertificate
+        ? `/certificates/view/${existingCertificate.certificateId}`
+        : null,
+      libraryUrl: "/library/in-person",
+      title: `Assessment Results - ${course.basic.title}`,
+    });
+  } catch (error) {
+    console.error("❌ Error loading in-person assessment results:", error);
+    console.error("❌ Stack trace:", error.stack);
+    res.status(500).render("error", {
+      message: "Error loading assessment results",
+      user: req.user,
+    });
+  }
+};
+
+/**
+ * ✅ FIXED: Get Online Live Assessment Results
+ */
+exports.getOnlineLiveAssessmentResults = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user._id;
+
+    console.log("📊 Loading online live assessment results for:", courseId);
+
+    // ✅ FIX: Require the User model at the top of controller
+    const User = require("../models/user");
+    const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
+
+    const course = await OnlineLiveTraining.findById(courseId).select(
+      "basic assessment schedule platform attendance"
+    );
+
+    if (!course) {
+      console.log("❌ Course not found in database:", courseId);
+      return res.status(404).render("error", {
+        message: "Course not found",
+        user: req.user,
+      });
+    }
+
+    if (!course.assessment?.required || course.assessment?.type === "none") {
+      console.log("❌ Course does not have assessment:", courseId);
+      req.flash("info_message", "This course does not have an assessment.");
+      return res.redirect(`/library/live`);
+    }
+
+    // Get user enrollment
+    const user = await User.findById(userId);
+    const enrollment = user.myLiveCourses.find(
+      (c) => c.courseId.toString() === courseId
+    );
+
+    if (!enrollment) {
+      console.log("❌ User not enrolled in course:", courseId);
+      return res.status(404).render("error", {
+        message: "You are not enrolled in this course",
+        user: req.user,
+      });
+    }
+
+    // Get assessment history from user enrollment (stored outside userProgress)
+    const assessmentHistory = enrollment.assessmentHistory || [];
+
+    console.log(`📊 Found ${assessmentHistory.length} assessment results`);
+
+    if (assessmentHistory.length === 0) {
+      req.flash(
+        "info_message",
+        "No assessment results found. Please take the assessment first."
+      );
+      return res.redirect(`/library/online-live/assessment/${courseId}`);
+    }
+
+    // Sort by attempt number (latest first for display)
+    const sortedHistory = assessmentHistory.sort(
+      (a, b) => (b.attemptNumber || 0) - (a.attemptNumber || 0)
+    );
+
+    // Check if user can retake
+    const latestAttempt = sortedHistory[0];
+    const hasPassedAssessment = latestAttempt ? latestAttempt.passed : false;
+    const currentAttempts = assessmentHistory.length;
+    const maxAttempts = (course.assessment.retakesAllowed || 0) + 1;
+    const canRetake = !hasPassedAssessment && currentAttempts < maxAttempts;
+
+    // Check certificate availability
+    const existingCertificate = user.myCertificates?.find(
+      (cert) =>
+        cert.courseId.toString() === courseId &&
+        cert.courseType === "OnlineLiveTraining"
+    );
+    const canViewCertificate = hasPassedAssessment && !!existingCertificate;
+
+    console.log("✅ Online live assessment results loaded successfully");
+
+    res.render("assessment-results", {
+      user: req.user,
+      course: course,
+      assessmentHistory: sortedHistory,
+      passingScore: course.assessment.passingScore || 70,
+      canRetake: canRetake,
+      canViewCertificate: canViewCertificate,
+      assessmentUrl: `/library/online-live/assessment/${courseId}`,
+      certificateUrl: canViewCertificate
+        ? `/certificates/view/${existingCertificate.certificateId}`
+        : null,
+      libraryUrl: "/library/live",
+      title: `Assessment Results - ${course.basic.title}`,
+    });
+  } catch (error) {
+    console.error("❌ Error loading online live assessment results:", error);
+    console.error("❌ Stack trace:", error.stack);
+    res.status(500).render("error", {
+      message: "Error loading assessment results",
+      user: req.user,
+    });
+  }
+};
 // ============================================
 // ✅ UTILITY METHODS
 // ============================================

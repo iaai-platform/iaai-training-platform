@@ -4,10 +4,1384 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Library - In-Person Courses</title>
-  <link rel="stylesheet" href="/css/librarystyle.css">
+  <link rel="stylesheet" href="/css/inpersonlibrarystyle.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    /* In-Person Library Professional Styling */
+/* Enhanced styling maintaining brand colors (dark green #002147 and gold #ffcc00) */
+
+:root {
+  /* Brand Colors - Dark Green & Gold Theme */
+  --primary-color: #002147;
+  --secondary-color: #ffcc00;
+  --accent-color: #1a5b3e;
+  --gold-light: #ffd700;
+  --gold-dark: #b8860b;
+  
+  /* Status Colors */
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  
+  /* Neutral Colors */
+  --text-dark: #1a1a1a;
+  --text-medium: #4a4a4a;
+  --text-light: #6c757d;
+  --text-muted: #9ca3af;
+  
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-dark: #002147;
+  
+  /* Border & Shadow */
+  --border-color: #e2e8f0;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 20px;
+  --border-radius-xl: 24px;
+  
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.2);
+  
+  /* Brand Gradients */
+  --gradient-primary: linear-gradient(135deg, #002147 0%, #1a5b3e 100%);
+  --gradient-secondary: linear-gradient(135deg, #ffcc00 0%, #ffd700 100%);
+  --gradient-accent: linear-gradient(135deg, #002147 0%, #1a5b3e 60%, #ffcc00 100%);
+  --gradient-gold: linear-gradient(135deg, #ffd700 0%, #ffcc00 50%, #b8860b 100%);
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease-out;
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Hero Section */
+#hero {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 140px 0 100px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(255, 204, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+    linear-gradient(45deg, transparent 30%, rgba(255, 204, 0, 0.03) 50%, transparent 70%);
+  z-index: 1;
+}
+
+#hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(180deg, transparent 0%, rgba(248, 250, 252, 0.1) 100%);
+  z-index: 2;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 30px;
+  animation: heroSlideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes heroSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-content h1 {
+  font-size: clamp(2.8rem, 6vw, 4.5rem);
+  font-weight: 800;
+  margin-bottom: 30px;
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.hero-content h1 i {
+  color: var(--secondary-color);
+  margin-right: 20px;
+  text-shadow: 0 4px 8px rgba(255, 204, 0, 0.4);
+}
+
+.hero-content p {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  opacity: 0.95;
+  max-width: 650px;
+  margin: 0 auto;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Enhanced Statistics Section */
+.library-stats {
+  background: var(--bg-primary);
+  padding: 60px 40px;
+  margin: -80px auto 80px;
+  max-width: 1300px;
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-xl);
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.library-stats::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-secondary);
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  text-align: center;
+}
+
+.stat-item {
+  padding: 35px 20px;
+  border-radius: var(--border-radius-lg);
+  transition: var(--transition-smooth);
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 33, 71, 0.02), rgba(255, 204, 0, 0.02));
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-accent);
+  border-radius: var(--border-radius-lg);
+  opacity: 0;
+  transition: var(--transition-smooth);
+  z-index: -1;
+}
+
+.stat-item:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--secondary-color);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-item:hover::before {
+  opacity: 0.05;
+}
+
+.stat-item:hover .stat-number {
+  transform: scale(1.1);
+}
+
+.stat-number {
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-weight: 900;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  display: block;
+  line-height: 1;
+  transition: var(--transition-smooth);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  color: var(--text-medium);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+/* Professional Course Cards */
+.course-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 40px;
+  animation: courseGridReveal 1s ease-out;
+}
+
+@keyframes courseGridReveal {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-card {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-smooth);
+  border: 1px solid var(--border-color);
+  position: relative;
+  animation: cardFloatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--card-index, 0) * 0.1s);
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+@keyframes cardFloatIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-accent);
+  opacity: 0;
+  transition: var(--transition-smooth);
+  z-index: 0;
+  border-radius: var(--border-radius-xl);
+}
+
+.course-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--secondary-color);
+}
+
+.course-card:hover::before {
+  opacity: 0.02;
+}
+
+/* Status-based Card Styling */
+.course-card.completed {
+  border-left: 6px solid var(--success-color);
+}
+
+.course-card.completed::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: var(--success-color);
+  border-radius: 50%;
+  opacity: 0.1;
+}
+
+.course-card.in-progress,
+.course-card.attended {
+  border-left: 6px solid var(--info-color);
+}
+
+.course-card.upcoming {
+  border-left: 6px solid var(--accent-color);
+}
+
+.course-card.needs-action {
+  border-left: 6px solid var(--warning-color);
+  animation: pulseAttention 3s ease-in-out infinite;
+}
+
+@keyframes pulseAttention {
+  0%, 100% { box-shadow: var(--shadow-md); }
+  50% { box-shadow: 0 8px 24px rgba(255, 193, 7, 0.2), var(--shadow-md); }
+}
+
+/* Enhanced Course Header */
+.course-header {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.course-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 204, 0, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.course-header::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(45deg, rgba(255, 204, 0, 0.1), transparent);
+  border-radius: 50%;
+  animation: floatReverse 8s ease-in-out infinite;
+}
+
+@keyframes floatReverse {
+  0%, 100% { transform: translateX(0) scale(1); }
+  50% { transform: translateX(15px) scale(1.1); }
+}
+
+/* Course Status Badge */
+.course-status {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 18px;
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 5;
+  transition: var(--transition-smooth);
+}
+
+.course-status:hover {
+  transform: scale(1.05);
+}
+
+.status-completed {
+  background: rgba(40, 167, 69, 0.9);
+  color: white;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.status-progress,
+.status-attended {
+  background: rgba(23, 162, 184, 0.9);
+  color: white;
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.status-upcoming {
+  background: rgba(26, 91, 62, 0.9);
+  color: white;
+  box-shadow: 0 4px 12px rgba(26, 91, 62, 0.3);
+}
+
+.status-needs-action {
+  background: rgba(255, 193, 7, 0.9);
+  color: var(--text-dark);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Linked Course Badge */
+.linked-course-badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: var(--gradient-secondary);
+  color: var(--text-dark);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  z-index: 5;
+  animation: linkedBadgeGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes linkedBadgeGlow {
+  from { box-shadow: 0 4px 12px rgba(255, 204, 0, 0.4); }
+  to { box-shadow: 0 6px 16px rgba(255, 204, 0, 0.6); }
+}
+
+.linked-course-text {
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Course Title and Meta */
+.course-title {
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  font-weight: 800;
+  margin: 20px 0 20px 0;
+  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
+}
+
+.course-code {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0 0 15px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.course-meta {
+  opacity: 0.95;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  font-weight: 400;
+  position: relative;
+  z-index: 2;
+}
+
+.course-meta i {
+  margin-right: 10px;
+  opacity: 0.9;
+  width: 16px;
+  color: var(--secondary-color);
+}
+
+/* Course Body */
+.course-body {
+  padding: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.course-description {
+  color: var(--text-medium);
+  margin-bottom: 30px;
+  line-height: 1.7;
+  font-size: 1.05rem;
+  font-weight: 400;
+}
+
+/* Enhanced Course Info Grid */
+.course-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+  padding: 30px;
+  background: linear-gradient(135deg, rgba(0, 33, 71, 0.02), rgba(255, 204, 0, 0.02));
+  border-radius: var(--border-radius-lg);
+  border: 2px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.course-info-grid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-secondary);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.course-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 15px;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  transition: var(--transition-smooth);
+  position: relative;
+}
+
+.course-info-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-accent);
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+  transform: scaleX(0);
+  transition: var(--transition-smooth);
+}
+
+.course-info-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--secondary-color);
+}
+
+.course-info-item:hover::before {
+  transform: scaleX(1);
+}
+
+.info-label {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-label i {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Linked Course Info Section */
+.linked-course-info {
+  margin: 30px 0;
+  animation: linkedCourseGlow 4s ease-in-out infinite alternate;
+  position: relative;
+  overflow: hidden;
+}
+
+.linked-course-info > div {
+  position: relative;
+  z-index: 2;
+}
+
+.linked-course-info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--gradient-secondary);
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+  animation: shimmerGold 2s linear infinite;
+}
+
+@keyframes linkedCourseGlow {
+  from { box-shadow: 0 0 15px rgba(23, 162, 184, 0.3); }
+  to { box-shadow: 0 0 25px rgba(255, 204, 0, 0.4); }
+}
+
+@keyframes shimmerGold {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.linked-course-info h5 {
+  color: var(--primary-color);
+  margin: 0 0 20px 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.linked-course-info h5 i {
+  color: var(--secondary-color);
+  font-size: 1.4rem;
+}
+
+/* Enhanced Material Section */
+.video-section {
+  margin-top: 35px;
+}
+
+.video-section h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.video-section h4 i {
+  color: var(--secondary-color);
+  font-size: 1.3rem;
+}
+
+.video-list {
+  max-height: 450px;
+  overflow-y: auto;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  background: var(--bg-primary);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.video-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.video-list::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 5px;
+  margin: 5px;
+}
+
+.video-list::-webkit-scrollbar-thumb {
+  background: var(--gradient-secondary);
+  border-radius: 5px;
+  border: 2px solid var(--bg-tertiary);
+}
+
+.video-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-gold);
+}
+
+/* Enhanced Video Item */
+.video-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "number info actions";
+  align-items: center;
+  gap: 20px;
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--border-color);
+  transition: var(--transition-smooth);
+  position: relative;
+  min-height: 90px;
+}
+
+.video-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: transparent;
+  transition: var(--transition-smooth);
+}
+
+.video-item:hover {
+  background: linear-gradient(135deg, rgba(0, 33, 71, 0.02), rgba(255, 204, 0, 0.02));
+  transform: translateX(5px);
+}
+
+.video-item:hover::before {
+  background: var(--gradient-secondary);
+}
+
+.video-item:last-child {
+  border-bottom: none;
+}
+
+.video-number {
+  grid-area: number;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+  transition: var(--transition-smooth);
+  border: 3px solid var(--border-color);
+  box-shadow: var(--shadow-xs);
+}
+
+.video-number:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: var(--shadow-sm);
+}
+
+.video-info {
+  grid-area: info;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.video-title {
+  font-weight: 700;
+  color: var(--text-dark);
+  font-size: 1rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.video-meta {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.video-meta i {
+  color: var(--primary-color);
+}
+
+.video-actions {
+  grid-area: actions;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  min-width: 120px;
+}
+
+.video-action {
+  padding: 8px 16px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  border: 2px solid transparent;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.action-watch {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.action-watch:hover {
+  background: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 33, 71, 0.3);
+}
+
+.action-exam,
+.action-view {
+  background: var(--gradient-secondary);
+  color: var(--text-dark);
+  border-color: var(--secondary-color);
+}
+
+.action-exam:hover,
+.action-view:hover {
+  background: var(--gold-dark);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 204, 0, 0.4);
+}
+
+.action-review {
+  background: linear-gradient(135deg, var(--info-color), #20c997);
+  color: white;
+  border-color: var(--info-color);
+}
+
+.action-review:hover {
+  background: var(--info-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(23, 162, 184, 0.3);
+}
+
+/* Professional Action Buttons */
+.course-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 35px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cta-btn {
+  flex: 1;
+  min-width: 180px;
+  padding: 18px 30px;
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border: 2px solid transparent;
+}
+
+.cta-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: var(--transition-smooth);
+}
+
+.cta-btn:hover::before {
+  left: 100%;
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background: var(--primary-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 33, 71, 0.3);
+}
+
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 33, 71, 0.2);
+}
+
+.btn-certificate {
+  background: var(--gradient-gold) !important;
+  color: var(--text-dark) !important;
+  font-weight: 900 !important;
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4) !important;
+  border-color: var(--gold-dark) !important;
+  animation: certificateGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes certificateGlow {
+  from { box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4); }
+  to { box-shadow: 0 8px 28px rgba(255, 215, 0, 0.6); }
+}
+
+.btn-certificate:hover {
+  background: var(--gold-dark) !important;
+  color: white !important;
+  transform: translateY(-4px) scale(1.02) !important;
+  box-shadow: 0 10px 32px rgba(255, 215, 0, 0.5) !important;
+}
+
+.btn-generate-certificate {
+  background: var(--gradient-secondary) !important;
+  color: var(--text-dark) !important;
+  animation: pulse-certificate 2s ease-in-out infinite;
+  font-weight: 900 !important;
+}
+
+@keyframes pulse-certificate {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7), 0 6px 20px rgba(255, 204, 0, 0.3); 
+  }
+  50% { 
+    box-shadow: 0 0 0 15px rgba(255, 204, 0, 0), 0 8px 24px rgba(255, 204, 0, 0.4); 
+  }
+}
+
+.btn-confirm-attendance {
+  background: linear-gradient(135deg, var(--info-color), #20c997) !important;
+  color: white !important;
+}
+
+.btn-confirm-attendance:hover {
+  background: var(--info-color) !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 24px rgba(23, 162, 184, 0.3) !important;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, var(--warning-color), #f8b500);
+  color: var(--text-dark);
+  border-color: var(--warning-color);
+}
+
+.btn-warning:hover {
+  background: #f8b500;
+  color: white;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 193, 7, 0.3);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success-color), #20c997);
+  color: white;
+  border-color: var(--success-color);
+}
+
+.btn-success:hover {
+  background: var(--success-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(40, 167, 69, 0.3);
+}
+
+.btn-outline-secondary {
+  background: transparent;
+  color: var(--text-medium);
+  border-color: var(--border-color);
+}
+
+.btn-outline-secondary:hover {
+  background: var(--bg-secondary);
+  color: var(--text-dark);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+/* Certificate Status Section */
+.certificate-status-section {
+  border-left: 5px solid var(--secondary-color);
+  transition: var(--transition-smooth);
+  position: relative;
+}
+
+.certificate-status-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -5px;
+  width: 5px;
+  height: 100%;
+  background: var(--gradient-gold);
+  animation: progressGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes progressGlow {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+.certificate-status-section:hover {
+  border-left-color: var(--gold-dark);
+  box-shadow: 0 4px 16px rgba(255, 204, 0, 0.1);
+  transform: translateX(3px);
+}
+
+/* Assessment Section Styling */
+.course-info-section {
+  margin: 25px 0;
+  transition: var(--transition-smooth);
+}
+
+.course-info-section h5 {
+  margin: 0 0 20px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-dark);
+}
+
+.course-info-section h5 i {
+  color: var(--secondary-color);
+  font-size: 1.3rem;
+}
+
+/* Empty State Enhancement */
+.empty-state {
+  text-align: center;
+  padding: 100px 40px;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--border-color);
+  animation: fadeInUp 1s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.empty-state::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--gradient-secondary);
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+}
+
+.empty-state i {
+  font-size: 5rem;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+  opacity: 0.6;
+}
+
+.empty-state h3 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+  line-height: 1.7;
+  color: var(--text-medium);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Loading States */
+.loading {
+  pointer-events: none;
+  opacity: 0.7;
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin: auto;
+  border: 3px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .course-list {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 35px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .course-list {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+  }
+  
+  .library-stats {
+    padding: 40px 25px;
+    margin: -60px auto 60px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+  }
+  
+  .course-info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 0 20px;
+  }
+
+  .course-list {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .course-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cta-btn {
+    min-width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .video-item {
+    grid-template-columns: auto 1fr;
+    grid-template-areas: 
+      "number info"
+      "actions actions";
+    gap: 15px;
+    padding: 18px 20px;
+  }
+
+  .video-actions {
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .course-header {
+    padding: 30px;
+    min-height: 180px;
+  }
+
+  .course-body {
+    padding: 30px;
+  }
+
+  .library-stats {
+    margin: -50px auto 50px;
+    padding: 30px 20px;
+  }
+
+  .course-info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .linked-course-badge,
+  .course-status {
+    position: static;
+    margin-bottom: 15px;
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .video-list {
+    max-height: 350px;
+  }
+
+  .video-item {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .video-number {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .cta-btn {
+    padding: 16px 24px;
+    font-size: 0.9rem;
+  }
+
+  .course-header {
+    padding: 25px;
+    min-height: 160px;
+  }
+
+  .empty-state {
+    padding: 60px 20px;
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+  }
+}
+
+/* Focus and Accessibility */
+.cta-btn:focus,
+.video-action:focus {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: 3px;
+}
+
+.course-card:focus {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: 3px;
+}
+
+/* Print Styles */
+@media print {
+  .hero-content,
+  .library-stats,
+  .video-actions,
+  .course-actions,
+  .linked-course-badge,
+  .course-status {
+    display: none;
+  }
+  
+  .course-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 2px solid var(--primary-color);
+    margin-bottom: 30px;
+  }
+  
+  .course-header {
+    background: var(--bg-secondary) !important;
+    color: var(--text-dark) !important;
+  }
+  
+  .linked-course-info {
+    border: 3px solid var(--secondary-color) !important;
+    animation: none !important;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #3a3a3a;
+    --text-dark: #ffffff;
+    --text-medium: #e0e0e0;
+    --text-light: #b0b0b0;
+    --border-color: #404040;
+  }
+  
+  .course-card {
+    background: var(--bg-primary);
+    border-color: var(--border-color);
+  }
+  
+  .video-list {
+    background: var(--bg-primary);
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .course-card {
+    border: 3px solid var(--primary-color);
+  }
+  
+  .cta-btn {
+    border: 3px solid currentColor;
+  }
+  
+  .linked-course-badge,
+  .course-status {
+    border: 3px solid white;
+    font-weight: 900;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .course-card:hover,
+  .cta-btn:hover,
+  .video-item:hover {
+    transform: none !important;
+  }
+}
+  </style>
 </head>
 
 <body>
@@ -275,44 +1649,59 @@
               <% } %>
 
               <!-- Assessment Information (if required) -->
-              <% if (course.assessmentRequired) { %>
-                <div class="course-info-section" style="margin: 20px 0;">
-                  <h5 style="color: #333; margin-bottom: 10px;">
-                    <i class="fas fa-clipboard-check"></i> Assessment Information
-                  </h5>
-                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                    <% if (course.assessmentCompleted && course.assessmentPassed) { %>
-                      <div style="color: #28a745; font-weight: 600;">
-                        <i class="fas fa-check-circle"></i> Assessment Passed
-                        <span style="float: right; font-weight: normal;">
-                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
-                        </span>
-                      </div>
-                    <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
-                      <div style="color: #dc3545; font-weight: 600;">
-                        <i class="fas fa-times-circle"></i> Assessment Not Passed
-                        <span style="float: right; font-weight: normal;">
-                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
-                        </span>
-                      </div>
-                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
-                        Attempts: <%= course.currentAttempts %> / <%= course.maxAttempts %>
-                      </div>
-                    <% } else { %>
-                      <div style="color: #ffc107; font-weight: 600;">
-                        <i class="fas fa-clock"></i> Assessment Pending
-                        <span style="float: right; font-weight: normal;">
-                          Required: <%= course.passingScore || 70 %>%
-                        </span>
-                      </div>
-                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
-                        Assessment Type: <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %>
-                        <br>Attempts available: <%= course.maxAttempts %>
-                      </div>
-                    <% } %>
-                  </div>
-                </div>
-              <% } %>
+ <!-- Assessment Information (Enhanced) -->
+<% if (course.assessmentRequired) { %>
+  <div class="course-info-section" style="margin: 20px 0;">
+    <h5 style="color: #333; margin-bottom: 10px;">
+      <i class="fas fa-clipboard-check"></i> Assessment Status
+    </h5>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+      
+      <% if (course.assessmentCompleted && course.assessmentPassed) { %>
+        <!-- ✅ ASSESSMENT PASSED -->
+        <div style="color: #28a745; font-weight: 600;">
+          <i class="fas fa-trophy"></i> Assessment Completed Successfully
+          <span style="float: right; font-weight: normal;">
+            Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
+          </span>
+        </div>
+        <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+          <i class="fas fa-calendar-check"></i> Completed: <%= course.lastAssessmentDate ? new Date(course.lastAssessmentDate).toLocaleDateString() : 'Recently' %><br>
+          <i class="fas fa-redo"></i> Attempts Used: <%= course.currentAttempts %> of <%= course.maxAttempts %>
+        </div>
+        
+      <% } else if (course.hasAttempted && !course.assessmentPassed) { %>
+        <!-- ❌ ASSESSMENT FAILED -->
+        <div style="color: #dc3545; font-weight: 600;">
+          <i class="fas fa-times-circle"></i> Assessment Not Passed
+          <span style="float: right; font-weight: normal;">
+            Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
+          </span>
+        </div>
+        <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+          <i class="fas fa-calendar-times"></i> Last Attempt: <%= course.lastAssessmentDate ? new Date(course.lastAssessmentDate).toLocaleDateString() : 'Recently' %><br>
+          <i class="fas fa-redo"></i> Attempts: <%= course.currentAttempts %> of <%= course.maxAttempts %>
+          <% if (course.canRetake) { %>
+            <br><span style="color: #ffc107;"><i class="fas fa-info-circle"></i> You can retake the assessment</span>
+          <% } %>
+        </div>
+        
+      <% } else { %>
+        <!-- ⏳ ASSESSMENT PENDING -->
+        <div style="color: #ffc107; font-weight: 600;">
+          <i class="fas fa-clock"></i> Assessment Pending
+          <span style="float: right; font-weight: normal;">
+            Required: <%= course.passingScore || 70 %>%
+          </span>
+        </div>
+        <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+          Assessment Type: <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %>
+          <br>Attempts available: <%= course.maxAttempts %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+<% } %>
 
               <!-- Course Registration Information -->
               <div class="course-info-section" style="margin: 20px 0;">
@@ -558,205 +1947,419 @@
               <% } %>
 
               <!-- Course Status and Next Steps -->
-              <% if (course.courseEnded && !course.canViewCertificate) { %>
-                <div class="course-info-section" style="margin: 20px 0;">
-                  
-                  <!-- Step 1: Attendance Confirmation (FIRST) -->
-                  <% if (!course.attendanceConfirmed) { %>
-                    <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
-                      <h5 style="color: #721c24; margin: 0 0 10px 0;">
-                        <i class="fas fa-user-check"></i> Step 1: Confirm Your Attendance
-                      </h5>
-                      <p style="margin: 0 0 15px 0; color: #721c24;">
-                        Please confirm that you attended this in-person course to proceed.
-                      </p>
-                      <button class="cta-btn btn-confirm-attendance" 
-                              data-course-id="<%= course.courseId %>"
-                              data-course-type="<%= course.courseType %>"
-                              style="margin: 0;">
-                        <i class="fas fa-check"></i> Confirm Attendance
-                      </button>
-                    </div>
-                  <% } else { %>
-                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
-                      <h5 style="color: #155724; margin: 0 0 5px 0;">
-                        <i class="fas fa-check-circle"></i> Step 1: Attendance Confirmed ✅
-                      </h5>
-                      <p style="margin: 0; color: #155724; font-size: 0.9rem;">
-                        <% if (course.attendanceDate) { %>
-                          Confirmed on <%= new Date(course.attendanceDate).toLocaleDateString() %>
-                        <% } else { %>
-                          Attendance confirmed
-                        <% } %>
-                      </p>
-                    </div>
-                  <% } %>
+              <!-- Course Status and Next Steps -->
+<% if (course.courseEnded && !course.canViewCertificate) { %>
+  <div class="course-info-section" style="margin: 20px 0;">
+    
+    <!-- Step 1: Attendance Confirmation (FIRST) -->
+    <% if (!course.attendanceConfirmed) { %>
+      <% if (course.canConfirmAttendance) { %>
+        <!-- ✅ ATTENDANCE AVAILABLE -->
+        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107; margin-bottom: 15px;">
+          <h5 style="color: #856404; margin: 0 0 10px 0;">
+            <i class="fas fa-user-check"></i> Step 1: Confirm Your Attendance
+          </h5>
+          <p style="margin: 0 0 15px 0; color: #856404;">
+            <% if (course.courseInProgress) { %>
+              <i class="fas fa-clock"></i> Course is currently in progress. You can confirm your attendance now.
+            <% } else if (course.courseEnded) { %>
+              <i class="fas fa-calendar-times"></i> Course has ended. Please confirm your attendance within the grace period.
+              <br><small>Grace period ends: <%= new Date(course.attendanceGracePeriodEnd).toLocaleDateString() %></small>
+            <% } %>
+          </p>
+          <button class="cta-btn btn-confirm-attendance" 
+                  data-course-id="<%= course.courseId %>"
+                  data-course-type="<%= course.courseType %>"
+                  style="margin: 0;">
+            <i class="fas fa-check"></i> Confirm Attendance
+          </button>
+        </div>
+      <% } else { %>
+        <!-- ✅ GRACE PERIOD EXPIRED -->
+        <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
+          <h5 style="color: #721c24; margin: 0 0 10px 0;">
+            <i class="fas fa-exclamation-triangle"></i> Step 1: Attendance Confirmation Expired
+          </h5>
+          <p style="margin: 0 0 15px 0; color: #721c24;">
+            The grace period for confirming attendance has expired. Please contact support if you attended this course.
+          </p>
+          <a href="/contact" class="cta-btn btn-secondary" style="margin: 0;">
+            <i class="fas fa-envelope"></i> Contact Support
+          </a>
+        </div>
+      <% } %>
+    <% } else { %>
+      <!-- ✅ ATTENDANCE CONFIRMED -->
+      <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
+        <h5 style="color: #155724; margin: 0 0 5px 0;">
+          <i class="fas fa-check-circle"></i> Step 1: Attendance Confirmed ✅
+        </h5>
+        <p style="margin: 0; color: #155724; font-size: 0.9rem;">
+          <% if (course.attendanceDate) { %>
+            Confirmed on <%= new Date(course.attendanceDate).toLocaleDateString() %>
+          <% } else { %>
+            Attendance confirmed
+          <% } %>
+        </p>
+      </div>
+    <% } %>
 
-                  <!-- Step 2: Assessment (SECOND) -->
-                  <% if (course.assessmentRequired) { %>
-                    <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%); padding: 20px; border-radius: 12px; border: 2px solid #17a2b8;">
-                      <h5 style="color: #17a2b8; margin: 0 0 15px 0;">
-                        <i class="fas fa-clipboard-check"></i> Step 2: Complete Assessment
-                        <% if (course.assessmentCompleted && course.assessmentPassed) { %>
-                          <span style="color: #28a745; font-size: 0.9rem; margin-left: 10px;">✅ COMPLETED</span>
-                        <% } %>
-                      </h5>
-                      <div style="display: grid; gap: 10px; margin-bottom: 15px;">
-                        <div><i class="fas fa-target" style="color: #17a2b8; width: 20px;"></i> <strong>Passing Score:</strong> <%= course.passingScore %>%</div>
-                        <div><i class="fas fa-question-circle" style="color: #17a2b8; width: 20px;"></i> <strong>Assessment Type:</strong> <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %></div>
-                        <div><i class="fas fa-redo" style="color: #17a2b8; width: 20px;"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %></div>
-                      </div>
-                      
-                      <% if (course.assessmentCompleted && course.assessmentPassed) { %>
-                        <!-- COMPLETED STATE -->
-                        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
-                          <h6 style="color: #155724; margin: 0 0 10px 0;">
-                            <i class="fas fa-trophy"></i> Assessment Completed Successfully!
-                          </h6>
-                          <div style="color: #155724;">
-                            <i class="fas fa-check-circle"></i> <strong>Score:</strong> <%= course.assessmentScore %>% - <span style="color: #28a745; font-weight: 700;">PASSED</span><br>
-                            <% if (course.lastAssessmentDate) { %>
-                              <i class="fas fa-calendar-check"></i> <strong>Completed:</strong> <%= new Date(course.lastAssessmentDate).toLocaleDateString() %><br>
-                            <% } %>
-                            <i class="fas fa-redo"></i> <strong>Attempts Used:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
-                          </div>
-                        </div>
-                        
-                      <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
-                        <!-- FAILED STATE -->
-                        <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
-                          <h6 style="color: #721c24; margin: 0 0 10px 0;">
-                            <i class="fas fa-times-circle"></i> Assessment Not Passed
-                          </h6>
-                          <div style="color: #721c24;">
-                            <i class="fas fa-chart-line"></i> <strong>Your Score:</strong> <%= course.assessmentScore %>%<br>
-                            <i class="fas fa-target"></i> <strong>Required:</strong> <%= course.passingScore %>%<br>
-                            <i class="fas fa-redo"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
-                            <% if (course.canRetake) { %>
-                              <br><span style="color: #ffc107;"><i class="fas fa-info-circle"></i> You can retake the assessment</span>
-                            <% } %>
-                          </div>
-                        </div>
-                        
-                        <% if (course.canRetake) { %>
-                          <a href="/library/in-person/assessment/<%= course.courseId %>" 
-                             class="cta-btn btn-warning" style="margin: 0;">
-                            <i class="fas fa-redo"></i> Retake Assessment
-                          </a>
-                        <% } %>
-                        
-                      <% } else { %>
-                        <!-- NOT STARTED STATE -->
-                        <p style="margin: 0 0 15px 0; color: #17a2b8;">
-                          <% if (!course.attendanceConfirmed) { %>
-                            <i class="fas fa-lock"></i> Complete Step 1 (Attendance) first to unlock assessment.
-                          <% } else { %>
-                            <i class="fas fa-play-circle"></i> Ready to take assessment.
-                          <% } %>
-                        </p>
-                        
-                        <% if (course.attendanceConfirmed) { %>
-                          <a href="/library/in-person/assessment/<%= course.courseId %>" 
-                             class="cta-btn btn-primary" style="margin: 0;">
-                            <i class="fas fa-clipboard-check"></i> Take Assessment
-                          </a>
-                        <% } else { %>
-                          <button class="cta-btn" 
-                                  style="background: #6c757d; color: white; cursor: not-allowed; margin: 0;" 
-                                  disabled>
-                            <i class="fas fa-lock"></i> Assessment Locked
-                          </button>
-                        <% } %>
-                      <% } %>
-                    </div>
-                  <% } else { %>
-                    <!-- No Assessment Required -->
-                    <% if (course.attendanceConfirmed && course.canGetCertificate) { %>
-                      <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
-                        <h6 style="color: #155724; margin: 0 0 10px 0;">
-                          <i class="fas fa-check-circle"></i> Course Completed Successfully!
-                        </h6>
-                        <p style="margin: 0; color: #155724;">
-                          No assessment required for this course. You can now generate your certificate.
-                        </p>
-                      </div>
-                    <% } %>
-                  <% } %>
-                </div>
-              <% } else if (!course.courseEnded) { %>
-                <!-- Course Not Ended Yet -->
-                <div class="course-info-section" style="margin: 20px 0;">
-                  <div style="background: linear-gradient(135deg, #e8f5e8 0%, #d4f4dd 100%); padding: 20px; border-radius: 12px; border: 2px solid #4caf50;">
-                    <h5 style="color: #2e7d32; margin: 0 0 15px 0;">
-                      <i class="fas fa-calendar-day"></i> Course Schedule
-                    </h5>
-                    <div style="display: grid; gap: 10px;">
-                      <% if (new Date(course.startDate) > new Date()) { %>
-                        <div><i class="fas fa-hourglass-start" style="color: #2e7d32; width: 20px;"></i> <strong>Status:</strong> Course starts in <%= Math.ceil((new Date(course.startDate) - new Date()) / (1000 * 60 * 60 * 24)) %> days</div>
-                      <% } else { %>
-                        <div><i class="fas fa-play-circle" style="color: #2e7d32; width: 20px;"></i> <strong>Status:</strong> Course is currently in progress</div>
-                      <% } %>
-                      <div><i class="fas fa-calendar-alt" style="color: #2e7d32; width: 20px;"></i> <strong>Start Date:</strong> <%= new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-                      <% if (course.endDate && course.endDate !== course.startDate) { %>
-                        <div><i class="fas fa-calendar-times" style="color: #2e7d32; width: 20px;"></i> <strong>End Date:</strong> <%= new Date(course.endDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-                      <% } %>
-                    </div>
-                  </div>
-                </div>
+    <!-- Step 2: Assessment (SECOND) -->
+    <% if (course.assessmentRequired) { %>
+      <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%); padding: 20px; border-radius: 12px; border: 2px solid #17a2b8;">
+        <h5 style="color: #17a2b8; margin: 0 0 15px 0;">
+          <i class="fas fa-clipboard-check"></i> Step 2: Complete Assessment
+          <% if (course.assessmentCompleted && course.assessmentPassed) { %>
+            <span style="color: #28a745; font-size: 0.9rem; margin-left: 10px;">✅ COMPLETED</span>
+          <% } %>
+        </h5>
+        <div style="display: grid; gap: 10px; margin-bottom: 15px;">
+          <div><i class="fas fa-target" style="color: #17a2b8; width: 20px;"></i> <strong>Passing Score:</strong> <%= course.passingScore %>%</div>
+          <div><i class="fas fa-question-circle" style="color: #17a2b8; width: 20px;"></i> <strong>Assessment Type:</strong> <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %></div>
+          <div><i class="fas fa-redo" style="color: #17a2b8; width: 20px;"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %></div>
+        </div>
+        
+        <% if (course.assessmentCompleted && course.assessmentPassed) { %>
+          <!-- COMPLETED STATE -->
+          <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
+            <h6 style="color: #155724; margin: 0 0 10px 0;">
+              <i class="fas fa-trophy"></i> Assessment Completed Successfully!
+            </h6>
+            <div style="color: #155724;">
+              <i class="fas fa-check-circle"></i> <strong>Score:</strong> <%= course.assessmentScore %>% - <span style="color: #28a745; font-weight: 700;">PASSED</span><br>
+              <% if (course.lastAssessmentDate) { %>
+                <i class="fas fa-calendar-check"></i> <strong>Completed:</strong> <%= new Date(course.lastAssessmentDate).toLocaleDateString() %><br>
               <% } %>
+              <i class="fas fa-redo"></i> <strong>Attempts Used:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
+            </div>
+          </div>
+          
+        <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
+          <!-- FAILED STATE -->
+          <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
+            <h6 style="color: #721c24; margin: 0 0 10px 0;">
+              <i class="fas fa-times-circle"></i> Assessment Not Passed
+            </h6>
+            <div style="color: #721c24;">
+              <i class="fas fa-chart-line"></i> <strong>Your Score:</strong> <%= course.assessmentScore %>%<br>
+              <i class="fas fa-target"></i> <strong>Required:</strong> <%= course.passingScore %>%<br>
+              <i class="fas fa-redo"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
+              <% if (course.canRetake) { %>
+                <br><span style="color: #ffc107;"><i class="fas fa-info-circle"></i> You can retake the assessment</span>
+              <% } %>
+            </div>
+          </div>
+          
+          <% if (course.canRetake) { %>
+            <a href="/library/in-person/assessment/<%= course.courseId %>" 
+               class="cta-btn btn-warning" style="margin: 0;">
+              <i class="fas fa-redo"></i> Retake Assessment
+            </a>
+          <% } %>
+          
+        <% } else { %>
+          <!-- NOT STARTED STATE -->
+          <p style="margin: 0 0 15px 0; color: #17a2b8;">
+            <% if (!course.attendanceConfirmed) { %>
+              <i class="fas fa-lock"></i> Complete Step 1 (Attendance) first to unlock assessment.
+            <% } else { %>
+              <i class="fas fa-play-circle"></i> Ready to take assessment.
+            <% } %>
+          </p>
+          
+          <% if (course.attendanceConfirmed) { %>
+            <a href="/library/in-person/assessment/<%= course.courseId %>" 
+               class="cta-btn btn-primary" style="margin: 0;">
+              <i class="fas fa-clipboard-check"></i> Take Assessment
+            </a>
+          <% } else { %>
+            <button class="cta-btn" 
+                    style="background: #6c757d; color: white; cursor: not-allowed; margin: 0;" 
+                    disabled>
+              <i class="fas fa-lock"></i> Assessment Locked
+            </button>
+          <% } %>
+        <% } %>
+      </div>
+    <% } else { %>
+      <!-- No Assessment Required -->
+      <% if (course.attendanceConfirmed && course.canGetCertificate) { %>
+        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
+          <h6 style="color: #155724; margin: 0 0 10px 0;">
+            <i class="fas fa-check-circle"></i> Course Completed Successfully!
+          </h6>
+          <p style="margin: 0; color: #155724;">
+            No assessment required for this course. You can now generate your certificate.
+          </p>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+<% } else if (!course.courseEnded) { %>
+  <!-- Course Not Ended Yet -->
+  <div class="course-info-section" style="margin: 20px 0;">
+    <% if (course.courseNotStarted) { %>
+      <!-- ✅ COURSE NOT STARTED -->
+      <div style="background: linear-gradient(135deg, #e8f5e8 0%, #d4f4dd 100%); padding: 20px; border-radius: 12px; border: 2px solid #4caf50;">
+        <h5 style="color: #2e7d32; margin: 0 0 15px 0;">
+          <i class="fas fa-calendar-alt"></i> Course Schedule
+        </h5>
+        <div style="display: grid; gap: 10px;">
+          <div><i class="fas fa-hourglass-start" style="color: #2e7d32; width: 20px;"></i> <strong>Status:</strong> Course starts in <%= Math.ceil((new Date(course.startDate) - new Date()) / (1000 * 60 * 60 * 24)) %> days</div>
+          <div><i class="fas fa-calendar-alt" style="color: #2e7d32; width: 20px;"></i> <strong>Start Date:</strong> <%= new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+          <% if (course.endDate && course.endDate !== course.startDate) { %>
+            <div><i class="fas fa-calendar-times" style="color: #2e7d32; width: 20px;"></i> <strong>End Date:</strong> <%= new Date(course.endDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+          <% } %>
+        </div>
+        <div style="margin-top: 15px; color: #2e7d32; font-size: 0.9rem;">
+          <i class="fas fa-info-circle"></i> Attendance confirmation will be available during and after the course.
+        </div>
+      </div>
+    <% } else if (course.courseInProgress) { %>
+      <!-- ✅ COURSE IN PROGRESS -->
+      <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
+        <h5 style="color: #856404; margin: 0 0 15px 0;">
+          <i class="fas fa-play-circle"></i> Course in Progress
+        </h5>
+        <div style="display: grid; gap: 10px;">
+          <div><i class="fas fa-calendar-alt" style="color: #856404; width: 20px;"></i> <strong>Started:</strong> <%= new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+          <% if (course.endDate && course.endDate !== course.startDate) { %>
+            <div><i class="fas fa-calendar-times" style="color: #856404; width: 20px;"></i> <strong>Ends:</strong> <%= new Date(course.endDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+          <% } %>
+        </div>
+        <div style="margin-top: 15px; color: #856404; font-size: 0.9rem;">
+          <i class="fas fa-info-circle"></i> You can confirm your attendance now or after the course ends.
+        </div>
+      </div>
+    <% } %>
+  </div>
+<% } %>
 
-              <!-- Enhanced Action Buttons -->
-              <div class="course-actions">
-                <% if (course.canViewCertificate && course.hasCertificate) { %>
-                  <!-- Certificate is available -->
-                  <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
-                    <i class="fas fa-certificate"></i> View Certificate
-                  </a>
-                  <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
-                    <i class="fas fa-download"></i> Download PDF
-                  </button>
-                <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
-                  <!-- All requirements met - can generate certificate -->
-                  <button class="cta-btn btn-generate-certificate" 
-                          data-course-id="<%= course.courseId %>" 
-                          data-course-type="<%= course.courseType %>"
-                          data-course-title="<%= course.title %>">
-                    <i class="fas fa-trophy"></i> Generate Certificate
-                  </button>
-                <% } else if (course.courseEnded && !course.attendanceConfirmed) { %>
-                  <!-- Course ended but attendance not confirmed -->
-                  <button class="cta-btn btn-confirm-attendance" 
-                          data-course-id="<%= course.courseId %>" 
-                          data-course-type="<%= course.courseType %>">
-                    <i class="fas fa-check"></i> Confirm Attendance
-                  </button>
-                <% } else if (course.assessmentRequired && course.attendanceConfirmed && !course.assessmentCompleted) { %>
-                  <!-- Attendance confirmed, assessment not taken -->
-                  <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
-                    <i class="fas fa-clipboard-check"></i> Take Assessment
-                  </a>
-                <% } else if (course.assessmentRequired && !course.assessmentPassed && course.canRetake) { %>
-                  <!-- Assessment failed but can retake -->
-                  <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
-                    <i class="fas fa-redo"></i> Retake Assessment
-                  </a>
-                <% } else { %>
-                  <!-- Course not started or ongoing -->
-                  <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
-                    <i class="fas fa-calendar"></i> 
-                    <% if (new Date(course.startDate) > new Date()) { %>
-                      Starts <%= new Date(course.startDate).toLocaleDateString() %>
-                    <% } else { %>
-                      Course in Progress
-                    <% } %>
-                  </div>
-                <% } %>
-                
-                <!-- Course details link -->
-                <a href="/in-person/courses/<%= course.courseId %>" class="cta-btn btn-secondary">
-                  <i class="fas fa-info-circle"></i> Course Details
-                </a>
-              </div>
+<!-- Enhanced Action Buttons with Status-Aware Logic -->
+<!-- Enhanced Action Buttons with CORRECTED Status-Aware Logic -->
+<!-- Enhanced Action Buttons with FIXED Assessment Logic -->
+<div class="course-actions">
+  
+  <!-- ========================================= -->
+  <!-- ✅ ASSESSMENT RESULTS BUTTON (ALWAYS SHOWN WHEN COMPLETED) -->
+  <!-- ========================================= -->
+  <% if (course.assessmentRequired && course.assessmentCompleted) { %>
+    <% if (course.assessmentPassed) { %>
+      <!-- ✅ PASSED: Always show assessment results with success styling -->
+      <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-success">
+        <i class="fas fa-trophy"></i> View Assessment Results 
+        <small>(Passed: <%= course.assessmentScore %>%)</small>
+      </a>
+    <% } else { %>
+      <!-- ❌ FAILED: Show assessment results with warning styling -->
+      <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+        <i class="fas fa-chart-line"></i> View Assessment Results 
+        <small>(Score: <%= course.assessmentScore %>%)</small>
+      </a>
+    <% } %>
+  <% } %>
+
+  <!-- ========================================= -->
+  <!-- ✅ CERTIFICATE BUTTONS (SEPARATE FROM ASSESSMENT) -->
+  <!-- ========================================= -->
+  
+  <!-- Certificate Already Available -->
+  <% if (course.canViewCertificate && course.hasCertificate) { %>
+    <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
+      <i class="fas fa-certificate"></i> View Certificate
+    </a>
+    <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
+      <i class="fas fa-download"></i> Download PDF
+    </button>
+    
+  <!-- Certificate Ready to Generate -->
+  <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
+    <button class="cta-btn btn-generate-certificate" 
+            data-course-id="<%= course.courseId %>" 
+            data-course-type="<%= course.courseType %>"
+            data-course-title="<%= course.title %>">
+      <i class="fas fa-trophy"></i> Generate Certificate
+    </button>
+    
+  <!-- Certificate Locked - Show Why -->
+  <% } else if (course.courseEnded && course.attendanceConfirmed && course.assessmentRequired && course.assessmentPassed) { %>
+    <!-- All requirements met but still locked (shouldn't happen, but safety check) -->
+    <div class="cta-btn" style="background: #28a745; color: white;">
+      <i class="fas fa-check-circle"></i> Certificate Processing...
+    </div>
+    
+  <!-- Certificate Not Available Yet - Show Status -->
+  <% } else { %>
+    <!-- Show certificate status and what's needed -->
+    <% if (!course.courseEnded) { %>
+      <div class="cta-btn certificate-locked" style="background: #f8f9fa; color: #666; cursor: not-allowed; position: relative;">
+        <i class="fas fa-lock"></i> 
+        Certificate Available After Course Ends
+        <div class="tooltip-text">
+          Course ends: <%= new Date(course.endDate || course.startDate).toLocaleDateString() %>
+        </div>
+      </div>
+      
+    <% } else if (!course.attendanceConfirmed) { %>
+      <div class="cta-btn certificate-locked" style="background: #ffc107; color: #333; cursor: not-allowed;">
+        <i class="fas fa-user-check"></i> 
+        Confirm Attendance First
+      </div>
+      
+    <% } else if (course.assessmentRequired && !course.assessmentPassed) { %>
+      <div class="cta-btn certificate-locked" style="background: #dc3545; color: white; cursor: not-allowed;">
+        <i class="fas fa-clipboard-question"></i> 
+        Pass Assessment Required
+      </div>
+      
+    <% } else if (course.assessmentRequired || course.certificationEnabled) { %>
+      <div class="certificate-status-section" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+        <h5 style="color: #333; margin-bottom: 10px;">
+          <i class="fas fa-award"></i> Certification Progress
+        </h5>
+        
+        <!-- Progress Checklist -->
+        <div style="display: grid; gap: 8px;">
+          
+          <!-- Course Completion -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <% if (course.courseEnded) { %>
+              <i class="fas fa-check-circle" style="color: #28a745;"></i>
+              <span style="color: #28a745;">Course Completed</span>
+            <% } else if (course.courseInProgress) { %>
+              <i class="fas fa-clock" style="color: #ffc107;"></i>
+              <span style="color: #ffc107;">Course In Progress</span>
+            <% } else { %>
+              <i class="fas fa-calendar" style="color: #6c757d;"></i>
+              <span style="color: #6c757d;">Course Upcoming</span>
+            <% } %>
+          </div>
+          
+          <!-- Attendance -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <% if (course.attendanceConfirmed) { %>
+              <i class="fas fa-check-circle" style="color: #28a745;"></i>
+              <span style="color: #28a745;">Attendance Confirmed</span>
+            <% } else { %>
+              <i class="fas fa-times-circle" style="color: #dc3545;"></i>
+              <span style="color: #dc3545;">Attendance Pending</span>
+            <% } %>
+          </div>
+          
+          <!-- Assessment -->
+          <% if (course.assessmentRequired) { %>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <% if (course.assessmentPassed) { %>
+                <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                <span style="color: #28a745;">Assessment Passed (<%= course.assessmentScore %>%)</span>
+              <% } else if (course.assessmentCompleted) { %>
+                <i class="fas fa-times-circle" style="color: #dc3545;"></i>
+                <span style="color: #dc3545;">Assessment Failed (<%= course.assessmentScore %>%)</span>
+              <% } else { %>
+                <i class="fas fa-minus-circle" style="color: #6c757d;"></i>
+                <span style="color: #6c757d;">Assessment Pending</span>
+              <% } %>
+            </div>
+          <% } %>
+          
+          <!-- Certificate Status -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <% if (course.hasCertificate) { %>
+              <i class="fas fa-check-circle" style="color: #28a745;"></i>
+              <span style="color: #28a745; font-weight: 600;">Certificate Issued</span>
+            <% } else if (course.canGetCertificate) { %>
+              <i class="fas fa-trophy" style="color: #ffc107;"></i>
+              <span style="color: #ffc107; font-weight: 600;">Certificate Ready</span>
+            <% } else { %>
+              <i class="fas fa-lock" style="color: #6c757d;"></i>
+              <span style="color: #6c757d;">Certificate Locked</span>
+            <% } %>
+          </div>
+        </div>
+        
+        <!-- Certificate Eligibility Message -->
+        <% if (course.certificateEligibilityReason) { %>
+          <div style="margin-top: 10px; padding: 8px 12px; background: <%= course.canGetCertificate ? '#d4edda' : '#f8d7da' %>; 
+                      border-radius: 6px; font-size: 0.9rem; color: <%= course.canGetCertificate ? '#155724' : '#721c24' %>;">
+            <i class="fas fa-info-circle"></i> <%= course.certificateEligibilityReason %>
+          </div>
+        <% } %>
+      </div>
+      
+    <% } else { %>
+      <div class="cta-btn certificate-locked" style="background: #17a2b8; color: white; cursor: not-allowed;">
+        <i class="fas fa-hourglass-half"></i> 
+        Certificate Processing
+      </div>
+    <% } %>
+  <% } %>
+
+  <!-- ========================================= -->
+  <!-- ✅ ASSESSMENT ACTION BUTTONS (FOR TAKING/RETAKING) -->
+  <!-- ========================================= -->
+  
+  <% if (course.assessmentRequired && course.attendanceConfirmed) { %>
+    <% if (!course.assessmentCompleted) { %>
+      <!-- Take Assessment (First Time) -->
+      <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-primary">
+        <i class="fas fa-clipboard-check"></i> Take Assessment
+      </a>
+      
+    <% } else if (!course.assessmentPassed && course.canRetake) { %>
+      <!-- Retake Assessment -->
+      <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+        <i class="fas fa-redo"></i> Retake Assessment 
+        <small>(Attempt <%= (course.currentAttempts || 0) + 1 %> of <%= course.maxAttempts || 3 %>)</small>
+      </a>
+      
+    <% } else if (!course.assessmentPassed && !course.canRetake) { %>
+      <!-- No More Attempts -->
+      <div class="cta-btn" style="background: #dc3545; color: white; cursor: not-allowed;">
+        <i class="fas fa-times-circle"></i> 
+        Assessment Failed (No retakes left)
+      </div>
+      <a href="/contact" class="cta-btn btn-secondary">
+        <i class="fas fa-envelope"></i> Contact Support
+      </a>
+    <% } %>
+  <% } %>
+
+  <!-- ========================================= -->
+  <!-- ✅ ATTENDANCE ACTION BUTTONS -->
+  <!-- ========================================= -->
+  
+  <% if (!course.attendanceConfirmed) { %>
+    <% if (course.canConfirmAttendance) { %>
+      <button class="cta-btn btn-confirm-attendance" 
+              data-course-id="<%= course.courseId %>" 
+              data-course-type="<%= course.courseType %>">
+        <i class="fas fa-check"></i> Confirm Attendance
+      </button>
+    <% } else if (course.courseEnded) { %>
+      <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
+        <i class="fas fa-exclamation-triangle"></i> 
+        Attendance Period Expired
+      </div>
+      <a href="/contact" class="cta-btn btn-secondary">
+        <i class="fas fa-envelope"></i> Contact Support
+      </a>
+    <% } %>
+  <% } %>
+
+  <!-- ========================================= -->
+  <!-- ✅ GENERAL COURSE ACTIONS (ALWAYS AVAILABLE) -->
+  <!-- ========================================= -->
+  
+  <!-- Course Details Link -->
+  <a href="/in-person/courses/<%= course.courseId %>" class="cta-btn btn-outline-secondary">
+    <i class="fas fa-info-circle"></i> Course Details
+  </a>
+
+  <!-- Print Details (Optional) -->
+  <button onclick="printCourseCard(this.closest('.course-card'))" class="cta-btn btn-outline-secondary">
+    <i class="fas fa-print"></i> Print Details
+  </button>
+</div>
             </div>
           </div>
         <% }) %>

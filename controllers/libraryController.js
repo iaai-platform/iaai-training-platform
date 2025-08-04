@@ -1187,6 +1187,32 @@ exports.getLiveLibrary = async (req, res) => {
   }
 };
 
+//new
+/**
+ * ✅ ENHANCED: Helper method to calculate course timing status
+ */
+const getCourseTimingStatus = (course) => {
+  const now = new Date();
+  const startDate = new Date(course.schedule?.startDate);
+  const endDate = new Date(
+    course.schedule?.endDate || course.schedule?.startDate
+  );
+
+  // Add grace period for attendance confirmation
+  const gracePeriodEnd = new Date(endDate);
+  gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7); // 7 days grace period
+
+  return {
+    courseStarted: startDate <= now,
+    courseEnded: endDate < now,
+    courseInProgress: startDate <= now && now <= endDate,
+    courseNotStarted: startDate > now,
+    withinGracePeriod: now <= gracePeriodEnd,
+    daysUntilStart: Math.ceil((startDate - now) / (1000 * 60 * 60 * 24)),
+    daysUntilEnd: Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)),
+    gracePeriodEnd: gracePeriodEnd,
+  };
+};
 /**
  * ✅ COMPLETE: Get In-Person Library with Fixed Assessment Integration
  * Updated to properly read assessment results from course model
@@ -1266,6 +1292,9 @@ exports.getInPersonLibrary = async (req, res) => {
 
               // Course hasn't started yet
               const courseNotStarted = courseStartDate > now;
+
+              // ✅ ADD THIS RIGHT HERE
+              const timingStatus = getCourseTimingStatus(course);
 
               console.log("📅 Course Date Status:", {
                 now: now.toISOString(),
@@ -1513,6 +1542,12 @@ exports.getInPersonLibrary = async (req, res) => {
                 courseEnded: courseEnded,
                 courseInProgress: courseInProgress,
                 courseNotStarted: courseNotStarted,
+
+                timingStatus: timingStatus,
+                courseStarted: timingStatus.courseStarted,
+                withinGracePeriod: timingStatus.withinGracePeriod,
+                attendanceGracePeriodEnd: timingStatus.gracePeriodEnd,
+                daysUntilStart: timingStatus.daysUntilStart,
                 attendanceConfirmed: attendanceConfirmed,
                 canConfirmAttendance: canConfirmAttendance,
                 attendanceGracePeriodEnd: gracePeriodEnd,

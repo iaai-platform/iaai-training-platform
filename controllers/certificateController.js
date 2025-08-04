@@ -5,7 +5,7 @@
 
 const User = require("../models/user");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
-const OnlineLiveTraining = require("../models/OnlineLiveTrainingModel");
+const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 
 class CertificateController {

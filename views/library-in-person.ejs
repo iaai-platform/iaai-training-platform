@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
- 
 </head>
 
 <body>
@@ -275,60 +274,59 @@
                 </div>
               <% } %>
 
-              <!-- Assessment Information (if required) -->
- <!-- Assessment Information (Enhanced) -->
-<% if (course.assessmentRequired) { %>
-  <div class="course-info-section" style="margin: 20px 0;">
-    <h5 style="color: #333; margin-bottom: 10px;">
-      <i class="fas fa-clipboard-check"></i> Assessment Status
-    </h5>
-    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-      
-      <% if (course.assessmentCompleted && course.assessmentPassed) { %>
-        <!-- ✅ ASSESSMENT PASSED -->
-        <div style="color: #28a745; font-weight: 600;">
-          <i class="fas fa-trophy"></i> Assessment Completed Successfully
-          <span style="float: right; font-weight: normal;">
-            Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
-          </span>
-        </div>
-        <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
-          <i class="fas fa-calendar-check"></i> Completed: <%= course.lastAssessmentDate ? new Date(course.lastAssessmentDate).toLocaleDateString() : 'Recently' %><br>
-          <i class="fas fa-redo"></i> Attempts Used: <%= course.currentAttempts %> of <%= course.maxAttempts %>
-        </div>
-        
-      <% } else if (course.hasAttempted && !course.assessmentPassed) { %>
-        <!-- ❌ ASSESSMENT FAILED -->
-        <div style="color: #dc3545; font-weight: 600;">
-          <i class="fas fa-times-circle"></i> Assessment Not Passed
-          <span style="float: right; font-weight: normal;">
-            Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
-          </span>
-        </div>
-        <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
-          <i class="fas fa-calendar-times"></i> Last Attempt: <%= course.lastAssessmentDate ? new Date(course.lastAssessmentDate).toLocaleDateString() : 'Recently' %><br>
-          <i class="fas fa-redo"></i> Attempts: <%= course.currentAttempts %> of <%= course.maxAttempts %>
-          <% if (course.canRetake) { %>
-            <br><span style="color: #ffc107;"><i class="fas fa-info-circle"></i> You can retake the assessment</span>
-          <% } %>
-        </div>
-        
-      <% } else { %>
-        <!-- ⏳ ASSESSMENT PENDING -->
-        <div style="color: #ffc107; font-weight: 600;">
-          <i class="fas fa-clock"></i> Assessment Pending
-          <span style="float: right; font-weight: normal;">
-            Required: <%= course.passingScore || 70 %>%
-          </span>
-        </div>
-        <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
-          Assessment Type: <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %>
-          <br>Attempts available: <%= course.maxAttempts %>
-        </div>
-      <% } %>
-    </div>
-  </div>
-<% } %>
+              <!-- Assessment Information (Enhanced) -->
+              <% if (course.assessmentRequired) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-clipboard-check"></i> Assessment Status
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    
+                    <% if (course.assessmentCompleted && course.assessmentPassed) { %>
+                      <!-- ✅ ASSESSMENT PASSED -->
+                      <div style="color: #28a745; font-weight: 600;">
+                        <i class="fas fa-trophy"></i> Assessment Completed Successfully
+                        <span style="float: right; font-weight: normal;">
+                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
+                        </span>
+                      </div>
+                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-calendar-check"></i> Completed: <%= course.lastAssessmentDate ? new Date(course.lastAssessmentDate).toLocaleDateString() : 'Recently' %><br>
+                        <i class="fas fa-redo"></i> Attempts Used: <%= course.currentAttempts %> of <%= course.maxAttempts %>
+                      </div>
+                      
+                    <% } else if (course.hasAttempted && !course.assessmentPassed) { %>
+                      <!-- ❌ ASSESSMENT FAILED -->
+                      <div style="color: #dc3545; font-weight: 600;">
+                        <i class="fas fa-times-circle"></i> Assessment Not Passed
+                        <span style="float: right; font-weight: normal;">
+                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore || 70 %>%)
+                        </span>
+                      </div>
+                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-calendar-times"></i> Last Attempt: <%= course.lastAssessmentDate ? new Date(course.lastAssessmentDate).toLocaleDateString() : 'Recently' %><br>
+                        <i class="fas fa-redo"></i> Attempts: <%= course.currentAttempts %> of <%= course.maxAttempts %>
+                        <% if (course.canRetake) { %>
+                          <br><span style="color: #ffc107;"><i class="fas fa-info-circle"></i> You can retake the assessment</span>
+                        <% } %>
+                      </div>
+                      
+                    <% } else { %>
+                      <!-- ⏳ ASSESSMENT PENDING -->
+                      <div style="color: #ffc107; font-weight: 600;">
+                        <i class="fas fa-clock"></i> Assessment Pending
+                        <span style="float: right; font-weight: normal;">
+                          Required: <%= course.passingScore || 70 %>%
+                        </span>
+                      </div>
+                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        Assessment Type: <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %>
+                        <br>Attempts available: <%= course.maxAttempts %>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
 
               <!-- Course Registration Information -->
               <div class="course-info-section" style="margin: 20px 0;">
@@ -429,29 +427,6 @@
                             </a>
                             <a href="<%= docUrl %>" download="<%= fileName %>" class="video-action action-exam">
                               <i class="fas fa-download"></i> Download
-                            </a>
-                          </div>
-                        </div>
-                      <% }) %>
-                    <% } %>
-                  
-                    
-                        <div class="video-item">
-                          <div class="video-number" style="background: <%= bgColor %>;">
-                            <i class="fas <%= icon %>"></i>
-                          </div>
-                          <div class="video-info">
-                            <div class="video-title"><%= fileName %></div>
-                            <div class="video-meta">
-                              <i class="fas <%= icon %>"></i> <%= fileType %>
-                            </div>
-                          </div>
-                          <div class="video-actions">
-                            <a href="<%= docUrl %>" target="_blank" class="video-action action-watch">
-                              <i class="fas fa-download"></i> Download
-                            </a>
-                            <a href="<%= docUrl %>" target="_blank" class="video-action action-exam">
-                              <i class="fas fa-eye"></i> View
                             </a>
                           </div>
                         </div>
@@ -617,419 +592,416 @@
               <% } %>
 
               <!-- Course Status and Next Steps -->
-              <!-- Course Status and Next Steps -->
-<% if (course.courseEnded && !course.canViewCertificate) { %>
-  <div class="course-info-section" style="margin: 20px 0;">
-    
-    <!-- Step 1: Attendance Confirmation (FIRST) -->
-    <% if (!course.attendanceConfirmed) { %>
-      <% if (course.canConfirmAttendance) { %>
-        <!-- ✅ ATTENDANCE AVAILABLE -->
-        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107; margin-bottom: 15px;">
-          <h5 style="color: #856404; margin: 0 0 10px 0;">
-            <i class="fas fa-user-check"></i> Step 1: Confirm Your Attendance
-          </h5>
-          <p style="margin: 0 0 15px 0; color: #856404;">
-            <% if (course.courseInProgress) { %>
-              <i class="fas fa-clock"></i> Course is currently in progress. You can confirm your attendance now.
-            <% } else if (course.courseEnded) { %>
-              <i class="fas fa-calendar-times"></i> Course has ended. Please confirm your attendance within the grace period.
-              <br><small>Grace period ends: <%= new Date(course.attendanceGracePeriodEnd).toLocaleDateString() %></small>
-            <% } %>
-          </p>
-          <button class="cta-btn btn-confirm-attendance" 
-                  data-course-id="<%= course.courseId %>"
-                  data-course-type="<%= course.courseType %>"
-                  style="margin: 0;">
-            <i class="fas fa-check"></i> Confirm Attendance
-          </button>
-        </div>
-      <% } else { %>
-        <!-- ✅ GRACE PERIOD EXPIRED -->
-        <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
-          <h5 style="color: #721c24; margin: 0 0 10px 0;">
-            <i class="fas fa-exclamation-triangle"></i> Step 1: Attendance Confirmation Expired
-          </h5>
-          <p style="margin: 0 0 15px 0; color: #721c24;">
-            The grace period for confirming attendance has expired. Please contact support if you attended this course.
-          </p>
-          <a href="/contact" class="cta-btn btn-secondary" style="margin: 0;">
-            <i class="fas fa-envelope"></i> Contact Support
-          </a>
-        </div>
-      <% } %>
-    <% } else { %>
-      <!-- ✅ ATTENDANCE CONFIRMED -->
-      <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
-        <h5 style="color: #155724; margin: 0 0 5px 0;">
-          <i class="fas fa-check-circle"></i> Step 1: Attendance Confirmed ✅
-        </h5>
-        <p style="margin: 0; color: #155724; font-size: 0.9rem;">
-          <% if (course.attendanceDate) { %>
-            Confirmed on <%= new Date(course.attendanceDate).toLocaleDateString() %>
-          <% } else { %>
-            Attendance confirmed
-          <% } %>
-        </p>
-      </div>
-    <% } %>
+              <% if (course.courseEnded && !course.canViewCertificate) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  
+                  <!-- Step 1: Attendance Confirmation (FIRST) -->
+                  <% if (!course.attendanceConfirmed) { %>
+                    <% if (course.canConfirmAttendance) { %>
+                      <!-- ✅ ATTENDANCE AVAILABLE -->
+                      <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107; margin-bottom: 15px;">
+                        <h5 style="color: #856404; margin: 0 0 10px 0;">
+                          <i class="fas fa-user-check"></i> Step 1: Confirm Your Attendance
+                        </h5>
+                        <p style="margin: 0 0 15px 0; color: #856404;">
+                          <% if (course.courseInProgress) { %>
+                            <i class="fas fa-clock"></i> Course is currently in progress. You can confirm your attendance now.
+                          <% } else if (course.courseEnded) { %>
+                            <i class="fas fa-calendar-times"></i> Course has ended. Please confirm your attendance within the grace period.
+                            <br><small>Grace period ends: <%= new Date(course.attendanceGracePeriodEnd).toLocaleDateString() %></small>
+                          <% } %>
+                        </p>
+                        <button class="cta-btn btn-confirm-attendance" 
+                                data-course-id="<%= course.courseId %>"
+                                data-course-type="<%= course.courseType %>"
+                                style="margin: 0;">
+                          <i class="fas fa-check"></i> Confirm Attendance
+                        </button>
+                      </div>
+                    <% } else { %>
+                      <!-- ✅ GRACE PERIOD EXPIRED -->
+                      <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
+                        <h5 style="color: #721c24; margin: 0 0 10px 0;">
+                          <i class="fas fa-exclamation-triangle"></i> Step 1: Attendance Confirmation Expired
+                        </h5>
+                        <p style="margin: 0 0 15px 0; color: #721c24;">
+                          The grace period for confirming attendance has expired. Please contact support if you attended this course.
+                        </p>
+                        <a href="/contact" class="cta-btn btn-secondary" style="margin: 0;">
+                          <i class="fas fa-envelope"></i> Contact Support
+                        </a>
+                      </div>
+                    <% } %>
+                  <% } else { %>
+                    <!-- ✅ ATTENDANCE CONFIRMED -->
+                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
+                      <h5 style="color: #155724; margin: 0 0 5px 0;">
+                        <i class="fas fa-check-circle"></i> Step 1: Attendance Confirmed ✅
+                      </h5>
+                      <p style="margin: 0; color: #155724; font-size: 0.9rem;">
+                        <% if (course.attendanceDate) { %>
+                          Confirmed on <%= new Date(course.attendanceDate).toLocaleDateString() %>
+                        <% } else { %>
+                          Attendance confirmed
+                        <% } %>
+                      </p>
+                    </div>
+                  <% } %>
 
-    <!-- Step 2: Assessment (SECOND) -->
-    <% if (course.assessmentRequired) { %>
-      <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%); padding: 20px; border-radius: 12px; border: 2px solid #17a2b8;">
-        <h5 style="color: #17a2b8; margin: 0 0 15px 0;">
-          <i class="fas fa-clipboard-check"></i> Step 2: Complete Assessment
-          <% if (course.assessmentCompleted && course.assessmentPassed) { %>
-            <span style="color: #28a745; font-size: 0.9rem; margin-left: 10px;">✅ COMPLETED</span>
-          <% } %>
-        </h5>
-        <div style="display: grid; gap: 10px; margin-bottom: 15px;">
-          <div><i class="fas fa-target" style="color: #17a2b8; width: 20px;"></i> <strong>Passing Score:</strong> <%= course.passingScore %>%</div>
-          <div><i class="fas fa-question-circle" style="color: #17a2b8; width: 20px;"></i> <strong>Assessment Type:</strong> <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %></div>
-          <div><i class="fas fa-redo" style="color: #17a2b8; width: 20px;"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %></div>
-        </div>
-        
-        <% if (course.assessmentCompleted && course.assessmentPassed) { %>
-          <!-- COMPLETED STATE -->
-          <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
-            <h6 style="color: #155724; margin: 0 0 10px 0;">
-              <i class="fas fa-trophy"></i> Assessment Completed Successfully!
-            </h6>
-            <div style="color: #155724;">
-              <i class="fas fa-check-circle"></i> <strong>Score:</strong> <%= course.assessmentScore %>% - <span style="color: #28a745; font-weight: 700;">PASSED</span><br>
-              <% if (course.lastAssessmentDate) { %>
-                <i class="fas fa-calendar-check"></i> <strong>Completed:</strong> <%= new Date(course.lastAssessmentDate).toLocaleDateString() %><br>
+                  <!-- Step 2: Assessment (SECOND) -->
+                  <% if (course.assessmentRequired) { %>
+                    <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%); padding: 20px; border-radius: 12px; border: 2px solid #17a2b8;">
+                      <h5 style="color: #17a2b8; margin: 0 0 15px 0;">
+                        <i class="fas fa-clipboard-check"></i> Step 2: Complete Assessment
+                        <% if (course.assessmentCompleted && course.assessmentPassed) { %>
+                          <span style="color: #28a745; font-size: 0.9rem; margin-left: 10px;">✅ COMPLETED</span>
+                        <% } %>
+                      </h5>
+                      <div style="display: grid; gap: 10px; margin-bottom: 15px;">
+                        <div><i class="fas fa-target" style="color: #17a2b8; width: 20px;"></i> <strong>Passing Score:</strong> <%= course.passingScore %>%</div>
+                        <div><i class="fas fa-question-circle" style="color: #17a2b8; width: 20px;"></i> <strong>Assessment Type:</strong> <%= course.assessmentType ? course.assessmentType.charAt(0).toUpperCase() + course.assessmentType.slice(1) : 'Quiz' %></div>
+                        <div><i class="fas fa-redo" style="color: #17a2b8; width: 20px;"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %></div>
+                      </div>
+                      
+                      <% if (course.assessmentCompleted && course.assessmentPassed) { %>
+                        <!-- COMPLETED STATE -->
+                        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
+                          <h6 style="color: #155724; margin: 0 0 10px 0;">
+                            <i class="fas fa-trophy"></i> Assessment Completed Successfully!
+                          </h6>
+                          <div style="color: #155724;">
+                            <i class="fas fa-check-circle"></i> <strong>Score:</strong> <%= course.assessmentScore %>% - <span style="color: #28a745; font-weight: 700;">PASSED</span><br>
+                            <% if (course.lastAssessmentDate) { %>
+                              <i class="fas fa-calendar-check"></i> <strong>Completed:</strong> <%= new Date(course.lastAssessmentDate).toLocaleDateString() %><br>
+                            <% } %>
+                            <i class="fas fa-redo"></i> <strong>Attempts Used:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
+                          </div>
+                        </div>
+                        
+                      <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
+                        <!-- FAILED STATE -->
+                        <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
+                          <h6 style="color: #721c24; margin: 0 0 10px 0;">
+                            <i class="fas fa-times-circle"></i> Assessment Not Passed
+                          </h6>
+                          <div style="color: #721c24;">
+                            <i class="fas fa-chart-line"></i> <strong>Your Score:</strong> <%= course.assessmentScore %>%<br>
+                            <i class="fas fa-target"></i> <strong>Required:</strong> <%= course.passingScore %>%<br>
+                            <i class="fas fa-redo"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
+                            <% if (course.canRetake) { %>
+                              <br><span style="color: #ffc107;"><i class="fas fa-info-circle"></i> You can retake the assessment</span>
+                            <% } %>
+                          </div>
+                        </div>
+                        
+                        <% if (course.canRetake) { %>
+                          <a href="/library/in-person/assessment/<%= course.courseId %>" 
+                             class="cta-btn btn-warning" style="margin: 0;">
+                            <i class="fas fa-redo"></i> Retake Assessment
+                          </a>
+                        <% } %>
+                        
+                      <% } else { %>
+                        <!-- NOT STARTED STATE -->
+                        <p style="margin: 0 0 15px 0; color: #17a2b8;">
+                          <% if (!course.attendanceConfirmed) { %>
+                            <i class="fas fa-lock"></i> Complete Step 1 (Attendance) first to unlock assessment.
+                          <% } else { %>
+                            <i class="fas fa-play-circle"></i> Ready to take assessment.
+                          <% } %>
+                        </p>
+                        
+                        <% if (course.attendanceConfirmed) { %>
+                          <a href="/library/in-person/assessment/<%= course.courseId %>" 
+                             class="cta-btn btn-primary" style="margin: 0;">
+                            <i class="fas fa-clipboard-check"></i> Take Assessment
+                          </a>
+                        <% } else { %>
+                          <button class="cta-btn" 
+                                  style="background: #6c757d; color: white; cursor: not-allowed; margin: 0;" 
+                                  disabled>
+                            <i class="fas fa-lock"></i> Assessment Locked
+                          </button>
+                        <% } %>
+                      <% } %>
+                    </div>
+                  <% } else { %>
+                    <!-- No Assessment Required -->
+                    <% if (course.attendanceConfirmed && course.canGetCertificate) { %>
+                      <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
+                        <h6 style="color: #155724; margin: 0 0 10px 0;">
+                          <i class="fas fa-check-circle"></i> Course Completed Successfully!
+                        </h6>
+                        <p style="margin: 0; color: #155724;">
+                          No assessment required for this course. You can now generate your certificate.
+                        </p>
+                      </div>
+                    <% } %>
+                  <% } %>
+                </div>
+              <% } else if (!course.courseEnded) { %>
+                <!-- Course Not Ended Yet -->
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <% if (course.courseNotStarted) { %>
+                    <!-- ✅ COURSE NOT STARTED -->
+                    <div style="background: linear-gradient(135deg, #e8f5e8 0%, #d4f4dd 100%); padding: 20px; border-radius: 12px; border: 2px solid #4caf50;">
+                      <h5 style="color: #2e7d32; margin: 0 0 15px 0;">
+                        <i class="fas fa-calendar-alt"></i> Course Schedule
+                      </h5>
+                      <div style="display: grid; gap: 10px;">
+                        <div><i class="fas fa-hourglass-start" style="color: #2e7d32; width: 20px;"></i> <strong>Status:</strong> Course starts in <%= Math.ceil((new Date(course.startDate) - new Date()) / (1000 * 60 * 60 * 24)) %> days</div>
+                        <div><i class="fas fa-calendar-alt" style="color: #2e7d32; width: 20px;"></i> <strong>Start Date:</strong> <%= new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                        <% if (course.endDate && course.endDate !== course.startDate) { %>
+                          <div><i class="fas fa-calendar-times" style="color: #2e7d32; width: 20px;"></i> <strong>End Date:</strong> <%= new Date(course.endDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                        <% } %>
+                      </div>
+                      <div style="margin-top: 15px; color: #2e7d32; font-size: 0.9rem;">
+                        <i class="fas fa-info-circle"></i> Attendance confirmation will be available during and after the course.
+                      </div>
+                    </div>
+                  <% } else if (course.courseInProgress) { %>
+                    <!-- ✅ COURSE IN PROGRESS -->
+                    <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
+                      <h5 style="color: #856404; margin: 0 0 15px 0;">
+                        <i class="fas fa-play-circle"></i> Course in Progress
+                      </h5>
+                      <div style="display: grid; gap: 10px;">
+                        <div><i class="fas fa-calendar-alt" style="color: #856404; width: 20px;"></i> <strong>Started:</strong> <%= new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                        <% if (course.endDate && course.endDate !== course.startDate) { %>
+                          <div><i class="fas fa-calendar-times" style="color: #856404; width: 20px;"></i> <strong>Ends:</strong> <%= new Date(course.endDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                        <% } %>
+                      </div>
+                      <div style="margin-top: 15px; color: #856404; font-size: 0.9rem;">
+                        <i class="fas fa-info-circle"></i> You can confirm your attendance now or after the course ends.
+                      </div>
+                    </div>
+                  <% } %>
+                </div>
               <% } %>
-              <i class="fas fa-redo"></i> <strong>Attempts Used:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
-            </div>
-          </div>
-          
-        <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
-          <!-- FAILED STATE -->
-          <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #dc3545; margin-bottom: 15px;">
-            <h6 style="color: #721c24; margin: 0 0 10px 0;">
-              <i class="fas fa-times-circle"></i> Assessment Not Passed
-            </h6>
-            <div style="color: #721c24;">
-              <i class="fas fa-chart-line"></i> <strong>Your Score:</strong> <%= course.assessmentScore %>%<br>
-              <i class="fas fa-target"></i> <strong>Required:</strong> <%= course.passingScore %>%<br>
-              <i class="fas fa-redo"></i> <strong>Attempts:</strong> <%= course.currentAttempts %> of <%= course.maxAttempts %>
-              <% if (course.canRetake) { %>
-                <br><span style="color: #ffc107;"><i class="fas fa-info-circle"></i> You can retake the assessment</span>
-              <% } %>
-            </div>
-          </div>
-          
-          <% if (course.canRetake) { %>
-            <a href="/library/in-person/assessment/<%= course.courseId %>" 
-               class="cta-btn btn-warning" style="margin: 0;">
-              <i class="fas fa-redo"></i> Retake Assessment
-            </a>
-          <% } %>
-          
-        <% } else { %>
-          <!-- NOT STARTED STATE -->
-          <p style="margin: 0 0 15px 0; color: #17a2b8;">
-            <% if (!course.attendanceConfirmed) { %>
-              <i class="fas fa-lock"></i> Complete Step 1 (Attendance) first to unlock assessment.
-            <% } else { %>
-              <i class="fas fa-play-circle"></i> Ready to take assessment.
-            <% } %>
-          </p>
-          
-          <% if (course.attendanceConfirmed) { %>
-            <a href="/library/in-person/assessment/<%= course.courseId %>" 
-               class="cta-btn btn-primary" style="margin: 0;">
-              <i class="fas fa-clipboard-check"></i> Take Assessment
-            </a>
-          <% } else { %>
-            <button class="cta-btn" 
-                    style="background: #6c757d; color: white; cursor: not-allowed; margin: 0;" 
-                    disabled>
-              <i class="fas fa-lock"></i> Assessment Locked
-            </button>
-          <% } %>
-        <% } %>
-      </div>
-    <% } else { %>
-      <!-- No Assessment Required -->
-      <% if (course.attendanceConfirmed && course.canGetCertificate) { %>
-        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 12px; border: 2px solid #28a745; margin-bottom: 15px;">
-          <h6 style="color: #155724; margin: 0 0 10px 0;">
-            <i class="fas fa-check-circle"></i> Course Completed Successfully!
-          </h6>
-          <p style="margin: 0; color: #155724;">
-            No assessment required for this course. You can now generate your certificate.
-          </p>
-        </div>
-      <% } %>
-    <% } %>
-  </div>
-<% } else if (!course.courseEnded) { %>
-  <!-- Course Not Ended Yet -->
-  <div class="course-info-section" style="margin: 20px 0;">
-    <% if (course.courseNotStarted) { %>
-      <!-- ✅ COURSE NOT STARTED -->
-      <div style="background: linear-gradient(135deg, #e8f5e8 0%, #d4f4dd 100%); padding: 20px; border-radius: 12px; border: 2px solid #4caf50;">
-        <h5 style="color: #2e7d32; margin: 0 0 15px 0;">
-          <i class="fas fa-calendar-alt"></i> Course Schedule
-        </h5>
-        <div style="display: grid; gap: 10px;">
-          <div><i class="fas fa-hourglass-start" style="color: #2e7d32; width: 20px;"></i> <strong>Status:</strong> Course starts in <%= Math.ceil((new Date(course.startDate) - new Date()) / (1000 * 60 * 60 * 24)) %> days</div>
-          <div><i class="fas fa-calendar-alt" style="color: #2e7d32; width: 20px;"></i> <strong>Start Date:</strong> <%= new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-          <% if (course.endDate && course.endDate !== course.startDate) { %>
-            <div><i class="fas fa-calendar-times" style="color: #2e7d32; width: 20px;"></i> <strong>End Date:</strong> <%= new Date(course.endDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-          <% } %>
-        </div>
-        <div style="margin-top: 15px; color: #2e7d32; font-size: 0.9rem;">
-          <i class="fas fa-info-circle"></i> Attendance confirmation will be available during and after the course.
-        </div>
-      </div>
-    <% } else if (course.courseInProgress) { %>
-      <!-- ✅ COURSE IN PROGRESS -->
-      <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
-        <h5 style="color: #856404; margin: 0 0 15px 0;">
-          <i class="fas fa-play-circle"></i> Course in Progress
-        </h5>
-        <div style="display: grid; gap: 10px;">
-          <div><i class="fas fa-calendar-alt" style="color: #856404; width: 20px;"></i> <strong>Started:</strong> <%= new Date(course.startDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-          <% if (course.endDate && course.endDate !== course.startDate) { %>
-            <div><i class="fas fa-calendar-times" style="color: #856404; width: 20px;"></i> <strong>Ends:</strong> <%= new Date(course.endDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-          <% } %>
-        </div>
-        <div style="margin-top: 15px; color: #856404; font-size: 0.9rem;">
-          <i class="fas fa-info-circle"></i> You can confirm your attendance now or after the course ends.
-        </div>
-      </div>
-    <% } %>
-  </div>
-<% } %>
 
-<!-- Enhanced Action Buttons with Status-Aware Logic -->
-<!-- Enhanced Action Buttons with CORRECTED Status-Aware Logic -->
-<!-- Enhanced Action Buttons with FIXED Assessment Logic -->
-<div class="course-actions">
-  
-  <!-- ========================================= -->
-  <!-- ✅ ASSESSMENT RESULTS BUTTON (ALWAYS SHOWN WHEN COMPLETED) -->
-  <!-- ========================================= -->
-  <% if (course.assessmentRequired && course.assessmentCompleted) { %>
-    <% if (course.assessmentPassed) { %>
-      <!-- ✅ PASSED: Always show assessment results with success styling -->
-      <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-success">
-        <i class="fas fa-trophy"></i> View Assessment Results 
-        <small>(Passed: <%= course.assessmentScore %>%)</small>
-      </a>
-    <% } else { %>
-      <!-- ❌ FAILED: Show assessment results with warning styling -->
-      <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
-        <i class="fas fa-chart-line"></i> View Assessment Results 
-        <small>(Score: <%= course.assessmentScore %>%)</small>
-      </a>
-    <% } %>
-  <% } %>
+              <!-- Enhanced Action Buttons with Status-Aware Logic -->
+              <div class="course-actions">
+                
+                <!-- ========================================= -->
+                <!-- ✅ ASSESSMENT RESULTS BUTTON (ALWAYS SHOWN WHEN COMPLETED) -->
+                <!-- ========================================= -->
+                <% if (course.assessmentRequired && course.assessmentCompleted) { %>
+                  <% if (course.assessmentPassed) { %>
+                    <!-- ✅ PASSED: Always show assessment results with success styling -->
+                    <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-success">
+                      <i class="fas fa-trophy"></i> View Assessment Results 
+                      <small>(Passed: <%= course.assessmentScore %>%)</small>
+                    </a>
+                  <% } else { %>
+                    <!-- ❌ FAILED: Show assessment results with warning styling -->
+                    <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+                      <i class="fas fa-chart-line"></i> View Assessment Results 
+                      <small>(Score: <%= course.assessmentScore %>%)</small>
+                    </a>
+                  <% } %>
+                <% } %>
 
-  <!-- ========================================= -->
-  <!-- ✅ CERTIFICATE BUTTONS (SEPARATE FROM ASSESSMENT) -->
-  <!-- ========================================= -->
-  
-  <!-- Certificate Already Available -->
-  <% if (course.canViewCertificate && course.hasCertificate) { %>
-    <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
-      <i class="fas fa-certificate"></i> View Certificate
-    </a>
-    <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
-      <i class="fas fa-download"></i> Download PDF
-    </button>
-    
-  <!-- Certificate Ready to Generate -->
-  <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
-    <button class="cta-btn btn-generate-certificate" 
-            data-course-id="<%= course.courseId %>" 
-            data-course-type="<%= course.courseType %>"
-            data-course-title="<%= course.title %>">
-      <i class="fas fa-trophy"></i> Generate Certificate
-    </button>
-    
-  <!-- Certificate Locked - Show Why -->
-  <% } else if (course.courseEnded && course.attendanceConfirmed && course.assessmentRequired && course.assessmentPassed) { %>
-    <!-- All requirements met but still locked (shouldn't happen, but safety check) -->
-    <div class="cta-btn" style="background: #28a745; color: white;">
-      <i class="fas fa-check-circle"></i> Certificate Processing...
-    </div>
-    
-  <!-- Certificate Not Available Yet - Show Status -->
-  <% } else { %>
-    <!-- Show certificate status and what's needed -->
-    <% if (!course.courseEnded) { %>
-      <div class="cta-btn certificate-locked" style="background: #f8f9fa; color: #666; cursor: not-allowed; position: relative;">
-        <i class="fas fa-lock"></i> 
-        Certificate Available After Course Ends
-        <div class="tooltip-text">
-          Course ends: <%= new Date(course.endDate || course.startDate).toLocaleDateString() %>
-        </div>
-      </div>
-      
-    <% } else if (!course.attendanceConfirmed) { %>
-      <div class="cta-btn certificate-locked" style="background: #ffc107; color: #333; cursor: not-allowed;">
-        <i class="fas fa-user-check"></i> 
-        Confirm Attendance First
-      </div>
-      
-    <% } else if (course.assessmentRequired && !course.assessmentPassed) { %>
-      <div class="cta-btn certificate-locked" style="background: #dc3545; color: white; cursor: not-allowed;">
-        <i class="fas fa-clipboard-question"></i> 
-        Pass Assessment Required
-      </div>
-      
-    <% } else if (course.assessmentRequired || course.certificationEnabled) { %>
-      <div class="certificate-status-section" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-        <h5 style="color: #333; margin-bottom: 10px;">
-          <i class="fas fa-award"></i> Certification Progress
-        </h5>
-        
-        <!-- Progress Checklist -->
-        <div style="display: grid; gap: 8px;">
-          
-          <!-- Course Completion -->
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <% if (course.courseEnded) { %>
-              <i class="fas fa-check-circle" style="color: #28a745;"></i>
-              <span style="color: #28a745;">Course Completed</span>
-            <% } else if (course.courseInProgress) { %>
-              <i class="fas fa-clock" style="color: #ffc107;"></i>
-              <span style="color: #ffc107;">Course In Progress</span>
-            <% } else { %>
-              <i class="fas fa-calendar" style="color: #6c757d;"></i>
-              <span style="color: #6c757d;">Course Upcoming</span>
-            <% } %>
-          </div>
-          
-          <!-- Attendance -->
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <% if (course.attendanceConfirmed) { %>
-              <i class="fas fa-check-circle" style="color: #28a745;"></i>
-              <span style="color: #28a745;">Attendance Confirmed</span>
-            <% } else { %>
-              <i class="fas fa-times-circle" style="color: #dc3545;"></i>
-              <span style="color: #dc3545;">Attendance Pending</span>
-            <% } %>
-          </div>
-          
-          <!-- Assessment -->
-          <% if (course.assessmentRequired) { %>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <% if (course.assessmentPassed) { %>
-                <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                <span style="color: #28a745;">Assessment Passed (<%= course.assessmentScore %>%)</span>
-              <% } else if (course.assessmentCompleted) { %>
-                <i class="fas fa-times-circle" style="color: #dc3545;"></i>
-                <span style="color: #dc3545;">Assessment Failed (<%= course.assessmentScore %>%)</span>
-              <% } else { %>
-                <i class="fas fa-minus-circle" style="color: #6c757d;"></i>
-                <span style="color: #6c757d;">Assessment Pending</span>
-              <% } %>
-            </div>
-          <% } %>
-          
-          <!-- Certificate Status -->
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <% if (course.hasCertificate) { %>
-              <i class="fas fa-check-circle" style="color: #28a745;"></i>
-              <span style="color: #28a745; font-weight: 600;">Certificate Issued</span>
-            <% } else if (course.canGetCertificate) { %>
-              <i class="fas fa-trophy" style="color: #ffc107;"></i>
-              <span style="color: #ffc107; font-weight: 600;">Certificate Ready</span>
-            <% } else { %>
-              <i class="fas fa-lock" style="color: #6c757d;"></i>
-              <span style="color: #6c757d;">Certificate Locked</span>
-            <% } %>
-          </div>
-        </div>
-        
-        <!-- Certificate Eligibility Message -->
-        <% if (course.certificateEligibilityReason) { %>
-          <div style="margin-top: 10px; padding: 8px 12px; background: <%= course.canGetCertificate ? '#d4edda' : '#f8d7da' %>; 
-                      border-radius: 6px; font-size: 0.9rem; color: <%= course.canGetCertificate ? '#155724' : '#721c24' %>;">
-            <i class="fas fa-info-circle"></i> <%= course.certificateEligibilityReason %>
-          </div>
-        <% } %>
-      </div>
-      
-    <% } else { %>
-      <div class="cta-btn certificate-locked" style="background: #17a2b8; color: white; cursor: not-allowed;">
-        <i class="fas fa-hourglass-half"></i> 
-        Certificate Processing
-      </div>
-    <% } %>
-  <% } %>
+                <!-- ========================================= -->
+                <!-- ✅ CERTIFICATE BUTTONS (SEPARATE FROM ASSESSMENT) -->
+                <!-- ========================================= -->
+                
+                <!-- Certificate Already Available -->
+                <% if (course.canViewCertificate && course.hasCertificate) { %>
+                  <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
+                    <i class="fas fa-certificate"></i> View Certificate
+                  </a>
+                  <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
+                    <i class="fas fa-download"></i> Download PDF
+                  </button>
+                  
+                <!-- Certificate Ready to Generate -->
+                <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
+                  <button class="cta-btn btn-generate-certificate" 
+                          data-course-id="<%= course.courseId %>" 
+                          data-course-type="<%= course.courseType %>"
+                          data-course-title="<%= course.title %>">
+                    <i class="fas fa-trophy"></i> Generate Certificate
+                  </button>
+                  
+                <!-- Certificate Locked - Show Why -->
+                <% } else if (course.courseEnded && course.attendanceConfirmed && course.assessmentRequired && course.assessmentPassed) { %>
+                  <!-- All requirements met but still locked (shouldn't happen, but safety check) -->
+                  <div class="cta-btn" style="background: #28a745; color: white;">
+                    <i class="fas fa-check-circle"></i> Certificate Processing...
+                  </div>
+                  
+                <!-- Certificate Not Available Yet - Show Status -->
+                <% } else { %>
+                  <!-- Show certificate status and what's needed -->
+                  <% if (!course.courseEnded) { %>
+                    <div class="cta-btn certificate-locked" style="background: #f8f9fa; color: #666; cursor: not-allowed; position: relative;">
+                      <i class="fas fa-lock"></i> 
+                      Certificate Available After Course Ends
+                      <div class="tooltip-text">
+                        Course ends: <%= new Date(course.endDate || course.startDate).toLocaleDateString() %>
+                      </div>
+                    </div>
+                    
+                  <% } else if (!course.attendanceConfirmed) { %>
+                    <div class="cta-btn certificate-locked" style="background: #ffc107; color: #333; cursor: not-allowed;">
+                      <i class="fas fa-user-check"></i> 
+                      Confirm Attendance First
+                    </div>
+                    
+                  <% } else if (course.assessmentRequired && !course.assessmentPassed) { %>
+                    <div class="cta-btn certificate-locked" style="background: #dc3545; color: white; cursor: not-allowed;">
+                      <i class="fas fa-clipboard-question"></i> 
+                      Pass Assessment Required
+                    </div>
+                    
+                  <% } else if (course.assessmentRequired || course.certificationEnabled) { %>
+                    <div class="certificate-status-section" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                      <h5 style="color: #333; margin-bottom: 10px;">
+                        <i class="fas fa-award"></i> Certification Progress
+                      </h5>
+                      
+                      <!-- Progress Checklist -->
+                      <div style="display: grid; gap: 8px;">
+                        
+                        <!-- Course Completion -->
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                          <% if (course.courseEnded) { %>
+                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                            <span style="color: #28a745;">Course Completed</span>
+                          <% } else if (course.courseInProgress) { %>
+                            <i class="fas fa-clock" style="color: #ffc107;"></i>
+                            <span style="color: #ffc107;">Course In Progress</span>
+                          <% } else { %>
+                            <i class="fas fa-calendar" style="color: #6c757d;"></i>
+                            <span style="color: #6c757d;">Course Upcoming</span>
+                          <% } %>
+                        </div>
+                        
+                        <!-- Attendance -->
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                          <% if (course.attendanceConfirmed) { %>
+                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                            <span style="color: #28a745;">Attendance Confirmed</span>
+                          <% } else { %>
+                            <i class="fas fa-times-circle" style="color: #dc3545;"></i>
+                            <span style="color: #dc3545;">Attendance Pending</span>
+                          <% } %>
+                        </div>
+                        
+                        <!-- Assessment -->
+                        <% if (course.assessmentRequired) { %>
+                          <div style="display: flex; align-items: center; gap: 10px;">
+                            <% if (course.assessmentPassed) { %>
+                              <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                              <span style="color: #28a745;">Assessment Passed (<%= course.assessmentScore %>%)</span>
+                            <% } else if (course.assessmentCompleted) { %>
+                              <i class="fas fa-times-circle" style="color: #dc3545;"></i>
+                              <span style="color: #dc3545;">Assessment Failed (<%= course.assessmentScore %>%)</span>
+                            <% } else { %>
+                              <i class="fas fa-minus-circle" style="color: #6c757d;"></i>
+                              <span style="color: #6c757d;">Assessment Pending</span>
+                            <% } %>
+                          </div>
+                        <% } %>
+                        
+                        <!-- Certificate Status -->
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                          <% if (course.hasCertificate) { %>
+                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                            <span style="color: #28a745; font-weight: 600;">Certificate Issued</span>
+                          <% } else if (course.canGetCertificate) { %>
+                            <i class="fas fa-trophy" style="color: #ffc107;"></i>
+                            <span style="color: #ffc107; font-weight: 600;">Certificate Ready</span>
+                          <% } else { %>
+                            <i class="fas fa-lock" style="color: #6c757d;"></i>
+                            <span style="color: #6c757d;">Certificate Locked</span>
+                          <% } %>
+                        </div>
+                      </div>
+                      
+                      <!-- Certificate Eligibility Message -->
+                      <% if (course.certificateEligibilityReason) { %>
+                        <div style="margin-top: 10px; padding: 8px 12px; background: <%= course.canGetCertificate ? '#d4edda' : '#f8d7da' %>; 
+                                    border-radius: 6px; font-size: 0.9rem; color: <%= course.canGetCertificate ? '#155724' : '#721c24' %>;">
+                          <i class="fas fa-info-circle"></i> <%= course.certificateEligibilityReason %>
+                        </div>
+                      <% } %>
+                    </div>
+                    
+                  <% } else { %>
+                    <div class="cta-btn certificate-locked" style="background: #17a2b8; color: white; cursor: not-allowed;">
+                      <i class="fas fa-hourglass-half"></i> 
+                      Certificate Processing
+                    </div>
+                  <% } %>
+                <% } %>
 
-  <!-- ========================================= -->
-  <!-- ✅ ASSESSMENT ACTION BUTTONS (FOR TAKING/RETAKING) -->
-  <!-- ========================================= -->
-  
-  <% if (course.assessmentRequired && course.attendanceConfirmed) { %>
-    <% if (!course.assessmentCompleted) { %>
-      <!-- Take Assessment (First Time) -->
-      <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-primary">
-        <i class="fas fa-clipboard-check"></i> Take Assessment
-      </a>
-      
-    <% } else if (!course.assessmentPassed && course.canRetake) { %>
-      <!-- Retake Assessment -->
-      <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
-        <i class="fas fa-redo"></i> Retake Assessment 
-        <small>(Attempt <%= (course.currentAttempts || 0) + 1 %> of <%= course.maxAttempts || 3 %>)</small>
-      </a>
-      
-    <% } else if (!course.assessmentPassed && !course.canRetake) { %>
-      <!-- No More Attempts -->
-      <div class="cta-btn" style="background: #dc3545; color: white; cursor: not-allowed;">
-        <i class="fas fa-times-circle"></i> 
-        Assessment Failed (No retakes left)
-      </div>
-      <a href="/contact" class="cta-btn btn-secondary">
-        <i class="fas fa-envelope"></i> Contact Support
-      </a>
-    <% } %>
-  <% } %>
+                <!-- ========================================= -->
+                <!-- ✅ ASSESSMENT ACTION BUTTONS (FOR TAKING/RETAKING) -->
+                <!-- ========================================= -->
+                
+                <% if (course.assessmentRequired && course.attendanceConfirmed) { %>
+                  <% if (!course.assessmentCompleted) { %>
+                    <!-- Take Assessment (First Time) -->
+                    <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-primary">
+                      <i class="fas fa-clipboard-check"></i> Take Assessment
+                    </a>
+                    
+                  <% } else if (!course.assessmentPassed && course.canRetake) { %>
+                    <!-- Retake Assessment -->
+                    <a href="/library/in-person/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+                      <i class="fas fa-redo"></i> Retake Assessment 
+                      <small>(Attempt <%= (course.currentAttempts || 0) + 1 %> of <%= course.maxAttempts || 3 %>)</small>
+                    </a>
+                    
+                  <% } else if (!course.assessmentPassed && !course.canRetake) { %>
+                    <!-- No More Attempts -->
+                    <div class="cta-btn" style="background: #dc3545; color: white; cursor: not-allowed;">
+                      <i class="fas fa-times-circle"></i> 
+                      Assessment Failed (No retakes left)
+                    </div>
+                    <a href="/contact" class="cta-btn btn-secondary">
+                      <i class="fas fa-envelope"></i> Contact Support
+                    </a>
+                  <% } %>
+                <% } %>
 
-  <!-- ========================================= -->
-  <!-- ✅ ATTENDANCE ACTION BUTTONS -->
-  <!-- ========================================= -->
-  
-  <% if (!course.attendanceConfirmed) { %>
-    <% if (course.canConfirmAttendance) { %>
-      <button class="cta-btn btn-confirm-attendance" 
-              data-course-id="<%= course.courseId %>" 
-              data-course-type="<%= course.courseType %>">
-        <i class="fas fa-check"></i> Confirm Attendance
-      </button>
-    <% } else if (course.courseEnded) { %>
-      <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
-        <i class="fas fa-exclamation-triangle"></i> 
-        Attendance Period Expired
-      </div>
-      <a href="/contact" class="cta-btn btn-secondary">
-        <i class="fas fa-envelope"></i> Contact Support
-      </a>
-    <% } %>
-  <% } %>
+                <!-- ========================================= -->
+                <!-- ✅ ATTENDANCE ACTION BUTTONS -->
+                <!-- ========================================= -->
+                
+                <% if (!course.attendanceConfirmed) { %>
+                  <% if (course.canConfirmAttendance) { %>
+                    <button class="cta-btn btn-confirm-attendance" 
+                            data-course-id="<%= course.courseId %>" 
+                            data-course-type="<%= course.courseType %>">
+                      <i class="fas fa-check"></i> Confirm Attendance
+                    </button>
+                  <% } else if (course.courseEnded) { %>
+                    <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
+                      <i class="fas fa-exclamation-triangle"></i> 
+                      Attendance Period Expired
+                    </div>
+                    <a href="/contact" class="cta-btn btn-secondary">
+                      <i class="fas fa-envelope"></i> Contact Support
+                    </a>
+                  <% } %>
+                <% } %>
 
-  <!-- ========================================= -->
-  <!-- ✅ GENERAL COURSE ACTIONS (ALWAYS AVAILABLE) -->
-  <!-- ========================================= -->
-  
-  <!-- Course Details Link -->
-  <a href="/in-person/courses/<%= course.courseId %>" class="cta-btn btn-outline-secondary">
-    <i class="fas fa-info-circle"></i> Course Details
-  </a>
+                <!-- ========================================= -->
+                <!-- ✅ GENERAL COURSE ACTIONS (ALWAYS AVAILABLE) -->
+                <!-- ========================================= -->
+                
+                <!-- Course Details Link -->
+                <a href="/in-person/courses/<%= course.courseId %>" class="cta-btn btn-outline-secondary">
+                  <i class="fas fa-info-circle"></i> Course Details
+                </a>
 
-  <!-- Print Details (Optional) -->
-  <button onclick="printCourseCard(this.closest('.course-card'))" class="cta-btn btn-outline-secondary">
-    <i class="fas fa-print"></i> Print Details
-  </button>
-</div>
+                <!-- Print Details (Optional) -->
+                <button onclick="printCourseCard(this.closest('.course-card'))" class="cta-btn btn-outline-secondary">
+                  <i class="fas fa-print"></i> Print Details
+                </button>
+              </div>
             </div>
           </div>
         <% }) %>
@@ -1473,87 +1445,6 @@
       }
     };
 
-    window.shareCertificate = async function(certificateId, courseTitle) {
-      Swal.fire({
-        title: 'Share Your Achievement! 🎉',
-        html: `
-          <div style="text-align: center; margin: 20px 0;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-              <i class="fas fa-medal" style="font-size: 2rem; margin-bottom: 10px;"></i>
-              <h4 style="margin: 10px 0;">Certificate of Completion</h4>
-              <p style="margin: 5px 0; opacity: 0.9;">${courseTitle}</p>
-              <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">IAAI Training Institute</p>
-            </div>
-            
-            <p style="margin-bottom: 20px; color: #666;">Share your professional achievement:</p>
-            
-            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
-              <button onclick="shareOnLinkedIn('${certificateId}', '${courseTitle}')" class="swal-btn swal-btn-linkedin">
-                <i class="fab fa-linkedin"></i> LinkedIn
-              </button>
-              <button onclick="shareOnTwitter('${certificateId}', '${courseTitle}')" class="swal-btn swal-btn-twitter">
-                <i class="fab fa-twitter"></i> Twitter
-              </button>
-              <button onclick="copyVerificationLink('${certificateId}')" class="swal-btn swal-btn-primary">
-                <i class="fas fa-copy"></i> Copy Link
-              </button>
-            </div>
-          </div>
-        `,
-        showConfirmButton: false,
-        showCloseButton: true,
-        customClass: {
-          popup: 'share-modal'
-        },
-        didOpen: () => {
-          const style = document.createElement('style');
-          style.textContent = `
-            .share-modal { width: 90% !important; max-width: 500px !important; }
-            .swal-btn {
-              padding: 8px 16px; border: none; border-radius: 6px; color: white;
-              font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;
-            }
-            .swal-btn-primary { background: #3182ce; }
-            .swal-btn-linkedin { background: #0077b5; }
-            .swal-btn-twitter { background: #1da1f2; }
-            .swal-btn:hover { transform: translateY(-1px); opacity: 0.9; }
-          `;
-          document.head.appendChild(style);
-        }
-      });
-    };
-
-    // Share functions
-    window.shareOnLinkedIn = function(certificateId, courseTitle) {
-      const text = `I just completed "${courseTitle}" and earned my certificate from IAAI Training Institute! 🎓`;
-      const url = encodeURIComponent(`${window.location.origin}/certificates/view/${certificateId}`);
-      const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&summary=${encodeURIComponent(text)}`;
-      window.open(linkedinUrl, '_blank', 'width=600,height=500');
-    };
-
-    window.shareOnTwitter = function(certificateId, courseTitle) {
-      const text = `Just earned my certificate in "${courseTitle}" from @IAAI_Training! 🎓 #ProfessionalDevelopment #AestheticTraining`;
-      const url = encodeURIComponent(`${window.location.origin}/certificates/view/${certificateId}`);
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`;
-      window.open(twitterUrl, '_blank', 'width=600,height=400');
-    };
-
-    window.copyVerificationLink = function(certificateId) {
-      const url = `${window.location.origin}/certificates/view/${certificateId}`;
-      navigator.clipboard.writeText(url).then(() => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Copied! 📋',
-          text: 'Certificate link copied to clipboard',
-          timer: 2000,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          toast: true,
-          position: 'top-end'
-        });
-      });
-    };
-
     // ========================================
     // GALLERY FUNCTIONALITY
     // ========================================
@@ -1626,42 +1517,28 @@
     }
 
     // ========================================
-    // MATERIALS TOGGLE AND INTERACTION
+    // PROGRESSIVE ENHANCEMENT
     // ========================================
     
-    function toggleMaterials(courseId) {
-      const courseCard = document.querySelector(`[data-course-id="${courseId}"]`)?.closest('.course-card');
-      if (!courseCard) return;
+    function initializeProgressiveEnhancements() {
+      // Check for modern browser features
+      const hasModernFeatures = 'fetch' in window && 'Promise' in window;
       
-      const materialsSection = courseCard.querySelector('.video-section');
-      const toggleButton = courseCard.querySelector('button[onclick*="toggleMaterials"]');
-      
-      if (materialsSection) {
-        if (materialsSection.style.display === 'none') {
-          materialsSection.style.display = 'block';
-          materialsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          if (toggleButton) {
-            toggleButton.innerHTML = '<i class="fas fa-folder"></i> Hide Materials';
-          }
-        } else {
-          materialsSection.style.display = 'none';
-          if (toggleButton) {
-            toggleButton.innerHTML = '<i class="fas fa-folder-open"></i> Show Materials';
-          }
-        }
+      if (!hasModernFeatures) {
+        // Fallback for older browsers
+        document.querySelectorAll('.btn-generate-certificate, .btn-confirm-attendance').forEach(button => {
+          button.onclick = function() {
+            alert('This feature requires a modern browser. Please update your browser and try again.');
+          };
+        });
+        return;
       }
-    }
 
-    // ========================================
-    // ENHANCED USER INTERACTIONS
-    // ========================================
-    
-    // Initialize material toggle buttons
-    function initializeMaterialToggles() {
-      document.querySelectorAll('button[onclick*="toggleMaterials"]').forEach(button => {
-        const originalText = button.innerHTML;
-        button.setAttribute('data-original-text', originalText);
-      });
+      // Initialize all modern features
+      initializeCardInteractions();
+      initializePrintSupport();
+      initializeAccessibility();
+      initializePerformanceOptimizations();
     }
 
     // Add hover effects to course cards
@@ -1679,16 +1556,9 @@
 
     // Initialize print functionality
     function initializePrintSupport() {
-      // Add print button to course cards
+      // Add print button functionality
       document.querySelectorAll('.course-card').forEach(card => {
-        const courseActions = card.querySelector('.course-actions');
-        if (courseActions && !card.querySelector('.btn-print')) {
-          const printButton = document.createElement('button');
-          printButton.className = 'cta-btn btn-outline-secondary btn-print';
-          printButton.innerHTML = '<i class="fas fa-print"></i> Print Details';
-          printButton.onclick = () => printCourseCard(card);
-          courseActions.appendChild(printButton);
-        }
+        // Print functionality is handled by inline onclick
       });
     }
 
@@ -1728,10 +1598,7 @@
       printWindow.print();
     }
 
-    // ========================================
-    // ACCESSIBILITY ENHANCEMENTS
-    // ========================================
-    
+    // Accessibility enhancements
     function initializeAccessibility() {
       // Add ARIA labels to interactive elements
       document.querySelectorAll('.cta-btn').forEach(button => {
@@ -1755,22 +1622,9 @@
           }
         });
       });
-      
-      // Enhance modal accessibility
-      const modals = ['galleryModal', 'lightbox'];
-      modals.forEach(modalId => {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-          modal.setAttribute('role', 'dialog');
-          modal.setAttribute('aria-modal', 'true');
-        }
-      });
     }
 
-    // ========================================
-    // PERFORMANCE OPTIMIZATIONS
-    // ========================================
-    
+    // Performance optimizations
     function initializePerformanceOptimizations() {
       // Lazy load images in gallery
       if ('IntersectionObserver' in window) {
@@ -1778,9 +1632,11 @@
           entries.forEach(entry => {
             if (entry.isIntersecting) {
               const img = entry.target;
-              img.src = img.dataset.src;
-              img.classList.remove('lazy');
-              observer.unobserve(img);
+              if (img.dataset.src) {
+                img.src = img.dataset.src;
+                img.classList.remove('lazy');
+                observer.unobserve(img);
+              }
             }
           });
         });
@@ -1802,10 +1658,6 @@
       }
     }
 
-    // ========================================
-    // UTILITY FUNCTIONS
-    // ========================================
-    
     // Close modals when clicking outside
     window.onclick = function(event) {
       const galleryModal = document.getElementById('galleryModal');
@@ -1836,216 +1688,7 @@
         }
       }
     });
-
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      });
-    });
-
-    // ========================================
-    // PROGRESSIVE ENHANCEMENT
-    // ========================================
-    
-    function initializeProgressiveEnhancements() {
-      // Check for modern browser features
-      const hasModernFeatures = 'fetch' in window && 'Promise' in window;
-      
-      if (!hasModernFeatures) {
-        // Fallback for older browsers
-        document.querySelectorAll('.btn-generate-certificate, .btn-confirm-attendance').forEach(button => {
-          button.onclick = function() {
-            alert('This feature requires a modern browser. Please update your browser and try again.');
-          };
-        });
-        return;
-      }
-
-      // Initialize all modern features
-      initializeMaterialToggles();
-      initializeCardInteractions();
-      initializePrintSupport();
-      initializeAccessibility();
-      initializePerformanceOptimizations();
-      
-      // Add connection status indicator
-      if ('navigator' in window && 'onLine' in navigator) {
-        const connectionStatus = document.createElement('div');
-        connectionStatus.id = 'connectionStatus';
-        connectionStatus.style.cssText = `
-          position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
-          background: #dc3545; color: white; text-align: center; padding: 5px;
-          transform: translateY(-100%); transition: transform 0.3s ease;
-        `;
-        connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> No internet connection';
-        document.body.appendChild(connectionStatus);
-        
-        function updateConnectionStatus() {
-          if (navigator.onLine) {
-            connectionStatus.style.transform = 'translateY(-100%)';
-          } else {
-            connectionStatus.style.transform = 'translateY(0)';
-          }
-        }
-        
-        window.addEventListener('online', updateConnectionStatus);
-        window.addEventListener('offline', updateConnectionStatus);
-      }
-    }
-
-    // Add custom CSS for enhanced interactions
-    const enhancedStyles = document.createElement('style');
-    enhancedStyles.textContent = `
-      /* Enhanced filtering styles */
-      .course-card.hidden {
-        display: none !important;
-      }
-      
-      .course-card {
-        transition: all 0.3s ease;
-      }
-      
-      /* Gallery enhancements */
-      .gallery-item {
-        position: relative;
-        overflow: hidden;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        cursor: pointer;
-      }
-      
-      .gallery-item img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-      }
-      
-      .gallery-item:hover img {
-        transform: scale(1.05);
-      }
-      
-      /* Loading states */
-      .loading {
-        position: relative;
-        pointer-events: none;
-        opacity: 0.7;
-      }
-      
-      .loading::after {
-        content: '';
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        margin: auto;
-        border: 2px solid transparent;
-        border-top-color: currentColor;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-      
-      @keyframes spin {
-        0% { transform: translate(-50%, -50%) rotate(0deg); }
-        100% { transform: translate(-50%, -50%) rotate(360deg); }
-      }
-      
-      /* Print optimizations */
-      @media print {
-        .course-actions,
-        .video-actions,
-        .gallery-modal,
-        .lightbox,
-        #connectionStatus,
-        .btn-print {
-          display: none !important;
-        }
-        
-        .course-card {
-          break-inside: avoid;
-          box-shadow: none;
-          border: 1px solid #000;
-          margin-bottom: 20px;
-        }
-        
-        .course-header {
-          background: #f8f9fa !important;
-          color: #000 !important;
-        }
-        
-        .linked-course-info {
-          border: 2px solid #17a2b8 !important;
-          animation: none !important;
-        }
-      }
-      
-      /* Focus styles for accessibility */
-      .course-card:focus {
-        outline: 3px solid #007bff;
-        outline-offset: 2px;
-      }
-      
-      .cta-btn:focus,
-      .video-action:focus {
-        outline: 3px solid var(--secondary-color);
-        outline-offset: 2px;
-      }
-      
-      /* Dark mode support */
-      @media (prefers-color-scheme: dark) {
-        .gallery-modal {
-          background: rgba(0,0,0,0.95);
-        }
-        
-        .lightbox {
-          background: rgba(0,0,0,0.98);
-        }
-      }
-      
-      /* Reduced motion support */
-      @media (prefers-reduced-motion: reduce) {
-        .course-card,
-        .gallery-item img,
-        .cta-btn,
-        .loading::after {
-          transition: none !important;
-          animation: none !important;
-        }
-        
-        .course-card:hover {
-          transform: none !important;
-        }
-      }
-      
-      /* High contrast mode */
-      @media (prefers-contrast: high) {
-        .course-card {
-          border: 2px solid #000;
-        }
-        
-        .cta-btn {
-          border: 2px solid currentColor;
-        }
-        
-        .linked-course-badge,
-        .course-status {
-          border: 2px solid #fff;
-        }
-      }
-    `;
-    document.head.appendChild(enhancedStyles);
   </script>
-
 
   <%- include('partials/footer') %>
 </body>

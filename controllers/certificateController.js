@@ -1,6 +1,6 @@
 // ============================================================================
 // FULLY ALIGNED CERTIFICATE CONTROLLER - ALL SYSTEMS INTEGRATED
-// Aligned with: User Model + In-Person Library + Routes + Certificate View
+// Aligned with: User Model + In-Person Library + Routes + Certificate View a
 // ============================================================================
 
 const User = require("../models/user");

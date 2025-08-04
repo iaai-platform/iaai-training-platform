@@ -1,4 +1,3 @@
-// Final Complete User Model - All Index Issues Fixed
 // This model removes all problematic certificate indexes that cause registration errors
 
 const mongoose = require("mongoose");

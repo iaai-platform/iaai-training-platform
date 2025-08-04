@@ -159,7 +159,7 @@ router.get("/api", adminInPersonCoursesController.getAllCourses);
  */
 router.post(
   "/api/upload/documents",
-  upload.array("files", 10), // Keep as "files" - frontend will send this
+  upload.array("files", 10),
   async (req, res) => {
     try {
       console.log(
@@ -175,19 +175,37 @@ router.post(
 
       const uploadPromises = req.files.map((file) => {
         return new Promise((resolve, reject) => {
+          // ✅ CRITICAL: Extract original filename without extension
+          const originalName = file.originalname.replace(/\.[^/.]+$/, "");
+
           const uploadStream = cloudinary.uploader.upload_stream(
             {
               folder: "iaai-platform/inperson/coursedocuments",
-              resource_type: "auto",
-              format: file.mimetype.includes("pdf") ? "pdf" : undefined,
+              resource_type: "raw",
+              public_id: `${originalName}_${Date.now()}`, // ✅ Use original filename
+              use_filename: false, // ✅ We're setting public_id manually
+              unique_filename: false, // ✅ We're handling uniqueness
             },
             (error, result) => {
               if (error) {
                 console.error("❌ Cloudinary upload error:", error);
                 reject(error);
               } else {
-                console.log("✅ Document uploaded:", result.secure_url);
-                resolve(result.secure_url);
+                // ✅ CRITICAL FIX: Create URL with proper attachment parameter
+                const viewableUrl = `${result.secure_url.replace(
+                  "/upload/",
+                  "/upload/fl_attachment:" + file.originalname + "/"
+                )}`;
+
+                console.log(
+                  "✅ Document uploaded with viewable URL:",
+                  viewableUrl
+                );
+                resolve({
+                  url: result.secure_url, // Original URL for storage
+                  viewUrl: viewableUrl, // URL with proper filename for viewing
+                  originalName: file.originalname,
+                });
               }
             }
           );
@@ -195,17 +213,18 @@ router.post(
         });
       });
 
-      const uploadedUrls = await Promise.all(uploadPromises);
+      const uploadResults = await Promise.all(uploadPromises);
 
       console.log(
         "✅ All documents uploaded successfully:",
-        uploadedUrls.length
+        uploadResults.length
       );
 
       res.json({
         success: true,
-        message: `${uploadedUrls.length} document(s) uploaded successfully`,
-        files: uploadedUrls,
+        message: `${uploadResults.length} document(s) uploaded successfully`,
+        files: uploadResults.map((result) => result.viewUrl), // ✅ Return viewable URLs
+        uploadDetails: uploadResults, // ✅ Include full details if needed
       });
     } catch (error) {
       console.error("❌ Error uploading documents:", error);
@@ -225,7 +244,7 @@ router.post(
  */
 router.post(
   "/api/upload/images",
-  upload.array("files", 20), // Keep as "files" - frontend will send this
+  upload.array("files", 20),
   async (req, res) => {
     try {
       console.log("🖼️ Images upload - Files received:", req.files?.length || 0);
@@ -241,7 +260,7 @@ router.post(
           const uploadStream = cloudinary.uploader.upload_stream(
             {
               folder: "iaai-platform/inperson/gallery-images",
-              resource_type: "image",
+              resource_type: "image", // ✅ CORRECT: Use "image" for images
               format: "webp",
               transformation: [
                 { width: 800, height: 600, crop: "fill", quality: "auto" },
@@ -262,8 +281,6 @@ router.post(
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
-
-      console.log("✅ All images uploaded successfully:", uploadedUrls.length);
 
       res.json({
         success: true,

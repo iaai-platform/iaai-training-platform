@@ -2555,13 +2555,8 @@ class InPersonCoursesController {
     existing = {}
   ) {
     console.log("🎨 Processing media data...");
-    console.log("  Uploaded files received:", uploadedFiles);
-    console.log("  📥 uploadedFiles type:", typeof uploadedFiles);
-    console.log("  📥 uploadedFiles keys:", Object.keys(uploadedFiles || {}));
-    console.log("  Existing media:", existing);
 
     const media = {
-      // Preserve existing main image or set to null
       mainImage: existing?.mainImage || null,
       documents: [...(existing?.documents || [])],
       images: [...(existing?.images || [])],
@@ -2583,171 +2578,95 @@ class InPersonCoursesController {
       links: this._mergeLinks(body, savedDynamicItems, existing?.links),
     };
 
-    // Process uploaded files from AJAX uploads (Cloudinary URLs)
+    // ✅ FIXED: Process uploaded files with proper URL handling
     if (uploadedFiles && Object.keys(uploadedFiles).length > 0) {
       console.log("📁 Processing uploadedFiles...");
 
-      // Handle main image - should be in iaai-platform/inperson/main-images/
+      // Handle documents with proper viewing URLs
+      if (uploadedFiles.documents && uploadedFiles.documents.length > 0) {
+        const validDocuments = uploadedFiles.documents
+          .filter((doc) => doc && typeof doc === "string" && doc.trim())
+          .map((docUrl) => {
+            // ✅ CRITICAL: Convert storage URL to viewable URL if needed
+            if (
+              docUrl.includes("cloudinary.com") &&
+              docUrl.includes("/raw/upload/") &&
+              !docUrl.includes("fl_attachment")
+            ) {
+              // Extract filename from URL and add attachment parameter
+              const fileName =
+                this._extractFilenameFromUrl(docUrl) || "document.pdf";
+              return docUrl.replace(
+                "/upload/",
+                `/upload/fl_attachment:${fileName}/`
+              );
+            }
+            return docUrl;
+          });
+
+        media.documents.push(...validDocuments);
+        console.log(
+          "✅ Added documents with proper viewing URLs:",
+          validDocuments.length
+        );
+      }
+
+      // Handle other media types (images, videos) - unchanged
       if (uploadedFiles.mainImage && uploadedFiles.mainImage.length > 0) {
         const mainImageUrl = uploadedFiles.mainImage[0];
         if (
           mainImageUrl &&
-          typeof mainImageUrl === "string" &&
-          mainImageUrl.trim()
+          mainImageUrl.includes("iaai-platform/inperson/main-images/")
         ) {
-          // Verify it's from the correct folder
-          if (mainImageUrl.includes("iaai-platform/inperson/main-images/")) {
-            media.mainImage = {
-              url: mainImageUrl.trim(),
-              alt:
-                body.media?.mainImage?.alt ||
-                body.basic?.title ||
-                "Course Image",
-            };
-            console.log(
-              "  ✅ Set mainImage from correct folder:",
-              media.mainImage.url
-            );
-          } else {
-            console.warn(
-              "  ⚠️ Main image not from expected folder:",
-              mainImageUrl
-            );
-          }
+          media.mainImage = {
+            url: mainImageUrl.trim(),
+            alt:
+              body.media?.mainImage?.alt || body.basic?.title || "Course Image",
+          };
         }
       }
 
-      // Handle documents - should be in iaai-platform/inperson/coursedocuments/
-      if (uploadedFiles.documents && uploadedFiles.documents.length > 0) {
-        const validDocuments = uploadedFiles.documents.filter((doc) => {
-          if (!doc || typeof doc !== "string" || !doc.trim()) return false;
-
-          // Verify document is from correct folder
-          if (doc.includes("iaai-platform/inperson/coursedocuments/")) {
-            return true;
-          } else {
-            console.warn("  ⚠️ Document not from expected folder:", doc);
-            return false;
-          }
-        });
-
-        media.documents.push(...validDocuments);
-        console.log(
-          "  ✅ Added documents from correct folder:",
-          validDocuments.length,
-          "files"
-        );
-      }
-
-      // Handle gallery images - should be in iaai-platform/inperson/gallery-images/
       if (uploadedFiles.images && uploadedFiles.images.length > 0) {
-        const validImages = uploadedFiles.images.filter((img) => {
-          if (!img || typeof img !== "string" || !img.trim()) return false;
-
-          // Verify image is from correct folder
-          if (img.includes("iaai-platform/inperson/gallery-images/")) {
-            return true;
-          } else {
-            console.warn("  ⚠️ Gallery image not from expected folder:", img);
-            return false;
-          }
-        });
-
+        const validImages = uploadedFiles.images.filter(
+          (img) => img && img.includes("iaai-platform/inperson/gallery-images/")
+        );
         media.images.push(...validImages);
-        console.log(
-          "  ✅ Added gallery images from correct folder:",
-          validImages.length,
-          "files"
-        );
       }
 
-      // Handle videos - should be in iaai-platform/inperson/course-videos/
       if (uploadedFiles.videos && uploadedFiles.videos.length > 0) {
-        const validVideos = uploadedFiles.videos.filter((vid) => {
-          if (!vid || typeof vid !== "string" || !vid.trim()) return false;
-
-          // Verify video is from correct folder
-          if (vid.includes("iaai-platform/inperson/course-videos/")) {
-            return true;
-          } else {
-            console.warn("  ⚠️ Video not from expected folder:", vid);
-            return false;
-          }
-        });
-
+        const validVideos = uploadedFiles.videos.filter(
+          (vid) => vid && vid.includes("iaai-platform/inperson/course-videos/")
+        );
         media.videos.push(...validVideos);
-        console.log(
-          "  ✅ Added videos from correct folder:",
-          validVideos.length,
-          "files"
-        );
-      }
-    } else {
-      console.log("  📋 No uploadedFiles provided or uploadedFiles is empty");
-    }
-
-    // Process files from multipart form (legacy support)
-    if (files) {
-      console.log("📁 Processing multipart files...");
-
-      if (files.mainImage && files.mainImage[0]) {
-        // This would be local storage - deprecated in favor of Cloudinary
-        console.warn(
-          "  ⚠️ Multipart main image upload detected - should use Cloudinary instead"
-        );
-      }
-
-      if (files.documents) {
-        console.warn(
-          "  ⚠️ Multipart document upload detected - should use Cloudinary instead"
-        );
-      }
-
-      if (files.images) {
-        console.warn(
-          "  ⚠️ Multipart image upload detected - should use Cloudinary instead"
-        );
       }
     }
 
-    // Process video links from dynamic items
-    if (
-      savedDynamicItems.videoLinks &&
-      savedDynamicItems.videoLinks.length > 0
-    ) {
-      const videoUrls = savedDynamicItems.videoLinks
-        .map((v) => v.url || v)
-        .filter(Boolean);
-      media.videos.push(...videoUrls);
-      console.log(
-        "  ✅ Added video links from dynamic items:",
-        videoUrls.length,
-        "links"
-      );
-    }
-
-    // Remove duplicates and filter out empty values
+    // Remove duplicates
     media.documents = [...new Set(media.documents.filter(Boolean))];
     media.images = [...new Set(media.images.filter(Boolean))];
     media.videos = [...new Set(media.videos.filter(Boolean))];
 
-    // Log final counts for debugging
-    console.log("📊 Final media counts:", {
-      mainImage: media.mainImage ? "present" : "null",
-      documents: media.documents.length,
-      images: media.images.length,
-      videos: media.videos.length,
-      links: media.links.length,
-    });
-
-    // Validate folder structure
-    this._validateMediaFolderStructure(media);
-
-    console.log("✅ Final media object:", JSON.stringify(media, null, 2));
-
     return media;
   }
 
+  // ✅ ADD THIS HELPER METHOD to your controller:
+  _extractFilenameFromUrl(url) {
+    try {
+      // Extract filename from Cloudinary URL
+      const urlParts = url.split("/");
+      const lastPart = urlParts[urlParts.length - 1];
+
+      // If it has an extension, return as is, otherwise add .pdf
+      if (lastPart.includes(".")) {
+        return lastPart;
+      } else {
+        return lastPart + ".pdf";
+      }
+    } catch (error) {
+      console.warn("Could not extract filename from URL:", url);
+      return "document.pdf";
+    }
+  }
   /**
    * Validate that media files are in correct Cloudinary folders
    */

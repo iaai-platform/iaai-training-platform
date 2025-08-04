@@ -154,12 +154,7 @@ router.get("/api", adminInPersonCoursesController.getAllCourses);
 
 /**
  * @route   POST /admin-courses/inperson/api/upload/documents
- * @desc    Upload course documents - FIXED for untrusted customer issue
- * @access  Admin
-
-/**
- * @route   POST /admin-courses/inperson/api/upload/documents
- * @desc    Upload course documents - FINAL WORKING VERSION
+ * @desc    Upload course documents (PDF, DOC, PPT, etc.)
  * @access  Admin
  */
 router.post(
@@ -230,7 +225,7 @@ router.post(
  */
 router.post(
   "/api/upload/images",
-  upload.array("files", 20),
+  upload.array("files", 20), // Keep as "files" - frontend will send this
   async (req, res) => {
     try {
       console.log("🖼️ Images upload - Files received:", req.files?.length || 0);
@@ -246,7 +241,7 @@ router.post(
           const uploadStream = cloudinary.uploader.upload_stream(
             {
               folder: "iaai-platform/inperson/gallery-images",
-              resource_type: "image", // ✅ CORRECT: Use "image" for images
+              resource_type: "image",
               format: "webp",
               transformation: [
                 { width: 800, height: 600, crop: "fill", quality: "auto" },
@@ -267,6 +262,8 @@ router.post(
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
+
+      console.log("✅ All images uploaded successfully:", uploadedUrls.length);
 
       res.json({
         success: true,

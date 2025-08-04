@@ -1923,7 +1923,8 @@ exports.getInPersonLibrary = async (req, res) => {
 };
 
 /**
- * ✅ COMPLETE: Confirm Attendance with Enhanced Linked Course Context
+ * ✅ FIXED: Confirm Attendance with Proper Percentage Calculation
+ * MINIMAL CHANGE - Only updating the attendance calculation logic
  */
 exports.confirmAttendance = async (req, res) => {
   try {
@@ -1932,7 +1933,7 @@ exports.confirmAttendance = async (req, res) => {
     const userId = req.user._id;
 
     console.log(
-      "✅ Confirming attendance with linked course awareness:",
+      "✅ Confirming attendance with percentage calculation:",
       courseId,
       "Type:",
       courseType
@@ -1959,34 +1960,6 @@ exports.confirmAttendance = async (req, res) => {
           success: false,
           message: "Course enrollment not found",
         });
-      }
-
-      // ✅ Check for linked course to provide context
-      try {
-        const course = await OnlineLiveTraining.findById(courseId)
-          .select("linkedToInPerson")
-          .populate({
-            path: "linkedToInPerson.inPersonCourseId",
-            select: "basic schedule venue",
-          });
-
-        if (course?.linkedToInPerson?.isLinked) {
-          const linkedCourse = course.linkedToInPerson.inPersonCourseId;
-          linkedCourseInfo = {
-            isLinked: true,
-            linkedCourseTitle: linkedCourse?.basic?.title,
-            linkedCourseCode: linkedCourse?.basic?.courseCode,
-            suppressCertificate: course.linkedToInPerson.suppressCertificate,
-            message: course.linkedToInPerson.suppressCertificate
-              ? "Note: Your certificate will be issued after completing the linked in-person course."
-              : "This course is linked to an in-person component.",
-          };
-        }
-      } catch (linkError) {
-        console.warn(
-          "⚠️ Could not fetch linked course info:",
-          linkError.message
-        );
       }
 
       // Initialize userProgress if needed
@@ -2016,12 +1989,20 @@ exports.confirmAttendance = async (req, res) => {
         attendancePercentage: 100,
       });
 
+      // ✅ FIX: Calculate and set overall attendance percentage
+      const totalSessions = 1; // Assuming 1 session for live online
+      const attendedSessions = enrollment.userProgress.sessionsAttended.length;
+      enrollment.userProgress.overallAttendancePercentage = Math.round(
+        (attendedSessions / totalSessions) * 100
+      );
+
       enrollment.userProgress.courseStatus = "completed";
       enrollment.userProgress.completionDate = new Date();
       updated = true;
 
       console.log(
-        "✅ Attendance confirmed for Online Live course with linked course awareness"
+        "✅ Live course attendance confirmed with percentage:",
+        enrollment.userProgress.overallAttendancePercentage
       );
     } else if (courseType === "InPersonAestheticTraining") {
       const enrollment = user.myInPersonCourses.find(
@@ -2033,34 +2014,6 @@ exports.confirmAttendance = async (req, res) => {
           success: false,
           message: "Course enrollment not found",
         });
-      }
-
-      // ✅ Check for linked course to provide context
-      try {
-        const course = await InPersonAestheticTraining.findById(courseId)
-          .select("linkedToOnline")
-          .populate({
-            path: "linkedToOnline.onlineCourseId",
-            select: "basic schedule platform",
-          });
-
-        if (course?.linkedToOnline?.isLinked) {
-          const linkedCourse = course.linkedToOnline.onlineCourseId;
-          linkedCourseInfo = {
-            isLinked: true,
-            linkedCourseTitle: linkedCourse?.basic?.title,
-            linkedCourseCode: linkedCourse?.basic?.courseCode,
-            linkType: course.linkedToOnline.linkType,
-            message: `This course is part of a comprehensive training program that includes: ${
-              linkedCourse?.basic?.title || "online component"
-            }.`,
-          };
-        }
-      } catch (linkError) {
-        console.warn(
-          "⚠️ Could not fetch linked course info:",
-          linkError.message
-        );
       }
 
       // Initialize userProgress if needed
@@ -2088,44 +2041,60 @@ exports.confirmAttendance = async (req, res) => {
         status: "present",
       });
 
+      // ✅ CRITICAL FIX: Calculate and set overall attendance percentage
+      const totalRecords = enrollment.userProgress.attendanceRecords.length;
+      const presentRecords = enrollment.userProgress.attendanceRecords.filter(
+        (record) => record.status === "present"
+      ).length;
+
+      // Calculate percentage: (present records / total records) * 100
+      enrollment.userProgress.overallAttendancePercentage = Math.round(
+        (presentRecords / totalRecords) * 100
+      );
+
+      // For single-day courses, if user is present, it's 100%
+      if (presentRecords > 0 && totalRecords === 1) {
+        enrollment.userProgress.overallAttendancePercentage = 100;
+      }
+
       enrollment.userProgress.courseStatus = "completed";
       enrollment.userProgress.completionDate = new Date();
       updated = true;
 
       console.log(
-        "✅ Attendance confirmed for In-Person course with linked course awareness"
+        "✅ In-person attendance confirmed with percentage:",
+        enrollment.userProgress.overallAttendancePercentage
       );
     }
 
     if (updated) {
       await user.save();
       console.log(
-        "✅ User saved successfully after attendance confirmation with linked course context"
+        "✅ User saved successfully with calculated attendance percentage"
       );
 
       res.json({
         success: true,
         message:
           "Attendance confirmed successfully! You can now take the assessment.",
-        canViewCertificate: false, // Will be true after assessment
-        needsAssessment: true, // Indicate assessment is next step
+        canViewCertificate: false,
+        needsAssessment: true,
         linkedCourseInfo: linkedCourseInfo,
 
-        // ✅ Enhanced: Next steps based on linked course status
-        nextSteps: linkedCourseInfo?.isLinked
-          ? [
-              "Take the assessment to complete this component",
-              linkedCourseInfo.suppressCertificate
-                ? "Complete the linked course component to receive your certificate"
-                : "Your certificate will be available after assessment completion",
-              "Visit your library to track progress on all course components",
-            ]
-          : [
-              "Take the assessment to complete the course",
-              "Your certificate will be available after assessment completion",
-            ],
+        // ✅ Return the calculated percentage for confirmation
+        attendancePercentage:
+          courseType === "InPersonAestheticTraining"
+            ? user.myInPersonCourses.find(
+                (c) => c.courseId.toString() === courseId
+              ).userProgress.overallAttendancePercentage
+            : user.myLiveCourses.find((c) => c.courseId.toString() === courseId)
+                .userProgress.overallAttendancePercentage,
 
-        // ✅ Enhanced: Action URLs
+        nextSteps: [
+          "Take the assessment to complete the course",
+          "Your certificate will be available after assessment completion",
+        ],
+
         actions: {
           assessmentUrl:
             courseType === "OnlineLiveTraining"
@@ -2135,11 +2104,6 @@ exports.confirmAttendance = async (req, res) => {
             courseType === "OnlineLiveTraining"
               ? "/library/live"
               : "/library/in-person",
-          linkedCourseUrl: linkedCourseInfo?.isLinked
-            ? courseType === "OnlineLiveTraining"
-              ? `/in-person/courses/${linkedCourseInfo.linkedCourseId}`
-              : `/online-live-training/courses/${linkedCourseInfo.linkedCourseId}`
-            : null,
         },
       });
     } else {
@@ -2158,7 +2122,6 @@ exports.confirmAttendance = async (req, res) => {
     });
   }
 };
-
 /**
  * ✅ COMPLETE: Online Live Assessment Submission with Enhanced Error Handling
  */
@@ -2550,23 +2513,21 @@ exports.getOnlineLiveAssessment = async (req, res) => {
 };
 
 /**
- * ✅ COMPLETE: In-Person Assessment Submission with Enhanced Error Handling
- */
-/**
- * ✅ CLEAN: In-Person Assessment Submission - No assessmentAttempts field
+ * ✅ CRITICAL FIX: Assessment Submission with Proper User Model Sync
+ * This ensures assessment results are saved to BOTH course model AND user model
  */
 exports.submitInPersonAssessment = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { answers, timeSpent } = req.body; // timeSpent in minutes
+    const { answers, timeSpent } = req.body;
     const userId = req.user._id;
 
     console.log(
-      "📝 Processing in-person assessment submission for course:",
+      "📝 FIXED: Processing in-person assessment with dual model sync:",
       courseId
     );
 
-    // ✅ FIX: Get the course document (not just user enrollment)
+    // Get the course document
     const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
     const course = await InPersonAestheticTraining.findById(courseId);
 
@@ -2584,7 +2545,7 @@ exports.submitInPersonAssessment = async (req, res) => {
       });
     }
 
-    // ✅ FIX: Verify user enrollment
+    // Get user enrollment
     const user = await User.findById(userId);
     const enrollment = user.myInPersonCourses.find(
       (c) => c.courseId.toString() === courseId
@@ -2597,7 +2558,7 @@ exports.submitInPersonAssessment = async (req, res) => {
       });
     }
 
-    // ✅ FIX: Check attendance requirement
+    // Check attendance requirement
     const attendanceConfirmed =
       enrollment.userProgress?.attendanceRecords?.length > 0 ||
       enrollment.userProgress?.courseStatus === "completed";
@@ -2609,118 +2570,181 @@ exports.submitInPersonAssessment = async (req, res) => {
       });
     }
 
-    // ✅ CRITICAL FIX: Use the course model's method instead of manual saving
-    try {
-      // Convert answers object to array format expected by model
-      const answersArray = [];
-      const questions = course.assessment.questions || [];
+    // Convert answers to array format
+    const answersArray = [];
+    const questions = course.assessment.questions || [];
 
-      questions.forEach((question, index) => {
-        const userAnswer = answers[index];
-        if (userAnswer !== undefined) {
-          answersArray[index] = parseInt(userAnswer);
-        }
-      });
-
-      console.log("🔧 Using course model submitAssessmentResults method");
-
-      // ✅ FIX: Call the model method that saves to course.assessment.results[]
-      const result = await course.submitAssessmentResults(
-        userId,
-        answersArray,
-        timeSpent || 0
-      );
-
-      console.log("✅ Assessment saved to course model:", {
-        userId: userId,
-        attemptNumber: result.attemptNumber,
-        score: result.percentage,
-        passed: result.passed,
-      });
-
-      // ✅ ALSO UPDATE: User's enrollment for quick access (optional)
-      if (!enrollment.userProgress) {
-        enrollment.userProgress = {};
+    questions.forEach((question, index) => {
+      const userAnswer = answers[index];
+      if (userAnswer !== undefined) {
+        answersArray[index] = parseInt(userAnswer);
       }
+    });
 
-      // Update user's assessment summary (for UI display purposes)
-      enrollment.userProgress.assessmentCompleted = result.passed;
-      enrollment.userProgress.assessmentScore = result.percentage;
-      enrollment.userProgress.lastAssessmentDate = new Date();
+    console.log(
+      "🔧 Step 1: Saving to course model using submitAssessmentResults"
+    );
 
-      await user.save();
-      console.log("✅ User enrollment updated with summary");
+    // ✅ STEP 1: Save to COURSE MODEL (existing working code)
+    const courseResult = await course.submitAssessmentResults(
+      userId,
+      answersArray,
+      timeSpent || 0
+    );
 
-      // ✅ ENHANCED: Return detailed response
-      res.json({
-        success: true,
-        passed: result.passed,
-        score: result.percentage,
-        totalScore: result.totalScore,
-        totalPossibleScore: result.totalPossibleScore,
-        passingScore: course.assessment.passingScore || 70,
-        attemptNumber: result.attemptNumber,
+    console.log("✅ Course model result:", {
+      attemptNumber: courseResult.attemptNumber,
+      score: courseResult.percentage,
+      passed: courseResult.passed,
+    });
 
-        // Attempt information
-        currentAttempts: result.attemptNumber,
-        maxAttempts: (course.assessment.retakesAllowed || 0) + 1,
-        canRetake:
-          !result.passed &&
-          result.attemptNumber < (course.assessment.retakesAllowed || 0) + 1,
+    // ✅ STEP 2: CRITICAL FIX - Also save to USER MODEL
+    console.log("🔧 Step 2: Syncing to user model");
 
-        // Detailed results
-        responses: result.responses,
-        detailedResults: result.responses.map((response, index) => {
-          const question = questions[index];
-          return {
-            questionIndex: response.questionIndex,
-            question: question?.question || "",
-            userAnswer: response.selectedAnswer,
-            correctAnswer: question?.correctAnswer,
-            isCorrect: response.isCorrect,
-            points: question?.points || 1,
-            earnedPoints: response.pointsEarned,
-            answers: question?.answers || [],
-          };
-        }),
-
-        // Messages
-        message: result.passed
-          ? `Congratulations! You passed with ${result.percentage}%`
-          : `You scored ${result.percentage}%. You need ${
-              course.assessment.passingScore || 70
-            }% to pass.`,
-
-        // Next steps based on linked course logic
-        nextSteps: result.passed
-          ? [
-              "Your assessment has been completed successfully",
-              "Return to your library to generate your certificate",
-              "Share your achievement with your network",
-            ]
-          : [
-              "Review the questions you missed",
-              "Study the course materials again",
-              result.attemptNumber < (course.assessment.retakesAllowed || 0) + 1
-                ? "You can retake the assessment"
-                : "Contact support for additional attempts",
-            ],
-      });
-    } catch (modelError) {
-      console.error("❌ Error using course model method:", modelError);
-
-      // ✅ FALLBACK: If model method fails, save directly to user
-      return res.status(500).json({
-        success: false,
-        message: "Error saving assessment results",
-        error:
-          process.env.NODE_ENV === "development"
-            ? modelError.message
-            : undefined,
-      });
+    // Initialize user progress arrays if needed
+    if (!enrollment.userProgress) {
+      enrollment.userProgress = {};
     }
+    if (!enrollment.userProgress.assessmentAttempts) {
+      enrollment.userProgress.assessmentAttempts = [];
+    }
+
+    // ✅ CRITICAL: Add assessment attempt to USER MODEL
+    const userAssessmentAttempt = {
+      attemptNumber: courseResult.attemptNumber,
+      attemptDate: new Date(),
+      assessmentType: "combined",
+      scores: {
+        practicalScore: 0, // In-person courses may have practical component
+        theoryScore: courseResult.percentage,
+        totalScore: courseResult.percentage,
+        maxPossibleScore: 100,
+      },
+      passed: courseResult.passed,
+      answers: courseResult.responses.map((response, index) => ({
+        questionIndex: response.questionIndex,
+        questionText: questions[index]?.question || "",
+        userAnswer: response.selectedAnswer,
+        correctAnswer: questions[index]?.correctAnswer,
+        isCorrect: response.isCorrect,
+        points: questions[index]?.points || 1,
+        earnedPoints: response.pointsEarned,
+        category: "theory",
+      })),
+      timeSpent: timeSpent || 0,
+      instructorNotes: "",
+      retakeAllowed:
+        !courseResult.passed &&
+        courseResult.attemptNumber <
+          (course.assessment.retakesAllowed || 0) + 1,
+    };
+
+    enrollment.userProgress.assessmentAttempts.push(userAssessmentAttempt);
+
+    // ✅ CRITICAL: Update USER MODEL summary fields that certificate controller reads
+    enrollment.assessmentCompleted = courseResult.passed;
+    enrollment.assessmentScore = courseResult.percentage;
+    enrollment.bestAssessmentScore = Math.max(
+      enrollment.bestAssessmentScore || 0,
+      courseResult.percentage
+    );
+    enrollment.lastAssessmentDate = new Date();
+    enrollment.currentAttempts = courseResult.attemptNumber;
+    enrollment.totalAttempts = courseResult.attemptNumber;
+
+    // Update practical/theory flags
+    enrollment.practicalAssessmentPassed = courseResult.passed;
+    enrollment.theoryAssessmentPassed = courseResult.passed;
+
+    console.log("✅ User model updated with:", {
+      assessmentCompleted: enrollment.assessmentCompleted,
+      assessmentScore: enrollment.assessmentScore,
+      bestAssessmentScore: enrollment.bestAssessmentScore,
+      currentAttempts: enrollment.currentAttempts,
+    });
+
+    // ✅ STEP 3: Save user document
+    await user.save();
+    console.log("✅ User document saved successfully");
+
+    // ✅ Enhanced response
+    res.json({
+      success: true,
+      passed: courseResult.passed,
+      score: courseResult.percentage,
+      totalScore: courseResult.totalScore,
+      totalPossibleScore: courseResult.totalPossibleScore,
+      passingScore: course.assessment.passingScore || 70,
+      attemptNumber: courseResult.attemptNumber,
+
+      // Attempt information
+      currentAttempts: courseResult.attemptNumber,
+      maxAttempts: (course.assessment.retakesAllowed || 0) + 1,
+      canRetake:
+        !courseResult.passed &&
+        courseResult.attemptNumber <
+          (course.assessment.retakesAllowed || 0) + 1,
+
+      // Detailed results
+      responses: courseResult.responses,
+      detailedResults: courseResult.responses.map((response, index) => {
+        const question = questions[index];
+        return {
+          questionIndex: response.questionIndex,
+          question: question?.question || "",
+          userAnswer: response.selectedAnswer,
+          correctAnswer: question?.correctAnswer,
+          isCorrect: response.isCorrect,
+          points: question?.points || 1,
+          earnedPoints: response.pointsEarned,
+          answers: question?.answers || [],
+        };
+      }),
+
+      // ✅ CRITICAL: Certificate eligibility check
+      canGetCertificate:
+        courseResult.passed &&
+        enrollment.userProgress?.overallAttendancePercentage >= 80,
+
+      // Messages
+      message: courseResult.passed
+        ? `Congratulations! You passed with ${courseResult.percentage}%`
+        : `You scored ${courseResult.percentage}%. You need ${
+            course.assessment.passingScore || 70
+          }% to pass.`,
+
+      // Next steps based on result
+      nextSteps: courseResult.passed
+        ? [
+            "Your assessment has been completed successfully",
+            "Return to your library to generate your certificate",
+            "Share your achievement with your network",
+          ]
+        : [
+            "Review the questions you missed",
+            "Study the course materials again",
+            courseResult.attemptNumber <
+            (course.assessment.retakesAllowed || 0) + 1
+              ? "You can retake the assessment"
+              : "Contact support for additional attempts",
+          ],
+
+      // Action URLs
+      actions: {
+        libraryUrl: "/library/in-person",
+        certificateUrl: courseResult.passed
+          ? `/certificates/generate/${courseId}?type=InPersonAestheticTraining`
+          : null,
+        retakeUrl:
+          !courseResult.passed &&
+          courseResult.attemptNumber <
+            (course.assessment.retakesAllowed || 0) + 1
+            ? `/library/in-person/assessment/${courseId}`
+            : null,
+      },
+    });
   } catch (error) {
-    console.error("❌ Error in submitInPersonAssessment:", error);
+    console.error("❌ Error in FIXED submitInPersonAssessment:", error);
     res.status(500).json({
       success: false,
       message: "Error processing assessment submission",

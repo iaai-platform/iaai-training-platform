@@ -488,15 +488,7 @@
           </div>
         <% }) %>
       </div>
-
-      <!-- View Detailed Results Button -->
-      <!--<div class="assessment-actions">
-        <a href="/library/<%= typeof courseTypeForUrl !== 'undefined' ? courseTypeForUrl : 'in-person' %>/assessment/<%= course._id %>/results" 
-           class="cta-btn btn-secondary">
-          <i class="fas fa-chart-line"></i> View Detailed Results
-        </a>
-      </div>
-    <% } %>-->
+    <% } %>
 
     <!-- Assessment Form (only show if can take assessment) -->
     <% if (typeof canTakeAssessment !== 'undefined' && canTakeAssessment && (typeof hasPassedAssessment === 'undefined' || !hasPassedAssessment)) { %>
@@ -1066,7 +1058,7 @@
     const submissionData = {
       answers: userAnswers,
       timeSpent: 30 * 60 - timeRemaining,
-      submittedAt: new Date().toISOString()
+     
     };
     
     // Submit to server with better error handling
@@ -1086,7 +1078,7 @@
     })
     .then(data => {
       if (data.success) {
-        showAssessmentResults(data);
+        showAssessmentComplete(data);
       } else {
         throw new Error(data.message || 'Assessment submission failed');
       }
@@ -1109,80 +1101,44 @@
     });
   }
 
-  // Show assessment results
-  function showAssessmentResults(data) {
+  // Show simple assessment completion message and redirect
+  function showAssessmentComplete(data) {
     const passed = data.passed;
     const score = data.score;
     const passingScoreResult = data.passingScore || passingScore;
     
-    const resultHtml = `
-      <div style="text-align: center;">
-        <i class="fas fa-${passed ? 'trophy' : 'times-circle'}" 
-           style="font-size: 4rem; color: ${passed ? '#ffd700' : '#dc3545'}; margin-bottom: 20px;"></i>
-        
-        <h2 style="color: ${passed ? '#28a745' : '#dc3545'}; margin-bottom: 20px;">
-          ${passed ? 'Congratulations!' : 'Assessment Not Passed'}
-        </h2>
-        
-        <div style="font-size: 3rem; font-weight: bold; color: ${passed ? '#28a745' : '#dc3545'}; margin: 20px 0;">
-          ${score}%
-        </div>
-        
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-            <div>
-              <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">${score}%</div>
-              <div style="color: #666; font-size: 0.9rem;">Your Score</div>
-            </div>
-            <div>
-              <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">${passingScoreResult}%</div>
-              <div style="color: #666; font-size: 0.9rem;">Required</div>
-            </div>
-            <div>
-              <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">${data.totalQuestions || totalQuestions}</div>
-              <div style="color: #666; font-size: 0.9rem;">Questions</div>
-            </div>
-            <div>
-              <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">${data.correctAnswers || 'N/A'}</div>
-              <div style="color: #666; font-size: 0.9rem;">Correct</div>
-            </div>
+    Swal.fire({
+      title: passed ? 'Assessment Complete!' : 'Assessment Submitted',
+      html: `
+        <div style="text-align: center;">
+          <i class="fas fa-${passed ? 'check-circle' : 'info-circle'}" 
+             style="font-size: 4rem; color: ${passed ? '#28a745' : '#17a2b8'}; margin-bottom: 20px;"></i>
+          
+          <div style="font-size: 2.5rem; font-weight: bold; color: ${passed ? '#28a745' : '#17a2b8'}; margin: 20px 0;">
+            ${score}%
+          </div>
+          
+          <p style="font-size: 1.1rem; margin: 20px 0;">
+            ${passed 
+              ? 'Congratulations! You have successfully passed this assessment.'
+              : `Your assessment has been submitted. ${score >= passingScoreResult ? 'You passed!' : `You need ${passingScoreResult}% to pass.`}`
+            }
+          </p>
+          
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <strong>Score:</strong> ${score}% | <strong>Required:</strong> ${passingScoreResult}%
           </div>
         </div>
-        
-        <p style="margin: 20px 0; color: #666;">
-          ${passed 
-            ? 'Excellent work! You have successfully passed this assessment.'
-            : `You scored ${score}%. You need ${passingScoreResult}% to pass.`
-          }
-        </p>
-        
-        ${!passed && data.canRetake ? `
-          <p style="color: #ffc107;">
-            <i class="fas fa-info-circle"></i> 
-            You have ${data.attemptsRemaining || 0} attempt(s) remaining.
-          </p>
-        ` : ''}
-      </div>
-    `;
-    
-    Swal.fire({
-      title: passed ? 'Assessment Passed!' : 'Assessment Results',
-      html: resultHtml,
+      `,
       icon: null,
-      showCancelButton: true,
       confirmButtonColor: '#667eea',
-      cancelButtonColor: '#28a745',
       confirmButtonText: 'Return to Library',
-      cancelButtonText: '<i class="fas fa-chart-line"></i> View Detailed Results',
       allowOutsideClick: false,
       allowEscapeKey: false
-    }).then((result) => {
-      if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
-        window.location.href = `/library/${courseType}/assessment/${courseId}/results`;
-      } else {
-        const libraryUrl = `/library/${courseType === "online-live" ? "live" : "in-person"}`;
-        window.location.href = libraryUrl;
-      }
+    }).then(() => {
+      // Redirect to library
+      const libraryUrl = `/library/${courseType === "online-live" ? "live" : "in-person"}`;
+      window.location.href = libraryUrl;
     });
   }
 
@@ -1229,11 +1185,6 @@
 
   // Add cleanup when page unloads
   window.addEventListener('unload', cleanupAssessment);
-
-  // Helper function to view assessment results
-  function viewAssessmentResults() {
-    window.location.href = `/library/${courseType}/assessment/${courseId}/results`;
-  }
 
   // Additional safety checks
   window.addEventListener('error', function(e) {

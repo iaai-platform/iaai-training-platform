@@ -4122,6 +4122,500 @@ const getCourseIdFromMeetingId = async (meetingId) => {
   return course?._id;
 };
 
+// ========================================
+// ✅ LIBRARY TEMPLATE ALIGNMENT METHODS
+// These methods provide the exact fields that the in-person library template expects
+// ========================================
+
+/**
+ * ✅ Get In-Person Course Library Data
+ * Provides all fields needed by the library template
+ */
+userSchema.methods.getInPersonCourseLibraryData = async function () {
+  // Populate course data
+  await this.populate({
+    path: "myInPersonCourses.courseId",
+    select: "basic schedule venue instructors media assessment",
+  });
+
+  return this.myInPersonCourses
+    .filter(
+      (enrollment) =>
+        enrollment.courseId &&
+        ["paid", "registered", "completed"].includes(
+          enrollment.enrollmentData?.status
+        )
+    )
+    .map((enrollment) => {
+      const course = enrollment.courseId;
+      const now = new Date();
+
+      // ✅ LIBRARY TEMPLATE REQUIRED FIELDS
+      return {
+        // Basic course info
+        courseId: enrollment.courseId._id,
+        title: course.basic?.title || "Course Title",
+        courseCode: course.basic?.courseCode || "N/A",
+        description:
+          course.basic?.description || "Professional training course",
+        instructor: this.getInstructorName(course),
+
+        // Schedule info
+        startDate: course.schedule?.startDate,
+        endDate: course.schedule?.endDate,
+        duration: course.schedule?.duration,
+        location: course.venue
+          ? `${course.venue.city}, ${course.venue.country}`
+          : "Training Center",
+        venue: course.venue?.name || "IAAI Training Center",
+
+        // ✅ ATTENDANCE FIELDS (library template expects these)
+        attendanceConfirmed: this.isAttendanceConfirmed(enrollment),
+        attendancePercentage: this.getAttendancePercentage(enrollment),
+
+        // ✅ ASSESSMENT FIELDS (library template expects these)
+        assessmentRequired: course.assessment?.required || false,
+        assessmentCompleted: this.isAssessmentCompleted(enrollment),
+        assessmentPassed: this.isAssessmentPassed(enrollment),
+        assessmentScore: this.getAssessmentScore(enrollment),
+        passingScore: course.assessment?.passingScore || 70,
+        maxAttempts: enrollment.maxAttempts || 3,
+        currentAttempts:
+          enrollment.currentAttempts || enrollment.totalAttempts || 0,
+        canRetake: this.canRetakeAssessment(enrollment),
+        lastAssessmentDate: enrollment.lastAssessmentDate,
+
+        // ✅ CERTIFICATE FIELDS (library template expects these)
+        canViewCertificate: this.canViewCertificate(enrollment),
+        hasCertificate: !!enrollment.certificateId,
+        certificateId: enrollment.certificateId,
+
+        // ✅ COURSE STATUS FIELDS (library template expects these)
+        courseEnded: this.isCourseEnded(course, now),
+        courseInProgress: this.isCourseInProgress(course, now),
+        courseNotStarted: this.isCourseNotStarted(course, now),
+
+        // ✅ ACTION ELIGIBILITY FIELDS (library template expects these)
+        canGetCertificate: this.canGetCertificate(enrollment, course),
+        canConfirmAttendance: this.canConfirmAttendance(
+          enrollment,
+          course,
+          now
+        ),
+
+        // ✅ ENROLLMENT DATA
+        status: enrollment.enrollmentData?.status,
+        dateOfRegistration: enrollment.enrollmentData?.registrationDate,
+
+        // ✅ MEDIA/MATERIALS
+        media: course.media || {},
+
+        // ✅ CERTIFICATE ELIGIBILITY REASON (for UI messages)
+        certificateEligibilityReason: this.getCertificateEligibilityReason(
+          enrollment,
+          course
+        ),
+      };
+    });
+};
+
+/**
+ * ✅ Get Instructor Name
+ */
+userSchema.methods.getInstructorName = function (course) {
+  if (course.instructors?.primary?.instructorId) {
+    const instructor = course.instructors.primary.instructorId;
+    return (
+      instructor.fullName ||
+      `${instructor.firstName} ${instructor.lastName}` ||
+      course.instructors.primary.name
+    );
+  }
+  return course.instructors?.primary?.name || "IAAI Team";
+};
+
+/**
+ * ✅ Check if attendance is confirmed
+ * Used by library template for attendance display
+ */
+userSchema.methods.isAttendanceConfirmed = function (enrollment) {
+  // Method 1: Check overall attendance percentage
+  if (enrollment.userProgress?.overallAttendancePercentage >= 80) {
+    return true;
+  }
+
+  // Method 2: Check course completion status
+  if (enrollment.userProgress?.courseStatus === "completed") {
+    return true;
+  }
+
+  // Method 3: Check attendance records
+  if (enrollment.userProgress?.attendanceRecords?.length > 0) {
+    const records = enrollment.userProgress.attendanceRecords;
+    const presentCount = records.filter((r) => r.status === "present").length;
+    return presentCount / records.length >= 0.8; // 80% attendance
+  }
+
+  // Method 4: Default false for explicit confirmation
+  return false;
+};
+
+/**
+ * ✅ Get attendance percentage
+ */
+userSchema.methods.getAttendancePercentage = function (enrollment) {
+  // Method 1: Direct percentage
+  if (enrollment.userProgress?.overallAttendancePercentage !== undefined) {
+    return enrollment.userProgress.overallAttendancePercentage;
+  }
+
+  // Method 2: Calculate from records
+  if (enrollment.userProgress?.attendanceRecords?.length > 0) {
+    const records = enrollment.userProgress.attendanceRecords;
+    const presentCount = records.filter((r) => r.status === "present").length;
+    return Math.round((presentCount / records.length) * 100);
+  }
+
+  // Method 3: Default based on course status
+  if (enrollment.userProgress?.courseStatus === "completed") {
+    return 100;
+  }
+
+  return 0;
+};
+
+/**
+ * ✅ Check if assessment is completed
+ */
+userSchema.methods.isAssessmentCompleted = function (enrollment) {
+  // Method 1: Direct flag
+  if (enrollment.assessmentCompleted) {
+    return true;
+  }
+
+  // Method 2: Check if has attempts with passing score
+  if (enrollment.userProgress?.assessmentAttempts?.length > 0) {
+    return enrollment.userProgress.assessmentAttempts.some(
+      (attempt) => attempt.scores?.totalScore >= 70 || attempt.passed
+    );
+  }
+
+  // Method 3: Check score fields
+  if (enrollment.assessmentScore || enrollment.bestAssessmentScore) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * ✅ Check if assessment is passed
+ */
+userSchema.methods.isAssessmentPassed = function (enrollment) {
+  const bestScore = this.getAssessmentScore(enrollment);
+  return bestScore >= 70;
+};
+
+/**
+ * ✅ Get assessment score
+ */
+userSchema.methods.getAssessmentScore = function (enrollment) {
+  // Method 1: Best assessment score
+  if (enrollment.bestAssessmentScore) {
+    return enrollment.bestAssessmentScore;
+  }
+
+  // Method 2: Current assessment score
+  if (enrollment.assessmentScore) {
+    return enrollment.assessmentScore;
+  }
+
+  // Method 3: Calculate from attempts
+  if (enrollment.userProgress?.assessmentAttempts?.length > 0) {
+    const attempts = enrollment.userProgress.assessmentAttempts;
+    const bestAttempt = attempts.reduce((best, current) => {
+      const currentScore = current.scores?.totalScore || 0;
+      const bestScore = best.scores?.totalScore || 0;
+      return currentScore > bestScore ? current : best;
+    }, attempts[0]);
+
+    return bestAttempt.scores?.totalScore || 0;
+  }
+
+  return 0;
+};
+
+/**
+ * ✅ Check if can retake assessment
+ */
+userSchema.methods.canRetakeAssessment = function (enrollment) {
+  const maxAttempts = enrollment.maxAttempts || 3;
+  const currentAttempts =
+    enrollment.currentAttempts ||
+    enrollment.totalAttempts ||
+    enrollment.userProgress?.assessmentAttempts?.length ||
+    0;
+
+  return currentAttempts < maxAttempts && !this.isAssessmentPassed(enrollment);
+};
+
+/**
+ * ✅ Check if can view certificate
+ */
+userSchema.methods.canViewCertificate = function (enrollment) {
+  return !!enrollment.certificateId;
+};
+
+/**
+ * ✅ Check if course ended
+ */
+userSchema.methods.isCourseEnded = function (course, now = new Date()) {
+  const endDate = new Date(
+    course.schedule?.endDate || course.schedule?.startDate
+  );
+  return endDate < now;
+};
+
+/**
+ * ✅ Check if course in progress
+ */
+userSchema.methods.isCourseInProgress = function (course, now = new Date()) {
+  const startDate = new Date(course.schedule?.startDate);
+  const endDate = new Date(
+    course.schedule?.endDate || course.schedule?.startDate
+  );
+  return startDate <= now && now <= endDate;
+};
+
+/**
+ * ✅ Check if course not started
+ */
+userSchema.methods.isCourseNotStarted = function (course, now = new Date()) {
+  const startDate = new Date(course.schedule?.startDate);
+  return startDate > now;
+};
+
+/**
+ * ✅ Check if can get certificate
+ */
+userSchema.methods.canGetCertificate = function (enrollment, course) {
+  const courseEnded = this.isCourseEnded(course);
+  const attendanceOk = this.isAttendanceConfirmed(enrollment);
+  const assessmentOk =
+    !course.assessment?.required || this.isAssessmentPassed(enrollment);
+  const noCertificateYet = !enrollment.certificateId;
+
+  return courseEnded && attendanceOk && assessmentOk && noCertificateYet;
+};
+
+/**
+ * ✅ Check if can confirm attendance
+ */
+userSchema.methods.canConfirmAttendance = function (
+  enrollment,
+  course,
+  now = new Date()
+) {
+  const courseEnded = this.isCourseEnded(course, now);
+  const courseInProgress = this.isCourseInProgress(course, now);
+  const attendanceNotConfirmed = !this.isAttendanceConfirmed(enrollment);
+
+  // Can confirm during course or within grace period after end
+  const gracePeriodEnd = new Date(
+    course.schedule?.endDate || course.schedule?.startDate
+  );
+  gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7); // 7 day grace period
+
+  const withinGracePeriod = now <= gracePeriodEnd;
+
+  return (
+    attendanceNotConfirmed &&
+    (courseInProgress || (courseEnded && withinGracePeriod))
+  );
+};
+
+/**
+ * ✅ Get certificate eligibility reason
+ */
+userSchema.methods.getCertificateEligibilityReason = function (
+  enrollment,
+  course
+) {
+  const courseEnded = this.isCourseEnded(course);
+  const attendanceOk = this.isAttendanceConfirmed(enrollment);
+  const assessmentOk =
+    !course.assessment?.required || this.isAssessmentPassed(enrollment);
+  const hasCertificate = !!enrollment.certificateId;
+
+  if (hasCertificate) {
+    return "Certificate already issued";
+  }
+
+  if (!courseEnded) {
+    return "Course must be completed first";
+  }
+
+  if (!attendanceOk) {
+    return "Minimum 80% attendance required";
+  }
+
+  if (course.assessment?.required && !assessmentOk) {
+    return "Assessment must be passed first";
+  }
+
+  if (courseEnded && attendanceOk && assessmentOk) {
+    return "Ready for certificate generation";
+  }
+
+  return "Requirements not yet met";
+};
+
+// ========================================
+// ✅ LIBRARY CONTROLLER HELPER METHOD
+// For use in library controllers to get formatted course data
+// ========================================
+
+/**
+ * ✅ Static method to get library data for a user
+ * Usage: const libraryData = await User.getInPersonLibraryData(userId);
+ */
+userSchema.statics.getInPersonLibraryData = async function (userId) {
+  const user = await this.findById(userId);
+  if (!user) return [];
+
+  return await user.getInPersonCourseLibraryData();
+};
+
+// ========================================
+// ✅ UPDATE EXISTING METHODS FOR LIBRARY ALIGNMENT
+// These ensure enrollment data is properly maintained for library display
+// ========================================
+
+/**
+ * ✅ Update assessment completion for library alignment
+ */
+userSchema.methods.updateAssessmentForLibrary = function (
+  courseId,
+  assessmentData
+) {
+  const enrollment = this.myInPersonCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  // Update summary fields for library template
+  enrollment.assessmentCompleted = true;
+  enrollment.assessmentScore = assessmentData.totalScore;
+  enrollment.bestAssessmentScore = Math.max(
+    enrollment.bestAssessmentScore || 0,
+    assessmentData.totalScore
+  );
+  enrollment.lastAssessmentDate = new Date();
+  enrollment.currentAttempts = (enrollment.currentAttempts || 0) + 1;
+
+  // Also update detailed progress
+  if (!enrollment.userProgress.assessmentAttempts) {
+    enrollment.userProgress.assessmentAttempts = [];
+  }
+
+  enrollment.userProgress.assessmentAttempts.push({
+    attemptNumber: enrollment.currentAttempts,
+    attemptDate: new Date(),
+    assessmentType: assessmentData.type || "combined",
+    scores: {
+      practicalScore: assessmentData.practicalScore || 0,
+      theoryScore: assessmentData.theoryScore || 0,
+      totalScore: assessmentData.totalScore,
+      maxPossibleScore: 100,
+    },
+    passed: assessmentData.totalScore >= 70,
+    answers: assessmentData.answers || [],
+    timeSpent: assessmentData.timeSpent || 0,
+  });
+
+  return this.save();
+};
+
+/**
+ * ✅ Update attendance for library alignment
+ */
+userSchema.methods.updateAttendanceForLibrary = function (
+  courseId,
+  attendanceData
+) {
+  const enrollment = this.myInPersonCourses.find(
+    (e) => e.courseId.toString() === courseId.toString()
+  );
+
+  if (!enrollment) {
+    throw new Error("Course enrollment not found");
+  }
+
+  // Update overall attendance percentage
+  if (!enrollment.userProgress) {
+    enrollment.userProgress = {};
+  }
+
+  enrollment.userProgress.overallAttendancePercentage =
+    attendanceData.percentage || 100;
+
+  // Add attendance record if provided
+  if (attendanceData.record) {
+    if (!enrollment.userProgress.attendanceRecords) {
+      enrollment.userProgress.attendanceRecords = [];
+    }
+
+    enrollment.userProgress.attendanceRecords.push({
+      date: attendanceData.record.date || new Date(),
+      checkIn: attendanceData.record.checkIn,
+      checkOut: attendanceData.record.checkOut,
+      hoursAttended: attendanceData.record.hoursAttended || 8,
+      status: attendanceData.record.status || "present",
+    });
+  }
+
+  return this.save();
+};
+
+// ========================================
+// ✅ VIRTUAL FIELDS FOR LIBRARY TEMPLATE
+// These provide computed properties that the template can access directly
+// ========================================
+
+userSchema.virtual("inPersonCoursesForLibrary").get(async function () {
+  return await this.getInPersonCourseLibraryData();
+});
+
+// ========================================
+// ✅ MIDDLEWARE TO MAINTAIN LIBRARY DATA CONSISTENCY
+// Ensures data is always in sync for library display
+// ========================================
+
+userSchema.pre("save", function (next) {
+  // Sync assessment summary fields
+  this.myInPersonCourses.forEach((enrollment) => {
+    if (enrollment.userProgress?.assessmentAttempts?.length > 0) {
+      const attempts = enrollment.userProgress.assessmentAttempts;
+      const bestAttempt = attempts.reduce((best, current) => {
+        const currentScore = current.scores?.totalScore || 0;
+        const bestScore = best.scores?.totalScore || 0;
+        return currentScore > bestScore ? current : best;
+      }, attempts[0]);
+
+      // Update summary fields
+      enrollment.bestAssessmentScore = bestAttempt.scores?.totalScore || 0;
+      enrollment.assessmentCompleted =
+        bestAttempt.passed || bestAttempt.scores?.totalScore >= 70;
+      enrollment.totalAttempts = attempts.length;
+      enrollment.currentAttempts = attempts.length;
+    }
+  });
+
+  next();
+});
 // ┌─────────────────────────────────────────────────────────────────────────────┐
 //
 module.exports = mongoose.models.User || mongoose.model("User", userSchema);

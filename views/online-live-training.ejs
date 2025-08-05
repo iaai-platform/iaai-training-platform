@@ -217,26 +217,108 @@
       color: white;
       border-color: #b8860b;
     }
-    
-    /* Table Container */
-    .table-container {
+
+    /* User Instructions */
+    .user-instructions {
+      max-width: 1400px;
+      margin: 0 auto 30px;
+      padding: 0 20px;
+    }
+
+    .instructions-content {
+      background: linear-gradient(135deg, #e8f4ff 0%, #f0f7ff 100%);
+      padding: 20px 25px;
+      border-radius: 10px;
+      border-left: 5px solid #b8860b;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .instructions-content h3 {
+      color: #002147;
+      font-size: 18px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .instructions-content p {
+      color: #333;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .highlight {
+      color: #b8860b;
+      font-weight: 600;
+    }
+
+    /* Table Section Styling */
+    .table-view-container {
+      display: block;
+    }
+
+    .table-section {
       max-width: 1400px;
       margin: 0 auto 60px;
       padding: 0 20px;
-      overflow-x: auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px 0;
+    }
+
+    .section-header h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #002147;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .section-header h2 i {
+      color: #b8860b;
+    }
+
+    .section-header p {
+      font-size: 16px;
+      color: #666;
+      max-width: 600px;
+      margin: 0 auto;
     }
     
-    /* Modern Table Styling */
+    /* Table Container */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      background: white;
+    }
+    
+    /* Modern Table Styling with Sticky Header */
     .courses-table {
       width: 100%;
+      border-collapse: collapse;
       background: white;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
     }
     
     .courses-table thead {
       background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     
     .courses-table th {
@@ -247,6 +329,7 @@
       font-size: 14px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      white-space: nowrap;
       position: relative;
     }
     
@@ -292,12 +375,22 @@
       font-size: 13px;
       font-weight: 500;
     }
+
+    /* Completed course styling */
+    .date-badge.expired {
+      background: #f8f9fa;
+      color: #6c757d;
+    }
     
     /* Price Badge */
     .price-badge {
       font-weight: 700;
       color: #b8860b;
       font-size: 16px;
+    }
+
+    .price-badge.expired {
+      color: #6c757d;
     }
     
     /* Status Badges */
@@ -324,6 +417,12 @@
     .status-closed {
       background: #f8d7da;
       color: #721c24;
+    }
+
+    /* Completed status */
+    .status-completed {
+      background: #e9ecef;
+      color: #495057;
     }
     
     /* Platform Badge */
@@ -359,6 +458,12 @@
     .seats-danger {
       color: #721c24;
       background: #f8d7da;
+    }
+
+    /* Expired seats styling */
+    .seats-count.expired {
+      color: #6c757d;
+      background: #f8f9fa;
     }
     
     /* Certificate Interest Column Styles */
@@ -475,6 +580,29 @@
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
     }
+
+    /* Info and Archive buttons for completed courses */
+    .btn-info {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .btn-info:hover {
+      background: #138496;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+    }
+
+    .btn-archive {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-archive:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+    }
     
     /* Tooltips */
     .tooltip {
@@ -502,21 +630,57 @@
     .tooltip:hover::after {
       opacity: 1;
     }
+
+    /* No courses message styling */
+    .no-courses {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .no-courses-message {
+      color: #6c757d;
+    }
+
+    .no-courses-message i {
+      font-size: 60px;
+      color: #dee2e6;
+      margin-bottom: 20px;
+    }
+
+    .no-courses-message h3 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #495057;
+    }
+
+    .no-courses-message p {
+      font-size: 16px;
+      color: #6c757d;
+    }
+
+    /* Expired course row styling */
+    .expired-course {
+      opacity: 0.8;
+    }
+
+    .expired-course:hover {
+      opacity: 1;
+    }
     
-    /* Grid View */
+    /* Grid View (keep existing styles but hidden by default) */
     .grid-container {
       max-width: 1400px;
       margin: 0 auto 60px;
       padding: 0 20px;
       display: none;
     }
-    
+
     .courses-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
       gap: 30px;
     }
-    
+
     .course-card {
       background: white;
       border-radius: 12px;
@@ -525,12 +689,12 @@
       transition: all 0.3s ease;
       position: relative;
     }
-    
+
     .course-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
-    
+
     .course-image {
       width: 100%;
       height: 200px;
@@ -538,13 +702,24 @@
       position: relative;
       overflow: hidden;
     }
-    
+
     .course-image img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    
+
+    .course-image-placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 48px;
+    }
+
     .course-badge-overlay {
       position: absolute;
       top: 15px;
@@ -553,7 +728,7 @@
       flex-direction: column;
       gap: 8px;
     }
-    
+
     .live-indicator {
       background: #dc3545;
       color: white;
@@ -566,17 +741,17 @@
       gap: 5px;
       animation: pulse 2s infinite;
     }
-    
+
     @keyframes pulse {
       0% { opacity: 1; }
       50% { opacity: 0.7; }
       100% { opacity: 1; }
     }
-    
+
     .course-card-body {
       padding: 25px;
     }
-    
+
     .course-card-title {
       font-size: 18px;
       font-weight: 600;
@@ -587,7 +762,7 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    
+
     .course-card-instructor {
       color: #666;
       font-size: 14px;
@@ -596,7 +771,7 @@
       align-items: center;
       gap: 5px;
     }
-    
+
     .course-card-meta {
       display: flex;
       justify-content: space-between;
@@ -605,7 +780,7 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    
+
     .course-card-date {
       display: flex;
       align-items: center;
@@ -613,7 +788,7 @@
       color: #666;
       font-size: 14px;
     }
-    
+
     .course-card-platform {
       display: flex;
       align-items: center;
@@ -624,8 +799,7 @@
       border-radius: 15px;
       font-size: 13px;
     }
-    
-    /* Certificate Selection in Grid View */
+
     .course-card-certificate {
       margin: 10px 0;
       padding: 15px;
@@ -633,26 +807,26 @@
       border-radius: 8px;
       border: 1px solid #e9ecef;
     }
-    
+
     .certificate-option {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 10px;
     }
-    
+
     .certificate-option label {
       font-size: 14px;
       font-weight: 500;
       color: #333;
     }
-    
+
     .certificate-price-update {
       font-size: 12px;
       color: #666;
       font-style: italic;
     }
-    
+
     .course-card-footer {
       border-top: 1px solid #f0f0f0;
       padding-top: 20px;
@@ -660,16 +834,166 @@
       justify-content: space-between;
       align-items: center;
     }
-    
+
     .course-card-price {
       font-size: 24px;
       font-weight: 700;
       color: #b8860b;
     }
-    
+
     .course-card-actions {
       display: flex;
       gap: 8px;
+    }
+    
+    /* Modal Styles */
+    .course-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .course-modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      margin: auto;
+      padding: 0;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow: hidden;
+      position: relative;
+      animation: slideIn 0.3s ease;
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #002147 0%, #003366 100%);
+      color: white;
+      padding: 20px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .modal-header.archive-header {
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+      padding: 25px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .archive-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #e9ecef;
+      color: #495057;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .modal-course-info {
+      margin-bottom: 25px;
+    }
+
+    .modal-info-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 15px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .modal-info-row:last-child {
+      border-bottom: none;
+    }
+
+    .modal-label {
+      font-weight: 600;
+      color: #002147;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .modal-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-btn-primary {
+      background: #002147;
+      color: white;
+    }
+
+    .modal-btn-primary:hover {
+      background: #003366;
+    }
+
+    .modal-btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .modal-btn-secondary:hover {
+      background: #5a6268;
     }
     
     /* Notification Styles */
@@ -756,6 +1080,22 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { 
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
     
     /* Empty State */
     .empty-state {
@@ -800,7 +1140,7 @@
       }
       
       .table-container {
-        padding: 0 10px;
+        padding: 0;
       }
       
       .courses-table {
@@ -821,7 +1161,7 @@
         width: 32px;
         height: 32px;
       }
-      
+
       .courses-grid {
         grid-template-columns: 1fr;
       }
@@ -835,36 +1175,31 @@
       .notification.show {
         right: 10px;
       }
+
+      .modal-content {
+        width: 95%;
+        max-height: 90vh;
+      }
+
+      .modal-info-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+
+      .modal-btn {
+        width: 100%;
+        justify-content: center;
+      }
     }
   </style>
 </head>
 
 <body>
   <%- include('partials/header') %>
-
-<!-- Add this style to your online-live-training.ejs -->
-<style>
-  /* Placeholder for missing images */
-  .course-image-placeholder {
-    width: 100%;
-    height: 200px;
-    background: linear-gradient(135deg, #002147 0%, #003366 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 48px;
-  }
-  
-  /* Hide broken images */
-  img.course-img {
-    display: block;
-  }
-  
-  img.course-img.error {
-    display: none;
-  }
-</style>
 
   <!-- Enhanced Breadcrumb -->
   <nav class="breadcrumb">
@@ -936,173 +1271,311 @@
     </button>
   </div>
 
-  <!-- Enhanced Courses Table -->
-  <div class="table-container" id="tableView">
-    <% if (courses && courses.length > 0) { %>
-    <table class="courses-table" id="coursesTable">
-      <thead>
-        <tr>
-          <th style="width: 5%">#</th>
-          <th style="width: 10%">Code</th>
-          <th style="width: 20%">Course Title</th>
-          <th style="width: 12%">Start Date</th>
-          <th style="width: 10%">Duration</th>
-          <th style="width: 10%">Platform</th>
-          <th style="width: 8%">Certificate</th>
-          <th style="width: 8%">Price</th>
-          <th style="width: 8%">Seats</th>
-          <th style="width: 8%">Status</th>
-          <th style="width: 12%">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% courses.forEach((course, index) => { %>
-          <tr data-course-id="<%= course._id %>" 
-              data-status="<%= course.displayStatus || course.status %>"
-              data-date="<%= course.startDate %>"
-              data-price="<%= course.price || 0 %>"
-              data-platform="<%= course.platform?.toLowerCase() || 'zoom' %>">
-            <td><%= index + 1 %></td>
-            <td><strong><%= course.courseCode || 'N/A' %></strong></td>
-            <td class="course-title">
-              <%= course.title || 'Untitled Course' %>
-              <% if (course.instructor) { %>
-                <br><small style="color: #666;">
-                  <i class="fas fa-user-tie"></i> <%= course.instructor %>
-                  <% if (course.coInstructors && course.coInstructors.length > 0) { %>
-                    & <%= course.coInstructors.length %> more
-                  <% } %>
-                </small>
-              <% } %>
-            </td>
-            <td>
-              <span class="date-badge">
-                <i class="far fa-calendar"></i> 
-                <%= course.startDate ? new Date(course.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %>
-              </span>
-              <% if (course.timeUntilStart && course.daysUntilStart > 0) { %>
-                <br><small style="color: #666;">in <%= course.timeUntilStart %></small>
-              <% } %>
-            </td>
-            <td>
-              <%= course.duration || 'TBD' %>
-              <% if (course.isMultiDay) { %>
-                <br><small style="color: #666;">Multi-session</small>
-              <% } %>
-            </td>
-            <td>
-              <span class="platform-badge">
-                <i class="fas <%= course.platformIcon || 'fa-video' %>"></i>
-                <%= course.platform || 'Zoom' %>
-              </span>
-            </td>
-            <td class="certificate-interest">
-              <% if ((course.price || 0) === 0) { %>
-                <!-- Free course: Show certificate selection dropdown -->
-                <select class="certificate-select" data-course-id="<%= course._id %>">
-                  <option value="no">No</option>
-                  <option value="yes">Yes (+€10)</option>
-                </select>
-              <% } else { %>
-                <!-- Paid course: Show certificate availability status -->
-                <% if (course.certificateProvided !== false) { %>
-                  <span class="certificate-badge certificate-included">Included</span>
-                <% } else { %>
-                  <span class="certificate-badge certificate-not-available">Not Available</span>
-                <% } %>
-              <% } %>
-            </td>
-            <td class="price-badge" data-original-price="<%= course.price || 0 %>">
-              <span class="price-display">
-                <%= course.currency === 'EUR' ? '€' : (course.currency || '€') %><%= course.price || 0 %>
-              </span>
-              <% if (course.hasEarlyBird && course.earlyBirdPrice) { %>
-                <br>
-                <small style="color: #28a745;">
-                  Early: <%= course.currency === 'EUR' ? '€' : (course.currency || '€') %><%= course.earlyBirdPrice %>
-                </small>
-              <% } %>
-            </td>
-            <td>
-            <span class="seats-count <%= course.availableSeats > 5 ? 'seats-good' : course.availableSeats > 0 ? 'seats-warning' : 'seats-danger' %>">
-                <%= course.availableSeats || 0 %>/<%= course.seatsAvailable || 20 %>
-              </span>
-            </td>
-            <td>
-              <% 
-                let statusClass = 'status-closed';
-                let statusText = course.displayStatus || course.status || 'Closed';
-                
-                if (statusText === 'Open to Register') {
-                  statusClass = 'status-open';
-                } else if (statusText === 'Full' || course.availableSeats <= 0) {
-                  statusClass = 'status-closed';
-                  statusText = 'Full';
-                } else if (statusText === 'In Progress') {
-                  statusClass = 'status-limited';
-                }
-              %>
-              <span class="status-badge <%= statusClass %>"><%= statusText %></span>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="btn-icon btn-details tooltip" data-tooltip="View Details" 
-                        onclick="window.location.href='/online-live-training/courses/<%= course._id %>'">
-                  <i class="fas fa-info-circle"></i>
-                </button>
-                
-                <% if (user) { %>
-                  <button class="btn-icon btn-wishlist tooltip add-to-wishlist-btn" 
-                          data-tooltip="Add to Wishlist"
-                          data-course-id="<%= course._id %>" 
-                          data-course-type="OnlineLiveTraining"
-                          data-price="<%= course.price || 0 %>"
-                          data-course-code="<%= course.courseCode || 'N/A' %>"
-                          data-course-title="<%= course.title || 'Untitled Course' %>"
-                          data-wants-certificate="no">
-                    <i class="fas fa-heart"></i>
-                  </button>
-                  
-                  <button class="btn-icon btn-cart tooltip add-to-cart-btn" 
-                          data-tooltip="Add to Cart"
-                          data-course-id="<%= course._id %>" 
-                          data-course-type="OnlineLiveTraining"
-                          data-price="<%= course.price || 0 %>"
-                          data-course-code="<%= course.courseCode || 'N/A' %>"
-                          data-course-title="<%= course.title || 'Untitled Course' %>"
-                          data-wants-certificate="no"
-                          <%= (course.availableSeats <= 0 || statusText !== 'Open to Register') ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' %>>
-                    <i class="fas fa-shopping-cart"></i>
-                  </button>
-                <% } else { %>
-                  <button class="btn-icon btn-wishlist tooltip" 
-                          data-tooltip="Login to add to wishlist"
-                          onclick="showLoginRequired()">
-                    <i class="fas fa-heart"></i>
-                  </button>
-                  
-                  <button class="btn-icon btn-cart tooltip" 
-                          data-tooltip="Login to add to cart"
-                          onclick="showLoginRequired()">
-                    <i class="fas fa-shopping-cart"></i>
-                  </button>
-                <% } %>
-              </div>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-    <% } else { %>
-    <div class="empty-state">
-      <i class="fas fa-video-slash"></i>
-      <h3>No Online Live Courses Available</h3>
-      <p>Check back soon for upcoming live training sessions!</p>
+  <!-- User Instructions -->
+  <div class="user-instructions" id="userInstructions">
+    <div class="instructions-content">
+      <h3><i class="fas fa-info-circle"></i> How to Register</h3>
+      <p>
+        <strong>Quick Actions:</strong> 
+        Use the action buttons to <span class="highlight">view details</span>, 
+        add to <span class="highlight">wishlist <i class="fas fa-heart"></i></span>, 
+        or <span class="highlight">add to cart <i class="fas fa-shopping-cart"></i></span>. 
+        Adding to cart will redirect you to the order page automatically.
+      </p>
     </div>
-    <% } %>
   </div>
 
-  <!-- Grid View -->
+  <!-- Two-Table Structure -->
+  <div class="table-view-container" id="tableView">
+    
+    <!-- Upcoming Courses Section -->
+    <div class="table-section" id="upcomingSection">
+      <div class="section-header">
+        <h2><i class="fas fa-calendar-check"></i> Upcoming Live Sessions</h2>
+        <p>Current and future online training opportunities</p>
+      </div>
+      
+      <div class="table-container" id="upcomingTableContainer">
+        <% if (typeof upcomingCourses !== 'undefined' && upcomingCourses.length > 0) { %>
+        <table class="courses-table" id="upcomingCoursesTable">
+          <thead class="sticky-header">
+            <tr>
+              <th style="width: 5%">#</th>
+              <th style="width: 10%">Code</th>
+              <th style="width: 20%">Course Title</th>
+              <th style="width: 12%">Start Date</th>
+              <th style="width: 10%">Duration</th>
+              <th style="width: 10%">Platform</th>
+              <th style="width: 8%">Certificate</th>
+              <th style="width: 8%">Price</th>
+              <th style="width: 8%">Seats</th>
+              <th style="width: 8%">Status</th>
+              <th style="width: 12%">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% upcomingCourses.forEach((course, index) => { %>
+              <tr data-course-id="<%= course._id %>" 
+                  data-status="<%= course.displayStatus || course.status %>"
+                  data-date="<%= course.startDate %>"
+                  data-price="<%= course.price || 0 %>"
+                  data-platform="<%= course.platform?.toLowerCase() || 'zoom' %>">
+                <td><%= index + 1 %></td>
+                <td><strong><%= course.courseCode || 'N/A' %></strong></td>
+                <td class="course-title">
+                  <%= course.title || 'Untitled Course' %>
+                  <% if (course.instructor) { %>
+                    <br><small style="color: #666;">
+                      <i class="fas fa-user-tie"></i> <%= course.instructor %>
+                      <% if (course.coInstructors && course.coInstructors.length > 0) { %>
+                        & <%= course.coInstructors.length %> more
+                      <% } %>
+                    </small>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="date-badge">
+                    <i class="far fa-calendar"></i> 
+                    <%= course.startDate ? new Date(course.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %>
+                  </span>
+                  <% if (course.timeUntilStart && course.daysUntilStart > 0) { %>
+                    <br><small style="color: #666;">in <%= course.timeUntilStart %></small>
+                  <% } %>
+                </td>
+                <td>
+                  <%= course.duration || 'TBD' %>
+                  <% if (course.isMultiDay) { %>
+                    <br><small style="color: #666;">Multi-session</small>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="platform-badge">
+                    <i class="fas <%= course.platformIcon || 'fa-video' %>"></i>
+                    <%= course.platform || 'Zoom' %>
+                  </span>
+                </td>
+                <td class="certificate-interest">
+                  <% if ((course.price || 0) === 0) { %>
+                    <!-- Free course: Show certificate selection dropdown -->
+                    <select class="certificate-select" data-course-id="<%= course._id %>">
+                      <option value="no">No</option>
+                      <option value="yes">Yes (+€10)</option>
+                    </select>
+                  <% } else { %>
+                    <!-- Paid course: Show certificate availability status -->
+                    <% if (course.certificateProvided !== false) { %>
+                      <span class="certificate-badge certificate-included">Included</span>
+                    <% } else { %>
+                      <span class="certificate-badge certificate-not-available">Not Available</span>
+                    <% } %>
+                  <% } %>
+                </td>
+                <td class="price-badge" data-original-price="<%= course.price || 0 %>">
+                  <span class="price-display">
+                    <%= course.currency === 'EUR' ? '€' : (course.currency || '€') %><%= course.price || 0 %>
+                  </span>
+                  <% if (course.hasEarlyBird && course.earlyBirdPrice) { %>
+                    <br>
+                    <small style="color: #28a745;">
+                      Early: <%= course.currency === 'EUR' ? '€' : (course.currency || '€') %><%= course.earlyBirdPrice %>
+                    </small>
+                  <% } %>
+                </td>
+                <td>
+                <span class="seats-count <%= course.availableSeats > 5 ? 'seats-good' : course.availableSeats > 0 ? 'seats-warning' : 'seats-danger' %>">
+                    <%= course.availableSeats || 0 %>/<%= course.seatsAvailable || 20 %>
+                  </span>
+                </td>
+                <td>
+                  <% 
+                    let statusClass = 'status-closed';
+                    let statusText = course.displayStatus || course.status || 'Closed';
+                    
+                    if (statusText === 'Open to Register') {
+                      statusClass = 'status-open';
+                    } else if (statusText === 'Full' || course.availableSeats <= 0) {
+                      statusClass = 'status-closed';
+                      statusText = 'Full';
+                    } else if (statusText === 'In Progress') {
+                      statusClass = 'status-limited';
+                    }
+                  %>
+                  <span class="status-badge <%= statusClass %>"><%= statusText %></span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-icon btn-details tooltip" data-tooltip="View Details" 
+                            onclick="window.location.href='/online-live-training/courses/<%= course._id %>'">
+                      <i class="fas fa-info-circle"></i>
+                    </button>
+                    
+                    <% if (user) { %>
+                      <button class="btn-icon btn-wishlist tooltip add-to-wishlist-btn" 
+                              data-tooltip="Add to Wishlist"
+                              data-course-id="<%= course._id %>" 
+                              data-course-type="OnlineLiveTraining"
+                              data-price="<%= course.price || 0 %>"
+                              data-course-code="<%= course.courseCode || 'N/A' %>"
+                              data-course-title="<%= course.title || 'Untitled Course' %>"
+                              data-wants-certificate="no">
+                        <i class="fas fa-heart"></i>
+                      </button>
+                      
+                      <button class="btn-icon btn-cart tooltip add-to-cart-btn" 
+                              data-tooltip="Add to Cart"
+                              data-course-id="<%= course._id %>" 
+                              data-course-type="OnlineLiveTraining"
+                              data-price="<%= course.price || 0 %>"
+                              data-course-code="<%= course.courseCode || 'N/A' %>"
+                              data-course-title="<%= course.title || 'Untitled Course' %>"
+                              data-wants-certificate="no"
+                              <%= (course.availableSeats <= 0 || statusText !== 'Open to Register') ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' %>>
+                        <i class="fas fa-shopping-cart"></i>
+                      </button>
+                    <% } else { %>
+                      <button class="btn-icon btn-wishlist tooltip" 
+                              data-tooltip="Login to add to wishlist"
+                              onclick="showLoginRequired()">
+                        <i class="fas fa-heart"></i>
+                      </button>
+                      
+                      <button class="btn-icon btn-cart tooltip" 
+                              data-tooltip="Login to add to cart"
+                              onclick="showLoginRequired()">
+                        <i class="fas fa-shopping-cart"></i>
+                      </button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <% } else { %>
+        <div class="table-container">
+          <table class="courses-table">
+            <tbody>
+              <tr>
+                <td colspan="11" class="no-courses">
+                  <div class="no-courses-message">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No Upcoming Live Sessions Available</h3>
+                    <p>Check back later for new training opportunities or browse our completed courses below.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Completed/Historical Courses Section -->
+    <div class="table-section" id="historySection">
+      <div class="section-header">
+        <h2><i class="fas fa-history"></i> Course History & Recordings</h2>
+        <p>Previously completed sessions and available recordings</p>
+      </div>
+      
+      <div class="table-container" id="historyTableContainer">
+        <% if (typeof completedCourses !== 'undefined' && completedCourses.length > 0) { %>
+        <table class="courses-table" id="completedCoursesTable">
+          <thead class="sticky-header">
+            <tr>
+              <th style="width: 5%">#</th>
+              <th style="width: 10%">Code</th>
+              <th style="width: 20%">Course Title</th>
+              <th style="width: 12%">Completion Date</th>
+              <th style="width: 10%">Duration</th>
+              <th style="width: 10%">Platform</th>
+              <th style="width: 8%">Certificate</th>
+              <th style="width: 8%">Price</th>
+              <th style="width: 8%">Participants</th>
+              <th style="width: 8%">Status</th>
+              <th style="width: 12%">Info</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% completedCourses.forEach((course, index) => { %>
+              <tr data-course-id="<%= course._id %>" class="expired-course">
+                <td><%= index + 1 %></td>
+                <td><strong><%= course.courseCode || 'N/A' %></strong></td>
+                <td class="course-title">
+                  <%= course.title || 'Untitled Course' %>
+                  <% if (course.instructor) { %>
+                    <br><small style="color: #666;">Instructor: <%= course.instructor %></small>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="date-badge expired">
+                    <i class="far fa-calendar"></i> 
+                    <%= course.endDate ? new Date(course.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : (course.startDate ? new Date(course.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A') %>
+                  </span>
+                </td>
+                <td><%= course.duration || 'TBD' %></td>
+                <td>
+                  <span class="platform-badge">
+                    <i class="fas <%= course.platformIcon || 'fa-video' %>"></i>
+                    <%= course.platform || 'Zoom' %>
+                  </span>
+                </td>
+                <td class="certificate-interest">
+                  <% if (course.certificateProvided !== false) { %>
+                    <span class="certificate-badge certificate-included">Available</span>
+                  <% } else { %>
+                    <span class="certificate-badge certificate-not-available">Not Available</span>
+                  <% } %>
+                </td>
+                <td class="price-badge expired">
+                  <%= course.currency === 'EUR' ? '€' : (course.currency || '€') %><%= course.price || 0 %>
+                </td>
+                <td>
+                  <span class="seats-count expired">
+                    <%= course.enrolledStudents || 0 %>
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge status-completed">Completed</span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-icon btn-info tooltip" data-tooltip="Course Information" 
+                            onclick="showCourseInfo('<%= course._id %>')">
+                      <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="btn-icon btn-archive tooltip" data-tooltip="View Recordings" 
+                            onclick="window.location.href='/online-live-training/courses/<%= course._id %>/recordings'">
+                      <i class="fas fa-play"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <% } else { %>
+        <div class="table-container">
+          <table class="courses-table">
+            <tbody>
+              <tr>
+                <td colspan="11" class="no-courses">
+                  <div class="no-courses-message">
+                    <i class="fas fa-archive"></i>
+                    <h3>No Completed Courses Found</h3>
+                    <p>This institution is building its online training portfolio.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid View (Hidden by default, keep for backward compatibility) -->
   <div class="grid-container" id="gridView">
     <% if (courses && courses.length > 0) { %>
     <div class="courses-grid">
@@ -1232,13 +1705,53 @@
     <% } %>
   </div>
 
+  <!-- Course Info Modal for Completed Courses -->
+  <div class="course-modal" id="courseInfoModal">
+    <div class="modal-content">
+      <div class="modal-header archive-header">
+        <h3 id="infoModalCourseTitle">Course Information</h3>
+        <button class="modal-close" onclick="closeCourseInfoModal()">
+          <i class="fas fa-times" style="color: white;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="archive-badge">
+          <i class="fas fa-archive"></i> Completed Course
+        </div>
+        <div class="modal-course-info" id="infoModalCourseInfo">
+          <!-- Course info will be populated by JavaScript -->
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-secondary" onclick="closeCourseInfoModal()">
+            <i class="fas fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Notification Container -->
   <div id="notificationContainer"></div>
 
   <script>
-    // Simple notification function
+    // ========================================
+    // GLOBAL VARIABLES
+    // ========================================
+    const upcomingCoursesData = <%- JSON.stringify(upcomingCourses || []) %>;
+    const completedCoursesData = <%- JSON.stringify(completedCourses || []) %>;
+
+    // ========================================
+    // NOTIFICATION SYSTEM
+    // ========================================
     function showNotification(title, message, type = 'success') {
+      console.log(`📢 Notification: ${type.toUpperCase()} - ${title}: ${message}`);
+      
       const container = document.getElementById('notificationContainer');
+      if (!container) {
+        console.error('❌ Notification container not found');
+        return;
+      }
+      
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
       
@@ -1260,40 +1773,257 @@
       
       container.appendChild(notification);
       
-      // Show notification
       setTimeout(() => notification.classList.add('show'), 10);
       
-      // Remove after 5 seconds
       setTimeout(() => {
         notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 500);
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, 500);
       }, 5000);
     }
-    
-    // Login required
+
+    // ========================================
+    // LOGIN REQUIRED HANDLER
+    // ========================================
     function showLoginRequired() {
+      console.log('🔐 Login required - redirecting to login page');
       showNotification('Authentication Required', 'Please log in to continue', 'warning');
-      setTimeout(() => window.location.href = '/login', 2000);
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
     }
-    
-    // Enhanced button loading state
+
+    // ========================================
+    // BUTTON LOADING STATE
+    // ========================================
     function setButtonLoading(button, loading) {
       if (loading) {
         button.classList.add('btn-loading');
+        button.disabled = true;
+        
         const icon = button.querySelector('i');
         if (icon) {
-          icon.className = 'fas fa-spinner';
+          button.setAttribute('data-original-icon', icon.className);
+          icon.className = 'fas fa-spinner fa-spin';
         }
       } else {
         button.classList.remove('btn-loading');
+        button.disabled = false;
+        
         const icon = button.querySelector('i');
-        if (icon) {
-          icon.className = button.classList.contains('btn-wishlist') ? 'fas fa-heart' : 'fas fa-shopping-cart';
+        const originalIcon = button.getAttribute('data-original-icon');
+        if (icon && originalIcon) {
+          icon.className = originalIcon;
         }
       }
     }
 
-    // Certificate selection handling
+    // ========================================
+    // SEARCH AND FILTER FUNCTIONALITY
+    // ========================================
+    function filterCourses() {
+      const searchInput = document.getElementById('courseSearch');
+      const statusFilter = document.getElementById('statusFilter');
+      const dateFilter = document.getElementById('dateFilter');
+      const platformFilter = document.getElementById('platformFilter');
+      
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      const statusFilterValue = statusFilter ? statusFilter.value : '';
+      const dateFilterValue = dateFilter ? dateFilter.value : '';
+      const platformFilterValue = platformFilter ? platformFilter.value : '';
+      
+      // Filter upcoming courses
+      const upcomingRows = document.querySelectorAll('#upcomingCoursesTable tbody tr:not(.no-courses)');
+      filterTableRows(upcomingRows, searchTerm, statusFilterValue, dateFilterValue, platformFilterValue);
+      
+      // Update row numbers for upcoming courses
+      updateRowNumbers('#upcomingCoursesTable');
+    }
+
+    function filterTableRows(rows, searchTerm, statusFilterValue, dateFilterValue, platformFilterValue) {
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const status = row.querySelector('.status-badge')?.textContent.trim();
+        const courseDate = new Date(row.getAttribute('data-date'));
+        const platform = row.getAttribute('data-platform');
+        const today = new Date();
+        
+        let showRow = true;
+        
+        // Search filter
+        if (searchTerm && !text.includes(searchTerm)) {
+          showRow = false;
+        }
+        
+        // Status filter
+        if (statusFilterValue) {
+          if (statusFilterValue === 'Open to Register' && status !== 'Open to Register') {
+            showRow = false;
+          } else if (statusFilterValue === 'Full' && status !== 'Full') {
+            showRow = false;
+          } else if (statusFilterValue === 'In Progress' && status !== 'In Progress') {
+            showRow = false;
+          }
+        }
+        
+        // Platform filter
+        if (platformFilterValue && platform !== platformFilterValue) {
+          showRow = false;
+        }
+        
+        // Date filter
+        if (dateFilterValue && !isNaN(courseDate)) {
+          const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+          const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+          const nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+          const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+          
+          switch(dateFilterValue) {
+            case 'upcoming':
+              if (courseDate < today) showRow = false;
+              break;
+            case 'this-week':
+              const weekEnd = new Date(today);
+              weekEnd.setDate(today.getDate() + 7);
+              if (courseDate < today || courseDate > weekEnd) showRow = false;
+              break;
+            case 'this-month':
+              if (courseDate < monthStart || courseDate > monthEnd) showRow = false;
+              break;
+            case 'next-month':
+              if (courseDate < nextMonthStart || courseDate > nextMonthEnd) showRow = false;
+              break;
+          }
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+      });
+    }
+
+    function updateRowNumbers(tableSelector) {
+      const visibleRows = document.querySelectorAll(`${tableSelector} tbody tr:not([style*="display: none"]):not(.no-courses)`);
+      visibleRows.forEach((row, index) => {
+        const firstCell = row.querySelector('td:first-child');
+        if (firstCell) {
+          firstCell.textContent = index + 1;
+        }
+      });
+    }
+
+    function sortCourses() {
+      const sortBy = document.getElementById('sortBy');
+      const sortByValue = sortBy ? sortBy.value : '';
+      
+      if (!sortByValue) return;
+      
+      // Sort upcoming courses
+      sortTable('#upcomingCoursesTable', sortByValue);
+    }
+
+    function sortTable(tableSelector, sortByValue) {
+      const tbody = document.querySelector(`${tableSelector} tbody`);
+      if (!tbody) return;
+      
+      const rows = Array.from(tbody.querySelectorAll('tr:not(.no-courses)'));
+      
+      rows.sort((a, b) => {
+        switch(sortByValue) {
+          case 'date-asc':
+            return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+          case 'date-desc':
+            return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+          case 'price-asc':
+            return parseFloat(a.getAttribute('data-price')) - parseFloat(b.getAttribute('data-price'));
+          case 'price-desc':
+            return parseFloat(b.getAttribute('data-price')) - parseFloat(a.getAttribute('data-price'));
+          default:
+            return 0;
+        }
+      });
+      
+      rows.forEach(row => tbody.appendChild(row));
+      updateRowNumbers(tableSelector);
+    }
+
+    // ========================================
+    // COURSE INFO MODAL FOR COMPLETED COURSES
+    // ========================================
+    function showCourseInfo(courseId) {
+      const course = [...upcomingCoursesData, ...completedCoursesData].find(c => c._id === courseId);
+      if (!course) return;
+      
+      const modal = document.getElementById('courseInfoModal');
+      const modalTitle = document.getElementById('infoModalCourseTitle');
+      const courseInfo = document.getElementById('infoModalCourseInfo');
+      
+      if (modalTitle) {
+        modalTitle.textContent = course.title || 'Course Information';
+      }
+      
+      if (courseInfo) {
+        const startDate = new Date(course.startDate);
+        const endDate = course.endDate ? new Date(course.endDate) : null;
+        
+        courseInfo.innerHTML = `
+          <div class="modal-info-row">
+            <div class="modal-label">Course Code</div>
+            <div>${course.courseCode || 'N/A'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Description</div>
+            <div>${course.description || 'No description available'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Completion Date</div>
+            <div>${endDate ? endDate.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }) : startDate.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Duration</div>
+            <div>${course.duration || 'TBD'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Platform</div>
+            <div>${course.platform || 'Zoom'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Instructor(s)</div>
+            <div>${course.instructor || 'Expert Instructors'}</div>
+          </div>
+          <div class="modal-info-row">
+            <div class="modal-label">Participants</div>
+            <div>${course.enrolledStudents || 0} attendees</div>
+          </div>
+        `;
+      }
+      
+      if (modal) {
+        modal.classList.add('show');
+      }
+    }
+
+    function closeCourseInfoModal() {
+      const modal = document.getElementById('courseInfoModal');
+      if (modal) {
+        modal.classList.remove('show');
+      }
+    }
+
+    // ========================================
+    // CERTIFICATE SELECTION HANDLING
+    // ========================================
     document.addEventListener('DOMContentLoaded', function() {
       // Handle certificate selection changes
       document.querySelectorAll('.certificate-select').forEach(select => {
@@ -1323,208 +2053,184 @@
       });
     });
 
-    // Add to Cart
-    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-      button.addEventListener('click', async function(e) {
-        e.preventDefault();
-        
-        const courseId = this.getAttribute('data-course-id');
-        const courseType = this.getAttribute('data-course-type');
-        const courseTitle = this.getAttribute('data-course-title');
-        const wantsCertificate = this.getAttribute('data-wants-certificate') === 'yes';
-        
-        setButtonLoading(this, true);
-        
-        try {
-          const response = await fetch('/add-to-cart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              courseId, 
-              courseType,
-              wantsCertificate: wantsCertificate
-            })
-          });
+    // ========================================
+    // CART AND WISHLIST FUNCTIONALITY
+    // ========================================
+    function initializeCartWishlist() {
+      // Add to Cart functionality
+      document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', async function(e) {
+          e.preventDefault();
+          e.stopPropagation();
           
-          const result = await response.json();
-          
-          if (result.success) {
-            showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
-            setTimeout(() => window.location.href = '/orders', 3000);
-          } else {
-            showNotification('Error', result.message, 'error');
+          if (this.disabled) {
+            console.log('⚠️ Button is disabled, ignoring click');
+            return;
           }
-        } catch (error) {
-          console.error('Error:', error);
-          showNotification('Error', 'Failed to add to cart', 'error');
-        } finally {
-          setButtonLoading(this, false);
-        }
-      });
-    });
-
-    // Add to Wishlist
-    document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
-      button.addEventListener('click', async function(e) {
-        e.preventDefault();
-        
-        const courseId = this.getAttribute('data-course-id');
-        const courseType = this.getAttribute('data-course-type');
-        const courseTitle = this.getAttribute('data-course-title');
-        const wantsCertificate = this.getAttribute('data-wants-certificate') === 'yes';
-        
-        setButtonLoading(this, true);
-        
-        try {
-          const response = await fetch('/add-to-wishlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              courseId, 
-              courseType,
-              wantsCertificate: wantsCertificate
-            })
-          });
           
-          const result = await response.json();
+          const courseId = this.getAttribute('data-course-id');
+          const courseType = this.getAttribute('data-course-type');
+          const courseTitle = this.getAttribute('data-course-title');
+          const wantsCertificate = this.getAttribute('data-wants-certificate') === 'yes';
           
-          if (result.success) {
-            showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
+          console.log('🛒 Adding to cart:', { courseId, courseType, courseTitle });
+          
+          if (!courseId || !courseType) {
+            console.error('❌ Missing course data');
+            showNotification('Error', 'Missing course information', 'error');
+            return;
+          }
+          
+          setButtonLoading(this, true);
+          
+          try {
+            const response = await fetch('/add-to-cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                courseId, 
+                courseType,
+                wantsCertificate: wantsCertificate
+              })
+            });
             
-            // Optional: Update button appearance
-            this.style.color = '#e74c3c';
-            this.querySelector('i').classList.add('fas');
-            this.querySelector('i').classList.remove('far');
-          } else {
-            showNotification('Error', result.message, 'error');
+            const result = await response.json();
+            
+            if (result.success) {
+              showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
+              setTimeout(() => window.location.href = '/orders', 3000);
+            } else {
+              showNotification('Error', result.message, 'error');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            showNotification('Error', 'Failed to add to cart', 'error');
+          } finally {
+            setButtonLoading(this, false);
           }
-        } catch (error) {
-          console.error('Error:', error);
-          showNotification('Error', 'Failed to add to wishlist', 'error');
-        } finally {
-          setButtonLoading(this, false);
-        }
+        });
       });
-    });
 
-    // Search functionality
-    const searchInput = document.getElementById('courseSearch');
-    searchInput.addEventListener('input', filterCourses);
-
-    // Filter functionality
-    document.getElementById('statusFilter').addEventListener('change', filterCourses);
-    document.getElementById('dateFilter').addEventListener('change', filterCourses);
-    document.getElementById('platformFilter').addEventListener('change', filterCourses);
-    document.getElementById('sortBy').addEventListener('change', sortCourses);
-
-    function filterCourses() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const statusFilter = document.getElementById('statusFilter').value;
-      const dateFilter = document.getElementById('dateFilter').value;
-      const platformFilter = document.getElementById('platformFilter').value;
-      const rows = document.querySelectorAll('#coursesTable tbody tr');
-      
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        const status = row.querySelector('.status-badge')?.textContent.trim();
-        const courseDate = new Date(row.getAttribute('data-date'));
-        const platform = row.getAttribute('data-platform');
-        const today = new Date();
-        
-        let showRow = true;
-        
-        // Search filter
-        if (searchTerm && !text.includes(searchTerm)) {
-          showRow = false;
-        }
-        
-        // Status filter
-        if (statusFilter && status !== statusFilter) {
-          showRow = false;
-        }
-        
-        // Platform filter
-        if (platformFilter && platform !== platformFilter) {
-          showRow = false;
-        }
-        
-        // Date filter
-        if (dateFilter && !isNaN(courseDate)) {
-          const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-          const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-          const nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-          const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+      // Add to Wishlist functionality
+      document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
+        button.addEventListener('click', async function(e) {
+          e.preventDefault();
+          e.stopPropagation();
           
-          switch(dateFilter) {
-            case 'upcoming':
-              if (courseDate < today) showRow = false;
-              break;
-            case 'this-week':
-              const weekEnd = new Date(today);
-              weekEnd.setDate(today.getDate() + 7);
-              if (courseDate < today || courseDate > weekEnd) showRow = false;
-              break;
-            case 'this-month':
-              if (courseDate < monthStart || courseDate > monthEnd) showRow = false;
-              break;
-            case 'next-month':
-              if (courseDate < nextMonthStart || courseDate > nextMonthEnd) showRow = false;
-              break;
+          const courseId = this.getAttribute('data-course-id');
+          const courseType = this.getAttribute('data-course-type');
+          const courseTitle = this.getAttribute('data-course-title');
+          const wantsCertificate = this.getAttribute('data-wants-certificate') === 'yes';
+          
+          console.log('❤️ Adding to wishlist:', { courseId, courseType, courseTitle });
+          
+          if (!courseId || !courseType) {
+            console.error('❌ Missing course data');
+            showNotification('Error', 'Missing course information', 'error');
+            return;
           }
-        }
-        
-        row.style.display = showRow ? '' : 'none';
+          
+          setButtonLoading(this, true);
+          
+          try {
+            const response = await fetch('/add-to-wishlist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                courseId, 
+                courseType,
+                wantsCertificate: wantsCertificate
+              })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              showNotification('Added to Wishlist', `"${courseTitle}" has been saved to your wishlist`, 'success');
+              
+              // Update button appearance
+              this.style.color = '#e74c3c';
+              this.querySelector('i').classList.add('fas');
+              this.querySelector('i').classList.remove('far');
+            } else {
+              showNotification('Error', result.message, 'error');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            showNotification('Error', 'Failed to add to wishlist', 'error');
+          } finally {
+            setButtonLoading(this, false);
+          }
+        });
       });
     }
 
-    function sortCourses() {
-      const sortBy = document.getElementById('sortBy').value;
-      const tbody = document.querySelector('#coursesTable tbody');
-      const rows = Array.from(tbody.querySelectorAll('tr'));
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Initializing enhanced online live training page...');
       
-      rows.sort((a, b) => {
-        switch(sortBy) {
-          case 'date-asc':
-            return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
-          case 'date-desc':
-            return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
-          case 'price-asc':
-            return parseFloat(a.getAttribute('data-price')) - parseFloat(b.getAttribute('data-price'));
-          case 'price-desc':
-            return parseFloat(b.getAttribute('data-price')) - parseFloat(a.getAttribute('data-price'));
-          default:
-            return 0;
-        }
-      });
+      // Initialize cart and wishlist
+      initializeCartWishlist();
       
-      // Re-append sorted rows
-      rows.forEach(row => tbody.appendChild(row));
+      // Initialize search and filter event listeners
+      const searchInput = document.getElementById('courseSearch');
+      const statusFilter = document.getElementById('statusFilter');
+      const dateFilter = document.getElementById('dateFilter');
+      const platformFilter = document.getElementById('platformFilter');
+      const sortBy = document.getElementById('sortBy');
       
-      // Update row numbers
-      rows.forEach((row, index) => {
-        row.querySelector('td:first-child').textContent = index + 1;
-      });
-    }
-
-    // View toggle
-    document.getElementById('tableViewBtn').addEventListener('click', function() {
-      document.getElementById('tableView').style.display = 'block';
-      document.getElementById('gridView').style.display = 'none';
-      this.classList.add('active');
-      document.getElementById('gridViewBtn').classList.remove('active');
+      if (searchInput) searchInput.addEventListener('input', filterCourses);
+      if (statusFilter) statusFilter.addEventListener('change', filterCourses);
+      if (dateFilter) dateFilter.addEventListener('change', filterCourses);
+      if (platformFilter) platformFilter.addEventListener('change', filterCourses);
+      if (sortBy) sortBy.addEventListener('change', sortCourses);
+      
+      // Initialize view toggle functionality
+      const tableViewBtn = document.getElementById('tableViewBtn');
+      const gridViewBtn = document.getElementById('gridViewBtn');
+      const tableView = document.getElementById('tableView');
+      const gridView = document.getElementById('gridView');
+      
+      if (tableViewBtn) {
+        tableViewBtn.addEventListener('click', function() {
+          if (tableView) tableView.style.display = 'block';
+          if (gridView) gridView.style.display = 'none';
+          this.classList.add('active');
+          if (gridViewBtn) gridViewBtn.classList.remove('active');
+        });
+      }
+      
+      if (gridViewBtn) {
+        gridViewBtn.addEventListener('click', function() {
+          if (tableView) tableView.style.display = 'none';
+          if (gridView) gridView.style.display = 'block';
+          this.classList.add('active');
+          if (tableViewBtn) tableViewBtn.classList.remove('active');
+        });
+      }
+      
+      // Initialize modal close functionality
+      const courseInfoModal = document.getElementById('courseInfoModal');
+      
+      if (courseInfoModal) {
+        courseInfoModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeCourseInfoModal();
+          }
+        });
+      }
+      
+      // Debug information
+      console.log('📊 Page loaded with courses:');
+      console.log('📅 Upcoming courses:', upcomingCoursesData.length);
+      console.log('📚 Completed courses:', completedCoursesData.length);
+      console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
+      console.log('🛒 Cart buttons found:', document.querySelectorAll('.add-to-cart-btn').length);
+      console.log('❤️ Wishlist buttons found:', document.querySelectorAll('.add-to-wishlist-btn').length);
     });
-    
-    document.getElementById('gridViewBtn').addEventListener('click', function() {
-      document.getElementById('tableView').style.display = 'none';
-      document.getElementById('gridView').style.display = 'block';
-      this.classList.add('active');
-      document.getElementById('tableViewBtn').classList.remove('active');
-    });
-
-    // Initialize page
-    console.log('📊 Page loaded with <%= courses.length %> courses');
-    console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
-</script>
+  </script>
 
   <%- include('partials/footer') %>
 </body>

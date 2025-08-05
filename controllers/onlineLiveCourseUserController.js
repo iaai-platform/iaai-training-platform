@@ -1,4 +1,5 @@
-// controllers/onlineLiveCourseUserController.js
+// controllers/onlineLiveCourseUserController.js - UPDATED WITH TWO-TABLE APPROACH
+
 const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 const User = require("../models/user");
 const Instructor = require("../models/Instructor");
@@ -14,28 +15,25 @@ const getEnrolledCount = async (courseId) => {
   return count;
 };
 
-// 1. Controller to display Online Live Training Courses
+// 🔧 UPDATED: Controller to display Online Live Training Courses with two tables
 exports.getOnlineLiveTraining = async (req, res) => {
   try {
     console.log("📚 Fetching online live courses...");
 
-    // Fetch courses where status is not 'cancelled'
-    const courses = await OnlineLiveTraining.find({
+    const now = new Date();
+
+    // 🔧 UPDATED: Fetch ALL courses including completed ones
+    const allCourses = await OnlineLiveTraining.find({
       "basic.status": { $ne: "cancelled" },
     }).lean();
 
-    const user = req.user || null;
+    console.log(`📊 Found ${allCourses.length} total online live courses`);
 
-    console.log(`📊 Found ${courses.length} online live courses`);
-    console.log(
-      "👤 User:",
-      user ? `${user.firstName} (${user.email})` : "Not logged in"
-    );
+    // 🔧 NEW: Process courses and separate into categories
+    const upcomingCourses = [];
+    const completedCourses = [];
 
-    // Transform courses to match the view's expectations
-    const transformedCourses = [];
-
-    for (let course of courses) {
+    for (let course of allCourses) {
       // Get enrolled count
       const enrolledCount = await getEnrolledCount(course._id);
 
@@ -56,7 +54,7 @@ exports.getOnlineLiveTraining = async (req, res) => {
         // Pricing fields
         price: course.enrollment?.price || 0,
         earlyBirdPrice: course.enrollment?.earlyBirdPrice,
-        currency: course.enrollment?.currency || "EUR", // ADD THIS LINE
+        currency: course.enrollment?.currency || "EUR",
         seatsAvailable: course.enrollment?.seatsAvailable || 50,
 
         // Platform fields
@@ -95,53 +93,79 @@ exports.getOnlineLiveTraining = async (req, res) => {
             course.schedule?.startDate &&
             new Date(course.schedule.endDate).getTime() !==
               new Date(course.schedule.startDate).getTime()),
+
+        // Certificate info
+        certificateProvided: course.certification?.enabled !== false,
+
+        // Additional display fields
+        hasEarlyBird:
+          course.enrollment?.earlyBirdPrice &&
+          course.enrollment.earlyBirdPrice < course.enrollment.price,
+
+        mainImageUrl:
+          course.media?.mainImage?.url ||
+          course.media?.promotional?.brochureUrl ||
+          "/images/default-online-course.jpg",
+
+        // Platform icon mapping
+        platformIcon:
+          {
+            zoom: "fa-video",
+            "microsoft teams": "fa-microsoft",
+            webex: "fa-laptop",
+            "google meet": "fa-google",
+            gotowebinar: "fa-chalkboard-teacher",
+            custom: "fa-desktop",
+          }[course.platform?.name?.toLowerCase()] || "fa-video",
       };
 
-      // Calculate status and other display fields
-      const now = new Date();
+      // 🔧 NEW: Determine if course is completed/expired
       const startDate = transformedCourse.startDate
         ? new Date(transformedCourse.startDate)
         : null;
-      const registrationDeadline =
-        transformedCourse.registrationDeadline ||
-        (startDate
-          ? new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-          : null);
+      const endDate = transformedCourse.endDate
+        ? new Date(transformedCourse.endDate)
+        : null;
 
-      // Determine display status
+      let isCompleted = false;
+      let currentStatus = transformedCourse.status;
+
+      // Update status based on dates
+      if (endDate && now > endDate) {
+        currentStatus = "completed";
+        isCompleted = true;
+      } else if (
+        !endDate &&
+        startDate &&
+        now > new Date(startDate.getTime() + 24 * 60 * 60 * 1000)
+      ) {
+        currentStatus = "completed";
+        isCompleted = true;
+      } else if (
+        startDate &&
+        now >= startDate &&
+        (!endDate || now <= endDate)
+      ) {
+        currentStatus = "in-progress";
+      } else if (transformedCourse.availableSeats <= 0) {
+        currentStatus = "full";
+      } else if (startDate && now < startDate) {
+        currentStatus = "open";
+      }
+
+      // Calculate display status
       if (transformedCourse.availableSeats <= 0) {
         transformedCourse.displayStatus = "Full";
       } else if (startDate && startDate <= now) {
         transformedCourse.displayStatus = "In Progress";
-      } else if (registrationDeadline && registrationDeadline <= now) {
+      } else if (
+        transformedCourse.registrationDeadline &&
+        new Date(transformedCourse.registrationDeadline) <= now
+      ) {
         transformedCourse.displayStatus = "Registration Closed";
       } else {
         transformedCourse.displayStatus = "Open to Register";
       }
-
-      transformedCourse.certificateProvided =
-        course.certification?.enabled !== false;
-
-      // Additional display fields
-      transformedCourse.hasEarlyBird =
-        transformedCourse.earlyBirdPrice &&
-        transformedCourse.earlyBirdPrice < transformedCourse.price;
-
-      transformedCourse.mainImageUrl =
-        course.media?.mainImage?.url ||
-        course.media?.promotional?.brochureUrl ||
-        "/images/default-online-course.jpg";
-
-      // Platform icon mapping
-      transformedCourse.platformIcon =
-        {
-          zoom: "fa-video",
-          "microsoft teams": "fa-microsoft",
-          webex: "fa-laptop",
-          "google meet": "fa-google",
-          gotowebinar: "fa-chalkboard-teacher",
-          custom: "fa-desktop",
-        }[transformedCourse.platform?.toLowerCase()] || "fa-video";
 
       // Calculate days until start
       if (startDate && startDate > now) {
@@ -157,11 +181,25 @@ exports.getOnlineLiveTraining = async (req, res) => {
         transformedCourse.timeUntilStart = "Started";
       }
 
-      transformedCourses.push(transformedCourse);
+      // Update the status in the transformed course
+      transformedCourse.status = currentStatus;
+
+      // 🔧 NEW: Categorize courses
+      if (isCompleted) {
+        completedCourses.push(transformedCourse);
+        console.log(
+          `📚 Added to completed: ${transformedCourse.title} (${transformedCourse.status})`
+        );
+      } else {
+        upcomingCourses.push(transformedCourse);
+        console.log(
+          `📅 Added to upcoming: ${transformedCourse.title} (${transformedCourse.status})`
+        );
+      }
     }
 
-    // Sort courses: upcoming first, then by start date
-    transformedCourses.sort((a, b) => {
+    // Sort courses
+    upcomingCourses.sort((a, b) => {
       if (
         a.displayStatus === "In Progress" &&
         b.displayStatus !== "In Progress"
@@ -177,9 +215,41 @@ exports.getOnlineLiveTraining = async (req, res) => {
       return new Date(a.startDate) - new Date(b.startDate);
     });
 
+    completedCourses.sort(
+      (a, b) => new Date(b.startDate) - new Date(a.startDate)
+    ); // Most recent first
+
+    const user = req.user || null;
+
+    console.log(`✅ Final categorization:`);
+    console.log(`   📅 Upcoming courses: ${upcomingCourses.length}`);
+    console.log(`   📚 Completed courses: ${completedCourses.length}`);
+    console.log(
+      `👤 User: ${user ? `${user.firstName} (${user.email})` : "Not logged in"}`
+    );
+
+    // 🔧 NEW: Pass both arrays to template
     res.render("online-live-training", {
-      courses: transformedCourses,
+      // Pass separate arrays for the two tables
+      upcomingCourses: upcomingCourses,
+      completedCourses: completedCourses,
+
+      // Keep backward compatibility with existing template
+      courses: [...upcomingCourses, ...completedCourses],
+
       user: user,
+
+      // Additional stats
+      stats: {
+        totalCourses: upcomingCourses.length + completedCourses.length,
+        upcomingCount: upcomingCourses.length,
+        completedCount: completedCourses.length,
+        availableCount: upcomingCourses.filter(
+          (course) =>
+            course.displayStatus === "Open to Register" &&
+            (course.availableSeats || 0) > 0
+        ).length,
+      },
     });
   } catch (err) {
     console.error("❌ Error fetching online live courses:", err);
@@ -187,7 +257,9 @@ exports.getOnlineLiveTraining = async (req, res) => {
   }
 };
 
-// 2. Controller to display specific course details
+// Keep all other existing methods unchanged...
+// (getCourseDetails, joinLiveSession, getCourseMaterials, etc.)
+
 // 2. Controller to display specific course details
 exports.getCourseDetails = async (req, res) => {
   try {
@@ -196,8 +268,8 @@ exports.getCourseDetails = async (req, res) => {
     const course = await OnlineLiveTraining.findById(req.params.courseId)
       .populate("instructors.primary.instructorId")
       .populate("instructors.additional.instructorId")
-      .populate("certification.issuingAuthorityId") // Add this population
-      .populate("certification.certificationBodies.bodyId") // Add this population
+      .populate("certification.issuingAuthorityId")
+      .populate("certification.certificationBodies.bodyId")
       .lean();
 
     if (!course) {
@@ -209,24 +281,6 @@ exports.getCourseDetails = async (req, res) => {
     }
 
     console.log("✅ Course found:", course.basic?.title);
-    // ADD THIS DEBUG LINE:
-    console.log(
-      "🔍 DEBUG - course.recording:",
-      JSON.stringify(course.recording, null, 2)
-    );
-    // ADD THESE DEBUG LOGS:
-    console.log(
-      "🔍 DEBUG - Raw course.schedule object:",
-      JSON.stringify(course.schedule, null, 2)
-    );
-    console.log(
-      "🔍 DEBUG - course.schedule?.startTime:",
-      course.schedule?.startTime
-    );
-    console.log(
-      "🔍 DEBUG - typeof startTime:",
-      typeof course.schedule?.startTime
-    );
 
     const currentDate = new Date();
     const courseStartDate = new Date(course.schedule?.startDate);
@@ -253,7 +307,7 @@ exports.getCourseDetails = async (req, res) => {
       registrationDeadline: course.schedule?.registrationDeadline,
       primaryTimezone: course.schedule?.primaryTimezone || "UTC",
       displayTimezones: course.schedule?.displayTimezones || [],
-      // Replace the single startTime line with this block:
+
       startTime:
         course.schedule?.sessions?.length > 0
           ? course.schedule.sessions[0].startTime
@@ -266,6 +320,7 @@ exports.getCourseDetails = async (req, res) => {
         course.schedule?.sessions?.length > 0
           ? `${course.schedule.sessions[0].startTime} - ${course.schedule.sessions[0].endTime}`
           : null,
+
       // Session details for multi-day courses
       isMultiDay: course.schedule?.sessions?.length > 1,
       courseDays:
@@ -307,13 +362,13 @@ exports.getCourseDetails = async (req, res) => {
             title: course.instructors.primary.instructorId.title,
             bio: course.instructors.primary.instructorId.bio,
             profilePicture:
-              course.instructors.primary.instructorId.profileImage, // Note: using profileImage from model
+              course.instructors.primary.instructorId.profileImage,
             qualifications:
               course.instructors.primary.instructorId.qualifications || [],
             specializations:
               course.instructors.primary.instructorId.specializations || [],
             yearsOfExperience:
-              course.instructors.primary.instructorId.experience, // Note: using experience field
+              course.instructors.primary.instructorId.experience,
             achievements:
               course.instructors.primary.instructorId.achievements || [],
           }
@@ -333,7 +388,7 @@ exports.getCourseDetails = async (req, res) => {
                   fullName: inst.instructorId.fullName,
                   title: inst.instructorId.title,
                   bio: inst.instructorId.bio,
-                  profilePicture: inst.instructorId.profileImage, // Note: using profileImage from model
+                  profilePicture: inst.instructorId.profileImage,
                   role: inst.role,
                 }
               : null
@@ -366,13 +421,13 @@ exports.getCourseDetails = async (req, res) => {
 
       // Recording info - ENHANCED
       recordingAvailable:
-        course.recording?.enabled !== false && // Default to true if not explicitly false
+        course.recording?.enabled !== false &&
         course.recording?.availability?.forStudents !== false,
       recordingDuration: course.recording?.availability?.duration || 90,
       recordingDownloadable:
         course.recording?.availability?.downloadable || false,
       recordingDetails: {
-        available: course.recording?.availability?.forStudents !== false, // Default to true
+        available: course.recording?.availability?.forStudents !== false,
         duration: course.recording?.availability?.duration || 90,
         downloadable: course.recording?.availability?.downloadable || false,
         passwordProtected:
@@ -569,7 +624,6 @@ exports.getCourseDetails = async (req, res) => {
     });
   }
 };
-
 // 5. Join live session (for registered students)
 exports.joinLiveSession = async (req, res) => {
   try {

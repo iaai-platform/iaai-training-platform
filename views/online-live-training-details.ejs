@@ -1928,8 +1928,8 @@
         <div class="hero-actions">
           <div class="price-display">
             <span class="price-label">Investment</span>
-            <div class="price-amount">
-              <span class="price-currency"><%= course.currency || 'USD' %></span><%= course.price || 0 %>
+            <div class="price-amount" id="displayPrice">
+              <span class="price-currency"><%= course.currency || 'USD' %></span><span id="priceValue"><%= course.price || 0 %></span>
             </div>
             <% if (course.earlyBirdPrice && course.earlyBirdPrice < course.price) { %>
               <span class="early-bird-tag">
@@ -1937,6 +1937,28 @@
               </span>
             <% } %>
           </div>
+          
+          <!-- ⭐ NEW: Certificate Selection (only for free courses) -->
+          <% if ((course.price || 0) === 0) { %>
+          <div class="certificate-selection-box" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px);">
+            <h4 style="color: white; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+              <i class="fas fa-certificate" style="color: #b8860b;"></i>
+              Certificate Interest
+            </h4>
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <label style="color: rgba(255, 255, 255, 0.9); font-size: 14px; font-weight: 500;">
+                Do you want a certificate?
+              </label>
+              <select id="certificateSelect" style="background: white; border: 2px solid #e0e0e0; border-radius: 8px; padding: 8px 15px; font-size: 14px; color: #333; cursor: pointer; transition: all 0.3s ease;">
+                <option value="no">No</option>
+                <option value="yes">Yes (+€10)</option>
+              </select>
+            </div>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 12px; margin-top: 10px; font-style: italic;">
+              Selecting certificate will add €10 to the course price
+            </p>
+          </div>
+          <% } %>
           
           <div class="action-buttons">
             <% if (typeof showJoinButton !== 'undefined' && showJoinButton && userRegistrationStatus?.isRegistered) { %>
@@ -1950,6 +1972,7 @@
                       data-price="<%= course.price || 0 %>"
                       data-course-code="<%= course.courseCode || 'N/A' %>"
                       data-course-title="<%= course.title || 'Untitled Course' %>"
+                      data-wants-certificate="no"
                       <%= (course.status !== 'Open to Register' || (typeof course.availableSeats !== 'undefined' && course.availableSeats <= 0)) ? 'disabled' : '' %>>
                 <i class="fas fa-shopping-cart"></i> 
                 <%= (typeof course.availableSeats !== 'undefined' && course.availableSeats <= 0) ? 'Course Full' : 'Add to Cart' %>
@@ -1960,7 +1983,8 @@
                       data-course-type="OnlineLiveTraining"
                       data-price="<%= course.price || 0 %>"
                       data-course-code="<%= course.courseCode || 'N/A' %>"
-                      data-course-title="<%= course.title || 'Untitled Course' %>">
+                      data-course-title="<%= course.title || 'Untitled Course' %>"
+                      data-wants-certificate="no">
                 <i class="fas fa-heart"></i> Save to Wishlist
               </button>
             <% } else { %>
@@ -2921,8 +2945,20 @@
   <!-- Mobile Action Bar -->
   <div class="mobile-action-bar">
     <div class="mobile-action-content">
-      <div class="mobile-price">
-        <%= course.currency || 'USD' %><%= course.price || 0 %>
+      <div>
+        <div class="mobile-price" id="mobilePriceDisplay">
+          <span class="price-currency"><%= course.currency || 'USD' %></span><span id="mobilePriceValue"><%= course.price || 0 %></span>
+        </div>
+        <!-- ⭐ NEW: Mobile Certificate Selection (only for free courses) -->
+        <% if ((course.price || 0) === 0) { %>
+        <div style="margin-top: 10px;">
+          <label style="font-size: 12px; color: #666; margin-right: 10px;">Certificate:</label>
+          <select id="mobileCertificateSelect" style="background: white; border: 1px solid #ddd; border-radius: 6px; padding: 4px 8px; font-size: 12px;">
+            <option value="no">No</option>
+            <option value="yes">Yes (+€10)</option>
+          </select>
+        </div>
+        <% } %>
       </div>
       <div class="mobile-buttons">
         <% if (typeof showJoinButton !== 'undefined' && showJoinButton && userRegistrationStatus?.isRegistered) { %>
@@ -2936,6 +2972,7 @@
                   data-price="<%= course.price || 0 %>"
                   data-course-code="<%= course.courseCode || 'N/A' %>"
                   data-course-title="<%= course.title || 'Untitled Course' %>"
+                  data-wants-certificate="no"
                   <%= (course.status !== 'Open to Register') ? 'disabled' : '' %>
                   style="padding: 12px 20px; font-size: 14px;">
             <i class="fas fa-shopping-cart"></i> Add to Cart
@@ -2953,6 +2990,61 @@
   <div id="notificationContainer"></div>
 
   <script>
+    // ⭐ Certificate Selection Handler
+    document.addEventListener('DOMContentLoaded', function() {
+      const certificateSelect = document.getElementById('certificateSelect');
+      const mobileCertificateSelect = document.getElementById('mobileCertificateSelect');
+      const priceValue = document.getElementById('priceValue');
+      const mobilePriceValue = document.getElementById('mobilePriceValue');
+      
+      const originalPrice = <%= course.price || 0 %>;
+      
+      // Handle certificate selection change
+      function handleCertificateChange(selectElement) {
+        const wantsCertificate = selectElement.value === 'yes';
+        const newPrice = wantsCertificate && originalPrice === 0 ? 10 : originalPrice;
+        
+        // Update price display
+        if (priceValue) priceValue.textContent = newPrice;
+        if (mobilePriceValue) mobilePriceValue.textContent = newPrice;
+        
+        // Sync both selects
+        if (certificateSelect && mobileCertificateSelect) {
+          certificateSelect.value = selectElement.value;
+          mobileCertificateSelect.value = selectElement.value;
+        }
+        
+        // Update all action buttons
+        const actionButtons = document.querySelectorAll('.add-to-cart-btn, .add-to-wishlist-btn');
+        actionButtons.forEach(button => {
+          button.setAttribute('data-wants-certificate', selectElement.value);
+          button.setAttribute('data-price', newPrice);
+        });
+      }
+      
+      // Add event listeners
+      if (certificateSelect) {
+        certificateSelect.addEventListener('change', function() {
+          handleCertificateChange(this);
+        });
+      }
+      
+      if (mobileCertificateSelect) {
+        mobileCertificateSelect.addEventListener('change', function() {
+          handleCertificateChange(this);
+        });
+      }
+    
+      // Initialize scroll animations (moved from bottom to DOMContentLoaded)
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(section);
+      });
+    });
+    
     // Show notification function
     function showNotification(title, message, type = 'success') {
       const container = document.getElementById('notificationContainer');
@@ -2986,7 +3078,7 @@
         setTimeout(() => notification.remove(), 500);
       }, 5000);
     }
-
+    
     // Show login required message
     function showLoginRequired() {
       showNotification('Authentication Required', 'Please log in to continue', 'warning');
@@ -2994,7 +3086,7 @@
         window.location.href = '/login';
       }, 2000);
     }
-
+    
     // Set button loading state
     function setButtonLoading(button, loading) {
       if (loading) {
@@ -3018,8 +3110,8 @@
         }
       }
     }
-
-    // Add to Cart
+    
+    // ⭐ UPDATED Add to Cart Function with Certificate Preference
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
       button.addEventListener('click', async function(e) {
         e.preventDefault();
@@ -3027,6 +3119,7 @@
         const courseId = this.getAttribute('data-course-id');
         const courseType = this.getAttribute('data-course-type');
         const courseTitle = this.getAttribute('data-course-title');
+        const wantsCertificate = this.getAttribute('data-wants-certificate') === 'yes';
         
         setButtonLoading(this, true);
         
@@ -3034,15 +3127,18 @@
           const response = await fetch('/add-to-cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseId, courseType })
+            body: JSON.stringify({ 
+              courseId, 
+              courseType,
+              wantsCertificate: wantsCertificate
+            })
           });
           
           const result = await response.json();
           
           if (result.success) {
             showNotification('Added to Cart', `"${courseTitle}" has been added to your cart`, 'success');
-            // ⭐ ADD ONLY THIS LINE:
-  setTimeout(() => window.location.href = '/orders', 3000);
+            setTimeout(() => window.location.href = '/orders', 3000);
           } else {
             showNotification('Error', result.message, 'error');
           }
@@ -3054,8 +3150,8 @@
         }
       });
     });
-
-    // Add to Wishlist
+    
+    // ⭐ UPDATED Add to Wishlist Function with Certificate Preference
     document.querySelectorAll('.add-to-wishlist-btn').forEach(button => {
       button.addEventListener('click', async function(e) {
         e.preventDefault();
@@ -3063,6 +3159,7 @@
         const courseId = this.getAttribute('data-course-id');
         const courseType = this.getAttribute('data-course-type');
         const courseTitle = this.getAttribute('data-course-title');
+        const wantsCertificate = this.getAttribute('data-wants-certificate') === 'yes';
         
         setButtonLoading(this, true);
         
@@ -3070,7 +3167,11 @@
           const response = await fetch('/add-to-wishlist', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseId, courseType })
+            body: JSON.stringify({ 
+              courseId, 
+              courseType,
+              wantsCertificate: wantsCertificate
+            })
           });
           
           const result = await response.json();
@@ -3093,7 +3194,7 @@
         }
       });
     });
-
+    
     // Join Live Session functionality
     async function joinLiveSession(courseId) {
       try {
@@ -3103,7 +3204,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
-
+    
         const result = await response.json();
         
         if (result.success) {
@@ -3122,7 +3223,7 @@
         showNotification('Error', 'Failed to join the session', 'error');
       }
     }
-
+    
     // FAQ Toggle
     function toggleFaq(element) {
       const faqItem = element.parentElement;
@@ -3138,7 +3239,7 @@
         faqItem.classList.add('active');
       }
     }
-
+    
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
@@ -3152,13 +3253,13 @@
         }
       });
     });
-
+    
     // Intersection Observer for scroll animations
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
     };
-
+    
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -3167,18 +3268,9 @@
         }
       });
     }, observerOptions);
+    
 
-    // Observe content sections for scroll animations
-    document.addEventListener('DOMContentLoaded', function() {
-      const sections = document.querySelectorAll('.content-section');
-      sections.forEach(section => {
-        section.style.opacity = '0';
-        section.style.transform = 'translateY(20px)';
-        section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(section);
-      });
-    });
-
+    
     // Initialize
     console.log('📚 Enhanced online live course details page loaded');
     console.log('👤 User logged in:', <%= user ? 'true' : 'false' %>);
@@ -3192,7 +3284,7 @@
       img.style.opacity = '0';
       img.style.transition = 'opacity 0.3s ease';
     });
-  </script>
+    </script>
 
   <%- include('partials/footer') %>
 </body>

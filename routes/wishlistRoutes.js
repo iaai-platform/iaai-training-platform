@@ -1,18 +1,32 @@
 // routes/wishlistRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const wishlistController = require('../controllers/wishlistController');
-const isAuthenticated = require('../middlewares/isAuthenticated');
+const wishlistController = require("../controllers/wishlistController");
+const isAuthenticated = require("../middlewares/isAuthenticated");
 
-// ✅ 1️⃣ Display Wishlist Page
-router.get('/wishlist', isAuthenticated, wishlistController.getWishlistPage);
+console.log("❤️ Loading wishlist page routes...");
 
+// ✅ Display Wishlist Page (use different path to avoid conflicts)
+router.get("/my-wishlist", isAuthenticated, wishlistController.getWishlistPage);
 
+// Alternative: you can also use this if you want to keep /wishlist
+// Just make sure this route file is loaded BEFORE cartWishlistRoutes.js in your main app
+// router.get('/wishlist', isAuthenticated, wishlistController.getWishlistPage);
 
-// ✅ 3️⃣ Remove Course from Wishlist
-router.post('/remove-from-wishlist', isAuthenticated, wishlistController.removeFromWishlist);
+// ✅ Remove Course from Wishlist (page-specific)
+router.post(
+  "/wishlist/remove",
+  isAuthenticated,
+  wishlistController.removeFromWishlist
+);
 
-// ✅ 4️⃣ Move Course from Wishlist to Cart
-router.post('/move-to-cart', isAuthenticated, wishlistController.moveToCart);
+// ✅ Move Course from Wishlist to Cart (page-specific)
+router.post(
+  "/wishlist/move-to-cart",
+  isAuthenticated,
+  wishlistController.moveToCart
+);
+
+console.log("✅ Wishlist page routes loaded successfully");
 
 module.exports = router;

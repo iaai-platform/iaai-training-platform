@@ -437,12 +437,18 @@ app.use("/", onlineLiveCourseUserRoutes);
 console.log("📚 Online live training routes loaded");
 
 // ============================================
-// 9.3 SHARED CART AND WISHLIST ROUTES (ADD THIS!)
+// 9.3.1 WISHLIST PAGE ROUTES (ADD THIS BEFORE CART ROUTES!)
+// ============================================
+const wishlistRoutes = require("./routes/wishlistRoutes");
+app.use("/", wishlistRoutes);
+console.log("❤️ Wishlist page routes loaded");
+
+// ============================================
+// 9.3.2 SHARED CART AND WISHLIST API ROUTES (EXISTING)
 // ============================================
 const cartWishlistRoutes = require("./routes/cartWishlistRoutes");
 app.use("/", cartWishlistRoutes);
-
-console.log("🛒 Shared cart and wishlist routes loaded");
+console.log("🛒 Shared cart and wishlist API routes loaded");
 
 // ============================================
 // 9.4 Self Paced USER ROUTES (NEW)

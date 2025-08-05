@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     
     <!-- Enhanced notification styles -->
     <style>
@@ -17,12 +16,13 @@
         top: 20px;
         right: 20px;
         padding: 15px 20px;
-        border-radius: 5px;
+        border-radius: 8px;
         color: white;
         font-weight: bold;
         z-index: 1000;
         animation: slideIn 0.3s ease-out;
-        max-width: 300px;
+        max-width: 350px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       }
       
       .notification.success { background-color: #28a745; }
@@ -42,6 +42,7 @@
       .btn-loading {
         opacity: 0.6;
         pointer-events: none;
+        position: relative;
       }
       
       .btn-loading::after {
@@ -50,23 +51,35 @@
       
       .empty-wishlist {
         text-align: center;
-        padding: 50px;
+        padding: 60px 20px;
         font-size: 18px;
         color: #666;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin: 20px 0;
       }
       
       .empty-wishlist i {
-        font-size: 48px;
+        font-size: 64px;
         color: #ddd;
         margin-bottom: 20px;
         display: block;
       }
 
+      .empty-wishlist .browse-links {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
       .status-badge {
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 4px 12px;
+        border-radius: 20px;
         font-size: 12px;
         font-weight: bold;
+        text-transform: uppercase;
       }
 
       .status-wishlist { background-color: #6c757d; color: white; }
@@ -78,15 +91,21 @@
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
+        justify-content: flex-start;
       }
       
       .cta-btn, .delete-btn {
-        padding: 8px 12px;
+        padding: 10px 16px;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
         font-size: 14px;
+        font-weight: 500;
         transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
       }
       
       .cta-btn {
@@ -96,6 +115,7 @@
       
       .cta-btn:hover {
         background-color: #0056b3;
+        transform: translateY(-1px);
       }
       
       .delete-btn {
@@ -105,6 +125,101 @@
       
       .delete-btn:hover {
         background-color: #c82333;
+        transform: translateY(-1px);
+      }
+
+      .wishlist-container {
+        margin: 20px auto;
+        max-width: 1200px;
+        padding: 0 20px;
+      }
+
+      .wishlist-container table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .wishlist-container th {
+        background-color: #f8f9fa;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+      }
+
+      .wishlist-container td {
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+      }
+
+      .wishlist-container tr:hover {
+        background-color: #f8f9fa;
+      }
+
+      .price-display {
+        font-weight: 600;
+        color: #28a745;
+        font-size: 16px;
+      }
+
+      .course-title {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .course-type-badge {
+        background-color: #e9ecef;
+        color: #495057;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .wishlist-stats {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .wishlist-stats h2 {
+        margin: 0 0 10px 0;
+        font-size: 2.5em;
+      }
+
+      .wishlist-stats p {
+        margin: 0;
+        opacity: 0.9;
+      }
+
+      @media (max-width: 768px) {
+        .wishlist-container {
+          padding: 0 10px;
+        }
+        
+        .action-buttons {
+          flex-direction: column;
+        }
+        
+        .cta-btn, .delete-btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .empty-wishlist .browse-links {
+          flex-direction: column;
+          align-items: center;
+        }
       }
     </style>
   </head>
@@ -119,18 +234,28 @@
 
     <!-- Page Title -->
     <section id="wishlist-header">
-      <h1>My Wishlist</h1>
+      <h1><i class="fas fa-heart"></i> My Wishlist</h1>
       <p>Manage your saved courses and move them to your cart when ready.</p>
     </section>
 
-    <!-- Wishlist Table -->
+    <!-- Wishlist Stats -->
+    <% if (wishlist && wishlist.length > 0) { %>
+      <div class="wishlist-container">
+        <div class="wishlist-stats">
+          <h2><%= totalItems || wishlist.length %></h2>
+          <p><%= totalItems === 1 ? 'Course' : 'Courses' %> in your wishlist</p>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Wishlist Content -->
     <div class="wishlist-container">
       <% if (wishlist && wishlist.length > 0) { %>
         <table>
           <thead>
             <tr>
               <th>Course Code</th>
-              <th>Title</th>
+              <th>Course Details</th>
               <th>Price</th>
               <th>Course Type</th>
               <th>Added On</th>
@@ -141,21 +266,34 @@
           <tbody>
             <% wishlist.forEach(course => { %>
               <tr>
-                <td><%= course.courseCode %></td>
-                <td><%= course.title %></td>
-                <td>$<%= course.price.toFixed(2) %></td>
                 <td>
-                  <% if (course.courseType === 'InPersonAestheticTraining') { %>
-                    In-Person Training
-                  <% } else if (course.courseType === 'OnlineLiveTraining') { %>
-                    Online Live Training
-                  <% } else if (course.courseType === 'SelfPacedOnlineTraining') { %>
-                    Self-Paced Training
-                  <% } else { %>
-                    <%= course.courseType %>
+                  <strong><%= course.courseCode %></strong>
+                </td>
+                <td>
+                  <div class="course-title"><%= course.title %></div>
+                  <% if (course.instructor) { %>
+                    <small style="color: #666;"><i class="fas fa-user"></i> <%= course.instructor %></small>
+                  <% } %>
+                  <% if (course.location) { %>
+                    <br><small style="color: #666;"><i class="fas fa-map-marker-alt"></i> <%= course.location %></small>
+                  <% } %>
+                  <% if (course.startDate) { %>
+                    <br><small style="color: #666;"><i class="fas fa-calendar"></i> <%= new Date(course.startDate).toLocaleDateString() %></small>
                   <% } %>
                 </td>
-                <td><%= new Date(course.addedAt).toLocaleDateString() %></td>
+                <td>
+                  <div class="price-display">
+                    <%= course.currency || 'USD' %> $<%= (course.price || 0).toFixed(2) %>
+                  </div>
+                </td>
+                <td>
+                  <span class="course-type-badge">
+                    <%= course.courseTypeDisplay || course.courseType %>
+                  </span>
+                </td>
+                <td>
+                  <%= course.addedAt ? new Date(course.addedAt).toLocaleDateString() : 'N/A' %>
+                </td>
                 <td>
                   <span class="status-badge status-<%= course.status %>">
                     <%= course.status.charAt(0).toUpperCase() + course.status.slice(1) %>
@@ -186,12 +324,20 @@
         </table>
       <% } else { %>
         <div class="empty-wishlist">
-          <i class="fas fa-heart"></i>
+          <i class="fas fa-heart-broken"></i>
           <h3>Your wishlist is empty</h3>
           <p>Browse our courses and add your favorites to your wishlist!</p>
-          <a href="/in-person-aesthetic-training" class="cta-btn">Browse In-Person Courses</a>
-          <a href="/online-live-training" class="cta-btn">Browse Live Courses</a>
-          <a href="/self-paced-online-training" class="cta-btn">Browse Self-Paced Courses</a>
+          <div class="browse-links">
+            <a href="/in-person-aesthetic-training" class="cta-btn">
+              <i class="fas fa-users"></i> Browse In-Person Courses
+            </a>
+            <a href="/online-live-training" class="cta-btn">
+              <i class="fas fa-video"></i> Browse Live Courses
+            </a>
+            <a href="/self-paced-online-training" class="cta-btn">
+              <i class="fas fa-play-circle"></i> Browse Self-Paced Courses
+            </a>
+          </div>
         </div>
       <% } %>
     </div>
@@ -200,6 +346,14 @@
     <script>
       // Show notification function
       function showNotification(message, type = 'success') {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notification => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        });
+
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.textContent = message;
@@ -230,7 +384,7 @@
       document.addEventListener('DOMContentLoaded', () => {
         console.log('🔧 Setting up wishlist event listeners...');
         
-        // ✅ Move to Cart
+        // ✅ Move to Cart - Updated to use new route
         const moveToCartButtons = document.querySelectorAll('.move-to-cart-btn');
         console.log('🛒 Found', moveToCartButtons.length, 'move-to-cart buttons');
         
@@ -257,8 +411,8 @@
             setButtonLoading(button, true);
 
             try {
-              // First, move from wishlist to cart
-              const moveResponse = await fetch('/move-to-cart', {
+              // Use the new wishlist-specific route
+              const moveResponse = await fetch('/wishlist/move-to-cart', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ courseId, courseType })
@@ -273,7 +427,7 @@
                 showNotification(`✅ "${courseTitle}" moved to cart!`, 'success');
                 setTimeout(() => location.reload(), 1500);
               } else {
-                showNotification(result.message, 'warning');
+                showNotification(result.message || 'Could not move course to cart', 'warning');
               }
             } catch (err) {
               console.error('❌ Network error:', err);
@@ -284,7 +438,7 @@
           });
         });
 
-        // ✅ Remove from Wishlist
+        // ✅ Remove from Wishlist - Updated to use new route
         const removeButtons = document.querySelectorAll('.remove-from-wishlist-btn');
         console.log('🗑️ Found', removeButtons.length, 'remove buttons');
         
@@ -304,7 +458,8 @@
             setButtonLoading(button, true);
 
             try {
-              const response = await fetch('/remove-from-wishlist', {
+              // Use the new wishlist-specific route
+              const response = await fetch('/wishlist/remove', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ courseId, courseType })
@@ -316,7 +471,7 @@
                 showNotification(`🗑️ "${courseTitle}" removed from wishlist`, 'success');
                 setTimeout(() => location.reload(), 1500);
               } else {
-                showNotification(result.message, 'warning');
+                showNotification(result.message || 'Could not remove course', 'warning');
               }
             } catch (err) {
               console.error('❌ Error:', err);
@@ -330,8 +485,8 @@
 
       // Debug logging
       console.log('📊 Wishlist page loaded');
-      console.log('📋 Wishlist items count:', <%= wishlist.length %>);
-      <% if (wishlist.length > 0) { %>
+      console.log('📋 Wishlist items count:', <%= (wishlist && wishlist.length) || 0 %>);
+      <% if (wishlist && wishlist.length > 0) { %>
         console.log('📋 Course types in wishlist:', [
           <% wishlist.forEach((course, index) => { %>
             '<%= course.courseType %>'<% if (index < wishlist.length - 1) { %>,<% } %>

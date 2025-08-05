@@ -1,4 +1,4 @@
-// controllers/checkoutController.js - COMPLETE ENHANCED VERSION
+// controllers/checkoutController.js - COMPLETE FIXED VERSION WITH CERTIFICATE PRICING
 const User = require("../models/user");
 const SelfPacedOnlineTraining = require("../models/selfPacedOnlineTrainingModel");
 const InPersonAestheticTraining = require("../models/InPersonAestheticTraining");
@@ -44,6 +44,27 @@ function calculateDiscount(totalPrice, discountPercentage) {
 
 function convertEurToAed(eurAmount) {
   return roundToTwoDecimals(eurAmount * EUR_TO_AED_RATE);
+}
+
+// ✅ FIXED: Helper function to get stored course price (includes certificate fees)
+function getStoredCoursePrice(enrollment, isLinkedCourse = false) {
+  if (isLinkedCourse) {
+    return 0; // Linked courses are always free
+  }
+
+  // Use the stored paidAmount which includes certificate fees
+  const storedPrice = enrollment.enrollmentData.paidAmount || 0;
+
+  console.log(`💰 Using stored price:`, {
+    courseName: enrollment.enrollmentData.courseName,
+    originalPrice: enrollment.enrollmentData.originalPrice,
+    paidAmount: storedPrice,
+    certificateFee: enrollment.enrollmentData.certificateFee,
+    enrollmentType: enrollment.enrollmentData.enrollmentType,
+    isLinkedCourse: isLinkedCourse,
+  });
+
+  return storedPrice;
 }
 
 function calculateCoursePricing(
@@ -202,11 +223,10 @@ async function scheduleCoursesReminders(courses, context = "registration") {
   return { scheduledCount, failedCount };
 }
 
-// ✅ ENHANCED: Display Checkout Page with Billing Data Integration
-// ✅ ENHANCED: Display Checkout Page with Billing Data Integration - COMPLETE VERSION
+// ✅ FIXED: Display Checkout Page with Certificate Price Support
 exports.getCheckoutPage = async (req, res) => {
   try {
-    console.log("🔍 Loading checkout page with billing integration...");
+    console.log("🔍 Loading checkout page with certificate price support...");
     const user = await User.findById(req.user._id).lean();
 
     if (!user) {
@@ -220,7 +240,7 @@ exports.getCheckoutPage = async (req, res) => {
     let totalEarlyBirdSavings = 0;
     let totalLinkedCourseSavings = 0;
 
-    // ✅ FIXED: Process In-Person Courses with correct pricing
+    // ✅ FIXED: Process In-Person Courses
     const inPersonCartItems =
       user.myInPersonCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -232,30 +252,30 @@ exports.getCheckoutPage = async (req, res) => {
       ).lean();
       if (course) {
         const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
+
+        // ⭐ FIX: Use stored price instead of recalculating
+        const finalPrice = getStoredCoursePrice(item, isLinkedCourse);
+        const originalPrice = item.enrollmentData.originalPrice || 0;
+
+        // Calculate savings for display
         const pricing = calculateCoursePricing(
           course,
           item.enrollmentData.registrationDate,
           isLinkedCourse
         );
 
-        // ⭐ FIX: Use paidAmount for correct price including certificate fees
-        const finalPrice = isLinkedCourse
-          ? 0
-          : item.enrollmentData.paidAmount || pricing.currentPrice;
-
         coursesInCart.push({
           courseId: item.courseId,
           title: course.basic?.title || "Untitled Course",
           courseCode: course.basic?.courseCode || "N/A",
-          price: finalPrice, // ✅ NOW USES CORRECT PRICE
-          originalPrice: pricing.regularPrice,
+          price: finalPrice, // ✅ NOW USES STORED PRICE WITH CERTIFICATE
+          originalPrice: originalPrice,
           isEarlyBird: pricing.isEarlyBird,
           earlyBirdSavings: pricing.earlyBirdSavings,
           isLinkedCourseFree: pricing.isLinkedCourseFree,
           courseType: "InPersonAestheticTraining",
           displayType: "In-Person",
           startDate: course.schedule?.startDate || null,
-          // ⭐ ADD: Certificate and enrollment type fields
           enrollmentType: item.enrollmentData.enrollmentType || "paid_regular",
           certificateRequested:
             item.enrollmentData.certificateRequested || false,
@@ -264,16 +284,16 @@ exports.getCheckoutPage = async (req, res) => {
             item.enrollmentData.enrollmentType === "free_with_certificate",
         });
 
-        totalOriginalPrice += pricing.regularPrice;
-        totalCurrentPrice += finalPrice; // ✅ NOW USES CORRECT PRICE
+        totalOriginalPrice += originalPrice;
+        totalCurrentPrice += finalPrice; // ✅ NOW INCLUDES CERTIFICATE FEES
         totalEarlyBirdSavings += pricing.earlyBirdSavings;
         if (pricing.isLinkedCourseFree) {
-          totalLinkedCourseSavings += pricing.regularPrice;
+          totalLinkedCourseSavings += originalPrice;
         }
       }
     }
 
-    // ✅ FIXED: Process Online Live Courses with correct pricing
+    // ✅ FIXED: Process Online Live Courses with Certificate Support
     const liveCartItems =
       user.myLiveCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -283,21 +303,14 @@ exports.getCheckoutPage = async (req, res) => {
       const course = await OnlineLiveTraining.findById(item.courseId).lean();
       if (course) {
         const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
-        const pricing = calculateCoursePricing(
-          course,
-          item.enrollmentData.registrationDate,
-          isLinkedCourse
-        );
 
-        // ⭐ FIX: Use paidAmount for correct price including certificate fees
-        const finalPrice = isLinkedCourse
-          ? 0
-          : item.enrollmentData.paidAmount || pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const finalPrice = getStoredCoursePrice(item, isLinkedCourse);
+        const originalPrice = item.enrollmentData.originalPrice || 0;
 
-        console.log(`💰 Online course pricing debug:`, {
+        console.log(`💰 Online course pricing - FIXED:`, {
           courseTitle: course.basic?.title,
-          originalPrice: pricing.regularPrice,
-          currentPrice: pricing.currentPrice,
+          originalPrice: originalPrice,
           paidAmount: item.enrollmentData.paidAmount,
           finalPrice: finalPrice,
           certificateFee: item.enrollmentData.certificateFee,
@@ -309,17 +322,16 @@ exports.getCheckoutPage = async (req, res) => {
           courseId: item.courseId,
           title: course.basic?.title || "Untitled Course",
           courseCode: course.basic?.courseCode || "N/A",
-          price: finalPrice, // ✅ NOW USES CORRECT PRICE
-          originalPrice: pricing.regularPrice,
-          isEarlyBird: pricing.isEarlyBird && !isLinkedCourse,
-          earlyBirdSavings: isLinkedCourse ? 0 : pricing.earlyBirdSavings,
-          isLinkedCourseFree: pricing.isLinkedCourseFree,
+          price: finalPrice, // ✅ NOW USES STORED PRICE WITH CERTIFICATE
+          originalPrice: originalPrice,
+          isEarlyBird: false, // For linked courses, no early bird
+          earlyBirdSavings: 0,
+          isLinkedCourseFree: isLinkedCourse,
           courseType: "OnlineLiveTraining",
           displayType: isLinkedCourse
             ? "Online Live (Included)"
             : "Online Live",
           startDate: course.schedule?.startDate || null,
-          // ⭐ ADD: Certificate and enrollment type fields
           enrollmentType:
             item.enrollmentData.enrollmentType ||
             (isLinkedCourse ? "linked_free" : "free_no_certificate"),
@@ -330,18 +342,15 @@ exports.getCheckoutPage = async (req, res) => {
             item.enrollmentData.enrollmentType === "free_with_certificate",
         });
 
-        totalOriginalPrice += pricing.regularPrice;
-        totalCurrentPrice += finalPrice; // ✅ NOW USES CORRECT PRICE
-        if (!isLinkedCourse) {
-          totalEarlyBirdSavings += pricing.earlyBirdSavings;
-        }
-        if (pricing.isLinkedCourseFree) {
-          totalLinkedCourseSavings += pricing.regularPrice;
+        totalOriginalPrice += originalPrice;
+        totalCurrentPrice += finalPrice; // ✅ NOW INCLUDES CERTIFICATE FEES
+        if (isLinkedCourse) {
+          totalLinkedCourseSavings += originalPrice;
         }
       }
     }
 
-    // ✅ FIXED: Process Self-Paced Courses with correct pricing
+    // ✅ FIXED: Process Self-Paced Courses
     const selfPacedCartItems =
       user.mySelfPacedCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -352,36 +361,30 @@ exports.getCheckoutPage = async (req, res) => {
         item.courseId
       ).lean();
       if (course) {
-        const pricing = calculateCoursePricing(
-          course,
-          item.enrollmentData.registrationDate
-        );
-
-        // ⭐ FIX: Use paidAmount for correct price
-        const finalPrice =
-          item.enrollmentData.paidAmount || pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const finalPrice = getStoredCoursePrice(item, false);
+        const originalPrice = item.enrollmentData.originalPrice || 0;
 
         coursesInCart.push({
           courseId: item.courseId,
           title: course.basic?.title || "Untitled Course",
           courseCode: course.basic?.courseCode || "N/A",
-          price: finalPrice, // ✅ NOW USES CORRECT PRICE
-          originalPrice: pricing.regularPrice,
+          price: finalPrice, // ✅ NOW USES STORED PRICE
+          originalPrice: originalPrice,
           isEarlyBird: false,
           earlyBirdSavings: 0,
           isLinkedCourseFree: false,
           courseType: "SelfPacedOnlineTraining",
           displayType: "Self-Paced",
           startDate: null,
-          // ⭐ ADD: Certificate and enrollment type fields
           enrollmentType: item.enrollmentData.enrollmentType || "paid_regular",
           certificateRequested: false,
           certificateFee: 0,
           isFreeWithCertificate: false,
         });
 
-        totalOriginalPrice += pricing.regularPrice;
-        totalCurrentPrice += finalPrice; // ✅ NOW USES CORRECT PRICE
+        totalOriginalPrice += originalPrice;
+        totalCurrentPrice += finalPrice; // ✅ NOW USES STORED PRICE
       }
     }
 
@@ -399,27 +402,20 @@ exports.getCheckoutPage = async (req, res) => {
     const totalOriginalPriceAED = convertEurToAed(totalOriginalPrice);
     const totalSavingsAED = convertEurToAed(totalSavings);
 
-    // ✅ NEW: Prepare Billing Information for the Billing Box
+    // ✅ Prepare Billing Information for the Billing Box
     const billingInfo = {
-      // Basic user info
       firstName: user.firstName || "",
       lastName: user.lastName || "",
       email: user.email || "",
       phoneNumber: user.phoneNumber || "",
       country: user.country || "",
-
-      // Professional title
       title: user.professionalInfo?.title || "",
-
-      // Address information
       address: user.addressInfo?.address || "",
       city: user.addressInfo?.city || "",
       state: user.addressInfo?.state || "",
       zipCode: user.addressInfo?.zipCode || "",
       addressCountry: user.addressInfo?.country || "",
       alternativePhone: user.addressInfo?.alternativePhone || "",
-
-      // Completion status for billing box
       isAddressComplete: user.addressInfo?.isComplete || false,
       isPaymentReady: !!(
         user.firstName &&
@@ -433,7 +429,7 @@ exports.getCheckoutPage = async (req, res) => {
         user.profileData?.completionStatus?.overallPercentage || 0,
     };
 
-    // ✅ NEW: Determine billing box initial state
+    // ✅ Determine billing box initial state
     const billingBoxStatus = {
       hasAnyBillingData: !!(billingInfo.firstName && billingInfo.email),
       isComplete: billingInfo.isPaymentReady,
@@ -457,8 +453,8 @@ exports.getCheckoutPage = async (req, res) => {
       }
     });
 
-    // ✅ ENHANCED LOGGING: Debug pricing calculations
-    console.log("💰 Detailed Pricing Debug:", {
+    // ✅ CRITICAL: Debug pricing calculations with certificate support
+    console.log("💰 CERTIFICATE FIX - Detailed Pricing Debug:", {
       coursesInCart: coursesInCart.length,
       courseDetails: coursesInCart.map((course) => ({
         title: course.title,
@@ -466,22 +462,23 @@ exports.getCheckoutPage = async (req, res) => {
         originalPrice: course.originalPrice,
         enrollmentType: course.enrollmentType,
         certificateFee: course.certificateFee,
+        certificateRequested: course.certificateRequested,
       })),
       totals: {
         originalPrice: totalOriginalPrice,
-        currentPrice: totalCurrentPrice,
+        currentPrice: totalCurrentPrice, // ✅ NOW INCLUDES CERTIFICATE FEES
         earlyBirdSavings: totalEarlyBirdSavings,
         linkedCourseSavings: totalLinkedCourseSavings,
         totalSavings: totalSavings,
       },
     });
 
-    console.log("📍 Enhanced Cart Summary with Billing Integration:", {
+    console.log("📍 Enhanced Cart Summary with Certificate Support:", {
       inPerson: inPersonCartItems.length,
       live: liveCartItems.length,
       selfPaced: selfPacedCartItems.length,
       totalOriginal: `€${totalOriginalPrice} (AED ${totalOriginalPriceAED})`,
-      totalCurrent: `€${totalCurrentPrice} (AED ${totalPriceAED})`, // ✅ NOW SHOWS CORRECT AMOUNT
+      totalCurrent: `€${totalCurrentPrice} (AED ${totalPriceAED})`, // ✅ NOW INCLUDES CERTIFICATES
       totalSavings: `€${totalSavings} (AED ${totalSavingsAED})`,
       billingComplete: billingBoxStatus.isComplete,
       missingBillingFields: billingBoxStatus.missingFields,
@@ -489,9 +486,8 @@ exports.getCheckoutPage = async (req, res) => {
     });
 
     res.render("checkout", {
-      // Existing checkout data
       coursesInCart,
-      totalPrice: totalCurrentPrice, // ✅ NOW USES CORRECT PRICE
+      totalPrice: totalCurrentPrice, // ✅ NOW INCLUDES CERTIFICATE FEES
       totalPriceAED: totalPriceAED,
       totalOriginalPrice: totalOriginalPrice,
       totalOriginalPriceAED: totalOriginalPriceAED,
@@ -503,11 +499,8 @@ exports.getCheckoutPage = async (req, res) => {
       paymentGatewayConfigured: !!(
         process.env.CCAVENUE_ACCESS_CODE && process.env.CCAVENUE_MERCHANT_ID
       ),
-
-      // ✅ NEW: Billing box data
       billingInfo: billingInfo,
       billingBoxStatus: billingBoxStatus,
-
       successMessage: "",
     });
   } catch (err) {
@@ -515,7 +508,8 @@ exports.getCheckoutPage = async (req, res) => {
     res.status(500).send("Error loading checkout page");
   }
 };
-// ✅ Apply Promo Code
+
+// ✅ FIXED: Apply Promo Code with Certificate Support
 exports.applyPromoCode = async (req, res) => {
   try {
     const { promoCode } = req.body;
@@ -529,7 +523,7 @@ exports.applyPromoCode = async (req, res) => {
 
     let totalPrice = 0;
 
-    // Calculate total from all course types
+    // ✅ FIXED: Calculate total from all course types using stored prices
     const inPersonCartItems =
       user.myInPersonCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -539,12 +533,9 @@ exports.applyPromoCode = async (req, res) => {
       const course = await InPersonAestheticTraining.findById(item.courseId);
       if (course) {
         const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
-        const pricing = calculateCoursePricing(
-          course,
-          item.enrollmentData.registrationDate,
-          isLinkedCourse
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(item, isLinkedCourse);
+        totalPrice += coursePrice;
       }
     }
 
@@ -557,12 +548,17 @@ exports.applyPromoCode = async (req, res) => {
       const course = await OnlineLiveTraining.findById(item.courseId);
       if (course) {
         const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
-        const pricing = calculateCoursePricing(
-          course,
-          item.enrollmentData.registrationDate,
-          isLinkedCourse
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(item, isLinkedCourse);
+        totalPrice += coursePrice;
+
+        console.log(`💰 Promo calculation - FIXED:`, {
+          courseTitle: course.basic?.title,
+          paidAmount: item.enrollmentData.paidAmount,
+          certificateFee: item.enrollmentData.certificateFee,
+          coursePrice: coursePrice,
+          isLinkedCourse: isLinkedCourse,
+        });
       }
     }
 
@@ -574,15 +570,15 @@ exports.applyPromoCode = async (req, res) => {
     for (const item of selfPacedCartItems) {
       const course = await SelfPacedOnlineTraining.findById(item.courseId);
       if (course) {
-        const pricing = calculateCoursePricing(
-          course,
-          item.enrollmentData.registrationDate
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(item, false);
+        totalPrice += coursePrice;
       }
     }
 
     totalPrice = roundToTwoDecimals(totalPrice);
+
+    console.log(`💰 CERTIFICATE FIX - Promo Total Price: €${totalPrice}`);
 
     if (totalPrice === 0) {
       return res.json({ success: false, message: "No courses in cart." });
@@ -619,7 +615,7 @@ exports.applyPromoCode = async (req, res) => {
     const discountAmountAED = convertEurToAed(promoResult.discountAmount);
 
     console.log(
-      `💰 Promo Calculation: €${promoResult.originalPrice} - €${promoResult.discountAmount} = €${promoResult.finalPrice}`
+      `💰 Promo Calculation with Certificates: €${promoResult.originalPrice} - €${promoResult.discountAmount} = €${promoResult.finalPrice}`
     );
     console.log(
       `💰 AED Equivalent: AED ${convertEurToAed(
@@ -646,7 +642,7 @@ exports.applyPromoCode = async (req, res) => {
   }
 };
 
-// ✅ Process Checkout
+// ✅ FIXED: Process Checkout with Certificate Support
 exports.processCheckout = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -664,7 +660,7 @@ exports.processCheckout = async (req, res) => {
 
     let totalPrice = 0;
 
-    // Calculate total price with linked course support
+    // ✅ FIXED: Calculate total price with certificate support
     for (const enrollment of user.myInPersonCourses?.filter(
       (e) => e.enrollmentData.status === "cart"
     ) || []) {
@@ -674,12 +670,16 @@ exports.processCheckout = async (req, res) => {
       if (course) {
         const isLinkedCourse =
           enrollment.enrollmentData.isLinkedCourseFree || false;
-        const pricing = calculateCoursePricing(
-          course,
-          enrollment.enrollmentData.registrationDate,
-          isLinkedCourse
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(enrollment, isLinkedCourse);
+        totalPrice += coursePrice;
+
+        console.log(`💰 Checkout processing - In-Person - FIXED:`, {
+          courseTitle: course.basic?.title,
+          paidAmount: enrollment.enrollmentData.paidAmount,
+          coursePrice: coursePrice,
+          isLinkedCourse: isLinkedCourse,
+        });
       }
     }
 
@@ -690,12 +690,17 @@ exports.processCheckout = async (req, res) => {
       if (course) {
         const isLinkedCourse =
           enrollment.enrollmentData.isLinkedCourseFree || false;
-        const pricing = calculateCoursePricing(
-          course,
-          enrollment.enrollmentData.registrationDate,
-          isLinkedCourse
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(enrollment, isLinkedCourse);
+        totalPrice += coursePrice;
+
+        console.log(`💰 Checkout processing - Live Online - FIXED:`, {
+          courseTitle: course.basic?.title,
+          paidAmount: enrollment.enrollmentData.paidAmount,
+          certificateFee: enrollment.enrollmentData.certificateFee,
+          coursePrice: coursePrice,
+          isLinkedCourse: isLinkedCourse,
+        });
       }
     }
 
@@ -706,17 +711,21 @@ exports.processCheckout = async (req, res) => {
         enrollment.courseId
       );
       if (course) {
-        const pricing = calculateCoursePricing(
-          course,
-          enrollment.enrollmentData.registrationDate
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(enrollment, false);
+        totalPrice += coursePrice;
+
+        console.log(`💰 Checkout processing - Self-Paced - FIXED:`, {
+          courseTitle: course.basic?.title,
+          paidAmount: enrollment.enrollmentData.paidAmount,
+          coursePrice: coursePrice,
+        });
       }
     }
 
     totalPrice = roundToTwoDecimals(totalPrice);
     console.log(
-      `💰 Calculated total price: €${totalPrice} (AED ${convertEurToAed(
+      `💰 CERTIFICATE FIX - Calculated total price: €${totalPrice} (AED ${convertEurToAed(
         totalPrice
       )})`
     );
@@ -738,16 +747,16 @@ exports.processCheckout = async (req, res) => {
         );
         finalPrice = promoResult.finalPrice;
 
-        // ✅ NEW: If course is FREE, redirect to free registration (no billing needed)
+        // ✅ If course is FREE, redirect to free registration (no billing needed)
         if (finalPrice <= 0) {
           console.log(
-            "🎯 Course is FREE - redirecting to complete registration (no billing required)"
+            "🎯 Course is FREE after promo - redirecting to complete registration (no billing required)"
           );
           return res.redirect("/complete-registration");
         }
 
         console.log(
-          `🏷️ Promo applied: ${appliedPromo}, Final price: €${finalPrice} (AED ${convertEurToAed(
+          `🏷️ Promo applied to certificate-inclusive price: ${appliedPromo}, Final price: €${finalPrice} (AED ${convertEurToAed(
             finalPrice
           )})`
         );
@@ -768,14 +777,14 @@ exports.processCheckout = async (req, res) => {
   }
 };
 
-// ✅ Process Payment
+// ✅ FIXED: Process Payment with Certificate Support
 exports.processPayment = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     let totalPrice = 0;
     const cartCourses = [];
 
-    // Process all course types
+    // ✅ FIXED: Process all course types using stored prices
     for (const enrollment of user.myInPersonCourses?.filter(
       (e) => e.enrollmentData.status === "cart"
     ) || []) {
@@ -785,16 +794,14 @@ exports.processPayment = async (req, res) => {
       if (course) {
         const isLinkedCourse =
           enrollment.enrollmentData.isLinkedCourseFree || false;
-        const pricing = calculateCoursePricing(
-          course,
-          enrollment.enrollmentData.registrationDate,
-          isLinkedCourse
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(enrollment, isLinkedCourse);
+        totalPrice += coursePrice;
+
         cartCourses.push({
           title: course.basic?.title,
-          price: pricing.currentPrice,
-          isLinkedCourseFree: pricing.isLinkedCourseFree,
+          price: coursePrice, // ✅ NOW INCLUDES CERTIFICATE FEES
+          isLinkedCourseFree: isLinkedCourse,
         });
       }
     }
@@ -806,16 +813,22 @@ exports.processPayment = async (req, res) => {
       if (course) {
         const isLinkedCourse =
           enrollment.enrollmentData.isLinkedCourseFree || false;
-        const pricing = calculateCoursePricing(
-          course,
-          enrollment.enrollmentData.registrationDate,
-          isLinkedCourse
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(enrollment, isLinkedCourse);
+        totalPrice += coursePrice;
+
         cartCourses.push({
           title: course.basic?.title,
-          price: pricing.currentPrice,
-          isLinkedCourseFree: pricing.isLinkedCourseFree,
+          price: coursePrice, // ✅ NOW INCLUDES CERTIFICATE FEES
+          isLinkedCourseFree: isLinkedCourse,
+        });
+
+        console.log(`💰 Payment processing - Live Course - FIXED:`, {
+          courseTitle: course.basic?.title,
+          paidAmount: enrollment.enrollmentData.paidAmount,
+          certificateFee: enrollment.enrollmentData.certificateFee,
+          coursePrice: coursePrice,
+          isLinkedCourse: isLinkedCourse,
         });
       }
     }
@@ -827,14 +840,13 @@ exports.processPayment = async (req, res) => {
         enrollment.courseId
       );
       if (course) {
-        const pricing = calculateCoursePricing(
-          course,
-          enrollment.enrollmentData.registrationDate
-        );
-        totalPrice += pricing.currentPrice;
+        // ⭐ FIX: Use stored price instead of recalculating
+        const coursePrice = getStoredCoursePrice(enrollment, false);
+        totalPrice += coursePrice;
+
         cartCourses.push({
           title: course.basic?.title,
-          price: pricing.currentPrice,
+          price: coursePrice, // ✅ NOW USES STORED PRICE
           isLinkedCourseFree: false,
         });
       }
@@ -854,7 +866,6 @@ exports.processPayment = async (req, res) => {
 };
 
 // ✅ ENHANCED: Complete Registration for FREE courses
-// ✅ ENHANCED: Complete Registration for FREE courses - FIXED VERSION
 exports.completeRegistration = async (req, res) => {
   try {
     console.log("🎯 Starting FREE registration process...");
@@ -1169,7 +1180,7 @@ exports.completeRegistration = async (req, res) => {
       // Don't fail the registration process due to email issues
     }
 
-    // ✅ FIXED: Schedule reminders with proper variable declaration
+    // ✅ Schedule reminders with proper variable declaration
     let reminderResult = { scheduledCount: 0, failedCount: 0 };
 
     try {
@@ -1222,8 +1233,7 @@ exports.completeRegistration = async (req, res) => {
   }
 };
 
-// ✅ ENHANCED: Payment Processing with Billing Information Box Integration
-// ✅ FIXED: proceedToPayment with proper variable scope
+// ✅ FIXED: Payment Processing with Certificate Price Support
 exports.proceedToPayment = async (req, res) => {
   try {
     // Environment Variables Validation
@@ -1253,7 +1263,7 @@ exports.proceedToPayment = async (req, res) => {
     }
 
     console.log(
-      "💳 Processing payment with CCAvenue and billing information..."
+      "💳 Processing payment with CCAvenue and certificate price support..."
     );
     const userId = req.user._id;
     const user = await User.findById(userId)
@@ -1275,7 +1285,7 @@ exports.proceedToPayment = async (req, res) => {
     let totalEarlyBirdSavings = 0;
     let totalLinkedCourseSavings = 0;
 
-    // Helper function to process cart items (EXISTING LOGIC)
+    // ✅ FIXED: Helper function to process cart items with certificate support
     const processCartItems = (enrollments, courseType) => {
       enrollments
         .filter((e) => e.enrollmentData.status === "cart")
@@ -1284,22 +1294,31 @@ exports.proceedToPayment = async (req, res) => {
           if (course) {
             const isLinkedCourse =
               enrollment.enrollmentData.isLinkedCourseFree || false;
-            const pricing = calculateCoursePricing(
-              course,
-              enrollment.enrollmentData.registrationDate,
-              isLinkedCourse
-            );
+
+            // ⭐ FIX: Use stored price instead of recalculating
+            const originalPrice = enrollment.enrollmentData.originalPrice || 0;
+            const finalPrice = getStoredCoursePrice(enrollment, isLinkedCourse);
+
+            console.log(`💰 Payment initiation - ${courseType} - FIXED:`, {
+              courseTitle: course.basic?.title,
+              originalPrice: originalPrice,
+              paidAmount: enrollment.enrollmentData.paidAmount,
+              finalPrice: finalPrice,
+              certificateFee: enrollment.enrollmentData.certificateFee,
+              enrollmentType: enrollment.enrollmentData.enrollmentType,
+              isLinkedCourse: isLinkedCourse,
+            });
 
             cartItems.push({
               courseId: course._id,
               courseType: courseType,
               courseTitle: course.basic?.title || "Untitled Course",
               courseCode: course.basic?.courseCode || "N/A",
-              originalPrice: pricing.regularPrice,
-              finalPrice: pricing.currentPrice,
-              isEarlyBird: pricing.isEarlyBird,
-              earlyBirdSavings: pricing.earlyBirdSavings,
-              isLinkedCourseFree: pricing.isLinkedCourseFree,
+              originalPrice: originalPrice,
+              finalPrice: finalPrice, // ✅ NOW INCLUDES CERTIFICATE FEES
+              isEarlyBird: false, // Set based on enrollment data if needed
+              earlyBirdSavings: 0,
+              isLinkedCourseFree: isLinkedCourse,
               courseSchedule: {
                 startDate: course.schedule?.startDate,
                 endDate: course.schedule?.endDate,
@@ -1317,17 +1336,16 @@ exports.proceedToPayment = async (req, res) => {
               },
             });
 
-            totalOriginalPrice += pricing.regularPrice;
-            totalCurrentPrice += pricing.currentPrice;
-            totalEarlyBirdSavings += pricing.earlyBirdSavings;
-            if (pricing.isLinkedCourseFree) {
-              totalLinkedCourseSavings += pricing.regularPrice;
+            totalOriginalPrice += originalPrice;
+            totalCurrentPrice += finalPrice; // ✅ NOW INCLUDES CERTIFICATE FEES
+            if (isLinkedCourse) {
+              totalLinkedCourseSavings += originalPrice;
             }
           }
         });
     };
 
-    // Process all course types (EXISTING LOGIC)
+    // Process all course types with certificate support
     processCartItems(user.myInPersonCourses, "InPersonAestheticTraining");
     processCartItems(user.myLiveCourses, "OnlineLiveTraining");
     processCartItems(user.mySelfPacedCourses, "SelfPacedOnlineTraining");
@@ -1344,7 +1362,7 @@ exports.proceedToPayment = async (req, res) => {
     totalEarlyBirdSavings = roundToTwoDecimals(totalEarlyBirdSavings);
     totalLinkedCourseSavings = roundToTwoDecimals(totalLinkedCourseSavings);
 
-    // Apply promo code discount (EXISTING LOGIC)
+    // Apply promo code discount
     let promoCodeDiscount = 0;
     let promoCodeData = null;
 
@@ -1366,21 +1384,23 @@ exports.proceedToPayment = async (req, res) => {
           discountAmount: promoCodeDiscount,
         };
 
-        console.log(`💰 Promo discount: €${promoCodeDiscount}`);
+        console.log(
+          `💰 Promo discount applied to certificate-inclusive total: €${promoCodeDiscount}`
+        );
       }
     }
 
-    // ⭐ FIX: CALCULATE finalAmountEUR HERE (BEFORE using it anywhere)
+    // ⭐ CRITICAL: Calculate finalAmountEUR with certificate fees included
     const finalAmountEUR = roundToTwoDecimals(
       Math.max(0, totalCurrentPrice - promoCodeDiscount)
     );
     const finalAmount = convertEurToAed(finalAmountEUR);
 
     console.log(
-      `💰 Final amount calculated: EUR ${finalAmountEUR} -> AED ${finalAmount}`
+      `💰 CERTIFICATE FIX - Final amount calculated: EUR ${finalAmountEUR} -> AED ${finalAmount}`
     );
 
-    // ✅ NOW you can use finalAmountEUR safely - Check if free first
+    // Check if free first
     if (finalAmountEUR <= 0) {
       console.log("🎯 Final amount is €0, redirecting to free registration");
       return res.redirect("/complete-registration");
@@ -1514,7 +1534,7 @@ exports.proceedToPayment = async (req, res) => {
       fieldCount: Object.keys(ccavenueBillingData).length,
     });
 
-    // Create transaction IDs (EXISTING LOGIC)
+    // Create transaction IDs
     const transactionId = `TXN_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}`;
@@ -1550,7 +1570,7 @@ exports.proceedToPayment = async (req, res) => {
         promoCodeDiscount: promoCodeDiscount,
         tax: 0,
         processingFee: 0,
-        finalAmount: finalAmountEUR,
+        finalAmount: finalAmountEUR, // ✅ NOW INCLUDES CERTIFICATE FEES
         finalAmountAED: finalAmount,
         currency: "EUR",
         currencyPaid: "AED",
@@ -1574,7 +1594,7 @@ exports.proceedToPayment = async (req, res) => {
         courseTitle: item.courseTitle,
         courseCode: item.courseCode,
         originalPrice: item.originalPrice,
-        finalPrice: item.finalPrice,
+        finalPrice: item.finalPrice, // ✅ NOW INCLUDES CERTIFICATE FEES
         isEarlyBird: item.isEarlyBird,
         earlyBirdSavings: item.earlyBirdSavings,
         courseSchedule: item.courseSchedule,
@@ -1654,7 +1674,7 @@ exports.proceedToPayment = async (req, res) => {
       // REQUIRED PARAMETERS
       merchant_id: process.env.CCAVENUE_MERCHANT_ID,
       order_id: orderNumber,
-      amount: finalAmount.toFixed(2), // AED AMOUNT TO BANK
+      amount: finalAmount.toFixed(2), // AED AMOUNT TO BANK (includes certificates)
       currency: "AED", // CURRENCY TO BANK
 
       // REDIRECT URLs
@@ -1739,10 +1759,10 @@ exports.proceedToPayment = async (req, res) => {
     }
 
     // Enhanced logging for debugging
-    console.log("💳 CCAvenue Parameters (Billing Box Enhanced):", {
+    console.log("💳 CCAvenue Parameters (Certificate Price Fixed):", {
       merchant_id: ccavenuePaymentData.merchant_id,
       order_id: ccavenuePaymentData.order_id,
-      amount: ccavenuePaymentData.amount,
+      amount: ccavenuePaymentData.amount, // ✅ NOW INCLUDES CERTIFICATE FEES
       currency: ccavenuePaymentData.currency,
       billing_email: ccavenuePaymentData.billing_email,
       billing_name: ccavenuePaymentData.billing_name,
@@ -1754,6 +1774,27 @@ exports.proceedToPayment = async (req, res) => {
       cancel_url: ccavenuePaymentData.cancel_url,
       paramCount: Object.keys(ccavenuePaymentData).length,
       billingFieldsValidated: "✅ YES",
+      certificateFeesIncluded: "✅ YES",
+    });
+
+    // ✅ CRITICAL DEBUG: Log certificate pricing breakdown
+    console.log("💰 CERTIFICATE FIX - Final Payment Debug:", {
+      totalOriginalPrice: totalOriginalPrice,
+      totalCurrentPrice: totalCurrentPrice, // ✅ Includes certificate fees
+      finalAmountEUR: finalAmountEUR, // ✅ Amount being charged in EUR
+      finalAmountAED: finalAmount, // ✅ Amount being charged to bank in AED
+      certificateCoursesInCart: cartItems
+        .filter(
+          (item) =>
+            item.courseTitle.includes("certificate") ||
+            item.finalPrice > item.originalPrice
+        )
+        .map((item) => ({
+          title: item.courseTitle,
+          originalPrice: item.originalPrice,
+          finalPrice: item.finalPrice,
+          certificateAdded: item.finalPrice > item.originalPrice,
+        })),
     });
 
     // Convert to query string with validation
@@ -1804,9 +1845,11 @@ exports.proceedToPayment = async (req, res) => {
     // ENCRYPTION: Use the CCAvenue utility
     let encRequest;
     try {
-      console.log("🔐 Starting encryption with billing data...");
+      console.log(
+        "🔐 Starting encryption with certificate-inclusive billing data..."
+      );
       encRequest = ccavUtil.encrypt(dataString);
-      console.log("✅ Encryption successful with billing information");
+      console.log("✅ Encryption successful with certificate pricing included");
       console.log("📏 Encrypted string length:", encRequest.length);
     } catch (encryptionError) {
       console.error("❌ Encryption failed:", encryptionError);
@@ -1819,7 +1862,7 @@ exports.proceedToPayment = async (req, res) => {
     const paymentUrl =
       "https://secure.ccavenue.ae/transaction/transaction.do?command=initiateTransaction";
 
-    // ✅ ENHANCED payment form with billing information confirmation
+    // ✅ ENHANCED payment form with certificate pricing confirmation
     const paymentForm = `
       <!DOCTYPE html>
       <html>
@@ -1890,6 +1933,14 @@ exports.proceedToPayment = async (req, res) => {
               margin: 15px 0;
               text-align: left;
             }
+            .certificate-info {
+              background: #fff3e0;
+              border: 1px solid #ffcc02;
+              border-radius: 5px;
+              padding: 15px;
+              margin: 15px 0;
+              text-align: left;
+            }
             .status { color: #28a745; font-weight: bold; }
             .error { color: #dc3545; font-weight: bold; }
           </style>
@@ -1913,14 +1964,25 @@ exports.proceedToPayment = async (req, res) => {
     }<br>
               <small style="color: #666;">✅ All required fields validated for payment gateway</small>
             </div>
+
+            <!-- ✅ NEW: Certificate Pricing Confirmation -->
+            <div class="certificate-info">
+              <strong>📜 Certificate Pricing Included:</strong><br>
+              Original Course Total: €${totalOriginalPrice.toFixed(2)}<br>
+              Final Total (with certificates): €${finalAmountEUR.toFixed(2)}<br>
+              Payment Amount: AED ${finalAmount.toFixed(2)}<br>
+              <small style="color: #666;">✅ Certificate fees are included in the final amount</small>
+            </div>
             
             <!-- Debug Information -->
             <div class="debug">
-              <strong>🔍 Payment Debug Info:</strong><br>
+              <strong>🔍 Payment Debug Info (Certificate Fix Applied):</strong><br>
               Order ID: ${orderNumber}<br>
               Amount: AED ${finalAmount.toFixed(
                 2
               )} (EUR ${finalAmountEUR.toFixed(2)})<br>
+              Original Total: €${totalOriginalPrice.toFixed(2)}<br>
+              Certificate Fees Included: ✅ YES<br>
               Merchant ID: ${process.env.CCAVENUE_MERCHANT_ID}<br>
               Access Code: ${process.env.CCAVENUE_ACCESS_CODE}<br>
               Encryption: ${encRequest ? "✅ Success" : "❌ Failed"}<br>
@@ -1943,7 +2005,7 @@ exports.proceedToPayment = async (req, res) => {
             </form>
             
             <div id="status" class="status">
-              Initializing secure connection with billing data...
+              Initializing secure connection with certificate pricing...
             </div>
             
             <div id="manualActions" style="display: none; margin-top: 20px;">
@@ -1981,14 +2043,17 @@ exports.proceedToPayment = async (req, res) => {
             
             function submitForm() {
               try {
-                updateStatus('Submitting to CCAvenue with billing data...');
-                console.log('🚀 Form submission attempt with billing info:', {
+                updateStatus('Submitting to CCAvenue with certificate pricing...');
+                console.log('🚀 Form submission attempt with certificate fees:', {
                   action: '${paymentUrl}',
                   encRequestLength: '${encRequest ? encRequest.length : 0}',
                   accessCode: '${process.env.CCAVENUE_ACCESS_CODE}',
                   billingName: '${ccavenuePaymentData.billing_name}',
                   billingEmail: '${ccavenuePaymentData.billing_email}',
                   billingCountry: '${ccavenuePaymentData.billing_country}',
+                  finalAmountEUR: '${finalAmountEUR.toFixed(2)}',
+                  finalAmountAED: '${finalAmount.toFixed(2)}',
+                  certificateFeesIncluded: true,
                   billingValidated: true,
                   attempt: redirectAttempts + 1
                 });
@@ -2013,8 +2078,8 @@ exports.proceedToPayment = async (req, res) => {
             
             // Manual form submission handler
             document.getElementById('paymentForm').addEventListener('submit', function(e) {
-              updateStatus('Form submitted manually with billing data');
-              console.log('📤 Manual form submission to CCAvenue with billing info');
+              updateStatus('Form submitted manually with certificate pricing');
+              console.log('📤 Manual form submission to CCAvenue with certificate fees included');
             });
             
             // Page unload detection
@@ -2031,14 +2096,14 @@ exports.proceedToPayment = async (req, res) => {
     console.log(
       `📊 Payment Amount: AED ${finalAmount.toFixed(
         2
-      )} (EUR ${finalAmountEUR.toFixed(2)})`
+      )} (EUR ${finalAmountEUR.toFixed(2)}) - Certificate Fees Included`
     );
     console.log(`👤 Billing Name: ${ccavenuePaymentData.billing_name}`);
     console.log(`📧 Billing Email: ${ccavenuePaymentData.billing_email}`);
     console.log(
       `🏠 Billing Address: ${ccavenuePaymentData.billing_city}, ${ccavenuePaymentData.billing_country}`
     );
-    console.log(`✅ Billing Box Integration: Complete`);
+    console.log(`✅ Certificate Fix Integration: Complete`);
 
     res.send(paymentForm);
   } catch (error) {
@@ -2124,7 +2189,7 @@ exports.handlePaymentResponse = async (req, res) => {
               SelfPacedOnlineTraining: "Self-Paced Online Course",
             }[item.courseType] || "Training Course",
           originalPrice: item.originalPrice,
-          finalPrice: item.finalPrice,
+          finalPrice: item.finalPrice, // ✅ Includes certificate fees
           price: item.originalPrice,
           startDate: item.courseSchedule?.startDate,
           isLinkedCourseFree: false, // Payment means it's not a linked free course
@@ -2134,7 +2199,7 @@ exports.handlePaymentResponse = async (req, res) => {
           referenceNumber: transaction.receiptNumber,
           receiptNumber: transaction.receiptNumber,
           orderNumber: transaction.orderNumber,
-          finalAmount: transaction.financial.finalAmount,
+          finalAmount: transaction.financial.finalAmount, // ✅ Includes certificate fees
           paymentMethod: "CCAvenue Payment Gateway",
         };
 
@@ -2185,7 +2250,7 @@ exports.handlePaymentResponse = async (req, res) => {
       delete req.session.appliedPromoCode;
 
       console.log(
-        `✅ PAID registration completed for ${transaction.items.length} courses`
+        `✅ PAID registration completed for ${transaction.items.length} courses (Certificate fees included)`
       );
       console.log(`📧 Email status: sent`);
       console.log(`📅 Reminders scheduled: ${reminderResult.scheduledCount}`);
@@ -2226,7 +2291,6 @@ exports.handlePaymentCancel = (req, res) => {
   res.redirect("/payment/cancelled");
 };
 
-//new
 // ✅ NEW: API route for getting user billing info
 exports.getUserBillingInfo = async (req, res) => {
   try {

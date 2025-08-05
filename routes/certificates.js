@@ -234,4 +234,101 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+//new
+// ============================================================================
+// STEP 4: UPDATE ROUTES - Add PDF download route
+// File: routes/certificates.js
+// ============================================================================
+
+// Add this route to your certificate routes:
+router.get(
+  "/download-pdf/:certificateId",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      await certificateController.generateCertificatePDF(req, res);
+    } catch (error) {
+      console.error("❌ Error in PDF download route:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error downloading certificate PDF",
+      });
+    }
+  }
+);
+
+// ============================================================================
+// STEP 5: UPDATE FRONTEND JAVASCRIPT - Replace downloadCertificate function
+// Update the downloadCertificate function in your HTML template
+// ============================================================================
+
+function downloadCertificate() {
+  const btn = event.target.closest(".btn");
+  const originalHTML = btn.innerHTML;
+
+  // Show loading state
+  btn.classList.add("loading");
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+  btn.disabled = true;
+
+  // Create download link
+  const downloadUrl = `/certificates/download-pdf/${certificateData.id}`;
+
+  // Use fetch to handle the download
+  fetch(downloadUrl, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`, // If you use token auth
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Download failed");
+      }
+      return response.blob();
+    })
+    .then((blob) => {
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `${certificateData.recipient.replace(
+        /[^a-zA-Z0-9]/g,
+        "_"
+      )}_Certificate.pdf`;
+
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      // Show success message
+      Swal.fire({
+        icon: "success",
+        title: "Download Complete!",
+        text: "Your certificate PDF has been downloaded successfully.",
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    })
+    .catch((error) => {
+      console.error("Download error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Download Failed",
+        text: "There was an error downloading your certificate. Please try again.",
+        confirmButtonColor: "#f59e0b",
+      });
+    })
+    .finally(() => {
+      // Reset button state
+      btn.classList.remove("loading");
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+    });
+}
+
 module.exports = router;

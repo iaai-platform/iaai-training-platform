@@ -132,7 +132,7 @@
       background: linear-gradient(90deg, transparent 0%, #f59e0b 50%, transparent 100%);
     }
 
-    /* IAAI Logo Area */
+    /* ✅ UPDATED: IAAI Logo Area with actual logo */
     .institution-logo {
       margin-bottom: 25px;
     }
@@ -150,6 +150,7 @@
         0 10px 25px rgba(245,158,11,0.3),
         inset 0 2px 5px rgba(255,255,255,0.3);
       position: relative;
+      overflow: hidden;
     }
 
     .logo-circle::before {
@@ -164,27 +165,30 @@
       z-index: -1;
     }
 
-    .logo-text {
-      color: white;
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 1.2rem;
-      line-height: 1.1;
-      text-align: center;
+    /* ✅ UPDATED: Company logo image */
+    .company-logo {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      padding: 8px;
     }
 
+    /* ✅ UPDATED: Institution name in one line */
     .institution-name {
       font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 600;
       color: #92400e;
-      letter-spacing: 3px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
+      line-height: 1.2;
     }
 
     .institution-subtitle {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #a16207;
       font-weight: 500;
       letter-spacing: 1px;
@@ -209,6 +213,7 @@
       line-height: 1.1;
     }
 
+    /* ✅ UPDATED: Dynamic certificate subtitle based on type */
     .certificate-subtitle {
       font-family: 'Playfair Display', serif;
       font-size: 1.8rem;
@@ -340,7 +345,7 @@
       font-size: 1.3rem;
     }
 
-    /* ✅ FIXED: Certification Bodies Section */
+    /* Certification Bodies Section */
     .certification-bodies {
       margin: 25px 0;
     }
@@ -390,7 +395,6 @@
       font-weight: 600;
     }
 
-    /* ✅ FIXED: Certification body logos */
     .cert-body-logo {
       width: 28px;
       height: 28px;
@@ -631,7 +635,7 @@
       word-break: break-word;
     }
 
-    /* ✅ FIXED: Instructors Section */
+    /* Instructors Section */
     .instructors-section {
       background: linear-gradient(135deg, rgba(245,158,11,0.05) 0%, rgba(251,191,36,0.03) 100%);
       border-radius: 20px;
@@ -897,32 +901,6 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
 
-    /* Debug Section */
-    .debug-section {
-      background: #f3f4f6;
-      padding: 20px;
-      margin: 20px 0;
-      border-radius: 10px;
-      font-family: monospace;
-      font-size: 0.8rem;
-      border: 2px dashed #d1d5db;
-    }
-
-    .debug-title {
-      font-weight: bold;
-      color: #374151;
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-    }
-
-    .debug-item {
-      margin: 5px 0;
-      padding: 5px;
-      background: white;
-      border-radius: 4px;
-      border-left: 3px solid #f59e0b;
-    }
-
     /* Responsive Design */
     @media (max-width: 768px) {
       .certificate-main-title {
@@ -977,6 +955,20 @@
         width: 24px;
         height: 24px;
       }
+
+      .company-logo {
+        width: 70px;
+        height: 70px;
+      }
+
+      .logo-circle {
+        width: 90px;
+        height: 90px;
+      }
+
+      .institution-name {
+        font-size: 1.4rem;
+      }
     }
 
     /* Print Styles */
@@ -1026,38 +1018,6 @@
       <span>Professional Certificate</span>
     </div>
 
-    <!-- ✅ DEBUG SECTION (only in development) -->
-    <% if (process.env.NODE_ENV === 'development') { %>
-      <div class="debug-section">
-        <div class="debug-title">🔍 DEBUG: Certificate Data</div>
-        <div class="debug-item">
-          <strong>Certificate ID:</strong> <%= certificate.certificateId %><br>
-          <strong>Course Type:</strong> <%= certificate.courseType %><br>
-          <strong>Has Course Details:</strong> <%= !!certificate.courseDetails %><br>
-          <strong>Certification Bodies Count:</strong> <%= certificate.courseDetails?.certificationBodies?.length || 0 %><br>
-          <strong>Instructors Count:</strong> <%= certificate.courseDetails?.instructors?.length || 0 %>
-        </div>
-        
-        <% if (certificate.courseDetails?.certificationBodies) { %>
-          <div class="debug-item">
-            <strong>📋 Certification Bodies:</strong><br>
-            <% certificate.courseDetails.certificationBodies.forEach(function(body, index) { %>
-              <%= index %>: <%= body.name %> (<%= body.role %>) - Logo: <%= body.logo ? 'YES' : 'NO' %><br>
-            <% }); %>
-          </div>
-        <% } %>
-        
-        <% if (certificate.courseDetails?.instructors) { %>
-          <div class="debug-item">
-            <strong>👨‍🏫 Instructors:</strong><br>
-            <% certificate.courseDetails.instructors.forEach(function(instructor, index) { %>
-              <%= index %>: <%= instructor.name %> (<%= instructor.role %>) - Primary: <%= instructor.isPrimary %><br>
-            <% }); %>
-          </div>
-        <% } %>
-      </div>
-    <% } %>
-
     <!-- Main Certificate -->
     <div class="certificate-main">
       <div class="certificate-frame">
@@ -1079,18 +1039,36 @@
           <!-- Header -->
           <div class="certificate-header">
             <div class="institution-logo">
+              <!-- ✅ UPDATED: Company logo in circle -->
               <div class="logo-circle">
-                <div class="logo-text">
-                  IAAI
-                </div>
+                <img src="/images/IAAI-Logo.jpg" alt="IAAI Logo" class="company-logo">
               </div>
-              <div class="institution-name">International Aesthetics</div>
-              <div class="institution-subtitle">Academic Institution</div>
+              <!-- ✅ UPDATED: Institution name in one line -->
+              <div class="institution-name">International Aesthetics Academic Institution</div>
             </div>
 
             <div class="certificate-title">
               <h1 class="certificate-main-title">CERTIFICATE</h1>
-              <p class="certificate-subtitle">of Completion</p>
+              <!-- ✅ UPDATED: Dynamic certificate subtitle based on course type and certification type -->
+              <p class="certificate-subtitle">
+                <% 
+                  let certificateType = 'of Completion';
+                  
+                  // For OnlineLiveTraining, check the certification type from course model
+                  if (certificate.courseType === 'OnlineLiveTraining' && certificate.courseDetails?.certification?.type) {
+                    const certType = certificate.courseDetails.certification.type;
+                    if (certType === 'achievement') {
+                      certificateType = 'of Achievement';
+                    } else if (certType === 'participation') {
+                      certificateType = 'of Participation';
+                    } else {
+                      certificateType = 'of Completion';
+                    }
+                  }
+                  // For other course types, default to 'of Completion'
+                %>
+                <%= certificateType %>
+              </p>
             </div>
           </div>
 
@@ -1100,7 +1078,25 @@
             
             <h2 class="recipient-name"><%= certificate.certificateData.recipientName %></h2>
             
-            <p class="completion-text">For successfully completion of</p>
+            <!-- ✅ UPDATED: Dynamic completion text based on certificate type -->
+            <p class="completion-text">
+              <% 
+                let completionText = 'For successfully completing';
+                
+                // Adjust text based on certificate type
+                if (certificate.courseType === 'OnlineLiveTraining' && certificate.courseDetails?.certification?.type) {
+                  const certType = certificate.courseDetails.certification.type;
+                  if (certType === 'achievement') {
+                    completionText = 'For outstanding achievement in';
+                  } else if (certType === 'participation') {
+                    completionText = 'For active participation in';
+                  } else {
+                    completionText = 'For successfully completing';
+                  }
+                }
+              %>
+              <%= completionText %>
+            </p>
             
             <h3 class="course-title-display"><%= certificate.certificateData.courseTitle %></h3>
 
@@ -1125,7 +1121,7 @@
                 <% } %>
               </div>
 
-              <!-- ✅ FIXED: Certification Bodies Section -->
+              <!-- Certification Bodies Section -->
               <% if (certificate.courseDetails?.certificationBodies && certificate.courseDetails.certificationBodies.length > 0) { %>
                 <div class="certification-bodies">
                   <div class="cert-bodies-title">Certified By</div>
@@ -1283,7 +1279,7 @@
         </div>
       </div>
 
-      <!-- ✅ FIXED: Instructors Section -->
+      <!-- Instructors Section -->
       <% if (certificate.courseDetails?.instructors && certificate.courseDetails.instructors.length > 0) { %>
         <div class="instructors-section">
           <h3 class="instructors-title">
@@ -1526,44 +1522,524 @@
     // Debug certificate data
     console.log('🔍 Certificate Data:', certificateData);
 
-    // Enhanced download certificate
+    // ✅ UPDATED: Working PDF download function
     function downloadCertificate() {
-      const btn = event.target.closest('.btn');
-      btn.classList.add('loading');
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+    const btn = event.target.closest('.btn');
+    const originalHTML = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing Certificate...';
+    btn.disabled = true;
+    
+    // Create a clean certificate for printing
+    const certificateMain = document.querySelector('.certificate-main');
+    if (!certificateMain) {
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Certificate Not Found',
+        text: 'Could not find certificate content to print.'
+      });
+      return;
+    }
+    
+    // Hide all non-essential elements
+    const elementsToHide = document.querySelectorAll(
+      '.breadcrumb, .action-buttons, .social-share, .certificate-details, .navbar, .footer, .debug-section, header, nav, .course-type-badge'
+    );
+    
+    // Store original display values and hide elements
+    const originalDisplays = [];
+    elementsToHide.forEach((el, index) => {
+      if (el) {
+        originalDisplays[index] = el.style.display;
+        el.style.display = 'none';
+      }
+    });
+    
+    // Store original body styles
+    const originalBodyStyle = {
+      background: document.body.style.background,
+      padding: document.body.style.padding,
+      margin: document.body.style.margin,
+      minHeight: document.body.style.minHeight
+    };
+    
+    // Apply print-ready styles to body
+    document.body.style.background = 'white';
+    document.body.style.padding = '0';
+    document.body.style.margin = '0';
+    document.body.style.minHeight = 'auto';
+    
+    // ✅ SMART CERTIFICATION BODIES HANDLING - BEFORE PRINT STYLES
+    const certBodiesSection = document.querySelector('.certification-bodies');
+    let certBodiesOriginalDisplay = '';
+    let shouldHideCertBodies = false;
+    
+    if (certBodiesSection) {
+      certBodiesOriginalDisplay = certBodiesSection.style.display;
       
-      setTimeout(() => {
-        btn.classList.remove('loading');
-        btn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
+      // Check if only IAAI is mentioned (redundant with header)
+      const certBodyItems = certBodiesSection.querySelectorAll('.cert-body-item');
+      const iaaiOnlyPattern = /international\s+aesthetics\s+academic\s+institution/i;
+      
+      let hasOnlyIAAI = true;
+      let hasOtherBodies = false;
+      
+      console.log(`🔍 Found ${certBodyItems.length} certification body items`);
+      
+      certBodyItems.forEach(item => {
+        const bodyName = item.querySelector('.cert-body-name')?.textContent || '';
+        console.log(`📋 Checking body: "${bodyName}"`);
         
+        if (iaaiOnlyPattern.test(bodyName)) {
+          // This is IAAI - mark for potential hiding
+          item.style.display = 'none';
+          console.log(`🎯 Hiding IAAI item: "${bodyName}"`);
+        } else if (bodyName.trim()) {
+          // This is another certification body - keep it
+          hasOtherBodies = true;
+          hasOnlyIAAI = false;
+          console.log(`✅ Keeping other body: "${bodyName}"`);
+        }
+      });
+      
+      // If only IAAI was found, hide the entire section
+      if (hasOnlyIAAI && !hasOtherBodies) {
+        certBodiesSection.style.display = 'none';
+        shouldHideCertBodies = true;
+        console.log('🎯 Hiding entire certification bodies section - only IAAI found');
+      } else if (hasOtherBodies) {
+        // Keep section but modify title to show co-certification
+        const certBodiesTitle = certBodiesSection.querySelector('.cert-bodies-title');
+        if (certBodiesTitle) {
+          certBodiesTitle.textContent = 'Co-Certified By';
+        }
+        console.log('🎯 Modified certification section to show co-certifiers only');
+      }
+    }
+    
+    // Create ultra-compact print styles
+    const printStyles = document.createElement('style');
+    printStyles.id = 'certificate-print-styles';
+    printStyles.innerHTML = `
+      /* ============================================================================ */
+      /* ULTRA-COMPACT A4 LANDSCAPE CERTIFICATE - SINGLE PAGE GUARANTEED */
+      /* ============================================================================ */
+      
+      @media print {
+        /* Page Setup - Tight margins for maximum space */
+        @page {
+          size: A4 landscape;
+          margin: 0.3in 0.4in;
+        }
+        
+        /* Body - Remove all spacing */
+        body {
+          background: white !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          min-height: auto !important;
+          font-family: 'Times New Roman', serif !important;
+          line-height: 1.2 !important;
+        }
+        
+        .certificate-container {
+          max-width: none !important;
+          margin: 0 !important;
+          width: 100% !important;
+          height: auto !important;
+          padding: 0 !important;
+        }
+        
+        /* Main Certificate - Ultra Compact */
+        .certificate-main {
+          box-shadow: none !important;
+          border-radius: 12px !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: white !important;
+          page-break-inside: avoid !important;
+          width: 100% !important;
+          height: auto !important;
+          max-width: none !important;
+          max-height: 7.5in !important; /* Force single page */
+        }
+        
+        /* Certificate Frame - Thinner padding */
+        .certificate-frame {
+          background: linear-gradient(45deg, #d97706 0%, #f59e0b 25%, #fbbf24 50%, #f59e0b 75%, #d97706 100%) !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          padding: 8px !important; /* Reduced from 12px */
+          border-radius: 12px !important;
+        }
+        
+        .certificate-frame::before {
+          border: 1px solid #92400e !important; /* Thinner border */
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          top: 15px !important;
+          left: 15px !important;
+          right: 15px !important;
+          bottom: 15px !important;
+        }
+        
+        /* Certificate Inner - Tight spacing */
+        .certificate-inner {
+          background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fffbeb 100%) !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          border-radius: 6px !important;
+          padding: 0 !important;
+        }
+        
+        /* Header Section - Compact */
+        .certificate-header {
+          padding: 15px 20px 12px !important; /* Much more compact */
+          text-align: center !important;
+          background: linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(245,158,11,0.05) 100%) !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+        
+        /* Logo - Smaller */
+        .logo-circle {
+          width: 50px !important; /* Reduced from 70px */
+          height: 50px !important;
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          margin: 0 auto 8px !important; /* Reduced margin */
+        }
+        
+        .company-logo {
+          width: 40px !important; /* Reduced from 60px */
+          height: 40px !important;
+        }
+        
+        /* Institution Name - Smaller */
+        .institution-name {
+          font-size: 11px !important; /* Reduced from 14px */
+          color: #92400e !important;
+          letter-spacing: 1px !important;
+          margin-bottom: 5px !important; /* Reduced margin */
+          font-weight: 600 !important;
+          line-height: 1.1 !important;
+        }
+        
+        /* Certificate Title - More compact */
+        .certificate-main-title {
+          font-size: 2.2rem !important; /* Reduced from 2.8rem */
+          color: #92400e !important;
+          letter-spacing: 1.5px !important;
+          margin: 12px 0 6px !important; /* Much tighter margins */
+          line-height: 0.9 !important;
+        }
+        
+        .certificate-subtitle {
+          font-size: 1.1rem !important; /* Reduced from 1.3rem */
+          color: #a16207 !important;
+          margin-bottom: 15px !important; /* Reduced margin */
+        }
+        
+        /* Main Content - Ultra compact */
+        .certificate-content {
+          padding: 0 25px 15px !important; /* Much tighter padding */
+          text-align: center !important;
+        }
+        
+        .certifies-text {
+          font-size: 0.95rem !important; /* Slightly smaller */
+          color: #78716c !important;
+          margin-bottom: 8px !important; /* Tighter margin */
+        }
+        
+        .recipient-name {
+          font-size: 1.8rem !important; /* Reduced from 2.2rem */
+          color: #92400e !important;
+          margin: 10px 0 !important; /* Much tighter margins */
+          text-decoration: underline !important;
+          text-decoration-color: #f59e0b !important;
+          text-underline-offset: 6px !important;
+          line-height: 1 !important;
+        }
+        
+        .completion-text {
+          font-size: 0.9rem !important; /* Slightly smaller */
+          color: #78716c !important;
+          margin: 8px 0 !important; /* Tighter margins */
+        }
+        
+        .course-title-display {
+          font-size: 1.25rem !important; /* Reduced from 1.5rem */
+          color: #a16207 !important;
+          margin: 10px 0 !important; /* Tighter margins */
+          line-height: 1.1 !important;
+        }
+        
+        .course-title-display::before,
+        .course-title-display::after {
+          font-size: 1.5rem !important; /* Smaller quotes */
+          color: #f59e0b !important;
+        }
+        
+        /* Course Details Banner - More compact */
+        .course-details-banner {
+          background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(251,191,36,0.1) 100%) !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          padding: 10px !important; /* Reduced padding */
+          margin: 8px 0 !important; /* Tighter margins */
+          border-radius: 8px !important;
+          border: 1px solid rgba(245,158,11,0.3) !important; /* Thinner border */
+        }
+        
+        .delivery-method {
+          font-size: 0.8rem !important; /* Smaller text */
+          color: #92400e !important;
+          margin-bottom: 6px !important;
+        }
+        
+        /* Signature Section - Compact */
+        .signature-section {
+          display: grid !important;
+          grid-template-columns: 1fr auto 1fr !important;
+          gap: 15px !important; /* Reduced gap */
+          align-items: end !important;
+          margin: 15px 0 10px !important; /* Much tighter margins */
+          padding: 12px 0 !important; /* Reduced padding */
+          border-top: 1px solid rgba(245,158,11,0.4) !important; /* Thinner border */
+        }
+        
+        .signature-block {
+          text-align: center !important;
+        }
+        
+        .signature-line {
+          width: 90px !important; /* Shorter lines */
+          height: 1px !important; /* Thinner line */
+          background: linear-gradient(90deg, transparent 0%, #a16207 20%, #a16207 80%, transparent 100%) !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          margin: 0 auto 5px !important; /* Tighter spacing */
+        }
+        
+        .signature-name {
+          font-size: 0.8rem !important; /* Smaller text */
+          color: #92400e !important;
+          margin-bottom: 2px !important;
+          line-height: 1.1 !important;
+        }
+        
+        .signature-title {
+          font-size: 0.65rem !important; /* Smaller text */
+          color: #a16207 !important;
+        }
+        
+        .signature-date {
+          font-size: 0.8rem !important; /* Smaller text */
+          color: #92400e !important;
+          margin-bottom: 2px !important;
+          line-height: 1.1 !important;
+        }
+        
+        /* Official Seal - Smaller */
+        .official-seal {
+          width: 60px !important; /* Much smaller */
+          height: 60px !important;
+          background: linear-gradient(135deg, #92400e 0%, #a16207 50%, #92400e 100%) !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          font-size: 0.55rem !important; /* Much smaller text */
+          flex-shrink: 0 !important;
+          line-height: 1 !important;
+        }
+        
+        .seal-text-large {
+          font-size: 0.6rem !important;
+        }
+        
+        /* Hide elements that shouldn't print */
+        .breadcrumb,
+        .action-buttons,
+        .social-share,
+        .certificate-details,
+        .navbar,
+        .footer,
+        .debug-section,
+        .course-type-badge,
+        header,
+        nav,
+        .achievement-stats,
+        .stats-grid,
+        .instructors-section,
+        .verification-section {
+          display: none !important;
+        }
+        
+        /* Hide certification bodies if only IAAI (already handled by JS) */
+        .certification-bodies[style*="display: none"] {
+          display: none !important;
+        }
+        
+        /* Ensure all colors print */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        
+        /* Force single page */
+        .certificate-main,
+        .certificate-frame,
+        .certificate-inner {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          page-break-after: avoid !important;
+          break-after: avoid !important;
+        }
+        
+        /* Remove any extra spacing that could cause page breaks */
+        p, div, h1, h2, h3 {
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+        
+        /* Override any spacing that might push to second page */
+        .certificate-content > * {
+          margin-top: 0 !important;
+          margin-bottom: 8px !important;
+        }
+        
+        .certificate-content > *:last-child {
+          margin-bottom: 0 !important;
+        }
+        
+        /* Ensure compact layout on smaller screens */
+        @media print and (max-width: 1000px) {
+          .certificate-main-title {
+            font-size: 1.8rem !important;
+          }
+          
+          .recipient-name {
+            font-size: 1.5rem !important;
+          }
+          
+          .course-title-display {
+            font-size: 1rem !important;
+          }
+          
+          .official-seal {
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 0.45rem !important;
+          }
+        }
+      }
+      
+      @media screen {
+        .print-preview-mode .certificate-main {
+          transform: scale(0.7);
+          transform-origin: top center;
+          margin: 20px auto;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+      }
+    `;
+    
+    document.head.appendChild(printStyles);
+    
+    // Apply temporary preview mode
+    certificateMain.classList.add('print-preview-mode');
+    
+    // Small delay to ensure styles are applied
+    setTimeout(() => {
+      // Trigger print dialog
+      window.print();
+      
+      // Restore everything after print dialog
+      setTimeout(() => {
+        // Remove print styles
+        const printStylesEl = document.getElementById('certificate-print-styles');
+        if (printStylesEl) {
+          printStylesEl.remove();
+        }
+        
+        // Remove preview mode
+        certificateMain.classList.remove('print-preview-mode');
+        
+        // Restore body styles
+        Object.keys(originalBodyStyle).forEach(key => {
+          document.body.style[key] = originalBodyStyle[key];
+        });
+        
+        // Restore certification bodies section
+        if (certBodiesSection) {
+          certBodiesSection.style.display = certBodiesOriginalDisplay;
+          
+          // Restore hidden IAAI items
+          const certBodyItems = certBodiesSection.querySelectorAll('.cert-body-item');
+          certBodyItems.forEach(item => {
+            item.style.display = '';
+          });
+          
+          // Restore original title
+          const certBodiesTitle = certBodiesSection.querySelector('.cert-bodies-title');
+          if (certBodiesTitle) {
+            certBodiesTitle.textContent = 'Certified By';
+          }
+        }
+  
+        // Restore hidden elements
+        elementsToHide.forEach((el, index) => {
+          if (el) {
+            el.style.display = originalDisplays[index] || '';
+          }
+        });
+        
+        // Restore button
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        
+        // Show success message
         Swal.fire({
-          icon: 'info',
-          title: 'PDF Generation Coming Soon',
+          icon: 'success',
+          title: '🎯 Single-Page Certificate Ready!',
           html: `
-            <div style="text-align: center;">
-              <div style="font-size: 4rem; color: #f59e0b; margin-bottom: 20px;">
-                <i class="fas fa-file-pdf"></i>
+            <div style="text-align: left;">
+              <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <p style="color: #15803d; margin: 0; font-weight: 600;">
+                  ✅ Ultra-compact design guaranteed to fit on one A4 landscape page!
+                </p>
               </div>
-              <h3 style="color: #92400e; margin-bottom: 15px;">Professional PDF Certificates</h3>
-              <p style="color: #78716c; margin-bottom: 20px;">
-                We're preparing beautiful PDF certificates that match this design. 
-                Meanwhile, you can share your achievement using the verification link.
-              </p>
+              
+              <p><strong>🎯 Optimizations Applied:</strong></p>
+              <ul style="text-align: left; margin: 10px 0; padding-left: 20px; line-height: 1.4;">
+                <li>Removed redundant IAAI certification section</li>
+                <li>Compact spacing and smaller fonts</li>
+                <li>Hidden non-essential details section</li>
+                <li>Optimized margins and padding</li>
+              </ul>
+              
+              <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin-top: 15px;">
+                <p style="color: #92400e; margin: 0; font-size: 0.9rem;">
+                  <strong>📏 Perfect Fit:</strong> Everything will now fit perfectly on one A4 landscape page with professional appearance!
+                </p>
+              </div>
             </div>
           `,
           confirmButtonColor: '#f59e0b',
-          confirmButtonText: 'Share My Certificate',
-          cancelButtonText: 'Close',
-          showCancelButton: true
-        }).then((result) => {
-          if (result.isConfirmed) {
-            shareCertificate();
-          }
+          confirmButtonText: 'Excellent!',
+          width: '550px'
         });
-      }, 2000);
-    }
-
-    // Enhanced share certificate
+      }, 1000);
+    }, 300);
+  }
+  // Enhanced share certificate
     function shareCertificate() {
       const courseTypeDisplay = getCourseTypeDisplay();
       const instructorsList = certificateData.instructors.map(i => i.name).join(', ') || 'IAAI Training Team';

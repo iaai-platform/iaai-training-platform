@@ -357,56 +357,137 @@ class CertificateController {
         break;
 
       case "OnlineLiveTraining":
-        // ✅ Live course attendance validation
-        if (enrollment.userProgress?.attendanceRequirements) {
-          const req = enrollment.userProgress.attendanceRequirements;
-          attendanceOk =
-            req.meetsOverallRequirement ||
-            req.confirmedAttendancePercentage >= 80;
-          attendancePercentage = req.confirmedAttendancePercentage || 0;
-          debug.attendanceSource = "live_requirements";
-          debug.liveAttendanceDetails = {
-            sessionsConfirmed: req.sessionsConfirmed,
-            totalSessions: req.totalSessionsAvailable,
-            meetsRequirement: req.meetsOverallRequirement,
-          };
-        } else if (
+        console.log(
+          `🔍 FIXED: Online Live attendance validation for user data:`,
+          {
+            hasUserProgress: !!enrollment.userProgress,
+            overallAttendancePercentage:
+              enrollment.userProgress?.overallAttendancePercentage,
+            sessionsAttendedCount:
+              enrollment.userProgress?.sessionsAttended?.length || 0,
+            courseStatus: enrollment.userProgress?.courseStatus,
+            attendanceRequirements:
+              enrollment.userProgress?.attendanceRequirements,
+          }
+        );
+
+        // ✅ FIXED METHOD 1: Check stored overallAttendancePercentage (PRIMARY - matches user data)
+        if (
           enrollment.userProgress?.overallAttendancePercentage !== undefined
         ) {
           attendancePercentage =
             enrollment.userProgress.overallAttendancePercentage;
           attendanceOk = attendancePercentage >= 80;
-          debug.attendanceSource = "live_overall_percentage";
-        } else if (enrollment.userProgress?.sessionsAttended?.length > 0) {
-          // Calculate from sessions attended
+          debug.attendanceSource = "live_overall_percentage_fixed";
+          console.log(
+            `📊 FIXED: Attendance from overallAttendancePercentage: ${attendancePercentage}%`
+          );
+        }
+
+        // ✅ FIXED METHOD 2: Check course completion status first (matches user data)
+        else if (enrollment.userProgress?.courseStatus === "completed") {
+          attendanceOk = true;
+          attendancePercentage = 100;
+          debug.attendanceSource = "live_course_completed_fixed";
+          console.log(
+            `✅ FIXED: Attendance confirmed via courseStatus: completed`
+          );
+        }
+
+        // ✅ FIXED METHOD 3: Check sessions attended (matches user data structure)
+        else if (enrollment.userProgress?.sessionsAttended?.length > 0) {
           const sessions = enrollment.userProgress.sessionsAttended;
           const totalSessions = sessions.length;
-          const confirmedSessions = sessions.filter(
-            (s) =>
-              s.attendanceConfirmation?.isConfirmed ||
-              s.timeTracking?.attendancePercentage >= 80
+
+          // Count sessions with "attended" status (matches user data structure)
+          const attendedSessions = sessions.filter(
+            (session) =>
+              session.status === "attended" ||
+              session.attendanceConfirmation?.isConfirmed ||
+              session.timeTracking?.attendancePercentage >= 80
           ).length;
 
           if (totalSessions > 0) {
             attendancePercentage = Math.round(
-              (confirmedSessions / totalSessions) * 100
+              (attendedSessions / totalSessions) * 100
             );
             attendanceOk = attendancePercentage >= 80;
-            debug.attendanceSource = "live_sessions_calculated";
-            debug.sessionCalculation = { totalSessions, confirmedSessions };
+            debug.attendanceSource = "live_sessions_calculated_fixed";
+            debug.sessionCalculation = {
+              totalSessions,
+              attendedSessions,
+              sessionsWithAttendedStatus: sessions.filter(
+                (s) => s.status === "attended"
+              ).length,
+            };
+            console.log(
+              `📊 FIXED: Attendance from sessions: ${attendancePercentage}% (${attendedSessions}/${totalSessions})`
+            );
           }
-        } else if (
+        }
+
+        // ✅ FIXED METHOD 4: Check attendance requirements (fallback)
+        else if (enrollment.userProgress?.attendanceRequirements) {
+          const req = enrollment.userProgress.attendanceRequirements;
+
+          // Use confirmedAttendancePercentage if available
+          if (req.confirmedAttendancePercentage !== undefined) {
+            attendancePercentage = req.confirmedAttendancePercentage;
+            attendanceOk = attendancePercentage >= 80;
+            debug.attendanceSource = "live_requirements_percentage";
+          }
+          // Check if overall requirement is met
+          else if (req.meetsOverallRequirement) {
+            attendanceOk = true;
+            attendancePercentage = 100;
+            debug.attendanceSource = "live_requirements_overall";
+          }
+          // Calculate from sessions confirmed
+          else if (req.sessionsConfirmed && req.totalSessionsAvailable) {
+            attendancePercentage = Math.round(
+              (req.sessionsConfirmed / req.totalSessionsAvailable) * 100
+            );
+            attendanceOk = attendancePercentage >= 80;
+            debug.attendanceSource = "live_requirements_sessions";
+          }
+
+          debug.liveAttendanceDetails = {
+            sessionsConfirmed: req.sessionsConfirmed,
+            totalSessions: req.totalSessionsAvailable,
+            meetsRequirement: req.meetsOverallRequirement,
+            confirmedPercentage: req.confirmedAttendancePercentage,
+          };
+
+          console.log(
+            `📊 FIXED: Attendance from requirements: ${attendancePercentage}%`,
+            debug.liveAttendanceDetails
+          );
+        }
+
+        // ✅ FIXED METHOD 5: Registration status check (for completed courses)
+        else if (
           enrollment.enrollmentData?.status === "registered" &&
           courseEnded
         ) {
           attendanceOk = true;
           attendancePercentage = 100;
-          debug.attendanceSource = "live_registered_fallback";
-        } else {
-          attendanceOk = true;
-          attendancePercentage = 100;
-          debug.attendanceSource = "live_default";
+          debug.attendanceSource = "live_registered_completed_fixed";
+          console.log(
+            `✅ FIXED: Attendance assumed for registered user after course completion`
+          );
         }
+
+        // ✅ FIXED METHOD 6: Final fallback (conservative approach)
+        else {
+          // For live courses, require explicit attendance confirmation
+          attendanceOk = false;
+          attendancePercentage = 0;
+          debug.attendanceSource = "live_no_confirmation";
+          console.log(
+            `❌ FIXED: No attendance confirmation found for live course`
+          );
+        }
+
         break;
 
       case "SelfPacedOnlineTraining":
@@ -1583,6 +1664,634 @@ class CertificateController {
       });
     }
   }
+
+  // ============================================================================
+  // FIXED PDF GENERATION METHOD FOR CERTIFICATE CONTROLLER
+  // ============================================================================
+
+  // Replace the generateCertificatePDF method in your CertificateController with this:
+
+  async generateCertificatePDF(req, res) {
+    try {
+      const { certificateId } = req.params;
+      const userId = req.user._id;
+
+      console.log(`📄 PDF Generation Request:`, {
+        certificateId,
+        userId: userId.toString(),
+      });
+
+      // Get user and certificate with proper error handling
+      const user = await User.findById(userId).select(
+        "myCertificates firstName lastName email myInPersonCourses myLiveCourses mySelfPacedCourses"
+      );
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      // Find certificate
+      const certificate = user.myCertificates?.find(
+        (cert) => cert.certificateId === certificateId
+      );
+
+      if (!certificate) {
+        return res.status(404).json({
+          success: false,
+          message: "Certificate not found",
+        });
+      }
+
+      console.log(`📋 Certificate found for PDF generation:`, {
+        certificateId: certificate.certificateId,
+        courseTitle: certificate.certificateData?.courseTitle,
+        recipientName: certificate.certificateData?.recipientName,
+      });
+
+      // ✅ FIX: Generate PDF using HTML content (with better error handling)
+      let pdfBuffer;
+      try {
+        pdfBuffer = await this.generatePDFFromHTML(certificate, user);
+      } catch (pdfError) {
+        console.error("❌ PDF generation failed:", pdfError);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to generate PDF. Please try again.",
+          error:
+            process.env.NODE_ENV === "development"
+              ? pdfError.message
+              : undefined,
+        });
+      }
+
+      // ✅ FIX: Update download count with safe saving
+      try {
+        // Ensure the certificate object has the required fields
+        if (!certificate.downloadCount) certificate.downloadCount = 0;
+        certificate.downloadCount += 1;
+        certificate.lastDownloaded = new Date();
+
+        // ✅ CRITICAL FIX: Initialize arrays if they don't exist before saving
+        if (!user.myInPersonCourses) user.myInPersonCourses = [];
+        if (!user.myLiveCourses) user.myLiveCourses = [];
+        if (!user.mySelfPacedCourses) user.mySelfPacedCourses = [];
+
+        // Save with error handling
+        await user.save();
+        console.log(`✅ Download count updated: ${certificate.downloadCount}`);
+      } catch (saveError) {
+        console.error("⚠️ Could not update download count:", saveError.message);
+        // Continue with PDF download even if save fails
+      }
+
+      // Generate safe filename
+      const safeName = certificate.certificateData.recipientName
+        .replace(/[^a-zA-Z0-9\s]/g, "")
+        .replace(/\s+/g, "_")
+        .substring(0, 50); // Limit length
+
+      const courseCode = certificate.certificateData.courseCode || "COURSE";
+      const filename = `${safeName}_Certificate_${courseCode}.pdf`;
+
+      console.log(`📤 Sending PDF:`, {
+        filename,
+        bufferSize: pdfBuffer.length,
+        contentType: "application/pdf",
+      });
+
+      // Set response headers for PDF download
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+      res.setHeader("Content-Length", pdfBuffer.length);
+      res.setHeader("Cache-Control", "no-cache");
+
+      // Send PDF
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("❌ Error in PDF generation:", error);
+
+      // Send proper error response
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: "Error generating PDF certificate",
+          error:
+            process.env.NODE_ENV === "development"
+              ? error.message
+              : "Internal server error",
+        });
+      }
+    }
+  }
+
+  // ============================================================================
+  // IMPROVED PDF GENERATION FROM HTML
+  // ============================================================================
+
+  async generatePDFFromHTML(certificate, user) {
+    let browser = null;
+
+    try {
+      const puppeteer = require("puppeteer");
+
+      console.log(`🚀 Launching browser for PDF generation...`);
+
+      // Launch browser with better error handling
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--no-first-run",
+          "--no-zygote",
+          "--single-process",
+        ],
+        timeout: 30000,
+      });
+
+      const page = await browser.newPage();
+
+      // Set page size for certificate (A4 landscape)
+      await page.setViewport({ width: 1200, height: 850 });
+
+      // Generate HTML content for PDF
+      const htmlContent = this.generateCertificateHTML(certificate, user);
+
+      console.log(
+        `📄 Setting HTML content (${htmlContent.length} characters)...`
+      );
+
+      // Set HTML content with timeout
+      await page.setContent(htmlContent, {
+        waitUntil: "networkidle0",
+        timeout: 20000,
+      });
+
+      console.log(`🖨️ Generating PDF...`);
+
+      // Generate PDF with specific options
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        landscape: true,
+        printBackground: true,
+        preferCSSPageSize: false,
+        margin: {
+          top: "0.5in",
+          right: "0.5in",
+          bottom: "0.5in",
+          left: "0.5in",
+        },
+        timeout: 30000,
+      });
+
+      console.log(`✅ PDF generated successfully: ${pdfBuffer.length} bytes`);
+
+      return pdfBuffer;
+    } catch (error) {
+      console.error("❌ PDF generation error:", error);
+      throw new Error(`PDF generation failed: ${error.message}`);
+    } finally {
+      // Always close browser
+      if (browser) {
+        try {
+          await browser.close();
+          console.log(`🔒 Browser closed`);
+        } catch (closeError) {
+          console.error("⚠️ Error closing browser:", closeError.message);
+        }
+      }
+    }
+  }
+
+  // ============================================================================
+  // ENHANCED HTML GENERATION WITH BETTER ERROR HANDLING
+  // ============================================================================
+
+  generateCertificateHTML(certificate, user) {
+    try {
+      const certData = certificate.certificateData || {};
+      const courseDetails = certificate.courseDetails || {};
+
+      // Safe data extraction with fallbacks
+      const recipientName =
+        certData.recipientName ||
+        `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+        "Certificate Recipient";
+      const courseTitle = certData.courseTitle || "Professional Course";
+      const courseCode = certData.courseCode || "N/A";
+      const verificationCode = certData.verificationCode || "N/A";
+      const certificateId = certificate.certificateId || "N/A";
+      const issueDate = certData.issueDate || new Date();
+
+      // Safe instructor name extraction
+      let instructorName = "IAAI Training Team";
+      if (courseDetails.instructors && courseDetails.instructors.length > 0) {
+        instructorName = courseDetails.instructors[0].name || instructorName;
+      } else if (certData.instructors && certData.instructors.length > 0) {
+        instructorName = certData.instructors[0].name || instructorName;
+      }
+
+      // Safe delivery method
+      const deliveryMethod = this.getDeliveryMethodDisplay(
+        certificate.courseType,
+        courseDetails
+      );
+
+      // Safe achievement data
+      const achievement = certData.achievement || {};
+      const attendancePercentage = achievement.attendancePercentage;
+      const examScore = achievement.examScore;
+      const totalHours = achievement.totalHours;
+      const grade = achievement.grade || "Pass";
+
+      console.log(`📋 Certificate HTML data:`, {
+        recipientName,
+        courseTitle,
+        instructorName,
+        deliveryMethod,
+      });
+
+      return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Professional Certificate</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Times New Roman', serif;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      width: 100%;
+      height: 100vh;
+    }
+    
+    .certificate-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border: 15px solid #d4af37;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      position: relative;
+      min-height: 700px;
+    }
+    
+    .certificate-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d4af37, #f1c40f);
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 24px;
+    }
+    
+    .institution-name {
+      font-size: 20px;
+      color: #2c3e50;
+      font-weight: bold;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+    
+    .certificate-title {
+      font-size: 48px;
+      color: #2c3e50;
+      font-weight: bold;
+      margin: 30px 0;
+      letter-spacing: 3px;
+    }
+    
+    .certificate-subtitle {
+      font-size: 24px;
+      color: #7f8c8d;
+      font-style: italic;
+      margin-bottom: 40px;
+    }
+    
+    .certificate-content {
+      text-align: center;
+      margin: 40px 0;
+    }
+    
+    .certifies-text {
+      font-size: 18px;
+      color: #5d6d7e;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+    
+    .recipient-name {
+      font-size: 36px;
+      color: #2c3e50;
+      font-weight: bold;
+      margin: 30px 0;
+      text-decoration: underline;
+      text-decoration-color: #d4af37;
+      text-underline-offset: 10px;
+    }
+    
+    .completion-text {
+      font-size: 18px;
+      color: #5d6d7e;
+      margin: 20px 0;
+      font-style: italic;
+    }
+    
+    .course-title {
+      font-size: 28px;
+      color: #34495e;
+      font-weight: 600;
+      margin: 30px 0;
+      font-style: italic;
+    }
+    
+    .course-title::before,
+    .course-title::after {
+      content: '"';
+      font-size: 36px;
+      color: #d4af37;
+    }
+    
+    .course-details {
+      background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(241,196,15,0.05));
+      padding: 20px;
+      border-radius: 10px;
+      margin: 30px 0;
+      border: 2px solid rgba(212,175,55,0.3);
+    }
+    
+    .delivery-method {
+      font-size: 16px;
+      color: #2c3e50;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    
+    .signature-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 2px solid rgba(212,175,55,0.3);
+    }
+    
+    .signature-block {
+      text-align: center;
+      flex: 1;
+    }
+    
+    .signature-line {
+      width: 150px;
+      height: 2px;
+      background: #7f8c8d;
+      margin: 0 auto 10px;
+    }
+    
+    .signature-name {
+      font-size: 16px;
+      color: #2c3e50;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .signature-title {
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+    
+    .official-seal {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+    
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      left: 40px;
+      right: 40px;
+      text-align: center;
+      font-size: 12px;
+      color: #7f8c8d;
+    }
+    
+    .verification-code {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #2c3e50;
+      background: rgba(212,175,55,0.1);
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    
+    .achievement-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .stat-item {
+      text-align: center;
+      background: rgba(212,175,55,0.1);
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 100px;
+    }
+    
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+      display: block;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #7f8c8d;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate-container">
+    <div class="certificate-header">
+      <div class="logo">IAAI</div>
+      <div class="institution-name">INTERNATIONAL AESTHETICS ACADEMIC INSTITUTION</div>
+    </div>
+    
+    <div class="certificate-title">CERTIFICATE</div>
+    <div class="certificate-subtitle">of Professional Achievement</div>
+    
+    <div class="certificate-content">
+      <div class="certifies-text">This certificate is proudly presented to</div>
+      <div class="recipient-name">${recipientName}</div>
+      <div class="completion-text">For successfully completing</div>
+      <div class="course-title">${courseTitle}</div>
+      
+      <div class="course-details">
+        <div class="delivery-method">${deliveryMethod}</div>
+      </div>
+      
+      <div class="achievement-stats">
+        ${
+          attendancePercentage
+            ? `
+          <div class="stat-item">
+            <span class="stat-number">${attendancePercentage}%</span>
+            <div class="stat-label">Attendance</div>
+          </div>
+        `
+            : ""
+        }
+        ${
+          examScore
+            ? `
+          <div class="stat-item">
+            <span class="stat-number">${examScore}%</span>
+            <div class="stat-label">Assessment Score</div>
+          </div>
+        `
+            : ""
+        }
+        ${
+          totalHours
+            ? `
+          <div class="stat-item">
+            <span class="stat-number">${totalHours}</span>
+            <div class="stat-label">Training Hours</div>
+          </div>
+        `
+            : ""
+        }
+        <div class="stat-item">
+          <span class="stat-number">${grade}</span>
+          <div class="stat-label">Final Grade</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="signature-section">
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="signature-name">${instructorName}</div>
+        <div class="signature-title">Lead Instructor</div>
+      </div>
+      
+      <div class="official-seal">
+        <div>OFFICIAL<br>SEAL</div>
+      </div>
+      
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="signature-name">${new Date(issueDate).toLocaleDateString(
+          "en-US",
+          {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }
+        )}</div>
+        <div class="signature-title">Date</div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div>Certificate ID: ${certificateId}</div>
+      <div class="verification-code">Verification Code: ${verificationCode}</div>
+      <div style="margin-top: 10px;">
+        This certificate can be verified at: https://training.iaai.com/certificates/verify/${verificationCode}
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+    } catch (error) {
+      console.error("❌ Error generating certificate HTML:", error);
+      throw new Error(`HTML generation failed: ${error.message}`);
+    }
+  }
+
+  // ============================================================================
+  // ALSO UPDATE YOUR USER MODEL PRE-SAVE MIDDLEWARE
+  // Add this safety check to your User model (around line 4598)
+  // ============================================================================
+
+  /*
+// In your User model, replace the pre-save middleware with this safer version:
+
+userSchema.pre("save", function (next) {
+  try {
+    // ✅ SAFETY CHECK: Ensure arrays exist before forEach
+    if (this.myInPersonCourses && Array.isArray(this.myInPersonCourses)) {
+      this.myInPersonCourses.forEach((enrollment) => {
+        if (enrollment.userProgress?.assessmentAttempts?.length > 0) {
+          const attempts = enrollment.userProgress.assessmentAttempts;
+          const bestAttempt = attempts.reduce((best, current) => {
+            const currentScore = current.scores?.totalScore || 0;
+            const bestScore = best.scores?.totalScore || 0;
+            return currentScore > bestScore ? current : best;
+          }, attempts[0]);
+
+          // Update summary fields
+          enrollment.bestAssessmentScore = bestAttempt.scores?.totalScore || 0;
+          enrollment.assessmentCompleted =
+            bestAttempt.passed || bestAttempt.scores?.totalScore >= 70;
+          enrollment.totalAttempts = attempts.length;
+          enrollment.currentAttempts = attempts.length;
+        }
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error("❌ Error in user pre-save middleware:", error);
+    next(error);
+  }
+});
+*/
 }
 
 module.exports = new CertificateController();

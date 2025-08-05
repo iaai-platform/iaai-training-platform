@@ -2319,8 +2319,12 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       `✅ Assessment submitted successfully. Score: ${score}%, Passed: ${passed}`
     );
 
-    // ✅ Enhanced response for modern UI
-    const response = {
+    // ✅ FIXED: Calculate values first, then use them in responseData
+    const canRetake = !passed && currentAttempts + 1 < maxAttempts;
+    const attemptsRemaining = Math.max(0, maxAttempts - (currentAttempts + 1));
+
+    // ✅ Enhanced responseData for modern UI
+    const responseData = {
       success: true,
       passed: passed,
       score: score,
@@ -2329,8 +2333,8 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       // Attempt information
       currentAttempts: currentAttempts + 1,
       totalAttempts: maxAttempts,
-      attemptsRemaining: Math.max(0, maxAttempts - (currentAttempts + 1)),
-      canRetake: !passed && currentAttempts + 1 < maxAttempts,
+      attemptsRemaining: attemptsRemaining,
+      canRetake: canRetake,
 
       // Results data
       totalQuestions: questions.length,
@@ -2349,13 +2353,13 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       // Messages for UI
       title: passed
         ? "🎉 Congratulations!"
-        : response.canRetake
+        : canRetake
         ? "Almost There!"
         : "Assessment Not Passed",
       message: passed
         ? `Excellent work! You passed with ${score}%`
-        : response.canRetake
-        ? `You scored ${score}%. You need ${passingScore}% to pass. You have ${response.attemptsRemaining} attempt(s) remaining.`
+        : canRetake
+        ? `You scored ${score}%. You need ${passingScore}% to pass. You have ${attemptsRemaining} attempt(s) remaining.`
         : `You scored ${score}%. You have used all available attempts.`,
 
       // Next steps
@@ -2365,11 +2369,11 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
             "Confirm your attendance to receive your certificate",
             "Share your achievement with others",
           ]
-        : response.canRetake
+        : canRetake
         ? [
             "Review your results and course materials",
             "Take the assessment again when ready",
-            `You have ${response.attemptsRemaining} attempt(s) remaining`,
+            `You have ${attemptsRemaining} attempt(s) remaining`,
           ]
         : [
             "Contact support for additional attempts if needed",
@@ -2388,7 +2392,7 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       },
     };
 
-    res.json(response);
+    res.json(responseData);
   } catch (error) {
     console.error("❌ Error submitting online assessment:", error);
     res.status(500).json({

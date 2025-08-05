@@ -162,6 +162,16 @@
       background: #cbd5e0;
     }
 
+    .btn-success {
+      background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(56, 161, 105, 0.3);
+    }
+
     .search-box {
       padding: 10px 20px;
       border: 2px solid #e2e8f0;
@@ -577,6 +587,63 @@
       font-size: 0.9rem;
     }
 
+    /* Course Type Badges */
+    .course-type-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-live-online {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+    }
+
+    .badge-in-person {
+      background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+      color: white;
+    }
+
+    .badge-self-paced {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+    }
+
+    /* Loading states */
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+    }
+
+    .btn-loading .btn-text {
+      opacity: 0;
+    }
+
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .hero-header h1 {
@@ -618,27 +685,10 @@
         font-size: 0.65rem;
         padding: 3px 30px;
       }
-    }
 
-    /* Loading State */
-    .loading-spinner {
-      text-align: center;
-      padding: 50px;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 50px;
-      height: 50px;
-      border: 5px solid #f3f3f3;
-      border-top: 5px solid #3182ce;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      .certificate-actions {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -683,6 +733,16 @@
     </div>
 
     <!-- Achievement Summary -->
+    <% 
+      const totalCertificates = certificates ? certificates.length : 0;
+      const totalLearningHours = certificates ? certificates.reduce((sum, cert) => sum + (cert.certificateData?.achievement?.totalHours || 0), 0) : 0;
+      const avgScore = certificates && certificates.length > 0 ? Math.round(certificates.reduce((sum, cert) => sum + (cert.certificateData?.achievement?.examScore || 0), 0) / certificates.length) : 0;
+      let achievementLevel = 'Beginner';
+      if (totalCertificates >= 5) achievementLevel = 'Expert';
+      else if (totalCertificates >= 3) achievementLevel = 'Advanced';
+      else if (totalCertificates >= 1) achievementLevel = 'Intermediate';
+    %>
+    
     <div class="achievement-summary">
       <div class="summary-header">
         <h2>Your Learning Journey</h2>
@@ -692,29 +752,29 @@
           <div class="stat-icon icon-gold">
             <i class="fas fa-certificate"></i>
           </div>
-          <span class="stat-number"><%= achievementSummary.totalCertificates || 0 %></span>
+          <span class="stat-number" data-target="<%= totalCertificates %>">0</span>
           <span class="stat-label">Total Certificates</span>
         </div>
         <div class="stat-card">
           <div class="stat-icon icon-bronze">
             <i class="fas fa-clock"></i>
           </div>
-          <span class="stat-number"><%= achievementSummary.totalLearningHours || 0 %></span>
+          <span class="stat-number" data-target="<%= totalLearningHours %>">0</span>
           <span class="stat-label">Learning Hours</span>
         </div>
         <div class="stat-card">
           <div class="stat-icon icon-silver">
             <i class="fas fa-award"></i>
           </div>
-          <div class="achievement-level"><%= achievementSummary.achievementLevel || 'Beginner' %></div>
+          <div class="achievement-level"><%= achievementLevel %></div>
           <span class="stat-label">Achievement Level</span>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="color: #3182ce;">
-            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-percentage"></i>
           </div>
-          <span class="stat-number"><%= achievementSummary.activeCertificates || 0 %></span>
-          <span class="stat-label">Active Certificates</span>
+          <span class="stat-number" data-target="<%= avgScore %>">0</span>
+          <span class="stat-label">Average Score</span>
         </div>
       </div>
     </div>
@@ -724,9 +784,9 @@
       <div class="filter-tabs">
         <button class="filter-tab active" onclick="filterCertificates('all')">All Certificates</button>
         <button class="filter-tab" onclick="filterCertificates('recent')">Recent</button>
-        <button class="filter-tab" onclick="filterCertificates('selfpaced')">Self-Paced</button>
-        <button class="filter-tab" onclick="filterCertificates('live')">Live Training</button>
-        <button class="filter-tab" onclick="filterCertificates('inperson')">In-Person</button>
+        <button class="filter-tab" onclick="filterCertificates('SelfPacedOnlineTraining')">Self-Paced</button>
+        <button class="filter-tab" onclick="filterCertificates('OnlineLiveTraining')">Live Training</button>
+        <button class="filter-tab" onclick="filterCertificates('InPersonAestheticTraining')">In-Person</button>
       </div>
     </div>
 
@@ -735,7 +795,7 @@
       <div class="section-header">
         <h2 class="section-title">
           <i class="fas fa-certificate"></i>
-          Your Certificates
+          Your Certificates (<%= totalCertificates %>)
         </h2>
         <div class="view-toggle">
           <button class="view-btn active" onclick="toggleView('grid')">
@@ -750,9 +810,22 @@
       <% if (certificates && certificates.length > 0) { %>
         <!-- Grid View -->
         <div class="certificates-grid" id="gridView">
-          <% certificates.forEach(certificate => { %>
+          <% certificates.forEach((certificate, index) => { %>
             <div class="certificate-card" data-course-type="<%= certificate.courseType %>">
-              <% if (certificate.certificateStatus?.downloadCount > 5) { %>
+              <!-- Course Type Badge -->
+              <div class="course-type-badge 
+                <%= certificate.courseType === 'OnlineLiveTraining' ? 'badge-live-online' : 
+                    certificate.courseType === 'InPersonAestheticTraining' ? 'badge-in-person' : 'badge-self-paced' %>">
+                <% if (certificate.courseType === 'OnlineLiveTraining') { %>
+                  Live Online
+                <% } else if (certificate.courseType === 'InPersonAestheticTraining') { %>
+                  In-Person
+                <% } else { %>
+                  Self-Paced
+                <% } %>
+              </div>
+
+              <% if ((certificate.downloadCount || 0) > 5) { %>
                 <div class="certificate-ribbon">Popular</div>
               <% } %>
               
@@ -760,9 +833,11 @@
                 <div class="certificate-icon">
                   <i class="fas fa-award"></i>
                 </div>
-                <div class="certificate-title"><%= certificate.certificateDetails?.title || 'Certificate' %></div>
+                <div class="certificate-title">
+                  <%= certificate.certificateData?.courseTitle || 'Professional Certificate' %>
+                </div>
                 <div class="certificate-code">
-                  <%= certificate.certificateDetails?.courseCode || 'N/A' %>
+                  <%= certificate.certificateData?.courseCode || 'N/A' %>
                 </div>
               </div>
 
@@ -774,8 +849,8 @@
                       Completed
                     </span>
                     <span class="info-value">
-                      <%= certificate.certificateDetails?.completionDate ? 
-                          new Date(certificate.certificateDetails.completionDate).toLocaleDateString('en-US', {
+                      <%= certificate.certificateData?.completionDate ? 
+                          new Date(certificate.certificateData.completionDate).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
@@ -785,47 +860,72 @@
                   </div>
                   <div class="info-row">
                     <span class="info-label">
-                      <i class="fas fa-user-graduate"></i>
-                      Instructor
+                      <i class="fas fa-calendar-plus"></i>
+                      Issued
                     </span>
                     <span class="info-value">
-                      <%= certificate.certificateDetails?.instructorName || 'IAAI Institute' %>
+                      <%= certificate.certificateData?.issueDate ? 
+                          new Date(certificate.certificateData.issueDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          }) : 
+                          'N/A' %>
                     </span>
                   </div>
+                  <% if (certificate.certificateData?.achievement?.examScore) { %>
                   <div class="info-row">
                     <span class="info-label">
                       <i class="fas fa-chart-line"></i>
-                      Performance
+                      Score
                     </span>
                     <span class="info-value">
                       <span class="certificate-score">
-                        <%= certificate.certificateDetails?.courseStats?.averageScore || 0 %>% Score
+                        <%= certificate.certificateData.achievement.examScore %>%
                       </span>
                     </span>
                   </div>
+                  <% } %>
+                  <% if (certificate.certificateData?.achievement?.totalHours) { %>
+                  <div class="info-row">
+                    <span class="info-label">
+                      <i class="fas fa-clock"></i>
+                      Duration
+                    </span>
+                    <span class="info-value">
+                      <%= certificate.certificateData.achievement.totalHours %> hours
+                    </span>
+                  </div>
+                  <% } %>
                   <div class="info-row">
                     <span class="info-label">
                       <i class="fas fa-download"></i>
                       Downloads
                     </span>
                     <span class="info-value">
-                      <%= certificate.certificateStatus?.downloadCount || 0 %> times
+                      <%= certificate.downloadCount || 0 %> times
                     </span>
                   </div>
                 </div>
 
                 <div class="certificate-actions">
                   <a href="/certificates/view/<%= certificate.certificateId %>" class="btn btn-primary">
-                    <i class="fas fa-eye"></i>
-                    View
+                    <span class="btn-text">
+                      <i class="fas fa-eye"></i>
+                      View
+                    </span>
                   </a>
-                  <button class="btn btn-secondary" onclick="downloadCertificate('<%= certificate.certificateId %>')">
-                    <i class="fas fa-download"></i>
-                    Download
+                  <button class="btn btn-success" onclick="downloadCertificatePDF('<%= certificate.certificateId %>')">
+                    <span class="btn-text">
+                      <i class="fas fa-download"></i>
+                      PDF
+                    </span>
                   </button>
-                  <button class="btn btn-secondary" onclick="shareCertificate('<%= certificate.certificateId %>')">
-                    <i class="fas fa-share"></i>
-                    Share
+                  <button class="btn btn-secondary" onclick="shareCertificate('<%= certificate.certificateId %>', '<%= certificate.certificateData?.verificationCode %>')">
+                    <span class="btn-text">
+                      <i class="fas fa-share"></i>
+                      Share
+                    </span>
                   </button>
                 </div>
               </div>
@@ -841,19 +941,24 @@
                 <i class="fas fa-certificate"></i>
               </div>
               <div class="list-content">
-                <div class="list-title"><%= certificate.certificateDetails?.title || 'Certificate' %></div>
+                <div class="list-title">
+                  <%= certificate.certificateData?.courseTitle || 'Professional Certificate' %>
+                </div>
                 <div class="list-details">
-                  <span><i class="fas fa-code"></i> <%= certificate.certificateDetails?.courseCode %></span>
-                  <span><i class="fas fa-calendar"></i> <%= new Date(certificate.certificateDetails?.completionDate).toLocaleDateString() %></span>
-                  <span><i class="fas fa-percentage"></i> <%= certificate.certificateDetails?.courseStats?.averageScore || 0 %>% Score</span>
+                  <span><i class="fas fa-code"></i> <%= certificate.certificateData?.courseCode || 'N/A' %></span>
+                  <span><i class="fas fa-calendar"></i> <%= certificate.certificateData?.completionDate ? new Date(certificate.certificateData.completionDate).toLocaleDateString() : 'N/A' %></span>
+                  <% if (certificate.certificateData?.achievement?.examScore) { %>
+                  <span><i class="fas fa-percentage"></i> <%= certificate.certificateData.achievement.examScore %>%</span>
+                  <% } %>
+                  <span><i class="fas fa-download"></i> <%= certificate.downloadCount || 0 %> downloads</span>
                 </div>
               </div>
               <div class="list-actions">
                 <a href="/certificates/view/<%= certificate.certificateId %>" class="btn btn-primary">
                   <i class="fas fa-eye"></i> View Certificate
                 </a>
-                <button class="btn btn-secondary" onclick="downloadCertificate('<%= certificate.certificateId %>')">
-                  <i class="fas fa-download"></i>
+                <button class="btn btn-success" onclick="downloadCertificatePDF('<%= certificate.certificateId %>')">
+                  <i class="fas fa-download"></i> PDF
                 </button>
               </div>
             </div>
@@ -920,11 +1025,7 @@
           card.style.display = '';
         } else {
           const courseType = card.getAttribute('data-course-type');
-          if (type === 'selfpaced' && courseType === 'SelfPacedOnlineTraining') {
-            card.style.display = '';
-          } else if (type === 'live' && courseType === 'OnlineLiveTraining') {
-            card.style.display = '';
-          } else if (type === 'inperson' && courseType === 'InPersonAestheticTraining') {
+          if (courseType === type) {
             card.style.display = '';
           } else {
             card.style.display = 'none';
@@ -948,113 +1049,171 @@
       });
     });
 
-    // Download certificate
-    function downloadCertificate(certificateId) {
-      Swal.fire({
-        title: 'Downloading Certificate',
-        text: 'Preparing your certificate for download...',
-        icon: 'info',
-        showCancelButton: false,
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => {
-          Swal.showLoading();
-        }
-      });
+    // ✅ UPDATED: Download certificate with new PDF functionality
+    function downloadCertificatePDF(certificateId) {
+      const btn = event.target.closest('.btn');
+      const originalHTML = btn.innerHTML;
+      
+      // Show loading state
+      btn.classList.add('btn-loading');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-text" style="opacity: 0;"><i class="fas fa-download"></i> PDF</span>';
 
-      fetch(`/certificates/download/${certificateId}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Success!',
-              text: 'Certificate ready for download',
-              timer: 2000
-            });
-          } else {
-            Swal.fire({
-              icon: 'info',
-              title: 'Coming Soon',
-              text: 'PDF download functionality will be available soon!',
-              confirmButtonColor: '#3182ce'
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Download error:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Download Failed',
-            text: 'Unable to download certificate at this time'
-          });
+      // Create download URL
+      const downloadUrl = `/certificates/download-pdf/${certificateId}`;
+      
+      // Use fetch to handle the download
+      fetch(downloadUrl, {
+        method: 'GET',
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        // Check if response is actually a PDF
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/pdf')) {
+          throw new Error('Invalid response format - not a PDF');
+        }
+        
+        return response.blob();
+      })
+      .then(blob => {
+        if (blob.size === 0) {
+          throw new Error('Empty PDF file received');
+        }
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Certificate_${certificateId}.pdf`;
+        
+        // Trigger download
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 100);
+        
+        // Show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'Download Complete!',
+          text: 'Your certificate PDF has been downloaded successfully.',
+          timer: 3000,
+          showConfirmButton: false
         });
+      })
+      .catch(error => {
+        console.error('Download error:', error);
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Download Failed',
+          html: `
+            <p>There was an error downloading your certificate:</p>
+            <p style="color: #dc2626; font-weight: 600; margin: 10px 0;">${error.message}</p>
+            <p>Please try again or contact support if the problem persists.</p>
+          `,
+          confirmButtonColor: '#3182ce'
+        });
+      })
+      .finally(() => {
+        // Reset button state
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+      });
     }
 
-    // Share certificate
-    function shareCertificate(certificateId) {
-      fetch(`/certificates/api/my-certificates`)
-        .then(response => response.json())
-        .then(data => {
-          const certificate = data.certificates.find(c => c.certificateId === certificateId);
-          if (certificate) {
-            const shareUrl = certificate.shareableUrl || `${window.location.origin}/certificates/verify-page/${certificateId}`;
+    // ✅ UPDATED: Share certificate with verification code
+    function shareCertificate(certificateId, verificationCode) {
+      const shareUrl = `${window.location.origin}/certificates/verify/${verificationCode}`;
+      
+      Swal.fire({
+        title: 'Share Your Achievement!',
+        html: `
+          <div style="text-align: center; margin: 20px 0;">
+            <div style="background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%); 
+                       color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+              <h3 style="margin: 0 0 10px 0;"><i class="fas fa-certificate"></i> Professional Certificate</h3>
+              <p style="margin: 0; opacity: 0.9;">IAAI Training Institute</p>
+            </div>
             
-            Swal.fire({
-              title: 'Share Your Achievement!',
-              html: `
-                <div style="text-align: center; margin: 20px 0;">
-                  <p style="margin-bottom: 20px;">Share your professional certificate:</p>
-                  <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <input type="text" value="${shareUrl}" readonly style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 5px; font-size: 0.9rem;" id="shareUrl">
-                  </div>
-                  <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-                    <button onclick="copyShareLink()" style="background: #3182ce; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                      <i class="fas fa-copy"></i> Copy Link
-                    </button>
-                    <button onclick="shareOnLinkedIn('${shareUrl}')" style="background: #0077b5; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                      <i class="fab fa-linkedin"></i> LinkedIn
-                    </button>
-                    <button onclick="shareOnTwitter('${shareUrl}')" style="background: #1da1f2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                      <i class="fab fa-twitter"></i> Twitter
-                    </button>
-                  </div>
-                </div>
-              `,
-              showConfirmButton: false,
-              showCloseButton: true,
-              width: '600px'
-            });
-          }
-        });
+            <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <input type="text" value="${shareUrl}" readonly 
+                     style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem;" 
+                     id="shareUrl">
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+              <button onclick="copyShareLink()" 
+                      style="background: #38a169; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <i class="fas fa-copy"></i> Copy Link
+              </button>
+              <button onclick="shareOnLinkedIn('${shareUrl}')" 
+                      style="background: #0077b5; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <i class="fab fa-linkedin"></i> LinkedIn
+              </button>
+              <button onclick="shareOnTwitter('${shareUrl}')" 
+                      style="background: #1da1f2; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <i class="fab fa-twitter"></i> Twitter
+              </button>
+            </div>
+          </div>
+        `,
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: '600px'
+      });
     }
 
     function copyShareLink() {
       const shareUrl = document.getElementById('shareUrl');
       shareUrl.select();
-      document.execCommand('copy');
+      shareUrl.setSelectionRange(0, 99999);
       
-      Swal.fire({
-        icon: 'success',
-        title: 'Copied!',
-        text: 'Link copied to clipboard',
-        timer: 1500,
-        showConfirmButton: false
+      navigator.clipboard.writeText(shareUrl.value).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Copied!',
+          text: 'Verification link copied to clipboard',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }).catch(() => {
+        // Fallback for older browsers
+        document.execCommand('copy');
+        Swal.fire({
+          icon: 'success',
+          title: 'Copied!',
+          text: 'Verification link copied to clipboard',
+          timer: 2000,
+          showConfirmButton: false
+        });
       });
     }
 
     function shareOnLinkedIn(url) {
-      const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      const text = encodeURIComponent('🎓 Proud to announce that I\'ve earned a professional certificate from IAAI Training Institute!');
+      const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${text}`;
       window.open(linkedinUrl, '_blank', 'width=600,height=500');
     }
 
     function shareOnTwitter(url) {
-      const text = encodeURIComponent('I just earned a professional certificate from IAAI Training Institute! 🎓');
+      const text = encodeURIComponent('🎓 Just earned a professional certificate from IAAI Training Institute!');
       const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`;
       window.open(twitterUrl, '_blank', 'width=600,height=500');
     }
 
-    // Initialize page animations
+    // Initialize page animations and stats
     document.addEventListener('DOMContentLoaded', function() {
       // Animate cards on load
       const cards = document.querySelectorAll('.certificate-card');
@@ -1069,21 +1228,21 @@
         }, index * 100);
       });
 
-      // Animate stats
-      const statNumbers = document.querySelectorAll('.stat-number');
+      // Animate stats counter
+      const statNumbers = document.querySelectorAll('.stat-number[data-target]');
       statNumbers.forEach(stat => {
-        const finalValue = parseInt(stat.textContent);
-        let currentValue = 0;
-        const increment = finalValue / 20;
+        const target = parseInt(stat.getAttribute('data-target'));
+        const increment = target / 50;
+        let current = 0;
         
         const timer = setInterval(() => {
-          currentValue += increment;
-          if (currentValue >= finalValue) {
-            currentValue = finalValue;
+          current += increment;
+          if (current >= target) {
+            current = target;
             clearInterval(timer);
           }
-          stat.textContent = Math.round(currentValue);
-        }, 50);
+          stat.textContent = Math.round(current);
+        }, 30);
       });
     });
   </script>

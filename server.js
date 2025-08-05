@@ -450,6 +450,8 @@ const cartWishlistRoutes = require("./routes/cartWishlistRoutes");
 app.use("/", cartWishlistRoutes);
 console.log("🛒 Shared cart and wishlist API routes loaded");
 
+console.log("🛒 Shared cart and wishlist routes loaded");
+
 // ============================================
 // 9.4 Self Paced USER ROUTES (NEW)
 // ============================================

@@ -13,9 +13,7 @@ const WatchExamController = require("../controllers/watchExamController"); // Se
 // ========================================
 
 // Main Library Route - Redirects to self-paced by default
-router.get("/library", isAuthenticated, async (req, res) => {
-  res.redirect("/library/self-paced");
-});
+router.get("/library", isAuthenticated, LibraryController.getMasterLibrary);
 
 // Specific Library Routes (Display pages only)
 router.get(

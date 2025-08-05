@@ -10,6 +10,7 @@ const mongoose = require("mongoose");
 // ============================================
 
 /**
+ *
  * Get timezone abbreviation safely
  */
 function getTimezoneAbbr(timezone) {
@@ -1957,6 +1958,144 @@ exports.getInPersonLibrary = async (req, res) => {
   }
 };
 
+// ✅ ADD THIS RIGHT HERE:
+exports.getMasterLibrary = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    console.log("📚 Loading master library for user:", userId);
+
+    const User = require("../models/user");
+    const user = await User.findById(userId).select(
+      "mySelfPacedCourses myLiveCourses myInPersonCourses myCertificates"
+    );
+
+    if (!user) {
+      req.flash("error_message", "User not found");
+      return res.redirect("/dashboard");
+    }
+
+    // Calculate aggregated statistics
+    const selfPacedCourses = user.mySelfPacedCourses || [];
+    const liveCourses = user.myLiveCourses || [];
+    const inPersonCourses = user.myInPersonCourses || [];
+    const certificates = user.myCertificates || [];
+
+    // Total courses across all types
+    const totalCourses =
+      selfPacedCourses.length + liveCourses.length + inPersonCourses.length;
+
+    // Count completed courses
+    let completedCourses = 0;
+    let inProgressCourses = 0;
+    let notStartedCourses = 0;
+
+    // Self-paced course stats
+    selfPacedCourses.forEach((course) => {
+      const progress = course.courseProgress || {};
+      if (
+        progress.status === "completed" ||
+        progress.overallPercentage === 100
+      ) {
+        completedCourses++;
+      } else if (progress.overallPercentage > 0) {
+        inProgressCourses++;
+      } else {
+        notStartedCourses++;
+      }
+    });
+
+    // Live course stats
+    liveCourses.forEach((course) => {
+      const progress = course.userProgress || {};
+      if (progress.courseStatus === "completed" || course.attendanceConfirmed) {
+        completedCourses++;
+      } else if (new Date(course.startDate) <= new Date()) {
+        inProgressCourses++;
+      } else {
+        notStartedCourses++;
+      }
+    });
+
+    // In-person course stats
+    inPersonCourses.forEach((course) => {
+      const progress = course.userProgress || {};
+      if (progress.courseStatus === "completed" || course.attendanceConfirmed) {
+        completedCourses++;
+      } else if (new Date(course.startDate) <= new Date()) {
+        inProgressCourses++;
+      } else {
+        notStartedCourses++;
+      }
+    });
+
+    // Calculate study hours and average score (basic implementation)
+    let totalStudyHours = 0;
+    let totalScores = 0;
+    let scoreCount = 0;
+
+    selfPacedCourses.forEach((course) => {
+      const progress = course.courseProgress || {};
+      if (progress.totalWatchTime) {
+        totalStudyHours += Math.round(progress.totalWatchTime / 60); // Convert minutes to hours
+      }
+      if (progress.averageExamScore) {
+        totalScores += progress.averageExamScore;
+        scoreCount++;
+      }
+    });
+
+    const averageScore =
+      scoreCount > 0 ? Math.round(totalScores / scoreCount) : 0;
+
+    // Get recent activity (simplified - you can expand this)
+    const recentActivity = [];
+
+    // Add recent completions
+    certificates.slice(-3).forEach((cert) => {
+      recentActivity.push({
+        type: "certificate",
+        title: cert.courseName || "Course Completed",
+        date: cert.issuedAt || cert.dateIssued,
+        description: "Certificate earned",
+      });
+    });
+
+    console.log("📊 Master library stats calculated:", {
+      totalCourses,
+      completedCourses,
+      inProgressCourses,
+      totalStudyHours,
+      averageScore,
+    });
+
+    res.render("librarymaster", {
+      user: req.user,
+      totalCourses: totalCourses,
+      completedCourses: completedCourses,
+      inProgressCourses: inProgressCourses,
+      notStartedCourses: notStartedCourses,
+      totalCertificates: certificates.length,
+      totalStudyHours: totalStudyHours,
+      averageScore: averageScore,
+      recentActivity: recentActivity,
+      libraryStats: {
+        selfPacedCount: selfPacedCourses.length,
+        liveCount: liveCourses.length,
+        inPersonCount: inPersonCourses.length,
+        totalCompletedVideos: 0, // You can calculate this from courseProgress
+        totalVideosInLibrary: 0, // You can calculate this from courseProgress
+        libraryProgressPercentage:
+          totalCourses > 0
+            ? Math.round((completedCourses / totalCourses) * 100)
+            : 0,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error loading master library:", error);
+    req.flash("error_message", "Error loading library dashboard");
+    res.redirect("/dashboard");
+  }
+};
 /**
  * ✅ FIXED: Confirm Attendance with Proper Percentage Calculation
  * MINIMAL CHANGE - Only updating the attendance calculation logic
@@ -3226,6 +3365,10 @@ const safeCourseMethodCall = async (course, methodName, ...args) => {
 // ============================================
 // ✅ BACKWARD COMPATIBILITY
 // ============================================
+
+// ========================================
+// MASTER LIBRARY HUB METHOD
+// ========================================
 
 // Keep the original method for backward compatibility
 exports.getLibraryPage = exports.getSelfPacedLibrary;

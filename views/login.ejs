@@ -46,6 +46,18 @@
       content: "✅ ";
       margin-right: 5px;
     }
+
+    /* ✅ DEBUG: Make debug info visible but subtle */
+    .debug-info {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 10px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-size: 12px;
+      border-radius: 4px;
+      color: #6c757d;
+    }
     
     @keyframes slideIn {
       from { opacity: 0; transform: translateY(-10px); }
@@ -106,8 +118,8 @@
       <!-- Security Notice -->
       <div class="security-notice">
         <i class="fas fa-shield-alt"></i>
-      <!--   <strong>Enhanced Security:</strong> Please verify you're human to protect your account.
-      </div>  -->
+        <strong>Enhanced Security:</strong> Please verify you're human to protect your account.
+      </div>
 
       <!-- Error Message Display -->
       <% if (error_message) { %>
@@ -143,7 +155,7 @@
         <!-- Google reCAPTCHA -->
         <div class="recaptcha-container">
           <div class="g-recaptcha" 
-          data-sitekey="<%= recaptcha_site_key %>"
+               data-sitekey="<%= recaptcha_site_key %>"
                data-callback="onRecaptchaSuccess"
                data-expired-callback="onRecaptchaExpired">
           </div>
@@ -172,9 +184,13 @@
   <script>
     let recaptchaVerified = false;
 
+    // ✅ DEBUG: Log page load
+    console.log("🔍 CLIENT: Login page loaded");
+    console.log("🔍 CLIENT: reCAPTCHA site key exists:", "<%= recaptcha_site_key ? 'YES' : 'NO' %>");
+
     // Callback when reCAPTCHA is successfully completed
     function onRecaptchaSuccess(token) {
-      console.log('✅ reCAPTCHA verified');
+      console.log('✅ CLIENT: reCAPTCHA verified');
       recaptchaVerified = true;
       document.getElementById('loginBtn').disabled = false;
       document.getElementById('recaptchaError').style.display = 'none';
@@ -182,7 +198,7 @@
 
     // Callback when reCAPTCHA expires
     function onRecaptchaExpired() {
-      console.log('⏰ reCAPTCHA expired');
+      console.log('⏰ CLIENT: reCAPTCHA expired');
       recaptchaVerified = false;
       document.getElementById('loginBtn').disabled = true;
       document.getElementById('recaptchaError').style.display = 'block';
@@ -191,7 +207,11 @@
 
     // Form validation
     function validateForm() {
+      console.log('🔍 CLIENT: Form validation started');
+      console.log('🔍 CLIENT: reCAPTCHA verified:', recaptchaVerified);
+      
       if (!recaptchaVerified) {
+        console.log('❌ CLIENT: reCAPTCHA not verified');
         document.getElementById('recaptchaError').style.display = 'block';
         return false;
       }
@@ -205,7 +225,7 @@
       loginText.style.display = 'none';
       loginLoader.style.display = 'inline';
       
-      console.log('🔐 Submitting login form with   verification');
+      console.log('🔐 CLIENT: Submitting login form with reCAPTCHA verification');
       return true;
     }
 
@@ -215,11 +235,13 @@
       const successMsg = document.getElementById('successMessage');
       
       if (errorMsg) {
+        console.log('🔍 CLIENT: Auto-hiding error message');
         errorMsg.style.animation = 'fadeOut 0.3s ease-out';
         setTimeout(() => errorMsg.remove(), 300);
       }
       
       if (successMsg) {
+        console.log('🔍 CLIENT: Auto-hiding success message');
         successMsg.style.animation = 'fadeOut 0.3s ease-out';
         setTimeout(() => successMsg.remove(), 300);
       }
@@ -234,6 +256,24 @@
       }
     `;
     document.head.appendChild(style);
+
+    // ✅ DEBUG: Manual test for flash messages
+    function showTestMessage() {
+      console.log('🧪 CLIENT: Showing test message');
+      const testDiv = document.createElement('div');
+      testDiv.className = 'error-message';
+      testDiv.textContent = 'TEST: This is a client-side test message!';
+      document.querySelector('.hero-content').insertBefore(testDiv, document.querySelector('form'));
+    }
+
+    // Add test button functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const testButton = document.createElement('button');
+      testButton.textContent = '🧪 Test Client Message';
+      testButton.onclick = showTestMessage;
+      testButton.style.cssText = 'margin: 10px; padding: 5px 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;';
+      document.querySelector('.hero-content').appendChild(testButton);
+    });
   </script>
 </body>
 </html>

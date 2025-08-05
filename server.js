@@ -115,8 +115,7 @@ app.use(flash());
 // Global variables for views
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
-  res.locals.success_message = req.flash("success_message");
-  res.locals.error_message = req.flash("error_message");
+
   next();
 });
 

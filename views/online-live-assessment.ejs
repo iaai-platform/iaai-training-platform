@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assessment - <%= course.basic.title %></title>
+  <title>Online Live Assessment - <%= course.basic.title %></title>
   <link rel="stylesheet" href="/css/librarystyle.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
   <style>
     body {
@@ -51,7 +52,7 @@
     }
 
     .meta-item i {
-      color: #b8860b;
+      color: #17a2b8;
       width: 20px;
     }
 
@@ -72,7 +73,7 @@
     .info-card {
       padding: 20px;
       border-radius: 12px;
-      border-left: 4px solid #b8860b;
+      border-left: 4px solid #17a2b8;
       background: #f8f9ff;
     }
 
@@ -218,7 +219,7 @@
     }
 
     .question-points {
-      background: #b8860b;
+      background: #17a2b8;
       color: white;
       padding: 4px 12px;
       border-radius: 20px;
@@ -244,7 +245,7 @@
     }
 
     .answer-option:hover {
-      border-color: #b8860b;
+      border-color: #17a2b8;
       background: #fffef7;
     }
 
@@ -359,7 +360,6 @@
       color: #721c24;
     }
 
-    /* ✅ NEW: Results Display Styles */
     .results-container {
       background: white;
       border-radius: 15px;
@@ -482,7 +482,6 @@
       color: #555;
     }
 
-    /* Animation effects */
     .fade-in {
       animation: fadeIn 0.8s ease-in;
     }
@@ -576,12 +575,10 @@
 <body>
   <%- include('partials/header') %>
 
-
-  
   <div class="assessment-container">
     <!-- Assessment Header -->
     <div class="assessment-header">
-      <h1><i class="fas fa-clipboard-check"></i> Live Online Course Assessment</h1>
+      <h1><i class="fas fa-laptop-code"></i> Online Live Course Assessment</h1>
       <p><strong><%= course.basic.title %></strong></p>
       <p><%= course.basic.description %></p>
       
@@ -599,7 +596,7 @@
           <span>Course Code: <%= course.basic.courseCode %></span>
         </div>
         <div class="meta-item">
-          <i class="fas fa-user-tie"></i>
+          <i class="fas fa-video"></i>
           <span>Platform: <%= course.platform.name || 'Online' %></span>
         </div>
       </div>
@@ -650,7 +647,7 @@
       </div>
     </div>
 
-    <!-- ✅ NEW: Assessment Results Display (Hidden by default) -->
+    <!-- Assessment Results Display (Hidden by default) -->
     <div id="resultsContainer" class="results-container" style="display: none;">
       <div id="resultsHero" class="results-hero">
         <i id="resultsIcon" class="results-icon"></i>
@@ -701,7 +698,7 @@
       </div>
     </div>
 
-    <!-- ✅ UPDATED: Assessment Results Display -->
+    <!-- Assessment Results Display for Completed -->
     <% if (hasPassedAssessment) { %>
     <div class="results-container fade-in">
       <div class="results-hero passed">
@@ -736,7 +733,7 @@
           <ul>
             <li>✅ Assessment completed successfully</li>
             <li>🎓 Return to your library to complete the course</li>
-            <li>📜 Confirm your attendance to receive your certificate</li>
+            <li>📜 Your certificate is now available</li>
             <li>💡 Share your achievement with others</li>
           </ul>
         </div>
@@ -756,7 +753,7 @@
     </div>
     
     <% } else if (!canTakeAssessment) { %>
-    <!-- ✅ UPDATED: No more attempts -->
+    <!-- No more attempts -->
     <div class="results-container fade-in">
       <div class="results-hero failed">
         <i class="fas fa-times-circle results-icon"></i>
@@ -812,7 +809,7 @@
     
     <% } else { %>
     
-    <!-- ✅ UPDATED: Assessment History (if exists) -->
+    <!-- Assessment History (if exists) -->
     <% if (assessmentHistory && assessmentHistory.length > 0) { %>
     <div class="assessment-history">
       <h2><i class="fas fa-history"></i> Previous Attempts</h2>
@@ -904,7 +901,7 @@
     <% } %>
   </div>
 
-  <!-- ✅ NEW: Detailed Results Modal -->
+  <!-- Detailed Results Modal -->
   <div id="resultsModal" class="loading-overlay">
     <div class="loading-content" style="max-width: 600px; width: 90%;">
       <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Assessment Results</h3>
@@ -938,7 +935,7 @@
       
       const totalQuestions = <%= assessment.questions ? assessment.questions.length : 0 %>;
       
-      // ✅ NEW: Check if assessment is completed on page load
+      // Check if assessment is completed on page load
       const hasPassedAssessment = <%= hasPassedAssessment || false %>;
       const assessmentCompleted = <%= assessmentCompleted || false %>;
       const assessmentScore = <%= assessmentScore || 0 %>;
@@ -1007,7 +1004,7 @@
         }
       }
 
-      // ✅ Show results with modern UI
+      // Show results with modern UI
       function showResults(result) {
         // Hide the assessment form
         if (assessmentForm) {
@@ -1054,7 +1051,7 @@
               <ul>
                 <li>✅ Assessment completed successfully</li>
                 <li>🎓 Return to your library to complete the course</li>
-                <li>📜 Confirm your attendance to receive your certificate</li>
+                <li>📜 Your certificate is now available</li>
                 <li>💡 Share your achievement with others</li>
               </ul>
             `;
@@ -1183,37 +1180,36 @@
                 showResults(result);
               }, 500);
               
-
               if (result.passed) {
-    setTimeout(() => {
-      Swal.fire({
-        icon: 'success',
-        title: '🎉 Assessment Completed!',
-        html: `
-          <div style="text-align: center;">
-            <i class="fas fa-trophy" style="font-size: 3rem; color: #ffd700; margin-bottom: 15px;"></i>
-            <h3 style="color: #28a745;">Congratulations!</h3>
-            <p>You scored <strong>${result.score}%</strong> and passed the assessment!</p>
-            <div style="background: #d4f4dd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-              <div style="color: #155724; font-weight: 600;">
-                <i class="fas fa-check-circle" style="color: #28a745;"></i> Assessment Completed<br>
-                <i class="fas fa-user-check" style="color: #28a745;"></i> Attendance Confirmed<br>
-                <i class="fas fa-certificate" style="color: #28a745;"></i> Ready for Certificate
-              </div>
-            </div>
-            <p style="color: #666;">You will be redirected to your library to complete the course.</p>
-          </div>
-        `,
-        confirmButtonColor: '#28a745',
-        confirmButtonText: '<i class="fas fa-arrow-right"></i> Go to Library',
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      }).then(() => {
-        // Redirect to library page
-        window.location.href = '/library/live';
-      });
-    }, 2000);
-  }
+                setTimeout(() => {
+                  Swal.fire({
+                    icon: 'success',
+                    title: '🎉 Assessment Completed!',
+                    html: `
+                      <div style="text-align: center;">
+                        <i class="fas fa-trophy" style="font-size: 3rem; color: #ffd700; margin-bottom: 15px;"></i>
+                        <h3 style="color: #28a745;">Congratulations!</h3>
+                        <p>You scored <strong>${result.score}%</strong> and passed the assessment!</p>
+                        <div style="background: #d4f4dd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                          <div style="color: #155724; font-weight: 600;">
+                            <i class="fas fa-check-circle" style="color: #28a745;"></i> Assessment Completed<br>
+                            <i class="fas fa-user-check" style="color: #28a745;"></i> Attendance Confirmed<br>
+                            <i class="fas fa-certificate" style="color: #28a745;"></i> Ready for Certificate
+                          </div>
+                        </div>
+                        <p style="color: #666;">You will be redirected to your library to complete the course.</p>
+                      </div>
+                    `,
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: '<i class="fas fa-arrow-right"></i> Go to Library',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                  }).then(() => {
+                    // Redirect to library page
+                    window.location.href = '/library/live';
+                  });
+                }, 2000);
+              }
 
             } else {
               throw new Error(result.message || 'Unknown error occurred');
@@ -1234,7 +1230,7 @@
         });
       }
 
-      // ✅ Event handlers for new buttons
+      // Event handlers for new buttons
       
       // Retake button
       const retakeBtn = document.getElementById('retakeBtn');
@@ -1256,55 +1252,9 @@
 
       // Initialize progress
       updateProgress();
-
-      // ✅ Auto-save progress (optional)
-      let autoSaveTimeout;
-      function autoSaveProgress() {
-        clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(() => {
-          const answers = {};
-          for (let i = 0; i < totalQuestions; i++) {
-            const selectedAnswer = document.querySelector(`input[name="question_${i}"]:checked`);
-            if (selectedAnswer) {
-              answers[i] = parseInt(selectedAnswer.value);
-            }
-          }
-          localStorage.setItem('assessment_progress_<%= course._id %>', JSON.stringify(answers));
-        }, 1000);
-      }
-
-      // Restore progress from localStorage
-      try {
-        const savedProgress = localStorage.getItem('assessment_progress_<%= course._id %>');
-        if (savedProgress) {
-          const answers = JSON.parse(savedProgress);
-          Object.keys(answers).forEach(questionIndex => {
-            const radio = document.querySelector(`input[name="question_${questionIndex}"][value="${answers[questionIndex]}"]`);
-            if (radio) {
-              radio.checked = true;
-              radio.closest('.answer-option').classList.add('selected');
-            }
-          });
-          updateProgress();
-        }
-      } catch (e) {
-        console.log('Could not restore previous progress');
-      }
-
-      // Add auto-save to radio buttons
-      answerOptions.forEach(option => {
-        option.addEventListener('click', autoSaveProgress);
-      });
-
-      // Clear saved progress on successful submission
-      if (form) {
-        form.addEventListener('submit', () => {
-          localStorage.removeItem('assessment_progress_<%= course._id %>');
-        });
-      }
     });
 
-    // ✅ Global functions for results modal
+    // Global functions for results modal
     function showDetailedResults() {
       const modal = document.getElementById('resultsModal');
       const content = document.getElementById('resultsContent');

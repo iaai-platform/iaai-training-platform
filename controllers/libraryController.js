@@ -2447,7 +2447,7 @@ exports.getOnlineLiveAssessment = async (req, res) => {
       });
     }
 
-    // ✅ FIXED: Check attendance requirement - Allow assessment after attendance confirmation
+    // ✅ FIXED: Enhanced attendance validation
     const totalSessions = course.schedule.sessions?.length || 1;
     const attendedSessions =
       enrollment.userProgress?.sessionsAttended?.length || 0;
@@ -2456,7 +2456,6 @@ exports.getOnlineLiveAssessment = async (req, res) => {
         ? Math.round((attendedSessions / totalSessions) * 100)
         : 0;
 
-    // ✅ Enhanced Logic: Allow assessment if attendance confirmed or meets requirements
     const hasConfirmedAttendance = attendedSessions > 0;
     const courseStatusCompleted =
       enrollment.userProgress?.courseStatus === "completed";
@@ -2475,7 +2474,7 @@ exports.getOnlineLiveAssessment = async (req, res) => {
       });
     }
 
-    // ✅ FIXED: Initialize assessment arrays OUTSIDE userProgress
+    // ✅ CRITICAL: Initialize assessment arrays OUTSIDE userProgress (consistency)
     if (!enrollment.assessmentAttempts) {
       enrollment.assessmentAttempts = [];
     }
@@ -2483,13 +2482,13 @@ exports.getOnlineLiveAssessment = async (req, res) => {
       enrollment.assessmentHistory = [];
     }
 
-    // ✅ FIXED: Get assessment data using OUTSIDE userProgress structure
+    // ✅ ALIGNED: Get assessment data using OUTSIDE userProgress structure
     const assessmentHistory = enrollment.assessmentHistory || [];
     const currentAttempts = enrollment.assessmentAttempts.length;
     const maxAttempts = (course.assessment.retakesAllowed || 0) + 1;
     const canTakeAssessment = currentAttempts < maxAttempts;
 
-    // ✅ FIXED: Properly check completion status using OUTSIDE userProgress
+    // ✅ CRITICAL ALIGNMENT: Calculate status flags consistently for view
     const assessmentCompleted = enrollment.assessmentCompleted || false;
     const assessmentScore =
       enrollment.assessmentScore || enrollment.bestAssessmentScore || null;
@@ -2497,7 +2496,7 @@ exports.getOnlineLiveAssessment = async (req, res) => {
     const hasPassedAssessment =
       assessmentCompleted && assessmentScore >= passingScore;
 
-    console.log(`🔍 Assessment Status Check:`, {
+    console.log(`🔍 Online Live Assessment Status (ALIGNED):`, {
       courseId: courseId,
       userId: userId,
       hasConfirmedAttendance: hasConfirmedAttendance,
@@ -2510,29 +2509,34 @@ exports.getOnlineLiveAssessment = async (req, res) => {
       currentAttempts: currentAttempts,
       maxAttempts: maxAttempts,
       canTakeAssessment: canTakeAssessment,
+      assessmentHistoryLength: assessmentHistory.length,
     });
 
+    // ✅ ENHANCED: Render with aligned data structure
     res.render("online-live-assessment", {
       user: req.user,
       course: course,
       assessment: course.assessment,
+
+      // ✅ ALIGNED: Assessment history data
       assessmentHistory: assessmentHistory,
       currentAttempts: currentAttempts,
       maxAttempts: maxAttempts,
       canTakeAssessment: canTakeAssessment,
 
-      // ✅ FIXED: Pass proper completion status flags with safe defaults
-      assessmentCompleted: assessmentCompleted || false,
-      hasPassedAssessment: hasPassedAssessment || false,
-      assessmentScore: assessmentScore || null,
-      passingScore: passingScore || 70,
+      // ✅ ALIGNED: Status flags that view expects
+      assessmentCompleted: assessmentCompleted,
+      hasPassedAssessment: hasPassedAssessment,
+      assessmentScore: assessmentScore,
+      passingScore: passingScore,
 
-      // ✅ Pass attendance info for display
+      // ✅ ALIGNED: Attendance info for display
       attendancePercentage: attendancePercentage,
       hasConfirmedAttendance: hasConfirmedAttendance,
       attendedSessions: attendedSessions,
       totalSessions: totalSessions,
-      // ✅ ADD: Explicit course type for the view
+
+      // ✅ ALIGNED: Course type identifiers
       courseType: "OnlineLiveTraining",
       courseTypeForUrl: "online-live",
 

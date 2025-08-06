@@ -503,6 +503,306 @@
             width: 120px;
         }
 
+        /* Enhanced Preview Button */
+        .preview-email-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 10px;
+        }
+
+        .preview-email-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .preview-email-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Email Preview Modal Styles */
+        .email-preview-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .email-preview-content {
+            background: white;
+            margin: 2% auto;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .email-preview-header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .email-preview-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-preview {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .close-preview:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .email-preview-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .email-preview-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f8f9fa;
+        }
+
+        .email-tab {
+            padding: 15px 25px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .email-tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: white;
+        }
+
+        .email-tab:hover {
+            background: #e5e7eb;
+        }
+
+        .email-tab-content {
+            display: none;
+            height: 60vh;
+            overflow-y: auto;
+        }
+
+        .email-tab-content.active {
+            display: block;
+        }
+
+        .email-html-preview {
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+
+        .email-info-section {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .email-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .email-info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .email-info-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .email-info-value {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .email-preview-actions {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .preview-action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-edit-email {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-edit-email:hover {
+            background: #d97706;
+        }
+
+        .btn-schedule-preview {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-schedule-preview:hover {
+            background: #059669;
+        }
+
+        .btn-cancel-preview {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel-preview:hover {
+            background: #545b62;
+        }
+
+        /* Email Editor Modal */
+        .email-editor-modal {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+        }
+
+        .email-editor-content {
+            background: white;
+            margin: 5% auto;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .email-editor-header {
+            background: #f59e0b;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .email-editor-body {
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .email-editor-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .email-editor-form textarea {
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .editor-actions {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Loading States */
+        .preview-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #666;
+        }
+
+        .preview-loading .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
         /* Reminders Table */
         .reminders-section {
             background: white;
@@ -739,6 +1039,31 @@
 
             .reminder-form-section {
                 padding: 20px;
+            }
+
+            .email-preview-content {
+                width: 95%;
+                margin: 5% auto;
+                max-height: 85vh;
+            }
+            
+            .email-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .email-preview-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .preview-action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .email-tab {
+                padding: 12px 15px;
+                font-size: 14px;
             }
         }
     </style>
@@ -1016,6 +1341,9 @@
                     </div>
 
                     <div class="action-buttons">
+                        <button type="button" class="preview-email-btn" id="previewEmailBtn" onclick="showEmailPreview()" disabled>
+                            <i class="fas fa-eye"></i> Preview Email
+                        </button>
                         <button type="submit" class="btn btn-primary" id="scheduleReminderBtn" disabled>
                             <i class="fas fa-paper-plane"></i> Schedule Reminder
                         </button>
@@ -1138,6 +1466,131 @@
         </div>
     </div>
 
+    <!-- Email Preview Modal -->
+    <div id="emailPreviewModal" class="email-preview-modal">
+        <div class="email-preview-content">
+            <div class="email-preview-header">
+                <h3><i class="fas fa-eye"></i> Email Preview</h3>
+                <button class="close-preview" onclick="closeEmailPreview()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="email-preview-body">
+                <!-- Email Information Section -->
+                <div class="email-info-section">
+                    <div class="email-info-grid">
+                        <div class="email-info-item">
+                            <div class="email-info-label">
+                                <i class="fas fa-envelope"></i> Subject Line
+                            </div>
+                            <div class="email-info-value" id="previewEmailSubject">Loading...</div>
+                        </div>
+                        <div class="email-info-item">
+                            <div class="email-info-label">
+                                <i class="fas fa-user"></i> Sample Recipient
+                            </div>
+                            <div class="email-info-value" id="previewEmailRecipient">John Doe (student@example.com)</div>
+                        </div>
+                        <div class="email-info-item">
+                            <div class="email-info-label">
+                                <i class="fas fa-tag"></i> Email Type
+                            </div>
+                            <div class="email-info-value" id="previewEmailType">Course Starting</div>
+                        </div>
+                        <div class="email-info-item">
+                            <div class="email-info-label">
+                                <i class="fas fa-graduation-cap"></i> Course
+                            </div>
+                            <div class="email-info-value" id="previewCourseName">Course Name</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Preview Tabs -->
+                <div class="email-preview-tabs">
+                    <button class="email-tab active" onclick="switchPreviewTab('html')">
+                        <i class="fas fa-code"></i> HTML Preview
+                    </button>
+                    <button class="email-tab" onclick="switchPreviewTab('source')">
+                        <i class="fas fa-file-code"></i> HTML Source
+                    </button>
+                </div>
+
+                <!-- HTML Preview Tab -->
+                <div id="htmlPreviewTab" class="email-tab-content active">
+                    <iframe id="emailHtmlPreview" class="email-html-preview"></iframe>
+                </div>
+
+                <!-- HTML Source Tab -->
+                <div id="sourcePreviewTab" class="email-tab-content">
+                    <pre style="margin: 0; padding: 20px; background: #f8f9fa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word;" id="emailSourceCode"></pre>
+                </div>
+            </div>
+
+            <div class="email-preview-actions">
+                <div>
+                    <span style="color: #666; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> This is a preview with sample data
+                    </span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="preview-action-btn btn-edit-email" onclick="openEmailEditor()">
+                        <i class="fas fa-edit"></i> Edit Email
+                    </button>
+                    <button class="preview-action-btn btn-schedule-preview" onclick="proceedWithScheduling()">
+                        <i class="fas fa-paper-plane"></i> Proceed to Schedule
+                    </button>
+                    <button class="preview-action-btn btn-cancel-preview" onclick="closeEmailPreview()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Editor Modal -->
+    <div id="emailEditorModal" class="email-editor-modal">
+        <div class="email-editor-content">
+            <div class="email-editor-header">
+                <h3><i class="fas fa-edit"></i> Edit Email Content</h3>
+                <button class="close-preview" onclick="closeEmailEditor()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="email-editor-body">
+                <form class="email-editor-form">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-envelope"></i> Email Subject
+                        </label>
+                        <input type="text" class="form-control" id="editEmailSubject" placeholder="Enter email subject">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-code"></i> Email HTML Content
+                            <small style="color: #666; font-weight: normal; margin-left: 10px;">
+                                Use {{firstName}} for student name, {{courseName}} for course title
+                            </small>
+                        </label>
+                        <textarea class="form-control" id="editEmailContent" placeholder="Enter email HTML content"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="editor-actions">
+                <button class="btn btn-secondary" onclick="closeEmailEditor()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-primary" onclick="applyEmailChanges()">
+                    <i class="fas fa-check"></i> Apply Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Success/Error Messages -->
     <% if (typeof success_message !== 'undefined' && success_message && success_message.length > 0) { %>
         <div class="toast success show" id="successToast">
@@ -1155,6 +1608,8 @@
         // Global variables
         let selectedCourse = null;
         let enrollmentData = null;
+        let currentEmailPreview = null;
+        let originalEmailContent = null;
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -1325,6 +1780,7 @@
             
             const previewSection = document.getElementById('reminderPreview');
             const scheduleBtn = document.getElementById('scheduleReminderBtn');
+            const previewBtn = document.getElementById('previewEmailBtn');
 
             if (reminderType && emailType && selectedCourse) {
                 previewSection.style.display = 'block';
@@ -1364,10 +1820,211 @@
                     (emailType !== 'custom' || customMessage.trim());
                 
                 scheduleBtn.disabled = !canSchedule;
+                previewBtn.disabled = !canSchedule;
             } else {
                 previewSection.style.display = 'none';
                 scheduleBtn.disabled = true;
+                previewBtn.disabled = true;
             }
+        }
+
+        // Show email preview
+        async function showEmailPreview() {
+            const courseId = document.getElementById('selectedCourseId').value;
+            const courseType = document.getElementById('selectedCourseType').value;
+            const emailType = document.getElementById('emailType').value;
+            const customMessage = document.getElementById('customMessage').value;
+
+            if (!courseId || !courseType || !emailType) {
+                showToast('Please select course and email type first', 'error');
+                return;
+            }
+
+            // Show loading
+            const modal = document.getElementById('emailPreviewModal');
+            modal.style.display = 'block';
+            
+            // Show loading state
+            const previewFrame = document.getElementById('emailHtmlPreview');
+            const sourceCode = document.getElementById('emailSourceCode');
+            
+            previewFrame.src = 'about:blank';
+            sourceCode.textContent = 'Loading...';
+            
+            document.getElementById('previewEmailSubject').textContent = 'Loading...';
+            document.getElementById('previewEmailType').textContent = emailType;
+            document.getElementById('previewCourseName').textContent = selectedCourse?.title || 'Loading...';
+
+            try {
+                const params = new URLSearchParams({
+                    courseId: courseId,
+                    courseType: courseType,
+                    emailType: emailType
+                });
+
+                if (customMessage && customMessage.trim()) {
+                    params.append('customMessage', customMessage);
+                }
+
+                const response = await fetch(`/admin/course-reminders/api/email-preview?${params}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentEmailPreview = data.preview;
+                    originalEmailContent = data.preview.html;
+                    
+                    // Update preview content
+                    document.getElementById('previewEmailSubject').textContent = data.preview.subject;
+                    document.getElementById('previewEmailRecipient').textContent = data.preview.sampleRecipient;
+                    document.getElementById('previewEmailType').textContent = emailType;
+                    document.getElementById('previewCourseName').textContent = data.preview.courseName;
+                    
+                    // Load HTML into iframe
+                    const iframe = document.getElementById('emailHtmlPreview');
+                    iframe.onload = function() {
+                        iframe.contentDocument.open();
+                        iframe.contentDocument.write(data.preview.html);
+                        iframe.contentDocument.close();
+                    };
+                    iframe.src = 'about:blank';
+                    iframe.onload();
+                    
+                    // Load HTML source
+                    document.getElementById('emailSourceCode').textContent = formatHTML(data.preview.html);
+                    
+                    console.log('📧 Email preview loaded successfully');
+                } else {
+                    throw new Error(data.error || 'Failed to generate preview');
+                }
+            } catch (error) {
+                console.error('❌ Error loading email preview:', error);
+                showToast('Failed to load email preview: ' + error.message, 'error');
+                closeEmailPreview();
+            }
+        }
+
+        // Switch between preview tabs
+        function switchPreviewTab(tabName) {
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.email-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            const contents = document.querySelectorAll('.email-tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            if (tabName === 'html') {
+                document.getElementById('htmlPreviewTab').classList.add('active');
+            } else if (tabName === 'source') {
+                document.getElementById('sourcePreviewTab').classList.add('active');
+            }
+        }
+
+        // Close email preview modal
+        function closeEmailPreview() {
+            document.getElementById('emailPreviewModal').style.display = 'none';
+            currentEmailPreview = null;
+        }
+
+        // Open email editor
+        function openEmailEditor() {
+            if (!currentEmailPreview) {
+                showToast('No email content to edit', 'error');
+                return;
+            }
+            
+            document.getElementById('editEmailSubject').value = currentEmailPreview.subject;
+            document.getElementById('editEmailContent').value = formatHTML(currentEmailPreview.html);
+            document.getElementById('emailEditorModal').style.display = 'block';
+        }
+
+        // Close email editor modal
+        function closeEmailEditor() {
+            document.getElementById('emailEditorModal').style.display = 'none';
+        }
+
+        // Apply email changes
+        function applyEmailChanges() {
+            const newSubject = document.getElementById('editEmailSubject').value;
+            const newContent = document.getElementById('editEmailContent').value;
+            
+            if (!newSubject.trim() || !newContent.trim()) {
+                showToast('Please fill in both subject and content', 'error');
+                return;
+            }
+            
+            // Update current preview
+            currentEmailPreview.subject = newSubject;
+            currentEmailPreview.html = newContent;
+            
+            // Update preview display
+            document.getElementById('previewEmailSubject').textContent = newSubject;
+            
+            // Reload iframe with new content
+            const iframe = document.getElementById('emailHtmlPreview');
+            iframe.contentDocument.open();
+            iframe.contentDocument.write(newContent);
+            iframe.contentDocument.close();
+            
+            // Update source code
+            document.getElementById('emailSourceCode').textContent = formatHTML(newContent);
+            
+            // Close editor
+            closeEmailEditor();
+            
+            showToast('Email content updated successfully', 'success');
+        }
+
+        // Proceed with scheduling using modified content
+        function proceedWithScheduling() {
+            if (!currentEmailPreview) {
+                showToast('No email preview available', 'error');
+                return;
+            }
+            
+            // If content was modified, store it
+            if (currentEmailPreview.html !== originalEmailContent) {
+                // Store modified content in a hidden form field
+                let modifiedContentField = document.getElementById('modifiedEmailContent');
+                if (!modifiedContentField) {
+                    modifiedContentField = document.createElement('input');
+                    modifiedContentField.type = 'hidden';
+                    modifiedContentField.name = 'modifiedEmailContent';
+                    modifiedContentField.id = 'modifiedEmailContent';
+                    document.getElementById('reminderConfigForm').appendChild(modifiedContentField);
+                }
+                
+                let modifiedSubjectField = document.getElementById('modifiedEmailSubject');
+                if (!modifiedSubjectField) {
+                    modifiedSubjectField = document.createElement('input');
+                    modifiedSubjectField.type = 'hidden';
+                    modifiedSubjectField.name = 'modifiedEmailSubject';
+                    modifiedSubjectField.id = 'modifiedEmailSubject';
+                    document.getElementById('reminderConfigForm').appendChild(modifiedSubjectField);
+                }
+                
+                modifiedContentField.value = currentEmailPreview.html;
+                modifiedSubjectField.value = currentEmailPreview.subject;
+            }
+            
+            // Close preview modal
+            closeEmailPreview();
+            
+            // Show the scheduling confirmation
+            document.getElementById('reminderConfigForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Format HTML for better readability
+        function formatHTML(html) {
+            // Simple HTML formatting (you might want to use a proper HTML formatter library)
+            return html
+                .replace(/></g, '>\n<')
+                .replace(/^\s*\n/gm, '')
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .join('\n');
         }
 
         // Show reminder configuration section
@@ -1598,6 +2255,7 @@
                         <p><strong>Recipients:</strong> ${document.getElementById('previewRecipients').textContent}</p>
                         <p><strong>Email Type:</strong> ${emailType}</p>
                         ${emailType === 'custom' ? `<p><strong>Custom Message:</strong> ${customMessage.substring(0, 100)}${customMessage.length > 100 ? '...' : ''}</p>` : ''}
+                        ${currentEmailPreview && currentEmailPreview.html !== originalEmailContent ? '<p style="color: #f59e0b;"><strong>Note:</strong> Using custom email content</p>' : ''}
                     </div>
                 `,
                 icon: 'question',
@@ -1633,6 +2291,31 @@
         document.addEventListener('change', function(e) {
             if (e.target.closest('#reminderConfigForm')) {
                 updatePreview();
+            }
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const previewModal = document.getElementById('emailPreviewModal');
+            const editorModal = document.getElementById('emailEditorModal');
+            
+            if (event.target === previewModal) {
+                closeEmailPreview();
+            }
+            if (event.target === editorModal) {
+                closeEmailEditor();
+            }
+        };
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Close modals with Escape key
+            if (e.key === 'Escape') {
+                if (document.getElementById('emailEditorModal').style.display === 'block') {
+                    closeEmailEditor();
+                } else if (document.getElementById('emailPreviewModal').style.display === 'block') {
+                    closeEmailPreview();
+                }
             }
         });
 

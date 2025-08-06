@@ -1,4 +1,4 @@
-// utils/courseReminderScheduler.js - COMPLETE ENHANCED VERSION
+// utils/courseReminderScheduler.js - COMPLETE ENHANCED VERSION WITH EMAIL PREVIEW
 
 const schedule = require("node-schedule");
 const mongoose = require("mongoose");
@@ -462,6 +462,224 @@ class CourseReminderScheduler {
     }
   }
 
+  /**
+   * Schedule custom reminder with email modifications - NEW METHOD
+   * @param {string} courseId - Course ID
+   * @param {string} courseType - Course type
+   * @param {Date} sendDate - When to send the reminder
+   * @param {string} emailType - Type of email
+   * @param {Object} emailCustomization - Email customization options
+   * @returns {string|null} Job ID if successful, null if failed
+   */
+  async scheduleCustomReminderWithModifications(
+    courseId,
+    courseType,
+    sendDate,
+    emailType = "course-starting",
+    emailCustomization = {}
+  ) {
+    try {
+      console.log(
+        `📅 Scheduling custom reminder with modifications for ${courseType} course: ${courseId}`
+      );
+      console.log(`   Email Type: ${emailType}`);
+      console.log(`   Send Date: ${sendDate.toLocaleString()}`);
+      console.log(`   Customizations:`, Object.keys(emailCustomization));
+
+      // Validate input
+      if (!courseId || !courseType || !sendDate || !emailType) {
+        console.error("❌ All parameters are required for custom reminder");
+        return null;
+      }
+
+      // Get course data
+      let course;
+      try {
+        if (courseType === "InPersonAestheticTraining") {
+          course = await InPersonAestheticTraining.findById(courseId)
+            .select("basic schedule enrollment venue instructors")
+            .lean();
+        } else if (courseType === "OnlineLiveTraining") {
+          course = await OnlineLiveTraining.findById(courseId)
+            .select("basic schedule enrollment platform instructors technical")
+            .lean();
+        } else {
+          console.log(
+            `⚠️ Custom reminders not supported for course type: ${courseType}`
+          );
+          return null;
+        }
+      } catch (dbError) {
+        console.error(
+          `❌ Database error fetching course ${courseId}:`,
+          dbError
+        );
+        return null;
+      }
+
+      if (!course) {
+        console.error(`❌ Course not found: ${courseId}`);
+        return null;
+      }
+
+      // Validate send date
+      const now = new Date();
+      if (sendDate <= now) {
+        console.error(`❌ Send date must be in the future`);
+        return null;
+      }
+
+      // Get enrolled users
+      const enrolledUsers = await this.getEnrolledUsers(courseId, courseType);
+
+      if (enrolledUsers.length === 0) {
+        console.log(`📧 No enrolled users found for course: ${courseId}`);
+        return null;
+      }
+
+      // Create job ID for custom reminder
+      const jobId = `custom-modified-${emailType}-${courseType}-${courseId}-${Date.now()}`;
+
+      // Schedule the custom reminder with modifications
+      const job = schedule.scheduleJob(sendDate, async () => {
+        if (this.isShuttingDown) {
+          console.log(
+            `⚠️ Skipping custom reminder execution - system shutting down: ${jobId}`
+          );
+          return;
+        }
+
+        console.log(
+          `📧 Executing custom ${emailType} reminder with modifications for: ${
+            course.basic?.title || course.title
+          }`
+        );
+
+        try {
+          const result = await this.sendCustomRemindersWithModifications(
+            course,
+            courseType,
+            enrolledUsers,
+            emailType,
+            emailCustomization
+          );
+
+          // Track in history
+          const historyEntry = {
+            jobId,
+            courseId,
+            courseType,
+            courseName: course.basic?.title || course.title,
+            courseCode: course.basic?.courseCode || "N/A",
+            emailType,
+            hasModifications: Object.keys(emailCustomization).length > 0,
+            modificationType: this.getModificationType(emailCustomization),
+            executedAt: new Date(),
+            recipientCount: enrolledUsers.length,
+            successCount: result.successCount,
+            failureCount: result.failureCount,
+            status: result.successCount > 0 ? "completed" : "failed",
+            isCustom: true,
+          };
+
+          this.reminderHistory.push(historyEntry);
+          this.stats.totalExecuted++;
+          this.stats.totalEmailsSent += result.successCount;
+          this.stats.totalEmailsFailed += result.failureCount;
+
+          // Update course reminder history
+          await this.updateCourseReminderHistory(
+            courseId,
+            courseType,
+            historyEntry
+          );
+
+          console.log(
+            `✅ Custom reminder with modifications execution completed for ${
+              course.basic?.title || course.title
+            }`
+          );
+        } catch (executionError) {
+          console.error(
+            `❌ Error executing custom reminder ${jobId}:`,
+            executionError
+          );
+
+          // Track failed execution
+          this.reminderHistory.push({
+            jobId,
+            courseId,
+            courseType,
+            courseName: course.basic?.title || course.title,
+            emailType,
+            hasModifications: Object.keys(emailCustomization).length > 0,
+            executedAt: new Date(),
+            recipientCount: enrolledUsers.length,
+            successCount: 0,
+            failureCount: enrolledUsers.length,
+            status: "failed",
+            error: executionError.message,
+            isCustom: true,
+          });
+        }
+
+        // Remove from scheduled reminders
+        this.scheduledReminders.delete(jobId);
+      });
+
+      if (!job) {
+        console.error(
+          `❌ Failed to create custom scheduled job for course ${courseId}`
+        );
+        return null;
+      }
+
+      // Store reminder info with modification details
+      this.scheduledReminders.set(jobId, {
+        job,
+        courseId,
+        courseType,
+        courseName: course.basic?.title || course.title,
+        courseCode: course.basic?.courseCode || "N/A",
+        reminderDate: sendDate,
+        userCount: enrolledUsers.length,
+        emailType,
+        hasModifications: Object.keys(emailCustomization).length > 0,
+        modificationType: this.getModificationType(emailCustomization),
+        customMessage: emailCustomization.customMessage
+          ? "Custom message included"
+          : "Standard template",
+        status: "scheduled",
+        createdAt: new Date(),
+        isCustom: true,
+      });
+
+      this.stats.totalScheduled++;
+
+      console.log(
+        `✅ Custom reminder with modifications scheduled for ${
+          course.basic?.title || course.title
+        }`
+      );
+      console.log(`📧 Email type: ${emailType}`);
+      console.log(`📅 Will send on: ${sendDate.toLocaleString()}`);
+      console.log(`👥 Recipients: ${enrolledUsers.length} users`);
+      console.log(
+        `🎨 Modifications: ${
+          Object.keys(emailCustomization).join(", ") || "None"
+        }`
+      );
+
+      return jobId;
+    } catch (error) {
+      console.error(
+        `❌ Error scheduling custom reminder with modifications for course ${courseId}:`,
+        error
+      );
+      return null;
+    }
+  }
+
   // ============================================
   // EMAIL SENDING METHODS
   // ============================================
@@ -500,7 +718,19 @@ class CourseReminderScheduler {
         // Send email based on course type
         let emailSent = false;
 
-        if (typeof emailService.sendCourseStartingReminder === "function") {
+        if (
+          typeof emailService.sendCourseStartingReminderEnhanced === "function"
+        ) {
+          await emailService.sendCourseStartingReminderEnhanced(
+            user,
+            course,
+            courseType,
+            enrollment
+          );
+          emailSent = true;
+        } else if (
+          typeof emailService.sendCourseStartingReminder === "function"
+        ) {
           await emailService.sendCourseStartingReminder(
             user,
             course,
@@ -642,7 +872,20 @@ class CourseReminderScheduler {
 
           case "course-starting":
           default:
-            if (typeof emailService.sendCourseStartingReminder === "function") {
+            if (
+              typeof emailService.sendCourseStartingReminderEnhanced ===
+              "function"
+            ) {
+              await emailService.sendCourseStartingReminderEnhanced(
+                user,
+                course,
+                courseType,
+                enrollment
+              );
+              emailSent = true;
+            } else if (
+              typeof emailService.sendCourseStartingReminder === "function"
+            ) {
               await emailService.sendCourseStartingReminder(
                 user,
                 course,
@@ -681,6 +924,240 @@ class CourseReminderScheduler {
     console.log(`📊 Success: ${successCount}, Failed: ${failureCount}`);
 
     return { successCount, failureCount };
+  }
+
+  /**
+   * Send custom reminders with email modifications to all enrolled users - NEW METHOD
+   * @param {Object} course - Course data
+   * @param {string} courseType - Course type
+   * @param {Array} enrolledUsers - List of enrolled users
+   * @param {string} emailType - Type of email
+   * @param {Object} emailCustomization - Email customization options
+   * @returns {Object} Success and failure counts
+   */
+  async sendCustomRemindersWithModifications(
+    course,
+    courseType,
+    enrolledUsers,
+    emailType,
+    emailCustomization = {}
+  ) {
+    let successCount = 0;
+    let failureCount = 0;
+
+    console.log(
+      `📧 Sending custom ${emailType} reminders with modifications to ${
+        enrolledUsers.length
+      } users for: ${course.basic?.title || course.title}`
+    );
+
+    for (const user of enrolledUsers) {
+      try {
+        // Get user's enrollment data
+        const enrollment =
+          user.getCourseEnrollment?.(course._id, courseType) || {};
+
+        if (
+          !enrollment ||
+          !["paid", "registered"].includes(enrollment.enrollmentData?.status)
+        ) {
+          console.log(`⚠️ Skipping user ${user.email} - not properly enrolled`);
+          continue;
+        }
+
+        let emailSent = false;
+
+        // Check if we have custom email content
+        if (emailCustomization.customHtml || emailCustomization.customSubject) {
+          // Send email with custom content
+          await this.sendCustomizedEmail(
+            user,
+            course,
+            emailCustomization,
+            emailType
+          );
+          emailSent = true;
+        } else {
+          // Use existing email sending logic based on type
+          switch (emailType) {
+            case "custom":
+              if (
+                emailCustomization.customMessage &&
+                typeof emailService.sendCustomCourseMessage === "function"
+              ) {
+                await emailService.sendCustomCourseMessage(
+                  user,
+                  course,
+                  emailCustomization.customMessage
+                );
+                emailSent = true;
+              } else {
+                await this.sendFallbackEmail(
+                  user,
+                  course,
+                  courseType,
+                  emailCustomization.customMessage
+                );
+                emailSent = true;
+              }
+              break;
+
+            case "tech-check":
+              if (
+                courseType === "OnlineLiveTraining" &&
+                typeof emailService.sendTechCheckReminder === "function"
+              ) {
+                await emailService.sendTechCheckReminder(user, course);
+                emailSent = true;
+              } else {
+                await this.sendFallbackEmail(
+                  user,
+                  course,
+                  courseType,
+                  "Please ensure you have completed the technical check for the upcoming online course."
+                );
+                emailSent = true;
+              }
+              break;
+
+            case "preparation":
+              if (typeof emailService.sendPreparationReminder === "function") {
+                await emailService.sendPreparationReminder(
+                  user,
+                  course,
+                  courseType
+                );
+                emailSent = true;
+              } else {
+                await this.sendFallbackEmail(
+                  user,
+                  course,
+                  courseType,
+                  "Please review the preparation materials for your upcoming course."
+                );
+                emailSent = true;
+              }
+              break;
+
+            case "course-starting":
+            default:
+              if (
+                typeof emailService.sendCourseStartingReminderEnhanced ===
+                "function"
+              ) {
+                await emailService.sendCourseStartingReminderEnhanced(
+                  user,
+                  course,
+                  courseType,
+                  enrollment
+                );
+                emailSent = true;
+              } else if (
+                typeof emailService.sendCourseStartingReminder === "function"
+              ) {
+                await emailService.sendCourseStartingReminder(
+                  user,
+                  course,
+                  courseType,
+                  enrollment
+                );
+                emailSent = true;
+              } else {
+                await this.sendFallbackEmail(user, course, courseType);
+                emailSent = true;
+              }
+              break;
+          }
+        }
+
+        if (emailSent) {
+          successCount++;
+          console.log(`✅ Custom ${emailType} reminder sent to ${user.email}`);
+        }
+
+        // Small delay between emails
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } catch (error) {
+        console.error(
+          `❌ Failed to send custom reminder to ${user.email}:`,
+          error
+        );
+        failureCount++;
+      }
+    }
+
+    console.log(
+      `✅ Custom reminder batch complete for ${
+        course.basic?.title || course.title
+      }`
+    );
+    console.log(`📊 Success: ${successCount}, Failed: ${failureCount}`);
+
+    return { successCount, failureCount };
+  }
+
+  /**
+   * Send email with custom HTML/subject - NEW METHOD
+   * @param {Object} user - User object
+   * @param {Object} course - Course object
+   * @param {Object} emailCustomization - Custom email content
+   * @param {string} emailType - Email type
+   */
+  async sendCustomizedEmail(user, course, emailCustomization, emailType) {
+    try {
+      // Replace template variables in custom content
+      let customHtml = emailCustomization.customHtml || "";
+      let customSubject =
+        emailCustomization.customSubject ||
+        `Course Reminder: ${course.basic?.title || course.title}`;
+
+      // Replace common variables
+      const replacements = {
+        "{{firstName}}": user.firstName || "Student",
+        "{{lastName}}": user.lastName || "",
+        "{{fullName}}": `${user.firstName || "Student"} ${
+          user.lastName || ""
+        }`.trim(),
+        "{{courseName}}": course.basic?.title || course.title || "Course",
+        "{{courseTitle}}": course.basic?.title || course.title || "Course",
+        "{{courseCode}}":
+          course.basic?.courseCode || course.courseCode || "N/A",
+        "{{startDate}}": course.schedule?.startDate
+          ? new Date(course.schedule.startDate).toLocaleDateString()
+          : "TBD",
+        "{{email}}": user.email,
+      };
+
+      // Apply replacements
+      Object.keys(replacements).forEach((key) => {
+        const value = replacements[key];
+        const regex = new RegExp(key.replace(/[{}]/g, "\\$&"), "g");
+        customHtml = customHtml.replace(regex, value);
+        customSubject = customSubject.replace(regex, value);
+      });
+
+      // Send email using emailService or fallback
+      if (typeof emailService.sendEmail === "function") {
+        await emailService.sendEmail({
+          to: user.email,
+          subject: customSubject,
+          html: customHtml,
+          text: customHtml.replace(/<[^>]*>/g, ""), // Strip HTML for text version
+        });
+      } else {
+        console.warn(
+          `⚠️ No email service available for customized email to ${user.email}`
+        );
+      }
+
+      console.log(`✅ Customized email sent to ${user.email}`);
+    } catch (error) {
+      console.error(
+        `❌ Failed to send customized email to ${user.email}:`,
+        error
+      );
+      throw error;
+    }
   }
 
   /**
@@ -890,6 +1367,8 @@ class CourseReminderScheduler {
         recipientCount: reminder.userCount || 0, // For HTML template compatibility
         emailType: reminder.emailType || "course-starting",
         customMessage: reminder.customMessage || "Standard template",
+        hasModifications: reminder.hasModifications || false,
+        modificationType: reminder.modificationType || "None",
         status: reminder.status || "scheduled",
         createdAt: reminder.createdAt || new Date(),
         isCustom: reminder.isCustom || false,
@@ -1150,6 +1629,24 @@ class CourseReminderScheduler {
         totalEmailsFailed: this.stats.totalEmailsFailed,
       },
     };
+  }
+
+  // ============================================
+  // HELPER METHODS
+  // ============================================
+
+  /**
+   * Get modification type description - NEW METHOD
+   * @param {Object} emailCustomization - Email customization object
+   * @returns {string} Description of modifications
+   */
+  getModificationType(emailCustomization) {
+    const modifications = [];
+    if (emailCustomization.customSubject) modifications.push("Subject");
+    if (emailCustomization.customHtml) modifications.push("Content");
+    if (emailCustomization.customMessage) modifications.push("Message");
+
+    return modifications.length > 0 ? modifications.join(", ") : "None";
   }
 
   // ============================================

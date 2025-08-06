@@ -1083,6 +1083,7 @@ exports.getLiveLibrary = async (req, res) => {
                 hasPaidForCertificate: hasPaidForCertificate,
                 certificateFeeAmount: certificatePaymentRequired ? 10 : 0,
                 isFreeCourseCertificate: certificatePaymentRequired,
+
                 // Certificate requirements status
                 certificateRequirements: {
                   courseEnded: courseEnded,

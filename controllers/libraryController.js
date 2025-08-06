@@ -1078,11 +1078,37 @@ exports.getLiveLibrary = async (req, res) => {
                 certificateId: certificateId,
                 certificateMessage: null,
 
-                // ✅ ADD THESE NEW FIELDS:
-                certificatePaymentRequired: certificatePaymentRequired,
-                hasPaidForCertificate: hasPaidForCertificate,
-                certificateFeeAmount: certificatePaymentRequired ? 10 : 0,
-                isFreeCourseCertificate: certificatePaymentRequired,
+                // ✅ NEW FIELDS:
+                // ✅ CERTIFICATE PAYMENT LOGIC - Add right after certificateMessage: null,
+                certificatePaymentRequired: (() => {
+                  // Check if it's a free course (originalPrice = 0)
+                  const originalPrice =
+                    enrollment.enrollmentData?.originalPrice || 0;
+                  return originalPrice === 0; // Only free courses require certificate payment
+                })(),
+
+                hasPaidForCertificate: (() => {
+                  const originalPrice =
+                    enrollment.enrollmentData?.originalPrice || 0;
+                  // If paid course (originalPrice > 0), certificate is included
+                  if (originalPrice > 0) return true;
+                  // If free course, check if certificate fee was paid
+                  return (
+                    (enrollment.certificate?.certificateFeePaid || 0) >= 10
+                  );
+                })(),
+
+                certificateFeeAmount: (() => {
+                  const originalPrice =
+                    enrollment.enrollmentData?.originalPrice || 0;
+                  return originalPrice === 0 ? 10 : 0; // €10 for free courses, €0 for paid courses
+                })(),
+
+                isFreeCourseCertificate: (() => {
+                  const originalPrice =
+                    enrollment.enrollmentData?.originalPrice || 0;
+                  return originalPrice === 0;
+                })(),
 
                 // Certificate requirements status
                 certificateRequirements: {

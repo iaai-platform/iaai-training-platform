@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Library - Live Online Courses</title>
+  <link rel="stylesheet" href="/css/librarystyle.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- ✅ ENHANCED: Dual Timezone CSS Styling -->
+  <style>
+    .dual-time-display {
+      line-height: 1.3;
+    }
+    
+    .primary-time {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .secondary-time {
+      font-size: 0.85rem;
+      color: #666;
+      font-style: italic;
+      margin-top: 2px;
+    }
+    
+    .time-display .primary-time {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .timezone-badge {
+      display: inline-block;
+      background: #e8f4f8;
+      color: #17a2b8;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+    
+    .button-time-info .primary-time {
+      font-weight: 600;
+    }
+    
+    .button-time-info .secondary-time {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+    
+    .share-modal { 
+      width: 90% !important; 
+      max-width: 500px !important; 
+    }
+    
+    .swal-btn {
+      padding: 8px 16px; 
+      border: none; 
+      border-radius: 6px; 
+      color: white;
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      font-size: 0.9rem;
+    }
+    
+    .swal-btn-primary { background: #3182ce; }
+    .swal-btn-linkedin { background: #0077b5; }
+    .swal-btn-twitter { background: #1da1f2; }
+    .swal-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+  </style>
+  
+  <!-- ✅ ENHANCED: Timezone-aware JavaScript Functions -->
+  <script>
+    function formatDateInTimezone(dateString, timezone) {
+      if (!dateString) return 'TBD';
+      
+      try {
+        const date = new Date(dateString);
+        const options = {
+          timeZone: timezone || 'UTC',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        };
+        
+        const formatted = date.toLocaleString('en-US', options);
+        
+        // Add timezone abbreviation
+        const tzAbbr = timezone ? 
+          date.toLocaleString('en-US', { timeZone: timezone, timeZoneName: 'short' })
+            .split(' ').pop() : 'UTC';
+        
+        return `${formatted} ${tzAbbr}`;
+      } catch (error) {
+        console.error('Date formatting error:', error);
+        return new Date(dateString).toLocaleString();
+      }
+    }
+
+    function formatDateOnly(dateString, timezone) {
+      if (!dateString) return 'TBD';
+      
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+          timeZone: timezone || 'UTC',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      } catch (error) {
+        return new Date(dateString).toLocaleDateString();
+      }
+    }
+  </script>
+  
+  <!-- ✅ ENHANCED: Dual timezone display functions -->
+  <script>
+    function formatDualTimezone(courseTime, courseTimezone, startTime, endTime) {
+      if (!courseTime || !courseTimezone) return 'TBD';
+      
+      try {
+        // Get user's timezone
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        if (userTimezone === courseTimezone) {
+          // Same timezone, show single time
+          return `<div class="time-display">
+            <span class="primary-time">${courseTime}</span>
+          </div>`;
+        }
+        
+        // Different timezones - show both
+        // Parse the course date and create user timezone version
+        const tempDate = new Date();
+        const today = tempDate.toISOString().split('T')[0];
+        
+        if (startTime) {
+          const startDateTime = new Date(`${today}T${startTime}:00`);
+          const endDateTime = endTime ? new Date(`${today}T${endTime}:00`) : null;
+          
+          const userStartTime = startDateTime.toLocaleTimeString('en-US', {
+            timeZone: userTimezone,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          });
+          
+          const userEndTime = endDateTime ? endDateTime.toLocaleTimeString('en-US', {
+            timeZone: userTimezone,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          }) : '';
+          
+          const userTzAbbr = tempDate.toLocaleString('en-US', { 
+            timeZone: userTimezone, 
+            timeZoneName: 'short' 
+          }).split(' ').pop();
+          
+          const userTimeRange = endTime ? `${userStartTime} - ${userEndTime} ${userTzAbbr}` : `${userStartTime} ${userTzAbbr}`;
+          
+          return `<div class="dual-time-display">
+            <div class="primary-time">${courseTime}</div>
+            <div class="secondary-time">(${userTimeRange} your time)</div>
+          </div>`;
+        }
+        
+        return `<div class="time-display">
+          <span class="primary-time">${courseTime}</span>
+        </div>`;
+        
+      } catch (error) {
+        console.error('Dual timezone formatting error:', error);
+        return `<div class="time-display">
+          <span class="primary-time">${courseTime}</span>
+        </div>`;
+      }
+    }
+  
+    function formatDualDate(dateString, courseTimezone) {
+      if (!dateString) return 'TBD';
+      
+      try {
+        const date = new Date(dateString);
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        const courseDate = date.toLocaleDateString('en-US', {
+          timeZone: courseTimezone,
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+        
+        if (userTimezone === courseTimezone) {
+          return courseDate;
+        }
+        
+        const userDate = date.toLocaleDateString('en-US', {
+          timeZone: userTimezone,
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+        
+        if (courseDate === userDate) {
+          return courseDate;
+        }
+        
+        return `${courseDate} (${userDate} your time)`;
+        
+      } catch (error) {
+        return new Date(dateString).toLocaleDateString();
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <div class="hero-content">
+      <h1><i class="fas fa-video"></i> Live Online Training Library</h1>
+      <p>Access your live online training courses, recordings, and certificates with timezone-aware scheduling.</p>
+    </div>
+  </section>
+
+  <!-- Statistics Section -->
+  <section class="library-stats">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number"><%= totalCourses %></div>
+        <div class="stat-label">Total Courses</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number"><%= attendedCourses %></div>
+        <div class="stat-label">Attended</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number"><%= upcomingCourses %></div>
+        <div class="stat-label">Upcoming</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number"><%= completedCourses %></div>
+        <div class="stat-label">Certificates</div>
+      </div>
+      <% if (linkedCourses > 0) { %>
+        <div class="stat-item">
+          <div class="stat-number"><%= linkedCourses %></div>
+          <div class="stat-label">Linked Programs</div>
+        </div>
+      <% } %>
+      <% if (coursesWithSuppressedCertificates > 0) { %>
+        <div class="stat-item">
+          <div class="stat-number"><%= coursesWithSuppressedCertificates %></div>
+          <div class="stat-label">Pending Certificates</div>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- Library Navigation Tabs -->
+  <section style="max-width: 1400px; margin: 0 auto 40px; padding: 0 20px;">
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+      <a href="/library/self-paced" class="cta-btn btn-secondary">
+        <i class="fas fa-play-circle"></i> Self-Paced Courses
+      </a>
+      <a href="/library/live" class="cta-btn btn-primary">
+        <i class="fas fa-video"></i> Live Online Courses
+      </a>
+      <a href="/library/in-person" class="cta-btn btn-secondary">
+        <i class="fas fa-users"></i> In-Person Courses
+      </a>
+    </div>
+  </section>
+
+  <!-- Library Content Section -->
+  <section id="library-content">
+    <div class="section-header">
+      <h2>Your Live Online Training Courses</h2>
+      <p>Manage your attendance and access course materials with accurate timezone information</p>
+    </div>
+
+    <% if (myCourses && myCourses.length > 0) { %>
+      <div class="course-list">
+        <% myCourses.forEach((course, index) => { %>
+          <div class="course-card" style="--card-index: <%= index %>">
+            
+            <!-- Enhanced Course Header with Status and Linked Course Badge -->
+            <div class="course-header">
+              <div class="course-status <%= course.canViewCertificate ? 'status-completed' : (course.attendanceConfirmed ? 'status-progress' : (new Date(course.startDate) < new Date() ? 'status-needs-action' : 'status-upcoming')) %>">
+                <% if (course.canViewCertificate) { %>
+                  <i class="fas fa-certificate"></i> Completed
+                <% } else if (course.attendanceConfirmed) { %>
+                  <i class="fas fa-check-circle"></i> Attended
+                <% } else if (new Date(course.startDate) > new Date()) { %>
+                  <i class="fas fa-calendar-alt"></i> Upcoming
+                <% } else { %>
+                  <i class="fas fa-exclamation-circle"></i> Action Required
+                <% } %>
+              </div>
+              
+              <!-- ✅ ENHANCED: Linked Course Badge -->
+              <% if (course.linkedCourse && course.linkedCourse.isLinked) { %>
+                <div class="linked-course-badge">
+                  <i class="fas fa-link"></i>
+                  <span class="linked-course-text">
+                    <% if (course.linkedCourse.linkType === "prerequisite") { %>
+                      Prerequisite for In-Person
+                    <% } else if (course.linkedCourse.linkType === "supplementary") { %>
+                      Linked to In-Person
+                    <% } else { %>
+                      Comprehensive Program
+                    <% } %>
+                  </span>
+                </div>
+              <% } %>
+              
+              <h3 class="course-title"><%= course.title %></h3>
+              <p class="course-code">Course Code: <%= course.courseCode %></p>
+            </div>
+
+            <div class="course-body">
+              <!-- Course Description -->
+              <p class="course-description"><%= course.description %></p>
+
+              <!-- ✅ ENHANCED: Course Information Grid with Dual Timezone Support -->
+              <div class="course-info-grid">
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-chalkboard-teacher"></i> Instructor
+                  </div>
+                  <div class="info-value"><%= course.instructor %></div>
+                </div>
+                
+                <!-- ✅ ENHANCED: Schedule with dual timezone -->
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-calendar-alt"></i> Schedule
+                  </div>
+                  <div class="info-value">
+                    <% if (course.displayInfo?.fullScheduleWithDual && typeof course.displayInfo.fullScheduleWithDual === 'object') { %>
+                      <script>
+                        document.write(formatDualDate('<%= course.startDate %>', '<%= course.timezone %>'));
+                      </script>
+                    <% } else { %>
+                      <%= course.displayInfo?.fullSchedule || course.displayInfo?.startsAt || 'Schedule TBD' %>
+                    <% } %>
+                  </div>
+                </div>
+                
+                <!-- ✅ ENHANCED: Session Time with dual timezone -->
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-clock"></i> Session Time
+                  </div>
+                  <div class="info-value">
+                    <% if (course.displayInfo?.sessionTimeWithDual && course.displayInfo.sessionTimeWithDual.primary !== 'Time TBD') { %>
+                      <script>
+                        document.write(formatDualTimezone(
+                          '<%= course.displayInfo.sessionTimeWithDual.primary %>',
+                          '<%= course.displayInfo.sessionTimeWithDual.courseTimezone %>',
+                          '<%= course.displayInfo.sessionTimeWithDual.startTime %>',
+                          '<%= course.displayInfo.sessionTimeWithDual.endTime %>'
+                        ));
+                      </script>
+                    <% } else { %>
+                      <%= course.displayInfo?.sessionTimeRange || 'Time TBD' %>
+                    <% } %>
+                  </div>
+                </div>
+                
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-hourglass-half"></i> Duration
+                  </div>
+                  <div class="info-value"><%= course.schedule %></div>
+                </div>
+                
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-video"></i> Platform
+                  </div>
+                  <div class="info-value"><%= course.platform %></div>
+                </div>
+                
+                <!-- ✅ ENHANCED: Timezone with user detection -->
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-globe"></i> Course Timezone
+                  </div>
+                  <div class="info-value">
+                    <%= course.timezone || 'UTC' %>
+                    <span class="timezone-badge">
+                      <script>
+                        const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                        const courseTz = '<%= course.timezone || "UTC" %>';
+                        if (userTz === courseTz) {
+                          document.write('Your timezone');
+                        } else {
+                          document.write('Your: ' + userTz.split('/').pop());
+                        }
+                      </script>
+                    </span>
+                  </div>
+                </div>
+                
+                <% if (course.courseEnded) { %>
+                  <div class="course-info-item">
+                    <div class="info-label">
+                      <i class="fas fa-calendar-check"></i> End Date
+                    </div>
+                    <div class="info-value">
+                      <%= course.displayInfo?.endDateOnly || course.displayDates?.endDateOnly || 'TBD' %>
+                    </div>
+                  </div>
+                <% } %>
+                
+                <div class="course-info-item">
+                  <div class="info-label">
+                    <i class="fas fa-users"></i> Attendance
+                  </div>
+                  <div class="info-value">
+                    <% if (course.attendanceConfirmed) { %>
+                      <span style="color: #28a745; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Confirmed
+                      </span>
+                    <% } else { %>
+                      <span style="color: #dc3545;">
+                        <i class="fas fa-times-circle"></i> Not Confirmed
+                      </span>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Session Information (if available) -->
+              <% if (course.totalSessions > 1) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-list"></i> Session Attendance
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>Sessions Attended:</span>
+                      <strong><%= course.attendedSessions %> / <%= course.totalSessions %></strong>
+                    </div>
+                    <div style="margin-top: 10px;">
+                      <div style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: <%= course.attendancePercentage >= 80 ? '#28a745' : course.attendancePercentage >= 60 ? '#ffc107' : '#dc3545' %>; height: 100%; width: <%= course.attendancePercentage %>%; transition: width 0.3s ease;"></div>
+                      </div>
+                      <small style="color: #666; margin-top: 5px; display: block;">
+                        <%= course.attendancePercentage %>% attendance
+                        <% if (course.attendancePercentage < 80) { %>
+                          (Minimum 80% required)
+                        <% } %>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Assessment Information (if required) -->
+              <% if (course.assessmentRequired) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-clipboard-check"></i> Assessment Status
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <% if (course.assessmentCompleted && course.assessmentPassed) { %>
+                      <div style="color: #28a745; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Assessment Passed
+                        <span style="float: right; font-weight: normal;">
+                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore %>%)
+                        </span>
+                      </div>
+                    <% } else if (course.assessmentCompleted && !course.assessmentPassed) { %>
+                      <div style="color: #dc3545; font-weight: 600;">
+                        <i class="fas fa-times-circle"></i> Assessment Not Passed
+                        <span style="float: right; font-weight: normal;">
+                          Score: <%= course.assessmentScore %>% (Required: <%= course.passingScore %>%)
+                        </span>
+                      </div>
+                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        Attempts: <%= course.currentAttempts %> / <%= course.maxAttempts %>
+                      </div>
+                    <% } else { %>
+                      <div style="color: #ffc107; font-weight: 600;">
+                        <i class="fas fa-clock"></i> Assessment Pending
+                        <span style="float: right; font-weight: normal;">
+                          Required: <%= course.passingScore %>%
+                        </span>
+                      </div>
+                      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        Attempts available: <%= course.maxAttempts %>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- ✅ ENHANCED: Linked Course Information Section -->
+              <% if (course.linkedCourse && course.linkedCourse.isLinked) { %>
+                <div class="linked-course-info" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%); padding: 20px; border-radius: 12px; border: 2px solid #17a2b8;">
+                    <h5 style="color: #17a2b8; margin: 0 0 15px 0; font-size: 1.2rem;">
+                      <i class="fas fa-link"></i> Comprehensive Training Program
+                    </h5>
+                    
+                    <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                      <div style="color: #17a2b8; font-weight: 600;">
+                        <i class="fas fa-info-circle"></i> <strong>This online course is part of a comprehensive training program:</strong>
+                      </div>
+                      <div style="margin-top: 10px; color: #0c5460;">
+                        <i class="fas fa-laptop" style="color: #17a2b8; width: 20px;"></i> <strong>Online Component:</strong> <%= course.title %><br>
+                        <i class="fas fa-users" style="color: #17a2b8; width: 20px;"></i> <strong>In-Person Component:</strong> <%= course.linkedCourse.linkedCourseTitle || 'Hands-on Training' %>
+                        <% if (course.linkedCourse.linkedCourseVenue) { %>
+                          <br><i class="fas fa-map-marker-alt" style="color: #17a2b8; width: 20px;"></i> <strong>Location:</strong> <%= course.linkedCourse.linkedCourseVenue %>
+                        <% } %>
+                        <% if (course.linkedCourse.linkedCourseCode) { %>
+                          <br><i class="fas fa-code" style="color: #17a2b8; width: 20px;"></i> <strong>In-Person Course Code:</strong> <%= course.linkedCourse.linkedCourseCode %>
+                        <% } %>
+                      </div>
+                    </div>
+
+                    <% if (course.linkedCourse.linkType) { %>
+                      <div style="background: rgba(23, 162, 184, 0.1); padding: 12px; border-radius: 8px;">
+                        <div style="color: #0c5460; font-size: 0.9rem;">
+                          <% if (course.linkedCourse.linkType === "prerequisite") { %>
+                            <i class="fas fa-arrow-right"></i> <strong>Prerequisite Training:</strong> Complete this online course before attending the in-person component.
+                          <% } else if (course.linkedCourse.linkType === "supplementary") { %>
+                            <i class="fas fa-plus-circle"></i> <strong>Supplementary Training:</strong> This online course enhances your in-person learning experience.
+                          <% } else { %>
+                            <i class="fas fa-link"></i> <strong>Linked Training:</strong> Part of a comprehensive learning program.
+                          <% } %>
+                        </div>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- ✅ FIXED: Certificate Section with Proper Logic Flow -->
+              <% if (course.certificatePaymentRequired && !course.hasPaidForCertificate) { %>
+                <!-- Certificate Payment Required for Free Course -->
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
+                    <h5 style="color: #856404; margin: 0 0 15px 0;">
+                      <i class="fas fa-certificate"></i> Certificate Available (€10)
+                    </h5>
+                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                      <p style="color: #856404; margin: 0 0 15px 0; font-weight: 600;">
+                        <i class="fas fa-info-circle"></i> This is a free course. Certificate fee: €10
+                      </p>
+                      <% if (course.attendanceConfirmed) { %>
+                        <p style="color: #856404; margin: 0 0 15px 0;">
+                          ✅ Attendance confirmed - You can now purchase your certificate
+                        </p>
+                        <button class="cta-btn btn-warning" onclick="purchaseCertificate('<%= course.courseId %>')">
+                          <i class="fas fa-shopping-cart"></i> Purchase Certificate (€10)
+                        </button>
+                      <% } else { %>
+                        <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+                          First confirm your attendance, then you can purchase your certificate.
+                        </p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+
+              <% } else if (course.certificateMessage) { %>
+                <!-- Certificate Suppression Message for Linked Courses -->
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
+                    <h5 style="color: #856404; margin: 0 0 15px 0;">
+                      <i class="fas fa-info-circle"></i> Certificate Information
+                    </h5>
+                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                      <p style="color: #856404; margin: 0; font-weight: 600;">
+                        <i class="fas fa-certificate"></i> <%= course.certificateMessage %>
+                      </p>
+                      
+                      <% if (course.linkedCourse && course.linkedCourse.isLinked && course.linkedCourse.linkedCourseTitle) { %>
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(133, 100, 4, 0.3);">
+                          <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+                            <i class="fas fa-arrow-right"></i> 
+                            <strong>Complete the in-person component:</strong> <%= course.linkedCourse.linkedCourseTitle %>
+                            <% if (course.linkedCourse.linkedCourseCode) { %>
+                              (<%= course.linkedCourse.linkedCourseCode %>)
+                            <% } %>
+                          </p>
+                          <% if (course.linkedCourse.linkedCourseStartDate) { %>
+                            <p style="color: #856404; margin: 5px 0 0 0; font-size: 0.9rem;">
+                              <i class="fas fa-calendar"></i> 
+                              <strong>Scheduled:</strong> <%= course.linkedCourse.linkedCourseStartDate %>
+                            </p>
+                          <% } %>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+
+              <% } else if (course.canViewCertificate && course.hasCertificate) { %>
+                <!-- Certificate Available Section -->
+                <div class="course-info-section certificate-ready" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
+                    <h5 style="color: #155724; margin: 0 0 15px 0;">
+                      <i class="fas fa-medal"></i> Certificate Available
+                    </h5>
+                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                      <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
+                        🎉 Congratulations! Your certificate is ready for download.
+                      </p>
+                      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
+                          <i class="fas fa-eye"></i> View Certificate
+                        </a>
+                        <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
+                          <i class="fas fa-download"></i> Download PDF
+                        </button>
+                        <button onclick="shareCertificate('<%= course.certificateId %>', '<%= course.title %>')" class="cta-btn btn-outline-primary">
+                          <i class="fas fa-share-alt"></i> Share
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              <% } else if (course.canGetCertificate && !course.hasCertificate && !course.certificatePaymentRequired) { %>
+                <!-- Certificate Generation Section (for paid courses) -->
+                <div class="course-info-section certificate-generate" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
+                    <h5 style="color: #155724; margin: 0 0 15px 0;">
+                      <i class="fas fa-trophy"></i> Ready for Certificate
+                    </h5>
+                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                      <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
+                        🎯 All requirements completed! Generate your certificate now.
+                      </p>
+                      <button class="cta-btn btn-generate-certificate" 
+                              data-course-id="<%= course.courseId %>" 
+                              data-course-type="<%= course.courseType %>"
+                              data-course-title="<%= course.title %>">
+                        <i class="fas fa-certificate"></i> Generate Certificate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Course Materials and Resources -->
+              <% if (course.materials && (course.materials.preReadings || course.materials.downloads || course.resources.length > 0)) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-folder-open"></i> Course Materials
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <% if (course.materials.preReadings && course.materials.preReadings.length > 0) { %>
+                      <div style="margin-bottom: 15px;">
+                        <strong style="color: #495057;">Pre-Course Readings:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #666;">
+                          <% course.materials.preReadings.forEach(reading => { %>
+                            <li><%= reading %></li>
+                          <% }) %>
+                        </ul>
+                      </div>
+                    <% } %>
+                    
+                    <% if (course.materials.downloads && course.materials.downloads.length > 0) { %>
+                      <div style="margin-bottom: 15px;">
+                        <strong style="color: #495057;">Downloads Available:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #666;">
+                          <% course.materials.downloads.forEach(download => { %>
+                            <li>
+                              <a href="<%= download.url %>" target="_blank" style="color: #007bff; text-decoration: none;">
+                                <i class="fas fa-download"></i> <%= download.title %>
+                              </a>
+                            </li>
+                          <% }) %>
+                        </ul>
+                      </div>
+                    <% } %>
+                    
+                    <% if (course.resources && course.resources.length > 0) { %>
+                      <div>
+                        <strong style="color: #495057;">Additional Resources:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #666;">
+                          <% course.resources.forEach(resource => { %>
+                            <li>
+                              <a href="<%= resource.url %>" target="_blank" style="color: #007bff; text-decoration: none;">
+                                <i class="fas fa-external-link-alt"></i> <%= resource.title %>
+                              </a>
+                            </li>
+                          <% }) %>
+                        </ul>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Recording Information (if available) -->
+              <% if (course.recordingAvailable && course.recordings && course.recordings.length > 0) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-play-circle"></i> Course Recordings
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <p style="color: #666; margin-bottom: 15px; font-size: 0.9rem;">
+                      <i class="fas fa-info-circle"></i> 
+                      Recordings are available for <%= course.recordingDuration %> days after the course
+                    </p>
+                    <% course.recordings.forEach((recording, index) => { %>
+                      <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px; border-left: 4px solid #007bff;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <div>
+                            <strong style="color: #333;">Session <%= index + 1 %></strong>
+                            <% if (recording.title) { %>
+                              <br><span style="color: #666; font-size: 0.9rem;"><%= recording.title %></span>
+                            <% } %>
+                          </div>
+                          <% if (recording.url) { %>
+                            <a href="<%= recording.url %>" target="_blank" class="cta-btn btn-sm btn-primary">
+                              <i class="fas fa-play"></i> Watch
+                            </a>
+                          <% } else { %>
+                            <span style="color: #666; font-size: 0.9rem;">Processing...</span>
+                          <% } %>
+                        </div>
+                      </div>
+                    <% }) %>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Platform Information and Access -->
+              <% if (!course.courseEnded && course.courseUrl) { %>
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <h5 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-laptop"></i> Course Access
+                  </h5>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                      <div>
+                        <strong style="color: #495057;">Platform:</strong>
+                        <p style="color: #666; margin: 5px 0;"><%= course.platform %></p>
+                      </div>
+                      <% if (course.meetingId) { %>
+                        <div>
+                          <strong style="color: #495057;">Meeting ID:</strong>
+                          <p style="color: #666; margin: 5px 0; font-family: monospace;"><%= course.meetingId %></p>
+                        </div>
+                      <% } %>
+                      <% if (course.passcode) { %>
+                        <div>
+                          <strong style="color: #495057;">Passcode:</strong>
+                          <p style="color: #666; margin: 5px 0; font-family: monospace;"><%= course.passcode %></p>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- ✅ ENHANCED: Action Buttons with Timezone-Aware Display -->
+              <div class="course-actions">
+                <!-- ✅ ENHANCED: Course Access Button with Timezone Info -->
+                <% if (new Date(course.startDate) <= new Date() && !course.courseEnded && course.courseUrl) { %>
+                  <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-primary">
+                    <i class="fas fa-video"></i> Join Live Session
+                    <% if (course.sessionTime?.startTime) { %>
+                      <small style="display: block; font-size: 0.8rem; opacity: 0.9;">
+                        <%= course.displayInfo?.sessionTimeRange %>
+                      </small>
+                    <% } %>
+                  </a>
+                <!-- ✅ ENHANCED: "Starts" button with dual timezone -->
+                <% } else if (new Date(course.startDate) > new Date()) { %>
+                  <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
+                    <i class="fas fa-clock"></i> 
+                    <div class="button-time-info">
+                      <div class="primary-time">
+                        Starts <%= course.displayInfo?.startsAt || course.displayInfo?.fullSchedule %>
+                      </div>
+                      <% if (course.sessionTime?.startTime) { %>
+                        <div class="secondary-time">
+                          <script>
+                            const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                            const courseTz = '<%= course.timezone %>';
+                            if (userTz !== courseTz) {
+                              const startTime = '<%= course.sessionTime.startTime %>';
+                              const tempDate = new Date();
+                              const today = tempDate.toISOString().split('T')[0];
+                              const startDateTime = new Date(`${today}T${startTime}:00`);
+                              const userTime = startDateTime.toLocaleTimeString('en-US', {
+                                timeZone: userTz,
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                              });
+                              const userTzAbbr = tempDate.toLocaleString('en-US', { 
+                                timeZone: userTz, 
+                                timeZoneName: 'short' 
+                              }).split(' ').pop();
+                              document.write(`${userTime} ${userTzAbbr} your time`);
+                            }
+                          </script>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                <% } %>
+
+                <!-- Attendance Confirmation Button -->
+                <% if (course.courseEnded && !course.attendanceConfirmed) { %>
+                  <button class="cta-btn btn-confirm-attendance" 
+                          data-course-id="<%= course.courseId %>" 
+                          data-course-type="<%= course.courseType %>">
+                    <i class="fas fa-check"></i> Confirm Attendance
+                  </button>
+                <% } %>
+
+                <!-- Assessment Button -->
+                <% if (course.assessmentRequired && course.attendanceConfirmed && !course.assessmentPassed) { %>
+                  <a href="/library/online-live/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+                    <i class="fas fa-clipboard-check"></i> 
+                    <%= course.assessmentCompleted ? 'Retake Assessment' : 'Take Assessment' %>
+                  </a>
+                <!-- ✅ ADD THIS NEW CONDITION: -->
+                <% } else if (course.assessmentRequired && course.attendanceConfirmed && course.assessmentPassed && course.certificatePaymentRequired && !course.hasPaidForCertificate) { %>
+                  <!-- Show purchase button instead of certificate generation -->
+                  <div style="text-align: center; padding: 10px;">
+                    <p style="color: #28a745; margin: 5px 0;">
+                      <i class="fas fa-check-circle"></i> Assessment Passed!
+                    </p>
+                    <p style="color: #666; font-size: 0.9rem; margin: 5px 0;">
+                      Purchase certificate to complete your training
+                    </p>
+                  </div>
+                <% } %>
+
+                <!-- Course Details Button -->
+                <a href="/online-live-training/courses/<%= course.courseId %>" class="cta-btn btn-secondary">
+                  <i class="fas fa-info-circle"></i> Course Details
+                </a>
+                
+                <!-- ✅ ENHANCED: Link to In-Person Component -->
+                <% if (course.linkedCourse && course.linkedCourse.isLinked && course.linkedCourse.linkedCourseId) { %>
+                  <a href="/in-person/courses/<%= course.linkedCourse.linkedCourseId %>" class="cta-btn btn-outline-info">
+                    <i class="fas fa-users"></i> View In-Person Component
+                  </a>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <!-- Empty State -->
+      <div class="empty-state">
+        <i class="fas fa-video"></i>
+        <h3>No live online courses in your library yet</h3>
+        <p>Register for a live online training course to see it here.</p>
+        <div class="course-actions">
+          <a href="/online-live-training" class="cta-btn btn-primary">
+            <i class="fas fa-search"></i> Browse Live Online Courses
+          </a>
+        </div>
+      </div>
+    <% } %>
+  </section>
+
+  <!-- ✅ ENHANCED: JavaScript with Certificate Purchase Function -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      
+      // ========================================
+      // ✅ ENHANCED: CERTIFICATE GENERATION WITH LINKED COURSE AWARENESS
+      // ========================================
+      
+      document.querySelectorAll('.btn-generate-certificate').forEach(button => {
+        button.addEventListener('click', async function() {
+          const courseId = this.dataset.courseId;
+          const courseType = this.dataset.courseType;
+          const courseTitle = this.dataset.courseTitle;
+          
+          // Check if this is a linked course
+          const courseCard = this.closest('.course-card');
+          const linkedCourseInfo = courseCard.querySelector('.linked-course-info');
+          const isLinkedCourse = !!linkedCourseInfo;
+          
+          // Enhanced confirmation dialog for linked courses
+          const confirmationHtml = `
+            <div style="text-align: center;">
+              <i class="fas fa-certificate" style="font-size: 3rem; color: #ffd700; margin-bottom: 15px;"></i>
+              <p>Are you ready to generate your certificate for:</p>
+              <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
+              ${isLinkedCourse ? `
+                <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <div style="color: #17a2b8; font-weight: 600;">
+                    <i class="fas fa-link"></i> <strong>Comprehensive Training Certificate</strong><br>
+                    <span style="font-size: 0.9rem; opacity: 0.8;">
+                      This certificate recognizes completion of your comprehensive training program.
+                    </span>
+                  </div>
+                </div>
+              ` : `
+                <p style="color: #666; font-size: 0.9rem;">This will create your official completion certificate.</p>
+              `}
+              <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <div style="color: #155724; font-weight: 600;">
+                  <i class="fas fa-check-circle" style="color: #28a745;"></i> All requirements completed<br>
+                  <i class="fas fa-award" style="color: #28a745;"></i> Ready for certification
+                </div>
+              </div>
+            </div>
+          `;
+          
+          const result = await Swal.fire({
+            title: isLinkedCourse ? 'Generate Comprehensive Certificate' : 'Generate Certificate',
+            html: confirmationHtml,
+            icon: null,
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-trophy"></i> Yes, Generate Certificate',
+            cancelButtonText: 'Cancel'
+          });
+          
+          if (!result.isConfirmed) return;
+          
+          // Show loading state
+          const originalText = this.innerHTML;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Certificate...';
+          this.disabled = true;
+          this.classList.add('loading');
+          
+          try {
+            const response = await fetch('/certificates/api/issue', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                courseId: courseId,
+                courseType: courseType
+              })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              // Enhanced success message for linked courses
+              const successHtml = `
+                <div style="text-align: center;">
+                  <i class="fas fa-medal" style="font-size: 4rem; color: #ffd700; margin-bottom: 20px;"></i>
+                  <h3 style="color: #28a745;">Congratulations!</h3>
+                  <p>Your ${isLinkedCourse ? 'comprehensive training' : ''} certificate has been successfully generated.</p>
+                  ${data.linkedCourseInfo && data.linkedCourseInfo.hasLinkedCourse ? `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                      <strong>Certificate Information:</strong><br>
+                      ${data.linkedCourseInfo.description || 'Comprehensive training program completed successfully.'}
+                    </div>
+                  ` : ''}
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <strong>Certificate ID:</strong> ${data.certificate.certificateId}<br>
+                    <strong>Verification Code:</strong> ${data.certificate.verificationCode}
+                  </div>
+                  <p style="color: #666; font-size: 0.9rem;">You can now view, download, and share your certificate.</p>
+                </div>
+              `;
+              
+              await Swal.fire({
+                title: 'Certificate Generated! 🎉',
+                html: successHtml,
+                icon: null,
+                confirmButtonColor: '#007bff',
+                confirmButtonText: '<i class="fas fa-eye"></i> View Certificate'
+              });
+              
+              // Redirect to certificate view
+              window.location.href = `/certificates/view/${data.certificate.certificateId}`;
+              
+            } else {
+              throw new Error(data.message || 'Failed to generate certificate');
+            }
+            
+          } catch (error) {
+            console.error('Error generating certificate:', error);
+            
+            // Enhanced error handling for linked courses
+            let errorMessage = error.message || 'Failed to generate certificate. Please try again or contact support.';
+            
+            if (error.message && error.message.includes('linked')) {
+              errorMessage = 'Certificate generation is pending completion of your linked course component. Please complete all required training before requesting your certificate.';
+            }
+            
+            Swal.fire({
+              icon: 'error',
+              title: 'Certificate Generation Failed',
+              text: errorMessage,
+              confirmButtonColor: '#dc3545'
+            });
+            
+            // Restore button
+            this.innerHTML = originalText;
+            this.disabled = false;
+            this.classList.remove('loading');
+          }
+        });
+      });
+      
+      // ========================================
+      // ✅ ENHANCED: ATTENDANCE CONFIRMATION WITH LINKED COURSE CONTEXT
+      // ========================================
+      
+      document.querySelectorAll('.btn-confirm-attendance').forEach(button => {
+        button.addEventListener('click', async function() {
+          const courseId = this.dataset.courseId;
+          const courseType = this.dataset.courseType;
+          const courseTitle = this.closest('.course-card').querySelector('.course-title').textContent;
+          
+          // Check if this is a linked course
+          const courseCard = this.closest('.course-card');
+          const linkedCourseInfo = courseCard.querySelector('.linked-course-info');
+          const isLinkedCourse = !!linkedCourseInfo;
+          
+          // Enhanced confirmation dialog for linked courses
+          const confirmationHtml = `
+            <div style="text-align: center;">
+              <i class="fas fa-user-check" style="font-size: 3rem; color: #28a745; margin-bottom: 15px;"></i>
+              <p>Please confirm that you attended:</p>
+              <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
+              ${isLinkedCourse ? `
+                <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <div style="color: #17a2b8; font-weight: 600;">
+                    <i class="fas fa-link"></i> <strong>Part of Comprehensive Training</strong><br>
+                    <span style="font-size: 0.9rem; opacity: 0.8;">
+                      This course is part of your comprehensive training program.
+                    </span>
+                  </div>
+                </div>
+              ` : ''}
+              <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; color: #856404;">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Important:</strong> Only confirm if you actually attended this course.
+              </div>
+            </div>
+          `;
+          
+          const result = await Swal.fire({
+            title: 'Confirm Attendance',
+            html: confirmationHtml,
+            icon: null,
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-check"></i> Yes, I Attended',
+            cancelButtonText: 'Cancel'
+          });
+          
+          if (!result.isConfirmed) return;
+          
+          // Show loading state
+          const originalText = this.innerHTML;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
+          this.disabled = true;
+          this.classList.add('loading');
+          
+          try {
+            const response = await fetch(`/library/confirm-attendance/${courseId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                courseType: courseType
+              })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              // Enhanced success message with linked course context
+              let successMessage = data.message;
+              
+              if (data.linkedCourseInfo && data.linkedCourseInfo.isLinked) {
+                successMessage += `\n\n${data.linkedCourseInfo.message}`;
+              }
+              
+              await Swal.fire({
+                icon: 'success',
+                title: 'Attendance Confirmed! ✅',
+                text: successMessage,
+                confirmButtonColor: '#28a745'
+              });
+              
+              // Reload page to show updated state
+              window.location.reload();
+              
+            } else {
+              throw new Error(data.message);
+            }
+            
+          } catch (error) {
+            console.error('Error confirming attendance:', error);
+            
+            Swal.fire({
+              icon: 'error',
+              title: 'Confirmation Failed',
+              text: error.message || 'Failed to confirm attendance. Please try again.',
+              confirmButtonColor: '#dc3545'
+            });
+            
+            // Restore button
+            this.innerHTML = originalText;
+            this.disabled = false;
+            this.classList.remove('loading');
+          }
+        });
+      });
+      
+      // ========================================
+      // ✅ NEW: CERTIFICATE PURCHASE FUNCTION
+      // ========================================
+      
+      window.purchaseCertificate = async function(courseId) {
+        const result = await Swal.fire({
+          title: 'Purchase Certificate',
+          html: `
+            <div style="text-align: center;">
+              <i class="fas fa-certificate" style="font-size: 3rem; color: #ffc107; margin-bottom: 15px;"></i>
+              <p>Purchase your completion certificate for this free course.</p>
+              <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <strong>Certificate Fee: €10</strong><br>
+                <small style="color: #666;">This allows you to receive an official completion certificate</small>
+              </div>
+            </div>
+          `,
+          showCancelButton: true,
+          confirmButtonColor: '#ffc107',
+          confirmButtonText: '<i class="fas fa-shopping-cart"></i> Purchase for €10',
+          cancelButtonText: 'Cancel'
+        });
+        
+        if (result.isConfirmed) {
+          // Redirect to payment page
+          window.location.href = `/payment/certificate/${courseId}?type=OnlineLiveTraining&fee=10`;
+        }
+      };
+      
+      // ========================================
+      // ✅ ENHANCED: CERTIFICATE ACTIONS (Download & Share)
+      // ========================================
+      
+      window.downloadCertificate = async function(certificateId) {
+        try {
+          const response = await fetch(`/certificates/download/${certificateId}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            if (data.downloadUrl) {
+              const link = document.createElement('a');
+              link.href = data.downloadUrl;
+              link.download = `certificate-${certificateId}.pdf`;
+              link.click();
+            } else {
+              Swal.fire({
+                icon: 'info',
+                title: 'PDF Generation Coming Soon',
+                text: 'PDF download functionality will be available soon. You can currently share your certificate verification link.',
+                confirmButtonColor: '#17a2b8'
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Download error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Download Failed',
+            text: 'Failed to download certificate. Please try again.',
+            confirmButtonColor: '#dc3545'
+          });
+        }
+      };
+
+      window.shareCertificate = async function(certificateId, courseTitle) {
+        Swal.fire({
+          title: 'Share Your Achievement! 🎉',
+          html: `
+            <div style="text-align: center; margin: 20px 0;">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                <i class="fas fa-medal" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <h4 style="margin: 10px 0;">Certificate of Completion</h4>
+                <p style="margin: 5px 0; opacity: 0.9;">${courseTitle}</p>
+                <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">IAAI Training Institute</p>
+              </div>
+              
+              <p style="margin-bottom: 20px; color: #666;">Share your professional achievement:</p>
+              
+              <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+                <button onclick="shareOnLinkedIn('${certificateId}', '${courseTitle}')" class="swal-btn swal-btn-linkedin">
+                  <i class="fab fa-linkedin"></i> LinkedIn
+                </button>
+                <button onclick="shareOnTwitter('${certificateId}', '${courseTitle}')" class="swal-btn swal-btn-twitter">
+                  <i class="fab fa-twitter"></i> Twitter
+                </button>
+                <button onclick="copyVerificationLink('${certificateId}')" class="swal-btn swal-btn-primary">
+                  <i class="fas fa-copy"></i> Copy Link
+                </button>
+              </div>
+            </div>
+          `,
+          showConfirmButton: false,
+          showCloseButton: true,
+          customClass: {
+            popup: 'share-modal'
+          }
+        });
+      };
+
+      // ========================================
+      // ✅ ENHANCED: SOCIAL SHARING FUNCTIONS
+      // ========================================
+
+      window.shareOnLinkedIn = function(certificateId, courseTitle) {
+        const text = `I just completed "${courseTitle}" and earned my certificate from IAAI Training Institute! 🎓`;
+        const url = encodeURIComponent(`${window.location.origin}/certificates/view/${certificateId}`);
+        const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&summary=${encodeURIComponent(text)}`;
+        window.open(linkedinUrl, '_blank', 'width=600,height=500');
+      };
+
+      window.shareOnTwitter = function(certificateId, courseTitle) {
+        const text = `Just earned my certificate in "${courseTitle}" from @IAAI_Training! 🎓 #ProfessionalDevelopment #AestheticTraining`;
+        const url = encodeURIComponent(`${window.location.origin}/certificates/view/${certificateId}`);
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`;
+        window.open(twitterUrl, '_blank', 'width=600,height=400');
+      };
+
+      window.copyVerificationLink = function(certificateId) {
+        const url = `${window.location.origin}/certificates/view/${certificateId}`;
+        navigator.clipboard.writeText(url).then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Copied! 📋',
+            text: 'Certificate link copied to clipboard',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+          });
+        });
+      };
+
+      // ========================================
+      // ✅ ENHANCED: TIMEZONE UTILITIES
+      // ========================================
+
+      // Add timezone conversion utilities for dynamic content
+      window.convertToUserTimezone = function(dateString, courseTimezone) {
+        if (!dateString) return 'TBD';
+        
+        try {
+          const date = new Date(dateString);
+          const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          
+          // Show in course timezone (primary) and user timezone (secondary)
+          const courseTime = date.toLocaleString('en-US', {
+            timeZone: courseTimezone,
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour:
+            hour: '2-digit',
+           minute: '2-digit'
+         });
+         
+         if (userTimezone !== courseTimezone) {
+           const userTime = date.toLocaleString('en-US', {
+             timeZone: userTimezone,
+             hour: '2-digit',
+             minute: '2-digit'
+           });
+           return `${courseTime} (${userTime} your time)`;
+         }
+         
+         return courseTime;
+       } catch (error) {
+         return new Date(dateString).toLocaleString();
+       }
+     };
+
+     // Initialize timezone-aware tooltips for course times
+     document.querySelectorAll('[data-course-timezone]').forEach(element => {
+       const timezone = element.dataset.courseTimezone;
+       const dateString = element.dataset.courseDate;
+       
+       if (timezone && dateString) {
+         element.title = convertToUserTimezone(dateString, timezone);
+       }
+     });
+
+     console.log('✅ Enhanced Live Online Library with Certificate Purchase Support initialized successfully');
+   });
+ </script>
+
+ <%- include('partials/footer') %>
+</body>
+</html>

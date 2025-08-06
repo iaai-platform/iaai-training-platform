@@ -1078,6 +1078,11 @@ exports.getLiveLibrary = async (req, res) => {
                 certificateId: certificateId,
                 certificateMessage: null,
 
+                // ✅ ADD THESE NEW FIELDS:
+                certificatePaymentRequired: certificatePaymentRequired,
+                hasPaidForCertificate: hasPaidForCertificate,
+                certificateFeeAmount: certificatePaymentRequired ? 10 : 0,
+                isFreeCourseCertificate: certificatePaymentRequired,
                 // Certificate requirements status
                 certificateRequirements: {
                   courseEnded: courseEnded,
@@ -2305,13 +2310,11 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
     const { answers } = req.body;
     const userId = req.user._id;
 
-    console.log(
-      "📝 Processing online assessment submission for course:",
-      courseId
-    );
+    console.log("📝 FIXED: Processing assessment with proper question reading");
 
+    // ✅ FIX 1: Get course with FULL assessment data
     const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
-    const course = await OnlineLiveTraining.findById(courseId);
+    const course = await OnlineLiveTraining.findById(courseId).lean(); // Use lean() for better data access
 
     if (!course) {
       return res.status(404).json({
@@ -2327,6 +2330,14 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       });
     }
 
+    // ✅ FIX 2: Debug assessment structure
+    console.log("🔍 DEBUGGING: Assessment structure:", {
+      hasAssessment: !!course.assessment,
+      hasQuestions: !!course.assessment?.questions,
+      questionsCount: course.assessment?.questions?.length || 0,
+      firstQuestionStructure: course.assessment?.questions?.[0] || null,
+    });
+
     const user = await User.findById(userId);
     const enrollmentIndex = user.myLiveCourses.findIndex(
       (c) => c.courseId.toString() === courseId
@@ -2341,7 +2352,7 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
 
     const enrollment = user.myLiveCourses[enrollmentIndex];
 
-    // ✅ CORRECTED: Initialize assessment arrays OUTSIDE userProgress
+    // Initialize assessment arrays
     if (!enrollment.assessmentAttempts) {
       enrollment.assessmentAttempts = [];
     }
@@ -2349,11 +2360,10 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       enrollment.assessmentHistory = [];
     }
 
-    // ✅ CORRECTED: Get current attempts using OUTSIDE userProgress structure
     const currentAttempts = enrollment.assessmentAttempts.length;
     const maxAttempts = (course.assessment.retakesAllowed || 0) + 1;
 
-    // ✅ CORRECTED: Check if already passed using OUTSIDE userProgress
+    // Check if already passed
     if (
       enrollment.assessmentCompleted &&
       (enrollment.bestAssessmentScore || 0) >=
@@ -2365,7 +2375,6 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       });
     }
 
-    // Check attempt limits
     if (currentAttempts >= maxAttempts) {
       return res.status(400).json({
         success: false,
@@ -2373,10 +2382,12 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       });
     }
 
-    // Calculate score and build detailed results
+    // ✅ FIX 3: CRITICAL - Proper question parsing and scoring
+    const questions = course.assessment.questions || [];
+    console.log("📊 FIXING: Processing questions:", questions.length);
+
     let correctAnswers = 0;
     let totalPoints = 0;
-    const questions = course.assessment.questions || [];
     const detailedResults = [];
 
     questions.forEach((question, index) => {
@@ -2384,9 +2395,37 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       const points = question.points || 1;
       totalPoints += points;
 
+      // ✅ CRITICAL FIX: Handle different correctAnswer field structures
+      let correctAnswerIndex;
+
+      // Try different possible field names
+      if (question.correctAnswer !== undefined) {
+        correctAnswerIndex = question.correctAnswer;
+      } else if (question.correct_answer !== undefined) {
+        correctAnswerIndex = question.correct_answer;
+      } else if (question.correctAnswerIndex !== undefined) {
+        correctAnswerIndex = question.correctAnswerIndex;
+      } else if (question.answer !== undefined) {
+        correctAnswerIndex = question.answer;
+      } else {
+        console.error(
+          "❌ CRITICAL: No correct answer field found for question",
+          index
+        );
+        console.error("Question structure:", Object.keys(question));
+        correctAnswerIndex = 0; // Default fallback
+      }
+
+      console.log(`🔍 Question ${index + 1}:`, {
+        userAnswer,
+        correctAnswerIndex,
+        questionKeys: Object.keys(question),
+      });
+
+      // ✅ FIX 4: Proper answer comparison
       const isCorrect =
         userAnswer !== undefined &&
-        parseInt(userAnswer) === question.correctAnswer;
+        parseInt(userAnswer) === parseInt(correctAnswerIndex);
 
       if (isCorrect) {
         correctAnswers += points;
@@ -2396,7 +2435,7 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
         questionIndex: index,
         question: question.question,
         userAnswer: userAnswer !== undefined ? parseInt(userAnswer) : null,
-        correctAnswer: question.correctAnswer,
+        correctAnswer: parseInt(correctAnswerIndex),
         isCorrect: isCorrect,
         points: points,
         earnedPoints: isCorrect ? points : 0,
@@ -2404,12 +2443,21 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       });
     });
 
+    // ✅ FIX 5: Safer score calculation
     const score =
       totalPoints > 0 ? Math.round((correctAnswers / totalPoints) * 100) : 0;
     const passingScore = course.assessment.passingScore || 70;
     const passed = score >= passingScore;
 
-    // ✅ CORRECTED: Add new attempt to OUTSIDE userProgress array
+    console.log("📊 FIXED: Assessment scoring:", {
+      correctAnswers,
+      totalPoints,
+      score,
+      passingScore,
+      passed,
+    });
+
+    // Add new attempt
     const newAttempt = {
       attemptNumber: currentAttempts + 1,
       attemptDate: new Date(),
@@ -2425,12 +2473,11 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
 
     enrollment.assessmentAttempts.push(newAttempt);
 
-    // ✅ CORRECTED: Update summary fields OUTSIDE userProgress
+    // Update summary fields
     enrollment.assessmentCompleted = passed;
-    enrollment.assessmentScore = score; // Latest score
+    enrollment.assessmentScore = score;
     enrollment.lastAssessmentDate = new Date();
 
-    // ✅ CORRECTED: Update best score OUTSIDE userProgress
     if (
       !enrollment.bestAssessmentScore ||
       score > enrollment.bestAssessmentScore
@@ -2438,7 +2485,7 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       enrollment.bestAssessmentScore = score;
     }
 
-    // ✅ CORRECTED: Add to assessment history OUTSIDE userProgress
+    // Add to assessment history
     enrollment.assessmentHistory.push({
       attemptNumber: currentAttempts + 1,
       date: new Date(),
@@ -2450,44 +2497,33 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
       detailedResults: detailedResults,
     });
 
-    // Update the user document
+    // Save user
     user.myLiveCourses[enrollmentIndex] = enrollment;
     await user.save();
 
-    console.log(
-      `✅ Assessment submitted successfully. Score: ${score}%, Passed: ${passed}`
-    );
+    console.log("✅ FIXED: Assessment submitted successfully", {
+      score,
+      passed,
+      questionsProcessed: questions.length,
+    });
 
-    // ✅ FIXED: Calculate values first, then use them in responseData
+    // Enhanced response
     const canRetake = !passed && currentAttempts + 1 < maxAttempts;
     const attemptsRemaining = Math.max(0, maxAttempts - (currentAttempts + 1));
 
-    // ✅ Enhanced responseData for modern UI
     const responseData = {
       success: true,
       passed: passed,
       score: score,
       passingScore: passingScore,
-
-      // Attempt information
       currentAttempts: currentAttempts + 1,
       totalAttempts: maxAttempts,
       attemptsRemaining: attemptsRemaining,
       canRetake: canRetake,
-
-      // Results data
       totalQuestions: questions.length,
       correctAnswers: Math.round(correctAnswers),
       detailedResults: detailedResults,
-
-      // Progress information
       bestScore: enrollment.bestAssessmentScore,
-      attemptHistory: enrollment.assessmentHistory.map((attempt) => ({
-        attemptNumber: attempt.attemptNumber,
-        score: attempt.score,
-        passed: attempt.passed,
-        date: attempt.date,
-      })),
 
       // Messages for UI
       title: passed
@@ -2501,26 +2537,7 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
         ? `You scored ${score}%. You need ${passingScore}% to pass. You have ${attemptsRemaining} attempt(s) remaining.`
         : `You scored ${score}%. You have used all available attempts.`,
 
-      // Next steps
-      nextSteps: passed
-        ? [
-            "Return to your library to complete the course",
-            "Confirm your attendance to receive your certificate",
-            "Share your achievement with others",
-          ]
-        : canRetake
-        ? [
-            "Review your results and course materials",
-            "Take the assessment again when ready",
-            `You have ${attemptsRemaining} attempt(s) remaining`,
-          ]
-        : [
-            "Contact support for additional attempts if needed",
-            "Review course materials for better preparation",
-            "Consider retaking the live course if available",
-          ],
-
-      // Action URLs
+      // Actions
       actions: {
         libraryUrl: "/library/live",
         retakeUrl: passed
@@ -2533,7 +2550,7 @@ exports.submitOnlineLiveAssessment = async (req, res) => {
 
     res.json(responseData);
   } catch (error) {
-    console.error("❌ Error submitting online assessment:", error);
+    console.error("❌ FIXED: Error in assessment submission:", error);
     res.status(500).json({
       success: false,
       message: "Error processing assessment submission. Please try again.",

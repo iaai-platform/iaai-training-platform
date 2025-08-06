@@ -551,8 +551,35 @@
                 </div>
               <% } %>
 
-              <!-- ✅ ENHANCED: Certificate Section with Suppression Logic -->
-              <% if (course.certificateMessage) { %>
+              <!-- ✅ FIXED: Certificate Section with Proper Logic Flow -->
+              <% if (course.certificatePaymentRequired && !course.hasPaidForCertificate) { %>
+                <!-- Certificate Payment Required for Free Course -->
+                <div class="course-info-section" style="margin: 20px 0;">
+                  <div style="background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
+                    <h5 style="color: #856404; margin: 0 0 15px 0;">
+                      <i class="fas fa-certificate"></i> Certificate Available (€10)
+                    </h5>
+                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                      <p style="color: #856404; margin: 0 0 15px 0; font-weight: 600;">
+                        <i class="fas fa-info-circle"></i> This is a free course. Certificate fee: €10
+                      </p>
+                      <% if (course.attendanceConfirmed) { %>
+                        <p style="color: #856404; margin: 0 0 15px 0;">
+                          ✅ Attendance confirmed - You can now purchase your certificate
+                        </p>
+                        <button class="cta-btn btn-warning" onclick="purchaseCertificate('<%= course.courseId %>')">
+                          <i class="fas fa-shopping-cart"></i> Purchase Certificate (€10)
+                        </button>
+                      <% } else { %>
+                        <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+                          First confirm your attendance, then you can purchase your certificate.
+                        </p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+
+              <% } else if (course.certificateMessage) { %>
                 <!-- Certificate Suppression Message for Linked Courses -->
                 <div class="course-info-section" style="margin: 20px 0;">
                   <div style="background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
@@ -576,7 +603,7 @@
                           <% if (course.linkedCourse.linkedCourseStartDate) { %>
                             <p style="color: #856404; margin: 5px 0 0 0; font-size: 0.9rem;">
                               <i class="fas fa-calendar"></i> 
-                              <strong>Scheduled:</strong> <%= formatDateInTimezone(course.linkedCourse.linkedCourseStartDate, course.timezone) %>
+                              <strong>Scheduled:</strong> <%= course.linkedCourse.linkedCourseStartDate %>
                             </p>
                           <% } %>
                         </div>
@@ -584,6 +611,7 @@
                     </div>
                   </div>
                 </div>
+
               <% } else if (course.canViewCertificate && course.hasCertificate) { %>
                 <!-- Certificate Available Section -->
                 <div class="course-info-section certificate-ready" style="margin: 20px 0;">
@@ -609,8 +637,9 @@
                     </div>
                   </div>
                 </div>
-              <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
-                <!-- Certificate Generation Section -->
+
+              <% } else if (course.canGetCertificate && !course.hasCertificate && !course.certificatePaymentRequired) { %>
+                <!-- Certificate Generation Section (for paid courses) -->
                 <div class="course-info-section certificate-generate" style="margin: 20px 0;">
                   <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
                     <h5 style="color: #155724; margin: 0 0 15px 0;">
@@ -809,6 +838,17 @@
                     <i class="fas fa-clipboard-check"></i> 
                     <%= course.assessmentCompleted ? 'Retake Assessment' : 'Take Assessment' %>
                   </a>
+                <!-- ✅ ADD THIS NEW CONDITION: -->
+                <% } else if (course.assessmentRequired && course.attendanceConfirmed && course.assessmentPassed && course.certificatePaymentRequired && !course.hasPaidForCertificate) { %>
+                  <!-- Show purchase button instead of certificate generation -->
+                  <div style="text-align: center; padding: 10px;">
+                    <p style="color: #28a745; margin: 5px 0;">
+                      <i class="fas fa-check-circle"></i> Assessment Passed!
+                    </p>
+                    <p style="color: #666; font-size: 0.9rem; margin: 5px 0;">
+                      Purchase certificate to complete your training
+                    </p>
+                  </div>
                 <% } %>
 
                 <!-- Course Details Button -->
@@ -842,7 +882,7 @@
     <% } %>
   </section>
 
-  <!-- ✅ ENHANCED: JavaScript with Timezone Support and All Functionality -->
+  <!-- ✅ ENHANCED: JavaScript with Certificate Purchase Function -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       
@@ -1093,6 +1133,35 @@
       });
       
       // ========================================
+      // ✅ NEW: CERTIFICATE PURCHASE FUNCTION
+      // ========================================
+      
+      window.purchaseCertificate = async function(courseId) {
+        const result = await Swal.fire({
+          title: 'Purchase Certificate',
+          html: `
+            <div style="text-align: center;">
+              <i class="fas fa-certificate" style="font-size: 3rem; color: #ffc107; margin-bottom: 15px;"></i>
+              <p>Purchase your completion certificate for this free course.</p>
+              <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <strong>Certificate Fee: €10</strong><br>
+                <small style="color: #666;">This allows you to receive an official completion certificate</small>
+              </div>
+            </div>
+          `,
+          showCancelButton: true,
+          confirmButtonColor: '#ffc107',
+          confirmButtonText: '<i class="fas fa-shopping-cart"></i> Purchase for €10',
+          cancelButtonText: 'Cancel'
+        });
+        
+        if (result.isConfirmed) {
+          // Redirect to payment page
+          window.location.href = `/payment/certificate/${courseId}?type=OnlineLiveTraining&fee=10`;
+        }
+      };
+      
+      // ========================================
       // ✅ ENHANCED: CERTIFICATE ACTIONS (Download & Share)
       // ========================================
       
@@ -1214,39 +1283,40 @@
             year: 'numeric',
             month: 'short',
             day: 'numeric',
+            hour:
             hour: '2-digit',
-            minute: '2-digit'
-          });
-          
-          if (userTimezone !== courseTimezone) {
-            const userTime = date.toLocaleString('en-US', {
-              timeZone: userTimezone,
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-            return `${courseTime} (${userTime} your time)`;
-          }
-          
-          return courseTime;
-        } catch (error) {
-          return new Date(dateString).toLocaleString();
-        }
-      };
+           minute: '2-digit'
+         });
+         
+         if (userTimezone !== courseTimezone) {
+           const userTime = date.toLocaleString('en-US', {
+             timeZone: userTimezone,
+             hour: '2-digit',
+             minute: '2-digit'
+           });
+           return `${courseTime} (${userTime} your time)`;
+         }
+         
+         return courseTime;
+       } catch (error) {
+         return new Date(dateString).toLocaleString();
+       }
+     };
 
-      // Initialize timezone-aware tooltips for course times
-      document.querySelectorAll('[data-course-timezone]').forEach(element => {
-        const timezone = element.dataset.courseTimezone;
-        const dateString = element.dataset.courseDate;
-        
-        if (timezone && dateString) {
-          element.title = convertToUserTimezone(dateString, timezone);
-        }
-      });
+     // Initialize timezone-aware tooltips for course times
+     document.querySelectorAll('[data-course-timezone]').forEach(element => {
+       const timezone = element.dataset.courseTimezone;
+       const dateString = element.dataset.courseDate;
+       
+       if (timezone && dateString) {
+         element.title = convertToUserTimezone(dateString, timezone);
+       }
+     });
 
-      console.log('✅ Enhanced Live Online Library with Dual Timezone Support initialized successfully');
-    });
-  </script>
+     console.log('✅ Enhanced Live Online Library with Certificate Purchase Support initialized successfully');
+   });
+ </script>
 
-  <%- include('partials/footer') %>
+ <%- include('partials/footer') %>
 </body>
 </html>

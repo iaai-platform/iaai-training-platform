@@ -46,22 +46,15 @@
       content: "✅ ";
       margin-right: 5px;
     }
-
-    /* ✅ DEBUG: Make debug info visible but subtle */
-    .debug-info {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      padding: 10px;
-      margin: 10px 0;
-      font-family: monospace;
-      font-size: 12px;
-      border-radius: 4px;
-      color: #6c757d;
-    }
     
     @keyframes slideIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-10px); }
     }
     
     /* reCAPTCHA Container Styling */
@@ -184,10 +177,6 @@
   <script>
     let recaptchaVerified = false;
 
-    // ✅ DEBUG: Log page load
-    console.log("🔍 CLIENT: Login page loaded");
-    console.log("🔍 CLIENT: reCAPTCHA site key exists:", "<%= recaptcha_site_key ? 'YES' : 'NO' %>");
-
     // Callback when reCAPTCHA is successfully completed
     function onRecaptchaSuccess(token) {
       console.log('✅ CLIENT: reCAPTCHA verified');
@@ -235,45 +224,15 @@
       const successMsg = document.getElementById('successMessage');
       
       if (errorMsg) {
-        console.log('🔍 CLIENT: Auto-hiding error message');
         errorMsg.style.animation = 'fadeOut 0.3s ease-out';
         setTimeout(() => errorMsg.remove(), 300);
       }
       
       if (successMsg) {
-        console.log('🔍 CLIENT: Auto-hiding success message');
         successMsg.style.animation = 'fadeOut 0.3s ease-out';
         setTimeout(() => successMsg.remove(), 300);
       }
     }, 8000);
-
-    // Add fade out animation
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeOut {
-        from { opacity: 1; transform: translateY(0); }
-        to { opacity: 0; transform: translateY(-10px); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // ✅ DEBUG: Manual test for flash messages
-    function showTestMessage() {
-      console.log('🧪 CLIENT: Showing test message');
-      const testDiv = document.createElement('div');
-      testDiv.className = 'error-message';
-      testDiv.textContent = 'TEST: This is a client-side test message!';
-      document.querySelector('.hero-content').insertBefore(testDiv, document.querySelector('form'));
-    }
-
-    // Add test button functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const testButton = document.createElement('button');
-      testButton.textContent = '🧪 Test Client Message';
-      testButton.onclick = showTestMessage;
-      testButton.style.cssText = 'margin: 10px; padding: 5px 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;';
-      document.querySelector('.hero-content').appendChild(testButton);
-    });
   </script>
 </body>
 </html>

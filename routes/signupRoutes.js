@@ -9,36 +9,34 @@ const userController = require("../controllers/userController");
 router.get("/signup", (req, res) => {
   console.log("📄 Rendering signup page...");
 
-  // Get formData flash message (custom flash for form persistence)
-  const formDataStr = req.flash("formData")[0] || null;
+  // Get flash messages (these come as arrays from connect-flash)
+  const errorMessage = req.flash("error_message") || [];
+  const successMessage = req.flash("success_message") || [];
 
-  // Parse form data if available
+  // Get form data from flash (userController stores it as JSON string)
   let formData = null;
-  if (formDataStr) {
+  const flashFormData = req.flash("formData");
+  if (flashFormData && flashFormData.length > 0) {
     try {
-      formData = JSON.parse(formDataStr);
-      // Remove passwords for security (never preserve passwords)
-      if (formData.password) delete formData.password;
-      if (formData.confirmPassword) delete formData.confirmPassword;
+      formData = JSON.parse(flashFormData[0]);
     } catch (e) {
-      console.log("❌ Error parsing form data:", e);
+      console.log("⚠️ Could not parse form data from flash");
       formData = null;
     }
   }
 
-  // Log flash messages (available via res.locals from global middleware)
   console.log("📨 Flash messages available:", {
-    error_message: res.locals.error_message,
-    success_message: res.locals.success_message,
+    error_message: errorMessage,
+    success_message: successMessage,
     has_formData: !!formData,
   });
 
-  // Render signup page with all necessary data
   res.render("signup", {
-    user: req.user || null,
+    error_message: errorMessage,
+    success_message: successMessage,
     formData: formData,
-    title: "Create Account - IAAI Training",
-    // Flash messages are automatically available via res.locals
+    user: req.user || null,
+    title: "Sign Up - IAAI Training Platform",
   });
 });
 
@@ -125,7 +123,7 @@ router.get("/confirm-user/:email", async (req, res, next) => {
 // ============================================
 
 // Render forgot password page
-router.get("/forgot-password", (req, res) => {
+router.get("/reset-password", (req, res) => {
   console.log("📄 Rendering forgot password page...");
 
   res.render("forgot-password", {

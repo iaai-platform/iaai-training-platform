@@ -2362,7 +2362,7 @@
 
         // Proceed with scheduling using modified content
       // Proceed with scheduling using modified content
-function proceedWithScheduling() {
+      function proceedWithScheduling() {
     if (!currentEmailPreview) {
         showToast('No email preview available', 'error');
         return;
@@ -2372,37 +2372,55 @@ function proceedWithScheduling() {
     const notificationType = document.getElementById('notificationType').value;
     
     if (notificationType === 'immediate') {
-        // For immediate notifications, submit the immediate form
+        // ✅ UPDATED: For immediate notifications, submit the immediate form
         const immediateForm = document.getElementById('immediateNotificationForm');
         
-        // If content was modified, we need to handle it differently for immediate emails
+        // ✅ FIXED: Check if content was modified and add proper hidden fields
         if (currentEmailPreview.html !== originalEmailContent) {
-            // For immediate emails, we can't use hidden fields the same way
-            // Instead, we'll need to modify the custom message field
-            const customMessageField = document.getElementById('immediateCustomMessage');
-            const customSubjectField = document.getElementById('immediateCustomSubject');
+            console.log('📝 Email content was modified, adding hidden fields to immediate form...');
             
-            // Update the form fields with modified content
-            if (currentEmailPreview.subject !== originalEmailContent) {
-                customSubjectField.value = currentEmailPreview.subject;
+            // ✅ ADD HIDDEN FIELD FOR MODIFIED EMAIL CONTENT
+            let modifiedContentField = document.getElementById('immediateModifiedEmailContent');
+            if (!modifiedContentField) {
+                modifiedContentField = document.createElement('input');
+                modifiedContentField.type = 'hidden';
+                modifiedContentField.name = 'modifiedEmailContent';
+                modifiedContentField.id = 'immediateModifiedEmailContent';
+                immediateForm.appendChild(modifiedContentField);
             }
+            modifiedContentField.value = currentEmailPreview.html;
             
-            // Note: For immediate emails, HTML modifications are more complex
-            // You may need to add additional hidden fields or modify the backend
+            // ✅ ADD HIDDEN FIELD FOR MODIFIED EMAIL SUBJECT
+            let modifiedSubjectField = document.getElementById('immediateModifiedEmailSubject');
+            if (!modifiedSubjectField) {
+                modifiedSubjectField = document.createElement('input');
+                modifiedSubjectField.type = 'hidden';
+                modifiedSubjectField.name = 'modifiedEmailSubject';
+                modifiedSubjectField.id = 'immediateModifiedEmailSubject';
+                immediateForm.appendChild(modifiedSubjectField);
+            }
+            modifiedSubjectField.value = currentEmailPreview.subject;
+            
+            console.log('✅ Added modified content and subject to immediate form');
             showToast('Email modifications applied. Proceeding with immediate send.', 'success');
+        } else {
+            console.log('📧 No modifications detected, using original template');
         }
         
         // Close preview modal
         closeEmailPreview();
         
-        // Trigger form submission
-        immediateForm.dispatchEvent(new Event('submit'));
+        // ✅ FIXED: Submit the form directly (not dispatch event)
+        console.log('🚀 Submitting immediate notification form...');
+        immediateForm.submit();
         
     } else if (notificationType === 'scheduled') {
-        // For scheduled reminders, use the existing logic
+        // ✅ UNCHANGED: For scheduled reminders, use the existing logic
         
         // If content was modified, store it
         if (currentEmailPreview.html !== originalEmailContent) {
+            console.log('📝 Email content was modified for scheduled reminder...');
+            
             // Store modified content in hidden form fields
             let modifiedContentField = document.getElementById('modifiedEmailContent');
             if (!modifiedContentField) {
@@ -2424,19 +2442,24 @@ function proceedWithScheduling() {
             
             modifiedContentField.value = currentEmailPreview.html;
             modifiedSubjectField.value = currentEmailPreview.subject;
+            
+            console.log('✅ Added modified content to scheduled form');
         }
         
         // Close preview modal
         closeEmailPreview();
         
-        // Show the scheduling confirmation
-        document.getElementById('reminderConfigForm').dispatchEvent(new Event('submit'));
+        // ✅ FIXED: Submit the form directly (not dispatch event)
+        console.log('🚀 Submitting scheduled reminder form...');
+        document.getElementById('reminderConfigForm').submit();
+        
     } else {
         showToast('Please select a notification type first', 'error');
         closeEmailPreview();
     }
 }
-        // Format HTML for better readability
+
+// Format HTML for better readability
         function formatHTML(html) {
             // Simple HTML formatting (you might want to use a proper HTML formatter library)
             return html

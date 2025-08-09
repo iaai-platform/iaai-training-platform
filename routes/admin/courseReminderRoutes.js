@@ -97,8 +97,15 @@ router.post(
   isAdmin,
   async (req, res) => {
     try {
-      const { courseId, courseType, emailType, customMessage, customSubject } =
-        req.body;
+      const {
+        courseId,
+        courseType,
+        emailType,
+        customMessage,
+        customSubject,
+        modifiedEmailContent, // ✅ ADDED
+        modifiedEmailSubject, // ✅ ADDED
+      } = req.body;
 
       console.log(
         `📧 Sending immediate notification for ${courseType}: ${courseId}`
@@ -106,6 +113,12 @@ router.post(
       console.log(`   Email Type: ${emailType}`);
       console.log(`   Custom Subject: ${customSubject ? "Yes" : "No"}`);
       console.log(`   Custom Message: ${customMessage ? "Yes" : "No"}`);
+      console.log(
+        `   Modified Content: ${modifiedEmailContent ? "Yes" : "No"}`
+      ); // ✅ ADDED
+      console.log(
+        `   Modified Subject: ${modifiedEmailSubject ? "Yes" : "No"}`
+      ); // ✅ ADDED
 
       // Validate required fields
       if (!courseId || !courseType || !emailType) {
@@ -113,14 +126,15 @@ router.post(
         return res.redirect("/admin/course-reminders");
       }
 
-      // Validate custom message if email type is custom
+      // ✅ UPDATED VALIDATION - Validate custom message if email type is custom
       if (
         emailType === "custom" &&
-        (!customMessage || customMessage.trim() === "")
+        (!customMessage || customMessage.trim() === "") &&
+        (!modifiedEmailContent || modifiedEmailContent.trim() === "") // ✅ ADDED
       ) {
         req.flash(
           "error_message",
-          "Custom message is required for custom email type"
+          "Custom message or modified content is required for custom email type"
         );
         return res.redirect("/admin/course-reminders");
       }
@@ -169,13 +183,13 @@ router.post(
           const enrollment =
             user.getCourseEnrollment?.(courseId, courseType) || {};
 
-          // ✅ FINAL SOLUTION: Check if user has any enrollment at all
+          // Check if user has any enrollment at all
           if (!enrollment) {
             console.log(`⚠️ Skipping user ${user.email} - no enrollment found`);
             continue;
           }
 
-          // ✅ For immediate notifications, be very lenient - just check if enrollment exists
+          // For immediate notifications, be very lenient - just check if enrollment exists
           console.log(
             `✅ Processing user ${user.email} - has enrollment, sending email`
           );
@@ -185,23 +199,44 @@ router.post(
           const isUrgent =
             emailType === "last-minute" || emailType === "urgent-update";
 
+          // ✅ UPDATED SWITCH STATEMENT WITH MODIFIED CONTENT SUPPORT
           switch (emailType) {
             case "course-starting":
               try {
-                const result = generateCourseStartingEmailContent(
-                  course,
-                  courseType,
-                  user
-                );
-                const emailSubject =
-                  customSubject && customSubject.trim()
-                    ? customSubject
-                    : result.subject;
+                let emailSubject, emailHtml;
+
+                // Check for modified content first
+                if (modifiedEmailContent && modifiedEmailContent.trim()) {
+                  emailHtml = modifiedEmailContent
+                    .replace(/{{firstName}}/g, user.firstName)
+                    .replace(/{{lastName}}/g, user.lastName)
+                    .replace(/{{courseName}}/g, course.basic?.title || "Course")
+                    .replace(
+                      /{{courseCode}}/g,
+                      course.basic?.courseCode || "N/A"
+                    );
+                  emailSubject =
+                    modifiedEmailSubject ||
+                    customSubject ||
+                    `Course Starting: ${course.basic?.title}`;
+                } else {
+                  // Use original template
+                  const result = generateCourseStartingEmailContent(
+                    course,
+                    courseType,
+                    user
+                  );
+                  emailHtml = result.html;
+                  emailSubject =
+                    customSubject && customSubject.trim()
+                      ? customSubject
+                      : result.subject;
+                }
 
                 await emailService.sendEmail({
                   to: user.email,
                   subject: emailSubject,
-                  html: result.html,
+                  html: emailHtml,
                   priority: "normal",
                 });
                 emailSent = true;
@@ -213,20 +248,38 @@ router.post(
 
             case "preparation":
               try {
-                const prepResult = generatePreparationEmailContent(
-                  course,
-                  courseType,
-                  user
-                );
-                const emailSubject =
-                  customSubject && customSubject.trim()
-                    ? customSubject
-                    : prepResult.subject;
+                let emailSubject, emailHtml;
+
+                if (modifiedEmailContent && modifiedEmailContent.trim()) {
+                  emailHtml = modifiedEmailContent
+                    .replace(/{{firstName}}/g, user.firstName)
+                    .replace(/{{lastName}}/g, user.lastName)
+                    .replace(/{{courseName}}/g, course.basic?.title || "Course")
+                    .replace(
+                      /{{courseCode}}/g,
+                      course.basic?.courseCode || "N/A"
+                    );
+                  emailSubject =
+                    modifiedEmailSubject ||
+                    customSubject ||
+                    `Preparation: ${course.basic?.title}`;
+                } else {
+                  const prepResult = generatePreparationEmailContent(
+                    course,
+                    courseType,
+                    user
+                  );
+                  emailHtml = prepResult.html;
+                  emailSubject =
+                    customSubject && customSubject.trim()
+                      ? customSubject
+                      : prepResult.subject;
+                }
 
                 await emailService.sendEmail({
                   to: user.email,
                   subject: emailSubject,
-                  html: prepResult.html,
+                  html: emailHtml,
                   priority: "normal",
                 });
                 emailSent = true;
@@ -239,19 +292,40 @@ router.post(
             case "tech-check":
               if (courseType === "OnlineLiveTraining") {
                 try {
-                  const techResult = generateTechCheckEmailContent(
-                    course,
-                    user
-                  );
-                  const emailSubject =
-                    customSubject && customSubject.trim()
-                      ? customSubject
-                      : techResult.subject;
+                  let emailSubject, emailHtml;
+
+                  if (modifiedEmailContent && modifiedEmailContent.trim()) {
+                    emailHtml = modifiedEmailContent
+                      .replace(/{{firstName}}/g, user.firstName)
+                      .replace(/{{lastName}}/g, user.lastName)
+                      .replace(
+                        /{{courseName}}/g,
+                        course.basic?.title || "Course"
+                      )
+                      .replace(
+                        /{{courseCode}}/g,
+                        course.basic?.courseCode || "N/A"
+                      );
+                    emailSubject =
+                      modifiedEmailSubject ||
+                      customSubject ||
+                      `Tech Check: ${course.basic?.title}`;
+                  } else {
+                    const techResult = generateTechCheckEmailContent(
+                      course,
+                      user
+                    );
+                    emailHtml = techResult.html;
+                    emailSubject =
+                      customSubject && customSubject.trim()
+                        ? customSubject
+                        : techResult.subject;
+                  }
 
                   await emailService.sendEmail({
                     to: user.email,
                     subject: emailSubject,
-                    html: techResult.html,
+                    html: emailHtml,
                     priority: "normal",
                   });
                   emailSent = true;
@@ -267,21 +341,39 @@ router.post(
 
             case "last-minute":
               try {
-                const lastMinuteResult = generateLastMinuteEmailContent(
-                  course,
-                  user,
-                  customMessage ||
-                    "Important last-minute information about your course."
-                );
-                const emailSubject =
-                  customSubject && customSubject.trim()
-                    ? customSubject
-                    : lastMinuteResult.subject;
+                let emailSubject, emailHtml;
+
+                if (modifiedEmailContent && modifiedEmailContent.trim()) {
+                  emailHtml = modifiedEmailContent
+                    .replace(/{{firstName}}/g, user.firstName)
+                    .replace(/{{lastName}}/g, user.lastName)
+                    .replace(/{{courseName}}/g, course.basic?.title || "Course")
+                    .replace(
+                      /{{courseCode}}/g,
+                      course.basic?.courseCode || "N/A"
+                    );
+                  emailSubject =
+                    modifiedEmailSubject ||
+                    customSubject ||
+                    `URGENT: ${course.basic?.title}`;
+                } else {
+                  const lastMinuteResult = generateLastMinuteEmailContent(
+                    course,
+                    user,
+                    customMessage ||
+                      "Important last-minute information about your course."
+                  );
+                  emailHtml = lastMinuteResult.html;
+                  emailSubject =
+                    customSubject && customSubject.trim()
+                      ? customSubject
+                      : lastMinuteResult.subject;
+                }
 
                 await emailService.sendEmail({
                   to: user.email,
                   subject: emailSubject,
-                  html: lastMinuteResult.html,
+                  html: emailHtml,
                   priority: "high",
                   headers: { "X-Priority": "1" },
                 });
@@ -294,20 +386,38 @@ router.post(
 
             case "urgent-update":
               try {
-                const urgentResult = generateUrgentUpdateEmailContent(
-                  course,
-                  user,
-                  customMessage || "Urgent update regarding your course."
-                );
-                const emailSubject =
-                  customSubject && customSubject.trim()
-                    ? customSubject
-                    : urgentResult.subject;
+                let emailSubject, emailHtml;
+
+                if (modifiedEmailContent && modifiedEmailContent.trim()) {
+                  emailHtml = modifiedEmailContent
+                    .replace(/{{firstName}}/g, user.firstName)
+                    .replace(/{{lastName}}/g, user.lastName)
+                    .replace(/{{courseName}}/g, course.basic?.title || "Course")
+                    .replace(
+                      /{{courseCode}}/g,
+                      course.basic?.courseCode || "N/A"
+                    );
+                  emailSubject =
+                    modifiedEmailSubject ||
+                    customSubject ||
+                    `URGENT UPDATE: ${course.basic?.title}`;
+                } else {
+                  const urgentResult = generateUrgentUpdateEmailContent(
+                    course,
+                    user,
+                    customMessage || "Urgent update regarding your course."
+                  );
+                  emailHtml = urgentResult.html;
+                  emailSubject =
+                    customSubject && customSubject.trim()
+                      ? customSubject
+                      : urgentResult.subject;
+                }
 
                 await emailService.sendEmail({
                   to: user.email,
                   subject: emailSubject,
-                  html: urgentResult.html,
+                  html: emailHtml,
                   priority: "high",
                   headers: { "X-Priority": "2" },
                 });
@@ -319,27 +429,52 @@ router.post(
               break;
 
             case "custom":
-              if (!customMessage || customMessage.trim() === "") {
+              // Check if we have modified content or custom message
+              if (
+                (!customMessage || customMessage.trim() === "") &&
+                (!modifiedEmailContent || modifiedEmailContent.trim() === "")
+              ) {
                 console.log(
-                  `⚠️ Skipping custom email for ${user.email} - no custom message`
+                  `⚠️ Skipping custom email for ${user.email} - no custom message or modified content`
                 );
                 emailSent = false;
               } else {
                 try {
-                  const customResult = generateCustomEmailContent(
-                    course,
-                    user,
-                    customMessage
-                  );
-                  const emailSubject =
-                    customSubject && customSubject.trim()
-                      ? customSubject
-                      : customResult.subject;
+                  let emailSubject, emailHtml;
+
+                  if (modifiedEmailContent && modifiedEmailContent.trim()) {
+                    emailHtml = modifiedEmailContent
+                      .replace(/{{firstName}}/g, user.firstName)
+                      .replace(/{{lastName}}/g, user.lastName)
+                      .replace(
+                        /{{courseName}}/g,
+                        course.basic?.title || "Course"
+                      )
+                      .replace(
+                        /{{courseCode}}/g,
+                        course.basic?.courseCode || "N/A"
+                      );
+                    emailSubject =
+                      modifiedEmailSubject ||
+                      customSubject ||
+                      `Important Update: ${course.basic?.title}`;
+                  } else {
+                    const customResult = generateCustomEmailContent(
+                      course,
+                      user,
+                      customMessage
+                    );
+                    emailHtml = customResult.html;
+                    emailSubject =
+                      customSubject && customSubject.trim()
+                        ? customSubject
+                        : customResult.subject;
+                  }
 
                   await emailService.sendEmail({
                     to: user.email,
                     subject: emailSubject,
-                    html: customResult.html,
+                    html: emailHtml,
                     priority: isUrgent ? "high" : "normal",
                     headers: isUrgent ? { "X-Priority": "1" } : {},
                   });
@@ -374,7 +509,7 @@ router.post(
         }
       }
 
-      // Log the immediate notification in history
+      // ✅ UPDATED LOG - Log the immediate notification in history
       const historyEntry = {
         jobId: `immediate-${emailType}-${courseType}-${courseId}-${Date.now()}`,
         courseId,
@@ -390,6 +525,7 @@ router.post(
         isImmediate: true,
         isCustom: emailType === "custom",
         sentBy: req.user._id,
+        hasModifiedContent: !!(modifiedEmailContent || modifiedEmailSubject), // ✅ ADDED
       };
 
       courseReminderScheduler.reminderHistory.push(historyEntry);
@@ -400,11 +536,14 @@ router.post(
       console.log(`✅ Immediate notification batch complete`);
       console.log(`📊 Success: ${successCount}, Failed: ${failureCount}`);
 
-      // Set success/error message
+      // ✅ UPDATED SUCCESS MESSAGE - Set success/error message
       if (successCount > 0) {
         let message = `Immediate notification sent successfully to ${successCount} students`;
         if (failureCount > 0) {
           message += ` (${failureCount} failed)`;
+        }
+        if (modifiedEmailContent || modifiedEmailSubject) {
+          message += " with custom modifications";
         }
         req.flash("success_message", message);
       } else {

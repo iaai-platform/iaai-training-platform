@@ -1,4 +1,4 @@
-// routes/admin/courseReminderRoutes.js - UPDATED WITH IMMEDIATE SEND
+// routes/admin/courseReminderRoutes.js - COMPLETE UPDATED VERSION WITH ALL FIXES
 
 const express = require("express");
 const router = express.Router();
@@ -12,6 +12,41 @@ const isAdmin = require("../../middlewares/isAdmin");
 const InPersonAestheticTraining = require("../../models/InPersonAestheticTraining");
 const OnlineLiveTraining = require("../../models/onlineLiveTrainingModel");
 const User = require("../../models/user");
+
+// ============================================
+// HELPER FUNCTION FOR EMAIL TEMPLATE REPLACEMENT
+// ============================================
+function replaceEmailTemplateVariables(content, user, course) {
+  if (!content) return content;
+
+  return (
+    content
+      // ✅ FIRST: Replace sample data from preview
+      .replace(/John Doe/g, `${user.firstName} ${user.lastName}`)
+      .replace(/John/g, user.firstName)
+      .replace(/Doe/g, user.lastName)
+      .replace(/student@example\.com/g, user.email)
+      .replace(/\(student@example\.com\)/g, `(${user.email})`)
+
+      // ✅ THEN: Replace template variables
+      .replace(/\{\{firstName\}\}/g, user.firstName)
+      .replace(/\{\{lastName\}\}/g, user.lastName)
+      .replace(/\{\{fullName\}\}/g, `${user.firstName} ${user.lastName}`)
+      .replace(/\{\{email\}\}/g, user.email)
+      .replace(
+        /\{\{courseName\}\}/g,
+        course.basic?.title || course.title || "Course"
+      )
+      .replace(
+        /\{\{courseCode\}\}/g,
+        course.basic?.courseCode || course.courseCode || "N/A"
+      )
+      .replace(
+        /\{\{courseTitle\}\}/g,
+        course.basic?.title || course.title || "Course"
+      )
+  );
+}
 
 // ============================================
 // MAIN DASHBOARD - Load ALL courses and reminders
@@ -89,7 +124,7 @@ router.get("/course-reminders", isAuthenticated, isAdmin, async (req, res) => {
 });
 
 // ============================================
-// NEW: SEND IMMEDIATE NOTIFICATION
+// SEND IMMEDIATE NOTIFICATION - FULLY FIXED
 // ============================================
 router.post(
   "/course-reminders/send-immediate",
@@ -199,7 +234,7 @@ router.post(
           const isUrgent =
             emailType === "last-minute" || emailType === "urgent-update";
 
-          // ✅ UPDATED SWITCH STATEMENT WITH MODIFIED CONTENT SUPPORT
+          // ✅ COMPLETELY FIXED SWITCH STATEMENT WITH HELPER FUNCTION
           switch (emailType) {
             case "course-starting":
               try {
@@ -207,18 +242,18 @@ router.post(
 
                 // Check for modified content first
                 if (modifiedEmailContent && modifiedEmailContent.trim()) {
-                  emailHtml = modifiedEmailContent
-                    .replace(/{{firstName}}/g, user.firstName)
-                    .replace(/{{lastName}}/g, user.lastName)
-                    .replace(/{{courseName}}/g, course.basic?.title || "Course")
-                    .replace(
-                      /{{courseCode}}/g,
-                      course.basic?.courseCode || "N/A"
-                    );
-                  emailSubject =
+                  emailHtml = replaceEmailTemplateVariables(
+                    modifiedEmailContent,
+                    user,
+                    course
+                  );
+                  emailSubject = replaceEmailTemplateVariables(
                     modifiedEmailSubject ||
-                    customSubject ||
-                    `Course Starting: ${course.basic?.title}`;
+                      customSubject ||
+                      `Course Starting: ${course.basic?.title}`,
+                    user,
+                    course
+                  );
                 } else {
                   // Use original template
                   const result = generateCourseStartingEmailContent(
@@ -251,18 +286,18 @@ router.post(
                 let emailSubject, emailHtml;
 
                 if (modifiedEmailContent && modifiedEmailContent.trim()) {
-                  emailHtml = modifiedEmailContent
-                    .replace(/{{firstName}}/g, user.firstName)
-                    .replace(/{{lastName}}/g, user.lastName)
-                    .replace(/{{courseName}}/g, course.basic?.title || "Course")
-                    .replace(
-                      /{{courseCode}}/g,
-                      course.basic?.courseCode || "N/A"
-                    );
-                  emailSubject =
+                  emailHtml = replaceEmailTemplateVariables(
+                    modifiedEmailContent,
+                    user,
+                    course
+                  );
+                  emailSubject = replaceEmailTemplateVariables(
                     modifiedEmailSubject ||
-                    customSubject ||
-                    `Preparation: ${course.basic?.title}`;
+                      customSubject ||
+                      `Preparation: ${course.basic?.title}`,
+                    user,
+                    course
+                  );
                 } else {
                   const prepResult = generatePreparationEmailContent(
                     course,
@@ -295,21 +330,18 @@ router.post(
                   let emailSubject, emailHtml;
 
                   if (modifiedEmailContent && modifiedEmailContent.trim()) {
-                    emailHtml = modifiedEmailContent
-                      .replace(/{{firstName}}/g, user.firstName)
-                      .replace(/{{lastName}}/g, user.lastName)
-                      .replace(
-                        /{{courseName}}/g,
-                        course.basic?.title || "Course"
-                      )
-                      .replace(
-                        /{{courseCode}}/g,
-                        course.basic?.courseCode || "N/A"
-                      );
-                    emailSubject =
+                    emailHtml = replaceEmailTemplateVariables(
+                      modifiedEmailContent,
+                      user,
+                      course
+                    );
+                    emailSubject = replaceEmailTemplateVariables(
                       modifiedEmailSubject ||
-                      customSubject ||
-                      `Tech Check: ${course.basic?.title}`;
+                        customSubject ||
+                        `Tech Check: ${course.basic?.title}`,
+                      user,
+                      course
+                    );
                   } else {
                     const techResult = generateTechCheckEmailContent(
                       course,
@@ -344,18 +376,18 @@ router.post(
                 let emailSubject, emailHtml;
 
                 if (modifiedEmailContent && modifiedEmailContent.trim()) {
-                  emailHtml = modifiedEmailContent
-                    .replace(/{{firstName}}/g, user.firstName)
-                    .replace(/{{lastName}}/g, user.lastName)
-                    .replace(/{{courseName}}/g, course.basic?.title || "Course")
-                    .replace(
-                      /{{courseCode}}/g,
-                      course.basic?.courseCode || "N/A"
-                    );
-                  emailSubject =
+                  emailHtml = replaceEmailTemplateVariables(
+                    modifiedEmailContent,
+                    user,
+                    course
+                  );
+                  emailSubject = replaceEmailTemplateVariables(
                     modifiedEmailSubject ||
-                    customSubject ||
-                    `URGENT: ${course.basic?.title}`;
+                      customSubject ||
+                      `URGENT: ${course.basic?.title}`,
+                    user,
+                    course
+                  );
                 } else {
                   const lastMinuteResult = generateLastMinuteEmailContent(
                     course,
@@ -389,18 +421,18 @@ router.post(
                 let emailSubject, emailHtml;
 
                 if (modifiedEmailContent && modifiedEmailContent.trim()) {
-                  emailHtml = modifiedEmailContent
-                    .replace(/{{firstName}}/g, user.firstName)
-                    .replace(/{{lastName}}/g, user.lastName)
-                    .replace(/{{courseName}}/g, course.basic?.title || "Course")
-                    .replace(
-                      /{{courseCode}}/g,
-                      course.basic?.courseCode || "N/A"
-                    );
-                  emailSubject =
+                  emailHtml = replaceEmailTemplateVariables(
+                    modifiedEmailContent,
+                    user,
+                    course
+                  );
+                  emailSubject = replaceEmailTemplateVariables(
                     modifiedEmailSubject ||
-                    customSubject ||
-                    `URGENT UPDATE: ${course.basic?.title}`;
+                      customSubject ||
+                      `URGENT UPDATE: ${course.basic?.title}`,
+                    user,
+                    course
+                  );
                 } else {
                   const urgentResult = generateUrgentUpdateEmailContent(
                     course,
@@ -443,21 +475,18 @@ router.post(
                   let emailSubject, emailHtml;
 
                   if (modifiedEmailContent && modifiedEmailContent.trim()) {
-                    emailHtml = modifiedEmailContent
-                      .replace(/{{firstName}}/g, user.firstName)
-                      .replace(/{{lastName}}/g, user.lastName)
-                      .replace(
-                        /{{courseName}}/g,
-                        course.basic?.title || "Course"
-                      )
-                      .replace(
-                        /{{courseCode}}/g,
-                        course.basic?.courseCode || "N/A"
-                      );
-                    emailSubject =
+                    emailHtml = replaceEmailTemplateVariables(
+                      modifiedEmailContent,
+                      user,
+                      course
+                    );
+                    emailSubject = replaceEmailTemplateVariables(
                       modifiedEmailSubject ||
-                      customSubject ||
-                      `Important Update: ${course.basic?.title}`;
+                        customSubject ||
+                        `Important Update: ${course.basic?.title}`,
+                      user,
+                      course
+                    );
                   } else {
                     const customResult = generateCustomEmailContent(
                       course,
@@ -614,7 +643,7 @@ router.get(
 
       // Create sample user for preview
       const user = {
-        firstName: "John",
+        firstName: "Sir/Madam",
         lastName: "Doe",
         email: "student@example.com",
       };
@@ -1592,177 +1621,179 @@ function generateCourseStartingEmailContent(course, courseType, user) {
   }: ${courseTitle}`;
 
   const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 650px; margin: 0 auto; background: #ffffff; }
-        .header { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 40px 30px; text-align: center; }
-        .content { padding: 40px 30px; }
-        .countdown { background: #dc2626; color: white; padding: 12px 20px; border-radius: 25px; font-weight: bold; display: inline-block; margin: 10px 0; }
-        .course-details { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 30px 0; }
-        .button { display: inline-block; padding: 14px 28px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 8px; }
-        .checklist { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 30px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <div class="countdown">
-            ⏰ ${
-              hoursUntilStart <= 24
-                ? "STARTS TOMORROW"
-                : `STARTS IN ${Math.ceil(hoursUntilStart / 24)} DAYS`
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 650px; margin: 0 auto; background: #ffffff; }
+      .header { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 40px 30px; text-align: center; }
+      .content { padding: 40px 30px; }
+      .countdown { background: #dc2626; color: white; padding: 12px 20px; border-radius: 25px; font-weight: bold; display: inline-block; margin: 10px 0; }
+      .course-details { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 30px 0; }
+      .button { display: inline-block; padding: 14px 28px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 8px; }
+      .checklist { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 30px 0; }
+      .course-title-header { color: #000000; margin: 0; font-size: 18px; background: rgba(255,255,255,0.95); padding: 10px 20px; border-radius: 8px; display: inline-block; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+      .header-title { color: #000000; margin: 0; background: rgba(255,255,255,0.95); padding: 15px 25px; border-radius: 10px; display: inline-block; font-weight: 700; box-shadow: 0 3px 6px rgba(0,0,0,0.15); margin-bottom: 20px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="countdown">
+          ⏰ ${
+            hoursUntilStart <= 24
+              ? "STARTS TOMORROW"
+              : `STARTS IN ${Math.ceil(hoursUntilStart / 24)} DAYS`
+          }
+        </div>
+        <h1 class="header-title">Course Reminder</h1>
+        <p class="course-title-header">${courseTitle}</p>
+      </div>
+      
+      <div class="content">
+        <h2>Dear ${user.firstName},</h2>
+        
+        <p>This is your reminder that <strong>${courseTitle}</strong> is starting soon!</p>
+
+        <div class="course-details">
+          <h3>📋 Course Information</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 12px 0; width: 140px; font-weight: 600;">📅 Date:</td>
+              <td>${startDate.toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; font-weight: 600;">🕐 Time:</td>
+              <td>${startDate.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; font-weight: 600;">📚 Course Code:</td>
+              <td><strong>${courseCode || "N/A"}</strong></td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; font-weight: 600;">👨‍🏫 Type:</td>
+              <td>${
+                isOnline ? "Online Live Training" : "In-Person Training"
+              }</td>
+            </tr>
+          </table>
+        </div>
+
+        ${
+          isOnline
+            ? `
+          <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+            <h4 style="margin: 0 0 16px 0; color: #1e40af;">💻 Online Session Information</h4>
+            <p><strong>Platform:</strong> ${
+              course.platform?.name || "Details will be provided"
+            }</p>
+            ${
+              course.platform?.accessUrl
+                ? `<p><strong>Join Link:</strong> <a href="${course.platform.accessUrl}" style="color: #1e40af;">Click here to join</a></p>`
+                : "<p><strong>Join Link:</strong> Will be sent 30 minutes before session</p>"
             }
           </div>
-          <h1>Course Reminder</h1>
-          <p style="margin: 0; font-size: 18px; opacity: 0.9;">${courseTitle}</p>
-        </div>
-        
-        <div class="content">
-          <h2>Dear ${user.firstName},</h2>
-          
-          <p>This is your reminder that <strong>${courseTitle}</strong> is starting soon!</p>
-
-          <div class="course-details">
-            <h3>📋 Course Information</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 12px 0; width: 140px; font-weight: 600;">📅 Date:</td>
-                <td>${startDate.toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px 0; font-weight: 600;">🕐 Time:</td>
-                <td>${startDate.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px 0; font-weight: 600;">📚 Course Code:</td>
-                <td><strong>${courseCode || "N/A"}</strong></td>
-              </tr>
-              <tr>
-                <td style="padding: 12px 0; font-weight: 600;">👨‍🏫 Type:</td>
-                <td>${
-                  isOnline ? "Online Live Training" : "In-Person Training"
-                }</td>
-              </tr>
-            </table>
-          </div>
-
-          ${
-            isOnline
-              ? `
-            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
-              <h4 style="margin: 0 0 16px 0; color: #1e40af;">💻 Online Session Information</h4>
-              <p><strong>Platform:</strong> ${
-                course.platform?.name || "Details will be provided"
-              }</p>
-              ${
-                course.platform?.accessUrl
-                  ? `<p><strong>Join Link:</strong> <a href="${course.platform.accessUrl}" style="color: #1e40af;">Click here to join</a></p>`
-                  : "<p><strong>Join Link:</strong> Will be sent 30 minutes before session</p>"
-              }
-            </div>
-          `
-              : `
-            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
-              <h4 style="margin: 0 0 16px 0; color: #065f46;">🏢 Venue Information</h4>
-              <p><strong>Location:</strong> ${
-                course.venue?.name || "Details in your course materials"
-              }</p>
-              ${
-                course.venue?.address
-                  ? `<p><strong>Address:</strong> ${course.venue.address}</p>`
-                  : ""
-              }
-              <p><strong>Arrival:</strong> Please arrive 15-20 minutes early</p>
-            </div>
-          `
-          }
-
-          <div class="checklist">
-            <h3>✅ Final Preparation Checklist</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-              ${
-                isOnline
-                  ? `
-                <div>
-                  <h4>Technical:</h4>
-                  <ul>
-                    <li>☐ Internet connection tested</li>
-                    <li>☐ Camera and mic working</li>
-                    <li>☐ Platform software ready</li>
-                    <li>☐ Quiet space prepared</li>
-                  </ul>
-                </div>
-              `
-                  : `
-                <div>
-                  <h4>Travel & Arrival:</h4>
-                  <ul>
-                    <li>☐ Route planned</li>
-                    <li>☐ Travel time calculated</li>
-                    <li>☐ ID and materials ready</li>
-                    <li>☐ Appropriate attire chosen</li>
-                  </ul>
-                </div>
-              `
-              }
-              <div>
-                <h4>Learning Preparation:</h4>
-                <ul>
-                  <li>☐ Course materials reviewed</li>
-                  <li>☐ Questions prepared</li>
-                  <li>☐ Notebook and pen ready</li>
-                  <li>☐ Positive mindset activated!</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <center>
-            <a href="${
-              process.env.BASE_URL || ""
-            }/library" class="button">View Course Details</a>
+        `
+            : `
+          <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+            <h4 style="margin: 0 0 16px 0; color: #065f46;">🏢 Venue Information</h4>
+            <p><strong>Location:</strong> ${
+              course.venue?.name || "Details in your course materials"
+            }</p>
             ${
-              isOnline && course.platform?.accessUrl
-                ? `<a href="${course.platform.accessUrl}" class="button" style="background: #10b981;">Join Online Session</a>`
+              course.venue?.address
+                ? `<p><strong>Address:</strong> ${course.venue.address}</p>`
                 : ""
             }
-          </center>
-
-          <div style="background: #f0f9ff; border-radius: 8px; padding: 20px; margin: 30px 0; text-align: center;">
-            <p style="margin: 0; color: #1e40af; font-weight: 600;">
-              🌟 We're excited to see you ${
-                hoursUntilStart <= 24 ? "tomorrow" : "soon"
-              }! Come ready to learn and grow.
-            </p>
+            <p><strong>Arrival:</strong> Please arrive 15-20 minutes early</p>
           </div>
+        `
+        }
 
-          <div style="border-top: 1px solid #e5e7eb; padding-top: 30px; margin-top: 40px;">
-            <h4>📞 Need Help?</h4>
-            <p style="font-size: 14px;">
-              📧 Email: <a href="mailto:support@iaai-institute.com">support@iaai-institute.com</a><br>
-              🌐 Support: <a href="${
-                process.env.BASE_URL || ""
-              }/contact-us">Contact Us</a>
-            </p>
+        <div class="checklist">
+          <h3>✅ Final Preparation Checklist</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            ${
+              isOnline
+                ? `
+              <div>
+                <h4>Technical:</h4>
+                <ul>
+                  <li>☐ Internet connection tested</li>
+                  <li>☐ Camera and mic working</li>
+                  <li>☐ Platform software ready</li>
+                  <li>☐ Quiet space prepared</li>
+                </ul>
+              </div>
+            `
+                : `
+              <div>
+                <h4>Travel & Arrival:</h4>
+                <ul>
+                  <li>☐ Route planned</li>
+                  <li>☐ Travel time calculated</li>
+                  <li>☐ ID and materials ready</li>
+                  <li>☐ Appropriate attire chosen</li>
+                </ul>
+              </div>
+            `
+            }
+            <div>
+              <h4>Learning Preparation:</h4>
+              <ul>
+                <li>☐ Course materials reviewed</li>
+                <li>☐ Questions prepared</li>
+                <li>☐ Notebook and pen ready</li>
+                <li>☐ Positive mindset activated!</li>
+              </ul>
+            </div>
           </div>
-
-          <p>Best regards,<br>IAAI Training Institute</p>
         </div>
+
+        <center>
+          <a href="${
+            process.env.BASE_URL || ""
+          }/library" class="button">View Course Details</a>
+          ${
+            isOnline && course.platform?.accessUrl
+              ? `<a href="${course.platform.accessUrl}" class="button" style="background: #10b981;">Join Online Session</a>`
+              : ""
+          }
+        </center>
+
+        <div style="background: #f0f9ff; border-radius: 8px; padding: 20px; margin: 30px 0; text-align: center;">
+          <p style="margin: 0; color: #1e40af; font-weight: 600;">
+            🌟 We're excited to see you ${
+              hoursUntilStart <= 24 ? "tomorrow" : "soon"
+            }! Come ready to learn and grow.
+          </p>
+        </div>
+
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 30px; margin-top: 40px;">
+          <h4>📞 Need Help?</h4>
+          <p style="font-size: 14px;">
+            📧 Email: <a href="info@iaa-i.com">info@iaa-i.com</a><br>
+            🌐 Support: <a href="${
+              process.env.BASE_URL || ""
+            }/contact-us">Contact Us</a>
+          </p>
+        </div>
+
+        <p>Best regards,<br>IAAI Training Institute</p>
       </div>
-    </body>
-    </html>
-  `;
+    </div>
+  </body>
+  </html>
+`;
 
   return { html, subject };
 }
@@ -1776,80 +1807,178 @@ function generatePreparationEmailContent(course, courseType, user) {
   const subject = `Preparation Instructions: ${courseTitle}`;
 
   const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 650px; margin: 0 auto; background: #ffffff; }
-        .header { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 40px 30px; text-align: center; }
-        .content { padding: 40px 30px; }
-        .prep-section { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
-        .checklist { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 30px 0; }
-        .button { display: inline-block; padding: 14px 28px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>📚 Course Preparation</h1>
-          <p style="margin: 0; font-size: 18px; opacity: 0.9;">${courseTitle}</p>
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 650px; margin: 0 auto; background: #ffffff; }
+      .header { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 40px 30px; text-align: center; }
+      .content { padding: 40px 30px; }
+      .countdown { background: #dc2626; color: white; padding: 12px 20px; border-radius: 25px; font-weight: bold; display: inline-block; margin: 10px 0; }
+      .course-details { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 30px 0; }
+      .button { display: inline-block; padding: 14px 28px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 8px; }
+      .checklist { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 30px 0; }
+      .course-title-header { color: #1f2937; margin: 0; font-size: 18px; background: rgba(255,255,255,0.95); padding: 10px 20px; border-radius: 8px; display: inline-block; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="countdown">
+          ⏰ ${
+            hoursUntilStart <= 24
+              ? "STARTS TOMORROW"
+              : `STARTS IN ${Math.ceil(hoursUntilStart / 24)} DAYS`
+          }
         </div>
+        <h1>Course Reminder</h1>
+        <p class="course-title-header">${courseTitle}</p>
+      </div>
+      
+      <div class="content">
+        <h2>Dear ${user.firstName},</h2>
         
-        <div class="content">
-          <h2>Dear ${user.firstName},</h2>
-          <p>Your course starts on ${startDate.toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}. Please review these preparation instructions:</p>
+        <p>This is your reminder that <strong>${courseTitle}</strong> is starting soon!</p>
 
-          <div class="prep-section">
-            <h3>📋 Pre-Course Requirements</h3>
+        <div class="course-details">
+          <h3>📋 Course Information</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 12px 0; width: 140px; font-weight: 600;">📅 Date:</td>
+              <td>${startDate.toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; font-weight: 600;">🕐 Time:</td>
+              <td>${startDate.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; font-weight: 600;">📚 Course Code:</td>
+              <td><strong>${courseCode || "N/A"}</strong></td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; font-weight: 600;">👨‍🏫 Type:</td>
+              <td>${
+                isOnline ? "Online Live Training" : "In-Person Training"
+              }</td>
+            </tr>
+          </table>
+        </div>
+
+        ${
+          isOnline
+            ? `
+          <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+            <h4 style="margin: 0 0 16px 0; color: #1e40af;">💻 Online Session Information</h4>
+            <p><strong>Platform:</strong> ${
+              course.platform?.name || "Details will be provided"
+            }</p>
+            ${
+              course.platform?.accessUrl
+                ? `<p><strong>Join Link:</strong> <a href="${course.platform.accessUrl}" style="color: #1e40af;">Click here to join</a></p>`
+                : "<p><strong>Join Link:</strong> Will be sent 30 minutes before session</p>"
+            }
+          </div>
+        `
+            : `
+          <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+            <h4 style="margin: 0 0 16px 0; color: #065f46;">🏢 Venue Information</h4>
+            <p><strong>Location:</strong> ${
+              course.venue?.name || "Details in your course materials"
+            }</p>
+            ${
+              course.venue?.address
+                ? `<p><strong>Address:</strong> ${course.venue.address}</p>`
+                : ""
+            }
+            <p><strong>Arrival:</strong> Please arrive 15-20 minutes early</p>
+          </div>
+        `
+        }
+
+        <div class="checklist">
+          <h3>✅ Final Preparation Checklist</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
             ${
               isOnline
                 ? `
-              <h4>🖥️ Technical Preparation:</h4>
-              <ul>
-                <li>Test your internet connection (minimum 10 Mbps recommended)</li>
-                <li>Ensure your camera and microphone are working</li>
-                <li>Download and test the platform software</li>
-                <li>Find a quiet, well-lit space for the session</li>
-              </ul>
+              <div>
+                <h4>Technical:</h4>
+                <ul>
+                  <li>☐ Internet connection tested</li>
+                  <li>☐ Camera and mic working</li>
+                  <li>☐ Platform software ready</li>
+                  <li>☐ Quiet space prepared</li>
+                </ul>
+              </div>
             `
                 : `
-              <h4>🏢 In-Person Preparation:</h4>
-              <ul>
-                <li>Plan your route to the venue in advance</li>
-                <li>Bring required identification</li>
-                <li>Arrive 15-20 minutes early for registration</li>
-                <li>Dress according to course requirements</li>
-              </ul>
+              <div>
+                <h4>Travel & Arrival:</h4>
+                <ul>
+                  <li>☐ Route planned</li>
+                  <li>☐ Travel time calculated</li>
+                  <li>☐ ID and materials ready</li>
+                  <li>☐ Appropriate attire chosen</li>
+                </ul>
+              </div>
             `
             }
-            
-            <h4>📚 Study Materials:</h4>
-            <ul>
-              <li>Review any pre-course materials in your library</li>
-              <li>Prepare questions you'd like to ask</li>
-              <li>Bring notebook and pen for notes</li>
-            </ul>
+            <div>
+              <h4>Learning Preparation:</h4>
+              <ul>
+                <li>☐ Course materials reviewed</li>
+                <li>☐ Questions prepared</li>
+                <li>☐ Notebook and pen ready</li>
+                <li>☐ Positive mindset activated!</li>
+              </ul>
+            </div>
           </div>
-
-          <center>
-            <a href="${
-              process.env.BASE_URL || ""
-            }/library" class="button">Access Course Materials</a>
-          </center>
-
-          <p>We're looking forward to seeing you in the course. If you have any questions, please don't hesitate to contact us.</p>
-          <p>Best regards,<br>IAAI Team</p>
         </div>
+
+        <center>
+          <a href="${
+            process.env.BASE_URL || ""
+          }/library" class="button">View Course Details</a>
+          ${
+            isOnline && course.platform?.accessUrl
+              ? `<a href="${course.platform.accessUrl}" class="button" style="background: #10b981;">Join Online Session</a>`
+              : ""
+          }
+        </center>
+
+        <div style="background: #f0f9ff; border-radius: 8px; padding: 20px; margin: 30px 0; text-align: center;">
+          <p style="margin: 0; color: #1e40af; font-weight: 600;">
+            🌟 We're excited to see you ${
+              hoursUntilStart <= 24 ? "tomorrow" : "soon"
+            }! Come ready to learn and grow.
+          </p>
+        </div>
+
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 30px; margin-top: 40px;">
+          <h4>📞 Need Help?</h4>
+          <p style="font-size: 14px;">
+            📧 Email: <a href="mailto:info@iaa-i.com">info@iaa-i.com</a><br>
+            🌐 Support: <a href="${
+              process.env.BASE_URL || ""
+            }/contact-us">Contact Us</a>
+          </p>
+        </div>
+
+        <p>Best regards,<br>IAAI Training Institute</p>
       </div>
-    </body>
-    </html>
-  `;
+    </div>
+  </body>
+  </html>
+`;
 
   return { html, subject };
 }

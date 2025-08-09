@@ -1168,7 +1168,7 @@
             <div class="action-header">
                 <div class="action-title">
                     <i class="fas fa-search"></i>
-                    Select Course for Reminder
+                    Select Course for Notification
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-success" onclick="scheduleAllReminders()">
@@ -1179,7 +1179,7 @@
                     </button>
                 </div>
             </div>
-
+        
             <!-- Course Selector -->
             <div class="course-selector-section">
                 <div class="form-group">
@@ -1187,7 +1187,7 @@
                         <i class="fas fa-graduation-cap"></i> Choose Course
                     </label>
                     <select class="form-control course-selector" id="courseSelector" onchange="loadCourseDetails()">
-                        <option value="">Select a course to schedule reminder...</option>
+                        <option value="">Select a course to send notification...</option>
                         <% if (typeof allCourses !== 'undefined' && allCourses) { %>
                             <% if (allCourses.inPerson && allCourses.inPerson.length > 0) { %>
                                 <optgroup label="📍 In-Person Courses">
@@ -1196,10 +1196,23 @@
                                                 data-type="InPersonAestheticTraining"
                                                 data-start-date="<%= course.schedule?.startDate || '' %>"
                                                 data-title="<%= course.basic?.title || 'Untitled Course' %>"
-                                                data-code="<%= course.basic?.courseCode || 'N/A' %>">
+                                                data-code="<%= course.basic?.courseCode || 'N/A' %>"
+                                                data-status="<%= course.basic?.status || 'unknown' %>">
                                             [<%= course.basic?.courseCode || 'N/A' %>] <%= course.basic?.title || 'Untitled Course' %>
                                             <% if (course.schedule?.startDate) { %>
                                                 - <%= new Date(course.schedule.startDate).toLocaleDateString() %>
+                                                <% 
+                                                    const now = new Date();
+                                                    const startDate = new Date(course.schedule.startDate);
+                                                    const daysFromNow = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
+                                                %>
+                                                <% if (daysFromNow <= 0) { %>
+                                                    (Started/Ongoing)
+                                                <% } else if (daysFromNow <= 1) { %>
+                                                    (Starting Today/Tomorrow)
+                                                <% } else { %>
+                                                    (<%= daysFromNow %> days)
+                                                <% } %>
                                             <% } %>
                                         </option>
                                     <% }) %>
@@ -1212,10 +1225,23 @@
                                                 data-type="OnlineLiveTraining"
                                                 data-start-date="<%= course.schedule?.startDate || '' %>"
                                                 data-title="<%= course.basic?.title || 'Untitled Course' %>"
-                                                data-code="<%= course.basic?.courseCode || 'N/A' %>">
+                                                data-code="<%= course.basic?.courseCode || 'N/A' %>"
+                                                data-status="<%= course.basic?.status || 'unknown' %>">
                                             [<%= course.basic?.courseCode || 'N/A' %>] <%= course.basic?.title || 'Untitled Course' %>
                                             <% if (course.schedule?.startDate) { %>
                                                 - <%= new Date(course.schedule.startDate).toLocaleDateString() %>
+                                                <% 
+                                                    const now = new Date();
+                                                    const startDate = new Date(course.schedule.startDate);
+                                                    const daysFromNow = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
+                                                %>
+                                                <% if (daysFromNow <= 0) { %>
+                                                    (Started/Ongoing)
+                                                <% } else if (daysFromNow <= 1) { %>
+                                                    (Starting Today/Tomorrow)
+                                                <% } else { %>
+                                                    (<%= daysFromNow %> days)
+                                                <% } %>
                                             <% } %>
                                         </option>
                                     <% }) %>
@@ -1225,7 +1251,7 @@
                     </select>
                     <% if (typeof allCourses === 'undefined' || !allCourses || ((!allCourses.inPerson || allCourses.inPerson.length === 0) && (!allCourses.onlineLive || allCourses.onlineLive.length === 0))) { %>
                         <p style="margin-top: 10px; color: #666; font-style: italic;">
-                            <i class="fas fa-info-circle"></i> No upcoming courses found that can have reminders scheduled.
+                            <i class="fas fa-info-circle"></i> No courses found.
                         </p>
                     <% } %>
                 </div>
@@ -1262,6 +1288,15 @@
                     </div>
                     <div class="detail-card">
                         <div class="detail-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Course Status</div>
+                            <div class="detail-value" id="courseStatus">-</div>
+                        </div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-icon">
                             <i class="fas fa-bell"></i>
                         </div>
                         <div class="detail-content">
@@ -1271,89 +1306,199 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Reminder Configuration Form -->
+        
+            <!-- Updated Reminder Configuration Form -->
             <div class="reminder-form-section">
-                <h4><i class="fas fa-cog"></i> Configure Reminder</h4>
+                <h4><i class="fas fa-cog"></i> Notification Options</h4>
                 
-                <form id="reminderConfigForm" action="/admin/course-reminders/schedule-custom" method="POST">
-                    <input type="hidden" name="courseId" id="selectedCourseId">
-                    <input type="hidden" name="courseType" id="selectedCourseType">
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-clock"></i> Reminder Schedule
-                            </label>
-                            <select class="form-control" name="reminderType" id="reminderType" onchange="updateReminderOptions()" required>
-                                <option value="">Select when to send reminder</option>
-                                <option value="24h">24 hours before course starts</option>
-                                <option value="48h">48 hours (2 days) before</option>
-                                <option value="72h">72 hours (3 days) before</option>
-                                <option value="1week">1 week before</option>
-                                <option value="custom">Custom date & time</option>
-                            </select>
-                        </div>
+                <!-- Notification Type Selector -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-paper-plane"></i> Notification Type
+                    </label>
+                    <select class="form-control" id="notificationType" onchange="updateNotificationOptions()" required>
+                        <option value="">Choose notification type...</option>
+                        <option value="immediate">Send Immediate Notification</option>
+                        <option value="scheduled">Schedule Future Reminder</option>
+                    </select>
+                    <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                        💡 <strong>Immediate:</strong> Sends email right now to all enrolled students | 
+                        <strong>Scheduled:</strong> Sets up automatic reminder for future
+                    </small>
+                </div>
+        
+                <!-- Immediate Notification Section -->
+                <div id="immediateSection" style="display: none;">
+                    <div style="background: #fff8e1; border: 2px solid #ffc107; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <h4 style="margin: 0 0 10px 0; color: #e65100;">
+                            <i class="fas fa-bolt"></i> Immediate Email Notification
+                        </h4>
+                        <p style="margin: 0; color: #bf360c; font-size: 14px;">
+                            This will send the email notification <strong>immediately</strong> to all enrolled students. 
+                            Use this for urgent updates, last-minute information, or when you want to send a reminder right now.
+                        </p>
+                    </div>
+        
+                    <form id="immediateNotificationForm" action="/admin/course-reminders/send-immediate" method="POST">
+                        <input type="hidden" name="courseId" id="immediateCourseId">
+                        <input type="hidden" name="courseType" id="immediateCourseType">
+                        
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-envelope"></i> Email Type
                             </label>
-                            <select class="form-control" name="emailType" id="emailType" onchange="updateReminderOptions()" required>
+                            <select class="form-control" name="emailType" id="immediateEmailType" onchange="updateImmediateOptions()" required>
                                 <option value="">Select email type</option>
                                 <option value="course-starting">Course Starting Reminder</option>
                                 <option value="preparation">Preparation Instructions</option>
                                 <option value="tech-check">Technical Check (Online courses)</option>
+                                <option value="last-minute">Last Minute Information</option>
+                                <option value="urgent-update">Urgent Course Update</option>
                                 <option value="custom">Custom Message</option>
                             </select>
                         </div>
-                    </div>
-
-                    <!-- Custom Date/Time Selection -->
-                    <div class="form-group" id="customDateGroup" style="display: none;">
-                        <label class="form-label">
-                            <i class="fas fa-calendar-alt"></i> Custom Reminder Date & Time
-                        </label>
-                        <input type="datetime-local" class="form-control" name="customDateTime" id="customDateTime">
-                    </div>
-
-                    <!-- Custom Message -->
-                    <div class="form-group" id="customMessageGroup" style="display: none;">
-                        <label class="form-label">
-                            <i class="fas fa-edit"></i> Custom Message
-                        </label>
-                        <textarea class="form-control" name="customMessage" id="customMessage" rows="4" placeholder="Enter your custom message for students..."></textarea>
-                    </div>
-
-                    <!-- Preview Section -->
-                    <div class="reminder-preview" id="reminderPreview" style="display: none;">
-                        <h5><i class="fas fa-eye"></i> Reminder Preview</h5>
-                        <div class="preview-box">
-                            <div class="preview-item">
-                                <strong>Send Date:</strong> <span id="previewSendDate">-</span>
-                            </div>
-                            <div class="preview-item">
-                                <strong>Recipients:</strong> <span id="previewRecipients">0 enrolled students</span>
-                            </div>
-                            <div class="preview-item">
-                                <strong>Email Subject:</strong> <span id="previewSubject">-</span>
+        
+                        <!-- Custom Message for Immediate -->
+                        <div class="form-group" id="immediateCustomMessageGroup" style="display: none;">
+                            <label class="form-label">
+                                <i class="fas fa-edit"></i> Custom Message
+                            </label>
+                            <textarea class="form-control" name="customMessage" id="immediateCustomMessage" rows="4" placeholder="Enter your urgent message for students..."></textarea>
+                        </div>
+        
+                        <!-- Subject Line Override -->
+                        <div class="form-group" id="immediateSubjectGroup" style="display: none;">
+                            <label class="form-label">
+                                <i class="fas fa-tag"></i> Email Subject (Optional)
+                            </label>
+                            <input type="text" class="form-control" name="customSubject" id="immediateCustomSubject" placeholder="Leave blank for default subject">
+                        </div>
+        
+                        <!-- Immediate Preview Section -->
+                        <div class="reminder-preview" id="immediatePreview" style="display: none;">
+                            <h5><i class="fas fa-eye"></i> Immediate Notification Preview</h5>
+                            <div class="preview-box">
+                                <div class="preview-item">
+                                    <strong>Send Time:</strong> <span id="immediatePreviewSendTime">Immediately upon clicking Send</span>
+                                </div>
+                                <div class="preview-item">
+                                    <strong>Recipients:</strong> <span id="immediatePreviewRecipients">0 enrolled students</span>
+                                </div>
+                                <div class="preview-item">
+                                    <strong>Email Subject:</strong> <span id="immediatePreviewSubject">-</span>
+                                </div>
+                                <div class="preview-item">
+                                    <strong>Priority:</strong> <span style="color: #dc2626; font-weight: bold;">High (Immediate Delivery)</span>
+                                </div>
                             </div>
                         </div>
+        
+                        <div class="action-buttons">
+                            <button type="button" class="preview-email-btn" id="previewImmediateEmailBtn" onclick="showImmediateEmailPreview()" disabled>
+                                <i class="fas fa-eye"></i> Preview Email
+                            </button>
+                            <button type="submit" class="btn btn-warning" id="sendImmediateBtn" disabled style="background: #dc2626; border-color: #dc2626;">
+                                <i class="fas fa-paper-plane"></i> Send Immediate Notification
+                            </button>
+                        </div>
+                    </form>
+                </div>
+        
+                <!-- Scheduled Reminder Section (Existing) -->
+                <div id="scheduledSection" style="display: none;">
+                    <div style="background: #e3f2fd; border: 2px solid #2196f3; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <h4 style="margin: 0 0 10px 0; color: #0d47a1;">
+                            <i class="fas fa-calendar-alt"></i> Scheduled Reminder
+                        </h4>
+                        <p style="margin: 0; color: #1565c0; font-size: 14px;">
+                            This will schedule an automatic reminder to be sent at a specific date and time in the future.
+                        </p>
                     </div>
-
-                    <div class="action-buttons">
-                        <button type="button" class="preview-email-btn" id="previewEmailBtn" onclick="showEmailPreview()" disabled>
-                            <i class="fas fa-eye"></i> Preview Email
-                        </button>
-                        <button type="submit" class="btn btn-primary" id="scheduleReminderBtn" disabled>
-                            <i class="fas fa-paper-plane"></i> Schedule Reminder
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="clearSelection()">
-                            <i class="fas fa-times"></i> Clear Selection
-                        </button>
-                    </div>
-                </form>
+        
+                    <form id="reminderConfigForm" action="/admin/course-reminders/schedule-custom" method="POST">
+                        <input type="hidden" name="courseId" id="selectedCourseId">
+                        <input type="hidden" name="courseType" id="selectedCourseType">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-clock"></i> Reminder Schedule
+                                </label>
+                                <select class="form-control" name="reminderType" id="reminderType" onchange="updateReminderOptions()" required>
+                                    <option value="">Select when to send reminder</option>
+                                    <option value="24h">24 hours before course starts</option>
+                                    <option value="48h">48 hours (2 days) before</option>
+                                    <option value="72h">72 hours (3 days) before</option>
+                                    <option value="1week">1 week before</option>
+                                    <option value="custom">Custom date & time</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope"></i> Email Type
+                                </label>
+                                <select class="form-control" name="emailType" id="emailType" onchange="updateReminderOptions()" required>
+                                    <option value="">Select email type</option>
+                                    <option value="course-starting">Course Starting Reminder</option>
+                                    <option value="preparation">Preparation Instructions</option>
+                                    <option value="tech-check">Technical Check (Online courses)</option>
+                                    <option value="custom">Custom Message</option>
+                                </select>
+                            </div>
+                        </div>
+        
+                        <!-- Custom Date/Time Selection -->
+                        <div class="form-group" id="customDateGroup" style="display: none;">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-alt"></i> Custom Reminder Date & Time
+                            </label>
+                            <input type="datetime-local" class="form-control" name="customDateTime" id="customDateTime">
+                        </div>
+        
+                        <!-- Custom Message -->
+                        <div class="form-group" id="customMessageGroup" style="display: none;">
+                            <label class="form-label">
+                                <i class="fas fa-edit"></i> Custom Message
+                            </label>
+                            <textarea class="form-control" name="customMessage" id="customMessage" rows="4" placeholder="Enter your custom message for students..."></textarea>
+                        </div>
+        
+                        <!-- Preview Section -->
+                        <div class="reminder-preview" id="reminderPreview" style="display: none;">
+                            <h5><i class="fas fa-eye"></i> Reminder Preview</h5>
+                            <div class="preview-box">
+                                <div class="preview-item">
+                                    <strong>Send Date:</strong> <span id="previewSendDate">-</span>
+                                </div>
+                                <div class="preview-item">
+                                    <strong>Recipients:</strong> <span id="previewRecipients">0 enrolled students</span>
+                                </div>
+                                <div class="preview-item">
+                                    <strong>Email Subject:</strong> <span id="previewSubject">-</span>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="action-buttons">
+                            <button type="button" class="preview-email-btn" id="previewEmailBtn" onclick="showEmailPreview()" disabled>
+                                <i class="fas fa-eye"></i> Preview Email
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="scheduleReminderBtn" disabled>
+                                <i class="fas fa-paper-plane"></i> Schedule Reminder
+                            </button>
+                        </div>
+                    </form>
+                </div>
+        
+                <!-- Common Actions -->
+                <div class="action-buttons" style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px;">
+                    <button type="button" class="btn btn-secondary" onclick="clearSelection()">
+                        <i class="fas fa-times"></i> Clear Selection
+                    </button>
+                </div>
             </div>
         </div>
+        
 
         <!-- Scheduled Reminders -->
         <div class="reminders-section">
@@ -1638,6 +1783,7 @@
             const courseTitle = selectedOption.dataset.title;
             const courseCode = selectedOption.dataset.code;
             const startDate = selectedOption.dataset.startDate;
+            const courseStatus = selectedOption.dataset.status;
 
             console.log('📋 Loading course details:', { courseId, courseType, courseTitle });
 
@@ -1647,7 +1793,8 @@
                 type: courseType,
                 title: courseTitle,
                 code: courseCode,
-                startDate: new Date(startDate)
+                startDate: new Date(startDate),
+                status: courseStatus
             };
 
             // Update form fields
@@ -1676,8 +1823,31 @@
                     month: 'long',
                     day: 'numeric'
                 });
+                
+                // Calculate course status
+                const now = new Date();
+                const daysFromNow = Math.ceil((course.startDate - now) / (1000 * 60 * 60 * 24));
+                let statusText = '';
+                let statusColor = '#666';
+                
+                if (daysFromNow < 0) {
+                    statusText = 'Started/Completed';
+                    statusColor = '#666';
+                } else if (daysFromNow === 0) {
+                    statusText = 'Starting Today';
+                    statusColor = '#dc2626';
+                } else if (daysFromNow === 1) {
+                    statusText = 'Starting Tomorrow';
+                    statusColor = '#f59e0b';
+                } else {
+                    statusText = `Starts in ${daysFromNow} days`;
+                    statusColor = '#10b981';
+                }
+                
+                document.getElementById('courseStatus').innerHTML = `<span style="color: ${statusColor}; font-weight: bold;">${statusText}</span>`;
             } else {
                 document.getElementById('courseStartDate').textContent = 'Date not available';
+                document.getElementById('courseStatus').textContent = 'Unknown';
             }
 
             // Update course type badge
@@ -1718,8 +1888,8 @@
                         reminderStatusElement.innerHTML = '<span class="status-indicator status-active">Not Scheduled</span>';
                     }
 
-                    // Update preview
-                    updatePreview();
+                    // Update previews
+                    updateAllPreviews();
                 } else {
                     enrolledElement.textContent = 'Error loading data';
                     reminderStatusElement.textContent = 'Error';
@@ -1731,6 +1901,210 @@
                 reminderStatusElement.textContent = 'Error';
             }
         }
+
+        // ============================================
+        // NOTIFICATION TYPE MANAGEMENT
+        // ============================================
+
+        // Update notification options based on selection
+        function updateNotificationOptions() {
+            const notificationType = document.getElementById('notificationType').value;
+            const immediateSection = document.getElementById('immediateSection');
+            const scheduledSection = document.getElementById('scheduledSection');
+            
+            // Hide both sections initially
+            immediateSection.style.display = 'none';
+            scheduledSection.style.display = 'none';
+            
+            if (notificationType === 'immediate') {
+                immediateSection.style.display = 'block';
+                // Copy course data to immediate form
+                document.getElementById('immediateCourseId').value = document.getElementById('selectedCourseId').value;
+                document.getElementById('immediateCourseType').value = document.getElementById('selectedCourseType').value;
+            } else if (notificationType === 'scheduled') {
+                scheduledSection.style.display = 'block';
+            }
+            
+            updateAllPreviews();
+        }
+
+        // ============================================
+        // IMMEDIATE NOTIFICATION FUNCTIONS
+        // ============================================
+
+        // Update immediate options based on email type
+        function updateImmediateOptions() {
+            const emailType = document.getElementById('immediateEmailType').value;
+            const customMessageGroup = document.getElementById('immediateCustomMessageGroup');
+            const subjectGroup = document.getElementById('immediateSubjectGroup');
+            
+            // Show/hide custom message input
+            if (emailType === 'custom') {
+                customMessageGroup.style.display = 'block';
+                subjectGroup.style.display = 'block';
+            } else {
+                customMessageGroup.style.display = 'none';
+                if (emailType === 'last-minute' || emailType === 'urgent-update') {
+                    subjectGroup.style.display = 'block';
+                } else {
+                    subjectGroup.style.display = 'none';
+                }
+            }
+
+            // Enable tech check option only for online courses
+            const techCheckOption = document.querySelector('#immediateEmailType option[value="tech-check"]');
+            if (selectedCourse && selectedCourse.type === 'OnlineLiveTraining') {
+                if (techCheckOption) techCheckOption.style.display = 'block';
+            } else {
+                if (techCheckOption) techCheckOption.style.display = 'none';
+                if (emailType === 'tech-check') {
+                    document.getElementById('immediateEmailType').value = '';
+                }
+            }
+            
+            updateImmediatePreview();
+        }
+
+        // Update immediate preview
+        function updateImmediatePreview() {
+            const emailType = document.getElementById('immediateEmailType').value;
+            const customMessage = document.getElementById('immediateCustomMessage').value;
+            const customSubject = document.getElementById('immediateCustomSubject').value;
+            
+            const previewSection = document.getElementById('immediatePreview');
+            const sendBtn = document.getElementById('sendImmediateBtn');
+            const previewBtn = document.getElementById('previewImmediateEmailBtn');
+
+            if (emailType && selectedCourse) {
+                previewSection.style.display = 'block';
+                
+                // Update preview content
+                document.getElementById('immediatePreviewSendTime').textContent = 'Immediately upon clicking Send';
+                document.getElementById('immediatePreviewRecipients').textContent = 
+                    enrollmentData ? `${enrollmentData.enrolledCount} enrolled students` : '0 enrolled students';
+                
+                // Generate subject based on email type or custom
+                let subject = '';
+                if (customSubject && customSubject.trim()) {
+                    subject = customSubject;
+                } else {
+                    const subjects = {
+                        'course-starting': `Reminder: ${selectedCourse.title} starts soon!`,
+                        'preparation': `Preparation Instructions: ${selectedCourse.title}`,
+                        'tech-check': `Technical Check Required: ${selectedCourse.title}`,
+                        'last-minute': `URGENT: Last Minute Update - ${selectedCourse.title}`,
+                        'urgent-update': `IMPORTANT UPDATE: ${selectedCourse.title}`,
+                        'custom': `Important Message: ${selectedCourse.title}`
+                    };
+                    subject = subjects[emailType] || 'Course Notification';
+                }
+                document.getElementById('immediatePreviewSubject').textContent = subject;
+
+                // Enable buttons if all required fields are filled
+                const canSend = emailType && (emailType !== 'custom' || customMessage.trim());
+                
+                sendBtn.disabled = !canSend;
+                previewBtn.disabled = !canSend;
+                
+                // Update button text based on urgency
+                if (emailType === 'last-minute' || emailType === 'urgent-update') {
+                    sendBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Send Urgent Notification';
+                    sendBtn.style.background = '#dc2626';
+                } else {
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Immediate Notification';
+                    sendBtn.style.background = '#f59e0b';
+                }
+            } else {
+                previewSection.style.display = 'none';
+                sendBtn.disabled = true;
+                previewBtn.disabled = true;
+            }
+        }
+
+        // Show immediate email preview
+        async function showImmediateEmailPreview() {
+            const courseId = document.getElementById('immediateCourseId').value;
+            const courseType = document.getElementById('immediateCourseType').value;
+            const emailType = document.getElementById('immediateEmailType').value;
+            const customMessage = document.getElementById('immediateCustomMessage').value;
+            const customSubject = document.getElementById('immediateCustomSubject').value;
+
+            if (!courseId || !courseType || !emailType) {
+                showToast('Please select course and email type first', 'error');
+                return;
+            }
+
+            // Show loading
+            const modal = document.getElementById('emailPreviewModal');
+            modal.style.display = 'block';
+            
+            // Show loading state
+            const previewFrame = document.getElementById('emailHtmlPreview');
+            const sourceCode = document.getElementById('emailSourceCode');
+            
+            previewFrame.src = 'about:blank';
+            sourceCode.textContent = 'Loading...';
+            
+            document.getElementById('previewEmailSubject').textContent = 'Loading...';
+            document.getElementById('previewEmailType').textContent = emailType;
+            document.getElementById('previewCourseName').textContent = selectedCourse?.title || 'Loading...';
+
+            try {
+                const params = new URLSearchParams({
+                    courseId: courseId,
+                    courseType: courseType,
+                    emailType: emailType,
+                    immediate: 'true'
+                });
+
+                if (customMessage && customMessage.trim()) {
+                    params.append('customMessage', customMessage);
+                }
+                
+                if (customSubject && customSubject.trim()) {
+                    params.append('customSubject', customSubject);
+                }
+
+                const response = await fetch(`/admin/course-reminders/api/email-preview?${params}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentEmailPreview = data.preview;
+                    originalEmailContent = data.preview.html;
+                    
+                    // Update preview content
+                    document.getElementById('previewEmailSubject').textContent = data.preview.subject;
+                    document.getElementById('previewEmailRecipient').textContent = data.preview.sampleRecipient;
+                    document.getElementById('previewEmailType').textContent = emailType + ' (Immediate)';
+                    document.getElementById('previewCourseName').textContent = data.preview.courseName;
+                    
+                    // Load HTML into iframe
+                    const iframe = document.getElementById('emailHtmlPreview');
+                    iframe.onload = function() {
+                        iframe.contentDocument.open();
+                        iframe.contentDocument.write(data.preview.html);
+                        iframe.contentDocument.close();
+                    };
+                    iframe.src = 'about:blank';
+                    iframe.onload();
+                    
+                    // Load HTML source
+                    document.getElementById('emailSourceCode').textContent = formatHTML(data.preview.html);
+                    
+                    console.log('📧 Immediate email preview loaded successfully');
+                } else {
+                    throw new Error(data.error || 'Failed to generate preview');
+                }
+            } catch (error) {
+                console.error('❌ Error loading immediate email preview:', error);
+                showToast('Failed to load email preview: ' + error.message, 'error');
+                closeEmailPreview();
+            }
+        }
+
+        // ============================================
+        // SCHEDULED REMINDER FUNCTIONS (EXISTING)
+        // ============================================
 
         // Update reminder options based on selection
         function updateReminderOptions() {
@@ -1758,11 +2132,11 @@
             }
 
             // Enable tech check option only for online courses
-            const techCheckOption = document.querySelector('option[value="tech-check"]');
+            const techCheckOption = document.querySelector('#emailType option[value="tech-check"]');
             if (selectedCourse && selectedCourse.type === 'OnlineLiveTraining') {
-                techCheckOption.style.display = 'block';
+                if (techCheckOption) techCheckOption.style.display = 'block';
             } else {
-                techCheckOption.style.display = 'none';
+                if (techCheckOption) techCheckOption.style.display = 'none';
                 if (emailType === 'tech-check') {
                     document.getElementById('emailType').value = '';
                 }
@@ -1903,6 +2277,16 @@
             }
         }
 
+        // ============================================
+        // SHARED PREVIEW FUNCTIONS
+        // ============================================
+
+        // Update all previews
+        function updateAllPreviews() {
+            updateImmediatePreview();
+            updatePreview();
+        }
+
         // Switch between preview tabs
         function switchPreviewTab(tabName) {
             // Update tab buttons
@@ -1977,44 +2361,81 @@
         }
 
         // Proceed with scheduling using modified content
-        function proceedWithScheduling() {
-            if (!currentEmailPreview) {
-                showToast('No email preview available', 'error');
-                return;
+      // Proceed with scheduling using modified content
+function proceedWithScheduling() {
+    if (!currentEmailPreview) {
+        showToast('No email preview available', 'error');
+        return;
+    }
+    
+    // Determine which form to submit based on notification type
+    const notificationType = document.getElementById('notificationType').value;
+    
+    if (notificationType === 'immediate') {
+        // For immediate notifications, submit the immediate form
+        const immediateForm = document.getElementById('immediateNotificationForm');
+        
+        // If content was modified, we need to handle it differently for immediate emails
+        if (currentEmailPreview.html !== originalEmailContent) {
+            // For immediate emails, we can't use hidden fields the same way
+            // Instead, we'll need to modify the custom message field
+            const customMessageField = document.getElementById('immediateCustomMessage');
+            const customSubjectField = document.getElementById('immediateCustomSubject');
+            
+            // Update the form fields with modified content
+            if (currentEmailPreview.subject !== originalEmailContent) {
+                customSubjectField.value = currentEmailPreview.subject;
             }
             
-            // If content was modified, store it
-            if (currentEmailPreview.html !== originalEmailContent) {
-                // Store modified content in a hidden form field
-                let modifiedContentField = document.getElementById('modifiedEmailContent');
-                if (!modifiedContentField) {
-                    modifiedContentField = document.createElement('input');
-                    modifiedContentField.type = 'hidden';
-                    modifiedContentField.name = 'modifiedEmailContent';
-                    modifiedContentField.id = 'modifiedEmailContent';
-                    document.getElementById('reminderConfigForm').appendChild(modifiedContentField);
-                }
-                
-                let modifiedSubjectField = document.getElementById('modifiedEmailSubject');
-                if (!modifiedSubjectField) {
-                    modifiedSubjectField = document.createElement('input');
-                    modifiedSubjectField.type = 'hidden';
-                    modifiedSubjectField.name = 'modifiedEmailSubject';
-                    modifiedSubjectField.id = 'modifiedEmailSubject';
-                    document.getElementById('reminderConfigForm').appendChild(modifiedSubjectField);
-                }
-                
-                modifiedContentField.value = currentEmailPreview.html;
-                modifiedSubjectField.value = currentEmailPreview.subject;
-            }
-            
-            // Close preview modal
-            closeEmailPreview();
-            
-            // Show the scheduling confirmation
-            document.getElementById('reminderConfigForm').dispatchEvent(new Event('submit'));
+            // Note: For immediate emails, HTML modifications are more complex
+            // You may need to add additional hidden fields or modify the backend
+            showToast('Email modifications applied. Proceeding with immediate send.', 'success');
         }
-
+        
+        // Close preview modal
+        closeEmailPreview();
+        
+        // Trigger form submission
+        immediateForm.dispatchEvent(new Event('submit'));
+        
+    } else if (notificationType === 'scheduled') {
+        // For scheduled reminders, use the existing logic
+        
+        // If content was modified, store it
+        if (currentEmailPreview.html !== originalEmailContent) {
+            // Store modified content in hidden form fields
+            let modifiedContentField = document.getElementById('modifiedEmailContent');
+            if (!modifiedContentField) {
+                modifiedContentField = document.createElement('input');
+                modifiedContentField.type = 'hidden';
+                modifiedContentField.name = 'modifiedEmailContent';
+                modifiedContentField.id = 'modifiedEmailContent';
+                document.getElementById('reminderConfigForm').appendChild(modifiedContentField);
+            }
+            
+            let modifiedSubjectField = document.getElementById('modifiedEmailSubject');
+            if (!modifiedSubjectField) {
+                modifiedSubjectField = document.createElement('input');
+                modifiedSubjectField.type = 'hidden';
+                modifiedSubjectField.name = 'modifiedEmailSubject';
+                modifiedSubjectField.id = 'modifiedEmailSubject';
+                document.getElementById('reminderConfigForm').appendChild(modifiedSubjectField);
+            }
+            
+            modifiedContentField.value = currentEmailPreview.html;
+            modifiedSubjectField.value = currentEmailPreview.subject;
+        }
+        
+        // Close preview modal
+        closeEmailPreview();
+        
+        // Show the scheduling confirmation
+        document.getElementById('reminderConfigForm').dispatchEvent(new Event('submit'));
+    } else {
+        showToast('Please select a notification type first', 'error');
+        closeEmailPreview();
+    }
+}
         // Format HTML for better readability
         function formatHTML(html) {
             // Simple HTML formatting (you might want to use a proper HTML formatter library)
@@ -2026,6 +2447,10 @@
                 .filter(line => line.length > 0)
                 .join('\n');
         }
+
+        // ============================================
+        // UI CONTROL FUNCTIONS
+        // ============================================
 
         // Show reminder configuration section
         function showReminderConfig() {
@@ -2041,10 +2466,17 @@
         function clearSelection() {
             document.getElementById('courseSelector').value = '';
             document.getElementById('reminderConfigForm').reset();
+            document.getElementById('immediateNotificationForm').reset();
+            document.getElementById('notificationType').value = '';
+            updateNotificationOptions();
             hideReminderConfig();
             selectedCourse = null;
             enrollmentData = null;
         }
+
+        // ============================================
+        // BULK ACTIONS
+        // ============================================
 
         // Schedule all upcoming reminders
         async function scheduleAllReminders() {
@@ -2157,6 +2589,10 @@
             }
         }
 
+        // ============================================
+        // SYSTEM FUNCTIONS
+        // ============================================
+
         // Refresh system status
         async function refreshSystemStatus() {
             try {
@@ -2182,6 +2618,10 @@
         function refreshReminders() {
             window.location.reload();
         }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
 
         // Show toast message
         function showToast(message, type = 'success') {
@@ -2210,75 +2650,148 @@
             });
         }
 
-        // Form validation and submission
-        document.getElementById('reminderConfigForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const reminderType = formData.get('reminderType');
-            const emailType = formData.get('emailType');
-            const customDateTime = formData.get('customDateTime');
-            const customMessage = formData.get('customMessage');
+        // ============================================
+        // FORM HANDLING & EVENT LISTENERS
+        // ============================================
 
-            // Validate required fields
-            if (!reminderType || !emailType) {
-                showToast('Please fill in all required fields', 'error');
-                return;
-            }
+        // Handle immediate notification form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const immediateForm = document.getElementById('immediateNotificationForm');
+            if (immediateForm) {
+                immediateForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const emailType = formData.get('emailType');
+                    const customMessage = formData.get('customMessage');
 
-            if (reminderType === 'custom' && !customDateTime) {
-                showToast('Please select a custom date and time', 'error');
-                return;
-            }
+                    // Validate required fields
+                    if (!emailType) {
+                        showToast('Please select an email type', 'error');
+                        return;
+                    }
 
-            if (emailType === 'custom' && !customMessage.trim()) {
-                showToast('Please enter a custom message', 'error');
-                return;
-            }
+                    if (emailType === 'custom' && !customMessage.trim()) {
+                        showToast('Please enter a custom message', 'error');
+                        return;
+                    }
 
-            // Validate that the send date is in the future
-            if (reminderType === 'custom') {
-                const sendDate = new Date(customDateTime);
-                if (sendDate <= new Date()) {
-                    showToast('Reminder date must be in the future', 'error');
-                    return;
-                }
-            }
-
-            // Show confirmation
-            Swal.fire({
-                title: 'Schedule Reminder?',
-                html: `
-                    <div style="text-align: left; margin: 20px 0;">
-                        <p><strong>Course:</strong> ${selectedCourse.title}</p>
-                        <p><strong>Send Date:</strong> ${document.getElementById('previewSendDate').textContent}</p>
-                        <p><strong>Recipients:</strong> ${document.getElementById('previewRecipients').textContent}</p>
-                        <p><strong>Email Type:</strong> ${emailType}</p>
-                        ${emailType === 'custom' ? `<p><strong>Custom Message:</strong> ${customMessage.substring(0, 100)}${customMessage.length > 100 ? '...' : ''}</p>` : ''}
-                        ${currentEmailPreview && currentEmailPreview.html !== originalEmailContent ? '<p style="color: #f59e0b;"><strong>Note:</strong> Using custom email content</p>' : ''}
-                    </div>
-                `,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#ff6b35',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Schedule Reminder'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Show loading
+                    // Show confirmation with urgency indicator
+                    const isUrgent = emailType === 'last-minute' || emailType === 'urgent-update';
+                    const confirmTitle = isUrgent ? 'Send Urgent Notification?' : 'Send Immediate Notification?';
+                    const confirmIcon = isUrgent ? 'warning' : 'question';
+                    
                     Swal.fire({
-                        title: 'Scheduling Reminder...',
-                        text: 'Please wait while we schedule your reminder.',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
+                        title: confirmTitle,
+                        html: `
+                            <div style="text-align: left; margin: 20px 0;">
+                                <p><strong>Course:</strong> ${selectedCourse.title}</p>
+                                <p><strong>Send Time:</strong> <span style="color: ${isUrgent ? '#dc2626' : '#f59e0b'}; font-weight: bold;">IMMEDIATELY</span></p>
+                                <p><strong>Recipients:</strong> ${document.getElementById('immediatePreviewRecipients').textContent}</p>
+                                <p><strong>Email Type:</strong> ${emailType}</p>
+                                ${customMessage ? `<p><strong>Custom Message:</strong> ${customMessage.substring(0, 100)}${customMessage.length > 100 ? '...' : ''}</p>` : ''}
+                                ${isUrgent ? '<p style="color: #dc2626;"><strong>⚠️ This is marked as urgent and will be sent with high priority!</strong></p>' : ''}
+                            </div>
+                        `,
+                        icon: confirmIcon,
+                        showCancelButton: true,
+                        confirmButtonColor: isUrgent ? '#dc2626' : '#f59e0b',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: isUrgent ? 'Yes, Send Urgent Email!' : 'Yes, Send Now!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Show loading
+                            Swal.fire({
+                                title: 'Sending Notification...',
+                                text: 'Please wait while we send the email to all enrolled students.',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            
+                            // Submit the form
+                            this.submit();
                         }
                     });
+                });
+            }
+        });
+
+        // Form validation and submission for scheduled reminders
+        document.addEventListener('DOMContentLoaded', function() {
+            const reminderForm = document.getElementById('reminderConfigForm');
+            if (reminderForm) {
+                reminderForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
                     
-                    // Submit the form
-                    this.submit();
-                }
-            });
+                    const formData = new FormData(this);
+                    const reminderType = formData.get('reminderType');
+                    const emailType = formData.get('emailType');
+                    const customDateTime = formData.get('customDateTime');
+                    const customMessage = formData.get('customMessage');
+
+                    // Validate required fields
+                    if (!reminderType || !emailType) {
+                        showToast('Please fill in all required fields', 'error');
+                        return;
+                    }
+
+                    if (reminderType === 'custom' && !customDateTime) {
+                        showToast('Please select a custom date and time', 'error');
+                        return;
+                    }
+
+                    if (emailType === 'custom' && !customMessage.trim()) {
+                        showToast('Please enter a custom message', 'error');
+                        return;
+                    }
+
+                    // Validate that the send date is in the future
+                    if (reminderType === 'custom') {
+                        const sendDate = new Date(customDateTime);
+                        if (sendDate <= new Date()) {
+                            showToast('Reminder date must be in the future', 'error');
+                            return;
+                        }
+                    }
+
+                    // Show confirmation
+                    Swal.fire({
+                        title: 'Schedule Reminder?',
+                        html: `
+                            <div style="text-align: left; margin: 20px 0;">
+                                <p><strong>Course:</strong> ${selectedCourse.title}</p>
+                                <p><strong>Send Date:</strong> ${document.getElementById('previewSendDate').textContent}</p>
+                                <p><strong>Recipients:</strong> ${document.getElementById('previewRecipients').textContent}</p>
+                                <p><strong>Email Type:</strong> ${emailType}</p>
+                                ${emailType === 'custom' ? `<p><strong>Custom Message:</strong> ${customMessage.substring(0, 100)}${customMessage.length > 100 ? '...' : ''}</p>` : ''}
+                                ${currentEmailPreview && currentEmailPreview.html !== originalEmailContent ? '<p style="color: #f59e0b;"><strong>Note:</strong> Using custom email content</p>' : ''}
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ff6b35',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, Schedule Reminder'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Show loading
+                            Swal.fire({
+                                title: 'Scheduling Reminder...',
+                                text: 'Please wait while we schedule your reminder.',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            
+                            // Submit the form
+                            this.submit();
+                        }
+                    });
+                });
+            }
         });
 
         // Add event listeners for form updates
@@ -2286,11 +2799,17 @@
             if (e.target.closest('#reminderConfigForm')) {
                 updatePreview();
             }
+            if (e.target.closest('#immediateNotificationForm')) {
+                updateImmediatePreview();
+            }
         });
 
         document.addEventListener('change', function(e) {
             if (e.target.closest('#reminderConfigForm')) {
                 updatePreview();
+            }
+            if (e.target.closest('#immediateNotificationForm')) {
+                updateImmediatePreview();
             }
         });
 
@@ -2319,16 +2838,25 @@
             }
         });
 
+        // ============================================
+        // DEBUG FUNCTIONS
+        // ============================================
+
         // Debug function for testing
         window.debugCourseReminders = function() {
             console.log('🔍 Debug Information:');
             console.log('Selected Course:', selectedCourse);
             console.log('Enrollment Data:', enrollmentData);
-            console.log('Form Values:', {
+            console.log('Scheduled Form Values:', {
                 reminderType: document.getElementById('reminderType').value,
                 emailType: document.getElementById('emailType').value,
                 customDateTime: document.getElementById('customDateTime').value,
                 customMessage: document.getElementById('customMessage').value
+            });
+            console.log('Immediate Form Values:', {
+                emailType: document.getElementById('immediateEmailType').value,
+                customMessage: document.getElementById('immediateCustomMessage').value,
+                customSubject: document.getElementById('immediateCustomSubject').value
             });
         };
     </script>

@@ -1,9 +1,10 @@
-// routes/admin/courseReminderRoutes.js - CLEAN UPDATED VERSION
+// routes/admin/courseReminderRoutes.js - UPDATED WITH IMMEDIATE SEND
 
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const courseReminderScheduler = require("../../utils/courseReminderScheduler");
+const emailService = require("../../utils/emailService");
 const isAuthenticated = require("../../middlewares/isAuthenticated");
 const isAdmin = require("../../middlewares/isAdmin");
 
@@ -13,7 +14,7 @@ const OnlineLiveTraining = require("../../models/onlineLiveTrainingModel");
 const User = require("../../models/user");
 
 // ============================================
-// MAIN DASHBOARD - Load courses and reminders
+// MAIN DASHBOARD - Load ALL courses and reminders
 // ============================================
 router.get("/course-reminders", isAuthenticated, isAdmin, async (req, res) => {
   try {
@@ -23,32 +24,32 @@ router.get("/course-reminders", isAuthenticated, isAdmin, async (req, res) => {
     const reminders = courseReminderScheduler.getScheduledReminders();
     const status = courseReminderScheduler.getStatus();
 
-    // Load all courses that can have reminders (upcoming courses)
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Load ALL courses (not just upcoming ones) for immediate notifications
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const oneMonthFromNow = new Date();
-    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
 
-    // Get upcoming in-person courses
+    // Get all recent and upcoming in-person courses
     const inPersonCourses = await InPersonAestheticTraining.find({
       "schedule.startDate": {
-        $gte: tomorrow,
-        $lte: oneMonthFromNow,
+        $gte: sixMonthsAgo,
+        $lte: threeMonthsFromNow,
       },
-      "basic.status": { $in: ["open", "full", "in-progress"] },
+      "basic.status": { $in: ["open", "full", "in-progress", "completed"] },
     })
       .select("basic schedule enrollment venue instructors")
       .sort({ "schedule.startDate": 1 })
       .lean();
 
-    // Get upcoming online courses
+    // Get all recent and upcoming online courses
     const onlineCourses = await OnlineLiveTraining.find({
       "schedule.startDate": {
-        $gte: tomorrow,
-        $lte: oneMonthFromNow,
+        $gte: sixMonthsAgo,
+        $lte: threeMonthsFromNow,
       },
-      "basic.status": { $in: ["open", "full", "in-progress"] },
+      "basic.status": { $in: ["open", "full", "in-progress", "completed"] },
     })
       .select("basic schedule enrollment platform instructors")
       .sort({ "schedule.startDate": 1 })
@@ -88,8 +89,782 @@ router.get("/course-reminders", isAuthenticated, isAdmin, async (req, res) => {
 });
 
 // ============================================
-// API: GET COURSE DATA FOR SELECTED COURSE
+// NEW: SEND IMMEDIATE NOTIFICATION
 // ============================================
+router.post(
+  "/course-reminders/send-immediate",
+  isAuthenticated,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const { courseId, courseType, emailType, customMessage, customSubject } =
+        req.body;
+
+      console.log(
+        `📧 Sending immediate notification for ${courseType}: ${courseId}`
+      );
+      console.log(`   Email Type: ${emailType}`);
+      console.log(`   Custom Subject: ${customSubject ? "Yes" : "No"}`);
+      console.log(`   Custom Message: ${customMessage ? "Yes" : "No"}`);
+
+      // Validate required fields
+      if (!courseId || !courseType || !emailType) {
+        req.flash("error_message", "All required fields must be filled");
+        return res.redirect("/admin/course-reminders");
+      }
+
+      // Validate custom message if email type is custom
+      if (
+        emailType === "custom" &&
+        (!customMessage || customMessage.trim() === "")
+      ) {
+        req.flash(
+          "error_message",
+          "Custom message is required for custom email type"
+        );
+        return res.redirect("/admin/course-reminders");
+      }
+
+      // Get course data
+      let course;
+      if (courseType === "InPersonAestheticTraining") {
+        course = await InPersonAestheticTraining.findById(courseId)
+          .select("basic schedule enrollment venue instructors")
+          .lean();
+      } else if (courseType === "OnlineLiveTraining") {
+        course = await OnlineLiveTraining.findById(courseId)
+          .select("basic schedule enrollment platform instructors technical")
+          .lean();
+      }
+
+      if (!course) {
+        req.flash("error_message", "Course not found");
+        return res.redirect("/admin/course-reminders");
+      }
+
+      // Get enrolled users
+      const enrolledUsers = await courseReminderScheduler.getEnrolledUsers(
+        courseId,
+        courseType
+      );
+
+      if (enrolledUsers.length === 0) {
+        req.flash(
+          "error_message",
+          "No enrolled students found for this course"
+        );
+        return res.redirect("/admin/course-reminders");
+      }
+
+      console.log(`👥 Sending to ${enrolledUsers.length} enrolled students`);
+
+      // Send immediate notifications
+      let successCount = 0;
+      let failureCount = 0;
+      const failedEmails = [];
+
+      for (const user of enrolledUsers) {
+        try {
+          // Get user's enrollment data
+          const enrollment =
+            user.getCourseEnrollment?.(courseId, courseType) || {};
+
+          if (
+            !enrollment ||
+            !["paid", "registered"].includes(enrollment.enrollmentData?.status)
+          ) {
+            console.log(
+              `⚠️ Skipping user ${user.email} - not properly enrolled`
+            );
+            continue;
+          }
+
+          // Send email based on type
+          let emailSent = false;
+          const isUrgent =
+            emailType === "last-minute" || emailType === "urgent-update";
+
+          switch (emailType) {
+            case "custom":
+              await sendCustomImmediateEmail(
+                user,
+                course,
+                courseType,
+                customMessage,
+                customSubject,
+                isUrgent
+              );
+              emailSent = true;
+              break;
+
+            case "last-minute":
+              await sendLastMinuteEmail(
+                user,
+                course,
+                courseType,
+                customMessage ||
+                  "Important last-minute information about your course.",
+                customSubject
+              );
+              emailSent = true;
+              break;
+
+            case "urgent-update":
+              await sendUrgentUpdateEmail(
+                user,
+                course,
+                courseType,
+                customMessage || "Urgent update regarding your course.",
+                customSubject
+              );
+              emailSent = true;
+              break;
+
+            case "tech-check":
+              if (courseType === "OnlineLiveTraining") {
+                await emailService.sendTechCheckReminder(user, course);
+                emailSent = true;
+              } else {
+                console.log(`⚠️ Tech check not available for ${courseType}`);
+                continue;
+              }
+              break;
+
+            case "preparation":
+              await emailService.sendPreparationReminder(
+                user,
+                course,
+                courseType
+              );
+              emailSent = true;
+              break;
+
+            case "course-starting":
+            default:
+              await emailService.sendCourseStartingReminderEnhanced(
+                user,
+                course,
+                courseType,
+                enrollment
+              );
+              emailSent = true;
+              break;
+          }
+
+          if (emailSent) {
+            successCount++;
+            console.log(`✅ Immediate notification sent to ${user.email}`);
+          }
+
+          // Small delay between emails to avoid overwhelming SMTP
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.error(
+            `❌ Failed to send immediate notification to ${user.email}:`,
+            error
+          );
+          failureCount++;
+          failedEmails.push(user.email);
+        }
+      }
+
+      // Log the immediate notification in history
+      const historyEntry = {
+        jobId: `immediate-${emailType}-${courseType}-${courseId}-${Date.now()}`,
+        courseId,
+        courseType,
+        courseName: course.basic?.title || "Unknown Course",
+        courseCode: course.basic?.courseCode || "N/A",
+        emailType,
+        executedAt: new Date(),
+        recipientCount: enrolledUsers.length,
+        successCount,
+        failureCount,
+        status: successCount > 0 ? "completed" : "failed",
+        isImmediate: true,
+        isCustom: emailType === "custom",
+        sentBy: req.user._id,
+      };
+
+      courseReminderScheduler.reminderHistory.push(historyEntry);
+
+      // Update course reminder history in database
+      await updateCourseReminderHistory(courseId, courseType, historyEntry);
+
+      console.log(`✅ Immediate notification batch complete`);
+      console.log(`📊 Success: ${successCount}, Failed: ${failureCount}`);
+
+      // Set success/error message
+      if (successCount > 0) {
+        let message = `Immediate notification sent successfully to ${successCount} students`;
+        if (failureCount > 0) {
+          message += ` (${failureCount} failed)`;
+        }
+        req.flash("success_message", message);
+      } else {
+        req.flash(
+          "error_message",
+          "Failed to send notifications. Please check the logs."
+        );
+      }
+
+      res.redirect("/admin/course-reminders");
+    } catch (error) {
+      console.error("❌ Error sending immediate notification:", error);
+      req.flash(
+        "error_message",
+        "Error sending immediate notification: " + error.message
+      );
+      res.redirect("/admin/course-reminders");
+    }
+  }
+);
+
+// ============================================
+// UPDATED: API EMAIL PREVIEW (Support immediate flag)
+// ============================================
+router.get(
+  "/course-reminders/api/email-preview",
+  isAuthenticated,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const {
+        courseId,
+        courseType,
+        emailType,
+        customMessage,
+        customSubject,
+        immediate,
+      } = req.query;
+
+      if (!courseId || !courseType || !emailType) {
+        return res.json({
+          success: false,
+          error: "Missing required parameters",
+        });
+      }
+
+      console.log(`📧 Generating email preview for ${courseType}: ${courseId}`);
+      console.log(`   Type: ${emailType}${immediate ? " (Immediate)" : ""}`);
+
+      // Get course data
+      let course;
+      if (courseType === "InPersonAestheticTraining") {
+        course = await InPersonAestheticTraining.findById(courseId)
+          .select("basic schedule enrollment venue instructors")
+          .lean();
+      } else if (courseType === "OnlineLiveTraining") {
+        course = await OnlineLiveTraining.findById(courseId)
+          .select("basic schedule enrollment platform instructors technical")
+          .lean();
+      }
+
+      if (!course) {
+        return res.json({
+          success: false,
+          error: "Course not found",
+        });
+      }
+
+      // Get a sample user for preview
+      const sampleUser = {
+        firstName: "John",
+        lastName: "Doe",
+        email: "student@example.com",
+      };
+
+      // Generate email content based on type
+      let emailContent = "";
+      let subject = "";
+
+      switch (emailType) {
+        case "course-starting":
+          try {
+            const result = generateCourseStartingEmailContent(
+              course,
+              courseType,
+              sampleUser
+            );
+            emailContent = result.html;
+            subject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : result.subject;
+          } catch (error) {
+            console.error("Error generating course starting email:", error);
+            return res.json({
+              success: false,
+              error: "Failed to generate course starting email preview",
+            });
+          }
+          break;
+
+        case "preparation":
+          try {
+            const prepResult = generatePreparationEmailContent(
+              course,
+              courseType,
+              sampleUser
+            );
+            emailContent = prepResult.html;
+            subject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : prepResult.subject;
+          } catch (error) {
+            console.error("Error generating preparation email:", error);
+            return res.json({
+              success: false,
+              error: "Failed to generate preparation email preview",
+            });
+          }
+          break;
+
+        case "tech-check":
+          if (courseType === "OnlineLiveTraining") {
+            try {
+              const techResult = generateTechCheckEmailContent(
+                course,
+                sampleUser
+              );
+              emailContent = techResult.html;
+              subject =
+                customSubject && customSubject.trim()
+                  ? customSubject
+                  : techResult.subject;
+            } catch (error) {
+              console.error("Error generating tech check email:", error);
+              return res.json({
+                success: false,
+                error: "Failed to generate tech check email preview",
+              });
+            }
+          } else {
+            return res.json({
+              success: false,
+              error: "Tech check is only available for online courses",
+            });
+          }
+          break;
+
+        case "last-minute":
+          try {
+            const lastMinuteResult = generateLastMinuteEmailContent(
+              course,
+              sampleUser,
+              customMessage ||
+                "Important last-minute information about your course."
+            );
+            emailContent = lastMinuteResult.html;
+            subject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : lastMinuteResult.subject;
+          } catch (error) {
+            console.error("Error generating last-minute email:", error);
+            return res.json({
+              success: false,
+              error: "Failed to generate last-minute email preview",
+            });
+          }
+          break;
+
+        case "urgent-update":
+          try {
+            const urgentResult = generateUrgentUpdateEmailContent(
+              course,
+              sampleUser,
+              customMessage || "Urgent update regarding your course."
+            );
+            emailContent = urgentResult.html;
+            subject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : urgentResult.subject;
+          } catch (error) {
+            console.error("Error generating urgent update email:", error);
+            return res.json({
+              success: false,
+              error: "Failed to generate urgent update email preview",
+            });
+          }
+          break;
+
+        case "custom":
+          if (!customMessage || customMessage.trim() === "") {
+            return res.json({
+              success: false,
+              error: "Custom message is required",
+            });
+          }
+          try {
+            const customResult = generateCustomEmailContent(
+              course,
+              sampleUser,
+              customMessage
+            );
+            emailContent = customResult.html;
+            subject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : customResult.subject;
+          } catch (error) {
+            console.error("Error generating custom email:", error);
+            return res.json({
+              success: false,
+              error: "Failed to generate custom email preview",
+            });
+          }
+          break;
+
+        default:
+          return res.json({
+            success: false,
+            error: "Invalid email type",
+          });
+      }
+
+      res.json({
+        success: true,
+        preview: {
+          subject: subject,
+          html: emailContent,
+          emailType: emailType + (immediate ? " (Immediate)" : ""),
+          courseName: course.basic?.title || "Unknown Course",
+          sampleRecipient: "John Doe (student@example.com)",
+        },
+      });
+    } catch (error) {
+      console.error("❌ Error generating email preview:", error);
+      res.json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+);
+
+// ============================================
+// HELPER FUNCTIONS FOR IMMEDIATE EMAILS
+// ============================================
+
+// Send custom immediate email
+async function sendCustomImmediateEmail(
+  user,
+  course,
+  courseType,
+  customMessage,
+  customSubject,
+  isUrgent = false
+) {
+  const courseTitle = course.basic?.title || course.title;
+  const priority = isUrgent ? "high" : "normal";
+
+  const subject =
+    customSubject && customSubject.trim()
+      ? customSubject
+      : `Important Message: ${courseTitle}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: ${
+          isUrgent ? "#dc2626" : "#3b82f6"
+        }; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .message-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid ${
+          isUrgent ? "#dc2626" : "#3b82f6"
+        }; }
+        .urgent-badge { background: #dc2626; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          ${isUrgent ? '<div class="urgent-badge">🚨 URGENT MESSAGE</div>' : ""}
+          <h1>📢 Course Message</h1>
+        </div>
+        <div class="content">
+          <h2>${courseTitle}</h2>
+          <p>Dear ${user.firstName},</p>
+          
+          <div class="message-box">
+            ${customMessage.replace(/\n/g, "<br>")}
+          </div>
+          
+          <p>If you have any questions about this message, please feel free to contact us.</p>
+          <p>Best regards,<br>IAAI Team</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return await emailService.sendEmail({
+    to: user.email,
+    subject: subject,
+    html: html,
+    priority: priority,
+    headers: isUrgent ? { "X-Priority": "1" } : {},
+  });
+}
+
+// Send last-minute email
+async function sendLastMinuteEmail(
+  user,
+  course,
+  courseType,
+  message,
+  customSubject
+) {
+  const courseTitle = course.basic?.title || course.title;
+  const subject =
+    customSubject && customSubject.trim()
+      ? customSubject
+      : `URGENT: Last Minute Update - ${courseTitle}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #dc2626; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .urgent-box { background: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .urgent-badge { background: #dc2626; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="urgent-badge">🚨 LAST MINUTE UPDATE</div>
+          <h1>Important Course Information</h1>
+        </div>
+        <div class="content">
+          <h2>${courseTitle}</h2>
+          <p>Dear ${user.firstName},</p>
+          
+          <div class="urgent-box">
+            <h3 style="color: #dc2626; margin-top: 0;">⚠️ Last Minute Information</h3>
+            <p style="margin-bottom: 0;">${message}</p>
+          </div>
+          
+          <p><strong>Please take note of this information as it affects your upcoming course.</strong></p>
+          
+          <p>If you have any questions, please contact us immediately.</p>
+          <p>Best regards,<br>IAAI Team</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return await emailService.sendEmail({
+    to: user.email,
+    subject: subject,
+    html: html,
+    priority: "high",
+    headers: { "X-Priority": "1" },
+  });
+}
+
+// Send urgent update email
+async function sendUrgentUpdateEmail(
+  user,
+  course,
+  courseType,
+  message,
+  customSubject
+) {
+  const courseTitle = course.basic?.title || course.title;
+  const subject =
+    customSubject && customSubject.trim()
+      ? customSubject
+      : `IMPORTANT UPDATE: ${courseTitle}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #f59e0b; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .update-box { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .urgent-badge { background: #f59e0b; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="urgent-badge">⚠️ URGENT UPDATE</div>
+          <h1>Course Update</h1>
+        </div>
+        <div class="content">
+          <h2>${courseTitle}</h2>
+          <p>Dear ${user.firstName},</p>
+          
+          <div class="update-box">
+            <h3 style="color: #92400e; margin-top: 0;">📢 Important Update</h3>
+            <p style="margin-bottom: 0;">${message}</p>
+          </div>
+          
+          <p>Please review this update carefully as it may affect your course participation.</p>
+          
+          <p>If you have any questions, please don't hesitate to contact us.</p>
+          <p>Best regards,<br>IAAI Team</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return await emailService.sendEmail({
+    to: user.email,
+    subject: subject,
+    html: html,
+    priority: "high",
+    headers: { "X-Priority": "2" },
+  });
+}
+
+// Generate last-minute email content for preview
+function generateLastMinuteEmailContent(course, user, message) {
+  const courseTitle = course.basic?.title || course.title;
+  const subject = `URGENT: Last Minute Update - ${courseTitle}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #dc2626; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .urgent-box { background: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .urgent-badge { background: #dc2626; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="urgent-badge">🚨 LAST MINUTE UPDATE</div>
+          <h1>Important Course Information</h1>
+        </div>
+        <div class="content">
+          <h2>${courseTitle}</h2>
+          <p>Dear ${user.firstName},</p>
+          
+          <div class="urgent-box">
+            <h3 style="color: #dc2626; margin-top: 0;">⚠️ Last Minute Information</h3>
+            <p style="margin-bottom: 0;">${message}</p>
+          </div>
+          
+          <p><strong>Please take note of this information as it affects your upcoming course.</strong></p>
+          
+          <p>If you have any questions, please contact us immediately.</p>
+          <p>Best regards,<br>IAAI Team</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return { html, subject };
+}
+
+// Generate urgent update email content for preview
+function generateUrgentUpdateEmailContent(course, user, message) {
+  const courseTitle = course.basic?.title || course.title;
+  const subject = `IMPORTANT UPDATE: ${courseTitle}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #f59e0b; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .update-box { background: #fffbeb; border: 2px solid #f59e0b; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .urgent-badge { background: #f59e0b; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="urgent-badge">⚠️ URGENT UPDATE</div>
+          <h1>Course Update</h1>
+        </div>
+        <div class="content">
+          <h2>${courseTitle}</h2>
+          <p>Dear ${user.firstName},</p>
+          
+          <div class="update-box">
+            <h3 style="color: #92400e; margin-top: 0;">📢 Important Update</h3>
+            <p style="margin-bottom: 0;">${message}</p>
+          </div>
+          
+          <p>Please review this update carefully as it may affect your course participation.</p>
+          
+          <p>If you have any questions, please don't hesitate to contact us.</p>
+          <p>Best regards,<br>IAAI Team</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return { html, subject };
+}
+
+// Update course reminder history in database
+async function updateCourseReminderHistory(courseId, courseType, historyEntry) {
+  try {
+    let CourseModel;
+    if (courseType === "InPersonAestheticTraining") {
+      CourseModel = InPersonAestheticTraining;
+    } else if (courseType === "OnlineLiveTraining") {
+      CourseModel = OnlineLiveTraining;
+    } else {
+      return;
+    }
+
+    const course = await CourseModel.findById(courseId);
+    if (course && typeof course.addReminderToHistory === "function") {
+      await course.addReminderToHistory({
+        type: historyEntry.emailType || "course-starting",
+        recipientCount: historyEntry.recipientCount,
+        successCount: historyEntry.successCount,
+        failureCount: historyEntry.failureCount,
+        isImmediate: historyEntry.isImmediate || false,
+        sentBy: historyEntry.sentBy || null,
+      });
+      console.log(`✅ Updated reminder history for course ${courseId}`);
+    }
+  } catch (error) {
+    console.error(
+      `❌ Error updating course reminder history for ${courseId}:`,
+      error
+    );
+  }
+}
+
+// ============================================
+// EXISTING ROUTES (KEEP ALL UNCHANGED)
+// ============================================
+
+// API: GET COURSE DATA FOR SELECTED COURSE
 router.get(
   "/course-reminders/api/course-data",
   isAuthenticated,
@@ -173,171 +948,7 @@ router.get(
   }
 );
 
-// ============================================
-// API: PREVIEW EMAIL CONTENT
-// ============================================
-router.get(
-  "/course-reminders/api/email-preview",
-  isAuthenticated,
-  isAdmin,
-  async (req, res) => {
-    try {
-      const { courseId, courseType, emailType, customMessage } = req.query;
-
-      if (!courseId || !courseType || !emailType) {
-        return res.json({
-          success: false,
-          error: "Missing required parameters",
-        });
-      }
-
-      console.log(`📧 Generating email preview for ${courseType}: ${courseId}`);
-
-      // Get course data
-      let course;
-      if (courseType === "InPersonAestheticTraining") {
-        course = await InPersonAestheticTraining.findById(courseId)
-          .select("basic schedule enrollment venue instructors")
-          .lean();
-      } else if (courseType === "OnlineLiveTraining") {
-        course = await OnlineLiveTraining.findById(courseId)
-          .select("basic schedule enrollment platform instructors technical")
-          .lean();
-      }
-
-      if (!course) {
-        return res.json({
-          success: false,
-          error: "Course not found",
-        });
-      }
-
-      // Get a sample user for preview (use admin user or create mock user)
-      const sampleUser = {
-        firstName: "John",
-        lastName: "Doe",
-        email: "student@example.com",
-      };
-
-      // Generate email content based on type
-      let emailContent = "";
-      let subject = "";
-
-      switch (emailType) {
-        case "course-starting":
-          try {
-            const result = generateCourseStartingEmailContent(
-              course,
-              courseType,
-              sampleUser
-            );
-            emailContent = result.html;
-            subject = result.subject;
-          } catch (error) {
-            console.error("Error generating course starting email:", error);
-            return res.json({
-              success: false,
-              error: "Failed to generate course starting email preview",
-            });
-          }
-          break;
-
-        case "preparation":
-          try {
-            const prepResult = generatePreparationEmailContent(
-              course,
-              courseType,
-              sampleUser
-            );
-            emailContent = prepResult.html;
-            subject = prepResult.subject;
-          } catch (error) {
-            console.error("Error generating preparation email:", error);
-            return res.json({
-              success: false,
-              error: "Failed to generate preparation email preview",
-            });
-          }
-          break;
-
-        case "tech-check":
-          if (courseType === "OnlineLiveTraining") {
-            try {
-              const techResult = generateTechCheckEmailContent(
-                course,
-                sampleUser
-              );
-              emailContent = techResult.html;
-              subject = techResult.subject;
-            } catch (error) {
-              console.error("Error generating tech check email:", error);
-              return res.json({
-                success: false,
-                error: "Failed to generate tech check email preview",
-              });
-            }
-          } else {
-            return res.json({
-              success: false,
-              error: "Tech check is only available for online courses",
-            });
-          }
-          break;
-
-        case "custom":
-          if (!customMessage || customMessage.trim() === "") {
-            return res.json({
-              success: false,
-              error: "Custom message is required",
-            });
-          }
-          try {
-            const customResult = generateCustomEmailContent(
-              course,
-              sampleUser,
-              customMessage
-            );
-            emailContent = customResult.html;
-            subject = customResult.subject;
-          } catch (error) {
-            console.error("Error generating custom email:", error);
-            return res.json({
-              success: false,
-              error: "Failed to generate custom email preview",
-            });
-          }
-          break;
-
-        default:
-          return res.json({
-            success: false,
-            error: "Invalid email type",
-          });
-      }
-
-      res.json({
-        success: true,
-        preview: {
-          subject: subject,
-          html: emailContent,
-          emailType: emailType,
-          courseName: course.basic?.title || "Unknown Course",
-          sampleRecipient: "John Doe (student@example.com)",
-        },
-      });
-    } catch (error) {
-      console.error("❌ Error generating email preview:", error);
-      res.json({
-        success: false,
-        error: error.message,
-      });
-    }
-  }
-);
-
-// ============================================
 // SCHEDULE CUSTOM REMINDER WITH MODIFICATIONS SUPPORT
-// ============================================
 router.post(
   "/course-reminders/schedule-custom",
   isAuthenticated,
@@ -351,8 +962,8 @@ router.post(
         emailType,
         customDateTime,
         customMessage,
-        modifiedEmailContent, // NEW: Modified email HTML
-        modifiedEmailSubject, // NEW: Modified email subject
+        modifiedEmailContent,
+        modifiedEmailSubject,
       } = req.body;
 
       console.log(
@@ -505,9 +1116,7 @@ router.post(
   }
 );
 
-// ============================================
 // SCHEDULE STANDARD REMINDER FOR A COURSE
-// ============================================
 router.post(
   "/course-reminders/schedule",
   isAuthenticated,
@@ -545,9 +1154,7 @@ router.post(
   }
 );
 
-// ============================================
 // CANCEL SPECIFIC REMINDER
-// ============================================
 router.post(
   "/course-reminders/cancel",
   isAuthenticated,
@@ -582,9 +1189,7 @@ router.post(
   }
 );
 
-// ============================================
 // SCHEDULE ALL UPCOMING REMINDERS
-// ============================================
 router.post(
   "/course-reminders/schedule-all",
   isAuthenticated,
@@ -613,9 +1218,7 @@ router.post(
   }
 );
 
-// ============================================
 // CANCEL ALL REMINDERS
-// ============================================
 router.post(
   "/course-reminders/cancel-all",
   isAuthenticated,
@@ -650,9 +1253,7 @@ router.post(
   }
 );
 
-// ============================================
 // API: GET REMINDER STATUS
-// ============================================
 router.get(
   "/api/course-reminders/status",
   isAuthenticated,
@@ -671,9 +1272,7 @@ router.get(
   }
 );
 
-// ============================================
 // API: GET DETAILED STATISTICS
-// ============================================
 router.get(
   "/api/course-reminders/statistics",
   isAuthenticated,
@@ -692,9 +1291,7 @@ router.get(
   }
 );
 
-// ============================================
 // DEBUG: GET ENROLLED USERS FOR COURSE
-// ============================================
 router.get(
   "/course-reminders/debug/enrolled-users",
   isAuthenticated,

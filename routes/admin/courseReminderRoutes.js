@@ -185,73 +185,6 @@ router.post(
           const isUrgent =
             emailType === "last-minute" || emailType === "urgent-update";
 
-          switch (emailType) {
-            case "custom":
-              await sendCustomImmediateEmail(
-                user,
-                course,
-                courseType,
-                customMessage,
-                customSubject,
-                isUrgent
-              );
-              emailSent = true;
-              break;
-
-            case "last-minute":
-              await sendLastMinuteEmail(
-                user,
-                course,
-                courseType,
-                customMessage ||
-                  "Important last-minute information about your course.",
-                customSubject
-              );
-              emailSent = true;
-              break;
-
-            case "urgent-update":
-              await sendUrgentUpdateEmail(
-                user,
-                course,
-                courseType,
-                customMessage || "Urgent update regarding your course.",
-                customSubject
-              );
-              emailSent = true;
-              break;
-
-            case "tech-check":
-              if (courseType === "OnlineLiveTraining") {
-                await emailService.sendTechCheckReminder(user, course);
-                emailSent = true;
-              } else {
-                console.log(`⚠️ Tech check not available for ${courseType}`);
-                continue;
-              }
-              break;
-
-            case "preparation":
-              await emailService.sendPreparationReminder(
-                user,
-                course,
-                courseType
-              );
-              emailSent = true;
-              break;
-
-            case "course-starting":
-            default:
-              await emailService.sendCourseStartingReminderEnhanced(
-                user,
-                course,
-                courseType,
-                enrollment
-              );
-              emailSent = true;
-              break;
-          }
-
           if (emailSent) {
             successCount++;
             console.log(`✅ Immediate notification sent to ${user.email}`);
@@ -378,7 +311,6 @@ router.get(
       // Generate email content based on type
       let emailContent = "";
       let subject = "";
-
       switch (emailType) {
         case "course-starting":
           try {
@@ -387,15 +319,16 @@ router.get(
               courseType,
               user
             );
-            const emailSubject = customSubject && customSubject.trim() 
-              ? customSubject 
-              : result.subject;
-            
+            const emailSubject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : result.subject;
+
             await emailService.sendEmail({
               to: user.email,
               subject: emailSubject,
               html: result.html,
-              priority: "normal"
+              priority: "normal",
             });
             emailSent = true;
           } catch (error) {
@@ -403,7 +336,7 @@ router.get(
             throw error;
           }
           break;
-      
+
         case "preparation":
           try {
             const prepResult = generatePreparationEmailContent(
@@ -411,15 +344,16 @@ router.get(
               courseType,
               user
             );
-            const emailSubject = customSubject && customSubject.trim()
-              ? customSubject
-              : prepResult.subject;
-            
+            const emailSubject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : prepResult.subject;
+
             await emailService.sendEmail({
               to: user.email,
               subject: emailSubject,
               html: prepResult.html,
-              priority: "normal"
+              priority: "normal",
             });
             emailSent = true;
           } catch (error) {
@@ -427,23 +361,21 @@ router.get(
             throw error;
           }
           break;
-      
+
         case "tech-check":
           if (courseType === "OnlineLiveTraining") {
             try {
-              const techResult = generateTechCheckEmailContent(
-                course,
-                user
-              );
-              const emailSubject = customSubject && customSubject.trim()
-                ? customSubject
-                : techResult.subject;
-              
+              const techResult = generateTechCheckEmailContent(course, user);
+              const emailSubject =
+                customSubject && customSubject.trim()
+                  ? customSubject
+                  : techResult.subject;
+
               await emailService.sendEmail({
                 to: user.email,
                 subject: emailSubject,
                 html: techResult.html,
-                priority: "normal"
+                priority: "normal",
               });
               emailSent = true;
             } catch (error) {
@@ -452,27 +384,30 @@ router.get(
             }
           } else {
             console.log(`⚠️ Tech check not available for ${courseType}`);
-            continue;
+            // Skip this user but don't break the loop
+            emailSent = false;
           }
           break;
-      
+
         case "last-minute":
           try {
             const lastMinuteResult = generateLastMinuteEmailContent(
               course,
               user,
-              customMessage || "Important last-minute information about your course."
+              customMessage ||
+                "Important last-minute information about your course."
             );
-            const emailSubject = customSubject && customSubject.trim()
-              ? customSubject
-              : lastMinuteResult.subject;
-            
+            const emailSubject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : lastMinuteResult.subject;
+
             await emailService.sendEmail({
               to: user.email,
               subject: emailSubject,
               html: lastMinuteResult.html,
               priority: "high",
-              headers: { "X-Priority": "1" }
+              headers: { "X-Priority": "1" },
             });
             emailSent = true;
           } catch (error) {
@@ -480,7 +415,7 @@ router.get(
             throw error;
           }
           break;
-      
+
         case "urgent-update":
           try {
             const urgentResult = generateUrgentUpdateEmailContent(
@@ -488,16 +423,17 @@ router.get(
               user,
               customMessage || "Urgent update regarding your course."
             );
-            const emailSubject = customSubject && customSubject.trim()
-              ? customSubject
-              : urgentResult.subject;
-            
+            const emailSubject =
+              customSubject && customSubject.trim()
+                ? customSubject
+                : urgentResult.subject;
+
             await emailService.sendEmail({
               to: user.email,
               subject: emailSubject,
               html: urgentResult.html,
               priority: "high",
-              headers: { "X-Priority": "2" }
+              headers: { "X-Priority": "2" },
             });
             emailSent = true;
           } catch (error) {
@@ -505,41 +441,45 @@ router.get(
             throw error;
           }
           break;
-      
+
         case "custom":
           if (!customMessage || customMessage.trim() === "") {
-            console.log(`⚠️ Skipping custom email for ${user.email} - no custom message`);
-            continue;
-          }
-          try {
-            const customResult = generateCustomEmailContent(
-              course,
-              user,
-              customMessage
+            console.log(
+              `⚠️ Skipping custom email for ${user.email} - no custom message`
             );
-            const emailSubject = customSubject && customSubject.trim()
-              ? customSubject
-              : customResult.subject;
-            
-            await emailService.sendEmail({
-              to: user.email,
-              subject: emailSubject,
-              html: customResult.html,
-              priority: isUrgent ? "high" : "normal",
-              headers: isUrgent ? { "X-Priority": "1" } : {}
-            });
-            emailSent = true;
-          } catch (error) {
-            console.error("Error sending custom email:", error);
-            throw error;
+            emailSent = false;
+          } else {
+            try {
+              const customResult = generateCustomEmailContent(
+                course,
+                user,
+                customMessage
+              );
+              const emailSubject =
+                customSubject && customSubject.trim()
+                  ? customSubject
+                  : customResult.subject;
+
+              await emailService.sendEmail({
+                to: user.email,
+                subject: emailSubject,
+                html: customResult.html,
+                priority: isUrgent ? "high" : "normal",
+                headers: isUrgent ? { "X-Priority": "1" } : {},
+              });
+              emailSent = true;
+            } catch (error) {
+              console.error("Error sending custom email:", error);
+              throw error;
+            }
           }
           break;
-      
+
         default:
           console.log(`⚠️ Invalid email type: ${emailType}`);
-          continue;
+          emailSent = false;
+          break;
       }
-
       res.json({
         success: true,
         preview: {

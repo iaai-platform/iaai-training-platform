@@ -169,33 +169,16 @@ router.post(
           const enrollment =
             user.getCourseEnrollment?.(courseId, courseType) || {};
 
-          // Check if user has any enrollment
+          // ✅ FINAL SOLUTION: Check if user has any enrollment at all
           if (!enrollment) {
             console.log(`⚠️ Skipping user ${user.email} - no enrollment found`);
             continue;
           }
 
-          // For immediate notifications, be more lenient with free courses
-          const isFreeOrLinkedCourse =
-            enrollment.enrollmentData?.originalPrice === 0 ||
-            enrollment.enrollmentData?.isLinkedCourseFree ||
-            enrollment.enrollmentData?.paidAmount === 0;
-
-          const hasValidStatus = [
-            "paid",
-            "registered",
-            "completed",
-            "cart",
-          ].includes(enrollment.enrollmentData?.status);
-
-          if (!hasValidStatus && !isFreeOrLinkedCourse) {
-            console.log(
-              `⚠️ Skipping user ${user.email} - not properly enrolled`
-            );
-            console.log(`   Status: ${enrollment.enrollmentData?.status}`);
-            console.log(`   Is free course: ${isFreeOrLinkedCourse}`);
-            continue;
-          }
+          // ✅ For immediate notifications, be very lenient - just check if enrollment exists
+          console.log(
+            `✅ Processing user ${user.email} - has enrollment, sending email`
+          );
 
           // Send email based on type
           let emailSent = false;

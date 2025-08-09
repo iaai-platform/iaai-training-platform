@@ -385,145 +385,159 @@ router.get(
             const result = generateCourseStartingEmailContent(
               course,
               courseType,
-              sampleUser
+              user
             );
-            emailContent = result.html;
-            subject =
-              customSubject && customSubject.trim()
-                ? customSubject
-                : result.subject;
-          } catch (error) {
-            console.error("Error generating course starting email:", error);
-            return res.json({
-              success: false,
-              error: "Failed to generate course starting email preview",
+            const emailSubject = customSubject && customSubject.trim() 
+              ? customSubject 
+              : result.subject;
+            
+            await emailService.sendEmail({
+              to: user.email,
+              subject: emailSubject,
+              html: result.html,
+              priority: "normal"
             });
+            emailSent = true;
+          } catch (error) {
+            console.error("Error sending course starting email:", error);
+            throw error;
           }
           break;
-
+      
         case "preparation":
           try {
             const prepResult = generatePreparationEmailContent(
               course,
               courseType,
-              sampleUser
+              user
             );
-            emailContent = prepResult.html;
-            subject =
-              customSubject && customSubject.trim()
-                ? customSubject
-                : prepResult.subject;
-          } catch (error) {
-            console.error("Error generating preparation email:", error);
-            return res.json({
-              success: false,
-              error: "Failed to generate preparation email preview",
+            const emailSubject = customSubject && customSubject.trim()
+              ? customSubject
+              : prepResult.subject;
+            
+            await emailService.sendEmail({
+              to: user.email,
+              subject: emailSubject,
+              html: prepResult.html,
+              priority: "normal"
             });
+            emailSent = true;
+          } catch (error) {
+            console.error("Error sending preparation email:", error);
+            throw error;
           }
           break;
-
+      
         case "tech-check":
           if (courseType === "OnlineLiveTraining") {
             try {
               const techResult = generateTechCheckEmailContent(
                 course,
-                sampleUser
+                user
               );
-              emailContent = techResult.html;
-              subject =
-                customSubject && customSubject.trim()
-                  ? customSubject
-                  : techResult.subject;
-            } catch (error) {
-              console.error("Error generating tech check email:", error);
-              return res.json({
-                success: false,
-                error: "Failed to generate tech check email preview",
+              const emailSubject = customSubject && customSubject.trim()
+                ? customSubject
+                : techResult.subject;
+              
+              await emailService.sendEmail({
+                to: user.email,
+                subject: emailSubject,
+                html: techResult.html,
+                priority: "normal"
               });
+              emailSent = true;
+            } catch (error) {
+              console.error("Error sending tech check email:", error);
+              throw error;
             }
           } else {
-            return res.json({
-              success: false,
-              error: "Tech check is only available for online courses",
-            });
+            console.log(`⚠️ Tech check not available for ${courseType}`);
+            continue;
           }
           break;
-
+      
         case "last-minute":
           try {
             const lastMinuteResult = generateLastMinuteEmailContent(
               course,
-              sampleUser,
-              customMessage ||
-                "Important last-minute information about your course."
+              user,
+              customMessage || "Important last-minute information about your course."
             );
-            emailContent = lastMinuteResult.html;
-            subject =
-              customSubject && customSubject.trim()
-                ? customSubject
-                : lastMinuteResult.subject;
-          } catch (error) {
-            console.error("Error generating last-minute email:", error);
-            return res.json({
-              success: false,
-              error: "Failed to generate last-minute email preview",
+            const emailSubject = customSubject && customSubject.trim()
+              ? customSubject
+              : lastMinuteResult.subject;
+            
+            await emailService.sendEmail({
+              to: user.email,
+              subject: emailSubject,
+              html: lastMinuteResult.html,
+              priority: "high",
+              headers: { "X-Priority": "1" }
             });
+            emailSent = true;
+          } catch (error) {
+            console.error("Error sending last-minute email:", error);
+            throw error;
           }
           break;
-
+      
         case "urgent-update":
           try {
             const urgentResult = generateUrgentUpdateEmailContent(
               course,
-              sampleUser,
+              user,
               customMessage || "Urgent update regarding your course."
             );
-            emailContent = urgentResult.html;
-            subject =
-              customSubject && customSubject.trim()
-                ? customSubject
-                : urgentResult.subject;
-          } catch (error) {
-            console.error("Error generating urgent update email:", error);
-            return res.json({
-              success: false,
-              error: "Failed to generate urgent update email preview",
+            const emailSubject = customSubject && customSubject.trim()
+              ? customSubject
+              : urgentResult.subject;
+            
+            await emailService.sendEmail({
+              to: user.email,
+              subject: emailSubject,
+              html: urgentResult.html,
+              priority: "high",
+              headers: { "X-Priority": "2" }
             });
+            emailSent = true;
+          } catch (error) {
+            console.error("Error sending urgent update email:", error);
+            throw error;
           }
           break;
-
+      
         case "custom":
           if (!customMessage || customMessage.trim() === "") {
-            return res.json({
-              success: false,
-              error: "Custom message is required",
-            });
+            console.log(`⚠️ Skipping custom email for ${user.email} - no custom message`);
+            continue;
           }
           try {
             const customResult = generateCustomEmailContent(
               course,
-              sampleUser,
+              user,
               customMessage
             );
-            emailContent = customResult.html;
-            subject =
-              customSubject && customSubject.trim()
-                ? customSubject
-                : customResult.subject;
-          } catch (error) {
-            console.error("Error generating custom email:", error);
-            return res.json({
-              success: false,
-              error: "Failed to generate custom email preview",
+            const emailSubject = customSubject && customSubject.trim()
+              ? customSubject
+              : customResult.subject;
+            
+            await emailService.sendEmail({
+              to: user.email,
+              subject: emailSubject,
+              html: customResult.html,
+              priority: isUrgent ? "high" : "normal",
+              headers: isUrgent ? { "X-Priority": "1" } : {}
             });
+            emailSent = true;
+          } catch (error) {
+            console.error("Error sending custom email:", error);
+            throw error;
           }
           break;
-
+      
         default:
-          return res.json({
-            success: false,
-            error: "Invalid email type",
-          });
+          console.log(`⚠️ Invalid email type: ${emailType}`);
+          continue;
       }
 
       res.json({

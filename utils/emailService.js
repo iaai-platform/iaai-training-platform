@@ -19,7 +19,22 @@ class EmailService {
     // Configuration for bulk email methods
     this.bulkEmailMethod = "bcc"; // Options: 'bcc', 'individual', 'batch'
   }
+  // ✅ ADD THIS METHOD HERE
+  async sendEmail(mailOptions) {
+    if (this.mockMode) {
+      console.log("📧 [MOCK] Would send email to:", mailOptions.to);
+      console.log("📧 [MOCK] Subject:", mailOptions.subject);
+      return { success: true };
+    }
 
+    try {
+      const result = await sendEmail(mailOptions);
+      return { success: true, result };
+    } catch (error) {
+      console.error("❌ Error sending email:", error);
+      return { success: false, error: error.message };
+    }
+  }
   // ============================================
   // EXISTING METHODS (UNCHANGED)
   // ============================================

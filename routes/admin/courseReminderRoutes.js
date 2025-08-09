@@ -302,11 +302,13 @@ router.get(
       }
 
       // Get a sample user for preview
-      const sampleUser = {
+      const user = {
         firstName: "John",
         lastName: "Doe",
         email: "student@example.com",
       };
+      // Also keep sampleUser for backward compatibility
+      const sampleUser = user;
 
       // Generate email content based on type
       let emailContent = "";

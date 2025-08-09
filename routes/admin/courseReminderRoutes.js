@@ -170,11 +170,31 @@ router.post(
             user.getCourseEnrollment?.(courseId, courseType) || {};
 
           if (
-            !enrollment ||
             !["paid", "registered"].includes(enrollment.enrollmentData?.status)
           ) {
             console.log(
               `⚠️ Skipping user ${user.email} - not properly enrolled`
+            );
+            continue;
+          }
+
+          // With this expanded validation for free courses:
+          const validStatusesForEmails = [
+            "paid", // Paid courses
+            "registered", // Free courses without certificate
+            "completed", // Completed courses
+            "cart", // Allow cart status for immediate notifications
+          ];
+
+          if (
+            !validStatusesForEmails.includes(enrollment.enrollmentData?.status)
+          ) {
+            console.log(
+              `⚠️ Skipping user ${user.email} - not properly enrolled`
+            );
+            console.log(`   Status: ${enrollment.enrollmentData?.status}`);
+            console.log(
+              `   Valid statuses: ${validStatusesForEmails.join(", ")}`
             );
             continue;
           }

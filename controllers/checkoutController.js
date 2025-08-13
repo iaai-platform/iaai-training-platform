@@ -6,6 +6,7 @@ const OnlineLiveTraining = require("../models/onlineLiveTrainingModel");
 const PromoCode = require("../models/promoCode");
 const sendEmail = require("../utils/sendEmail");
 const { v4: uuidv4 } = require("uuid");
+const { validatePromoCode } = require("./promoCodeAdminController");
 
 // ✅ ENHANCED EMAIL AND REMINDER SERVICES
 const emailService = require("../utils/emailService");
@@ -522,8 +523,9 @@ exports.applyPromoCode = async (req, res) => {
     }
 
     let totalPrice = 0;
+    const coursesInCart = []; // NEW: Track courses for validation
 
-    // ✅ FIXED: Calculate total from all course types using stored prices
+    // ✅ ENHANCED: Collect course information for validation
     const inPersonCartItems =
       user.myInPersonCourses?.filter(
         (enrollment) => enrollment.enrollmentData.status === "cart"
@@ -533,9 +535,14 @@ exports.applyPromoCode = async (req, res) => {
       const course = await InPersonAestheticTraining.findById(item.courseId);
       if (course) {
         const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
-        // ⭐ FIX: Use stored price instead of recalculating
         const coursePrice = getStoredCoursePrice(item, isLinkedCourse);
         totalPrice += coursePrice;
+
+        // NEW: Add course info for promo validation
+        coursesInCart.push({
+          courseId: item.courseId,
+          courseType: "InPerson",
+        });
       }
     }
 
@@ -548,9 +555,14 @@ exports.applyPromoCode = async (req, res) => {
       const course = await OnlineLiveTraining.findById(item.courseId);
       if (course) {
         const isLinkedCourse = item.enrollmentData.isLinkedCourseFree || false;
-        // ⭐ FIX: Use stored price instead of recalculating
         const coursePrice = getStoredCoursePrice(item, isLinkedCourse);
         totalPrice += coursePrice;
+
+        // NEW: Add course info for promo validation
+        coursesInCart.push({
+          courseId: item.courseId,
+          courseType: "OnlineLive",
+        });
 
         console.log(`💰 Promo calculation - FIXED:`, {
           courseTitle: course.basic?.title,
@@ -570,9 +582,14 @@ exports.applyPromoCode = async (req, res) => {
     for (const item of selfPacedCartItems) {
       const course = await SelfPacedOnlineTraining.findById(item.courseId);
       if (course) {
-        // ⭐ FIX: Use stored price instead of recalculating
         const coursePrice = getStoredCoursePrice(item, false);
         totalPrice += coursePrice;
+
+        // NEW: Add course info for promo validation
+        coursesInCart.push({
+          courseId: item.courseId,
+          courseType: "SelfPaced",
+        });
       }
     }
 
@@ -584,7 +601,11 @@ exports.applyPromoCode = async (req, res) => {
       return res.json({ success: false, message: "No courses in cart." });
     }
 
-    // Validate promo code
+    // ✅ NEW: Enhanced promo code validation with course restrictions
+    let promoValidationPassed = false;
+    let validationMessage = "";
+
+    // Basic promo code lookup
     const promo = await PromoCode.findOne({
       code: promoCode.toUpperCase(),
       isActive: true,
@@ -602,6 +623,42 @@ exports.applyPromoCode = async (req, res) => {
         success: false,
         message: "This promo code has expired.",
       });
+    }
+
+    // ✅ NEW: Enhanced validation for course and email restrictions
+    if (promo.restrictionType === "email" || promo.restrictionType === "both") {
+      if (
+        promo.allowedEmails.length > 0 &&
+        !promo.allowedEmails.includes(user.email)
+      ) {
+        return res.json({
+          success: false,
+          message: "This promo code is not valid for your email address.",
+        });
+      }
+    }
+
+    if (
+      promo.restrictionType === "course" ||
+      promo.restrictionType === "both"
+    ) {
+      if (promo.allowedCourses.length > 0) {
+        // Check if any course in cart is allowed
+        const hasValidCourse = coursesInCart.some((cartCourse) =>
+          promo.allowedCourses.some(
+            (allowedCourseId) =>
+              allowedCourseId.toString() === cartCourse.courseId.toString()
+          )
+        );
+
+        if (!hasValidCourse) {
+          return res.json({
+            success: false,
+            message:
+              "This promo code is not valid for the courses in your cart.",
+          });
+        }
+      }
     }
 
     console.log(

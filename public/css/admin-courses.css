@@ -2359,3 +2359,12 @@ input[readonly] {
       grid-template-columns: 1fr; /* Stack cards on small screens */
   }
 }
+
+.copy-btn {
+  background-color: #8b5cf6 !important;
+  color: white !important;
+}
+
+.copy-btn:hover {
+  background-color: #7c3aed !important;
+}

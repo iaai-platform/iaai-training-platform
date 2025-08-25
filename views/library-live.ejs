@@ -777,15 +777,21 @@
               <!-- ✅ ENHANCED: Action Buttons with Timezone-Aware Display -->
               <div class="course-actions">
                 <!-- ✅ ENHANCED: Course Access Button with Timezone Info -->
-                <% if (new Date(course.startDate) <= new Date() && !course.courseEnded && course.courseUrl) { %>
-                  <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-primary">
-                    <i class="fas fa-video"></i> Join Live Session
-                    <% if (course.sessionTime?.startTime) { %>
-                      <small style="display: block; font-size: 0.8rem; opacity: 0.9;">
-                        <%= course.displayInfo?.sessionTimeRange %>
-                      </small>
-                    <% } %>
-                  </a>
+               <!-- Enhanced Course Access Button with Embedded Option -->
+<% if (new Date(course.startDate) <= new Date() && !course.courseEnded && course.courseUrl) { %>
+  <div class="live-session-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button onclick="openEmbeddedSession('<%= course.courseUrl %>', '<%= course.title %>')" class="cta-btn btn-primary">
+      <i class="fas fa-video"></i> Join in Library
+      <% if (course.sessionTime?.startTime) { %>
+        <small style="display: block; font-size: 0.8rem; opacity: 0.9;">
+          <%= course.displayInfo?.sessionTimeRange %>
+        </small>
+      <% } %>
+    </button>
+    <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-secondary" style="padding: 10px 15px;">
+      <i class="fas fa-external-link-alt"></i> Open Separately
+    </a>
+  </div>
                 <!-- ✅ ENHANCED: "Starts" button with dual timezone -->
                 <% } else if (new Date(course.startDate) > new Date()) { %>
                   <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
@@ -1315,8 +1321,153 @@
 
      console.log('✅ Enhanced Live Online Library with Certificate Purchase Support initialized successfully');
    });
- </script>
+   // Live Session Embedded Functions
+let isFullscreen = false;
 
+function openEmbeddedSession(sessionUrl, courseTitle) {
+  console.log('Opening embedded session:', sessionUrl);
+  
+  // Set the iframe source and modal title
+  document.getElementById('liveSessionFrame').src = sessionUrl;
+  document.getElementById('sessionTitle').textContent = courseTitle || 'Live Training Session';
+  
+  // Show modal
+  const modal = document.getElementById('liveSessionModal');
+  modal.style.display = 'block';
+  modal.classList.add('show');
+  
+  // Add backdrop
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop fade show';
+  backdrop.id = 'sessionBackdrop';
+  document.body.appendChild(backdrop);
+  
+  // Prevent body scroll
+  document.body.style.overflow = 'hidden';
+  
+  // Track session start
+  trackSessionEvent('session_embedded_opened', courseTitle);
+}
+
+function closeLiveSession() {
+  const modal = document.getElementById('liveSessionModal');
+  const backdrop = document.getElementById('sessionBackdrop');
+  
+  // Clear iframe source to stop the session
+  document.getElementById('liveSessionFrame').src = 'about:blank';
+  
+  // Hide modal
+  modal.style.display = 'none';
+  modal.classList.remove('show');
+  
+  // Remove backdrop
+  if (backdrop) {
+    backdrop.remove();
+  }
+  
+  // Restore body scroll
+  document.body.style.overflow = 'auto';
+  
+  // Exit fullscreen if active
+  if (isFullscreen) {
+    exitFullscreen();
+  }
+  
+  // Track session end
+  trackSessionEvent('session_embedded_closed', null);
+}
+
+function toggleFullscreen() {
+  const modal = document.getElementById('liveSessionModal');
+  const icon = document.getElementById('fullscreenIcon');
+  
+  if (!isFullscreen) {
+    // Enter fullscreen
+    if (modal.requestFullscreen) {
+      modal.requestFullscreen();
+    } else if (modal.webkitRequestFullscreen) {
+      modal.webkitRequestFullscreen();
+    } else if (modal.msRequestFullscreen) {
+      modal.msRequestFullscreen();
+    }
+    icon.className = 'fas fa-compress';
+    isFullscreen = true;
+  } else {
+    // Exit fullscreen
+    exitFullscreen();
+  }
+}
+
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
+  document.getElementById('fullscreenIcon').className = 'fas fa-expand';
+  isFullscreen = false;
+}
+
+function trackSessionEvent(eventType, courseTitle) {
+  try {
+    // Optional: Track usage analytics
+    console.log('Session event:', eventType, courseTitle);
+    
+    // You can add analytics tracking here if needed
+    // Example: gtag('event', eventType, { course_title: courseTitle });
+  } catch (error) {
+    console.log('Analytics tracking error:', error);
+  }
+}
+
+// Handle fullscreen change events
+document.addEventListener('fullscreenchange', function() {
+  if (!document.fullscreenElement) {
+    isFullscreen = false;
+    document.getElementById('fullscreenIcon').className = 'fas fa-expand';
+  }
+});
+
+// Close modal on escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    const modal = document.getElementById('liveSessionModal');
+    if (modal.style.display === 'block') {
+      closeLiveSession();
+    }
+  }
+});
+ </script>
+<!-- Live Session Embedded Modal -->
+<div id="liveSessionModal" class="modal fade" tabindex="-1" style="display: none;">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #1e3a8a; color: white; padding: 10px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <h5 class="modal-title" id="sessionTitle">Live Training Session</h5>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button onclick="toggleFullscreen()" class="btn btn-outline-light btn-sm">
+              <i class="fas fa-expand" id="fullscreenIcon"></i> Fullscreen
+            </button>
+            <button onclick="closeLiveSession()" class="btn btn-outline-light btn-sm">
+              <i class="fas fa-times"></i> Close
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 0; height: calc(100vh - 60px);">
+        <iframe 
+          id="liveSessionFrame" 
+          src="" 
+          style="width: 100%; height: 100%; border: none;"
+          allow="camera; microphone; fullscreen; display-capture">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</div>
  <%- include('partials/footer') %>
 </body>
 </html>

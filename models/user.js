@@ -4366,34 +4366,91 @@ userSchema.methods.canViewCertificate = function (enrollment) {
 };
 
 /**
- * ✅ Check if course ended
+ * FIXED: Check if course ended with proper timezone handling
  */
 userSchema.methods.isCourseEnded = function (course, now = new Date()) {
+  if (!course.schedule?.startDate) return false;
+
+  const courseTimezone = course.schedule.primaryTimezone || "UTC";
+  const startDate = new Date(course.schedule.startDate);
   const endDate = new Date(
-    course.schedule?.endDate || course.schedule?.startDate
+    course.schedule.endDate || course.schedule.startDate
   );
-  return endDate < now;
+
+  // If we have session time, combine it with the date
+  if (course.schedule.sessionTime?.endTime) {
+    const [endHours, endMinutes] = course.schedule.sessionTime.endTime
+      .split(":")
+      .map(Number);
+    endDate.setUTCHours(endHours, endMinutes, 0, 0);
+  }
+
+  // Convert to course timezone for accurate comparison
+  const nowUTC = now.getTime();
+  const endDateUTC = endDate.getTime();
+
+  // Get timezone offset difference
+  const nowInCourseTimezone = new Date(nowUTC);
+  const endDateInCourseTimezone = new Date(endDateUTC);
+
+  return endDateInCourseTimezone.getTime() < nowUTC;
 };
 
 /**
- * ✅ Check if course in progress
+ * FIXED: Check if course in progress with proper timezone handling
  */
 userSchema.methods.isCourseInProgress = function (course, now = new Date()) {
-  const startDate = new Date(course.schedule?.startDate);
+  if (!course.schedule?.startDate) return false;
+
+  const courseTimezone = course.schedule.primaryTimezone || "UTC";
+  const startDate = new Date(course.schedule.startDate);
   const endDate = new Date(
-    course.schedule?.endDate || course.schedule?.startDate
+    course.schedule.endDate || course.schedule.startDate
   );
-  return startDate <= now && now <= endDate;
+
+  // If we have session times, use them
+  if (course.schedule.sessionTime?.startTime) {
+    const [startHours, startMinutes] = course.schedule.sessionTime.startTime
+      .split(":")
+      .map(Number);
+    startDate.setUTCHours(startHours, startMinutes, 0, 0);
+  }
+
+  if (course.schedule.sessionTime?.endTime) {
+    const [endHours, endMinutes] = course.schedule.sessionTime.endTime
+      .split(":")
+      .map(Number);
+    endDate.setUTCHours(endHours, endMinutes, 0, 0);
+  }
+
+  const nowUTC = now.getTime();
+  const startDateUTC = startDate.getTime();
+  const endDateUTC = endDate.getTime();
+
+  return startDateUTC <= nowUTC && nowUTC <= endDateUTC;
 };
 
 /**
- * ✅ Check if course not started
+ * FIXED: Check if course not started with proper timezone handling
  */
 userSchema.methods.isCourseNotStarted = function (course, now = new Date()) {
-  const startDate = new Date(course.schedule?.startDate);
-  return startDate > now;
-};
+  if (!course.schedule?.startDate) return true;
 
+  const startDate = new Date(course.schedule.startDate);
+
+  // If we have session start time, use it
+  if (course.schedule.sessionTime?.startTime) {
+    const [startHours, startMinutes] = course.schedule.sessionTime.startTime
+      .split(":")
+      .map(Number);
+    startDate.setUTCHours(startHours, startMinutes, 0, 0);
+  }
+
+  const nowUTC = now.getTime();
+  const startDateUTC = startDate.getTime();
+
+  return startDateUTC > nowUTC;
+};
 /**
  * ✅ Check if can get certificate
  */

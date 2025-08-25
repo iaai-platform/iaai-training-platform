@@ -2844,6 +2844,11 @@ class AdminOnlineCoursesManager {
                       }')">
                           <i class="fas fa-copy"></i>
                       </button>
+                      <button class="action-btn copy-btn" onclick="adminOnlineCourses.copyCourse('${
+                        course._id
+                      }')" title="Quick Copy">
+    <i class="fas fa-clone"></i>
+</button>
                       <button class="action-btn delete-btn" onclick="adminOnlineCourses.deleteCourse('${
                         course._id
                       }')">
@@ -2920,6 +2925,9 @@ class AdminOnlineCoursesManager {
                       <button class="action-btn clone-btn" onclick="adminOnlineCourses.cloneCourse('${course._id}')">
                           <i class="fas fa-copy"></i>
                       </button>
+                      <button class="action-btn copy-btn" onclick="adminOnlineCourses.copyCourse('${course._id}')" title="Quick Copy">
+    <i class="fas fa-clone"></i>
+</button>
                       <button class="action-btn delete-btn" onclick="adminOnlineCourses.deleteCourse('${course._id}')">
                           <i class="fas fa-trash"></i>
                       </button>
@@ -5508,7 +5516,94 @@ class AdminOnlineCoursesManager {
       this.showToast("error", "Error", "Failed to prepare course clone");
     }
   }
+  /**
+   * Quick copy course with minimal options
+   */
+  async copyCourse(courseId) {
+    try {
+      const course = this.courses.find((c) => c._id === courseId);
+      const courseName = course
+        ? course.basic?.title || "this course"
+        : "this course";
 
+      // Simple prompt for new title
+      const newTitle = prompt(
+        `Enter title for copied course:`,
+        `${courseName} (Copy)`
+      );
+      if (!newTitle) return;
+
+      // Generate new course code
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      const originalCode = course.basic?.courseCode || "COURSE";
+      const newCourseCode = `${originalCode}-COPY-${timestamp}`;
+
+      // Set future date (30 days from now)
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 30);
+
+      // Prepare copy options with all features enabled
+      const copyOptions = {
+        title: newTitle.trim(),
+        courseCode: newCourseCode,
+        startDate: futureDate.toISOString().slice(0, 16),
+        status: "draft",
+        notes: `Quick copy of ${courseName}`,
+        options: {
+          cloneInstructors: true,
+          cloneContent: true,
+          cloneAssessment: true,
+          clonePlatform: true,
+          cloneTechnical: true,
+          cloneInteraction: true,
+          cloneRecording: true,
+          cloneMedia: false, // Don't copy media files for quick copy
+          cloneMaterials: true,
+          clonePostCourse: true,
+          cloneExperience: true,
+          resetEnrollment: true,
+        },
+      };
+
+      this.showLoading(true);
+
+      // Use existing clone API
+      const response = await fetch(
+        `/admin-courses/onlinelive/api/${courseId}/clone`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(copyOptions),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        this.showToast(
+          "success",
+          "Success",
+          `Course copied successfully as "${newTitle}"`
+        );
+
+        // Reload course data
+        await this.loadInitialData();
+      } else {
+        throw new Error(result.message || "Failed to copy course");
+      }
+    } catch (error) {
+      console.error("Error copying course:", error);
+      this.showToast(
+        "error",
+        "Copy Failed",
+        `Failed to copy course: ${error.message}`
+      );
+    } finally {
+      this.showLoading(false);
+    }
+  }
   showCloneOptionsModal(courseId, courseName) {
     // Create clone options modal dynamically
     const modalHTML = `

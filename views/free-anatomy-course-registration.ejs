@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Free Anatomy Unlocked Course - IAAI Training Institute</title>
+  <title>Free Anatomy Unlocked Course - Cadaver-Based Facial Anatomy | IAAI Training Institute</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
@@ -661,13 +661,15 @@
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-content">
-      <h1 class="hero-title">Start Your Aesthetic Medicine Journey</h1>
-      <p class="hero-subtitle">Join thousands of healthcare professionals advancing their careers with IAAI</p>
+      <h1 class="hero-title">Master Facial Anatomy for Aesthetic Injections</h1>
+      <p class="hero-subtitle">Free comprehensive anatomy course - Learn safe injection techniques from expert instructors</p>
       
-      
+      <div class="company-intro">
+        <h2>IAAI Training Institute</h2>
+        <p>Join the International Academy of Aesthetic Injections and advance your career in aesthetic medicine. Our expert-led training programs combine theoretical knowledge with practical experience to ensure you provide safe, effective treatments with confidence.</p>
+      </div>
     </div>
   </section>
-
 
   <!-- Main Content -->
   <div class="main-content">
@@ -680,20 +682,38 @@
     
     <div class="course-details-grid">
       <div class="course-info">
-        <h2 id="course-title">Free Anatomy Unlocked Course</h2>
+        <h2>Anatomy Unlocked: Cadaver-Based Facial Anatomy</h2>
         
-        <div class="course-meta" id="course-meta">
-          <!-- Course meta will be populated by JavaScript -->
+        <div class="course-meta">
+          <div class="meta-item">
+            <i class="fas fa-calendar"></i>
+            <span>Wednesday, August 27, 2025 at 8:00 PM</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-user-tie"></i>
+            <span>Noura Lebbar</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-clock"></i>
+            <span>1 hour</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-video"></i>
+            <span>Google Meet</span>
+          </div>
         </div>
         
-        <p class="course-description" id="course-description">
-          <!-- Course description will be populated by JavaScript -->
+        <p class="course-description">
+          A free, aesthetic-focused anatomy course designed for beginner injectors, nurses, dentists, and medical students entering the field of medical aesthetics. Learn facial anatomy layers, identify danger zones, understand safe injection practices, and build confidence for advanced aesthetic procedures.
         </p>
         
         <div class="course-highlights">
           <h4>What You'll Learn:</h4>
-          <ul id="course-objectives">
-            <!-- Objectives will be populated by JavaScript -->
+          <ul>
+            <li>Master the five anatomical layers of the face for safe aesthetic injections</li>
+            <li>Identify critical facial danger zones to prevent complications</li>
+            <li>Understand cadaver-based anatomy for real-world application</li>
+            <li>Build confidence for advanced aesthetic injection procedures</li>
           </ul>
         </div>
       </div>
@@ -701,9 +721,9 @@
       <div class="course-actions">
         <div class="course-price">FREE</div>
         <div class="course-price-label">Limited Time Offer</div>
-        <a href="https://iaa-i.com/online-live-training/courses/6884c082935e6577ad62ed93" 
+        <a href="https://meet.google.com/idw-csbu-ymk" 
            class="btn-details" target="_blank">
-          <i class="fas fa-external-link-alt"></i> View Full Course Details
+          <i class="fas fa-video"></i> Join Google Meet Session
         </a>
       </div>
     </div>
@@ -720,8 +740,8 @@
       
       <div class="form-container">
         <div class="form-intro">
-          <h2>Create Your Account & Enroll</h2>
-          <p>Complete the form below to create your IAAI account and automatically enroll in our Free Anatomy Unlocked Course. This is your first step towards mastering aesthetic medicine!</p>
+          <h2>Enroll in Free Anatomy Course</h2>
+          <p>Complete the form below to create your IAAI account and automatically enroll in our "Anatomy Unlocked" course scheduled for August 27, 2025. This comprehensive cadaver-based anatomy session will give you essential knowledge for safe aesthetic injections.</p>
         </div>
 
         <!-- Success/Error Messages -->
@@ -816,7 +836,7 @@
           
           <div class="info-box">
             <h4><i class="fas fa-info-circle"></i> Important Information</h4>
-            <p>By submitting this form, you will create a new IAAI account and be automatically enrolled in our Free Anatomy Unlocked Course. You'll receive email confirmation with your login details and course access information. If you already have an account, the course will be added to your existing profile.</p>
+            <p>By submitting this form, you will create a new IAAI account and be automatically enrolled in our "Anatomy Unlocked" course scheduled for August 27, 2025 at 8:00 PM Istanbul time. You'll receive email confirmation with your login details and Google Meet access information. If you already have an account, the course will be added to your existing profile.</p>
           </div>
           
           <div class="submit-section">
@@ -872,74 +892,37 @@
             <i class="fas fa-calendar"></i> Live interactive sessions • <i class="fas fa-certificate"></i> Certificate included
           </div>
         </div>
-        
-        
       </div>
     </div>
-
- 
 
   </div>
 
   <script>
-    // Course data will be populated by the server
-    const courseData = <%- JSON.stringify(course) %>;
-    
-    // Populate course information
-    function populateCourseInfo() {
-      if (courseData) {
-        // Update course title
-        document.getElementById('course-title').textContent = courseData.basic?.title || courseData.title || 'Free Anatomy Unlocked Course';
-        
-        // Update course description
-        document.getElementById('course-description').textContent = courseData.basic?.description || courseData.description || 'Learn essential facial anatomy for safe aesthetic injections';
-        
-        // Update course meta information
-        const metaContainer = document.getElementById('course-meta');
-        const startDate = courseData.schedule?.startDate || courseData.startDate;
-        const instructor = courseData.instructors?.primary?.name || courseData.instructor || 'Expert Instructor';
-        
-        metaContainer.innerHTML = `
-          <div class="meta-item">
-            <i class="fas fa-calendar"></i>
-            <span>${startDate ? new Date(startDate).toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            }) : 'Date to be announced'}</span>
-          </div>
-          <div class="meta-item">
-            <i class="fas fa-user-tie"></i>
-            <span>${instructor}</span>
-          </div>
-          <div class="meta-item">
-            <i class="fas fa-clock"></i>
-            <span>${courseData.schedule?.duration || courseData.duration || '1 hour'}</span>
-          </div>
-          <div class="meta-item">
-            <i class="fas fa-laptop"></i>
-            <span>${courseData.platform?.name || 'Online Platform'}</span>
-          </div>
-        `;
-        
-        // Update course objectives
-        const objectivesContainer = document.getElementById('course-objectives');
-        const objectives = courseData.content?.objectives || courseData.objectives || [
-          'Master facial anatomy related to aesthetic injections',
-          'Identify facial danger zones to avoid complications',
-          'Understand the five anatomical layers of the face',
-          'Learn safe injection depths and surface anatomy markers'
-        ];
-        
-        objectivesContainer.innerHTML = objectives.slice(0, 4).map(objective => 
-          `<li>${objective}</li>`
-        ).join('');
+    // Course data from the model
+    const courseData = {
+      basic: {
+        title: "free unblocked anatomy based on cadaver dissection",
+        description: "A free, aesthetic-focused anatomy course designed for beginner injectors, nurses, dentists, and medical students entering the field of medical aesthetics. Learn facial anatomy layers, identify danger zones, understand safe injection practices, and build confidence for advanced aesthetic procedures."
+      },
+      schedule: {
+        startDate: "2025-08-27T20:00:00.000Z",
+        sessionTime: {
+          startTime: "20:00",
+          endTime: "21:00"
+        },
+        duration: "1 hour",
+        primaryTimezone: "Europe/Istanbul"
+      },
+      instructors: {
+        primary: {
+          name: "Noura Lebbar"
+        }
+      },
+      platform: {
+        name: "Google Meet",
+        accessUrl: "https://meet.google.com/idw-csbu-ymk"
       }
-    }
-    
-    // Initialize course information
-    populateCourseInfo();
+    };
     
     // Form submission handling
     document.getElementById('registrationForm').addEventListener('submit', async function(e) {
@@ -974,6 +957,9 @@
         const formData = new FormData(this);
         const data = Object.fromEntries(formData.entries());
         
+        // Add course ID for the new anatomy course
+        data.courseId = '68ac2d903a95829d2b38fdc7';
+        
         // Submit to server
         const response = await fetch('/register-anatomy-course', {
           method: 'POST',
@@ -988,19 +974,17 @@
         if (result.success) {
           // Show success message
           document.getElementById('successText').innerHTML = `
-            <h4 style="margin: 0 0 10px 0; color: #065f46;">🎉 Registration Successful!</h4>
+            <h4 style="margin: 0 0 10px 0; color: #065f46;">Registration Successful!</h4>
             <p style="margin: 0 0 10px 0;">${result.message}</p>
             <p style="margin: 0; font-size: 14px;">
-              ${result.isNewUser ? 
-                'Your account has been created and you\'ve been enrolled in the Free Anatomy Unlocked Course. Check your email for confirmation details.' : 
-                'The Free Anatomy Unlocked Course has been added to your existing account. You can access it immediately from your library.'
-              }
+              You've been enrolled in the "Anatomy Unlocked" course scheduled for August 27, 2025 at 8:00 PM (Istanbul time). 
+              Check your email for the Google Meet link and course confirmation details.
             </p>
           `;
           
           document.getElementById('successActions').innerHTML = `
-            <a href="https://iaa-i.com/login">
-              <i class="fas fa-sign-in-alt"></i> Login to Your Account
+            <a href="https://meet.google.com/idw-csbu-ymk" target="_blank">
+              <i class="fas fa-video"></i> Join Google Meet
             </a>
             <a href="https://iaa-i.com/library">
               <i class="fas fa-book-open"></i> Access Course Library
@@ -1046,7 +1030,7 @@
         strengthDiv.textContent = 'Passwords do not match';
         strengthDiv.style.color = '#dc2626';
       } else if (confirmPassword && password === confirmPassword) {
-        strengthDiv.textContent = 'Passwords match ✓';
+        strengthDiv.textContent = 'Passwords match';
         strengthDiv.style.color = '#10b981';
       } else {
         strengthDiv.textContent = '';
@@ -1067,8 +1051,9 @@
       });
     });
 
-    console.log('📚 Free Anatomy Course Registration Page Loaded');
-    console.log('🎯 Course ID: 6884c082935e6577ad62ed93');
+    console.log('Anatomy Unlocked Course Registration Page Loaded');
+    console.log('Course ID: 68ac2d903a95829d2b38fdc7');
+    console.log('Course Date: August 27, 2025 at 8:00 PM Istanbul');
   </script>
 
   <%- include('partials/footer') %>

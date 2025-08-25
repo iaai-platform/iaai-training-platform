@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const Instructor = require("../models/Instructor");
 const CoursePool = require("../models/CoursePool");
 const sendEmail = require("../utils/sendEmail");
-
+const DeletedCourse = require("../models/deletedCourse");
 // ============================================
 // EMAIL CONFIGURATION HELPER (ALIGNED WITH USER CONTROLLER)
 // ============================================
@@ -401,17 +401,20 @@ exports.getUserDetails = async (req, res) => {
       .populate({
         path: "myInPersonCourses.courseId",
         select:
-          "basic.title basic.courseCode schedule.startDate schedule.endDate enrollment.price venue.city venue.country certification.enabled instructors",
+          "basic title courseCode schedule venue instructors enrollment certification media",
+        options: { strictPopulate: false },
       })
       .populate({
         path: "myLiveCourses.courseId",
         select:
-          "basic.title basic.courseCode schedule.startDate schedule.endDate enrollment.price platform.name certification.enabled instructors",
+          "basic title courseCode schedule platform instructors enrollment certification recording",
+        options: { strictPopulate: false },
       })
       .populate({
         path: "mySelfPacedCourses.courseId",
         select:
-          "basic.title basic.courseCode content.estimatedMinutes access.price access.accessDays certification.enabled videos instructor",
+          "basic title courseCode content access instructor certification videos",
+        options: { strictPopulate: false },
       })
       .lean();
 
@@ -425,6 +428,8 @@ exports.getUserDetails = async (req, res) => {
     const wishlistCourses = [];
 
     // Enhanced In-Person Courses Processing with full details
+    // Enhanced In-Person Courses Processing with full details
+    // Enhanced In-Person Courses Processing with full details
     if (
       userDetails.myInPersonCourses &&
       userDetails.myInPersonCourses.length > 0
@@ -432,17 +437,23 @@ exports.getUserDetails = async (req, res) => {
       userDetails.myInPersonCourses.forEach((course) => {
         const courseData = {
           ...course,
-          courseType: "In-Person",
+          _id: course._id, // Include enrollment ID
+          courseType: "InPersonAestheticTraining", // Use model name
           courseTitle: course.courseId
-            ? course.courseId.basic?.title
-            : course.title,
+            ? course.courseId.basic?.title || course.courseId.title
+            : course.enrollmentData?.courseName ||
+              course.title ||
+              "Unknown Course",
           courseCode: course.courseId
-            ? course.courseId.basic?.courseCode
-            : course.courseCode,
+            ? course.courseId.basic?.courseCode || course.courseId.courseCode
+            : course.enrollmentData?.courseCode || course.courseCode || "N/A",
           price:
             course.enrollmentData?.paidAmount ||
             course.courseId?.enrollment?.price ||
+            course.courseId?.basic?.price ||
             0,
+
+          // Enhanced enrollment details
           enrollmentStatus: course.enrollmentData?.status || "unknown",
           registrationDate:
             course.enrollmentData?.registrationDate ||
@@ -450,20 +461,30 @@ exports.getUserDetails = async (req, res) => {
           paidAmount: course.enrollmentData?.paidAmount || 0,
           promoCodeUsed:
             course.enrollmentData?.promoCodeUsed || course.promoCode,
+
+          // Progress details
           attendancePercentage:
             course.userProgress?.overallAttendancePercentage || 0,
           courseStatus:
             course.userProgress?.courseStatus || course.status || "not-started",
           completionDate: course.userProgress?.completionDate,
           assessmentScore:
-            course.userProgress?.assessmentScore || course.assessmentScore,
+            course.userProgress?.assessmentScore ||
+            course.assessmentScore ||
+            course.bestAssessmentScore ||
+            0,
           certificateId: course.certificateId,
+
+          // Location and schedule info
           location: course.courseId?.venue
             ? `${course.courseId.venue.city}, ${course.courseId.venue.country}`
-            : null,
+            : course.courseId?.location || null,
           startDate: course.courseId?.schedule?.startDate,
           endDate: course.courseId?.schedule?.endDate,
-          instructor: course.courseId?.instructors?.primary?.name || "TBA",
+          instructor:
+            course.courseId?.instructors?.primary?.name ||
+            course.courseId?.instructor?.name ||
+            "TBA",
         };
         allCourses.push(courseData);
 
@@ -478,17 +499,23 @@ exports.getUserDetails = async (req, res) => {
       userDetails.myLiveCourses.forEach((course) => {
         const courseData = {
           ...course,
-          courseType: "Online Live",
+          _id: course._id, // Include enrollment ID
+          courseType: "OnlineLiveTraining", // Use model name
           courseTitle: course.courseId
-            ? course.courseId.basic?.title
-            : course.title,
+            ? course.courseId.basic?.title || course.courseId.title
+            : course.enrollmentData?.courseName ||
+              course.title ||
+              "Unknown Course",
           courseCode: course.courseId
-            ? course.courseId.basic?.courseCode
-            : course.courseCode,
+            ? course.courseId.basic?.courseCode || course.courseId.courseCode
+            : course.enrollmentData?.courseCode || course.courseCode || "N/A",
           price:
             course.enrollmentData?.paidAmount ||
             course.courseId?.enrollment?.price ||
+            course.courseId?.basic?.price ||
             0,
+
+          // Enhanced enrollment details
           enrollmentStatus: course.enrollmentData?.status || "unknown",
           registrationDate:
             course.enrollmentData?.registrationDate ||
@@ -496,14 +523,21 @@ exports.getUserDetails = async (req, res) => {
           paidAmount: course.enrollmentData?.paidAmount || 0,
           promoCodeUsed:
             course.enrollmentData?.promoCodeUsed || course.promoCode,
+
+          // Progress details
           attendancePercentage:
             course.userProgress?.overallAttendancePercentage || 0,
           courseStatus:
             course.userProgress?.courseStatus || course.status || "not-started",
           completionDate: course.userProgress?.completionDate,
           assessmentScore:
-            course.userProgress?.bestAssessmentScore || course.assessmentScore,
+            course.userProgress?.bestAssessmentScore ||
+            course.assessmentScore ||
+            course.bestAssessmentScore ||
+            0,
           certificateId: course.certificateId,
+
+          // Online-specific details
           sessionsAttended: course.userProgress?.sessionsAttended?.length || 0,
           recordingsWatched:
             course.userProgress?.recordingsWatched?.length || 0,
@@ -511,7 +545,10 @@ exports.getUserDetails = async (req, res) => {
           platform: course.courseId?.platform?.name || "Online Platform",
           startDate: course.courseId?.schedule?.startDate,
           endDate: course.courseId?.schedule?.endDate,
-          instructor: course.courseId?.instructors?.primary?.name || "TBA",
+          instructor:
+            course.courseId?.instructors?.primary?.name ||
+            course.courseId?.instructor?.name ||
+            "TBA",
         };
         allCourses.push(courseData);
 
@@ -537,17 +574,23 @@ exports.getUserDetails = async (req, res) => {
 
         const courseData = {
           ...course,
-          courseType: "Self-Paced",
+          _id: course._id, // Include enrollment ID
+          courseType: "SelfPacedOnlineTraining", // Use model name
           courseTitle: course.courseId
-            ? course.courseId.basic?.title
-            : course.title,
+            ? course.courseId.basic?.title || course.courseId.title
+            : course.enrollmentData?.courseName ||
+              course.title ||
+              "Unknown Course",
           courseCode: course.courseId
-            ? course.courseId.basic?.courseCode
-            : course.courseCode,
+            ? course.courseId.basic?.courseCode || course.courseId.courseCode
+            : course.enrollmentData?.courseCode || course.courseCode || "N/A",
           price:
             course.enrollmentData?.paidAmount ||
             course.courseId?.access?.price ||
+            course.courseId?.basic?.price ||
             0,
+
+          // Enhanced enrollment details
           enrollmentStatus: course.enrollmentData?.status || "unknown",
           registrationDate:
             course.enrollmentData?.registrationDate ||
@@ -556,6 +599,8 @@ exports.getUserDetails = async (req, res) => {
           paidAmount: course.enrollmentData?.paidAmount || 0,
           promoCodeUsed:
             course.enrollmentData?.promoCodeUsed || course.promoCode,
+
+          // Progress details
           overallPercentage: overallPercentage,
           courseStatus:
             course.courseProgress?.status || course.status || "not-started",
@@ -564,6 +609,8 @@ exports.getUserDetails = async (req, res) => {
           totalWatchTime: course.courseProgress?.totalWatchTime || 0,
           averageExamScore: course.courseProgress?.averageExamScore || 0,
           certificateId: course.certificateId,
+
+          // Self-paced specific details
           completedVideos: completedVideos,
           totalVideos: totalVideos,
           completedExams: course.courseProgress?.completedExams?.length || 0,
@@ -579,7 +626,6 @@ exports.getUserDetails = async (req, res) => {
         }
       });
     }
-
     // Calculate comprehensive user statistics
     const userStats = {
       totalSpent: userDetails.paymentTransactions
@@ -3014,5 +3060,461 @@ exports.getFilteredAnalytics = async (req, res) => {
   } catch (err) {
     console.error("❌ Error fetching filtered analytics:", err);
     res.status(500).json({ error: "Error fetching analytics" });
+  }
+};
+
+// ✅ Remove Course from User
+exports.removeCourseFromUser = async (req, res) => {
+  try {
+    const { userId, enrollmentId } = req.params;
+    const { courseType, reason } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    let enrollment = null;
+    let courseArray = null;
+
+    // Find the enrollment based on course type
+    switch (courseType) {
+      case "InPersonAestheticTraining":
+        courseArray = user.myInPersonCourses;
+        enrollment = courseArray.id(enrollmentId);
+        break;
+      case "OnlineLiveTraining":
+        courseArray = user.myLiveCourses;
+        enrollment = courseArray.id(enrollmentId);
+        break;
+      case "SelfPacedOnlineTraining":
+        courseArray = user.mySelfPacedCourses;
+        enrollment = courseArray.id(enrollmentId);
+        break;
+      default:
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid course type" });
+    }
+
+    if (!enrollment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course enrollment not found" });
+    }
+
+    // Create deleted course record
+    const deletedCourse = new DeletedCourse({
+      originalEnrollmentId: enrollmentId,
+      userId: userId,
+      courseData: {
+        courseId: enrollment.courseId,
+        courseType: courseType,
+        courseName: enrollment.enrollmentData?.courseName || "Unknown Course",
+        courseCode: enrollment.enrollmentData?.courseCode || "N/A",
+        enrollmentData: enrollment.enrollmentData,
+        userProgress: enrollment.userProgress || enrollment.courseProgress,
+        assessmentData: {
+          assessmentCompleted: enrollment.assessmentCompleted,
+          assessmentScore: enrollment.assessmentScore,
+          bestAssessmentScore: enrollment.bestAssessmentScore,
+        },
+      },
+      deletedBy: {
+        adminId: req.user._id,
+        adminName: `${req.user.firstName} ${req.user.lastName}`,
+        adminEmail: req.user.email,
+      },
+      deletionReason: reason || "Removed by admin",
+    });
+
+    await deletedCourse.save();
+
+    // Remove from user's course array
+    courseArray.pull(enrollmentId);
+    await user.save();
+
+    console.log(
+      `✅ Course ${enrollment.enrollmentData?.courseCode} removed from user ${user.email}`
+    );
+
+    res.json({
+      success: true,
+      message: "Course removed successfully and moved to recycle bin",
+    });
+  } catch (error) {
+    console.error("❌ Error removing course from user:", error);
+    res.status(500).json({ success: false, message: "Error removing course" });
+  }
+};
+
+// ✅ Add Course to User
+exports.addCourseToUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { courseId, courseType } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Get course details
+    let course = null;
+    switch (courseType) {
+      case "InPersonAestheticTraining":
+        course = await InPersonAestheticTraining.findById(courseId);
+        break;
+      case "OnlineLiveTraining":
+        course = await OnlineLiveTraining.findById(courseId);
+        break;
+      case "SelfPacedOnlineTraining":
+        course = await SelfPacedOnlineTraining.findById(courseId);
+        break;
+      default:
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid course type" });
+    }
+
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" });
+    }
+
+    // Check if user already enrolled
+    const existingEnrollment = user.getCourseEnrollment(courseId, courseType);
+    if (existingEnrollment) {
+      return res.status(400).json({
+        success: false,
+        message: "User already enrolled in this course",
+      });
+    }
+
+    // Create enrollment object
+    const enrollment = {
+      courseId: courseId,
+      enrollmentData: {
+        status: "registered", // Admin added = registered status
+        registrationDate: new Date(),
+        courseName: course.basic?.title || course.title,
+        courseCode: course.basic?.courseCode || course.courseCode,
+        courseType: courseType,
+        originalPrice: course.enrollment?.price || course.access?.price || 0,
+        paidAmount: 0, // Admin added = no payment
+        currency: "EUR",
+        isLinkedCourse: false,
+        isLinkedCourseFree: false,
+      },
+    };
+
+    // Initialize progress tracking based on course type
+    if (courseType === "InPersonAestheticTraining") {
+      enrollment.userProgress = {
+        attendanceRecords: [],
+        overallAttendancePercentage: 0,
+        assessmentAttempts: [],
+        courseStatus: "not-started",
+      };
+      enrollment.assessmentCompleted = false;
+      enrollment.assessmentScore = 0;
+      enrollment.courseMaterials = {
+        downloadedMaterials: [],
+        sharedNotes: [],
+        materialSummary: { totalDownloads: 0, uniqueMaterialsAccessed: 0 },
+      };
+      user.myInPersonCourses.push(enrollment);
+    } else if (courseType === "OnlineLiveTraining") {
+      enrollment.userProgress = {
+        sessionsAttended: [],
+        overallAttendancePercentage: 0,
+        recordingsWatched: [],
+        assessmentAttempts: [],
+        courseStatus: "not-started",
+      };
+      enrollment.assessmentCompleted = false;
+      enrollment.assessmentScore = 0;
+      user.myLiveCourses.push(enrollment);
+    } else if (courseType === "SelfPacedOnlineTraining") {
+      enrollment.videoProgress = [];
+      enrollment.examProgress = [];
+      enrollment.courseProgress = {
+        completedVideos: [],
+        completedExams: [],
+        overallPercentage: 0,
+        totalWatchTime: 0,
+        averageExamScore: 0,
+        status: "not-started",
+      };
+      enrollment.videoNotes = [];
+      enrollment.bookmarks = [];
+
+      // Set expiry date for self-paced courses
+      if (course.access?.accessDays) {
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + course.access.accessDays);
+        enrollment.enrollmentData.expiryDate = expiryDate;
+      }
+
+      user.mySelfPacedCourses.push(enrollment);
+    }
+
+    await user.save();
+
+    console.log(
+      `✅ Course ${
+        course.basic?.courseCode || course.courseCode
+      } added to user ${user.email}`
+    );
+
+    res.json({
+      success: true,
+      message: `Course "${
+        course.basic?.title || course.title
+      }" added successfully`,
+      enrollment: enrollment,
+    });
+  } catch (error) {
+    console.error("❌ Error adding course to user:", error);
+    res.status(500).json({ success: false, message: "Error adding course" });
+  }
+};
+
+// ✅ Get Available Courses for Admin Selection
+// ✅ Get Available Courses for Admin Selection - FIXED
+exports.getAvailableCoursesForUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Get all courses with broader query (remove isActive filter if not needed)
+    const [inPersonCourses, liveCourses, selfPacedCourses] = await Promise.all([
+      InPersonAestheticTraining.find({}) // ✅ REMOVE: isActive filter
+        .select(
+          "basic.title basic.courseCode schedule.startDate enrollment.price title courseCode" // ✅ ADD: fallback fields
+        )
+        .lean(),
+      OnlineLiveTraining.find({}) // ✅ REMOVE: isActive filter
+        .select(
+          "basic.title basic.courseCode schedule.startDate enrollment.price title courseCode" // ✅ ADD: fallback fields
+        )
+        .lean(),
+      SelfPacedOnlineTraining.find({}) // ✅ REMOVE: isActive filter
+        .select(
+          "basic.title basic.courseCode access.price access.accessDays title courseCode"
+        ) // ✅ ADD: fallback fields
+        .lean(),
+    ]);
+
+    console.log("Found courses:", {
+      inPerson: inPersonCourses.length,
+      live: liveCourses.length,
+      selfPaced: selfPacedCourses.length,
+    }); // ✅ ADD: Debug logging
+
+    // Filter out courses user is already enrolled in
+    const userEnrollments = new Set();
+    user.myInPersonCourses?.forEach((e) =>
+      userEnrollments.add(`InPersonAestheticTraining-${e.courseId}`)
+    );
+    user.myLiveCourses?.forEach((e) =>
+      userEnrollments.add(`OnlineLiveTraining-${e.courseId}`)
+    );
+    user.mySelfPacedCourses?.forEach((e) =>
+      userEnrollments.add(`SelfPacedOnlineTraining-${e.courseId}`)
+    );
+
+    const availableCourses = [];
+
+    // Process In-Person courses with fallback fields
+    inPersonCourses.forEach((course) => {
+      if (!userEnrollments.has(`InPersonAestheticTraining-${course._id}`)) {
+        availableCourses.push({
+          _id: course._id,
+          title: course.basic?.title || course.title || "Untitled Course", // ✅ ADD: fallback
+          courseCode: course.basic?.courseCode || course.courseCode || "N/A", // ✅ ADD: fallback
+          courseType: "InPersonAestheticTraining",
+          startDate: course.schedule?.startDate,
+          price: course.enrollment?.price || 0,
+          category: "In-Person Training",
+        });
+      }
+    });
+
+    // Process Online Live courses with fallback fields
+    liveCourses.forEach((course) => {
+      if (!userEnrollments.has(`OnlineLiveTraining-${course._id}`)) {
+        availableCourses.push({
+          _id: course._id,
+          title: course.basic?.title || course.title || "Untitled Course", // ✅ ADD: fallback
+          courseCode: course.basic?.courseCode || course.courseCode || "N/A", // ✅ ADD: fallback
+          courseType: "OnlineLiveTraining",
+          startDate: course.schedule?.startDate,
+          price: course.enrollment?.price || 0,
+          category: "Online Live Training",
+        });
+      }
+    });
+
+    // Process Self-Paced courses with fallback fields
+    selfPacedCourses.forEach((course) => {
+      if (!userEnrollments.has(`SelfPacedOnlineTraining-${course._id}`)) {
+        availableCourses.push({
+          _id: course._id,
+          title: course.basic?.title || course.title || "Untitled Course", // ✅ ADD: fallback
+          courseCode: course.basic?.courseCode || course.courseCode || "N/A", // ✅ ADD: fallback
+          courseType: "SelfPacedOnlineTraining",
+          accessDays: course.access?.accessDays || 365,
+          price: course.access?.price || 0,
+          category: "Self-Paced Training",
+        });
+      }
+    });
+
+    // Sort by category and title
+    availableCourses.sort((a, b) => {
+      if (a.category !== b.category) {
+        return a.category.localeCompare(b.category);
+      }
+      return a.title.localeCompare(b.title);
+    });
+
+    console.log("Available courses after filtering:", availableCourses.length); // ✅ ADD: Debug logging
+
+    res.json({
+      success: true,
+      courses: availableCourses,
+    });
+  } catch (error) {
+    console.error("❌ Error getting available courses:", error);
+    res.status(500).json({ success: false, message: "Error fetching courses" });
+  }
+};
+
+// ✅ Get Deleted Courses (Recycle Bin for courses)
+exports.getDeletedCourses = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const deletedCourses = await DeletedCourse.find({
+      userId: userId,
+      isRecovered: false,
+    })
+      .populate("userId", "firstName lastName email")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({
+      success: true,
+      deletedCourses: deletedCourses,
+    });
+  } catch (error) {
+    console.error("❌ Error getting deleted courses:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching deleted courses" });
+  }
+};
+
+// ✅ Recover Deleted Course
+exports.recoverDeletedCourse = async (req, res) => {
+  try {
+    const { userId, deletedCourseId } = req.params;
+
+    const deletedCourse = await DeletedCourse.findById(deletedCourseId);
+    if (!deletedCourse || deletedCourse.userId.toString() !== userId) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Deleted course record not found" });
+    }
+
+    if (deletedCourse.isRecovered) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Course already recovered" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Recreate the enrollment
+    const courseData = deletedCourse.courseData;
+    const enrollment = {
+      courseId: courseData.courseId,
+      enrollmentData: courseData.enrollmentData,
+      userProgress: courseData.userProgress,
+      assessmentCompleted:
+        courseData.assessmentData?.assessmentCompleted || false,
+      assessmentScore: courseData.assessmentData?.assessmentScore || 0,
+      bestAssessmentScore: courseData.assessmentData?.bestAssessmentScore || 0,
+    };
+
+    // Add to appropriate course array
+    switch (courseData.courseType) {
+      case "InPersonAestheticTraining":
+        enrollment.courseMaterials = {
+          downloadedMaterials: [],
+          sharedNotes: [],
+          materialSummary: { totalDownloads: 0, uniqueMaterialsAccessed: 0 },
+        };
+        user.myInPersonCourses.push(enrollment);
+        break;
+      case "OnlineLiveTraining":
+        user.myLiveCourses.push(enrollment);
+        break;
+      case "SelfPacedOnlineTraining":
+        enrollment.videoProgress = [];
+        enrollment.examProgress = [];
+        enrollment.courseProgress = courseData.userProgress || {
+          completedVideos: [],
+          completedExams: [],
+          overallPercentage: 0,
+          status: "not-started",
+        };
+        enrollment.videoNotes = [];
+        enrollment.bookmarks = [];
+        user.mySelfPacedCourses.push(enrollment);
+        break;
+    }
+
+    await user.save();
+
+    // Mark as recovered
+    deletedCourse.isRecovered = true;
+    deletedCourse.recoveredBy = {
+      adminId: req.user._id,
+      adminName: `${req.user.firstName} ${req.user.lastName}`,
+      recoveredAt: new Date(),
+    };
+    await deletedCourse.save();
+
+    console.log(
+      `✅ Course ${courseData.courseCode} recovered for user ${user.email}`
+    );
+
+    res.json({
+      success: true,
+      message: "Course recovered successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error recovering deleted course:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error recovering course" });
   }
 };

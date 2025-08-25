@@ -541,3 +541,111 @@ exports.exportCourseData = async (req, res) => {
     });
   }
 };
+
+// Delete user enrollment
+exports.deleteUserEnrollment = async (req, res) => {
+  try {
+    const { courseId, courseType, userId } = req.params;
+    const { reason } = req.body;
+
+    console.log(
+      `🗑️ Deleting user ${userId} from course ${courseId} (${courseType})`
+    );
+
+    // Import models
+    const User = require("../../models/user");
+    const DeletedCourse = require("../../models/deletedCourse");
+
+    // Get user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Find enrollment based on course type
+    let enrollment = null;
+    let enrollmentArray = null;
+
+    switch (courseType) {
+      case "in-person":
+        enrollmentArray = user.myInPersonCourses;
+        enrollment = user.myInPersonCourses.find(
+          (c) => c.courseId.toString() === courseId
+        );
+        break;
+      case "online-live":
+        enrollmentArray = user.myLiveCourses;
+        enrollment = user.myLiveCourses.find(
+          (c) => c.courseId.toString() === courseId
+        );
+        break;
+      case "self-paced":
+        enrollmentArray = user.mySelfPacedCourses;
+        enrollment = user.mySelfPacedCourses.find(
+          (c) => c.courseId.toString() === courseId
+        );
+        break;
+    }
+
+    if (!enrollment) {
+      return res.status(404).json({
+        success: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    // Create deleted course record
+    await new DeletedCourse({
+      originalEnrollmentId: enrollment._id,
+      userId: userId,
+      courseData: {
+        courseId: courseId,
+        courseType:
+          courseType === "in-person"
+            ? "InPersonAestheticTraining"
+            : courseType === "online-live"
+            ? "OnlineLiveTraining"
+            : "SelfPacedOnlineTraining",
+        courseName: enrollment.enrollmentData?.courseName,
+        courseCode: enrollment.enrollmentData?.courseCode,
+        enrollmentData: enrollment.enrollmentData,
+        userProgress: enrollment.userProgress || enrollment.courseProgress,
+        assessmentData: {
+          assessmentCompleted: enrollment.assessmentCompleted,
+          assessmentScore: enrollment.assessmentScore,
+          bestAssessmentScore: enrollment.bestAssessmentScore,
+        },
+      },
+      deletedBy: {
+        adminId: req.user._id,
+        adminName: `${req.user.firstName} ${req.user.lastName}`,
+        adminEmail: req.user.email,
+      },
+      deletionReason: reason || "Removed by admin",
+    }).save();
+
+    // Remove enrollment from user
+    const enrollmentIndex = enrollmentArray.findIndex(
+      (c) => c.courseId.toString() === courseId
+    );
+    if (enrollmentIndex > -1) {
+      enrollmentArray.splice(enrollmentIndex, 1);
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "User enrollment deleted successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error deleting user enrollment:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete enrollment",
+    });
+  }
+};

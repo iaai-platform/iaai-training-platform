@@ -600,6 +600,21 @@
         .course-dropdown option[data-type="self-paced"] {
             background: #e8f5e8;
         }
+        .btn-danger {
+    background: #dc3545;
+    color: white;
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-sm {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+}
     </style>
 </head>
 
@@ -752,6 +767,7 @@
                         <th>Payment</th>
                         <th>Promo Code</th>
                         <th>Confirmed</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="usersTableBody">
@@ -933,48 +949,53 @@
             filteredUsers.forEach(user => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                ${user.name.split(' ').map(n => n[0]).join('')}
-                            </div>
-                            <div>
-                                <strong>${user.name}</strong><br>
-                                <small>${user.profession}</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        ${user.email}<br>
-                        <small>${user.phone}</small>
-                    </td>
-                    <td>${user.country}</td>
-                    <td>
-                        ${new Date(user.registrationDate).toLocaleDateString()}<br>
-                        ${user.paymentDate ? `<small>Paid: ${new Date(user.paymentDate).toLocaleDateString()}</small>` : ''}
-                    </td>
-                    <td>
-                        <span class="status-badge status-${user.courseStatus}">
-                            ${user.courseStatus}
-                        </span>
-                        ${user.completionDate ? `<br><small>Completed: ${new Date(user.completionDate).toLocaleDateString()}</small>` : ''}
-                    </td>
-                    <td>
-                        <span class="status-badge status-${user.paymentStatus.toLowerCase().replace('/', '-')}">
-                            ${user.paymentStatus}
-                        </span>
-                        ${user.amountPaid > 0 ? `<br><small>$${user.amountPaid.toFixed(2)}</small>` : ''}
-                    </td>
-                    <td>
-                        ${user.promoCodeUsed !== 'None' ? user.promoCodeUsed : '-'}
-                        ${user.discountApplied > 0 ? `<br><small>-$${user.discountApplied.toFixed(2)}</small>` : ''}
-                    </td>
-                    <td>
-                        <span class="status-badge status-${user.isConfirmed ? 'confirmed' : 'unconfirmed'}">
-                            ${user.isConfirmed ? 'Confirmed' : 'Pending'}
-                        </span>
-                    </td>
-                `;
+    <td>
+        <div class="user-info">
+            <div class="user-avatar">
+                ${user.name.split(' ').map(n => n[0]).join('')}
+            </div>
+            <div>
+                <strong>${user.name}</strong><br>
+                <small>${user.profession}</small>
+            </div>
+        </div>
+    </td>
+    <td>
+        ${user.email}<br>
+        <small>${user.phone}</small>
+    </td>
+    <td>${user.country}</td>
+    <td>
+        ${new Date(user.registrationDate).toLocaleDateString()}<br>
+        ${user.paymentDate ? `<small>Paid: ${new Date(user.paymentDate).toLocaleDateString()}</small>` : ''}
+    </td>
+    <td>
+        <span class="status-badge status-${user.courseStatus}">
+            ${user.courseStatus}
+        </span>
+        ${user.completionDate ? `<br><small>Completed: ${new Date(user.completionDate).toLocaleDateString()}</small>` : ''}
+    </td>
+    <td>
+        <span class="status-badge status-${user.paymentStatus.toLowerCase().replace('/', '-')}">
+            ${user.paymentStatus}
+        </span>
+        ${user.amountPaid > 0 ? `<br><small>$${user.amountPaid.toFixed(2)}</small>` : ''}
+    </td>
+    <td>
+        ${user.promoCodeUsed !== 'None' ? user.promoCodeUsed : '-'}
+        ${user.discountApplied > 0 ? `<br><small>-$${user.discountApplied.toFixed(2)}</small>` : ''}
+    </td>
+    <td>
+        <span class="status-badge status-${user.isConfirmed ? 'confirmed' : 'unconfirmed'}">
+            ${user.isConfirmed ? 'Confirmed' : 'Pending'}
+        </span>
+    </td>
+    <td>
+        <button class="btn btn-danger btn-sm" onclick="deleteUserEnrollment('${user._id}')">
+            <i class="fas fa-trash"></i> Delete
+        </button>
+    </td>
+`;
                 tbody.appendChild(row);
             });
         }
@@ -1083,6 +1104,56 @@
             document.getElementById('exportCsvBtn').disabled = true;
             document.getElementById('exportJsonBtn').disabled = true;
         }
+    // Delete user enrollment
+async function deleteUserEnrollment(userId) {
+    if (!currentCourseData) {
+        Swal.fire('Error', 'No course data available', 'error');
+        return;
+    }
+
+    const courseSelector = document.getElementById('courseSelector');
+    const courseId = courseSelector.value;
+    const courseType = courseSelector.options[courseSelector.selectedIndex]?.dataset.courseType;
+
+    const result = await Swal.fire({
+        title: 'Delete User Enrollment?',
+        text: 'This will remove the user from the course and move the enrollment to deleted records.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        input: 'textarea',
+        inputPlaceholder: 'Reason for deletion (optional)...'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin-course-status/api/course/${courseType}/${courseId}/user/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reason: result.value
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire('Deleted!', 'User enrollment has been deleted.', 'success');
+                // Reload course data
+                handleCourseSelection();
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting enrollment:', error);
+            Swal.fire('Error', 'Failed to delete enrollment: ' + error.message, 'error');
+        }
+    }
+}
     </script>
 
     <%- include('../partials/footer') %>

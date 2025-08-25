@@ -49,4 +49,12 @@ router.get(
   courseStatusController.exportCourseData
 );
 
+// API: Delete user enrollment
+router.delete(
+  "/api/course/:courseType/:courseId/user/:userId",
+  ensureAuthenticated,
+  isAdmin,
+  courseStatusController.deleteUserEnrollment
+);
+
 module.exports = router;

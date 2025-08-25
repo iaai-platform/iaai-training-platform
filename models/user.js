@@ -4371,29 +4371,26 @@ userSchema.methods.canViewCertificate = function (enrollment) {
 userSchema.methods.isCourseEnded = function (course, now = new Date()) {
   if (!course.schedule?.startDate) return false;
 
-  const courseTimezone = course.schedule.primaryTimezone || "UTC";
   const startDate = new Date(course.schedule.startDate);
-  const endDate = new Date(
-    course.schedule.endDate || course.schedule.startDate
-  );
+  const courseTimezone = course.schedule.primaryTimezone || "UTC";
 
-  // If we have session time, combine it with the date
   if (course.schedule.sessionTime?.endTime) {
     const [endHours, endMinutes] = course.schedule.sessionTime.endTime
       .split(":")
       .map(Number);
-    endDate.setUTCHours(endHours, endMinutes, 0, 0);
+
+    // Calculate timezone offset in minutes
+    const offsetMinutes = this.getTimezoneOffset(courseTimezone);
+    const endDateTime = new Date(startDate);
+    endDateTime.setUTCHours(endHours, endMinutes - offsetMinutes, 0, 0);
+
+    return now > endDateTime;
   }
 
-  // Convert to course timezone for accurate comparison
-  const nowUTC = now.getTime();
-  const endDateUTC = endDate.getTime();
-
-  // Get timezone offset difference
-  const nowInCourseTimezone = new Date(nowUTC);
-  const endDateInCourseTimezone = new Date(endDateUTC);
-
-  return endDateInCourseTimezone.getTime() < nowUTC;
+  const endDate = new Date(
+    course.schedule.endDate || course.schedule.startDate
+  );
+  return now > endDate;
 };
 
 /**
@@ -4408,28 +4405,25 @@ userSchema.methods.isCourseInProgress = function (course, now = new Date()) {
     course.schedule.endDate || course.schedule.startDate
   );
 
-  // If we have session times, use them
+  // Calculate timezone offset in minutes
+  const offsetMinutes = this.getTimezoneOffset(courseTimezone);
+
   if (course.schedule.sessionTime?.startTime) {
     const [startHours, startMinutes] = course.schedule.sessionTime.startTime
       .split(":")
       .map(Number);
-    startDate.setUTCHours(startHours, startMinutes, 0, 0);
+    startDate.setUTCHours(startHours, startMinutes - offsetMinutes, 0, 0);
   }
 
   if (course.schedule.sessionTime?.endTime) {
     const [endHours, endMinutes] = course.schedule.sessionTime.endTime
       .split(":")
       .map(Number);
-    endDate.setUTCHours(endHours, endMinutes, 0, 0);
+    endDate.setUTCHours(endHours, endMinutes - offsetMinutes, 0, 0);
   }
 
-  const nowUTC = now.getTime();
-  const startDateUTC = startDate.getTime();
-  const endDateUTC = endDate.getTime();
-
-  return startDateUTC <= nowUTC && nowUTC <= endDateUTC;
+  return startDate <= now && now <= endDate;
 };
-
 /**
  * FIXED: Check if course not started with proper timezone handling
  */
@@ -4437,19 +4431,38 @@ userSchema.methods.isCourseNotStarted = function (course, now = new Date()) {
   if (!course.schedule?.startDate) return true;
 
   const startDate = new Date(course.schedule.startDate);
+  const courseTimezone = course.schedule.primaryTimezone || "UTC";
 
-  // If we have session start time, use it
   if (course.schedule.sessionTime?.startTime) {
     const [startHours, startMinutes] = course.schedule.sessionTime.startTime
       .split(":")
       .map(Number);
-    startDate.setUTCHours(startHours, startMinutes, 0, 0);
+
+    const offsetMinutes = this.getTimezoneOffset(courseTimezone);
+    startDate.setUTCHours(startHours, startMinutes - offsetMinutes, 0, 0);
   }
 
-  const nowUTC = now.getTime();
-  const startDateUTC = startDate.getTime();
+  return startDate > now;
+};
 
-  return startDateUTC > nowUTC;
+userSchema.methods.getTimezoneOffset = function (timezone) {
+  const offsets = {
+    UTC: 0,
+    GMT: 0,
+    EST: -300,
+    EDT: -240,
+    CST: -360,
+    CDT: -300,
+    MST: -420,
+    MDT: -360,
+    PST: -480,
+    PDT: -420,
+    CET: 60,
+    CEST: 120,
+    GST: 240,
+    AST: 240,
+  };
+  return offsets[timezone] || 0;
 };
 /**
  * ✅ Check if can get certificate

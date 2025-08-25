@@ -762,52 +762,47 @@
               <div class="course-actions">
                 <% 
 const now = new Date();
-const courseStart = new Date(course.startDate);
+const courseTimezone = course.timezone || 'UTC';
 
-// FIXED: Use the correct path to sessionDateTime
-let courseHasStarted = false;
-console.log('Template Debug:', {
-  hasDisplayInfo: !!course.displayInfo,
-  hasSessionTimeWithDual: !!course.displayInfo?.sessionTimeWithDual,
-  sessionDateTime: course.displayInfo?.sessionTimeWithDual?.sessionDateTime
-});
-
-if (course.displayInfo?.sessionTimeWithDual?.sessionDateTime) {
-  const sessionDateTime = new Date(course.displayInfo.sessionTimeWithDual.sessionDateTime);
-  courseHasStarted = !isNaN(sessionDateTime.getTime()) && sessionDateTime <= now;
-  console.log('Using sessionDateTime logic:', {
-    sessionDateTime: sessionDateTime.toISOString(),
-    now: now.toISOString(),
-    courseHasStarted
-  });
-} else {
-  courseHasStarted = courseStart <= now;
-  console.log('Using fallback logic:', {
-    courseStart: courseStart.toISOString(),
-    courseHasStarted
-  });
-}
+// Use the timingStatus from controller (which now uses proper timezone calculation)
+const courseHasStarted = course.timingStatus ? course.timingStatus.courseStarted : (new Date(course.startDate) <= now);
+const courseEnded = course.timingStatus ? course.timingStatus.courseEnded : course.courseEnded;
 %>
 
-  <% if (courseHasStarted && !course.courseEnded && course.courseUrl) { %>
-    <!-- Course is live now -->
-    <div class="live-session-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
-      <button onclick="window.open('<%= course.courseUrl %>', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes')" class="cta-btn btn-primary">
-        <i class="fas fa-video"></i> Join Live Session
-      </button>
-      <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-secondary" style="padding: 10px 15px;">
-        <i class="fas fa-external-link-alt"></i> Open Separately
-      </a>
+<% if (courseHasStarted && !course.courseEnded && course.courseUrl) { %>
+  <!-- Course is live now -->
+  <div class="live-session-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button onclick="window.open('<%= course.courseUrl %>', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes')" class="cta-btn btn-primary">
+      <i class="fas fa-video"></i> Join Live Session
+    </button>
+    <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-secondary" style="padding: 10px 15px;">
+      <i class="fas fa-external-link-alt"></i> Open Separately
+    </a>
+  </div>
+
+<% } else if (course.courseEnded && !course.attendanceConfirmed) { %>
+  <!-- Course ended, need to confirm attendance -->
+  <button class="cta-btn btn-success btn-confirm-attendance" 
+          data-course-id="<%= course.courseId %>" 
+          data-course-type="<%= course.courseType %>">
+    <i class="fas fa-user-check"></i> Confirm Attendance
+  </button>
+
+<% } else if (course.courseEnded && course.attendanceConfirmed) { %>
+  <!-- Course ended, attendance confirmed -->
+  <div class="cta-btn" style="background: #d4edda; color: #155724; cursor: default;">
+    <i class="fas fa-check-circle"></i> Attendance Confirmed
+  </div>
+
+<% } else if (!courseHasStarted) { %>
+  <!-- Course hasn't started yet -->
+  <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
+    <i class="fas fa-clock"></i> 
+    <div class="button-time-info">
+      <div class="primary-time">Starts <%= course.displayInfo?.startsAt %></div>
     </div>
-  <% } else if (!courseHasStarted) { %>
-    <!-- Course hasn't started yet -->
-    <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
-      <i class="fas fa-clock"></i> 
-      <div class="button-time-info">
-        <div class="primary-time">Starts <%= course.displayInfo?.startsAt %></div>
-      </div>
-    </div>
-  <% } %>
+  </div>
+<% } %>
             </div>
           </div>
         <% }) %>

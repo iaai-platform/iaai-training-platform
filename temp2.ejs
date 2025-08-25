@@ -31,21 +31,6 @@ function getTimezoneAbbr(timezone) {
   }
 }
 
-function getTimezoneOffsetHours(timezone) {
-  if (!timezone) return 0;
-
-  try {
-    const now = new Date();
-    const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-    const timezoneTime = new Date(utcTime + getTimezoneOffset(timezone));
-    return Math.round((timezoneTime.getTime() - utcTime) / 3600000);
-  } catch (error) {
-    // Istanbul is UTC+3
-    if (timezone.includes("Istanbul")) return 3;
-    return 0;
-  }
-}
-
 function getTimezoneOffset(timezone) {
   const offsets = {
     "Europe/Istanbul": 3 * 3600000, // UTC+3
@@ -53,40 +38,20 @@ function getTimezoneOffset(timezone) {
   };
   return offsets[timezone] || 0;
 }
-/**
- * Combine course date with session time for accurate display
- */
-function combineDateTime(courseDate, sessionTime, timezone) {
-  if (!courseDate) return null;
 
-  try {
-    // Get the date part
-    const date = new Date(courseDate);
-
-    // If we have session time, create a proper datetime
-    if (sessionTime) {
-      const [hours, minutes] = sessionTime.split(":").map(Number);
-
-      // Create date in the course timezone
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const day = date.getDate();
-
-      // Create a date object with the session time
-      const combinedDate = new Date();
-      combinedDate.setFullYear(year, month, day);
-      combinedDate.setHours(hours, minutes || 0, 0, 0);
-
-      return combinedDate;
-    }
-
-    return date;
-  } catch (error) {
-    console.error("DateTime combination error:", error);
-    return new Date(courseDate);
-  }
+function getTimezoneOffsetMinutes(timezone) {
+  const offsets = {
+    UTC: 0,
+    GMT: 0,
+    "Europe/Istanbul": 180, // UTC+3
+    "Europe/London": 0, // UTC+0
+    "America/New_York": -300, // EST
+    "America/Chicago": -360, // CST
+    "America/Denver": -420, // MST
+    "America/Los_Angeles": -480, // PST
+  };
+  return offsets[timezone] || 0;
 }
-
 /**
  * Enhanced date formatter that handles session times
  */
@@ -942,7 +907,7 @@ exports.getLiveLibrary = async (req, res) => {
                 storedStartDate: course.schedule.startDate,
                 sessionStartTime: course.schedule.sessionTime?.startTime,
                 timezone: course.schedule.primaryTimezone,
-                courseEnded: courseEnded,
+                courseEnded: timingStatus.courseEnded,
                 canJoin: !courseEnded,
               });
 
@@ -1135,7 +1100,7 @@ exports.getLiveLibrary = async (req, res) => {
                 recordings: course.recording?.sessions || [],
 
                 // Course status flags
-                courseEnded: courseEnded,
+                courseEnded: timingStatus.courseEnded,
                 attendanceConfirmed: attendanceConfirmed,
                 attendanceDate: enrollment.userProgress?.completionDate,
                 attendancePercentage: attendancePercentage,
@@ -1208,7 +1173,7 @@ exports.getLiveLibrary = async (req, res) => {
 
                 // Certificate requirements status
                 certificateRequirements: {
-                  courseEnded: courseEnded,
+                  courseEnded: timingStatus.courseEnded,
                   attendanceConfirmed: attendanceConfirmed,
                   meetsAttendance: meetsAttendanceRequirement,
                   assessmentRequired: assessmentRequired,
@@ -1322,23 +1287,52 @@ exports.getLiveLibrary = async (req, res) => {
  */
 const getCourseTimingStatus = (course) => {
   const now = new Date();
-  const startDate = new Date(course.schedule?.startDate);
-  const endDate = new Date(
+  const courseTimezone = course.schedule?.primaryTimezone || "UTC";
+
+  let startDateTime = new Date(course.schedule?.startDate);
+  let endDateTime = new Date(
     course.schedule?.endDate || course.schedule?.startDate
   );
 
-  // Add grace period for attendance confirmation
-  const gracePeriodEnd = new Date(endDate);
-  gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7); // 7 days grace period
+  // Apply session times with timezone adjustment
+  if (course.schedule?.sessionTime?.startTime) {
+    const [startHours, startMinutes] = course.schedule.sessionTime.startTime
+      .split(":")
+      .map(Number);
+    const offsetMinutes = getTimezoneOffsetMinutes(courseTimezone);
+    startDateTime.setUTCHours(
+      startHours - Math.floor(offsetMinutes / 60),
+      startMinutes - (offsetMinutes % 60),
+      0,
+      0
+    );
+  }
+
+  if (course.schedule?.sessionTime?.endTime) {
+    const [endHours, endMinutes] = course.schedule.sessionTime.endTime
+      .split(":")
+      .map(Number);
+    const offsetMinutes = getTimezoneOffsetMinutes(courseTimezone);
+    endDateTime.setUTCHours(
+      endHours - Math.floor(offsetMinutes / 60),
+      endMinutes - (offsetMinutes % 60),
+      0,
+      0
+    );
+  }
+
+  const gracePeriodEnd = new Date(
+    endDateTime.getTime() + 7 * 24 * 60 * 60 * 1000
+  );
 
   return {
-    courseStarted: startDate <= now,
-    courseEnded: endDate < now,
-    courseInProgress: startDate <= now && now <= endDate,
-    courseNotStarted: startDate > now,
+    courseStarted: timingStatus.courseStarted <= now,
+    courseEnded: timingStatus.courseEnded, < now,
+    courseInProgress: timingStatus.courseStarted <= now && now <= timingStatus.courseEnded,
+    courseNotStarted: timingStatus.courseNotStarted > now,
     withinGracePeriod: now <= gracePeriodEnd,
-    daysUntilStart: Math.ceil((startDate - now) / (1000 * 60 * 60 * 24)),
-    daysUntilEnd: Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)),
+    daysUntilStart: Math.ceil((startDateTime - now) / (1000 * 60 * 60 * 24)),
+    daysUntilEnd: Math.ceil((endDateTime - now) / (1000 * 60 * 60 * 24)),
     gracePeriodEnd: gracePeriodEnd,
   };
 };
@@ -1420,7 +1414,7 @@ exports.getInPersonLibrary = async (req, res) => {
                 courseStartDate <= now && courseEndDate >= now;
 
               // Course hasn't started yet
-              const courseNotStarted = courseStartDate > now;
+              const courseNotStarted = timingStatus.courseStarted > now;
 
               // ✅ ADD THIS RIGHT HERE
               const timingStatus = getCourseTimingStatus(course);
@@ -1668,9 +1662,9 @@ exports.getInPersonLibrary = async (req, res) => {
                 venue: course.venue?.name,
 
                 // Course status flags
-                courseEnded: courseEnded,
-                courseInProgress: courseInProgress,
-                courseNotStarted: courseNotStarted,
+                courseEnded: timingStatus.courseEnded,
+                courseInProgress: timingStatus.courseInProgress,,
+                courseNotStarted: timingStatus.courseNotStarted,
 
                 timingStatus: timingStatus,
                 courseStarted: timingStatus.courseStarted,
@@ -1732,7 +1726,7 @@ exports.getInPersonLibrary = async (req, res) => {
 
                 // ✅ ENHANCED: Certificate requirements summary with detailed breakdown
                 certificateRequirements: {
-                  courseEnded: courseEnded,
+                  courseEnded: timingStatus.courseEnded,
                   attendanceConfirmed: attendanceConfirmed,
                   assessmentRequired: assessmentRequired,
                   assessmentCompleted: assessmentCompleted,
@@ -3127,7 +3121,7 @@ exports.getInPersonAssessment = async (req, res) => {
 
     const courseEnded = courseEndDate < now;
     const courseInProgress = courseStartDate <= now && courseEndDate >= now;
-    const courseNotStarted = courseStartDate > now;
+    const courseNotStarted = courseStarted > now;
 
     if (courseNotStarted) {
       return res.status(400).render("error", {

@@ -656,8 +656,6 @@
 </head>
 
 <body>
-  <%- include('partials/header') %>
-
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-content">
@@ -896,14 +894,18 @@
   </div>
 
   <script>
-    // Course data from the model
+    // Course data from the MongoDB document
     const courseData = {
+      _id: "68ac2d903a95829d2b38fdc7",
       basic: {
+        courseCode: "ONLINE-2025-UNBLO-001",
         title: "free unblocked anatomy based on cadaver dissection",
-        description: "A free, aesthetic-focused anatomy course designed for beginner injectors, nurses, dentists, and medical students entering the field of medical aesthetics. Learn facial anatomy layers, identify danger zones, understand safe injection practices, and build confidence for advanced aesthetic procedures."
+        description: "A free, aesthetic-focused anatomy course designed for beginner injectors, nurses, dentists, and medical students entering the field of medical aesthetics. Learn facial anatomy layers, identify danger zones, understand safe injection practices, and build confidence for advanced aesthetic procedures.",
+        category: "aesthetic",
+        status: "open"
       },
       schedule: {
-        startDate: "2025-08-27T20:00:00.000Z",
+        startDate: new Date("2025-08-27T20:00:00.000Z"),
         sessionTime: {
           startTime: "20:00",
           endTime: "21:00"
@@ -913,12 +915,18 @@
       },
       instructors: {
         primary: {
-          name: "Noura Lebbar"
+          name: "Noura Lebbar",
+          role: "Lead Instructor"
         }
       },
       platform: {
         name: "Google Meet",
         accessUrl: "https://meet.google.com/idw-csbu-ymk"
+      },
+      enrollment: {
+        price: 0,
+        currency: "EUR",
+        seatsAvailable: 100
       }
     };
     
@@ -955,8 +963,11 @@
         const formData = new FormData(this);
         const data = Object.fromEntries(formData.entries());
         
-        // Add course ID for the new anatomy course
-        data.courseId = '68ac2d903a95829d2b38fdc7';
+        // Add course ID from the MongoDB document - THIS IS THE FIXED PART
+        data.courseId = courseData._id; // Using the actual course ID from MongoDB
+        data.courseCode = courseData.basic.courseCode; // Also include course code for reference
+        
+        console.log('Registration data:', data); // For debugging
         
         // Submit to server
         const response = await fetch('/register-anatomy-course', {
@@ -975,19 +986,19 @@
             <h4 style="margin: 0 0 10px 0; color: #065f46;">Registration Successful!</h4>
             <p style="margin: 0 0 10px 0;">${result.message}</p>
             <p style="margin: 0; font-size: 14px;">
-              You've been enrolled in the "Anatomy Unlocked" course scheduled for August 27, 2025 at 8:00 PM (Istanbul time). 
+              You've been enrolled in the "Anatomy Unlocked" course (${courseData.basic.courseCode}) scheduled for August 27, 2025 at 8:00 PM (Istanbul time). 
               Check your email for the Google Meet link and course confirmation details.
             </p>
           `;
           
           document.getElementById('successActions').innerHTML = `
-  <a href="https://iaa-i.com/login">
-    <i class="fas fa-sign-in-alt"></i> Login to Your Account
-  </a>
-  <a href="https://iaa-i.com/library">
-    <i class="fas fa-book-open"></i> Access Course Library
-  </a>
-`;
+            <a href="https://iaa-i.com/login">
+              <i class="fas fa-sign-in-alt"></i> Login to Your Account
+            </a>
+            <a href="https://iaa-i.com/library">
+              <i class="fas fa-book-open"></i> Access Course Library
+            </a>
+          `;
           
           successMsg.style.display = 'block';
           successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1049,11 +1060,11 @@
       });
     });
 
+    // Debug logging
     console.log('Anatomy Unlocked Course Registration Page Loaded');
-    console.log('Course ID: 68ac2d903a95829d2b38fdc7');
+    console.log('Course ID:', courseData._id);
+    console.log('Course Code:', courseData.basic.courseCode);
     console.log('Course Date: August 27, 2025 at 8:00 PM Istanbul');
   </script>
-
-  <%- include('partials/footer') %>
 </body>
 </html>

@@ -125,68 +125,40 @@
   
   <!-- ✅ ENHANCED: Dual timezone display functions -->
   <script>
-    function formatDualTimezone(courseTime, courseTimezone, startTime, endTime) {
-      if (!courseTime || !courseTimezone) return 'TBD';
-      
-      try {
-        // Get user's timezone
-        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        
-        if (userTimezone === courseTimezone) {
-          // Same timezone, show single time
-          return `<div class="time-display">
-            <span class="primary-time">${courseTime}</span>
-          </div>`;
-        }
-        
-        // Different timezones - show both
-        // Parse the course date and create user timezone version
-        const tempDate = new Date();
-        const today = tempDate.toISOString().split('T')[0];
-        
-        if (startTime) {
-          const startDateTime = new Date(`${today}T${startTime}:00`);
-          const endDateTime = endTime ? new Date(`${today}T${endTime}:00`) : null;
-          
-          const userStartTime = startDateTime.toLocaleTimeString('en-US', {
-            timeZone: userTimezone,
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-          });
-          
-          const userEndTime = endDateTime ? endDateTime.toLocaleTimeString('en-US', {
-            timeZone: userTimezone,
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-          }) : '';
-          
-          const userTzAbbr = tempDate.toLocaleString('en-US', { 
-            timeZone: userTimezone, 
-            timeZoneName: 'short' 
-          }).split(' ').pop();
-          
-          const userTimeRange = endTime ? `${userStartTime} - ${userEndTime} ${userTzAbbr}` : `${userStartTime} ${userTzAbbr}`;
-          
-          return `<div class="dual-time-display">
-            <div class="primary-time">${courseTime}</div>
-            <div class="secondary-time">(${userTimeRange} your time)</div>
-          </div>`;
-        }
-        
-        return `<div class="time-display">
-          <span class="primary-time">${courseTime}</span>
-        </div>`;
-        
-      } catch (error) {
-        console.error('Dual timezone formatting error:', error);
-        return `<div class="time-display">
-          <span class="primary-time">${courseTime}</span>
-        </div>`;
-      }
-    }
+    function formatDualTimezone(courseTime, courseTimezone, sessionDateTime) {
+  if (!courseTime || !courseTimezone) return 'TBD';
   
+  try {
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    if (userTimezone === courseTimezone || !sessionDateTime) {
+      return `<div class="time-display"><span class="primary-time">${courseTime}</span></div>`;
+    }
+    
+    // Convert the session datetime to user timezone
+    const sessionDate = new Date(sessionDateTime);
+    const userTime = sessionDate.toLocaleTimeString('en-US', {
+      timeZone: userTimezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    
+    const userTzAbbr = sessionDate.toLocaleString('en-US', { 
+      timeZone: userTimezone, 
+      timeZoneName: 'short' 
+    }).split(' ').pop();
+    
+    return `<div class="dual-time-display">
+      <div class="primary-time">${courseTime}</div>
+      <div class="secondary-time">(${userTime} ${userTzAbbr} your time)</div>
+    </div>`;
+    
+  } catch (error) {
+    console.error('Dual timezone formatting error:', error);
+    return `<div class="time-display"><span class="primary-time">${courseTime}</span></div>`;
+  }
+}
     function formatDualDate(dateString, courseTimezone) {
       if (!dateString) return 'TBD';
       
@@ -371,10 +343,9 @@
                         document.write(formatDualTimezone(
                           '<%= course.displayInfo.sessionTimeWithDual.primary %>',
                           '<%= course.displayInfo.sessionTimeWithDual.courseTimezone %>',
-                          '<%= course.displayInfo.sessionTimeWithDual.startTime %>',
-                          '<%= course.displayInfo.sessionTimeWithDual.endTime %>'
+                          '<%= course.displayInfo.sessionTimeWithDual.sessionDateTime %>'
                         ));
-                      </script>
+                        </script>
                     <% } else { %>
                       <%= course.displayInfo?.sessionTimeRange || 'Time TBD' %>
                     <% } %>
@@ -775,100 +746,67 @@
               <% } %>
 
               <!-- ✅ ENHANCED: Action Buttons with Timezone-Aware Display -->
+              <!-- ✅ FIXED: Action Buttons with Proper Timezone Handling -->
+<!-- TEMPORARY DEBUG INFO -->
+<div style="background: yellow; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px;">
+  <strong>DEBUG INFO:</strong><br>
+  now: <%= new Date() %><br>
+  courseStart: <%= new Date(course.startDate) %><br>
+  sessionDateTime: <%= course.displayInfo?.sessionTimeWithDual?.sessionDateTime || 'undefined' %><br>
+  sessionTimeWithDual exists: <%= !!course.displayInfo?.sessionTimeWithDual %><br>
+  courseHasStarted: <%= new Date() >= new Date(course.startDate) %><br>
+  courseEnded: <%= course.courseEnded %><br>
+  courseUrl: <%= course.courseUrl || 'undefined' %>
+</div>
               <div class="course-actions">
-                <!-- ✅ ENHANCED: Course Access Button with Timezone Info -->
-               <!-- Enhanced Course Access Button with Embedded Option -->
-<% if (new Date(course.startDate) <= new Date() && !course.courseEnded && course.courseUrl) { %>
-  <div class="live-session-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <button onclick="openEmbeddedSession('<%= course.courseUrl %>', '<%= course.title %>')" class="cta-btn btn-primary">
-      <i class="fas fa-video"></i> Join in Library
-      <% if (course.sessionTime?.startTime) { %>
-        <small style="display: block; font-size: 0.8rem; opacity: 0.9;">
-          <%= course.displayInfo?.sessionTimeRange %>
-        </small>
-      <% } %>
-    </button>
-    <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-secondary" style="padding: 10px 15px;">
-      <i class="fas fa-external-link-alt"></i> Open Separately
-    </a>
-  </div>
-                <!-- ✅ ENHANCED: "Starts" button with dual timezone -->
-                <% } else if (new Date(course.startDate) > new Date()) { %>
-                  <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
-                    <i class="fas fa-clock"></i> 
-                    <div class="button-time-info">
-                      <div class="primary-time">
-                        Starts <%= course.displayInfo?.startsAt || course.displayInfo?.fullSchedule %>
-                      </div>
-                      <% if (course.sessionTime?.startTime) { %>
-                        <div class="secondary-time">
-                          <script>
-                            const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                            const courseTz = '<%= course.timezone %>';
-                            if (userTz !== courseTz) {
-                              const startTime = '<%= course.sessionTime.startTime %>';
-                              const tempDate = new Date();
-                              const today = tempDate.toISOString().split('T')[0];
-                              const startDateTime = new Date(`${today}T${startTime}:00`);
-                              const userTime = startDateTime.toLocaleTimeString('en-US', {
-                                timeZone: userTz,
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: false
-                              });
-                              const userTzAbbr = tempDate.toLocaleString('en-US', { 
-                                timeZone: userTz, 
-                                timeZoneName: 'short' 
-                              }).split(' ').pop();
-                              document.write(`${userTime} ${userTzAbbr} your time`);
-                            }
-                          </script>
-                        </div>
-                      <% } %>
-                    </div>
-                  </div>
-                <% } %>
+                <% 
+const now = new Date();
+const courseStart = new Date(course.startDate);
 
-                <!-- Attendance Confirmation Button -->
-                <% if (course.courseEnded && !course.attendanceConfirmed) { %>
-                  <button class="cta-btn btn-confirm-attendance" 
-                          data-course-id="<%= course.courseId %>" 
-                          data-course-type="<%= course.courseType %>">
-                    <i class="fas fa-check"></i> Confirm Attendance
-                  </button>
-                <% } %>
+// FIXED: Use the correct path to sessionDateTime
+let courseHasStarted = false;
+console.log('Template Debug:', {
+  hasDisplayInfo: !!course.displayInfo,
+  hasSessionTimeWithDual: !!course.displayInfo?.sessionTimeWithDual,
+  sessionDateTime: course.displayInfo?.sessionTimeWithDual?.sessionDateTime
+});
 
-                <!-- Assessment Button -->
-                <% if (course.assessmentRequired && course.attendanceConfirmed && !course.assessmentPassed) { %>
-                  <a href="/library/online-live/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
-                    <i class="fas fa-clipboard-check"></i> 
-                    <%= course.assessmentCompleted ? 'Retake Assessment' : 'Take Assessment' %>
-                  </a>
-                <!-- ✅ ADD THIS NEW CONDITION: -->
-                <% } else if (course.assessmentRequired && course.attendanceConfirmed && course.assessmentPassed && course.certificatePaymentRequired && !course.hasPaidForCertificate) { %>
-                  <!-- Show purchase button instead of certificate generation -->
-                  <div style="text-align: center; padding: 10px;">
-                    <p style="color: #28a745; margin: 5px 0;">
-                      <i class="fas fa-check-circle"></i> Assessment Passed!
-                    </p>
-                    <p style="color: #666; font-size: 0.9rem; margin: 5px 0;">
-                      Purchase certificate to complete your training
-                    </p>
-                  </div>
-                <% } %>
+if (course.displayInfo?.sessionTimeWithDual?.sessionDateTime) {
+  const sessionDateTime = new Date(course.displayInfo.sessionTimeWithDual.sessionDateTime);
+  courseHasStarted = !isNaN(sessionDateTime.getTime()) && sessionDateTime <= now;
+  console.log('Using sessionDateTime logic:', {
+    sessionDateTime: sessionDateTime.toISOString(),
+    now: now.toISOString(),
+    courseHasStarted
+  });
+} else {
+  courseHasStarted = courseStart <= now;
+  console.log('Using fallback logic:', {
+    courseStart: courseStart.toISOString(),
+    courseHasStarted
+  });
+}
+%>
 
-                <!-- Course Details Button -->
-                <a href="/online-live-training/courses/<%= course.courseId %>" class="cta-btn btn-secondary">
-                  <i class="fas fa-info-circle"></i> Course Details
-                </a>
-                
-                <!-- ✅ ENHANCED: Link to In-Person Component -->
-                <% if (course.linkedCourse && course.linkedCourse.isLinked && course.linkedCourse.linkedCourseId) { %>
-                  <a href="/in-person/courses/<%= course.linkedCourse.linkedCourseId %>" class="cta-btn btn-outline-info">
-                    <i class="fas fa-users"></i> View In-Person Component
-                  </a>
-                <% } %>
-              </div>
+  <% if (courseHasStarted && !course.courseEnded && course.courseUrl) { %>
+    <!-- Course is live now -->
+    <div class="live-session-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button onclick="openEmbeddedSession('<%= course.courseUrl %>', '<%= course.title %>')" class="cta-btn btn-primary">
+        <i class="fas fa-video"></i> Join Live Session
+      </button>
+      <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-secondary" style="padding: 10px 15px;">
+        <i class="fas fa-external-link-alt"></i> Open Separately
+      </a>
+    </div>
+  <% } else if (!courseHasStarted) { %>
+    <!-- Course hasn't started yet -->
+    <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
+      <i class="fas fa-clock"></i> 
+      <div class="button-time-info">
+        <div class="primary-time">Starts <%= course.displayInfo?.startsAt %></div>
+      </div>
+    </div>
+  <% } %>
             </div>
           </div>
         <% }) %>

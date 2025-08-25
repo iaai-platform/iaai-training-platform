@@ -30,6 +30,28 @@ function getTimezoneAbbr(timezone) {
   }
 }
 
+function getTimezoneOffsetHours(timezone) {
+  if (!timezone) return 0;
+
+  try {
+    const now = new Date();
+    const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+    const timezoneTime = new Date(utcTime + getTimezoneOffset(timezone));
+    return Math.round((timezoneTime.getTime() - utcTime) / 3600000);
+  } catch (error) {
+    // Istanbul is UTC+3
+    if (timezone.includes("Istanbul")) return 3;
+    return 0;
+  }
+}
+
+function getTimezoneOffset(timezone) {
+  const offsets = {
+    "Europe/Istanbul": 3 * 3600000, // UTC+3
+    "Europe/London": 0, // UTC+0 (GMT)
+  };
+  return offsets[timezone] || 0;
+}
 /**
  * Combine course date with session time for accurate display
  */
@@ -107,6 +129,10 @@ function formatCourseScheduleWithTime(courseDate, sessionTime, timezone) {
 /**
  * ✅ ENHANCED: Format with dual timezone display
  */
+// REPLACE THIS FUNCTION (around line 350)
+/**
+ * ✅ FIXED: Format with dual timezone display
+ */
 function formatWithDualTimezone(
   courseDate,
   sessionTime,
@@ -116,51 +142,37 @@ function formatWithDualTimezone(
   if (!courseDate) return "Schedule TBD";
 
   try {
-    const date = new Date(courseDate);
+    const baseDate = new Date(courseDate);
 
     if (sessionTime && courseTimezone) {
-      // Parse session time
       const [hours, minutes] = sessionTime.split(":").map(Number);
 
-      // Create combined datetime
-      const combinedDate = new Date(date);
-      combinedDate.setHours(hours, minutes || 0, 0, 0);
+      // Create session datetime in Istanbul timezone
+      const sessionDateTime = new Date(baseDate);
+      sessionDateTime.setHours(hours, minutes, 0, 0);
 
-      // Format in course timezone
-      const courseTime = combinedDate.toLocaleString("en-US", {
-        timeZone: courseTimezone,
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
+      // For Istanbul (UTC+3), subtract 3 hours to get UTC
+      const utcDateTime = new Date(sessionDateTime);
+      if (courseTimezone === "Europe/Istanbul") {
+        utcDateTime.setHours(utcDateTime.getHours() - 3);
+      }
 
-      const courseTzAbbr = getTimezoneAbbr(courseTimezone);
+      const courseTimeStr = `${sessionTime} ${getTimezoneAbbr(courseTimezone)}`;
 
       if (showDual) {
         return {
-          primary: `${courseTime} ${courseTzAbbr}`,
+          primary: courseTimeStr,
           courseTimezone: courseTimezone,
-          sessionTime: sessionTime,
-          utcTimestamp: combinedDate.getTime(),
-          // For JavaScript timezone conversion on frontend
-          displayData: {
-            year: combinedDate.getFullYear(),
-            month: combinedDate.getMonth(),
-            day: combinedDate.getDate(),
-            hour: hours,
-            minute: minutes,
-            courseTimezone: courseTimezone,
-          },
+          startTime: sessionTime,
+          sessionDateTime: utcDateTime.toISOString(), // Now always returns valid ISO string
+          utcTimestamp: utcDateTime.getTime(),
         };
       }
 
-      return `${courseTime} ${courseTzAbbr}`;
+      return courseTimeStr;
     }
 
-    return date.toLocaleDateString("en-US", {
+    return baseDate.toLocaleDateString("en-US", {
       timeZone: courseTimezone || "UTC",
       year: "numeric",
       month: "short",
@@ -170,6 +182,36 @@ function formatWithDualTimezone(
     console.error("Dual timezone formatting error:", error);
     return new Date(courseDate).toLocaleDateString();
   }
+}
+
+// ✅ FIXED: Proper timezone conversion
+function convertToUTC(localDateTime, timezone) {
+  const year = localDateTime.getFullYear();
+  const month = localDateTime.getMonth();
+  const day = localDateTime.getDate();
+  const hours = localDateTime.getHours();
+  const minutes = localDateTime.getMinutes();
+
+  // Create a temporary date to get timezone offset
+  const tempDate = new Date();
+
+  // Calculate offset for the target timezone
+  const utcTime1 = tempDate.getTime() + tempDate.getTimezoneOffset() * 60000;
+  const utcTime2 = new Date(utcTime1 + getTimezoneOffset(timezone));
+  const offsetHours = (utcTime2.getTime() - utcTime1) / 3600000;
+
+  // Apply offset to get UTC time
+  const utcDateTime = new Date(
+    year,
+    month,
+    day,
+    hours - offsetHours,
+    minutes,
+    0,
+    0
+  );
+
+  return utcDateTime;
 }
 
 /**
@@ -846,9 +888,62 @@ exports.getLiveLibrary = async (req, res) => {
               const isLinkedToInPerson = false;
 
               // Check if course has ended
-              const courseEnded =
-                new Date(course.schedule.endDate || course.schedule.startDate) <
-                new Date();
+              const courseEnded = (() => {
+                const now = new Date();
+                const courseStartDate = new Date(course.schedule.startDate);
+
+                // If we have session start time, combine it with the date
+                if (course.schedule.sessionTime?.startTime) {
+                  const [startHours, startMinutes] =
+                    course.schedule.sessionTime.startTime
+                      .split(":")
+                      .map(Number);
+
+                  // Create the exact course start time in UTC
+                  // The stored date is already in UTC, so we just need to set the time
+                  const courseStartWithTime = new Date(courseStartDate);
+                  courseStartWithTime.setUTCHours(
+                    startHours,
+                    startMinutes,
+                    0,
+                    0
+                  );
+
+                  // For course end, use the end time or add duration to start time
+                  let courseEndWithTime;
+                  if (course.schedule.sessionTime?.endTime) {
+                    const [endHours, endMinutes] =
+                      course.schedule.sessionTime.endTime
+                        .split(":")
+                        .map(Number);
+                    courseEndWithTime = new Date(courseStartDate);
+                    courseEndWithTime.setUTCHours(endHours, endMinutes, 0, 0);
+                  } else {
+                    // If no end time, assume 1 hour duration
+                    courseEndWithTime = new Date(
+                      courseStartWithTime.getTime() + 60 * 60 * 1000
+                    );
+                  }
+
+                  return courseEndWithTime < now;
+                }
+
+                // Fallback to original logic if no session time
+                return (
+                  new Date(
+                    course.schedule.endDate || course.schedule.startDate
+                  ) < now
+                );
+              })();
+
+              console.log(`DEBUG Course Timing for ${course.basic.title}:`, {
+                now: new Date().toISOString(),
+                storedStartDate: course.schedule.startDate,
+                sessionStartTime: course.schedule.sessionTime?.startTime,
+                timezone: course.schedule.primaryTimezone,
+                courseEnded: courseEnded,
+                canJoin: !courseEnded,
+              });
 
               // Calculate attendance percentage
               const totalSessions = course.schedule.sessions?.length || 1;

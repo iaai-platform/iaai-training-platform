@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -791,7 +792,7 @@ if (course.displayInfo?.sessionTimeWithDual?.sessionDateTime) {
   <% if (courseHasStarted && !course.courseEnded && course.courseUrl) { %>
     <!-- Course is live now -->
     <div class="live-session-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
-      <button onclick="openEmbeddedSession('<%= course.courseUrl %>', '<%= course.title %>')" class="cta-btn btn-primary">
+      <button onclick="window.open('<%= course.courseUrl %>', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes')" class="cta-btn btn-primary">
         <i class="fas fa-video"></i> Join Live Session
       </button>
       <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-secondary" style="padding: 10px 15px;">
@@ -1406,6 +1407,43 @@ document.addEventListener('keydown', function(event) {
     </div>
   </div>
 </div>
+<script>
+  function openEmbeddedSession(sessionUrl, courseTitle) {
+    // Simple fallback - open in new window if modal fails
+    try {
+      const modal = document.getElementById('liveSessionModal');
+      if (!modal) {
+        throw new Error('Modal not found');
+      }
+      
+      // Set iframe source and title
+      document.getElementById('liveSessionFrame').src = sessionUrl;
+      document.getElementById('sessionTitle').textContent = courseTitle;
+      
+      // Show modal
+      modal.style.display = 'block';
+      modal.classList.add('show');
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      
+    } catch (error) {
+      console.log('Modal failed, opening in new window:', error);
+      // Fallback to new window
+      window.open(sessionUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+    }
+  }
+  
+  function closeLiveSession() {
+    const modal = document.getElementById('liveSessionModal');
+    if (modal) {
+      document.getElementById('liveSessionFrame').src = 'about:blank';
+      modal.style.display = 'none';
+      modal.classList.remove('show');
+      document.body.style.overflow = 'auto';
+    }
+  }
+  </script>
  <%- include('partials/footer') %>
 </body>
 </html>

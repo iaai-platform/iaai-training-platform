@@ -435,8 +435,11 @@ exports.getCourseDetails = async (req, res) => {
       },
 
       // Media - properly structured
+      // Media - properly structured - FIXED
       mainImage:
-        course.media?.mainImage?.url || "/images/default-online-course.jpg",
+        course.media?.mainImage?.url ||
+        course.media?.promotional?.brochureUrl ||
+        "/images/default-online-course.jpg",
       mainImageAlt: course.media?.mainImage?.alt || course.basic?.title,
       videos: course.media?.videos || [],
       promotional: {
@@ -496,6 +499,7 @@ exports.getCourseDetails = async (req, res) => {
     };
 
     // Calculate enrollment data
+    // Calculate enrollment data
     const enrolledCount = await getEnrolledCount(course._id);
     transformedCourse.enrolledStudents = enrolledCount;
     transformedCourse.availableSeats = Math.max(
@@ -503,43 +507,89 @@ exports.getCourseDetails = async (req, res) => {
       transformedCourse.seatsAvailable - enrolledCount
     );
 
-    // Determine course status and messaging
+    // IMPROVED: Fix main image URL
+    transformedCourse.mainImage =
+      course.media?.mainImage?.url ||
+      course.media?.promotional?.brochureUrl ||
+      "/images/default-online-course.jpg";
+
+    // IMPROVED: Better course status and timeline calculation
     let courseStatusMessage = "";
     let canJoinSession = false;
     let showJoinButton = false;
+    let courseStatus = "open"; // Default status
 
-    if (currentDate < courseStartDate) {
-      const daysUntilStart = Math.ceil(
-        (courseStartDate - currentDate) / (1000 * 60 * 60 * 24)
-      );
-      const hoursUntilStart = Math.ceil(
-        (courseStartDate - currentDate) / (1000 * 60 * 60)
-      );
+    // Calculate time differences more accurately
+    const now = new Date();
+    const startTime = courseStartDate ? new Date(courseStartDate) : null;
+    const endTime = courseEndDate
+      ? new Date(courseEndDate)
+      : startTime
+      ? new Date(startTime.getTime() + 2 * 60 * 60 * 1000)
+      : null; // Default 2 hours if no end time
 
-      if (hoursUntilStart <= 24) {
-        courseStatusMessage = `Course starts in ${hoursUntilStart} hour${
-          hoursUntilStart !== 1 ? "s" : ""
-        }`;
+    if (startTime) {
+      const msUntilStart = startTime.getTime() - now.getTime();
+      const msAfterEnd = endTime ? now.getTime() - endTime.getTime() : -1;
+
+      if (msAfterEnd > 0) {
+        // Course has ended
+        courseStatus = "completed";
+        courseStatusMessage = "This course has ended.";
+        transformedCourse.status = "Completed";
+      } else if (msUntilStart > 0) {
+        // Course hasn't started yet
+        const daysUntilStart = Math.floor(msUntilStart / (1000 * 60 * 60 * 24));
+        const hoursUntilStart = Math.floor(msUntilStart / (1000 * 60 * 60));
+        const minutesUntilStart = Math.floor(msUntilStart / (1000 * 60));
+
+        if (minutesUntilStart <= 15) {
+          canJoinSession = true;
+          showJoinButton = true;
+          courseStatusMessage = "Session starting soon! You can join now.";
+          courseStatus = "starting-soon";
+        } else if (hoursUntilStart < 1) {
+          courseStatusMessage = `Course starts in ${minutesUntilStart} minutes`;
+          courseStatus = "starting-soon";
+        } else if (hoursUntilStart <= 24) {
+          courseStatusMessage = `Course starts in ${hoursUntilStart} hour${
+            hoursUntilStart !== 1 ? "s" : ""
+          }`;
+          courseStatus = "upcoming";
+        } else {
+          courseStatusMessage = `Course starts in ${daysUntilStart} day${
+            daysUntilStart !== 1 ? "s" : ""
+          }`;
+          courseStatus = "upcoming";
+        }
+
+        // Update display status
+        if (transformedCourse.availableSeats <= 0) {
+          transformedCourse.status = "Full";
+        } else {
+          transformedCourse.status = "Open to Register";
+        }
       } else {
-        courseStatusMessage = `Course starts in ${daysUntilStart} day${
-          daysUntilStart !== 1 ? "s" : ""
-        }`;
-      }
-
-      // Show join button 15 minutes before start
-      const minutesUntilStart = (courseStartDate - currentDate) / (1000 * 60);
-      if (minutesUntilStart <= 15) {
+        // Course is currently live
+        courseStatusMessage = "This course session is currently live!";
         canJoinSession = true;
         showJoinButton = true;
-        courseStatusMessage = "Session starting soon! You can join now.";
+        courseStatus = "live";
+        transformedCourse.status = "Live Now";
       }
-    } else if (courseEndDate && currentDate > courseEndDate) {
-      courseStatusMessage = "This course has ended.";
     } else {
-      courseStatusMessage = "This course session is currently live!";
-      canJoinSession = true;
-      showJoinButton = true;
+      courseStatusMessage = "Course schedule to be announced.";
+      transformedCourse.status = "Schedule TBA";
     }
+
+    // Add timeline info to course object
+    transformedCourse.timeline = {
+      status: courseStatus,
+      message: courseStatusMessage,
+      canJoin: canJoinSession,
+      startTime: startTime ? startTime.toISOString() : null,
+      endTime: endTime ? endTime.toISOString() : null,
+    };
 
     // Check if user has already registered
     let userRegistrationStatus = null;

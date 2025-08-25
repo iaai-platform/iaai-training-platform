@@ -1856,7 +1856,22 @@
         padding: 15px;
       }
     }
-  </style>
+  
+    .course-status-timeline {
+  position: relative;
+  z-index: 3;
+}
+
+.timeline-live {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+</style>
 </head>
 
 <body>
@@ -1892,7 +1907,31 @@
           
           <h1 class="hero-title"><%= course.title || 'Online Live Training Course' %></h1>
           <p class="hero-description"><%= course.description || 'Join our interactive live online training session and learn from expert instructors in real-time.' %></p>
-          
+          <!-- ADDED: Course Status Timeline -->
+<% if (course.timeline && course.timeline.message) { %>
+  <div class="course-status-timeline" style="margin-bottom: 25px; text-align: center;">
+    <div class="timeline-badge 
+      <%= course.timeline.status === 'completed' ? 'timeline-completed' : 
+          course.timeline.status === 'live' ? 'timeline-live' : 
+          course.timeline.status === 'starting-soon' ? 'timeline-starting' : 'timeline-upcoming' %>"
+         style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; 
+                border-radius: 25px; font-size: 16px; font-weight: 600; backdrop-filter: blur(10px);
+                <% if (course.timeline.status === 'completed') { %>
+                  background: rgba(108, 117, 125, 0.3); color: #fff; border: 2px solid rgba(255,255,255,0.5);
+                <% } else if (course.timeline.status === 'live') { %>
+                  background: rgba(220, 53, 69, 0.3); color: #fff; border: 2px solid #ff6b6b; animation: pulse 2s infinite;
+                <% } else if (course.timeline.status === 'starting-soon') { %>
+                  background: rgba(255, 193, 7, 0.3); color: #fff; border: 2px solid #ffc107;
+                <% } else { %>
+                  background: rgba(40, 167, 69, 0.3); color: #fff; border: 2px solid rgba(255,255,255,0.5);
+                <% } %>">
+      <i class="fas <%= course.timeline.status === 'completed' ? 'fa-check-circle' : 
+                         course.timeline.status === 'live' ? 'fa-circle' : 
+                         course.timeline.status === 'starting-soon' ? 'fa-clock' : 'fa-calendar' %>"></i>
+      <%= course.timeline.message %>
+    </div>
+  </div>
+  <% } %>
           <div class="hero-meta">
             <div class="meta-item">
               <i class="fas fa-user-tie"></i>
@@ -2075,11 +2114,19 @@
     </div>
 
     <!-- Course Status Message -->
-    <% if (typeof courseStatusMessage !== 'undefined' && courseStatusMessage) { %>
-    <div class="course-status-message">
-      <i class="fas fa-info-circle"></i> <%= courseStatusMessage %>
-    </div>
+  <!-- Enhanced Course Status Message -->
+<% if (course.timeline && course.timeline.message) { %>
+  <div class="course-status-message 
+    <%= course.timeline.status === 'completed' ? 'status-completed' : 
+        course.timeline.status === 'live' ? 'status-live' : '' %>">
+    <i class="fas <%= course.timeline.status === 'completed' ? 'fa-times-circle' : 
+                       course.timeline.status === 'live' ? 'fa-circle' : 'fa-info-circle' %>"></i> 
+    <%= course.timeline.message %>
+    <% if (course.timeline.status === 'completed') { %>
+      <br><small>Check our upcoming courses for new sessions.</small>
     <% } %>
+  </div>
+  <% } %>
 
     <!-- Course Overview -->
     <div class="content-section">

@@ -3064,10 +3064,34 @@ exports.getFilteredAnalytics = async (req, res) => {
 };
 
 // ✅ Remove Course from User
+// ✅ Remove Course from User - COMPLETE FIX
 exports.removeCourseFromUser = async (req, res) => {
   try {
-    const { userId, enrollmentId } = req.params;
-    const { courseType, reason } = req.body;
+    console.log("🗑️ DELETE REQUEST PARAMS:", req.params);
+    console.log("🗑️ DELETE REQUEST BODY:", req.body);
+
+    const { userId, enrollmentId, courseType: rawCourseType } = req.params;
+    const { reason } = req.body;
+
+    // Helper function to normalize course type
+    const normalizeCourseType = (type) => {
+      const typeMap = {
+        "in-person": "InPersonAestheticTraining",
+        "In-Person": "InPersonAestheticTraining",
+        InPersonAestheticTraining: "InPersonAestheticTraining",
+        "online-live": "OnlineLiveTraining",
+        "Online Live": "OnlineLiveTraining",
+        OnlineLiveTraining: "OnlineLiveTraining",
+        "self-paced": "SelfPacedOnlineTraining",
+        "Self-Paced": "SelfPacedOnlineTraining",
+        SelfPacedOnlineTraining: "SelfPacedOnlineTraining",
+      };
+      return typeMap[type] || type;
+    };
+
+    // Normalize course type
+    const courseType = normalizeCourseType(rawCourseType);
+    console.log("📝 Normalized course type:", courseType);
 
     const user = await User.findById(userId);
     if (!user) {
@@ -3078,31 +3102,60 @@ exports.removeCourseFromUser = async (req, res) => {
 
     let enrollment = null;
     let courseArray = null;
+    let courseArrayName = "";
 
     // Find the enrollment based on course type
     switch (courseType) {
       case "InPersonAestheticTraining":
         courseArray = user.myInPersonCourses;
-        enrollment = courseArray.id(enrollmentId);
+        courseArrayName = "myInPersonCourses";
+        enrollment = courseArray.find(
+          (e) => e._id.toString() === enrollmentId.toString()
+        );
         break;
       case "OnlineLiveTraining":
         courseArray = user.myLiveCourses;
-        enrollment = courseArray.id(enrollmentId);
+        courseArrayName = "myLiveCourses";
+        enrollment = courseArray.find(
+          (e) => e._id.toString() === enrollmentId.toString()
+        );
         break;
       case "SelfPacedOnlineTraining":
         courseArray = user.mySelfPacedCourses;
-        enrollment = courseArray.id(enrollmentId);
+        courseArrayName = "mySelfPacedCourses";
+        enrollment = courseArray.find(
+          (e) => e._id.toString() === enrollmentId.toString()
+        );
         break;
       default:
+        console.error("❌ Invalid course type:", courseType);
         return res
           .status(400)
-          .json({ success: false, message: "Invalid course type" });
+          .json({
+            success: false,
+            message: "Invalid course type: " + courseType,
+          });
     }
 
+    console.log("🔍 Found enrollment:", !!enrollment);
+    console.log(
+      "📚 Course array length:",
+      courseArray ? courseArray.length : 0
+    );
+
     if (!enrollment) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Course enrollment not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Course enrollment not found",
+        debug: {
+          userId,
+          enrollmentId,
+          courseType,
+          availableEnrollments: courseArray
+            ? courseArray.map((e) => e._id.toString())
+            : [],
+        },
+      });
     }
 
     // Create deleted course record
@@ -3112,8 +3165,15 @@ exports.removeCourseFromUser = async (req, res) => {
       courseData: {
         courseId: enrollment.courseId,
         courseType: courseType,
-        courseName: enrollment.enrollmentData?.courseName || "Unknown Course",
-        courseCode: enrollment.enrollmentData?.courseCode || "N/A",
+        courseName:
+          enrollment.enrollmentData?.courseName ||
+          enrollment.courseName ||
+          enrollment.courseTitle ||
+          "Unknown Course",
+        courseCode:
+          enrollment.enrollmentData?.courseCode ||
+          enrollment.courseCode ||
+          "N/A",
         enrollmentData: enrollment.enrollmentData,
         userProgress: enrollment.userProgress || enrollment.courseProgress,
         assessmentData: {
@@ -3131,9 +3191,10 @@ exports.removeCourseFromUser = async (req, res) => {
     });
 
     await deletedCourse.save();
+    console.log("💾 Saved to deleted course record");
 
-    // Remove from user's course array
-    courseArray.pull(enrollmentId);
+    // Remove from user's course array using pull method
+    user[courseArrayName].pull({ _id: enrollmentId });
     await user.save();
 
     console.log(
@@ -3143,10 +3204,19 @@ exports.removeCourseFromUser = async (req, res) => {
     res.json({
       success: true,
       message: "Course removed successfully and moved to recycle bin",
+      removed: {
+        courseCode: enrollment.enrollmentData?.courseCode,
+        courseName: enrollment.enrollmentData?.courseName,
+        enrollmentId: enrollmentId,
+      },
     });
   } catch (error) {
     console.error("❌ Error removing course from user:", error);
-    res.status(500).json({ success: false, message: "Error removing course" });
+    res.status(500).json({
+      success: false,
+      message: "Error removing course",
+      error: error.message,
+    });
   }
 };
 
@@ -3305,10 +3375,8 @@ exports.getAvailableCoursesForUser = async (req, res) => {
           "basic.title basic.courseCode schedule.startDate enrollment.price title courseCode" // ✅ ADD: fallback fields
         )
         .lean(),
-      OnlineLiveTraining.find({}) // ✅ REMOVE: isActive filter
-        .select(
-          "basic.title basic.courseCode schedule.startDate enrollment.price title courseCode" // ✅ ADD: fallback fields
-        )
+      OnlineLiveTraining.find({})
+        .select("basic schedule enrollment title courseCode") // Get the entire basic object
         .lean(),
       SelfPacedOnlineTraining.find({}) // ✅ REMOVE: isActive filter
         .select(

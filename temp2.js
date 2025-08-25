@@ -854,53 +854,8 @@ exports.getLiveLibrary = async (req, res) => {
               const isLinkedToInPerson = false;
 
               // Check if course has ended
-              const courseEnded = (() => {
-                const now = new Date();
-                const courseStartDate = new Date(course.schedule.startDate);
-
-                // If we have session start time, combine it with the date
-                if (course.schedule.sessionTime?.startTime) {
-                  const [startHours, startMinutes] =
-                    course.schedule.sessionTime.startTime
-                      .split(":")
-                      .map(Number);
-
-                  // Create the exact course start time in UTC
-                  // The stored date is already in UTC, so we just need to set the time
-                  const courseStartWithTime = new Date(courseStartDate);
-                  courseStartWithTime.setUTCHours(
-                    startHours,
-                    startMinutes,
-                    0,
-                    0
-                  );
-
-                  // For course end, use the end time or add duration to start time
-                  let courseEndWithTime;
-                  if (course.schedule.sessionTime?.endTime) {
-                    const [endHours, endMinutes] =
-                      course.schedule.sessionTime.endTime
-                        .split(":")
-                        .map(Number);
-                    courseEndWithTime = new Date(courseStartDate);
-                    courseEndWithTime.setUTCHours(endHours, endMinutes, 0, 0);
-                  } else {
-                    // If no end time, assume 1 hour duration
-                    courseEndWithTime = new Date(
-                      courseStartWithTime.getTime() + 60 * 60 * 1000
-                    );
-                  }
-
-                  return now > courseEndWithTime;
-                }
-
-                // Fallback to original logic if no session time
-                return (
-                  new Date(
-                    course.schedule.endDate || course.schedule.startDate
-                  ) < now
-                );
-              })();
+              const timingStatus = getCourseTimingStatus(course);
+              const courseEnded = timingStatus.courseEnded;
 
               console.log(`DEBUG Course Timing for ${course.basic.title}:`, {
                 now: new Date().toISOString(),
@@ -993,6 +948,7 @@ exports.getLiveLibrary = async (req, res) => {
                 startDate: course.schedule?.startDate,
                 endDate: course.schedule?.endDate,
                 timezone: course.schedule?.primaryTimezone || "UTC",
+                timingStatus: timingStatus,
 
                 // ✅ ENHANCED: Session time with dual timezone data
                 sessionTime: {
@@ -1281,59 +1237,61 @@ exports.getLiveLibrary = async (req, res) => {
   }
 };
 
-//new
 /**
- * ✅ ENHANCED: Helper method to calculate course timing status
+ * ✅ FIXED: Helper method to calculate course timing status with proper timezone handling
  */
 const getCourseTimingStatus = (course) => {
   const now = new Date();
   const courseTimezone = course.schedule?.primaryTimezone || "UTC";
+  
+  // Get timezone offset in minutes
+  const getTimezoneOffsetMinutes = (timezone) => {
+    const offsets = {
+      'UTC': 0,
+      'GMT': 0,
+      'Europe/Istanbul': 180,   // UTC+3
+      'Europe/London': 0,       // UTC+0
+      'America/New_York': -300, // EST
+      'America/Chicago': -360,  // CST
+      'America/Denver': -420,   // MST
+      'America/Los_Angeles': -480, // PST
+    };
+    return offsets[timezone] || 0;
+  };
 
   let startDateTime = new Date(course.schedule?.startDate);
-  let endDateTime = new Date(
-    course.schedule?.endDate || course.schedule?.startDate
-  );
-
-  // Apply session times with timezone adjustment
+  let endDateTime = new Date(course.schedule?.endDate || course.schedule?.startDate);
+  
+  // Apply session times with proper timezone conversion
   if (course.schedule?.sessionTime?.startTime) {
-    const [startHours, startMinutes] = course.schedule.sessionTime.startTime
-      .split(":")
-      .map(Number);
+    const [startHours, startMinutes] = course.schedule.sessionTime.startTime.split(':').map(Number);
     const offsetMinutes = getTimezoneOffsetMinutes(courseTimezone);
-    startDateTime.setUTCHours(
-      startHours - Math.floor(offsetMinutes / 60),
-      startMinutes - (offsetMinutes % 60),
-      0,
-      0
-    );
+    
+    // Convert course timezone to UTC
+    startDateTime.setUTCHours(startHours - Math.floor(offsetMinutes / 60), startMinutes - (offsetMinutes % 60), 0, 0);
   }
 
   if (course.schedule?.sessionTime?.endTime) {
-    const [endHours, endMinutes] = course.schedule.sessionTime.endTime
-      .split(":")
-      .map(Number);
+    const [endHours, endMinutes] = course.schedule.sessionTime.endTime.split(':').map(Number);
     const offsetMinutes = getTimezoneOffsetMinutes(courseTimezone);
-    endDateTime.setUTCHours(
-      endHours - Math.floor(offsetMinutes / 60),
-      endMinutes - (offsetMinutes % 60),
-      0,
-      0
-    );
+    
+    // Convert course timezone to UTC  
+    endDateTime.setUTCHours(endHours - Math.floor(offsetMinutes / 60), endMinutes - (offsetMinutes % 60), 0, 0);
   }
 
-  const gracePeriodEnd = new Date(
-    endDateTime.getTime() + 7 * 24 * 60 * 60 * 1000
-  );
+  const gracePeriodEnd = new Date(endDateTime.getTime() + (7 * 24 * 60 * 60 * 1000)); // 7 days grace
 
   return {
-    courseStarted: timingStatus.courseStarted <= now,
-    courseEnded: timingStatus.courseEnded, < now,
-    courseInProgress: timingStatus.courseStarted <= now && now <= timingStatus.courseEnded,
-    courseNotStarted: timingStatus.courseNotStarted > now,
+    courseStarted: now >= startDateTime,
+    courseEnded: now > endDateTime,
+    courseInProgress: now >= startDateTime && now <= endDateTime,
+    courseNotStarted: now < startDateTime,
     withinGracePeriod: now <= gracePeriodEnd,
     daysUntilStart: Math.ceil((startDateTime - now) / (1000 * 60 * 60 * 24)),
     daysUntilEnd: Math.ceil((endDateTime - now) / (1000 * 60 * 60 * 24)),
     gracePeriodEnd: gracePeriodEnd,
+    startDateTime: startDateTime, // For debugging
+    endDateTime: endDateTime      // For debugging
   };
 };
 /**

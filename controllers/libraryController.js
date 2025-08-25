@@ -31,21 +31,6 @@ function getTimezoneAbbr(timezone) {
   }
 }
 
-function getTimezoneOffsetHours(timezone) {
-  if (!timezone) return 0;
-
-  try {
-    const now = new Date();
-    const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-    const timezoneTime = new Date(utcTime + getTimezoneOffset(timezone));
-    return Math.round((timezoneTime.getTime() - utcTime) / 3600000);
-  } catch (error) {
-    // Istanbul is UTC+3
-    if (timezone.includes("Istanbul")) return 3;
-    return 0;
-  }
-}
-
 function getTimezoneOffset(timezone) {
   const offsets = {
     "Europe/Istanbul": 3 * 3600000, // UTC+3
@@ -53,40 +38,20 @@ function getTimezoneOffset(timezone) {
   };
   return offsets[timezone] || 0;
 }
-/**
- * Combine course date with session time for accurate display
- */
-function combineDateTime(courseDate, sessionTime, timezone) {
-  if (!courseDate) return null;
 
-  try {
-    // Get the date part
-    const date = new Date(courseDate);
-
-    // If we have session time, create a proper datetime
-    if (sessionTime) {
-      const [hours, minutes] = sessionTime.split(":").map(Number);
-
-      // Create date in the course timezone
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const day = date.getDate();
-
-      // Create a date object with the session time
-      const combinedDate = new Date();
-      combinedDate.setFullYear(year, month, day);
-      combinedDate.setHours(hours, minutes || 0, 0, 0);
-
-      return combinedDate;
-    }
-
-    return date;
-  } catch (error) {
-    console.error("DateTime combination error:", error);
-    return new Date(courseDate);
-  }
+function getTimezoneOffsetMinutes(timezone) {
+  const offsets = {
+    UTC: 0,
+    GMT: 0,
+    "Europe/Istanbul": 180, // UTC+3
+    "Europe/London": 0, // UTC+0
+    "America/New_York": -300, // EST
+    "America/Chicago": -360, // CST
+    "America/Denver": -420, // MST
+    "America/Los_Angeles": -480, // PST
+  };
+  return offsets[timezone] || 0;
 }
-
 /**
  * Enhanced date formatter that handles session times
  */
@@ -126,7 +91,30 @@ function formatCourseScheduleWithTime(courseDate, sessionTime, timezone) {
     return new Date(courseDate).toLocaleDateString();
   }
 }
+/**
+ * Helper: Combine date and time to create proper datetime
+ */
+function combineDateTime(dateString, timeString, timezone) {
+  if (!dateString || !timeString) return new Date(dateString);
 
+  try {
+    const date = new Date(dateString);
+    const [hours, minutes] = timeString.split(":").map(Number);
+
+    // Set the time in local timezone
+    date.setHours(hours, minutes, 0, 0);
+
+    // Convert to UTC if timezone is specified
+    if (timezone === "Europe/Istanbul") {
+      date.setTime(date.getTime() - 3 * 60 * 60 * 1000); // Subtract 3 hours
+    }
+
+    return date;
+  } catch (error) {
+    console.error("combineDateTime error:", error);
+    return new Date(dateString);
+  }
+}
 /**
  * ✅ ENHANCED: Format with dual timezone display
  */
@@ -140,48 +128,40 @@ function formatWithDualTimezone(
   courseTimezone,
   showDual = true
 ) {
-  if (!courseDate) return "Schedule TBD";
+  if (!courseDate || !sessionTime || !courseTimezone) return "Schedule TBD";
 
   try {
     const baseDate = new Date(courseDate);
+    const [hours, minutes] = sessionTime.split(":").map(Number);
 
-    if (sessionTime && courseTimezone) {
-      const [hours, minutes] = sessionTime.split(":").map(Number);
+    // Create the session datetime in the course timezone
+    const sessionDateTime = new Date(baseDate);
+    sessionDateTime.setHours(hours, minutes, 0, 0);
 
-      // Create session datetime in Istanbul timezone
-      const sessionDateTime = new Date(baseDate);
-      sessionDateTime.setHours(hours, minutes, 0, 0);
+    // Convert to UTC for proper storage/transmission
+    const utcDateTime = new Date(sessionDateTime);
 
-      // For Istanbul (UTC+3), subtract 3 hours to get UTC
-      const utcDateTime = new Date(sessionDateTime);
-      if (courseTimezone === "Europe/Istanbul") {
-        utcDateTime.setHours(utcDateTime.getHours() - 3);
-      }
-
-      const courseTimeStr = `${sessionTime} ${getTimezoneAbbr(courseTimezone)}`;
-
-      if (showDual) {
-        return {
-          primary: courseTimeStr,
-          courseTimezone: courseTimezone,
-          startTime: sessionTime,
-          sessionDateTime: utcDateTime.toISOString(),
-          utcTimestamp: utcDateTime.getTime(),
-        };
-      }
-
-      return courseTimeStr;
+    // For Istanbul (UTC+3), subtract 3 hours to get UTC
+    if (courseTimezone === "Europe/Istanbul") {
+      utcDateTime.setHours(utcDateTime.getHours() - 3);
     }
 
-    return baseDate.toLocaleDateString("en-US", {
-      timeZone: courseTimezone || "UTC",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    const courseTimeStr = `${sessionTime} ${getTimezoneAbbr(courseTimezone)}`;
+
+    if (showDual) {
+      return {
+        primary: courseTimeStr,
+        courseTimezone: courseTimezone,
+        startTime: sessionTime,
+        sessionDateTime: utcDateTime.toISOString(), // ← This was missing/incorrect
+        utcTimestamp: utcDateTime.getTime(),
+      };
+    }
+
+    return courseTimeStr;
   } catch (error) {
     console.error("Dual timezone formatting error:", error);
-    return new Date(courseDate).toLocaleDateString();
+    return "Schedule TBD";
   }
 }
 
@@ -889,60 +869,15 @@ exports.getLiveLibrary = async (req, res) => {
               const isLinkedToInPerson = false;
 
               // Check if course has ended
-              const courseEnded = (() => {
-                const now = new Date();
-                const courseStartDate = new Date(course.schedule.startDate);
-
-                // If we have session start time, combine it with the date
-                if (course.schedule.sessionTime?.startTime) {
-                  const [startHours, startMinutes] =
-                    course.schedule.sessionTime.startTime
-                      .split(":")
-                      .map(Number);
-
-                  // Create the exact course start time in UTC
-                  // The stored date is already in UTC, so we just need to set the time
-                  const courseStartWithTime = new Date(courseStartDate);
-                  courseStartWithTime.setUTCHours(
-                    startHours,
-                    startMinutes,
-                    0,
-                    0
-                  );
-
-                  // For course end, use the end time or add duration to start time
-                  let courseEndWithTime;
-                  if (course.schedule.sessionTime?.endTime) {
-                    const [endHours, endMinutes] =
-                      course.schedule.sessionTime.endTime
-                        .split(":")
-                        .map(Number);
-                    courseEndWithTime = new Date(courseStartDate);
-                    courseEndWithTime.setUTCHours(endHours, endMinutes, 0, 0);
-                  } else {
-                    // If no end time, assume 1 hour duration
-                    courseEndWithTime = new Date(
-                      courseStartWithTime.getTime() + 60 * 60 * 1000
-                    );
-                  }
-
-                  return now > courseEndWithTime;
-                }
-
-                // Fallback to original logic if no session time
-                return (
-                  new Date(
-                    course.schedule.endDate || course.schedule.startDate
-                  ) < now
-                );
-              })();
+              const timingStatus = getCourseTimingStatus(course);
+              const courseEnded = timingStatus.courseEnded;
 
               console.log(`DEBUG Course Timing for ${course.basic.title}:`, {
                 now: new Date().toISOString(),
                 storedStartDate: course.schedule.startDate,
                 sessionStartTime: course.schedule.sessionTime?.startTime,
                 timezone: course.schedule.primaryTimezone,
-                courseEnded: courseEnded,
+                courseEnded: timingStatus.courseEnded,
                 canJoin: !courseEnded,
               });
 
@@ -1028,6 +963,7 @@ exports.getLiveLibrary = async (req, res) => {
                 startDate: course.schedule?.startDate,
                 endDate: course.schedule?.endDate,
                 timezone: course.schedule?.primaryTimezone || "UTC",
+                timingStatus: timingStatus,
 
                 // ✅ ENHANCED: Session time with dual timezone data
                 sessionTime: {
@@ -1049,7 +985,7 @@ exports.getLiveLibrary = async (req, res) => {
                     course.schedule?.primaryTimezone
                   ),
 
-                  // ✅ ENHANCED: Dual timezone objects for frontend
+                  // Enhanced: Dual timezone objects for frontend
                   fullScheduleWithDual: formatWithDualTimezone(
                     course.schedule?.startDate,
                     course.schedule?.sessionTime?.startTime,
@@ -1071,17 +1007,9 @@ exports.getLiveLibrary = async (req, res) => {
                           courseTimezone: course.schedule?.primaryTimezone,
                           startTime: course.schedule.sessionTime.startTime,
                           endTime: course.schedule.sessionTime.endTime,
-                          // For frontend conversion
-                          startUtc: combineDateTimeToUTC(
-                            course.schedule?.startDate,
-                            course.schedule.sessionTime.startTime,
-                            course.schedule?.primaryTimezone
-                          ),
-                          endUtc: combineDateTimeToUTC(
-                            course.schedule?.startDate,
-                            course.schedule.sessionTime.endTime,
-                            course.schedule?.primaryTimezone
-                          ),
+                          // Use the correctly calculated timing from timingStatus
+                          sessionDateTime:
+                            timingStatus.startDateTime.toISOString(),
                         }
                       : { primary: "Time TBD" },
 
@@ -1135,7 +1063,7 @@ exports.getLiveLibrary = async (req, res) => {
                 recordings: course.recording?.sessions || [],
 
                 // Course status flags
-                courseEnded: courseEnded,
+                courseEnded: timingStatus.courseEnded,
                 attendanceConfirmed: attendanceConfirmed,
                 attendanceDate: enrollment.userProgress?.completionDate,
                 attendancePercentage: attendancePercentage,
@@ -1208,7 +1136,7 @@ exports.getLiveLibrary = async (req, res) => {
 
                 // Certificate requirements status
                 certificateRequirements: {
-                  courseEnded: courseEnded,
+                  courseEnded: timingStatus.courseEnded,
                   attendanceConfirmed: attendanceConfirmed,
                   meetsAttendance: meetsAttendanceRequirement,
                   assessmentRequired: assessmentRequired,
@@ -1316,30 +1244,86 @@ exports.getLiveLibrary = async (req, res) => {
   }
 };
 
-//new
 /**
- * ✅ ENHANCED: Helper method to calculate course timing status
+ * ✅ FIXED: Helper method to calculate course timing status with proper timezone handling
  */
 const getCourseTimingStatus = (course) => {
+  console.log("🔧 getCourseTimingStatus called with:", {
+    courseTitle: course.basic?.title,
+    startDate: course.schedule?.startDate,
+    sessionTime: course.schedule?.sessionTime?.startTime,
+    timezone: course.schedule?.primaryTimezone,
+  });
+
   const now = new Date();
-  const startDate = new Date(course.schedule?.startDate);
-  const endDate = new Date(
+  const courseTimezone = course.schedule?.primaryTimezone || "UTC";
+
+  // Start with the stored date (which is already in UTC or local storage format)
+  let startDateTime = new Date(course.schedule?.startDate);
+  let endDateTime = new Date(
     course.schedule?.endDate || course.schedule?.startDate
   );
 
-  // Add grace period for attendance confirmation
-  const gracePeriodEnd = new Date(endDate);
-  gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7); // 7 days grace period
+  // If we have session times, we need to reconstruct the proper datetime
+  if (course.schedule?.sessionTime?.startTime) {
+    const [startHours, startMinutes] = course.schedule.sessionTime.startTime
+      .split(":")
+      .map(Number);
+
+    // Create a new date using the date part from course.schedule.startDate
+    // but set the time according to the session time in the course timezone
+    const dateOnly = new Date(course.schedule.startDate);
+    dateOnly.setUTCHours(0, 0, 0, 0); // Reset to start of day in UTC
+
+    // Add the session time
+    startDateTime = new Date(dateOnly);
+    startDateTime.setUTCHours(startHours, startMinutes, 0, 0);
+
+    // Convert from course timezone to UTC
+    if (courseTimezone === "Europe/Istanbul") {
+      startDateTime.setTime(startDateTime.getTime() - 3 * 60 * 60 * 1000); // Subtract 3 hours
+    }
+  }
+
+  if (course.schedule?.sessionTime?.endTime) {
+    const [endHours, endMinutes] = course.schedule.sessionTime.endTime
+      .split(":")
+      .map(Number);
+
+    const dateOnly = new Date(course.schedule.startDate);
+    dateOnly.setUTCHours(0, 0, 0, 0);
+
+    endDateTime = new Date(dateOnly);
+    endDateTime.setUTCHours(endHours, endMinutes, 0, 0);
+
+    if (courseTimezone === "Europe/Istanbul") {
+      endDateTime.setTime(endDateTime.getTime() - 3 * 60 * 60 * 1000);
+    }
+  }
+
+  const gracePeriodEnd = new Date(
+    endDateTime.getTime() + 7 * 24 * 60 * 60 * 1000
+  );
+
+  console.log("🔧 Calculated times:", {
+    startDateTime: startDateTime.toISOString(),
+    endDateTime: endDateTime.toISOString(),
+    now: now.toISOString(),
+    courseStarted: now >= startDateTime,
+    courseEnded: now > endDateTime,
+  });
 
   return {
-    courseStarted: startDate <= now,
-    courseEnded: endDate < now,
-    courseInProgress: startDate <= now && now <= endDate,
-    courseNotStarted: startDate > now,
+    courseStarted: now >= startDateTime,
+    courseEnded: now > endDateTime,
+    courseInProgress: now >= startDateTime && now <= endDateTime,
+    courseNotStarted: now < startDateTime,
     withinGracePeriod: now <= gracePeriodEnd,
-    daysUntilStart: Math.ceil((startDate - now) / (1000 * 60 * 60 * 24)),
-    daysUntilEnd: Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)),
+    daysUntilStart: Math.ceil((startDateTime - now) / (1000 * 60 * 60 * 24)),
+    daysUntilEnd: Math.ceil((endDateTime - now) / (1000 * 60 * 60 * 24)),
     gracePeriodEnd: gracePeriodEnd,
+    startDateTime: startDateTime,
+    endDateTime: endDateTime,
   };
 };
 /**
@@ -1420,7 +1404,7 @@ exports.getInPersonLibrary = async (req, res) => {
                 courseStartDate <= now && courseEndDate >= now;
 
               // Course hasn't started yet
-              const courseNotStarted = courseStartDate > now;
+              const courseNotStarted = timingStatus.courseStarted > now;
 
               // ✅ ADD THIS RIGHT HERE
               const timingStatus = getCourseTimingStatus(course);
@@ -1668,9 +1652,9 @@ exports.getInPersonLibrary = async (req, res) => {
                 venue: course.venue?.name,
 
                 // Course status flags
-                courseEnded: courseEnded,
-                courseInProgress: courseInProgress,
-                courseNotStarted: courseNotStarted,
+                courseEnded: timingStatus.courseEnded,
+                courseInProgress: timingStatus.courseInProgress,
+                courseNotStarted: timingStatus.courseNotStarted,
 
                 timingStatus: timingStatus,
                 courseStarted: timingStatus.courseStarted,
@@ -1732,7 +1716,7 @@ exports.getInPersonLibrary = async (req, res) => {
 
                 // ✅ ENHANCED: Certificate requirements summary with detailed breakdown
                 certificateRequirements: {
-                  courseEnded: courseEnded,
+                  courseEnded: timingStatus.courseEnded,
                   attendanceConfirmed: attendanceConfirmed,
                   assessmentRequired: assessmentRequired,
                   assessmentCompleted: assessmentCompleted,
@@ -3127,7 +3111,7 @@ exports.getInPersonAssessment = async (req, res) => {
 
     const courseEnded = courseEndDate < now;
     const courseInProgress = courseStartDate <= now && courseEndDate >= now;
-    const courseNotStarted = courseStartDate > now;
+    const courseNotStarted = courseStarted > now;
 
     if (courseNotStarted) {
       return res.status(400).render("error", {

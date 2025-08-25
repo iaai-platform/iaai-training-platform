@@ -748,62 +748,135 @@
 
               <!-- ✅ ENHANCED: Action Buttons with Timezone-Aware Display -->
               <!-- ✅ FIXED: Action Buttons with Proper Timezone Handling -->
-<!-- TEMPORARY DEBUG INFO -->
-<div style="background: yellow; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px;">
-  <strong>DEBUG INFO:</strong><br>
-  now: <%= new Date() %><br>
-  courseStart: <%= new Date(course.startDate) %><br>
-  sessionDateTime: <%= course.displayInfo?.sessionTimeWithDual?.sessionDateTime || 'undefined' %><br>
-  sessionTimeWithDual exists: <%= !!course.displayInfo?.sessionTimeWithDual %><br>
-  courseHasStarted: <%= new Date() >= new Date(course.startDate) %><br>
-  courseEnded: <%= course.courseEnded %><br>
-  courseUrl: <%= course.courseUrl || 'undefined' %>
-</div>
-              <div class="course-actions">
-                <% 
-const now = new Date();
-const courseTimezone = course.timezone || 'UTC';
 
-// Use the timingStatus from controller (which now uses proper timezone calculation)
-const courseHasStarted = course.timingStatus ? course.timingStatus.courseStarted : (new Date(course.startDate) <= now);
-const courseEnded = course.timingStatus ? course.timingStatus.courseEnded : course.courseEnded;
-%>
+<div class="course-actions">
+  <% 
+  const now = new Date();
+  const timingStatus = course.timingStatus || {}; // Use timing status from controller
+  %>
 
-<% if (courseHasStarted && !course.courseEnded && course.courseUrl) { %>
-  <!-- Course is live now -->
-  <div class="live-session-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <button onclick="window.open('<%= course.courseUrl %>', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes')" class="cta-btn btn-primary">
-      <i class="fas fa-video"></i> Join Live Session
-    </button>
-    <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-secondary" style="padding: 10px 15px;">
-      <i class="fas fa-external-link-alt"></i> Open Separately
-    </a>
-  </div>
-
-<% } else if (course.courseEnded && !course.attendanceConfirmed) { %>
-  <!-- Course ended, need to confirm attendance -->
-  <button class="cta-btn btn-success btn-confirm-attendance" 
-          data-course-id="<%= course.courseId %>" 
-          data-course-type="<%= course.courseType %>">
-    <i class="fas fa-user-check"></i> Confirm Attendance
-  </button>
-
-<% } else if (course.courseEnded && course.attendanceConfirmed) { %>
-  <!-- Course ended, attendance confirmed -->
-  <div class="cta-btn" style="background: #d4edda; color: #155724; cursor: default;">
-    <i class="fas fa-check-circle"></i> Attendance Confirmed
-  </div>
-
-<% } else if (!courseHasStarted) { %>
-  <!-- Course hasn't started yet -->
-  <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
-    <i class="fas fa-clock"></i> 
-    <div class="button-time-info">
-      <div class="primary-time">Starts <%= course.displayInfo?.startsAt %></div>
+  <% if (timingStatus.courseInProgress && !course.courseEnded && course.courseUrl) { %>
+    <!-- Course is live now -->
+    <div class="live-session-options" style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button onclick="window.open('<%= course.courseUrl %>', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes')" class="cta-btn btn-primary">
+        <i class="fas fa-video"></i> Join Live Session
+      </button>
+      <a href="<%= course.courseUrl %>" target="_blank" class="cta-btn btn-secondary">
+        <i class="fas fa-external-link-alt"></i> Open Separately
+      </a>
     </div>
-  </div>
-<% } %>
-            </div>
+
+  <% } else if (timingStatus.courseEnded && !course.attendanceConfirmed && timingStatus.withinGracePeriod) { %>
+    <!-- Course ended, within grace period for attendance confirmation -->
+    <button class="cta-btn btn-success btn-confirm-attendance" 
+            data-course-id="<%= course.courseId %>" 
+            data-course-type="<%= course.courseType %>">
+      <i class="fas fa-user-check"></i> Confirm Attendance
+    </button>
+    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+      Grace period ends: <%= timingStatus.gracePeriodEnd.toLocaleDateString() %>
+    </div>
+
+  <% } else if (course.attendanceConfirmed && course.assessmentRequired && !course.assessmentCompleted) { %>
+    <!-- Assessment Required - Take Assessment -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <a href="/library/online-live/assessment/<%= course.courseId %>" class="cta-btn btn-warning">
+        <i class="fas fa-clipboard-check"></i> Take Assessment
+      </a>
+      <div style="font-size: 0.8rem; color: #666; text-align: center;">
+        Required score: <%= course.passingScore || 70 %>% | Attempts: <%= course.currentAttempts || 0 %>/<%= course.maxAttempts || 2 %>
+      </div>
+    </div>
+
+  <% } else if (course.attendanceConfirmed && course.assessmentRequired && course.assessmentCompleted && !course.assessmentPassed && course.currentAttempts < course.maxAttempts) { %>
+    <!-- Assessment Failed - Retake Available -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <a href="/library/online-live/assessment/<%= course.courseId %>" class="cta-btn btn-danger">
+        <i class="fas fa-redo"></i> Retake Assessment
+      </a>
+      <div style="font-size: 0.8rem; color: #666; text-align: center;">
+        Score: <%= course.assessmentScore %>% (Need: <%= course.passingScore || 70 %>%) | Attempts: <%= course.currentAttempts || 0 %>/<%= course.maxAttempts || 2 %>
+      </div>
+    </div>
+
+  <% } else if (course.attendanceConfirmed && course.assessmentRequired && course.assessmentCompleted && !course.assessmentPassed && course.currentAttempts >= course.maxAttempts) { %>
+    <!-- Assessment Failed - No More Attempts -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="cta-btn" style="background: #f8d7da; color: #721c24; cursor: not-allowed;">
+        <i class="fas fa-times-circle"></i> Assessment Attempts Exhausted
+      </div>
+      <div style="font-size: 0.8rem; color: #666; text-align: center;">
+        Final Score: <%= course.assessmentScore %>% | Contact support for assistance
+      </div>
+    </div>
+
+  <% } else if (course.attendanceConfirmed && course.assessmentRequired && course.assessmentPassed && course.canGetCertificate && !course.hasCertificate) { %>
+    <!-- Assessment Passed - Generate Certificate -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <button class="cta-btn btn-generate-certificate btn-success" 
+              data-course-id="<%= course.courseId %>" 
+              data-course-type="<%= course.courseType %>"
+              data-course-title="<%= course.title %>">
+        <i class="fas fa-certificate"></i> Generate Certificate
+      </button>
+      <div style="font-size: 0.8rem; color: #28a745; text-align: center;">
+        Assessment passed: <%= course.assessmentScore %>% | Ready for certification
+      </div>
+    </div>
+
+  <% } else if (course.attendanceConfirmed && course.hasCertificate) { %>
+    <!-- Certificate Available -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
+        <i class="fas fa-eye"></i> View Certificate
+      </a>
+      <div style="font-size: 0.8rem; color: #28a745; text-align: center;">
+        Certificate ready | Congratulations!
+      </div>
+    </div>
+
+  <% } else if (course.attendanceConfirmed && !course.assessmentRequired && course.canGetCertificate && !course.hasCertificate) { %>
+    <!-- No Assessment Required - Direct Certificate Generation -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <button class="cta-btn btn-generate-certificate btn-success" 
+              data-course-id="<%= course.courseId %>" 
+              data-course-type="<%= course.courseType %>"
+              data-course-title="<%= course.title %>">
+        <i class="fas fa-certificate"></i> Generate Certificate
+      </button>
+      <div style="font-size: 0.8rem; color: #28a745; text-align: center;">
+        All requirements completed | Ready for certification
+      </div>
+    </div>
+
+  <% } else if (course.attendanceConfirmed) { %>
+    <!-- Attendance Confirmed - Default State -->
+    <div class="cta-btn" style="background: #d4edda; color: #155724; cursor: default;">
+      <i class="fas fa-check-circle"></i> Attendance Confirmed
+    </div>
+
+  <% } else if (timingStatus.courseNotStarted) { %>
+    <!-- Course hasn't started yet -->
+    <div class="cta-btn" style="background: #f8f9fa; color: #666; cursor: not-allowed;">
+      <i class="fas fa-clock"></i> 
+      <div class="button-time-info">
+        <div class="primary-time">Starts <%= course.displayInfo?.startsAt %></div>
+        <div style="font-size: 0.8rem; opacity: 0.7;">
+          (<%= timingStatus.daysUntilStart %> days remaining)
+        </div>
+      </div>
+    </div>
+
+  <% } else if (timingStatus.courseEnded && !timingStatus.withinGracePeriod) { %>
+    <!-- Course ended, grace period expired -->
+    <div class="cta-btn" style="background: #f8d7da; color: #721c24; cursor: default;">
+      <i class="fas fa-exclamation-triangle"></i> Grace Period Expired
+    </div>
+    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+      Contact support for attendance confirmation
+    </div>
+  <% } %>
+</div>
           </div>
         <% }) %>
       </div>
@@ -826,256 +899,239 @@ const courseEnded = course.timingStatus ? course.timingStatus.courseEnded : cour
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       
-      // ========================================
-      // ✅ ENHANCED: CERTIFICATE GENERATION WITH LINKED COURSE AWARENESS
-      // ========================================
-      
-      document.querySelectorAll('.btn-generate-certificate').forEach(button => {
-        button.addEventListener('click', async function() {
-          const courseId = this.dataset.courseId;
-          const courseType = this.dataset.courseType;
-          const courseTitle = this.dataset.courseTitle;
+      // Wait for page to fully load, then attach all event listeners
+      setTimeout(() => {
+        console.log('Initializing all event listeners...');
+        
+        // ========================================
+        // ATTENDANCE CONFIRMATION
+        // ========================================
+        const attendanceButtons = document.querySelectorAll('.btn-confirm-attendance');
+        console.log('Found attendance buttons:', attendanceButtons.length);
+        
+        attendanceButtons.forEach(button => {
+          console.log('Attaching listener to button with courseId:', button.dataset.courseId);
           
-          // Check if this is a linked course
-          const courseCard = this.closest('.course-card');
-          const linkedCourseInfo = courseCard.querySelector('.linked-course-info');
-          const isLinkedCourse = !!linkedCourseInfo;
-          
-          // Enhanced confirmation dialog for linked courses
-          const confirmationHtml = `
-            <div style="text-align: center;">
-              <i class="fas fa-certificate" style="font-size: 3rem; color: #ffd700; margin-bottom: 15px;"></i>
-              <p>Are you ready to generate your certificate for:</p>
-              <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
-              ${isLinkedCourse ? `
-                <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                  <div style="color: #17a2b8; font-weight: 600;">
-                    <i class="fas fa-link"></i> <strong>Comprehensive Training Certificate</strong><br>
-                    <span style="font-size: 0.9rem; opacity: 0.8;">
-                      This certificate recognizes completion of your comprehensive training program.
-                    </span>
-                  </div>
-                </div>
-              ` : `
-                <p style="color: #666; font-size: 0.9rem;">This will create your official completion certificate.</p>
-              `}
-              <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <div style="color: #155724; font-weight: 600;">
-                  <i class="fas fa-check-circle" style="color: #28a745;"></i> All requirements completed<br>
-                  <i class="fas fa-award" style="color: #28a745;"></i> Ready for certification
-                </div>
-              </div>
-            </div>
-          `;
-          
-          const result = await Swal.fire({
-            title: isLinkedCourse ? 'Generate Comprehensive Certificate' : 'Generate Certificate',
-            html: confirmationHtml,
-            icon: null,
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-trophy"></i> Yes, Generate Certificate',
-            cancelButtonText: 'Cancel'
-          });
-          
-          if (!result.isConfirmed) return;
-          
-          // Show loading state
-          const originalText = this.innerHTML;
-          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Certificate...';
-          this.disabled = true;
-          this.classList.add('loading');
-          
-          try {
-            const response = await fetch('/certificates/api/issue', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                courseId: courseId,
-                courseType: courseType
-              })
+          button.addEventListener('click', async function() {
+            console.log('Attendance button clicked!');
+            
+            const courseId = this.dataset.courseId;
+            const courseType = this.dataset.courseType;
+            
+            console.log('Confirming attendance for:', courseId, courseType);
+            
+            if (!courseId || !courseType) {
+              console.error('Missing courseId or courseType');
+              return;
+            }
+            
+            // Show confirmation dialog
+            const result = await Swal.fire({
+              title: 'Confirm Attendance',
+              text: 'Please confirm that you attended this course.',
+              icon: 'question',
+              showCancelButton: true,
+              confirmButtonColor: '#28a745',
+              confirmButtonText: 'Yes, I Attended',
+              cancelButtonText: 'Cancel'
             });
             
-            const data = await response.json();
+            if (!result.isConfirmed) return;
             
-            if (data.success) {
-              // Enhanced success message for linked courses
-              const successHtml = `
-                <div style="text-align: center;">
-                  <i class="fas fa-medal" style="font-size: 4rem; color: #ffd700; margin-bottom: 20px;"></i>
-                  <h3 style="color: #28a745;">Congratulations!</h3>
-                  <p>Your ${isLinkedCourse ? 'comprehensive training' : ''} certificate has been successfully generated.</p>
-                  ${data.linkedCourseInfo && data.linkedCourseInfo.hasLinkedCourse ? `
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                      <strong>Certificate Information:</strong><br>
-                      ${data.linkedCourseInfo.description || 'Comprehensive training program completed successfully.'}
-                    </div>
-                  ` : ''}
-                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <strong>Certificate ID:</strong> ${data.certificate.certificateId}<br>
-                    <strong>Verification Code:</strong> ${data.certificate.verificationCode}
-                  </div>
-                  <p style="color: #666; font-size: 0.9rem;">You can now view, download, and share your certificate.</p>
-                </div>
-              `;
-              
-              await Swal.fire({
-                title: 'Certificate Generated! 🎉',
-                html: successHtml,
-                icon: null,
-                confirmButtonColor: '#007bff',
-                confirmButtonText: '<i class="fas fa-eye"></i> View Certificate'
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
+            this.disabled = true;
+            
+            try {
+              const response = await fetch(`/library/confirm-attendance/${courseId}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  courseType: courseType
+                })
               });
               
-              // Redirect to certificate view
-              window.location.href = `/certificates/view/${data.certificate.certificateId}`;
+              console.log('Response status:', response.status);
+              const data = await response.json();
+              console.log('Response data:', data);
               
-            } else {
-              throw new Error(data.message || 'Failed to generate certificate');
-            }
-            
-          } catch (error) {
-            console.error('Error generating certificate:', error);
-            
-            // Enhanced error handling for linked courses
-            let errorMessage = error.message || 'Failed to generate certificate. Please try again or contact support.';
-            
-            if (error.message && error.message.includes('linked')) {
-              errorMessage = 'Certificate generation is pending completion of your linked course component. Please complete all required training before requesting your certificate.';
-            }
-            
-            Swal.fire({
-              icon: 'error',
-              title: 'Certificate Generation Failed',
-              text: errorMessage,
-              confirmButtonColor: '#dc3545'
-            });
-            
-            // Restore button
-            this.innerHTML = originalText;
-            this.disabled = false;
-            this.classList.remove('loading');
-          }
-        });
-      });
-      
-      // ========================================
-      // ✅ ENHANCED: ATTENDANCE CONFIRMATION WITH LINKED COURSE CONTEXT
-      // ========================================
-      
-      document.querySelectorAll('.btn-confirm-attendance').forEach(button => {
-        button.addEventListener('click', async function() {
-          const courseId = this.dataset.courseId;
-          const courseType = this.dataset.courseType;
-          const courseTitle = this.closest('.course-card').querySelector('.course-title').textContent;
-          
-          // Check if this is a linked course
-          const courseCard = this.closest('.course-card');
-          const linkedCourseInfo = courseCard.querySelector('.linked-course-info');
-          const isLinkedCourse = !!linkedCourseInfo;
-          
-          // Enhanced confirmation dialog for linked courses
-          const confirmationHtml = `
-            <div style="text-align: center;">
-              <i class="fas fa-user-check" style="font-size: 3rem; color: #28a745; margin-bottom: 15px;"></i>
-              <p>Please confirm that you attended:</p>
-              <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
-              ${isLinkedCourse ? `
-                <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                  <div style="color: #17a2b8; font-weight: 600;">
-                    <i class="fas fa-link"></i> <strong>Part of Comprehensive Training</strong><br>
-                    <span style="font-size: 0.9rem; opacity: 0.8;">
-                      This course is part of your comprehensive training program.
-                    </span>
-                  </div>
-                </div>
-              ` : ''}
-              <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; color: #856404;">
-                <i class="fas fa-info-circle"></i> 
-                <strong>Important:</strong> Only confirm if you actually attended this course.
-              </div>
-            </div>
-          `;
-          
-          const result = await Swal.fire({
-            title: 'Confirm Attendance',
-            html: confirmationHtml,
-            icon: null,
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-check"></i> Yes, I Attended',
-            cancelButtonText: 'Cancel'
-          });
-          
-          if (!result.isConfirmed) return;
-          
-          // Show loading state
-          const originalText = this.innerHTML;
-          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
-          this.disabled = true;
-          this.classList.add('loading');
-          
-          try {
-            const response = await fetch(`/library/confirm-attendance/${courseId}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                courseType: courseType
-              })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-              // Enhanced success message with linked course context
-              let successMessage = data.message;
-              
-              if (data.linkedCourseInfo && data.linkedCourseInfo.isLinked) {
-                successMessage += `\n\n${data.linkedCourseInfo.message}`;
+              if (data.success) {
+                await Swal.fire({
+                  icon: 'success',
+                  title: 'Attendance Confirmed!',
+                  text: data.message,
+                  confirmButtonColor: '#28a745'
+                });
+                
+                // Reload page to show updated state
+                window.location.reload();
+              } else {
+                throw new Error(data.message || 'Failed to confirm attendance');
               }
               
-              await Swal.fire({
-                icon: 'success',
-                title: 'Attendance Confirmed! ✅',
-                text: successMessage,
-                confirmButtonColor: '#28a745'
+            } catch (error) {
+              console.error('Error confirming attendance:', error);
+              
+              Swal.fire({
+                icon: 'error',
+                title: 'Confirmation Failed',
+                text: error.message || 'Failed to confirm attendance. Please try again.',
+                confirmButtonColor: '#dc3545'
               });
               
-              // Reload page to show updated state
-              window.location.reload();
-              
-            } else {
-              throw new Error(data.message);
+              // Restore button
+              this.innerHTML = originalText;
+              this.disabled = false;
             }
+          });
+        });
+    
+        // ========================================
+        // CERTIFICATE GENERATION
+        // ========================================
+        const certificateButtons = document.querySelectorAll('.btn-generate-certificate');
+        console.log('Found certificate generation buttons:', certificateButtons.length);
+        
+        certificateButtons.forEach(button => {
+          button.addEventListener('click', async function() {
+            const courseId = this.dataset.courseId;
+            const courseType = this.dataset.courseType;
+            const courseTitle = this.dataset.courseTitle;
             
-          } catch (error) {
-            console.error('Error confirming attendance:', error);
+            // Check if this is a linked course
+            const courseCard = this.closest('.course-card');
+            const linkedCourseInfo = courseCard.querySelector('.linked-course-info');
+            const isLinkedCourse = !!linkedCourseInfo;
             
-            Swal.fire({
-              icon: 'error',
-              title: 'Confirmation Failed',
-              text: error.message || 'Failed to confirm attendance. Please try again.',
-              confirmButtonColor: '#dc3545'
+            // Enhanced confirmation dialog for linked courses
+            const confirmationHtml = `
+              <div style="text-align: center;">
+                <i class="fas fa-certificate" style="font-size: 3rem; color: #ffd700; margin-bottom: 15px;"></i>
+                <p>Are you ready to generate your certificate for:</p>
+                <h4 style="color: #333; margin: 10px 0;">"${courseTitle}"</h4>
+                ${isLinkedCourse ? `
+                  <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <div style="color: #17a2b8; font-weight: 600;">
+                      <i class="fas fa-link"></i> <strong>Comprehensive Training Certificate</strong><br>
+                      <span style="font-size: 0.9rem; opacity: 0.8;">
+                        This certificate recognizes completion of your comprehensive training program.
+                      </span>
+                    </div>
+                  </div>
+                ` : `
+                  <p style="color: #666; font-size: 0.9rem;">This will create your official completion certificate.</p>
+                `}
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <div style="color: #155724; font-weight: 600;">
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i> All requirements completed<br>
+                    <i class="fas fa-award" style="color: #28a745;"></i> Ready for certification
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            const result = await Swal.fire({
+              title: isLinkedCourse ? 'Generate Comprehensive Certificate' : 'Generate Certificate',
+              html: confirmationHtml,
+              icon: null,
+              showCancelButton: true,
+              confirmButtonColor: '#28a745',
+              cancelButtonColor: '#6c757d',
+              confirmButtonText: '<i class="fas fa-trophy"></i> Yes, Generate Certificate',
+              cancelButtonText: 'Cancel'
             });
             
-            // Restore button
-            this.innerHTML = originalText;
-            this.disabled = false;
-            this.classList.remove('loading');
-          }
+            if (!result.isConfirmed) return;
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Certificate...';
+            this.disabled = true;
+            this.classList.add('loading');
+            
+            try {
+              const response = await fetch('/certificates/api/issue', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  courseId: courseId,
+                  courseType: courseType
+                })
+              });
+              
+              const data = await response.json();
+              
+              if (data.success) {
+                // Enhanced success message for linked courses
+                const successHtml = `
+                  <div style="text-align: center;">
+                    <i class="fas fa-medal" style="font-size: 4rem; color: #ffd700; margin-bottom: 20px;"></i>
+                    <h3 style="color: #28a745;">Congratulations!</h3>
+                    <p>Your ${isLinkedCourse ? 'comprehensive training' : ''} certificate has been successfully generated.</p>
+                    ${data.linkedCourseInfo && data.linkedCourseInfo.hasLinkedCourse ? `
+                      <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>Certificate Information:</strong><br>
+                        ${data.linkedCourseInfo.description || 'Comprehensive training program completed successfully.'}
+                      </div>
+                    ` : ''}
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                      <strong>Certificate ID:</strong> ${data.certificate.certificateId}<br>
+                      <strong>Verification Code:</strong> ${data.certificate.verificationCode}
+                    </div>
+                    <p style="color: #666; font-size: 0.9rem;">You can now view, download, and share your certificate.</p>
+                  </div>
+                `;
+                
+                await Swal.fire({
+                  title: 'Certificate Generated!',
+                  html: successHtml,
+                  icon: null,
+                  confirmButtonColor: '#007bff',
+                  confirmButtonText: '<i class="fas fa-eye"></i> View Certificate'
+                });
+                
+                // Redirect to certificate view
+                window.location.href = `/certificates/view/${data.certificate.certificateId}`;
+                
+              } else {
+                throw new Error(data.message || 'Failed to generate certificate');
+              }
+              
+            } catch (error) {
+              console.error('Error generating certificate:', error);
+              
+              // Enhanced error handling for linked courses
+              let errorMessage = error.message || 'Failed to generate certificate. Please try again or contact support.';
+              
+              if (error.message && error.message.includes('linked')) {
+                errorMessage = 'Certificate generation is pending completion of your linked course component. Please complete all required training before requesting your certificate.';
+              }
+              
+              Swal.fire({
+                icon: 'error',
+                title: 'Certificate Generation Failed',
+                text: errorMessage,
+                confirmButtonColor: '#dc3545'
+              });
+              
+              // Restore button
+              this.innerHTML = originalText;
+              this.disabled = false;
+              this.classList.remove('loading');
+            }
+          });
         });
-      });
-      
+        
+      }, 1000); // Wait 1 second for page to fully load
+    
       // ========================================
-      // ✅ NEW: CERTIFICATE PURCHASE FUNCTION
+      // CERTIFICATE PURCHASE FUNCTION
       // ========================================
-      
       window.purchaseCertificate = async function(courseId) {
         const result = await Swal.fire({
           title: 'Purchase Certificate',
@@ -1102,9 +1158,8 @@ const courseEnded = course.timingStatus ? course.timingStatus.courseEnded : cour
       };
       
       // ========================================
-      // ✅ ENHANCED: CERTIFICATE ACTIONS (Download & Share)
+      // CERTIFICATE ACTIONS (Download & Share)
       // ========================================
-      
       window.downloadCertificate = async function(certificateId) {
         try {
           const response = await fetch(`/certificates/download/${certificateId}`);
@@ -1135,10 +1190,10 @@ const courseEnded = course.timingStatus ? course.timingStatus.courseEnded : cour
           });
         }
       };
-
+    
       window.shareCertificate = async function(certificateId, courseTitle) {
         Swal.fire({
-          title: 'Share Your Achievement! 🎉',
+          title: 'Share Your Achievement!',
           html: `
             <div style="text-align: center; margin: 20px 0;">
               <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
@@ -1170,31 +1225,30 @@ const courseEnded = course.timingStatus ? course.timingStatus.courseEnded : cour
           }
         });
       };
-
+    
       // ========================================
-      // ✅ ENHANCED: SOCIAL SHARING FUNCTIONS
+      // SOCIAL SHARING FUNCTIONS
       // ========================================
-
       window.shareOnLinkedIn = function(certificateId, courseTitle) {
-        const text = `I just completed "${courseTitle}" and earned my certificate from IAAI Training Institute! 🎓`;
+        const text = `I just completed "${courseTitle}" and earned my certificate from IAAI Training Institute!`;
         const url = encodeURIComponent(`${window.location.origin}/certificates/view/${certificateId}`);
         const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&summary=${encodeURIComponent(text)}`;
         window.open(linkedinUrl, '_blank', 'width=600,height=500');
       };
-
+    
       window.shareOnTwitter = function(certificateId, courseTitle) {
-        const text = `Just earned my certificate in "${courseTitle}" from @IAAI_Training! 🎓 #ProfessionalDevelopment #AestheticTraining`;
+        const text = `Just earned my certificate in "${courseTitle}" from @IAAI_Training! #ProfessionalDevelopment #AestheticTraining`;
         const url = encodeURIComponent(`${window.location.origin}/certificates/view/${certificateId}`);
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`;
         window.open(twitterUrl, '_blank', 'width=600,height=400');
       };
-
+    
       window.copyVerificationLink = function(certificateId) {
         const url = `${window.location.origin}/certificates/view/${certificateId}`;
         navigator.clipboard.writeText(url).then(() => {
           Swal.fire({
             icon: 'success',
-            title: 'Copied! 📋',
+            title: 'Copied!',
             text: 'Certificate link copied to clipboard',
             timer: 2000,
             timerProgressBar: true,
@@ -1204,12 +1258,10 @@ const courseEnded = course.timingStatus ? course.timingStatus.courseEnded : cour
           });
         });
       };
-
+    
       // ========================================
-      // ✅ ENHANCED: TIMEZONE UTILITIES
+      // TIMEZONE UTILITIES
       // ========================================
-
-      // Add timezone conversion utilities for dynamic content
       window.convertToUserTimezone = function(dateString, courseTimezone) {
         if (!dateString) return 'TBD';
         
@@ -1223,157 +1275,38 @@ const courseEnded = course.timingStatus ? course.timingStatus.courseEnded : cour
             year: 'numeric',
             month: 'short',
             day: 'numeric',
-            hour:
             hour: '2-digit',
-           minute: '2-digit'
-         });
-         
-         if (userTimezone !== courseTimezone) {
-           const userTime = date.toLocaleString('en-US', {
-             timeZone: userTimezone,
-             hour: '2-digit',
-             minute: '2-digit'
-           });
-           return `${courseTime} (${userTime} your time)`;
-         }
-         
-         return courseTime;
-       } catch (error) {
-         return new Date(dateString).toLocaleString();
-       }
-     };
-
-     // Initialize timezone-aware tooltips for course times
-     document.querySelectorAll('[data-course-timezone]').forEach(element => {
-       const timezone = element.dataset.courseTimezone;
-       const dateString = element.dataset.courseDate;
-       
-       if (timezone && dateString) {
-         element.title = convertToUserTimezone(dateString, timezone);
-       }
-     });
-
-     console.log('✅ Enhanced Live Online Library with Certificate Purchase Support initialized successfully');
-   });
-   // Live Session Embedded Functions
-let isFullscreen = false;
-
-function openEmbeddedSession(sessionUrl, courseTitle) {
-  console.log('Opening embedded session:', sessionUrl);
-  
-  // Set the iframe source and modal title
-  document.getElementById('liveSessionFrame').src = sessionUrl;
-  document.getElementById('sessionTitle').textContent = courseTitle || 'Live Training Session';
-  
-  // Show modal
-  const modal = document.getElementById('liveSessionModal');
-  modal.style.display = 'block';
-  modal.classList.add('show');
-  
-  // Add backdrop
-  const backdrop = document.createElement('div');
-  backdrop.className = 'modal-backdrop fade show';
-  backdrop.id = 'sessionBackdrop';
-  document.body.appendChild(backdrop);
-  
-  // Prevent body scroll
-  document.body.style.overflow = 'hidden';
-  
-  // Track session start
-  trackSessionEvent('session_embedded_opened', courseTitle);
-}
-
-function closeLiveSession() {
-  const modal = document.getElementById('liveSessionModal');
-  const backdrop = document.getElementById('sessionBackdrop');
-  
-  // Clear iframe source to stop the session
-  document.getElementById('liveSessionFrame').src = 'about:blank';
-  
-  // Hide modal
-  modal.style.display = 'none';
-  modal.classList.remove('show');
-  
-  // Remove backdrop
-  if (backdrop) {
-    backdrop.remove();
-  }
-  
-  // Restore body scroll
-  document.body.style.overflow = 'auto';
-  
-  // Exit fullscreen if active
-  if (isFullscreen) {
-    exitFullscreen();
-  }
-  
-  // Track session end
-  trackSessionEvent('session_embedded_closed', null);
-}
-
-function toggleFullscreen() {
-  const modal = document.getElementById('liveSessionModal');
-  const icon = document.getElementById('fullscreenIcon');
-  
-  if (!isFullscreen) {
-    // Enter fullscreen
-    if (modal.requestFullscreen) {
-      modal.requestFullscreen();
-    } else if (modal.webkitRequestFullscreen) {
-      modal.webkitRequestFullscreen();
-    } else if (modal.msRequestFullscreen) {
-      modal.msRequestFullscreen();
-    }
-    icon.className = 'fas fa-compress';
-    isFullscreen = true;
-  } else {
-    // Exit fullscreen
-    exitFullscreen();
-  }
-}
-
-function exitFullscreen() {
-  if (document.exitFullscreen) {
-    document.exitFullscreen();
-  } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
-  } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
-  }
-  document.getElementById('fullscreenIcon').className = 'fas fa-expand';
-  isFullscreen = false;
-}
-
-function trackSessionEvent(eventType, courseTitle) {
-  try {
-    // Optional: Track usage analytics
-    console.log('Session event:', eventType, courseTitle);
+            minute: '2-digit'
+          });
+          
+          if (userTimezone !== courseTimezone) {
+            const userTime = date.toLocaleString('en-US', {
+              timeZone: userTimezone,
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            return `${courseTime} (${userTime} your time)`;
+          }
+          
+          return courseTime;
+        } catch (error) {
+          return new Date(dateString).toLocaleString();
+        }
+      };
     
-    // You can add analytics tracking here if needed
-    // Example: gtag('event', eventType, { course_title: courseTitle });
-  } catch (error) {
-    console.log('Analytics tracking error:', error);
-  }
-}
-
-// Handle fullscreen change events
-document.addEventListener('fullscreenchange', function() {
-  if (!document.fullscreenElement) {
-    isFullscreen = false;
-    document.getElementById('fullscreenIcon').className = 'fas fa-expand';
-  }
-});
-
-// Close modal on escape key
-document.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape') {
-    const modal = document.getElementById('liveSessionModal');
-    if (modal.style.display === 'block') {
-      closeLiveSession();
-    }
-  }
-});
- </script>
+      // Initialize timezone-aware tooltips for course times
+      document.querySelectorAll('[data-course-timezone]').forEach(element => {
+        const timezone = element.dataset.courseTimezone;
+        const dateString = element.dataset.courseDate;
+        
+        if (timezone && dateString) {
+          element.title = convertToUserTimezone(dateString, timezone);
+        }
+      });
+    
+      console.log('Enhanced Live Online Library with all features initialized successfully');
+    });
+    </script>
 <!-- Live Session Embedded Modal -->
 <div id="liveSessionModal" class="modal fade" tabindex="-1" style="display: none;">
   <div class="modal-dialog modal-fullscreen">

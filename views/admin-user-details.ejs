@@ -1918,56 +1918,62 @@
 
 <script>
     // Remove course from user
-    async function removeCourseFromUser(enrollmentId, courseType, courseName) {
-        const { value: reason } = await Swal.fire({
-            title: 'Remove Course',
-            html: `
-                <p>Remove <strong>${courseName}</strong> from this user?</p>
-                <p class="text-muted">The course will be moved to recycle bin and can be recovered.</p>
-                <div style="margin-top: 20px;">
-                    <label for="removal-reason" style="display: block; text-align: left; margin-bottom: 5px;">Reason for removal:</label>
-                    <textarea id="removal-reason" class="swal2-input" style="width: 100%; height: 80px;" placeholder="Enter reason..."></textarea>
-                </div>
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Remove Course',
-            preConfirm: () => {
-                return document.getElementById('removal-reason').value || 'No reason provided';
-            }
-        });
+    // Updated frontend function
+async function removeCourseFromUser(enrollmentId, courseType, courseName) {
+    console.log('🗑️ Frontend remove course:', { enrollmentId, courseType, courseName });
     
-        if (reason) {
-            try {
-                const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/${enrollmentId}/${courseType}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ reason: reason })
+    const { value: reason } = await Swal.fire({
+        title: 'Remove Course',
+        html: `
+            <p>Remove <strong>${courseName}</strong> from this user?</p>
+            <p class="text-muted">The course will be moved to recycle bin and can be recovered.</p>
+            <div style="margin-top: 20px;">
+                <label for="removal-reason" style="display: block; text-align: left; margin-bottom: 5px;">Reason for removal:</label>
+                <textarea id="removal-reason" class="swal2-input" style="width: 100%; height: 80px;" placeholder="Enter reason..."></textarea>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Remove Course',
+        preConfirm: () => {
+            return document.getElementById('removal-reason').value || 'No reason provided';
+        }
+    });
+
+    if (reason) {
+        try {
+            console.log('🌐 Making delete request to:', `/admin-users/<%= userDetails._id %>/courses/${enrollmentId}/${courseType}`);
+            
+            const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/${enrollmentId}/${courseType}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ reason: reason })
+            });
+
+            const data = await response.json();
+            console.log('📥 Delete response:', data);
+
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Course Removed',
+                    text: data.message,
+                    timer: 2000
                 });
-    
-                const data = await response.json();
-    
-                if (data.success) {
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Course Removed',
-                        text: data.message,
-                        timer: 2000
-                    });
-                    location.reload();
-                } else {
-                    Swal.fire('Error', data.message, 'error');
-                }
-            } catch (error) {
-                Swal.fire('Error', 'Failed to remove course', 'error');
+                location.reload();
+            } else {
+                Swal.fire('Error', data.message, 'error');
             }
+        } catch (error) {
+            console.error('❌ Delete error:', error);
+            Swal.fire('Error', 'Failed to remove course', 'error');
         }
     }
-    
+}
     // Add course to user
     async function addCourseToUser() {
         try {

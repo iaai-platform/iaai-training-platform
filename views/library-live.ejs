@@ -1259,21 +1259,7 @@
       console.log('Enhanced Live Online Library with all features initialized successfully');
     });
     
-    // Real-time course status checking
-function initializeRealTimeStatusCheck() {
-  const courseCards = document.querySelectorAll('.course-card');
-  
-  courseCards.forEach(card => {
-    const courseId = card.querySelector('[data-course-id]')?.dataset.courseId;
-    const startTime = card.dataset.startTime;
-    const endTime = card.dataset.endTime;
     
-    if (courseId && (startTime || endTime)) {
-      scheduleStatusUpdates(courseId, startTime, endTime);
-    }
-  });
-}
-
 function scheduleStatusUpdates(courseId, startTime, endTime) {
   const now = new Date().getTime();
   

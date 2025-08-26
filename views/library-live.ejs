@@ -524,112 +524,64 @@
               <% } %>
 
               <!-- ✅ FIXED: Certificate Section with Proper Logic Flow -->
-              <% if (course.certificatePaymentRequired && !course.hasPaidForCertificate) { %>
-                <!-- Certificate Payment Required for Free Course -->
-                <div class="course-info-section" style="margin: 20px 0;">
-                  <div style="background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
-                    <h5 style="color: #856404; margin: 0 0 15px 0;">
-                      <i class="fas fa-certificate"></i> Certificate Available (€10)
-                    </h5>
-                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
-                      <p style="color: #856404; margin: 0 0 15px 0; font-weight: 600;">
-                        <i class="fas fa-info-circle"></i> This is a free course. Certificate fee: €10
-                      </p>
-                      <% if (course.attendanceConfirmed) { %>
-                        <p style="color: #856404; margin: 0 0 15px 0;">
-                          ✅ Attendance confirmed - You can now purchase your certificate
+              <% if (course.showCertificateSection) { %>
+                <% if (course.canViewCertificate && course.hasCertificate) { %>
+                  <!-- Certificate Available Section -->
+                  <div class="course-info-section certificate-ready" style="margin: 20px 0;">
+                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
+                      <h5 style="color: #155724; margin: 0 0 15px 0;">
+                        <i class="fas fa-medal"></i> Certificate Available
+                      </h5>
+                      <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                        <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
+                          🎉 Congratulations! Your certificate is ready for download.
                         </p>
-                        <button class="cta-btn btn-warning" onclick="purchaseCertificate('<%= course.courseId %>')">
-                          <i class="fas fa-shopping-cart"></i> Purchase Certificate (€10)
-                        </button>
-                      <% } else { %>
-                        <p style="color: #856404; margin: 0; font-size: 0.9rem;">
-                          First confirm your attendance, then you can purchase your certificate.
-                        </p>
-                      <% } %>
-                    </div>
-                  </div>
-                </div>
-
-              <% } else if (course.certificateMessage) { %>
-                <!-- Certificate Suppression Message for Linked Courses -->
-                <div class="course-info-section" style="margin: 20px 0;">
-                  <div style="background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
-                    <h5 style="color: #856404; margin: 0 0 15px 0;">
-                      <i class="fas fa-info-circle"></i> Certificate Information
-                    </h5>
-                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
-                      <p style="color: #856404; margin: 0; font-weight: 600;">
-                        <i class="fas fa-certificate"></i> <%= course.certificateMessage %>
-                      </p>
-                      
-                      <% if (course.linkedCourse && course.linkedCourse.isLinked && course.linkedCourse.linkedCourseTitle) { %>
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(133, 100, 4, 0.3);">
-                          <p style="color: #856404; margin: 0; font-size: 0.9rem;">
-                            <i class="fas fa-arrow-right"></i> 
-                            <strong>Complete the in-person component:</strong> <%= course.linkedCourse.linkedCourseTitle %>
-                            <% if (course.linkedCourse.linkedCourseCode) { %>
-                              (<%= course.linkedCourse.linkedCourseCode %>)
-                            <% } %>
-                          </p>
-                          <% if (course.linkedCourse.linkedCourseStartDate) { %>
-                            <p style="color: #856404; margin: 5px 0 0 0; font-size: 0.9rem;">
-                              <i class="fas fa-calendar"></i> 
-                              <strong>Scheduled:</strong> <%= course.linkedCourse.linkedCourseStartDate %>
-                            </p>
-                          <% } %>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                          <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
+                            <i class="fas fa-eye"></i> View Certificate
+                          </a>
+                          <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
+                            <i class="fas fa-download"></i> Download PDF
+                          </button>
+                          <button onclick="shareCertificate('<%= course.certificateId %>', '<%= course.title %>')" class="cta-btn btn-outline-primary">
+                            <i class="fas fa-share-alt"></i> Share
+                          </button>
                         </div>
-                      <% } %>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-              <% } else if (course.canViewCertificate && course.hasCertificate) { %>
-                <!-- Certificate Available Section -->
-                <div class="course-info-section certificate-ready" style="margin: 20px 0;">
-                  <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
-                    <h5 style="color: #155724; margin: 0 0 15px 0;">
-                      <i class="fas fa-medal"></i> Certificate Available
-                    </h5>
-                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
-                      <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
-                        🎉 Congratulations! Your certificate is ready for download.
-                      </p>
-                      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
-                          <i class="fas fa-eye"></i> View Certificate
-                        </a>
-                        <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
-                          <i class="fas fa-download"></i> Download PDF
-                        </button>
-                        <button onclick="shareCertificate('<%= course.certificateId %>', '<%= course.title %>')" class="cta-btn btn-outline-primary">
-                          <i class="fas fa-share-alt"></i> Share
+                <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
+                  <!-- Certificate Generation Section -->
+                  <div class="course-info-section certificate-generate" style="margin: 20px 0;">
+                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
+                      <h5 style="color: #155724; margin: 0 0 15px 0;">
+                        <i class="fas fa-trophy"></i> Ready for Certificate
+                      </h5>
+                      <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                        <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
+                          🎯 All requirements completed! Generate your certificate now.
+                        </p>
+                        <button class="cta-btn btn-generate-certificate" 
+                                data-course-id="<%= course.courseId %>" 
+                                data-course-type="<%= course.courseType %>"
+                                data-course-title="<%= course.title %>">
+                          <i class="fas fa-certificate"></i> Generate Certificate
                         </button>
                       </div>
                     </div>
                   </div>
-                </div>
-
-              <% } else if (course.canGetCertificate && !course.hasCertificate && !course.certificatePaymentRequired) { %>
-                <!-- Certificate Generation Section (for paid courses) -->
-                <div class="course-info-section certificate-generate" style="margin: 20px 0;">
-                  <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
-                    <h5 style="color: #155724; margin: 0 0 15px 0;">
-                      <i class="fas fa-trophy"></i> Ready for Certificate
-                    </h5>
-                    <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
-                      <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
-                        🎯 All requirements completed! Generate your certificate now.
-                      </p>
-                      <button class="cta-btn btn-generate-certificate" 
-                              data-course-id="<%= course.courseId %>" 
-                              data-course-type="<%= course.courseType %>"
-                              data-course-title="<%= course.title %>">
-                        <i class="fas fa-certificate"></i> Generate Certificate
-                      </button>
+                <% } %>
+              <% } else { %>
+                <!-- For free courses without certificate payment - show simple completion -->
+                <% if (course.attendanceConfirmed && course.courseEnded) { %>
+                  <div class="course-info-section" style="margin: 20px 0;">
+                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 8px; border: 2px solid #28a745;">
+                      <h5 style="color: #155724; margin: 0; text-align: center;">
+                        <i class="fas fa-check-circle"></i> Course Completed
+                      </h5>
                     </div>
                   </div>
-                </div>
+                <% } %>
               <% } %>
 
               <!-- Course Materials and Resources -->

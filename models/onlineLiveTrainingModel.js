@@ -1346,7 +1346,7 @@ onlineLiveCourseSchema.pre("save", async function (next) {
       this.schedule.startDate
     ) {
       const deadline = new Date(this.schedule.startDate);
-      deadline.setDate(deadline.getDate() - 7); // 1 week before
+      deadline.setHours(deadline.getHours() - 4);
       this.schedule.registrationDeadline = deadline;
       console.log(
         "📅 Registration deadline set:",

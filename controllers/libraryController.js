@@ -1105,10 +1105,55 @@ exports.getLiveLibrary = async (req, res) => {
                 // ✅ NEW FIELDS:
                 // ✅ CERTIFICATE PAYMENT LOGIC - Add right after certificateMessage: null,
                 certificatePaymentRequired: (() => {
-                  // Check if it's a free course (originalPrice = 0)
                   const originalPrice =
                     enrollment.enrollmentData?.originalPrice || 0;
-                  return originalPrice === 0; // Only free courses require certificate payment
+                  const paidAmount = enrollment.enrollmentData?.paidAmount || 0;
+
+                  // Never show certificate payment for any scenario
+                  // Free courses either have paid for certificate or don't get certificate options
+                  return false;
+                })(),
+
+                hasPaidForCertificate: (() => {
+                  const originalPrice =
+                    enrollment.enrollmentData?.originalPrice || 0;
+                  const paidAmount = enrollment.enrollmentData?.paidAmount || 0;
+
+                  // If paid course, certificate is included
+                  if (originalPrice > 0) return true;
+
+                  // If free course and user paid something (certificate fee), they have certificate access
+                  if (originalPrice === 0 && paidAmount > 0) return true;
+
+                  // Check alternative certificate payment tracking
+                  return (
+                    (enrollment.certificate?.certificateFeePaid || 0) >= 10
+                  );
+                })(),
+
+                // Add new field for showing certificate section at all
+                showCertificateSection: (() => {
+                  const originalPrice =
+                    enrollment.enrollmentData?.originalPrice || 0;
+                  const paidAmount = enrollment.enrollmentData?.paidAmount || 0;
+
+                  // Show certificate section only if:
+                  // 1. Paid course (always gets certificate)
+                  // 2. Free course where user paid for certificate
+                  return (
+                    originalPrice > 0 || (originalPrice === 0 && paidAmount > 0)
+                  );
+                })(),
+
+                hasPaidForCertificate: (() => {
+                  const originalPrice =
+                    enrollment.enrollmentData?.originalPrice || 0;
+                  // If paid course (originalPrice > 0), certificate is included
+                  if (originalPrice > 0) return true;
+                  // If free course, check if certificate fee was paid
+                  return (
+                    (enrollment.certificate?.certificateFeePaid || 0) >= 10
+                  );
                 })(),
 
                 hasPaidForCertificate: (() => {

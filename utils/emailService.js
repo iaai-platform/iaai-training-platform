@@ -308,8 +308,8 @@ class EmailService {
             <body>
               <div class="container">
                 <div class="header">
-                  <h1 style="margin: 0; font-size: 32px;">🎉 Registration Confirmed!</h1>
-                  <p style="margin: 16px 0 0 0; font-size: 18px; opacity: 0.9;">Welcome to IAAI Training Institute</p>
+                    <h1 style="margin: 0; font-size: 32px; color: black;">🎉 Registration Confirmed!</h1>
+                    <p style="margin: 16px 0 0 0; font-size: 18px; opacity: 0.9; color: black;">Welcome to IAAI Training Institute</p>
                 </div>
                 
                 <div class="content">

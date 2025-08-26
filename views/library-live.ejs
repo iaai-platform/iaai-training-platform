@@ -552,7 +552,7 @@
         </div>
       </div>
     </div>
-  <% } else if (course.canGetCertificate && !course.hasCertificate && course.hasPaidForCertificate) { %>
+    <% } else if (course.canGetCertificate && !course.hasCertificate && course.hasPaidForCertificate && course.courseEnded) { %>
     <!-- Certificate Generation Section (only if user paid for certificate) -->
     <div class="course-info-section certificate-generate" style="margin: 20px 0;">
       <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">

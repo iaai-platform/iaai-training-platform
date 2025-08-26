@@ -1314,7 +1314,14 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-content">
       <div class="modal-header" style="background: #1e3a8a; color: white; padding: 10px 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <h5 class="modal-title" id="sessionTitle">Live Training Session</h5>
+          <div style="flex: 1;">
+            <h5 class="modal-title" id="sessionTitle">Live Training Session</h5>
+            <div id="sessionDetails" style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">
+              <span id="courseStatus">Loading...</span> | 
+              <span id="sessionTimer">--:--:--</span> | 
+              <span id="participantCount">-- participants</span>
+            </div>
+          </div>
           <div style="display: flex; gap: 10px; align-items: center;">
             <button onclick="toggleFullscreen()" class="btn btn-outline-light btn-sm">
               <i class="fas fa-expand" id="fullscreenIcon"></i> Fullscreen
@@ -1337,17 +1344,33 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 <script>
- function openEmbeddedSession(sessionUrl, courseTitle) {
-  // Simple fallback - open in new window if modal fails
+let sessionTimer = null;
+let courseEndTime = null;
+
+function openEmbeddedSession(sessionUrl, courseTitle) {
   try {
     const modal = document.getElementById('liveSessionModal');
     if (!modal) {
       throw new Error('Modal not found');
     }
     
+    // Find course data from the clicked button
+    const clickedButton = event.target.closest('button');
+    const courseCard = clickedButton.closest('.course-card');
+    const endTime = courseCard?.dataset.endTime;
+    
     // Set iframe source and title
     document.getElementById('liveSessionFrame').src = sessionUrl;
     document.getElementById('sessionTitle').textContent = courseTitle;
+    
+    // Set course end time for timer
+    if (endTime) {
+      courseEndTime = new Date(endTime);
+    }
+    
+    // Initialize session details
+    updateSessionStatus();
+    startSessionTimer();
     
     // Show modal
     modal.style.display = 'block';
@@ -1365,11 +1388,88 @@ document.addEventListener('DOMContentLoaded', function() {
     
   } catch (error) {
     console.log('Modal failed, opening in new window:', error);
-    // Fallback to new window
     window.open(sessionUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
   }
 }
 
+function updateSessionStatus() {
+  const statusElement = document.getElementById('courseStatus');
+  const now = new Date();
+  
+  if (courseEndTime) {
+    if (now < courseEndTime) {
+      statusElement.textContent = 'Live Session Active';
+      statusElement.style.color = '#28a745';
+    } else {
+      statusElement.textContent = 'Session Ended';
+      statusElement.style.color = '#dc3545';
+    }
+  } else {
+    statusElement.textContent = 'Live Session';
+    statusElement.style.color = '#17a2b8';
+  }
+}
+
+function startSessionTimer() {
+  // Clear existing timer
+  if (sessionTimer) {
+    clearInterval(sessionTimer);
+  }
+  
+  sessionTimer = setInterval(() => {
+    const now = new Date();
+    const timerElement = document.getElementById('sessionTimer');
+    
+    if (courseEndTime && now < courseEndTime) {
+      // Show time remaining
+      const timeLeft = courseEndTime - now;
+      const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      
+      timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
+      timerElement.style.color = '#28a745';
+      
+      // Update status
+      updateSessionStatus();
+      
+      // If session ended, refresh the page
+      if (timeLeft <= 0) {
+        timerElement.textContent = 'Session Ended';
+        timerElement.style.color = '#dc3545';
+        setTimeout(() => {
+          closeLiveSession();
+          window.location.reload();
+        }, 3000);
+      }
+    } else {
+      // Show current time
+      timerElement.textContent = now.toLocaleTimeString();
+      timerElement.style.color = '#ffffff';
+    }
+    
+    // Update participant count (placeholder - you'd need real data)
+    document.getElementById('participantCount').textContent = 'Live participants';
+    
+  }, 1000);
+}
+
+function closeLiveSession() {
+  const modal = document.getElementById('liveSessionModal');
+  if (modal) {
+    document.getElementById('liveSessionFrame').src = 'about:blank';
+    modal.style.display = 'none';
+    modal.classList.remove('show');
+    document.body.style.overflow = 'auto';
+    
+    // Clear timer
+    if (sessionTimer) {
+      clearInterval(sessionTimer);
+      sessionTimer = null;
+    }
+    courseEndTime = null;
+  }
+}
 function closeLiveSession() {
   const modal = document.getElementById('liveSessionModal');
   if (modal) {

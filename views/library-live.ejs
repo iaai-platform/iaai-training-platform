@@ -525,66 +525,66 @@
                 </div>
               <% } %>
 
-              <!-- ✅ FIXED: Certificate Section with Proper Logic Flow -->
-              <% if (course.showCertificateSection) { %>
-                <% if (course.canViewCertificate && course.hasCertificate) { %>
-                  <!-- Certificate Available Section -->
-                  <div class="course-info-section certificate-ready" style="margin: 20px 0;">
-                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
-                      <h5 style="color: #155724; margin: 0 0 15px 0;">
-                        <i class="fas fa-medal"></i> Certificate Available
-                      </h5>
-                      <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
-                        <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
-                          🎉 Congratulations! Your certificate is ready for download.
-                        </p>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                          <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
-                            <i class="fas fa-eye"></i> View Certificate
-                          </a>
-                          <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
-                            <i class="fas fa-download"></i> Download PDF
-                          </button>
-                          <button onclick="shareCertificate('<%= course.certificateId %>', '<%= course.title %>')" class="cta-btn btn-outline-primary">
-                            <i class="fas fa-share-alt"></i> Share
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                <% } else if (course.canGetCertificate && !course.hasCertificate) { %>
-                  <!-- Certificate Generation Section -->
-                  <div class="course-info-section certificate-generate" style="margin: 20px 0;">
-                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
-                      <h5 style="color: #155724; margin: 0 0 15px 0;">
-                        <i class="fas fa-trophy"></i> Ready for Certificate
-                      </h5>
-                      <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
-                        <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
-                          🎯 All requirements completed! Generate your certificate now.
-                        </p>
-                        <button class="cta-btn btn-generate-certificate" 
-                                data-course-id="<%= course.courseId %>" 
-                                data-course-type="<%= course.courseType %>"
-                                data-course-title="<%= course.title %>">
-                          <i class="fas fa-certificate"></i> Generate Certificate
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                <% } %>
-              <% } else { %>
-                <!-- For free courses without certificate payment - show simple completion -->
-                <% if (course.attendanceConfirmed && course.courseEnded) { %>
-                  <div class="course-info-section" style="margin: 20px 0;">
-                    <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 8px; border: 2px solid #28a745;">
-                      <h5 style="color: #155724; margin: 0; text-align: center;">
-                        <i class="fas fa-check-circle"></i> Course Completed
-                      </h5>
-                    </div>
-                  </div>
-                <% } %>
-              <% } %>
+             <!-- ✅ Certificate Section with Proper Logic Flow -->
+<% if (course.showCertificateSection) { %>
+  <% if (course.canViewCertificate && course.hasCertificate) { %>
+    <!-- Certificate Available Section -->
+    <div class="course-info-section certificate-ready" style="margin: 20px 0;">
+      <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
+        <h5 style="color: #155724; margin: 0 0 15px 0;">
+          <i class="fas fa-medal"></i> Certificate Available
+        </h5>
+        <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+          <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
+            🎉 Congratulations! Your certificate is ready for download.
+          </p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/certificates/view/<%= course.certificateId %>" class="cta-btn btn-certificate">
+              <i class="fas fa-eye"></i> View Certificate
+            </a>
+            <button onclick="downloadCertificate('<%= course.certificateId %>')" class="cta-btn btn-secondary">
+              <i class="fas fa-download"></i> Download PDF
+            </button>
+            <button onclick="shareCertificate('<%= course.certificateId %>', '<%= course.title %>')" class="cta-btn btn-outline-primary">
+              <i class="fas fa-share-alt"></i> Share
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } else if (course.canGetCertificate && !course.hasCertificate && course.hasPaidForCertificate) { %>
+    <!-- Certificate Generation Section (only if user paid for certificate) -->
+    <div class="course-info-section certificate-generate" style="margin: 20px 0;">
+      <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
+        <h5 style="color: #155724; margin: 0 0 15px 0;">
+          <i class="fas fa-trophy"></i> Ready for Certificate
+        </h5>
+        <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+          <p style="color: #155724; margin: 0 0 15px 0; font-weight: 600;">
+            All requirements completed! Generate your certificate now.
+          </p>
+          <button class="cta-btn btn-generate-certificate" 
+                  data-course-id="<%= course.courseId %>" 
+                  data-course-type="<%= course.courseType %>"
+                  data-course-title="<%= course.title %>">
+            <i class="fas fa-certificate"></i> Generate Certificate
+          </button>
+        </div>
+      </div>
+    </div>
+  <% } %>
+<% } else { %>
+  <!-- For free courses without certificate payment - show simple completion -->
+  <% if (course.attendanceConfirmed && course.courseEnded) { %>
+    <div class="course-info-section" style="margin: 20px 0;">
+      <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 15px; border-radius: 8px; border: 2px solid #28a745;">
+        <h5 style="color: #155724; margin: 0; text-align: center;">
+          <i class="fas fa-check-circle"></i> Course Completed Successfully
+        </h5>
+      </div>
+    </div>
+  <% } %>
+<% } %>
 
               <!-- Course Materials and Resources -->
               <% if (course.materials && (course.materials.preReadings || course.materials.downloads || course.resources.length > 0)) { %>
@@ -1489,6 +1489,60 @@ function toggleFullscreen() {
       document.body.style.overflow = 'auto';
     }
   }
+  // Auto-refresh functionality for course timing changes
+function initializeAutoRefresh() {
+  // Only run auto-refresh for courses that are starting soon or in progress
+  const coursesNeedingRefresh = document.querySelectorAll('.course-card').length;
+  
+  if (coursesNeedingRefresh > 0) {
+    // Check for timing changes every 60 seconds
+    setInterval(checkForTimingUpdates, 60000);
+  }
+}
+
+async function checkForTimingUpdates() {
+  try {
+    const currentUrl = window.location.pathname + window.location.search;
+    const response = await fetch(currentUrl, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Cache-Control': 'no-cache'
+      }
+    });
+    
+    if (response.ok) {
+      const newContent = await response.text();
+      const parser = new DOMParser();
+      const newDoc = parser.parseFromString(newContent, 'text/html');
+      
+      // Check if any course action buttons have changed
+      let needsRefresh = false;
+      
+      document.querySelectorAll('.course-actions').forEach((currentActions, index) => {
+        const newActions = newDoc.querySelectorAll('.course-actions')[index];
+        if (newActions && currentActions.innerHTML !== newActions.innerHTML) {
+          needsRefresh = true;
+        }
+      });
+      
+      if (needsRefresh) {
+        console.log('Course timing changed, refreshing page...');
+        window.location.reload();
+      }
+    }
+  } catch (error) {
+    console.log('Auto-refresh check failed:', error);
+  }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Existing initialization code...
+  
+  // Add auto-refresh initialization
+  initializeAutoRefresh();
+});
   </script>
  <%- include('partials/footer') %>
 </body>

@@ -1293,18 +1293,61 @@ exports.completeRegistration = async (req, res) => {
 // ✅ FIXED: Payment Processing with Certificate Price Support
 exports.proceedToPayment = async (req, res) => {
   try {
-    // Environment Variables Validation
-    console.log("🔧 CCAvenue Environment Check:", {
-      CCAVENUE_ACCESS_CODE: process.env.CCAVENUE_ACCESS_CODE
-        ? "✅ SET"
-        : "❌ MISSING",
-      CCAVENUE_MERCHANT_ID: process.env.CCAVENUE_MERCHANT_ID
-        ? "✅ SET"
-        : "❌ MISSING",
-      CCAVENUE_WORKING_KEY: process.env.CCAVENUE_WORKING_KEY
-        ? "✅ SET"
-        : "❌ MISSING",
+    // ENHANCED: More detailed credential debugging
+    console.log("🔧 Detailed CCAvenue Credentials:", {
+      MERCHANT_ID: {
+        exists: !!process.env.CCAVENUE_MERCHANT_ID,
+        length: process.env.CCAVENUE_MERCHANT_ID?.length || 0,
+        preview: process.env.CCAVENUE_MERCHANT_ID
+          ? process.env.CCAVENUE_MERCHANT_ID.substring(0, 4) +
+            "..." +
+            process.env.CCAVENUE_MERCHANT_ID.slice(-4)
+          : "MISSING",
+      },
+      ACCESS_CODE: {
+        exists: !!process.env.CCAVENUE_ACCESS_CODE,
+        length: process.env.CCAVENUE_ACCESS_CODE?.length || 0,
+        preview: process.env.CCAVENUE_ACCESS_CODE
+          ? process.env.CCAVENUE_ACCESS_CODE.substring(0, 6) + "..."
+          : "MISSING",
+      },
+      WORKING_KEY: {
+        exists: !!process.env.CCAVENUE_WORKING_KEY,
+        length: process.env.CCAVENUE_WORKING_KEY?.length || 0,
+        isValidLength: process.env.CCAVENUE_WORKING_KEY?.length === 32,
+      },
     });
+
+    // CRITICAL: Validate credential format
+    const credentialIssues = [];
+    if (
+      !process.env.CCAVENUE_MERCHANT_ID ||
+      process.env.CCAVENUE_MERCHANT_ID.trim() === ""
+    ) {
+      credentialIssues.push("MERCHANT_ID is empty");
+    }
+    if (
+      !process.env.CCAVENUE_ACCESS_CODE ||
+      process.env.CCAVENUE_ACCESS_CODE.trim() === ""
+    ) {
+      credentialIssues.push("ACCESS_CODE is empty");
+    }
+    if (
+      !process.env.CCAVENUE_WORKING_KEY ||
+      process.env.CCAVENUE_WORKING_KEY.length !== 32
+    ) {
+      credentialIssues.push("WORKING_KEY invalid (should be 32 characters)");
+    }
+
+    if (credentialIssues.length > 0) {
+      console.error("❌ CRITICAL CREDENTIAL ISSUES:", credentialIssues);
+      return res.status(500).json({
+        success: false,
+        message:
+          "CCAvenue credentials configuration error: " +
+          credentialIssues.join(", "),
+      });
+    }
 
     if (
       !process.env.CCAVENUE_ACCESS_CODE ||
@@ -1902,14 +1945,34 @@ exports.proceedToPayment = async (req, res) => {
     // ENCRYPTION: Use the CCAvenue utility
     let encRequest;
     try {
+      console.log("🔐 Pre-encryption data validation:", {
+        dataStringLength: dataString.length,
+        workingKeyLength: process.env.CCAVENUE_WORKING_KEY?.length,
+        sampleData: dataString.substring(0, 200) + "...",
+      });
+
       console.log(
         "🔐 Starting encryption with certificate-inclusive billing data..."
       );
       encRequest = ccavUtil.encrypt(dataString);
+
+      // Verify encrypted string
+      if (!encRequest || encRequest.trim() === "") {
+        throw new Error("Encryption resulted in empty string");
+      }
+
       console.log("✅ Encryption successful with certificate pricing included");
       console.log("📏 Encrypted string length:", encRequest.length);
+      console.log(
+        "📏 Encrypted string preview:",
+        encRequest.substring(0, 50) + "..."
+      );
     } catch (encryptionError) {
       console.error("❌ Encryption failed:", encryptionError);
+      console.error("❌ Working key status:", {
+        exists: !!process.env.CCAVENUE_WORKING_KEY,
+        length: process.env.CCAVENUE_WORKING_KEY?.length,
+      });
       return res.status(500).json({
         success: false,
         message: "Payment encryption failed: " + encryptionError.message,
@@ -2147,6 +2210,23 @@ exports.proceedToPayment = async (req, res) => {
         </body>
       </html>
     `;
+
+    // Final Payment Data Verification
+    console.log("💳 Final Payment Data Verification:", {
+      merchant_id: ccavenuePaymentData.merchant_id,
+      access_code: process.env.CCAVENUE_ACCESS_CODE?.substring(0, 6) + "...",
+      order_id: ccavenuePaymentData.order_id,
+      amount: ccavenuePaymentData.amount,
+      currency: ccavenuePaymentData.currency,
+      dataStringLength: dataString.length,
+      encryptedLength: encRequest?.length || 0,
+      hasAllRequiredParams: !!(
+        ccavenuePaymentData.merchant_id &&
+        ccavenuePaymentData.order_id &&
+        ccavenuePaymentData.amount &&
+        ccavenuePaymentData.currency
+      ),
+    });
 
     console.log(`💳 Payment form generated for Order ${orderNumber}`);
     console.log(`🔗 Target URL: ${paymentUrl}`);

@@ -526,8 +526,8 @@
               <% } %>
 
              <!-- ✅ Certificate Section with Proper Logic Flow -->
-<% if (course.showCertificateSection) { %>
-  <% if (course.canViewCertificate && course.hasCertificate) { %>
+             <% if (course.showCertificateSection && course.hasPaidForCertificate) { %>
+              <% if (course.canViewCertificate && course.hasCertificate && course.hasPaidForCertificate) { %>
     <!-- Certificate Available Section -->
     <div class="course-info-section certificate-ready" style="margin: 20px 0;">
       <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">

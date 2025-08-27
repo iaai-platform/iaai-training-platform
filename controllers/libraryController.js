@@ -827,7 +827,7 @@ exports.getSelfPacedLibrary = async (req, res) => {
 };
 
 /**
- * ✅ COMPLETE: Get Live Library with Enhanced Dual Timezone Support
+ * ✅ COMPLETE: Get Live Library with Enhanced Dual Timezone Support & Certificate Logic Fix
  */
 exports.getLiveLibrary = async (req, res) => {
   try {
@@ -920,7 +920,7 @@ exports.getLiveLibrary = async (req, res) => {
                 assessmentScore >= (course.assessment?.passingScore || 70);
 
               // ✅ SAFE: Basic certificate eligibility (no linked course logic)
-              const canGetCertificate =
+              const baseCertificateEligibility =
                 courseEnded &&
                 meetsAttendanceRequirement &&
                 attendanceConfirmed &&
@@ -936,13 +936,49 @@ exports.getLiveLibrary = async (req, res) => {
 
               const hasCertificate = !!existingCertificate;
               const certificateId = existingCertificate?.certificateId || null;
-              const canViewCertificate = canGetCertificate || hasCertificate;
+
+              // ✅ STEP 1: Calculate certificate payment logic FIRST
+              const originalPrice =
+                enrollment.enrollmentData?.originalPrice || 0;
+              const paidAmount = enrollment.enrollmentData?.paidAmount || 0;
+
+              const hasPaidForCertificate = (() => {
+                // If paid course (originalPrice > 0), certificate is included
+                if (originalPrice > 0) return true;
+
+                // If free course, check if user paid for certificate (€10)
+                if (originalPrice === 0 && paidAmount >= 10) return true;
+
+                // Check alternative certificate payment tracking
+                return (enrollment.certificate?.certificateFeePaid || 0) >= 10;
+              })();
+
+              const showCertificateSection = (() => {
+                // Show certificate section only if:
+                // 1. Paid course (always gets certificate)
+                // 2. Free course where user paid for certificate
+                return (
+                  originalPrice > 0 || (originalPrice === 0 && paidAmount > 0)
+                );
+              })();
+
+              // ✅ STEP 2: Apply payment logic to certificate eligibility
+              // ✅ STEP 2: Apply payment logic to certificate eligibility
+              const canGetCertificate =
+                baseCertificateEligibility && hasPaidForCertificate;
+              const canViewCertificate =
+                hasCertificate && hasPaidForCertificate; // Only show if has certificate AND paid
 
               console.log(`📊 Live Course: ${course.basic.title}`, {
+                originalPrice,
+                paidAmount,
+                hasPaidForCertificate,
+                showCertificateSection,
                 courseEnded,
                 attendanceConfirmed,
                 assessmentRequired,
                 assessmentPassed,
+                baseCertificateEligibility,
                 canGetCertificate,
                 hasCertificate,
                 canViewCertificate,
@@ -1095,89 +1131,18 @@ exports.getLiveLibrary = async (req, res) => {
                   linkedCourseStartDate: null,
                 },
 
-                // Certificate information
+                // ✅ FIXED: Certificate information with payment logic
                 canViewCertificate: canViewCertificate,
                 canGetCertificate: canGetCertificate,
                 hasCertificate: hasCertificate,
                 certificateId: certificateId,
                 certificateMessage: null,
 
-                // ✅ NEW FIELDS:
-                // ✅ CERTIFICATE PAYMENT LOGIC - Add right after certificateMessage: null,
-                certificatePaymentRequired: (() => {
-                  const originalPrice =
-                    enrollment.enrollmentData?.originalPrice || 0;
-                  const paidAmount = enrollment.enrollmentData?.paidAmount || 0;
-
-                  // Never show certificate payment for any scenario
-                  // Free courses either have paid for certificate or don't get certificate options
-                  return false;
-                })(),
-
-                hasPaidForCertificate: (() => {
-                  const originalPrice =
-                    enrollment.enrollmentData?.originalPrice || 0;
-                  const paidAmount = enrollment.enrollmentData?.paidAmount || 0;
-
-                  // If paid course, certificate is included
-                  if (originalPrice > 0) return true;
-
-                  // If free course and user paid something (certificate fee), they have certificate access
-                  if (originalPrice === 0 && paidAmount > 0) return true;
-
-                  // Check alternative certificate payment tracking
-                  return (
-                    (enrollment.certificate?.certificateFeePaid || 0) >= 10
-                  );
-                })(),
-
-                // Add new field for showing certificate section at all
-                showCertificateSection: (() => {
-                  const originalPrice =
-                    enrollment.enrollmentData?.originalPrice || 0;
-                  const paidAmount = enrollment.enrollmentData?.paidAmount || 0;
-
-                  // Show certificate section only if:
-                  // 1. Paid course (always gets certificate)
-                  // 2. Free course where user paid for certificate
-                  return (
-                    originalPrice > 0 || (originalPrice === 0 && paidAmount > 0)
-                  );
-                })(),
-
-                hasPaidForCertificate: (() => {
-                  const originalPrice =
-                    enrollment.enrollmentData?.originalPrice || 0;
-                  // If paid course (originalPrice > 0), certificate is included
-                  if (originalPrice > 0) return true;
-                  // If free course, check if certificate fee was paid
-                  return (
-                    (enrollment.certificate?.certificateFeePaid || 0) >= 10
-                  );
-                })(),
-
-                hasPaidForCertificate: (() => {
-                  const originalPrice =
-                    enrollment.enrollmentData?.originalPrice || 0;
-                  // If paid course (originalPrice > 0), certificate is included
-                  if (originalPrice > 0) return true;
-                  // If free course, check if certificate fee was paid
-                  return (
-                    (enrollment.certificate?.certificateFeePaid || 0) >= 10
-                  );
-                })(),
-
-                certificateFeeAmount: (() => {
-                  const originalPrice =
-                    enrollment.enrollmentData?.originalPrice || 0;
-                  return originalPrice === 0 ? 10 : 0; // €10 for free courses, €0 for paid courses
-                })(),
-
-                isFreeCourseCertificate: (() => {
-                  const originalPrice =
-                    enrollment.enrollmentData?.originalPrice || 0;
-                  return originalPrice === 0;
-                })(),
+                // ✅ FIXED: Certificate payment logic (SINGLE DEFINITION)
+                hasPaidForCertificate: hasPaidForCertificate,
+                showCertificateSection: showCertificateSection,
+                certificateFeeAmount: originalPrice === 0 ? 10 : 0,
+                isFreeCourseCertificate: originalPrice === 0,
 
                 // Certificate requirements status
                 certificateRequirements: {
@@ -1187,6 +1152,7 @@ exports.getLiveLibrary = async (req, res) => {
                   assessmentRequired: assessmentRequired,
                   assessmentPassed: assessmentPassed || !assessmentRequired,
                   allRequirementsMet: canGetCertificate,
+                  hasPaidForCertificate: hasPaidForCertificate,
                   isLinkedToInPerson: false,
                   certificateSuppressionReason: null,
                 },

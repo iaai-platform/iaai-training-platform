@@ -236,6 +236,45 @@ class CertificateController {
     }
 
     // ========================================
+    // ✅ PAYMENT VALIDATION FOR FREE COURSES (INSERT HERE)
+    // ========================================
+    if (courseType === "OnlineLiveTraining") {
+      const enrollmentData = enrollment.enrollmentData;
+      const originalPrice = enrollmentData.originalPrice || 0;
+      const paidAmount = enrollmentData.paidAmount || 0;
+
+      // For free courses, check if user paid for certificate
+      if (originalPrice === 0) {
+        const hasPaidForCertificate = paidAmount >= 10; // €10 certificate fee
+
+        if (!hasPaidForCertificate) {
+          return {
+            eligible: false,
+            message: "Certificate fee payment required for free courses (€10)",
+            requirements: {
+              ...requirements,
+              certificateFeePaid: false,
+            },
+            debug: {
+              ...debug,
+              isFreeBase: true,
+              paidAmount: paidAmount,
+              certificateFeeRequired: 10,
+              hasPaidForCertificate: false,
+            },
+          };
+        }
+
+        debug.certificatePaymentValidated = true;
+      }
+    }
+
+    // ========================================
+    // ✅ ATTENDANCE VALIDATION - LIBRARY ALIGNED
+    // Uses all possible methods from User Model structure
+    // ========================================
+
+    // ========================================
     // ✅ ATTENDANCE VALIDATION - LIBRARY ALIGNED
     // Uses all possible methods from User Model structure
     // ========================================
@@ -1140,17 +1179,17 @@ class CertificateController {
   }
 
   // ========================================
-  // ✅ VIEW CERTIFICATE - ROUTES ALIGNED
+  // VIEW CERTIFICATE - ROUTES ALIGNED WITH PAYMENT VALIDATION
   // ========================================
   async viewCertificate(req, res) {
     try {
       const { certificateId } = req.params;
       const userId = req.user._id;
 
-      console.log(`🔍 Certificate view with full alignment: ${certificateId}`);
+      console.log(`Certificate view with full alignment: ${certificateId}`);
 
       const user = await User.findById(userId).select(
-        "myCertificates firstName lastName email"
+        "myCertificates firstName lastName email myLiveCourses myInPersonCourses mySelfPacedCourses"
       );
 
       if (!user) {
@@ -1177,13 +1216,54 @@ class CertificateController {
         });
       }
 
-      console.log(`📋 Certificate found:`, {
+      // PAYMENT VALIDATION CHECK FOR FREE COURSES
+      if (certificate.courseType === "OnlineLiveTraining") {
+        try {
+          const enrollment = user.myLiveCourses.find(
+            (c) =>
+              c.courseId &&
+              c.courseId.toString() === certificate.courseId.toString()
+          );
+
+          if (enrollment) {
+            const originalPrice = enrollment.enrollmentData?.originalPrice || 0;
+            const paidAmount = enrollment.enrollmentData?.paidAmount || 0;
+
+            // For free courses, check certificate payment
+            if (originalPrice === 0 && paidAmount < 10) {
+              console.log(`Certificate access denied - payment required:`, {
+                certificateId,
+                originalPrice,
+                paidAmount,
+                required: 10,
+              });
+
+              return res.status(403).render("error", {
+                message:
+                  "Certificate access requires payment for free courses (€10). Please purchase certificate access first.",
+                user: req.user,
+              });
+            }
+
+            console.log(`Certificate payment validated:`, {
+              originalPrice,
+              paidAmount,
+              accessGranted: true,
+            });
+          }
+        } catch (paymentError) {
+          console.error("Error checking certificate payment:", paymentError);
+          // Continue with certificate view if payment check fails
+        }
+      }
+
+      console.log(`Certificate found:`, {
         certificateId: certificate.certificateId,
         courseId: certificate.courseId,
         courseType: certificate.courseType,
       });
 
-      // ✅ FETCH ENHANCED COURSE DATA FOR VIEW ALIGNMENT
+      // FETCH ENHANCED COURSE DATA FOR VIEW ALIGNMENT
       let enhancedCourseData = {};
       const courseId = certificate.courseId;
       const courseType = certificate.courseType;
@@ -1261,13 +1341,13 @@ class CertificateController {
         }
 
         if (course) {
-          console.log(`✅ Course found with populated data:`, {
+          console.log(`Course found with populated data:`, {
             title: course.basic?.title,
             hasInstructors: !!(course.instructors || course.instructor),
             hasCertification: !!course.certification,
           });
 
-          // ✅ BUILD ENHANCED COURSE DATA for view
+          // BUILD ENHANCED COURSE DATA for view
           enhancedCourseData = {
             basic: course.basic,
             certification: course.certification,
@@ -1285,7 +1365,7 @@ class CertificateController {
             deliveryMethod: this.getDeliveryMethodDisplay(courseType, course),
           };
         } else {
-          console.log(`⚠️ Course not found, using certificate data`);
+          console.log(`Course not found, using certificate data`);
           // Fallback to certificate data
           enhancedCourseData = {
             instructors: certificate.certificateData.instructors || [],
@@ -1297,7 +1377,7 @@ class CertificateController {
           };
         }
       } catch (courseError) {
-        console.error(`❌ Error fetching enhanced course data:`, courseError);
+        console.error(`Error fetching enhanced course data:`, courseError);
         // Use certificate data as fallback
         enhancedCourseData = {
           instructors: certificate.certificateData.instructors || [],
@@ -1309,7 +1389,7 @@ class CertificateController {
         };
       }
 
-      // ✅ BUILD ENHANCED CERTIFICATE OBJECT FOR VIEW
+      // BUILD ENHANCED CERTIFICATE OBJECT FOR VIEW
       const enhancedCertificate = {
         ...certificate.toObject(),
         courseDetails: enhancedCourseData,
@@ -1323,10 +1403,10 @@ class CertificateController {
       try {
         await user.save();
       } catch (saveError) {
-        console.log("⚠️ Could not update view count:", saveError.message);
+        console.log("Could not update view count:", saveError.message);
       }
 
-      console.log(`✅ Enhanced certificate ready for view:`, {
+      console.log(`Enhanced certificate ready for view:`, {
         hasCourseDetails: !!enhancedCertificate.courseDetails,
         instructorsCount:
           enhancedCertificate.courseDetails.instructors?.length || 0,
@@ -1334,14 +1414,14 @@ class CertificateController {
           enhancedCertificate.courseDetails.certificationBodies?.length || 0,
       });
 
-      // ✅ RENDER WITH VIEW ALIGNMENT
+      // RENDER WITH VIEW ALIGNMENT
       res.render("certificate-view", {
         user: req.user,
         certificate: enhancedCertificate,
         title: `Professional Certificate - ${certificate.certificateData?.courseTitle}`,
       });
     } catch (error) {
-      console.error("❌ Error in enhanced certificate view:", error);
+      console.error("Error in enhanced certificate view:", error);
       res.status(500).render("error", {
         message: "Error loading certificate. Please try again later.",
         user: req.user,

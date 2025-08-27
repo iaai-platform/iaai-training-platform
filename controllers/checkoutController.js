@@ -1291,8 +1291,22 @@ exports.completeRegistration = async (req, res) => {
 };
 
 // ✅ FIXED: Payment Processing with Certificate Price Support
+// ✅ FIXED: Payment Processing with Certificate Support
 exports.proceedToPayment = async (req, res) => {
   try {
+    // Environment Variables Validation
+    console.log("🔧 CCAvenue Environment Check:", {
+      CCAVENUE_ACCESS_CODE: process.env.CCAVENUE_ACCESS_CODE
+        ? "✅ SET"
+        : "❌ MISSING",
+      CCAVENUE_MERCHANT_ID: process.env.CCAVENUE_MERCHANT_ID
+        ? "✅ SET"
+        : "❌ MISSING",
+      CCAVENUE_WORKING_KEY: process.env.CCAVENUE_WORKING_KEY
+        ? "✅ SET"
+        : "❌ MISSING",
+    });
+
     // ENHANCED: More detailed credential debugging
     console.log("🔧 Detailed CCAvenue Credentials:", {
       MERCHANT_ID: {
@@ -1346,19 +1360,6 @@ exports.proceedToPayment = async (req, res) => {
         message:
           "CCAvenue credentials configuration error: " +
           credentialIssues.join(", "),
-      });
-    }
-
-    if (
-      !process.env.CCAVENUE_ACCESS_CODE ||
-      !process.env.CCAVENUE_MERCHANT_ID ||
-      !process.env.CCAVENUE_WORKING_KEY
-    ) {
-      console.error("❌ CRITICAL: Missing CCAvenue environment variables");
-      return res.status(500).json({
-        success: false,
-        message:
-          "Payment gateway not configured. Missing environment variables.",
       });
     }
 
@@ -1641,6 +1642,11 @@ exports.proceedToPayment = async (req, res) => {
     const orderNumber = `ORD_${Date.now()}_${userId.toString().slice(-6)}`;
 
     console.log("🔧 Creating transaction with billing information...");
+    console.log("🆔 Transaction identifiers:", {
+      transactionId: transactionId,
+      orderNumber: orderNumber,
+      userId: userId.toString(),
+    });
 
     // Create transaction with enhanced billing information
     const transaction = {
@@ -1787,7 +1793,7 @@ exports.proceedToPayment = async (req, res) => {
       // ✅ BILLING INFORMATION FROM BILLING BOX - ALL VALIDATED
       ...ccavenueBillingData,
 
-      // MERCHANT PARAMETERS (for tracking)
+      // MERCHANT PARAMETERS (for tracking) - ENHANCED
       merchant_param1: transactionId,
       merchant_param2: userId.toString(),
       merchant_param3: cartItems.length.toString(),
@@ -1812,6 +1818,18 @@ exports.proceedToPayment = async (req, res) => {
       sub_acc_id: "", // Leave empty unless using sub-accounts
       invoice_number: orderNumber,
     };
+
+    // ENHANCED: Debug merchant parameters being sent
+    console.log("🔗 Merchant params being sent to CCAvenue:", {
+      merchant_param1: ccavenuePaymentData.merchant_param1,
+      merchant_param2: ccavenuePaymentData.merchant_param2,
+      merchant_param3: ccavenuePaymentData.merchant_param3,
+      merchant_param4: ccavenuePaymentData.merchant_param4,
+      merchant_param5: ccavenuePaymentData.merchant_param5,
+      orderNumber: orderNumber,
+      transactionId: transactionId,
+      userId: userId.toString(),
+    });
 
     // ✅ ENHANCED VALIDATION: Check all required parameters including billing
     const requiredParams = [
@@ -1956,7 +1974,7 @@ exports.proceedToPayment = async (req, res) => {
       );
       encRequest = ccavUtil.encrypt(dataString);
 
-      // Verify encrypted string
+      // Verify encrypted string is not empty
       if (!encRequest || encRequest.trim() === "") {
         throw new Error("Encryption resulted in empty string");
       }
@@ -1981,6 +1999,23 @@ exports.proceedToPayment = async (req, res) => {
 
     const paymentUrl =
       "https://secure.ccavenue.ae/transaction/transaction.do?command=initiateTransaction";
+
+    // Final Payment Data Verification
+    console.log("💳 Final Payment Data Verification:", {
+      merchant_id: ccavenuePaymentData.merchant_id,
+      access_code: process.env.CCAVENUE_ACCESS_CODE?.substring(0, 6) + "...",
+      order_id: ccavenuePaymentData.order_id,
+      amount: ccavenuePaymentData.amount,
+      currency: ccavenuePaymentData.currency,
+      dataStringLength: dataString.length,
+      encryptedLength: encRequest?.length || 0,
+      hasAllRequiredParams: !!(
+        ccavenuePaymentData.merchant_id &&
+        ccavenuePaymentData.order_id &&
+        ccavenuePaymentData.amount &&
+        ccavenuePaymentData.currency
+      ),
+    });
 
     // ✅ ENHANCED payment form with certificate pricing confirmation
     const paymentForm = `
@@ -2098,6 +2133,7 @@ exports.proceedToPayment = async (req, res) => {
             <div class="debug">
               <strong>🔍 Payment Debug Info (Certificate Fix Applied):</strong><br>
               Order ID: ${orderNumber}<br>
+              Transaction ID: ${transactionId}<br>
               Amount: AED ${finalAmount.toFixed(
                 2
               )} (EUR ${finalAmountEUR.toFixed(2)})<br>
@@ -2175,6 +2211,7 @@ exports.proceedToPayment = async (req, res) => {
                   finalAmountAED: '${finalAmount.toFixed(2)}',
                   certificateFeesIncluded: true,
                   billingValidated: true,
+                  transactionId: '${transactionId}',
                   attempt: redirectAttempts + 1
                 });
                 
@@ -2211,23 +2248,6 @@ exports.proceedToPayment = async (req, res) => {
       </html>
     `;
 
-    // Final Payment Data Verification
-    console.log("💳 Final Payment Data Verification:", {
-      merchant_id: ccavenuePaymentData.merchant_id,
-      access_code: process.env.CCAVENUE_ACCESS_CODE?.substring(0, 6) + "...",
-      order_id: ccavenuePaymentData.order_id,
-      amount: ccavenuePaymentData.amount,
-      currency: ccavenuePaymentData.currency,
-      dataStringLength: dataString.length,
-      encryptedLength: encRequest?.length || 0,
-      hasAllRequiredParams: !!(
-        ccavenuePaymentData.merchant_id &&
-        ccavenuePaymentData.order_id &&
-        ccavenuePaymentData.amount &&
-        ccavenuePaymentData.currency
-      ),
-    });
-
     console.log(`💳 Payment form generated for Order ${orderNumber}`);
     console.log(`🔗 Target URL: ${paymentUrl}`);
     console.log(
@@ -2253,17 +2273,23 @@ exports.proceedToPayment = async (req, res) => {
 };
 
 // ✅ ENHANCED: Handle Payment Response
+// ✅ ENHANCED: Handle Payment Response
 exports.handlePaymentResponse = async (req, res) => {
   try {
     console.log("📥 Received payment response from CCAvenue");
+    console.log("📋 Raw CCAvenue response body:", req.body);
+
     const { encResp } = req.body;
 
     if (!encResp) {
+      console.error("❌ No encResp in response body");
       return res.status(400).send("Invalid payment response");
     }
 
     // Decrypt the response
+    console.log("🔓 Decrypting CCAvenue response...");
     const decryptedResponse = ccavUtil.decrypt(encResp);
+    console.log("🔓 Decrypted response:", decryptedResponse);
 
     // Parse response data
     const responseData = {};
@@ -2272,12 +2298,7 @@ exports.handlePaymentResponse = async (req, res) => {
       responseData[decodeURIComponent(key)] = decodeURIComponent(value || "");
     });
 
-    console.log("💳 Payment Response Details:", {
-      order_status: responseData.order_status,
-      order_id: responseData.order_id,
-      tracking_id: responseData.tracking_id,
-      amount: responseData.amount,
-    });
+    console.log("💳 Complete Payment Response Data:", responseData);
 
     const {
       order_status,
@@ -2292,27 +2313,220 @@ exports.handlePaymentResponse = async (req, res) => {
       failure_message,
     } = responseData;
 
+    console.log("🔍 Extracted payment details:", {
+      order_status,
+      order_id,
+      tracking_id,
+      amount,
+      transactionId,
+      userId,
+      payment_mode,
+      bank_ref_no,
+    });
+
+    // Enhanced user lookup with debugging
+    console.log("👤 Looking up user with ID:", userId);
     const user = await User.findById(userId);
+
     if (!user) {
+      console.error("❌ User not found in database:", userId);
+      console.error("❌ This could indicate session issues or user deletion");
       return res.redirect("/payment/error?message=User not found");
     }
 
-    // Update payment transaction with CCAvenue response
-    const transaction = user.updatePaymentTransaction(
-      transactionId,
-      responseData
+    console.log("✅ User found:", user.email);
+    console.log(
+      "📊 User has",
+      user.paymentTransactions.length,
+      "payment transactions"
     );
 
-    if (!transaction) {
-      return res.redirect("/payment/error?message=Transaction not found");
+    // Debug: List all user's transactions for reference
+    if (user.paymentTransactions.length > 0) {
+      console.log("🔍 User's existing transactions:");
+      user.paymentTransactions.forEach((tx, index) => {
+        console.log(
+          `  ${index + 1}. TransactionID: ${tx.transactionId}, OrderID: ${
+            tx.orderNumber
+          }, Status: ${tx.paymentStatus}`
+        );
+      });
     }
 
+    // Enhanced transaction lookup with multiple fallback methods
+    console.log("🔍 Searching for transaction with ID:", transactionId);
+    let transaction = user.paymentTransactions.find(
+      (t) => t.transactionId === transactionId
+    );
+
+    if (!transaction && order_id) {
+      console.log("🔍 TransactionId not found, trying by order_id:", order_id);
+      transaction = user.paymentTransactions.find(
+        (t) => t.orderNumber === order_id
+      );
+    }
+
+    // Additional fallback: find by pending status and recent creation
+    if (!transaction) {
+      console.log("🔍 Trying to find by pending status and recent creation...");
+      const recentTransactions = user.paymentTransactions
+        .filter((t) => t.paymentStatus === "pending")
+        .filter((t) => {
+          const timeDiff = Date.now() - t.createdAt.getTime();
+          return timeDiff < 30 * 60 * 1000; // Within last 30 minutes
+        })
+        .sort((a, b) => b.createdAt - a.createdAt); // Most recent first
+
+      if (recentTransactions.length > 0) {
+        transaction = recentTransactions[0];
+        console.log(
+          "🔍 Found recent pending transaction:",
+          transaction.transactionId
+        );
+      }
+    }
+
+    if (!transaction) {
+      console.error("❌ Transaction not found in user's payment history");
+      console.error("❌ Search criteria:", {
+        transactionId: transactionId,
+        order_id: order_id,
+        userId: userId,
+      });
+      console.error(
+        "❌ Available transaction IDs:",
+        user.paymentTransactions.map((t) => t.transactionId)
+      );
+      console.error(
+        "❌ Available order numbers:",
+        user.paymentTransactions.map((t) => t.orderNumber)
+      );
+
+      // Create a more detailed error message
+      const errorMessage = `Transaction lookup failed. TransactionID: ${transactionId}, OrderID: ${order_id}`;
+      return res.redirect(
+        `/payment/error?message=${encodeURIComponent(errorMessage)}`
+      );
+    }
+
+    console.log("✅ Transaction found:", {
+      transactionId: transaction.transactionId,
+      orderNumber: transaction.orderNumber,
+      currentStatus: transaction.paymentStatus,
+      amount: transaction.financial.finalAmount,
+    });
+
+    // Update payment transaction with CCAvenue response
+    console.log("💾 Updating transaction with CCAvenue response...");
+
+    // Update CCAvenue specific fields
+    transaction.ccavenue = {
+      orderId: order_id,
+      trackingId: tracking_id,
+      bankRefNo: bank_ref_no,
+      paymentMode: payment_mode,
+      cardName: card_name,
+      statusCode: responseData.status_code || "",
+      statusMessage: responseData.status_message || "",
+      failureMessage: failure_message || "",
+      rawResponse: responseData, // Store complete response for debugging
+    };
+
+    // Update transaction status and completion
+    transaction.paymentStatus =
+      order_status === "Success" ? "completed" : "failed";
+    transaction.completedAt = new Date();
+
+    // Add detailed logging for payment status
+    console.log("📊 Payment status update:", {
+      order_status: order_status,
+      new_paymentStatus: transaction.paymentStatus,
+      tracking_id: tracking_id,
+      amount_processed: amount,
+    });
+
     if (order_status === "Success") {
-      // Payment successful - update enrollment status
-      user.updateEnrollmentStatusAfterPayment(transactionId);
+      console.log("✅ Payment successful - processing course enrollment...");
+
+      // Update course enrollment status after successful payment
+      let enrollmentsUpdated = 0;
+
+      transaction.items.forEach((item) => {
+        console.log(`🔄 Processing course enrollment for: ${item.courseTitle}`);
+
+        // Update enrollment status based on course type
+        if (item.courseType === "InPersonAestheticTraining") {
+          const enrollment = user.myInPersonCourses.find(
+            (e) =>
+              e.courseId.toString() === item.courseId.toString() &&
+              e.enrollmentData.status === "cart"
+          );
+          if (enrollment) {
+            enrollment.enrollmentData.status = "paid";
+            enrollment.enrollmentData.paidAmount = item.finalPrice;
+            enrollment.enrollmentData.paymentTransactionId =
+              transaction.transactionId;
+            enrollmentsUpdated++;
+            console.log(
+              `✅ Updated In-Person course enrollment: ${item.courseTitle}`
+            );
+          }
+        } else if (item.courseType === "OnlineLiveTraining") {
+          const enrollment = user.myLiveCourses.find(
+            (e) =>
+              e.courseId.toString() === item.courseId.toString() &&
+              e.enrollmentData.status === "cart"
+          );
+          if (enrollment) {
+            enrollment.enrollmentData.status = "paid";
+            enrollment.enrollmentData.paidAmount = item.finalPrice;
+            enrollment.enrollmentData.paymentTransactionId =
+              transaction.transactionId;
+            enrollmentsUpdated++;
+            console.log(
+              `✅ Updated Online Live course enrollment: ${item.courseTitle}`
+            );
+          }
+        } else if (item.courseType === "SelfPacedOnlineTraining") {
+          const enrollment = user.mySelfPacedCourses.find(
+            (e) =>
+              e.courseId.toString() === item.courseId.toString() &&
+              e.enrollmentData.status === "cart"
+          );
+          if (enrollment) {
+            enrollment.enrollmentData.status = "paid";
+            enrollment.enrollmentData.paidAmount = item.finalPrice;
+            enrollment.enrollmentData.paymentTransactionId =
+              transaction.transactionId;
+
+            // Set expiry date for self-paced courses
+            if (item.courseSchedule.accessDays) {
+              const expiryDate = new Date();
+              expiryDate.setDate(
+                expiryDate.getDate() + item.courseSchedule.accessDays
+              );
+              enrollment.enrollmentData.expiryDate = expiryDate;
+              console.log(
+                `📅 Set expiry date for self-paced course: ${expiryDate}`
+              );
+            }
+
+            enrollmentsUpdated++;
+            console.log(
+              `✅ Updated Self-Paced course enrollment: ${item.courseTitle}`
+            );
+          }
+        }
+      });
+
+      console.log(
+        `📊 Total enrollments updated: ${enrollmentsUpdated}/${transaction.items.length}`
+      );
 
       // ✅ ENHANCED: Send confirmation email with retry logic
       try {
+        console.log("📧 Preparing to send payment confirmation email...");
+
         // Prepare registered courses data
         const registeredCourses = transaction.items.map((item) => ({
           courseId: item.courseId,
@@ -2338,6 +2552,8 @@ exports.handlePaymentResponse = async (req, res) => {
           orderNumber: transaction.orderNumber,
           finalAmount: transaction.financial.finalAmount, // ✅ Includes certificate fees
           paymentMethod: "CCAvenue Payment Gateway",
+          trackingId: tracking_id,
+          bankRefNo: bank_ref_no,
         };
 
         const emailResult = await sendEnhancedRegistrationEmail(
@@ -2348,9 +2564,7 @@ exports.handlePaymentResponse = async (req, res) => {
         );
 
         if (emailResult.success) {
-          console.log(
-            "✅ Enhanced payment confirmation email sent successfully"
-          );
+          console.log("✅ Payment confirmation email sent successfully");
         } else {
           console.error("⚠️ Payment confirmation email failed but continuing");
         }
@@ -2362,6 +2576,7 @@ exports.handlePaymentResponse = async (req, res) => {
       }
 
       // ✅ ENHANCED: Schedule reminders with centralized function
+      console.log("📅 Scheduling course reminders...");
       const reminderResult = await scheduleCoursesReminders(
         transaction.items,
         "paid registration"
@@ -2381,19 +2596,21 @@ exports.handlePaymentResponse = async (req, res) => {
         } - IAAI Training`,
       });
 
-      await user.save();
+      // Save all changes
+      await user.save({ validateBeforeSave: false });
 
       // Clear applied promo code from session
       delete req.session.appliedPromoCode;
 
+      console.log(`✅ PAID registration completed successfully`);
       console.log(
-        `✅ PAID registration completed for ${transaction.items.length} courses (Certificate fees included)`
+        `📧 Email status: ${emailResult?.success ? "sent" : "failed"}`
       );
-      console.log(`📧 Email status: sent`);
       console.log(`📅 Reminders scheduled: ${reminderResult.scheduledCount}`);
+      console.log(`🎯 Redirecting to success page`);
 
       res.redirect(
-        `/payment/success?order_id=${order_id}&amount=${amount}&ref=${transaction.receiptNumber}`
+        `/payment/success?order_id=${order_id}&amount=${amount}&ref=${transaction.receiptNumber}&userId=${userId}`
       );
     } else {
       // Payment failed
@@ -2406,19 +2623,33 @@ exports.handlePaymentResponse = async (req, res) => {
         status: "pending",
         recipientEmail: user.email,
         subject: `Payment Failed - Order #${order_id}`,
+        failureReason: failure_message,
       });
 
-      await user.save();
+      await user.save({ validateBeforeSave: false });
 
+      console.log(`❌ Payment failed, redirecting to failure page`);
       res.redirect(
         `/payment/failure?order_id=${order_id}&reason=${encodeURIComponent(
           failure_message || "Payment failed"
-        )}`
+        )}&userId=${userId}`
       );
     }
   } catch (error) {
     console.error("❌ Payment response handling error:", error);
-    res.redirect("/payment/error?message=Payment processing error");
+    console.error("❌ Error stack:", error.stack);
+
+    // Log additional context for debugging
+    console.error("❌ Request details:", {
+      body: req.body,
+      headers: req.headers,
+      method: req.method,
+      url: req.url,
+    });
+
+    res.redirect(
+      "/payment/error?message=Payment processing error - please contact support"
+    );
   }
 };
 

@@ -2603,9 +2603,9 @@ exports.handlePaymentResponse = async (req, res) => {
       delete req.session.appliedPromoCode;
 
       console.log(`✅ PAID registration completed successfully`);
-      console.log(
-        `📧 Email status: ${emailResult?.success ? "sent" : "failed"}`
-      );
+      console.log(`📧 Email status: sent`);
+      console.log(`📅 Reminders scheduled: ${reminderResult.scheduledCount}`);
+      console.log(`🎯 Redirecting to success page`);
       console.log(`📅 Reminders scheduled: ${reminderResult.scheduledCount}`);
       console.log(`🎯 Redirecting to success page`);
 

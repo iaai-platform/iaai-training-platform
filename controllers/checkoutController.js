@@ -17,7 +17,7 @@ const CCavenueUtils = require("../utils/ccavenueUtils");
 const ccavUtil = new CCavenueUtils(process.env.CCAVENUE_WORKING_KEY);
 
 // ✅ CURRENCY CONVERSION CONSTANT
-const EUR_TO_AED_RATE = 4.0;
+const EUR_TO_AED_RATE = 4.2;
 
 // ✅ EMAIL SERVICE INITIALIZATION CHECK
 const emailServiceStatus = emailService.testEmailConfiguration

@@ -393,6 +393,9 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // ✅ Enhanced Get User Details with Complete Course Data
+// ✅ Enhanced Get User Details with Complete Course Data
+// ✅ Enhanced Get User Details with Complete Course Data
+// ✅ Enhanced Get User Details with Complete Course Data
 exports.getUserDetails = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -401,19 +404,18 @@ exports.getUserDetails = async (req, res) => {
       .populate({
         path: "myInPersonCourses.courseId",
         select:
-          "basic title courseCode schedule venue instructors enrollment certification media",
+          "basic schedule venue instructors enrollment certification media",
         options: { strictPopulate: false },
       })
       .populate({
         path: "myLiveCourses.courseId",
         select:
-          "basic title courseCode schedule platform instructors enrollment certification recording",
+          "basic schedule platform instructors enrollment certification recording",
         options: { strictPopulate: false },
       })
       .populate({
         path: "mySelfPacedCourses.courseId",
-        select:
-          "basic title courseCode content access instructor certification videos",
+        select: "basic content access instructor certification videos",
         options: { strictPopulate: false },
       })
       .lean();
@@ -423,69 +425,59 @@ exports.getUserDetails = async (req, res) => {
       return res.redirect("/admin-users");
     }
 
-    // Process user data with enhanced course information (same logic as getAllUsers but with more detail)
+    // Process user data with enhanced course information
     const allCourses = [];
     const wishlistCourses = [];
 
-    // Enhanced In-Person Courses Processing with full details
-    // Enhanced In-Person Courses Processing with full details
-    // Enhanced In-Person Courses Processing with full details
+    // Enhanced In-Person Courses Processing
     if (
       userDetails.myInPersonCourses &&
       userDetails.myInPersonCourses.length > 0
     ) {
       userDetails.myInPersonCourses.forEach((course) => {
         const courseData = {
+          // Spread the original course data
           ...course,
-          _id: course._id, // Include enrollment ID
-          courseType: "InPersonAestheticTraining", // Use model name
-          courseTitle: course.courseId
-            ? course.courseId.basic?.title || course.courseId.title
-            : course.enrollmentData?.courseName ||
-              course.title ||
-              "Unknown Course",
-          courseCode: course.courseId
-            ? course.courseId.basic?.courseCode || course.courseId.courseCode
-            : course.enrollmentData?.courseCode || course.courseCode || "N/A",
+          _id: course._id,
+          courseType: "InPersonAestheticTraining",
+
+          // CRITICAL: Set both courseName and courseTitle from enrollmentData
+          courseName: course.enrollmentData?.courseName || "Unknown Course",
+          courseTitle: course.enrollmentData?.courseName || "Unknown Course",
+          courseCode: course.enrollmentData?.courseCode || "N/A",
+
+          // Price fields
           price:
             course.enrollmentData?.paidAmount ||
-            course.courseId?.enrollment?.price ||
-            course.courseId?.basic?.price ||
+            course.enrollmentData?.originalPrice ||
             0,
-
-          // Enhanced enrollment details
-          enrollmentStatus: course.enrollmentData?.status || "unknown",
-          registrationDate:
-            course.enrollmentData?.registrationDate ||
-            course.dateOfRegistration,
           paidAmount: course.enrollmentData?.paidAmount || 0,
-          promoCodeUsed:
-            course.enrollmentData?.promoCodeUsed || course.promoCode,
+          originalPrice: course.enrollmentData?.originalPrice || 0,
 
-          // Progress details
+          // Status fields
+          enrollmentStatus: course.enrollmentData?.status || "unknown",
+          registrationDate: course.enrollmentData?.registrationDate,
+          promoCodeUsed: course.enrollmentData?.promoCodeUsed,
+          currency: course.enrollmentData?.currency || "EUR",
+
+          // Progress fields
           attendancePercentage:
             course.userProgress?.overallAttendancePercentage || 0,
-          courseStatus:
-            course.userProgress?.courseStatus || course.status || "not-started",
+          courseStatus: course.userProgress?.courseStatus || "not-started",
           completionDate: course.userProgress?.completionDate,
           assessmentScore:
-            course.userProgress?.assessmentScore ||
-            course.assessmentScore ||
-            course.bestAssessmentScore ||
-            0,
+            course.assessmentScore || course.bestAssessmentScore || 0,
           certificateId: course.certificateId,
 
-          // Location and schedule info
+          // Additional info from populated courseId
           location: course.courseId?.venue
             ? `${course.courseId.venue.city}, ${course.courseId.venue.country}`
-            : course.courseId?.location || null,
+            : null,
           startDate: course.courseId?.schedule?.startDate,
           endDate: course.courseId?.schedule?.endDate,
-          instructor:
-            course.courseId?.instructors?.primary?.name ||
-            course.courseId?.instructor?.name ||
-            "TBA",
+          instructor: course.courseId?.instructors?.primary?.name || "TBA",
         };
+
         allCourses.push(courseData);
 
         if (course.wishlistStatus === 1) {
@@ -494,50 +486,43 @@ exports.getUserDetails = async (req, res) => {
       });
     }
 
-    // Enhanced Online Live Courses Processing with full details
+    // Enhanced Online Live Courses Processing
     if (userDetails.myLiveCourses && userDetails.myLiveCourses.length > 0) {
       userDetails.myLiveCourses.forEach((course) => {
         const courseData = {
           ...course,
-          _id: course._id, // Include enrollment ID
-          courseType: "OnlineLiveTraining", // Use model name
-          courseTitle: course.courseId
-            ? course.courseId.basic?.title || course.courseId.title
-            : course.enrollmentData?.courseName ||
-              course.title ||
-              "Unknown Course",
-          courseCode: course.courseId
-            ? course.courseId.basic?.courseCode || course.courseId.courseCode
-            : course.enrollmentData?.courseCode || course.courseCode || "N/A",
+          _id: course._id,
+          courseType: "OnlineLiveTraining",
+
+          // CRITICAL: Set both courseName and courseTitle from enrollmentData
+          courseName: course.enrollmentData?.courseName || "Unknown Course",
+          courseTitle: course.enrollmentData?.courseName || "Unknown Course",
+          courseCode: course.enrollmentData?.courseCode || "N/A",
+
+          // Price fields
           price:
             course.enrollmentData?.paidAmount ||
-            course.courseId?.enrollment?.price ||
-            course.courseId?.basic?.price ||
+            course.enrollmentData?.originalPrice ||
             0,
-
-          // Enhanced enrollment details
-          enrollmentStatus: course.enrollmentData?.status || "unknown",
-          registrationDate:
-            course.enrollmentData?.registrationDate ||
-            course.dateOfRegistration,
           paidAmount: course.enrollmentData?.paidAmount || 0,
-          promoCodeUsed:
-            course.enrollmentData?.promoCodeUsed || course.promoCode,
+          originalPrice: course.enrollmentData?.originalPrice || 0,
 
-          // Progress details
+          // Status fields
+          enrollmentStatus: course.enrollmentData?.status || "unknown",
+          registrationDate: course.enrollmentData?.registrationDate,
+          promoCodeUsed: course.enrollmentData?.promoCodeUsed,
+          currency: course.enrollmentData?.currency || "EUR",
+
+          // Progress fields
           attendancePercentage:
             course.userProgress?.overallAttendancePercentage || 0,
-          courseStatus:
-            course.userProgress?.courseStatus || course.status || "not-started",
+          courseStatus: course.userProgress?.courseStatus || "not-started",
           completionDate: course.userProgress?.completionDate,
           assessmentScore:
-            course.userProgress?.bestAssessmentScore ||
-            course.assessmentScore ||
-            course.bestAssessmentScore ||
-            0,
+            course.assessmentScore || course.bestAssessmentScore || 0,
           certificateId: course.certificateId,
 
-          // Online-specific details
+          // Online specific
           sessionsAttended: course.userProgress?.sessionsAttended?.length || 0,
           recordingsWatched:
             course.userProgress?.recordingsWatched?.length || 0,
@@ -545,11 +530,9 @@ exports.getUserDetails = async (req, res) => {
           platform: course.courseId?.platform?.name || "Online Platform",
           startDate: course.courseId?.schedule?.startDate,
           endDate: course.courseId?.schedule?.endDate,
-          instructor:
-            course.courseId?.instructors?.primary?.name ||
-            course.courseId?.instructor?.name ||
-            "TBA",
+          instructor: course.courseId?.instructors?.primary?.name || "TBA",
         };
+
         allCourses.push(courseData);
 
         if (course.wishlistStatus === 1) {
@@ -558,7 +541,7 @@ exports.getUserDetails = async (req, res) => {
       });
     }
 
-    // Enhanced Self-Paced Courses Processing with full details
+    // Enhanced Self-Paced Courses Processing
     if (
       userDetails.mySelfPacedCourses &&
       userDetails.mySelfPacedCourses.length > 0
@@ -574,43 +557,39 @@ exports.getUserDetails = async (req, res) => {
 
         const courseData = {
           ...course,
-          _id: course._id, // Include enrollment ID
-          courseType: "SelfPacedOnlineTraining", // Use model name
-          courseTitle: course.courseId
-            ? course.courseId.basic?.title || course.courseId.title
-            : course.enrollmentData?.courseName ||
-              course.title ||
-              "Unknown Course",
-          courseCode: course.courseId
-            ? course.courseId.basic?.courseCode || course.courseId.courseCode
-            : course.enrollmentData?.courseCode || course.courseCode || "N/A",
+          _id: course._id,
+          courseType: "SelfPacedOnlineTraining",
+
+          // CRITICAL: Set both courseName and courseTitle from enrollmentData
+          courseName: course.enrollmentData?.courseName || "Unknown Course",
+          courseTitle: course.enrollmentData?.courseName || "Unknown Course",
+          courseCode: course.enrollmentData?.courseCode || "N/A",
+
+          // Price fields
           price:
             course.enrollmentData?.paidAmount ||
-            course.courseId?.access?.price ||
-            course.courseId?.basic?.price ||
+            course.enrollmentData?.originalPrice ||
             0,
-
-          // Enhanced enrollment details
-          enrollmentStatus: course.enrollmentData?.status || "unknown",
-          registrationDate:
-            course.enrollmentData?.registrationDate ||
-            course.dateOfRegistration,
-          expiryDate: course.enrollmentData?.expiryDate,
           paidAmount: course.enrollmentData?.paidAmount || 0,
-          promoCodeUsed:
-            course.enrollmentData?.promoCodeUsed || course.promoCode,
+          originalPrice: course.enrollmentData?.originalPrice || 0,
 
-          // Progress details
+          // Status fields
+          enrollmentStatus: course.enrollmentData?.status || "unknown",
+          registrationDate: course.enrollmentData?.registrationDate,
+          expiryDate: course.enrollmentData?.expiryDate,
+          promoCodeUsed: course.enrollmentData?.promoCodeUsed,
+          currency: course.enrollmentData?.currency || "EUR",
+
+          // Progress fields
           overallPercentage: overallPercentage,
-          courseStatus:
-            course.courseProgress?.status || course.status || "not-started",
+          courseStatus: course.courseProgress?.status || "not-started",
           completionDate: course.courseProgress?.completionDate,
           lastAccessedAt: course.courseProgress?.lastAccessedAt,
           totalWatchTime: course.courseProgress?.totalWatchTime || 0,
           averageExamScore: course.courseProgress?.averageExamScore || 0,
           certificateId: course.certificateId,
 
-          // Self-paced specific details
+          // Self-paced specific
           completedVideos: completedVideos,
           totalVideos: totalVideos,
           completedExams: course.courseProgress?.completedExams?.length || 0,
@@ -619,6 +598,7 @@ exports.getUserDetails = async (req, res) => {
           estimatedMinutes: course.courseId?.content?.estimatedMinutes || 0,
           instructor: course.courseId?.instructor?.name || "TBA",
         };
+
         allCourses.push(courseData);
 
         if (course.wishlistStatus === 1) {
@@ -626,6 +606,7 @@ exports.getUserDetails = async (req, res) => {
         }
       });
     }
+
     // Calculate comprehensive user statistics
     const userStats = {
       totalSpent: userDetails.paymentTransactions
@@ -744,6 +725,7 @@ exports.getUserDetails = async (req, res) => {
     res.redirect("/admin-users");
   }
 };
+//
 
 // ✅ Enhanced Approve User - ALIGNED WITH USER CONTROLLER EMAIL STRATEGY
 exports.approveUser = async (req, res) => {
@@ -2128,6 +2110,14 @@ exports.getUserDetails = async (req, res) => {
       userDetails.myInPersonCourses.length > 0
     ) {
       userDetails.myInPersonCourses.forEach((course) => {
+        // DEBUG: Log the actual course data structure
+        console.log("📚 Course Raw Data:", {
+          enrollmentData: course.enrollmentData,
+          courseId: course.courseId,
+          hasCourseName: !!course.enrollmentData?.courseName,
+          hasCourseTitle: !!course.courseId?.basic?.title,
+          fallbackTitle: course.title,
+        });
         const courseData = {
           ...course,
           courseType: "In-Person",
@@ -3129,12 +3119,10 @@ exports.removeCourseFromUser = async (req, res) => {
         break;
       default:
         console.error("❌ Invalid course type:", courseType);
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Invalid course type: " + courseType,
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Invalid course type: " + courseType,
+        });
     }
 
     console.log("🔍 Found enrollment:", !!enrollment);

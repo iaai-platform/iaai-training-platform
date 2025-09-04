@@ -346,7 +346,7 @@
             white-space: nowrap;
         }
 
-        .status-paid {
+        .status-paid, .status-completed, .status-Success, .status-success {
             background: #d4edda;
             color: #155724;
         }
@@ -366,7 +366,7 @@
             color: #856404;
         }
 
-        .status-rejected {
+        .status-rejected, .status-failed, .status-Failed, .status-failure {
             background: #f8d7da;
             color: #721c24;
         }
@@ -384,11 +384,6 @@
         .status-in-progress {
             background: #cce7ff;
             color: #004085;
-        }
-
-        .status-completed {
-            background: #d4edda;
-            color: #155724;
         }
 
         /* Progress Section */
@@ -496,6 +491,11 @@
 
         .btn-secondary:hover {
             background: #545b62;
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 12px;
         }
 
         /* Empty State */
@@ -752,7 +752,7 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="info-label">Total Spent</div>
-                            <div class="info-value">$<%= userDetails.userStats.totalSpent.toFixed(2) %></div>
+                            <div class="info-value">€<%= userDetails.userStats.totalSpent.toFixed(2) %></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Total Transactions</div>
@@ -847,39 +847,6 @@
                         <h5><i class="fas fa-target"></i> Training Goals</h5>
                         <div style="margin-top: 10px;">
                             <div class="info-value"><%= userDetails.professionalInfo.basic.trainingGoals %></div>
-                        </div>
-                    <% } %>
-                </div>
-            <% } %>
-
-            <!-- Legacy Professional Profile (fallback) -->
-            <% if (userDetails.professionalProfile && (userDetails.professionalProfile.clinicName || userDetails.professionalProfile.bio)) { %>
-                <div class="professional-section">
-                    <h4><i class="fas fa-briefcase-medical"></i> Legacy Professional Profile</h4>
-                    <div class="info-grid">
-                        <% if (userDetails.professionalProfile.clinicName) { %>
-                            <div class="info-item">
-                                <div class="info-label">Clinic Name</div>
-                                <div class="info-value"><%= userDetails.professionalProfile.clinicName %></div>
-                            </div>
-                        <% } %>
-                        <% if (userDetails.professionalProfile.licenseNumber) { %>
-                            <div class="info-item">
-                                <div class="info-label">License Number</div>
-                                <div class="info-value"><%= userDetails.professionalProfile.licenseNumber %></div>
-                            </div>
-                        <% } %>
-                        <% if (userDetails.professionalProfile.yearsExperience) { %>
-                            <div class="info-item">
-                                <div class="info-label">Years of Experience</div>
-                                <div class="info-value"><%= userDetails.professionalProfile.yearsExperience %></div>
-                            </div>
-                        <% } %>
-                    </div>
-                    <% if (userDetails.professionalProfile.bio) { %>
-                        <div style="margin-top: 15px;">
-                            <div class="info-label">Bio</div>
-                            <div class="info-value"><%= userDetails.professionalProfile.bio %></div>
                         </div>
                     <% } %>
                 </div>
@@ -1035,227 +1002,226 @@
         </div>
 
         <!-- Enhanced Course Progress Details -->
-       <!-- Enhanced Course Progress Details -->
-       <div class="section-card">
-        <div class="section-header">
-            <h3 class="section-title">
-                <i class="fas fa-graduation-cap"></i> Enrolled Courses
-            </h3>
-            <div style="display: flex; gap: 10px;">
-                <span class="badge badge-primary"><%= userDetails.myCourses ? userDetails.myCourses.length : 0 %> Courses</span>
-                <button class="btn btn-success btn-sm" onclick="addCourseToUser()">
-                    <i class="fas fa-plus"></i> Add Course
-                </button>
-                <button class="btn btn-warning btn-sm" onclick="viewDeletedCourses()">
-                    <i class="fas fa-recycle"></i> Recycle Bin
-                </button>
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-graduation-cap"></i> Enrolled Courses
+                </h3>
+                <div style="display: flex; gap: 10px;">
+                    <span class="badge badge-primary"><%= userDetails.myCourses ? userDetails.myCourses.length : 0 %> Courses</span>
+                    <button class="btn btn-success btn-sm" onclick="addCourseToUser()">
+                        <i class="fas fa-plus"></i> Add Course
+                    </button>
+                    <button class="btn btn-warning btn-sm" onclick="viewDeletedCourses()">
+                        <i class="fas fa-recycle"></i> Recycle Bin
+                    </button>
+                </div>
             </div>
+        
+            <% if (userDetails.myCourses && userDetails.myCourses.length > 0) { %>
+                <div class="course-list">
+                    <% userDetails.myCourses.forEach(course => { %>
+                        <div class="course-item">
+                            <div class="course-details">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div style="flex: 1;">
+                                        <h4><%= course.courseName || course.courseTitle || course.title || 'Unknown Course' %></h4>
+                                    </div>
+                                    <div style="margin-left: 20px;">
+                                        <button class="btn btn-danger btn-sm" 
+                                                onclick="removeCourseFromUser('<%= course._id %>', '<%= course.courseType %>', '<%= course.courseName || course.courseTitle || course.title || 'Unknown' %>')"
+                                                title="Remove Course">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Course Meta Information -->
+                                <div class="course-meta">
+                                    <% if (course.courseCode) { %>
+                                        <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
+                                    <% } %>
+                                    <% if (course.price !== undefined || course.originalPrice !== undefined || course.paidAmount !== undefined) { %>
+                                        <span><i class="fas fa-euro-sign"></i> €<%= (course.paidAmount || course.price || course.originalPrice || 0).toFixed(2) %></span>
+                                    <% } %>
+                                    <% if (course.location) { %>
+                                        <span><i class="fas fa-map-marker-alt"></i> <%= course.location %></span>
+                                    <% } %>
+                                    <% if (course.platform) { %>
+                                        <span><i class="fas fa-laptop"></i> <%= course.platform %></span>
+                                    <% } %>
+                                    <% if (course.startDate) { %>
+                                        <span><i class="fas fa-calendar"></i> <%= new Date(course.startDate).toLocaleDateString() %></span>
+                                    <% } %>
+                                    <% if (course.endDate) { %>
+                                        <span><i class="fas fa-calendar-check"></i> End: <%= new Date(course.endDate).toLocaleDateString() %></span>
+                                    <% } %>
+                                    <% if (course.instructor) { %>
+                                        <span><i class="fas fa-user-tie"></i> <%= course.instructor %></span>
+                                    <% } %>
+                                </div>
+        
+                                <!-- Registration & Payment Info -->
+                                <% if (course.registrationDate || course.paidAmount || course.promoCodeUsed) { %>
+                                    <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                        <div class="progress-grid">
+                                            <% if (course.registrationDate) { %>
+                                                <div><small><strong>Registered:</strong> <%= new Date(course.registrationDate).toLocaleDateString() %></small></div>
+                                            <% } %>
+                                            <% if (course.paidAmount !== undefined) { %>
+                                                <div><small><strong>Paid:</strong> €<%= (course.paidAmount || 0).toFixed(2) %></small></div>
+                                            <% } %>
+                                            <% if (course.promoCodeUsed) { %>
+                                                <div><small><strong>Promo Code:</strong> <%= course.promoCodeUsed %></small></div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% } %>
+        
+                                <!-- In-Person Course Progress -->
+                                <% if (course.courseType === 'InPersonAestheticTraining' || course.courseType === 'In-Person') { %>
+                                    <% if (course.attendancePercentage !== undefined || course.assessmentScore !== undefined) { %>
+                                        <div class="progress-section">
+                                            <small><strong>Course Progress</strong></small>
+                                            
+                                            <% if (course.attendancePercentage !== undefined) { %>
+                                                <div style="margin: 5px 0;">
+                                                    <small>Attendance: <%= course.attendancePercentage %>%</small>
+                                                    <div class="progress-bar-container">
+                                                        <div class="progress-bar-fill" style="width: <%= course.attendancePercentage %>%"></div>
+                                                    </div>
+                                                </div>
+                                            <% } %>
+                                            
+                                            <div class="progress-grid">
+                                                <% if (course.assessmentScore !== undefined) { %>
+                                                    <div><small><strong>Assessment Score:</strong> <%= course.assessmentScore %>%</small></div>
+                                                <% } %>
+                                                <% if (course.completionDate) { %>
+                                                    <div><small><strong>Completed:</strong> <%= new Date(course.completionDate).toLocaleDateString() %></small></div>
+                                                <% } %>
+                                                <% if (course.certificateId) { %>
+                                                    <div><small><strong>Certificate ID:</strong> <%= course.certificateId %></small></div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    <% } %>
+                                <% } %>
+        
+                                <!-- Online Live Course Progress -->
+                                <% if (course.courseType === 'OnlineLiveTraining' || course.courseType === 'Online Live') { %>
+                                    <% if (course.attendancePercentage !== undefined || course.sessionsAttended !== undefined) { %>
+                                        <div class="progress-section">
+                                            <small><strong>Online Course Progress</strong></small>
+                                            
+                                            <% if (course.attendancePercentage !== undefined) { %>
+                                                <div style="margin: 5px 0;">
+                                                    <small>Overall Attendance: <%= course.attendancePercentage %>%</small>
+                                                    <div class="progress-bar-container">
+                                                        <div class="progress-bar-fill" style="width: <%= course.attendancePercentage %>%"></div>
+                                                    </div>
+                                                </div>
+                                            <% } %>
+                                            
+                                            <div class="progress-grid">
+                                                <% if (course.sessionsAttended !== undefined) { %>
+                                                    <div><small><strong>Sessions Attended:</strong> <%= course.sessionsAttended %></small></div>
+                                                <% } %>
+                                                <% if (course.recordingsWatched !== undefined) { %>
+                                                    <div><small><strong>Recordings Watched:</strong> <%= course.recordingsWatched %></small></div>
+                                                <% } %>
+                                                <% if (course.assessmentAttempts !== undefined) { %>
+                                                    <div><small><strong>Assessment Attempts:</strong> <%= course.assessmentAttempts %></small></div>
+                                                <% } %>
+                                                <% if (course.assessmentScore !== undefined) { %>
+                                                    <div><small><strong>Best Score:</strong> <%= course.assessmentScore %>%</small></div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    <% } %>
+                                <% } %>
+        
+                                <!-- Self-Paced Course Progress -->
+                                <% if (course.courseType === 'SelfPacedOnlineTraining' || course.courseType === 'Self-Paced') { %>
+                                    <% if (course.overallPercentage !== undefined || course.completedVideos !== undefined) { %>
+                                        <div class="progress-section">
+                                            <small><strong>Self-Paced Progress</strong></small>
+                                            
+                                            <% if (course.overallPercentage !== undefined) { %>
+                                                <div style="margin: 5px 0;">
+                                                    <small>Overall Progress: <%= course.overallPercentage %>%</small>
+                                                    <div class="progress-bar-container">
+                                                        <div class="progress-bar-fill" style="width: <%= course.overallPercentage %>%"></div>
+                                                    </div>
+                                                </div>
+                                            <% } %>
+                                            
+                                            <div class="progress-grid">
+                                                <% if (course.completedVideos !== undefined && course.totalVideos !== undefined) { %>
+                                                    <div><small><strong>Videos:</strong> <%= course.completedVideos %>/<%= course.totalVideos %></small></div>
+                                                <% } %>
+                                                <% if (course.completedExams !== undefined) { %>
+                                                    <div><small><strong>Exams Completed:</strong> <%= course.completedExams %></small></div>
+                                                <% } %>
+                                                <% if (course.totalWatchTime !== undefined) { %>
+                                                    <div><small><strong>Watch Time:</strong> <%= Math.round(course.totalWatchTime) %> min</small></div>
+                                                <% } %>
+                                                <% if (course.averageExamScore !== undefined) { %>
+                                                    <div><small><strong>Avg Exam Score:</strong> <%= course.averageExamScore %>%</small></div>
+                                                <% } %>
+                                                <% if (course.lastAccessedAt) { %>
+                                                    <div><small><strong>Last Accessed:</strong> <%= new Date(course.lastAccessedAt).toLocaleDateString() %></small></div>
+                                                <% } %>
+                                                <% if (course.expiryDate) { %>
+                                                    <div><small><strong>Expires:</strong> <%= new Date(course.expiryDate).toLocaleDateString() %></small></div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    <% } %>
+                                <% } %>
+        
+                                <!-- Additional Course Details -->
+                                <% if (course.videoNotes || course.bookmarks || course.estimatedMinutes) { %>
+                                    <div style="margin-top: 10px; padding: 10px; background: #e8f4f8; border-radius: 5px;">
+                                        <div class="progress-grid">
+                                            <% if (course.videoNotes) { %>
+                                                <div><small><strong>Notes:</strong> <%= course.videoNotes %></small></div>
+                                            <% } %>
+                                            <% if (course.bookmarks) { %>
+                                                <div><small><strong>Bookmarks:</strong> <%= course.bookmarks %></small></div>
+                                            <% } %>
+                                            <% if (course.estimatedMinutes) { %>
+                                                <div><small><strong>Duration:</strong> <%= Math.round(course.estimatedMinutes/60) %> hours</small></div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% } %>
+                                
+                            </div>
+                            <div class="course-status-info">
+                                <span class="course-type-badge type-<%= (course.courseType || '').toLowerCase().replace(/\s+/g, '-').replace('training', '').replace('aesthetictraining', '') %>">
+                                    <%= course.courseType ? course.courseType.replace('Training', '').replace('AestheticTraining', 'Training') : 'Unknown Type' %>
+                                </span>
+                                <span class="status-pill status-<%= course.enrollmentStatus || course.courseStatus || 'unknown' %>">
+                                    <%= course.enrollmentStatus || course.courseStatus || 'Unknown' %>
+                                </span>
+                                <% if (course.certificateId) { %>
+                                    <span class="status-pill status-verified">Certified</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <p>No courses enrolled yet</p>
+                    <small style="color: #666; margin-top: 10px; display: block;">
+                        Click "Add Course" above to enroll this user in a course
+                    </small>
+                </div>
+            <% } %>
         </div>
-    
-        <% if (userDetails.myCourses && userDetails.myCourses.length > 0) { %>
-            <div class="course-list">
-                <% userDetails.myCourses.forEach(course => { %>
-                    <div class="course-item">
-                        <div class="course-details">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                <div style="flex: 1;">
-                                    <h4><%= course.courseTitle || course.title || 'Unknown Course' %></h4>
-                                </div>
-                                <div style="margin-left: 20px;">
-                                    <button class="btn btn-danger btn-sm" 
-                                            onclick="removeCourseFromUser('<%= course._id %>', '<%= course.courseType %>', '<%= course.courseTitle || course.title || 'Unknown' %>')"
-                                            title="Remove Course">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Course Meta Information -->
-                            <div class="course-meta">
-                                <% if (course.courseCode) { %>
-                                    <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
-                                <% } %>
-                                <% if (course.price !== undefined) { %>
-                                    <span><i class="fas fa-dollar-sign"></i> €<%= (course.price || 0).toFixed(2) %></span>
-                                <% } %>
-                                <% if (course.location) { %>
-                                    <span><i class="fas fa-map-marker-alt"></i> <%= course.location %></span>
-                                <% } %>
-                                <% if (course.platform) { %>
-                                    <span><i class="fas fa-laptop"></i> <%= course.platform %></span>
-                                <% } %>
-                                <% if (course.startDate) { %>
-                                    <span><i class="fas fa-calendar"></i> <%= new Date(course.startDate).toLocaleDateString() %></span>
-                                <% } %>
-                                <% if (course.endDate) { %>
-                                    <span><i class="fas fa-calendar-check"></i> End: <%= new Date(course.endDate).toLocaleDateString() %></span>
-                                <% } %>
-                                <% if (course.instructor) { %>
-                                    <span><i class="fas fa-user-tie"></i> <%= course.instructor %></span>
-                                <% } %>
-                            </div>
-    
-                            <!-- Registration & Payment Info -->
-                            <% if (course.registrationDate || course.paidAmount || course.promoCodeUsed) { %>
-                                <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                                    <div class="progress-grid">
-                                        <% if (course.registrationDate) { %>
-                                            <div><small><strong>Registered:</strong> <%= new Date(course.registrationDate).toLocaleDateString() %></small></div>
-                                        <% } %>
-                                        <% if (course.paidAmount !== undefined) { %>
-                                            <div><small><strong>Paid:</strong> €<%= (course.paidAmount || 0).toFixed(2) %></small></div>
-                                        <% } %>
-                                        <% if (course.promoCodeUsed) { %>
-                                            <div><small><strong>Promo Code:</strong> <%= course.promoCodeUsed %></small></div>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            <% } %>
-    
-                            <!-- In-Person Course Progress -->
-                            <% if (course.courseType === 'InPersonAestheticTraining' || course.courseType === 'In-Person') { %>
-                                <% if (course.attendancePercentage !== undefined || course.assessmentScore !== undefined) { %>
-                                    <div class="progress-section">
-                                        <small><strong>Course Progress</strong></small>
-                                        
-                                        <% if (course.attendancePercentage !== undefined) { %>
-                                            <div style="margin: 5px 0;">
-                                                <small>Attendance: <%= course.attendancePercentage %>%</small>
-                                                <div class="progress-bar-container">
-                                                    <div class="progress-bar-fill" style="width: <%= course.attendancePercentage %>%"></div>
-                                                </div>
-                                            </div>
-                                        <% } %>
-                                        
-                                        <div class="progress-grid">
-                                            <% if (course.assessmentScore !== undefined) { %>
-                                                <div><small><strong>Assessment Score:</strong> <%= course.assessmentScore %>%</small></div>
-                                            <% } %>
-                                            <% if (course.completionDate) { %>
-                                                <div><small><strong>Completed:</strong> <%= new Date(course.completionDate).toLocaleDateString() %></small></div>
-                                            <% } %>
-                                            <% if (course.certificateId) { %>
-                                                <div><small><strong>Certificate ID:</strong> <%= course.certificateId %></small></div>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                <% } %>
-                            <% } %>
-    
-                            <!-- Online Live Course Progress -->
-                            <% if (course.courseType === 'OnlineLiveTraining' || course.courseType === 'Online Live') { %>
-                                <% if (course.attendancePercentage !== undefined || course.sessionsAttended !== undefined) { %>
-                                    <div class="progress-section">
-                                        <small><strong>Online Course Progress</strong></small>
-                                        
-                                        <% if (course.attendancePercentage !== undefined) { %>
-                                            <div style="margin: 5px 0;">
-                                                <small>Overall Attendance: <%= course.attendancePercentage %>%</small>
-                                                <div class="progress-bar-container">
-                                                    <div class="progress-bar-fill" style="width: <%= course.attendancePercentage %>%"></div>
-                                                </div>
-                                            </div>
-                                        <% } %>
-                                        
-                                        <div class="progress-grid">
-                                            <% if (course.sessionsAttended !== undefined) { %>
-                                                <div><small><strong>Sessions Attended:</strong> <%= course.sessionsAttended %></small></div>
-                                            <% } %>
-                                            <% if (course.recordingsWatched !== undefined) { %>
-                                                <div><small><strong>Recordings Watched:</strong> <%= course.recordingsWatched %></small></div>
-                                            <% } %>
-                                            <% if (course.assessmentAttempts !== undefined) { %>
-                                                <div><small><strong>Assessment Attempts:</strong> <%= course.assessmentAttempts %></small></div>
-                                            <% } %>
-                                            <% if (course.assessmentScore !== undefined) { %>
-                                                <div><small><strong>Best Score:</strong> <%= course.assessmentScore %>%</small></div>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                <% } %>
-                            <% } %>
-    
-                            <!-- Self-Paced Course Progress -->
-                            <% if (course.courseType === 'SelfPacedOnlineTraining' || course.courseType === 'Self-Paced') { %>
-                                <% if (course.overallPercentage !== undefined || course.completedVideos !== undefined) { %>
-                                    <div class="progress-section">
-                                        <small><strong>Self-Paced Progress</strong></small>
-                                        
-                                        <% if (course.overallPercentage !== undefined) { %>
-                                            <div style="margin: 5px 0;">
-                                                <small>Overall Progress: <%= course.overallPercentage %>%</small>
-                                                <div class="progress-bar-container">
-                                                    <div class="progress-bar-fill" style="width: <%= course.overallPercentage %>%"></div>
-                                                </div>
-                                            </div>
-                                        <% } %>
-                                        
-                                        <div class="progress-grid">
-                                            <% if (course.completedVideos !== undefined && course.totalVideos !== undefined) { %>
-                                                <div><small><strong>Videos:</strong> <%= course.completedVideos %>/<%= course.totalVideos %></small></div>
-                                            <% } %>
-                                            <% if (course.completedExams !== undefined) { %>
-                                                <div><small><strong>Exams Completed:</strong> <%= course.completedExams %></small></div>
-                                            <% } %>
-                                            <% if (course.totalWatchTime !== undefined) { %>
-                                                <div><small><strong>Watch Time:</strong> <%= Math.round(course.totalWatchTime) %> min</small></div>
-                                            <% } %>
-                                            <% if (course.averageExamScore !== undefined) { %>
-                                                <div><small><strong>Avg Exam Score:</strong> <%= course.averageExamScore %>%</small></div>
-                                            <% } %>
-                                            <% if (course.lastAccessedAt) { %>
-                                                <div><small><strong>Last Accessed:</strong> <%= new Date(course.lastAccessedAt).toLocaleDateString() %></small></div>
-                                            <% } %>
-                                            <% if (course.expiryDate) { %>
-                                                <div><small><strong>Expires:</strong> <%= new Date(course.expiryDate).toLocaleDateString() %></small></div>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                <% } %>
-                            <% } %>
-    
-                            <!-- Additional Course Details -->
-                            <% if (course.videoNotes || course.bookmarks || course.estimatedMinutes) { %>
-                                <div style="margin-top: 10px; padding: 10px; background: #e8f4f8; border-radius: 5px;">
-                                    <div class="progress-grid">
-                                        <% if (course.videoNotes) { %>
-                                            <div><small><strong>Notes:</strong> <%= course.videoNotes %></small></div>
-                                        <% } %>
-                                        <% if (course.bookmarks) { %>
-                                            <div><small><strong>Bookmarks:</strong> <%= course.bookmarks %></small></div>
-                                        <% } %>
-                                        <% if (course.estimatedMinutes) { %>
-                                            <div><small><strong>Duration:</strong> <%= Math.round(course.estimatedMinutes/60) %> hours</small></div>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            <% } %>
-                            
-                        </div>
-                        <div class="course-status-info">
-                            <span class="course-type-badge type-<%= (course.courseType || '').toLowerCase().replace(/\s+/g, '-').replace('training', '').replace('aesthetictraining', '') %>">
-                                <%= course.courseType ? course.courseType.replace('Training', '').replace('AestheticTraining', 'Training') : 'Unknown Type' %>
-                            </span>
-                            <span class="status-pill status-<%= course.enrollmentStatus || course.courseStatus || 'unknown' %>">
-                                <%= course.enrollmentStatus || course.courseStatus || 'Unknown' %>
-                            </span>
-                            <% if (course.certificateId) { %>
-                                <span class="status-pill status-verified">Certified</span>
-                            <% } %>
-                        </div>
-                    </div>
-                <% }) %>
-            </div>
-        <% } else { %>
-            <div class="empty-state">
-                <i class="fas fa-book"></i>
-                <p>No courses enrolled yet</p>
-                <small style="color: #666; margin-top: 10px; display: block;">
-                    Click "Add Course" above to enroll this user in a course
-                </small>
-            </div>
-        <% } %>
-    </div>
 
         <!-- Wishlist -->
         <div class="section-card">
@@ -1271,12 +1237,12 @@
                     <% userDetails.myWishlist.forEach(course => { %>
                         <div class="course-item">
                             <div class="course-details">
-                                <h4><%= course.courseTitle || course.title || 'Unknown Course' %></h4>
+                                <h4><%= course.courseName || course.courseTitle || course.title || 'Unknown Course' %></h4>
                                 <div class="course-meta">
                                     <% if (course.courseCode) { %>
                                         <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
                                     <% } %>
-                                    <span><i class="fas fa-dollar-sign"></i> $<%= (course.price || 0).toFixed(2) %></span>
+                                    <span><i class="fas fa-euro-sign"></i> €<%= (course.price || 0).toFixed(2) %></span>
                                     <% if (course.location) { %>
                                         <span><i class="fas fa-map-marker-alt"></i> <%= course.location %></span>
                                     <% } %>
@@ -1437,24 +1403,6 @@
                             <span>Language</span>
                             <span><%= userDetails.userPreferences.learning.language || 'en' %></span>
                         </div>
-                    <% } else if (userDetails.learningPreferences && Object.keys(userDetails.learningPreferences).length > 0) { %>
-                        <!-- Legacy support -->
-                        <div class="setting-item">
-                            <span>Pace</span>
-                            <span><%= userDetails.learningPreferences.pace || 'normal' %></span>
-                        </div>
-                        <div class="setting-item">
-                            <span>Video Quality</span>
-                            <span><%= userDetails.learningPreferences.videoQuality || 'auto' %></span>
-                        </div>
-                        <div class="setting-item">
-                            <span>Subtitles</span>
-                            <span><%= userDetails.learningPreferences.subtitles ? '✓' : '✗' %></span>
-                        </div>
-                        <div class="setting-item">
-                            <span>Language</span>
-                            <span><%= userDetails.learningPreferences.language || 'en' %></span>
-                        </div>
                     <% } else { %>
                         <div class="setting-item">
                             <span>Status</span>
@@ -1483,24 +1431,6 @@
                             <span>Reminders</span>
                             <span><%= userDetails.userPreferences.notifications.reminders !== false ? '✓' : '✗' %></span>
                         </div>
-                    <% } else if (userDetails.notificationSettings && Object.keys(userDetails.notificationSettings).length > 0) { %>
-                        <!-- Legacy support -->
-                        <div class="setting-item">
-                            <span>Email Notifications</span>
-                            <span><%= userDetails.notificationSettings.email ? '✓' : '✗' %></span>
-                        </div>
-                        <div class="setting-item">
-                            <span>Course Updates</span>
-                            <span><%= userDetails.notificationSettings.courseUpdates ? '✓' : '✗' %></span>
-                        </div>
-                        <div class="setting-item">
-                            <span>Promotions</span>
-                            <span><%= userDetails.notificationSettings.promotions ? '✓' : '✗' %></span>
-                        </div>
-                        <div class="setting-item">
-                            <span>Digest Frequency</span>
-                            <span><%= userDetails.notificationSettings.digest || 'weekly' %></span>
-                        </div>
                     <% } else { %>
                         <div class="setting-item">
                             <span>Status</span>
@@ -1519,630 +1449,646 @@
                                 <%= userDetails.accountInfo.status.isActive !== false ? 'Active' : 'Inactive' %>
                             </span>
                         </div>
-                        <div class="setting-item">
-                            <span>Account Locked</span>
-                            <span style="color: <%= userDetails.accountInfo.status.isLocked ? '#dc3545' : '#28a745' %>;">
-                                <%= userDetails.accountInfo.status.isLocked ? 'Yes' : 'No' %>
-                            </span>
-                        </div>
-                        <div class="setting-item">
-                            <span>Login Attempts</span>
-                            <span><%= userDetails.accountInfo.status.loginAttempts || 0 %></span>
-                        </div>
-                        <% if (userDetails.accountInfo.status.lastLoginAt) { %>
-                            <div class="setting-item">
-                                <span>Last Login</span>
-                                <span><%= new Date(userDetails.accountInfo.status.lastLoginAt).toLocaleString() %></span>
-                            </div>
-                        <% } %>
-                    <% } else if (userDetails.accountStatus && Object.keys(userDetails.accountStatus).length > 0) { %>
-                        <!-- Legacy support -->
-                        <div class="setting-item">
-                            <span>Account Status</span>
-                            <span style="color: <%= userDetails.accountStatus.isActive !== false ? '#28a745' : '#dc3545' %>;">
-                                <%= userDetails.accountStatus.isActive !== false ? 'Active' : 'Inactive' %>
-                            </span>
-                        </div>
-                        <div class="setting-item">
-                            <span>Account Locked</span>
-                            <span style="color: <%= userDetails.accountStatus.isLocked ? '#dc3545' : '#28a745' %>;">
-                                <%= userDetails.accountStatus.isLocked ? 'Yes' : 'No' %>
-                            </span>
-                        </div>
-                        <% if (userDetails.accountStatus.lastLoginAt) { %>
-                            <div class="setting-item">
-                                <span>Last Login</span>
-                                <span><%= new Date(userDetails.accountStatus.lastLoginAt).toLocaleString() %></span>
-                            </div>
-                        <% } %>
-                    <% } else { %>
-                        <div class="setting-item">
-                            <span>Status</span>
-                            <span>Standard account</span>
-                        </div>
-                    <% } %>
-                    
-                    <!-- Two-Factor Authentication -->
-                    <% if (userDetails.accountInfo && userDetails.accountInfo.twoFactorAuth) { %>
-                        <div class="setting-item">
-                            <span>Two-Factor Auth</span>
-                            <span style="color: <%= userDetails.accountInfo.twoFactorAuth.enabled ? '#28a745' : '#6c757d' %>;">
-                                <%= userDetails.accountInfo.twoFactorAuth.enabled ? 'Enabled' : 'Disabled' %>
-                            </span>
-                        </div>
-                    <% } else if (userDetails.twoFactorAuth) { %>
-                        <!-- Legacy support -->
-                        <div class="setting-item">
-                            <span>Two-Factor Auth</span>
-                            <span style="color: <%= userDetails.twoFactorAuth.enabled ? '#28a745' : '#6c757d' %>;">
-                                <%= userDetails.twoFactorAuth.enabled ? 'Enabled' : 'Disabled' %>
-                            </span>
-                        </div>
-                    <% } %>
-                </div>
-            </div>
-        </div>
+                        <div class="setting-item
+                        <span>Account Locked</span>
+                           <span style="color: <%= userDetails.accountInfo.status.isLocked ? '#dc3545' : '#28a745' %>;">
+                               <%= userDetails.accountInfo.status.isLocked ? 'Yes' : 'No' %>
+                           </span>
+                       </div>
+                       <div class="setting-item">
+                           <span>Login Attempts</span>
+                           <span><%= userDetails.accountInfo.status.loginAttempts || 0 %></span>
+                       </div>
+                       <% if (userDetails.accountInfo.status.lastLoginAt) { %>
+                           <div class="setting-item">
+                               <span>Last Login</span>
+                               <span><%= new Date(userDetails.accountInfo.status.lastLoginAt).toLocaleString() %></span>
+                           </div>
+                       <% } %>
+                   <% } else { %>
+                       <div class="setting-item">
+                           <span>Status</span>
+                           <span>Standard account</span>
+                       </div>
+                   <% } %>
+                   
+                   <!-- Two-Factor Authentication -->
+                   <% if (userDetails.accountInfo && userDetails.accountInfo.twoFactorAuth) { %>
+                       <div class="setting-item">
+                           <span>Two-Factor Auth</span>
+                           <span style="color: <%= userDetails.accountInfo.twoFactorAuth.enabled ? '#28a745' : '#6c757d' %>;">
+                               <%= userDetails.accountInfo.twoFactorAuth.enabled ? 'Enabled' : 'Disabled' %>
+                           </span>
+                       </div>
+                   <% } %>
+               </div>
+           </div>
+       </div>
 
-        <!-- Account Activity -->
-        <div class="section-card">
-            <div class="section-header">
-                <h3 class="section-title">
-                    <i class="fas fa-history"></i> Recent Activity
-                </h3>
-            </div>
+       <!-- Account Activity -->
+       <div class="section-card">
+           <div class="section-header">
+               <h3 class="section-title">
+                   <i class="fas fa-history"></i> Recent Activity
+               </h3>
+           </div>
 
-            <div class="activity-timeline">
-                <% if (userDetails.accountInfo && userDetails.accountInfo.status && userDetails.accountInfo.status.lastLoginAt) { %>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <div class="timeline-date">
-                                <%= new Date(userDetails.accountInfo.status.lastLoginAt).toLocaleString() %>
-                            </div>
-                            <div>Last login</div>
-                        </div>
-                    </div>
-                <% } else if (userDetails.accountStatus && userDetails.accountStatus.lastLoginAt) { %>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <div class="timeline-date">
-                                <%= new Date(userDetails.accountStatus.lastLoginAt).toLocaleString() %>
-                            </div>
-                            <div>Last login</div>
-                        </div>
-                    </div>
-                <% } %>
-                
-                <% if (userDetails.accountInfo && userDetails.accountInfo.loginActivity && userDetails.accountInfo.loginActivity.length > 0) { %>
-                    <% userDetails.accountInfo.loginActivity.slice(0, 5).forEach(activity => { %>
-                        <div class="timeline-item">
-                            <div class="timeline-content">
-                                <div class="timeline-date">
-                                    <%= new Date(activity.loginTime).toLocaleString() %>
-                                </div>
-                                <div>
-                                    Login from <%= activity.location || 'Unknown location' %>
-                                    <% if (activity.ip) { %>
-                                        <small class="text-muted">(IP: <%= activity.ip %>)</small>
-                                    <% } %>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
-                <% } else if (userDetails.loginActivity && userDetails.loginActivity.length > 0) { %>
-                    <% userDetails.loginActivity.slice(0, 5).forEach(activity => { %>
-                        <div class="timeline-item">
-                            <div class="timeline-content">
-                                <div class="timeline-date">
-                                    <%= new Date(activity.loginTime).toLocaleString() %>
-                                </div>
-                                <div>
-                                    Login from <%= activity.location || 'Unknown location' %>
-                                    <% if (activity.ip) { %>
-                                        <small class="text-muted">(IP: <%= activity.ip %>)</small>
-                                    <% } %>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
-                <% } %>
-                
-                <div class="timeline-item">
-                    <div class="timeline-content">
-                        <div class="timeline-date">
-                            <%= new Date(userDetails.createdAt).toLocaleString() %>
-                        </div>
-                        <div>Account created</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+           <div class="activity-timeline">
+               <% if (userDetails.accountInfo && userDetails.accountInfo.status && userDetails.accountInfo.status.lastLoginAt) { %>
+                   <div class="timeline-item">
+                       <div class="timeline-content">
+                           <div class="timeline-date">
+                               <%= new Date(userDetails.accountInfo.status.lastLoginAt).toLocaleString() %>
+                           </div>
+                           <div>Last login</div>
+                       </div>
+                   </div>
+               <% } %>
+               
+               <% if (userDetails.accountInfo && userDetails.accountInfo.loginActivity && userDetails.accountInfo.loginActivity.length > 0) { %>
+                   <% userDetails.accountInfo.loginActivity.slice(0, 5).forEach(activity => { %>
+                       <div class="timeline-item">
+                           <div class="timeline-content">
+                               <div class="timeline-date">
+                                   <%= new Date(activity.loginTime).toLocaleString() %>
+                               </div>
+                               <div>
+                                   Login from <%= activity.location || 'Unknown location' %>
+                                   <% if (activity.ip) { %>
+                                       <small class="text-muted">(IP: <%= activity.ip %>)</small>
+                                   <% } %>
+                               </div>
+                           </div>
+                       </div>
+                   <% }) %>
+               <% } %>
+               
+               <div class="timeline-item">
+                   <div class="timeline-content">
+                       <div class="timeline-date">
+                           <%= new Date(userDetails.createdAt).toLocaleString() %>
+                       </div>
+                       <div>Account created</div>
+                   </div>
+               </div>
+           </div>
+       </div>
 
-        <!-- Payment Transactions -->
-        <% if (userDetails.paymentTransactions && userDetails.paymentTransactions.length > 0) { %>
-            <div class="section-card">
-                <div class="section-header">
-                    <h3 class="section-title">
-                        <i class="fas fa-credit-card"></i> Payment Transactions
-                    </h3>
-                    <span class="badge badge-primary"><%= userDetails.paymentTransactions.length %> Transactions</span>
-                </div>
+       <!-- Payment Transactions -->
+       <% if (userDetails.paymentTransactions && userDetails.paymentTransactions.length > 0) { %>
+           <div class="section-card">
+               <div class="section-header">
+                   <h3 class="section-title">
+                       <i class="fas fa-credit-card"></i> Payment Transactions
+                   </h3>
+                   <span class="badge badge-primary"><%= userDetails.paymentTransactions.length %> Transactions</span>
+               </div>
 
-                <div class="course-list">
-                    <% userDetails.paymentTransactions.slice(0, 10).forEach(transaction => { %>
-                        <div class="course-item">
-                            <div class="course-details">
-                                <h4>Receipt #<%= transaction.receiptNumber || 'N/A' %></h4>
-                                <div class="course-meta">
-                                    <span><i class="fas fa-calendar"></i> <%= new Date(transaction.transactionDate).toLocaleDateString() %></span>
-                                    <span><i class="fas fa-credit-card"></i> <%= transaction.paymentMethod || 'Card' %></span>
-                                    <span><i class="fas fa-dollar-sign"></i> Subtotal: $<%= (transaction.subtotal || 0).toFixed(2) %></span>
-                                    <% if (transaction.discountAmount && transaction.discountAmount > 0) { %>
-                                        <span><i class="fas fa-tag"></i> Discount: $<%= transaction.discountAmount.toFixed(2) %></span>
-                                    <% } %>
-                                    <span><i class="fas fa-money-bill"></i> Total: $<%= (transaction.finalAmount || 0).toFixed(2) %></span>
-                                    <% if (transaction.promoCode) { %>
-                                        <span><i class="fas fa-percent"></i> Promo: <%= transaction.promoCode %></span>
-                                    <% } %>
-                                </div>
-                                
-                                <!-- Transaction Items -->
-                                <% if (transaction.items && transaction.items.length > 0) { %>
-                                    <div style="margin-top: 10px; padding: 10px; background: #f0f8ff; border-radius: 5px;">
-                                        <small><strong>Items purchased:</strong></small>
-                                        <% transaction.items.forEach(item => { %>
-                                            <div style="margin-top: 5px;">
-                                                <small>• <%= item.courseType || 'Course' %> - $<%= (item.paidPrice || 0).toFixed(2) %></small>
-                                            </div>
-                                        <% }) %>
-                                    </div>
-                                <% } else if (transaction.coursesRegistered && transaction.coursesRegistered.length > 0) { %>
-                                    <div style="margin-top: 10px; padding: 10px; background: #f0f8ff; border-radius: 5px;">
-                                        <small><strong>Courses registered:</strong></small>
-                                        <% transaction.coursesRegistered.forEach(course => { %>
-                                            <div style="margin-top: 5px;">
-                                                <small>• <%= course.courseType || 'Course' %> - $<%= (course.paidPrice || 0).toFixed(2) %></small>
-                                            </div>
-                                        <% }) %>
-                                    </div>
-                                <% } %>
-                            </div>
-                            <div class="course-status-info">
-                                <span class="status-pill status-<%= transaction.paymentStatus === 'completed' ? 'paid' : transaction.paymentStatus %>">
-                                    <%= transaction.paymentStatus || 'unknown' %>
-                                </span>
-                                <span class="badge badge-info">
-                                    <%= transaction.currency || 'USD' %>
-                                </span>
-                            </div>
-                        </div>
-                    <% }) %>
-                    
-                    <% if (userDetails.paymentTransactions.length > 10) { %>
-                        <div style="text-align: center; padding: 20px; color: #666;">
-                            <small>Showing 10 of <%= userDetails.paymentTransactions.length %> transactions</small>
-                        </div>
-                    <% } %>
-                </div>
-            </div>
-        <% } %>
-    </div>
+               <div class="course-list">
+                   <% userDetails.paymentTransactions.slice(0, 10).forEach(transaction => { %>
+                       <div class="course-item">
+                           <div class="course-details">
+                               <h4>Receipt #<%= transaction.receiptNumber || 'N/A' %></h4>
+                               <div class="course-meta">
+                                   <span><i class="fas fa-calendar"></i> <%= new Date(transaction.transactionDate).toLocaleDateString() %></span>
+                                   <span><i class="fas fa-credit-card"></i> <%= transaction.paymentMethod || 'Card' %></span>
+                                   
+                                   <% 
+                                   // Determine the currency to display
+                                   let displayCurrency = transaction.currency || transaction.financial?.currency || 'EUR';
+                                   let currencySymbol = displayCurrency === 'EUR' ? '€' : (displayCurrency === 'AED' ? 'AED ' : displayCurrency + ' ');
+                                   
+                                   // Get the correct amounts based on currency
+                                   let subtotalAmount = transaction.financial?.subtotal || transaction.subtotal || 0;
+                                   let discountAmount = transaction.financial?.discountAmount || transaction.discountAmount || 0;
+                                   let finalAmount = transaction.financial?.finalAmount || transaction.finalAmount || 0;
+                                   
+                                   // Check if transaction was paid in AED
+                                   if (transaction.financial?.currencyPaid === 'AED' && transaction.financial?.finalAmountAED) {
+                                       finalAmount = transaction.financial.finalAmountAED;
+                                       currencySymbol = 'AED ';
+                                       displayCurrency = 'AED';
+                                   }
+                                   %>
+                                   
+                                   <span><i class="fas fa-money-bill-wave"></i> Subtotal: <%= currencySymbol %><%= subtotalAmount.toFixed(2) %></span>
+                                   <% if (discountAmount && discountAmount > 0) { %>
+                                       <span><i class="fas fa-tag"></i> Discount: <%= currencySymbol %><%= discountAmount.toFixed(2) %></span>
+                                   <% } %>
+                                   <span><i class="fas fa-money-bill"></i> Total: <%= currencySymbol %><%= finalAmount.toFixed(2) %></span>
+                                   
+                                   <% if (transaction.promoCode || (transaction.discounts && transaction.discounts.promoCode && transaction.discounts.promoCode.code)) { %>
+                                       <span><i class="fas fa-percent"></i> Promo: <%= transaction.promoCode || transaction.discounts.promoCode.code %></span>
+                                   <% } %>
+                                   
+                                   <% if (transaction.financial?.exchangeRate && transaction.financial.exchangeRate !== 1) { %>
+                                       <span><i class="fas fa-exchange-alt"></i> Rate: <%= transaction.financial.exchangeRate.toFixed(2) %></span>
+                                   <% } %>
+                               </div>
+                               
+                               <!-- Transaction Items -->
+                               <% if (transaction.items && transaction.items.length > 0) { %>
+                                   <div style="margin-top: 10px; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+                                       <small><strong>Items purchased:</strong></small>
+                                       <% transaction.items.forEach(item => { %>
+                                           <div style="margin-top: 5px;">
+                                               <small>• <%= item.courseTitle || item.courseCode || 'Course' %> (<%= item.courseType || 'Training' %>) - <%= currencySymbol %><%= (item.finalPrice || item.paidPrice || 0).toFixed(2) %></small>
+                                           </div>
+                                       <% }) %>
+                                   </div>
+                               <% } else if (transaction.coursesRegistered && transaction.coursesRegistered.length > 0) { %>
+                                   <div style="margin-top: 10px; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+                                       <small><strong>Courses registered:</strong></small>
+                                       <% transaction.coursesRegistered.forEach(course => { %>
+                                           <div style="margin-top: 5px;">
+                                               <small>• <%= course.courseTitle || course.courseName || course.courseType || 'Course' %> - <%= currencySymbol %><%= (course.paidPrice || 0).toFixed(2) %></small>
+                                           </div>
+                                       <% }) %>
+                                   </div>
+                               <% } %>
+                               
+                               <!-- CCAvenue Transaction Details -->
+                               <% if (transaction.ccavenue && (transaction.ccavenue.trackingId || transaction.ccavenue.bankRefNo)) { %>
+                                   <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                       <small><strong>Payment Details:</strong></small>
+                                       <div class="progress-grid">
+                                           <% if (transaction.ccavenue.trackingId) { %>
+                                               <div><small>Tracking ID: <%= transaction.ccavenue.trackingId %></small></div>
+                                           <% } %>
+                                           <% if (transaction.ccavenue.bankRefNo) { %>
+                                               <div><small>Bank Ref: <%= transaction.ccavenue.bankRefNo %></small></div>
+                                           <% } %>
+                                           <% if (transaction.ccavenue.paymentMode) { %>
+                                               <div><small>Mode: <%= transaction.ccavenue.paymentMode %></small></div>
+                                           <% } %>
+                                           <% if (transaction.ccavenue.cardName) { %>
+                                               <div><small>Card/Bank: <%= transaction.ccavenue.cardName %></small></div>
+                                           <% } %>
+                                       </div>
+                                       <% if (transaction.ccavenue.failureMessage) { %>
+                                           <div style="margin-top: 5px; color: #dc3545;">
+                                               <small><strong>Failure Reason:</strong> <%= transaction.ccavenue.failureMessage %></small>
+                                           </div>
+                                       <% } %>
+                                   </div>
+                               <% } %>
+                           </div>
+                           <div class="course-status-info">
+                               <% 
+                               // Determine the payment status to display
+                               let paymentStatus = transaction.paymentStatus || 'unknown';
+                               let statusClass = 'status-' + paymentStatus.toLowerCase();
+                               
+                               // Map statuses to appropriate classes
+                               if (paymentStatus.toLowerCase() === 'completed' || paymentStatus.toLowerCase() === 'success') {
+                                   statusClass = 'status-completed';
+                               } else if (paymentStatus.toLowerCase() === 'failed' || paymentStatus.toLowerCase() === 'failure') {
+                                   statusClass = 'status-failed';
+                               } else if (paymentStatus.toLowerCase() === 'pending' || paymentStatus.toLowerCase() === 'processing') {
+                                   statusClass = 'status-pending';
+                               } else if (paymentStatus.toLowerCase() === 'cancelled' || paymentStatus.toLowerCase() === 'canceled') {
+                                   statusClass = 'status-failed';
+                               } else if (paymentStatus.toLowerCase() === 'refunded') {
+                                   statusClass = 'status-pending';
+                               }
+                               %>
+                               <span class="status-pill <%= statusClass %>">
+                                   <%= paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1) %>
+                               </span>
+                               <span class="badge badge-info">
+                                   <%= displayCurrency %>
+                               </span>
+                               <% if (transaction.financial?.currencyPaid && transaction.financial.currencyPaid !== transaction.financial.currency) { %>
+                                   <span class="badge badge-warning">
+                                       Paid in <%= transaction.financial.currencyPaid %>
+                                   </span>
+                               <% } %>
+                           </div>
+                       </div>
+                   <% }) %>
+                   
+                   <% if (userDetails.paymentTransactions.length > 10) { %>
+                       <div style="text-align: center; padding: 20px; color: #666;">
+                           <small>Showing 10 of <%= userDetails.paymentTransactions.length %> transactions</small>
+                       </div>
+                   <% } %>
+               </div>
+           </div>
+       <% } %>
+   </div>
 
-    <script>
-        // Approve user
-        async function approveUser(userId) {
-            const result = await Swal.fire({
-                title: 'Approve User',
-                text: 'Are you sure you want to approve this user?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, approve!'
-            });
+   <script>
+       // Approve user
+       async function approveUser(userId) {
+           const result = await Swal.fire({
+               title: 'Approve User',
+               text: 'Are you sure you want to approve this user?',
+               icon: 'question',
+               showCancelButton: true,
+               confirmButtonColor: '#28a745',
+               cancelButtonColor: '#6c757d',
+               confirmButtonText: 'Yes, approve!'
+           });
 
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch('/admin/approve-user', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ 
-                            userId: userId,
-                            sendEmail: true  // Always send email
-                        })
-                    });
+           if (result.isConfirmed) {
+               try {
+                   const response = await fetch('/admin/approve-user', {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       },
+                       body: JSON.stringify({ 
+                           userId: userId,
+                           sendEmail: true
+                       })
+                   });
 
-                    const data = await response.json();
+                   const data = await response.json();
 
-                    if (data.success) {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'User Approved!',
-                            text: data.message,
-                            timer: 2000
-                        });
-                        location.reload();
-                    } else {
-                        Swal.fire('Error', data.message, 'error');
-                    }
-                } catch (error) {
-                    Swal.fire('Error', 'Failed to approve user', 'error');
-                }
-            }
-        }
+                   if (data.success) {
+                       await Swal.fire({
+                           icon: 'success',
+                           title: 'User Approved!',
+                           text: data.message,
+                           timer: 2000
+                       });
+                       location.reload();
+                   } else {
+                       Swal.fire('Error', data.message, 'error');
+                   }
+               } catch (error) {
+                   Swal.fire('Error', 'Failed to approve user', 'error');
+               }
+           }
+       }
 
-        // Change user role
-        async function changeRole(userId, currentRole) {
-            const { value: newRole } = await Swal.fire({
-                title: 'Change User Role',
-                input: 'select',
-                inputOptions: {
-                    'user': 'User',
-                    'instructor': 'Instructor',
-                    'admin': 'Admin'
-                },
-                inputPlaceholder: 'Select a role',
-                inputValue: currentRole,
-                showCancelButton: true,
-                confirmButtonColor: '#007bff',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'You need to select a role!'
-                    }
-                }
-            });
+       // Change user role
+       async function changeRole(userId, currentRole) {
+           const { value: newRole } = await Swal.fire({
+               title: 'Change User Role',
+               input: 'select',
+               inputOptions: {
+                   'user': 'User',
+                   'instructor': 'Instructor',
+                   'admin': 'Admin'
+               },
+               inputPlaceholder: 'Select a role',
+               inputValue: currentRole,
+               showCancelButton: true,
+               confirmButtonColor: '#007bff',
+               inputValidator: (value) => {
+                   if (!value) {
+                       return 'You need to select a role!'
+                   }
+               }
+           });
 
-            if (newRole && newRole !== currentRole) {
-                try {
-                    const response = await fetch(`/admin-users/${userId}/update-role`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ role: newRole })
-                    });
+           if (newRole && newRole !== currentRole) {
+               try {
+                   const response = await fetch(`/admin-users/${userId}/update-role`, {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       },
+                       body: JSON.stringify({ role: newRole })
+                   });
 
-                    const data = await response.json();
+                   const data = await response.json();
 
-                    if (data.success) {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'Role Updated!',
-                            text: `User role changed to ${newRole}`,
-                            timer: 2000
-                        });
-                        location.reload();
-                    }
-                } catch (error) {
-                    Swal.fire('Error', 'Failed to update role', 'error');
-                }
-            }
-        }
+                   if (data.success) {
+                       await Swal.fire({
+                           icon: 'success',
+                           title: 'Role Updated!',
+                           text: `User role changed to ${newRole}`,
+                           timer: 2000
+                       });
+                       location.reload();
+                   }
+               } catch (error) {
+                   Swal.fire('Error', 'Failed to update role', 'error');
+               }
+           }
+       }
 
-        // Reset password
-        async function resetPassword(userId) {
-            const result = await Swal.fire({
-                title: 'Reset Password',
-                text: 'This will send a password reset email to the user. Continue?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ffc107',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, reset!'
-            });
+       // Reset password
+       async function resetPassword(userId) {
+           const result = await Swal.fire({
+               title: 'Reset Password',
+               text: 'This will send a password reset email to the user. Continue?',
+               icon: 'warning',
+               showCancelButton: true,
+               confirmButtonColor: '#ffc107',
+               cancelButtonColor: '#6c757d',
+               confirmButtonText: 'Yes, reset!'
+           });
 
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch(`/admin-users/${userId}/reset-password`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
+           if (result.isConfirmed) {
+               try {
+                   const response = await fetch(`/admin-users/${userId}/reset-password`, {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       }
+                   });
 
-                    const data = await response.json();
+                   const data = await response.json();
 
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Password Reset!',
-                            text: data.message,
-                            timer: 3000
-                        });
-                    }
-                } catch (error) {
-                    Swal.fire('Error', 'Failed to reset password', 'error');
-                }
-            }
-        }
+                   if (data.success) {
+                       Swal.fire({
+                           icon: 'success',
+                           title: 'Password Reset!',
+                           text: data.message,
+                           timer: 3000
+                       });
+                   }
+               } catch (error) {
+                   Swal.fire('Error', 'Failed to reset password', 'error');
+               }
+           }
+       }
 
-        // Delete user (Move to Recycle Bin)
-        async function deleteUser(userId, userName) {
-            const { value: formValues } = await Swal.fire({
-                title: 'Delete User',
-                html: `
-                    <p>Are you sure you want to delete <strong>${userName}</strong>?</p>
-                    <p class="text-muted">The user will be moved to recycle bin and can be recovered within 30 days.</p>
-                    <div style="margin-top: 20px;">
-                        <label for="deletion-reason" style="display: block; text-align: left; margin-bottom: 5px;">Reason for deletion (optional):</label>
-                        <textarea id="deletion-reason" class="swal2-input" style="width: 100%; height: 80px;" placeholder="Enter reason..."></textarea>
-                    </div>
-                `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete!',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true,
-                preConfirm: () => {
-                    return {
-                        reason: document.getElementById('deletion-reason').value
-                    }
-                }
-            });
-            
-            if (formValues) {
-                try {
-                    const response = await fetch('/admin/reject-user', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ 
-                            userId,
-                            reason: formValues.reason || 'Deleted by admin'
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'User Moved to Recycle Bin!',
-                            text: data.message,
-                            timer: 2000
-                        });
-                        window.location.href = '/admin-users';
-                    } else {
-                        Swal.fire('Error', data.message, 'error');
-                    }
-                } catch (error) {
-                    Swal.fire('Error', 'Failed to delete user', 'error');
-                }
-            }
-        }
-    </script>
+       // Delete user (Move to Recycle Bin)
+       async function deleteUser(userId, userName) {
+           const { value: formValues } = await Swal.fire({
+               title: 'Delete User',
+               html: `
+                   <p>Are you sure you want to delete <strong>${userName}</strong>?</p>
+                   <p class="text-muted">The user will be moved to recycle bin and can be recovered within 30 days.</p>
+                   <div style="margin-top: 20px;">
+                       <label for="deletion-reason" style="display: block; text-align: left; margin-bottom: 5px;">Reason for deletion (optional):</label>
+                       <textarea id="deletion-reason" class="swal2-input" style="width: 100%; height: 80px;" placeholder="Enter reason..."></textarea>
+                   </div>
+               `,
+               icon: 'warning',
+               showCancelButton: true,
+               confirmButtonColor: '#dc3545',
+               cancelButtonColor: '#6c757d',
+               confirmButtonText: 'Yes, delete!',
+               cancelButtonText: 'Cancel',
+               reverseButtons: true,
+               preConfirm: () => {
+                   return {
+                       reason: document.getElementById('deletion-reason').value
+                   }
+               }
+           });
+           
+           if (formValues) {
+               try {
+                   const response = await fetch('/admin/reject-user', {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       },
+                       body: JSON.stringify({ 
+                           userId,
+                           reason: formValues.reason || 'Deleted by admin'
+                       })
+                   });
+                   
+                   const data = await response.json();
+                   
+                   if (data.success) {
+                       await Swal.fire({
+                           icon: 'success',
+                           title: 'User Moved to Recycle Bin!',
+                           text: data.message,
+                           timer: 2000
+                       });
+                       window.location.href = '/admin-users';
+                   } else {
+                       Swal.fire('Error', data.message, 'error');
+                   }
+               } catch (error) {
+                   Swal.fire('Error', 'Failed to delete user', 'error');
+               }
+           }
+       }
 
-<script>
-    // Remove course from user
-    // Updated frontend function
-async function removeCourseFromUser(enrollmentId, courseType, courseName) {
-    console.log('🗑️ Frontend remove course:', { enrollmentId, courseType, courseName });
-    
-    const { value: reason } = await Swal.fire({
-        title: 'Remove Course',
-        html: `
-            <p>Remove <strong>${courseName}</strong> from this user?</p>
-            <p class="text-muted">The course will be moved to recycle bin and can be recovered.</p>
-            <div style="margin-top: 20px;">
-                <label for="removal-reason" style="display: block; text-align: left; margin-bottom: 5px;">Reason for removal:</label>
-                <textarea id="removal-reason" class="swal2-input" style="width: 100%; height: 80px;" placeholder="Enter reason..."></textarea>
-            </div>
-        `,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Remove Course',
-        preConfirm: () => {
-            return document.getElementById('removal-reason').value || 'No reason provided';
-        }
-    });
+       // Remove course from user
+       async function removeCourseFromUser(enrollmentId, courseType, courseName) {
+           console.log('🗑️ Frontend remove course:', { enrollmentId, courseType, courseName });
+           
+           const { value: reason } = await Swal.fire({
+               title: 'Remove Course',
+               html: `
+                   <p>Remove <strong>${courseName}</strong> from this user?</p>
+                   <p class="text-muted">The course will be moved to recycle bin and can be recovered.</p>
+                   <div style="margin-top: 20px;">
+                       <label for="removal-reason" style="display: block; text-align: left; margin-bottom: 5px;">Reason for removal:</label>
+                       <textarea id="removal-reason" class="swal2-input" style="width: 100%; height: 80px;" placeholder="Enter reason..."></textarea>
+                   </div>
+               `,
+               icon: 'warning',
+               showCancelButton: true,
+               confirmButtonColor: '#dc3545',
+               cancelButtonColor: '#6c757d',
+               confirmButtonText: 'Remove Course',
+               preConfirm: () => {
+                   return document.getElementById('removal-reason').value || 'No reason provided';
+               }
+           });
 
-    if (reason) {
-        try {
-            console.log('🌐 Making delete request to:', `/admin-users/<%= userDetails._id %>/courses/${enrollmentId}/${courseType}`);
-            
-            const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/${enrollmentId}/${courseType}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ reason: reason })
-            });
+           if (reason) {
+               try {
+                   console.log('🌐 Making delete request to:', `/admin-users/<%= userDetails._id %>/courses/${enrollmentId}/${courseType}`);
+                   
+                   const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/${enrollmentId}/${courseType}`, {
+                       method: 'DELETE',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       },
+                       body: JSON.stringify({ reason: reason })
+                   });
 
-            const data = await response.json();
-            console.log('📥 Delete response:', data);
+                   const data = await response.json();
+                   console.log('📥 Delete response:', data);
 
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Course Removed',
-                    text: data.message,
-                    timer: 2000
-                });
-                location.reload();
-            } else {
-                Swal.fire('Error', data.message, 'error');
-            }
-        } catch (error) {
-            console.error('❌ Delete error:', error);
-            Swal.fire('Error', 'Failed to remove course', 'error');
-        }
-    }
-}
-    // Add course to user
-    async function addCourseToUser() {
-        try {
-            // Get available courses
-            const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/available`);
-            const data = await response.json();
-    
-            if (!data.success) {
-                Swal.fire('Error', data.message, 'error');
-                return;
-            }
-    
-            const courses = data.courses;
-            if (courses.length === 0) {
-                Swal.fire('Info', 'No available courses to add', 'info');
-                return;
-            }
-    
-            // Create options for course selection
-            const courseOptions = {};
-            let currentCategory = '';
-            courses.forEach(course => {
-                if (course.category !== currentCategory) {
-                    courseOptions[`--- ${course.category} ---`] = course.category;
-                    currentCategory = course.category;
-                }
-                courseOptions[course._id] = `${course.courseCode} - ${course.title} (€${course.price || 0})`;
-            });
-    
-            const { value: selectedCourseId } = await Swal.fire({
-                title: 'Add Course to User',
-                input: 'select',
-                inputOptions: courseOptions,
-                inputPlaceholder: 'Select a course',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                inputValidator: (value) => {
-                    if (!value || value.startsWith('---')) {
-                        return 'Please select a course!';
-                    }
-                }
-            });
-    
-            if (selectedCourseId) {
-                const selectedCourse = courses.find(c => c._id === selectedCourseId);
-                
-                const addResponse = await fetch(`/admin-users/<%= userDetails._id %>/courses/add`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        courseId: selectedCourseId,
-                        courseType: selectedCourse.courseType
-                    })
-                });
-    
-                const addData = await addResponse.json();
-    
-                if (addData.success) {
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Course Added',
-                        text: addData.message,
-                        timer: 2000
-                    });
-                    location.reload();
-                } else {
-                    Swal.fire('Error', addData.message, 'error');
-                }
-            }
-        } catch (error) {
-            Swal.fire('Error', 'Failed to add course', 'error');
-        }
-    }
-    
-    // View deleted courses (recycle bin)
-    async function viewDeletedCourses() {
-        try {
-            const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/deleted`);
-            const data = await response.json();
-    
-            if (!data.success) {
-                Swal.fire('Error', data.message, 'error');
-                return;
-            }
-    
-            const deletedCourses = data.deletedCourses;
-            if (deletedCourses.length === 0) {
-                Swal.fire('Info', 'No deleted courses found', 'info');
-                return;
-            }
-    
-            let html = '<div style="max-height: 400px; overflow-y: auto;">';
-            deletedCourses.forEach(deleted => {
-                const course = deleted.courseData;
-                html += `
-                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f8f9fa;">
-                        <div style="display: flex; justify-content: between; align-items: center;">
-                            <div>
-                                <h5 style="margin: 0 0 5px 0;">${course.courseName}</h5>
-                                <small style="color: #666;">${course.courseCode} • ${course.courseType}</small>
-                                <br>
-                                <small style="color: #999;">Deleted: ${new Date(deleted.createdAt).toLocaleDateString()}</small>
-                                <br>
-                                <small style="color: #999;">Reason: ${deleted.deletionReason}</small>
-                            </div>
-                            <button class="btn btn-success btn-sm" onclick="recoverCourse('${deleted._id}')" style="margin-left: 15px;">
-                                <i class="fas fa-undo"></i> Recover
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            html += '</div>';
-    
-            Swal.fire({
-                title: 'Deleted Courses (Recycle Bin)',
-                html: html,
-                width: '600px',
-                showConfirmButton: false,
-                showCancelButton: true,
-                cancelButtonText: 'Close'
-            });
-        } catch (error) {
-            Swal.fire('Error', 'Failed to load deleted courses', 'error');
-        }
-    }
-    
-    // Recover deleted course
-    async function recoverCourse(deletedCourseId) {
-        const result = await Swal.fire({
-            title: 'Recover Course',
-            text: 'Are you sure you want to recover this course?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, recover it!'
-        });
-    
-        if (result.isConfirmed) {
-            try {
-                const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/deleted/${deletedCourseId}/recover`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-    
-                const data = await response.json();
-    
-                if (data.success) {
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Course Recovered',
-                        text: data.message,
-                        timer: 2000
-                    });
-                    location.reload();
-                } else {
-                    Swal.fire('Error', data.message, 'error');
-                }
-            } catch (error) {
-                Swal.fire('Error', 'Failed to recover course', 'error');
-            }
-        }
-    }
-    </script>
-    <%- include('partials/footer') %>
+                   if (data.success) {
+                       await Swal.fire({
+                           icon: 'success',
+                           title: 'Course Removed',
+                           text: data.message,
+                           timer: 2000
+                       });
+                       location.reload();
+                   } else {
+                       Swal.fire('Error', data.message, 'error');
+                   }
+               } catch (error) {
+                   console.error('❌ Delete error:', error);
+                   Swal.fire('Error', 'Failed to remove course', 'error');
+               }
+           }
+       }
+
+       // Add course to user
+       async function addCourseToUser() {
+           try {
+               const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/available`);
+               const data = await response.json();
+       
+               if (!data.success) {
+                   Swal.fire('Error', data.message, 'error');
+                   return;
+               }
+       
+               const courses = data.courses;
+               if (courses.length === 0) {
+                   Swal.fire('Info', 'No available courses to add', 'info');
+                   return;
+               }
+       
+               const courseOptions = {};
+               let currentCategory = '';
+               courses.forEach(course => {
+                   if (course.category !== currentCategory) {
+                       courseOptions[`--- ${course.category} ---`] = course.category;
+                       currentCategory = course.category;
+                   }
+                   courseOptions[course._id] = `${course.courseCode} - ${course.title} (€${course.price || 0})`;
+               });
+       
+               const { value: selectedCourseId } = await Swal.fire({
+                   title: 'Add Course to User',
+                   input: 'select',
+                   inputOptions: courseOptions,
+                   inputPlaceholder: 'Select a course',
+                   showCancelButton: true,
+                   confirmButtonColor: '#28a745',
+                   inputValidator: (value) => {
+                       if (!value || value.startsWith('---')) {
+                           return 'Please select a course!';
+                       }
+                   }
+               });
+       
+               if (selectedCourseId) {
+                   const selectedCourse = courses.find(c => c._id === selectedCourseId);
+                   
+                   const addResponse = await fetch(`/admin-users/<%= userDetails._id %>/courses/add`, {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       },
+                       body: JSON.stringify({
+                           courseId: selectedCourseId,
+                           courseType: selectedCourse.courseType
+                       })
+                   });
+       
+                   const addData = await addResponse.json();
+       
+                   if (addData.success) {
+                       await Swal.fire({
+                           icon: 'success',
+                           title: 'Course Added',
+                           text: addData.message,
+                           timer: 2000
+                       });
+                       location.reload();
+                   } else {
+                       Swal.fire('Error', addData.message, 'error');
+                   }
+               }
+           } catch (error) {
+               Swal.fire('Error', 'Failed to add course', 'error');
+           }
+       }
+       
+       // View deleted courses (recycle bin)
+       async function viewDeletedCourses() {
+           try {
+               const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/deleted`);
+               const data = await response.json();
+       
+               if (!data.success) {
+                   Swal.fire('Error', data.message, 'error');
+                   return;
+               }
+       
+               const deletedCourses = data.deletedCourses;
+               if (deletedCourses.length === 0) {
+                   Swal.fire('Info', 'No deleted courses found', 'info');
+                   return;
+               }
+       
+               let html = '<div style="max-height: 400px; overflow-y: auto;">';
+               deletedCourses.forEach(deleted => {
+                   const course = deleted.courseData;
+                   html += `
+                       <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f8f9fa;">
+                           <div style="display: flex; justify-content: between; align-items: center;">
+                               <div>
+                                   <h5 style="margin: 0 0 5px 0;">${course.courseName}</h5>
+                                   <small style="color: #666;">${course.courseCode} • ${course.courseType}</small>
+                                   <br>
+                                   <small style="color: #999;">Deleted: ${new Date(deleted.createdAt).toLocaleDateString()}</small>
+                                   <br>
+                                   <small style="color: #999;">Reason: ${deleted.deletionReason}</small>
+                               </div>
+                               <button class="btn btn-success btn-sm" onclick="recoverCourse('${deleted._id}')" style="margin-left: 15px;">
+                                   <i class="fas fa-undo"></i> Recover
+                               </button>
+                           </div>
+                       </div>
+                   `;
+               });
+               html += '</div>';
+       
+               Swal.fire({
+                   title: 'Deleted Courses (Recycle Bin)',
+                   html: html,
+                   width: '600px',
+                   showConfirmButton: false,
+                   showCancelButton: true,
+                   cancelButtonText: 'Close'
+               });
+           } catch (error) {
+               Swal.fire('Error', 'Failed to load deleted courses', 'error');
+           }
+       }
+       
+       // Recover deleted course
+       async function recoverCourse(deletedCourseId) {
+           const result = await Swal.fire({
+               title: 'Recover Course',
+               text: 'Are you sure you want to recover this course?',
+               icon: 'question',
+               showCancelButton: true,
+               confirmButtonColor: '#28a745',
+               cancelButtonColor: '#6c757d',
+               confirmButtonText: 'Yes, recover it!'
+           });
+       
+           if (result.isConfirmed) {
+               try {
+                   const response = await fetch(`/admin-users/<%= userDetails._id %>/courses/deleted/${deletedCourseId}/recover`, {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       }
+                   });
+       
+                   const data = await response.json();
+       
+                   if (data.success) {
+                       await Swal.fire({
+                           icon: 'success',
+                           title: 'Course Recovered',
+                           text: data.message,
+                           timer: 2000
+                       });
+                       location.reload();
+                   } else {
+                       Swal.fire('Error', data.message, 'error');
+                   }
+               } catch (error) {
+                   Swal.fire('Error', 'Failed to recover course', 'error');
+               }
+           }
+       }
+   </script>
+   <%- include('partials/footer') %>
 </body>
 </html>

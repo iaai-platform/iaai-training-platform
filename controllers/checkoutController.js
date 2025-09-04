@@ -2519,6 +2519,9 @@ exports.handlePaymentResponse = async (req, res) => {
         }
       });
 
+      // Convert AED back to EUR for display
+      const amountInEUR = (parseFloat(amount) / EUR_TO_AED_RATE).toFixed(2);
+
       console.log(
         `📊 Total enrollments updated: ${enrollmentsUpdated}/${transaction.items.length}`
       );
@@ -2610,7 +2613,7 @@ exports.handlePaymentResponse = async (req, res) => {
       console.log(`🎯 Redirecting to success page`);
 
       res.redirect(
-        `/payment/success?order_id=${order_id}&amount=${amount}&ref=${transaction.receiptNumber}&userId=${userId}`
+        `/payment/success?order_id=${order_id}&amount=${amountInEUR}&ref=${transaction.receiptNumber}&userId=${userId}`
       );
     } else {
       // Payment failed

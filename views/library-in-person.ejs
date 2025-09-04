@@ -365,6 +365,7 @@
                     
 <!-- FIXED Documents Section -->
 <!-- FIXED Documents Section with View Option -->
+<!-- SECURE Documents Section - NO DOWNLOAD OPTION -->
 <% if (hasDocuments) { %>
   <% course.media.documents.forEach((docUrl, index) => { %>
     <% 
@@ -429,20 +430,17 @@
         </div>
       </div>
       <div class="video-actions">
-        <!-- NEW: Secure View Button -->
+        <!-- ONLY SECURE VIEW - NO DOWNLOAD OPTION -->
         <a href="/library/view-document/<%= course.courseId %>/<%= index %>" 
            target="_blank" 
            class="video-action action-watch" 
            style="background: linear-gradient(135deg, #667eea, #764ba2);">
-          <i class="fas fa-lock"></i> Secure View
+          <i class="fas fa-lock"></i> View Document
         </a>
-        <!-- Original view button (optional - can be removed) -->
-        <a href="<%= docUrl %>#toolbar=0" 
-           target="_blank" 
-           class="video-action action-exam" 
-           rel="noopener noreferrer">
-          <i class="fas fa-eye"></i> Quick View
-        </a>
+        <!-- Small text to indicate secure viewing -->
+        <small style="display: block; margin-top: 5px; color: #666; font-size: 0.8rem;">
+          <i class="fas fa-info-circle"></i> Secure viewing only
+        </small>
       </div>
     </div>
   <% }) %>

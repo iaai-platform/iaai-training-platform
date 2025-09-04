@@ -21,6 +21,16 @@
       -ms-user-select: none;
     }
     
+    /* Disable text selection everywhere */
+    * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
     .viewer-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -29,6 +39,8 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 10000;
     }
     
     .viewer-title {
@@ -80,177 +92,179 @@
       border: none;
     }
     
+    /* Additional protection overlay */
     .protection-overlay {
-      position: fixed;
-      top: 60px;
+      position: absolute;
+      top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      z-index: 9998;
-      pointer-events: none;
-    }
-    
-    .zoom-controls {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-      background: rgba(0,0,0,0.3);
-      padding: 5px;
-      border-radius: 5px;
-    }
-    
-    .zoom-btn {
+      z-index: 9999;
       background: transparent;
-      border: 1px solid white;
-      color: white;
-      width: 30px;
-      height: 30px;
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      cursor: default;
     }
     
-    .zoom-btn:hover {
-      background: rgba(255,255,255,0.1);
+    .watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.05);
+      font-weight: bold;
+      pointer-events: none;
+      z-index: 9997;
+      white-space: nowrap;
     }
     
-    #zoomLevel {
-      color: white;
-      font-size: 14px;
-      min-width: 50px;
+    .security-notice {
+      background: #ffc107;
+      color: #000;
+      padding: 5px 15px;
+      font-size: 0.85rem;
       text-align: center;
     }
     
     @media print {
-      body { display: none !important; }
+      * { display: none !important; }
+      body::before {
+        content: "Printing is not allowed";
+        display: block !important;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        color: red;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Security notice -->
+  <div class="security-notice">
+    <i class="fas fa-shield-alt"></i> This document is protected. Downloading and printing are disabled.
+  </div>
+  
   <!-- Header with controls -->
   <div class="viewer-header">
     <div class="viewer-title">
-      <i class="fas fa-file-pdf"></i> Secure Document Viewer
+      <i class="fas fa-lock"></i> Secure Document Viewer - Read Only
     </div>
     <div class="viewer-controls">
-      <div class="zoom-controls">
-        <button class="zoom-btn" onclick="zoomOut()">−</button>
-        <span id="zoomLevel">100%</span>
-        <button class="zoom-btn" onclick="zoomIn()">+</button>
-      </div>
+      <span style="color: #ffc107; margin-right: 15px; font-size: 0.9rem;">
+        <i class="fas fa-eye"></i> Viewing Only
+      </span>
       <button class="control-btn close-btn" onclick="closeViewer()">
         <i class="fas fa-times"></i> Close
       </button>
     </div>
   </div>
   
+  <!-- Watermark -->
+  <div class="watermark">
+    <%= user.email %> - IAAI CONFIDENTIAL
+  </div>
+  
   <!-- PDF Container -->
   <div id="pdfContainer">
     <iframe 
       id="pdfFrame"
-      src="<%= documentUrl %>#toolbar=0&navpanes=0&scrollbar=1"
-      title="PDF Document">
+      src="<%= documentUrl %>#toolbar=0&navpanes=0&scrollbar=1&view=FitH&zoom=100"
+      title="Protected Document"
+      sandbox="allow-same-origin">
     </iframe>
+    <!-- Protection overlay to prevent interactions -->
+    <div class="protection-overlay"></div>
   </div>
-  
-  <!-- Protection overlay -->
-  <div class="protection-overlay"></div>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
   <script>
-    // Disable right-click
-    document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // Disable print
-    window.addEventListener('beforeprint', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    });
-    
-    // Disable keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-      // Disable Ctrl+S (Save)
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    // Aggressive protection measures
+    (function() {
+      // Disable right-click
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }, true);
+      
+      // Disable text selection
+      document.addEventListener('selectstart', function(e) {
         e.preventDefault();
         return false;
-      }
-      // Disable Ctrl+P (Print)
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      });
+      
+      // Disable drag
+      document.addEventListener('dragstart', function(e) {
         e.preventDefault();
         return false;
-      }
-      // Disable Ctrl+A (Select All)
-      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+      });
+      
+      // Disable print
+      window.addEventListener('beforeprint', function(e) {
         e.preventDefault();
+        e.stopPropagation();
+        alert('Printing is disabled for this document.');
         return false;
-      }
-      // Disable F12 (Dev Tools)
-      if (e.key === 'F12') {
-        e.preventDefault();
-        return false;
-      }
-    });
-    
-    // Zoom functionality
-    let currentZoom = 100;
-    
-    function zoomIn() {
-      if (currentZoom < 200) {
-        currentZoom += 25;
-        applyZoom();
-      }
-    }
-    
-    function zoomOut() {
-      if (currentZoom > 50) {
-        currentZoom -= 25;
-        applyZoom();
-      }
-    }
-    
-    function applyZoom() {
-      const frame = document.getElementById('pdfFrame');
-      frame.style.width = currentZoom + '%';
-      frame.style.height = currentZoom + '%';
-      document.getElementById('zoomLevel').textContent = currentZoom + '%';
-    }
-    
-    function closeViewer() {
-      window.history.back();
-    }
-    
-    // Disable drag and drop
-    document.addEventListener('dragstart', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    document.addEventListener('drop', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // Auto-close after 30 minutes of inactivity
-    let inactivityTimer;
-    
-    function resetInactivityTimer() {
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(function() {
-        alert('Session expired due to inactivity.');
-        window.close();
-      }, 30 * 60 * 1000); // 30 minutes
-    }
-    
-    document.addEventListener('mousemove', resetInactivityTimer);
-    document.addEventListener('keypress', resetInactivityTimer);
-    resetInactivityTimer();
+      });
+      
+      // Disable keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Disable Ctrl+S (Save)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        // Disable Ctrl+P (Print)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+          e.preventDefault();
+          e.stopPropagation();
+          alert('Printing is disabled for this document.');
+          return false;
+        }
+        // Disable Ctrl+A (Select All)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        // Disable Ctrl+C (Copy)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        // Disable F12 and Dev Tools
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      }, true);
+      
+      // Disable developer tools (basic protection)
+      setInterval(function() {
+        if (window.devtools && window.devtools.open) {
+          window.location.href = '/library/in-person';
+        }
+      }, 1000);
+      
+      // Close viewer function
+      window.closeViewer = function() {
+        window.location.href = '/library/in-person';
+      };
+      
+      // Auto-close after 30 minutes
+      setTimeout(function() {
+        alert('Session expired. Please reload to continue viewing.');
+        window.location.href = '/library/in-person';
+      }, 30 * 60 * 1000);
+      
+      // Log view activity (optional - for tracking)
+      console.log('Document viewed by:', '<%= user.email %>', 'at', new Date().toISOString());
+    })();
   </script>
 </body>
 </html>

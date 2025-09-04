@@ -146,6 +146,71 @@ router.post(
 );
 
 // ========================================
+// DOCUMENT VIEWER ROUTE (NEW)
+// ========================================
+
+// Secure PDF viewer route - TEMPORARY INLINE HANDLER
+// (You should move this to LibraryController later)
+router.get(
+  "/library/view-document/:courseId/:materialIndex",
+  isAuthenticated,
+  async (req, res) => {
+    try {
+      const { courseId, materialIndex } = req.params;
+      const userId = req.user._id;
+
+      // Import User model
+      const User = require("../models/user");
+
+      // Verify user has access to the course
+      const user = await User.findById(userId).populate({
+        path: "myInPersonCourses.courseId",
+        select: "media",
+      });
+
+      const enrollment = user.myInPersonCourses.find(
+        (e) => e.courseId._id.toString() === courseId
+      );
+
+      if (
+        !enrollment ||
+        !["paid", "registered"].includes(enrollment.enrollmentData.status)
+      ) {
+        return res.status(403).render("error", {
+          message: "Access denied. You are not enrolled in this course.",
+          user: req.user,
+        });
+      }
+
+      const course = enrollment.courseId;
+      const documentUrl = course.media?.documents?.[materialIndex];
+
+      if (!documentUrl) {
+        return res.status(404).render("error", {
+          message: "Document not found.",
+          user: req.user,
+        });
+      }
+
+      // Render PDF viewer page
+      res.render("pdf-viewer", {
+        user: req.user,
+        documentUrl: documentUrl,
+        courseId: courseId,
+        materialIndex: materialIndex,
+        title: `Document Viewer - Material ${parseInt(materialIndex) + 1}`,
+      });
+    } catch (error) {
+      console.error("Error in viewPDF:", error);
+      res.status(500).render("error", {
+        message: "Error loading document viewer.",
+        user: req.user,
+      });
+    }
+  }
+);
+
+// ========================================
 // ASSESSMENT RESULTS ROUTES (FIXED)
 // ========================================
 
@@ -156,7 +221,7 @@ router.get(
   LibraryController.getInPersonAssessmentResults
 );
 
-// Online Live Assessment Results (THIS WAS MISSING!)
+// Online Live Assessment Results
 router.get(
   "/library/online-live/assessment/:courseId/results",
   isAuthenticated,
@@ -220,6 +285,7 @@ router.get(
     }
   }
 );
+
 // ========================================
 // GENERAL ATTENDANCE ROUTES (for backward compatibility)
 // ========================================
@@ -239,11 +305,8 @@ router.post(
 // ========================================
 // CERTIFICATE ROUTES (All Course Types)
 // ========================================
-// ========================================
-// CERTIFICATE ROUTES (All Course Types)
-// ========================================
 
-// ✅ ADD: Redirect old certificate routes to new system
+// Redirect old certificate routes to new system
 router.get("/certificate/:courseId", isAuthenticated, async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -288,7 +351,7 @@ router.get("/certificate/:courseId", isAuthenticated, async (req, res) => {
   }
 });
 
-// ✅ ADD: Redirect certificate download
+// Redirect certificate download
 router.get(
   "/certificate/download/:certificateId",
   isAuthenticated,

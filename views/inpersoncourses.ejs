@@ -1283,7 +1283,7 @@
               <span><strong><%= (course.enrollment?.seatsAvailable || 0) - (course.enrollment?.currentEnrollment || 0) %></strong> of <strong><%= course.enrollment?.seatsAvailable || 0 %></strong> seats available</span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill" style="width: <%= course.enrollment?.seatsAvailable > 0 ? ((course.enrollment?.currentEnrollment || 0) / (course.enrollment?.seatsAvailable + (course.enrollment?.currentEnrollment || 0)) * 100) : 0 %>%"></div>
+              <div class="progress-fill" style="width: <%= course.enrollment?.seatsAvailable > 0 ? ((course.enrollment?.currentEnrollment || 0) / course.enrollment.seatsAvailable * 100) : 0 %>%"></div>
             </div>
             <div class="availability-status">
               <% if (course.enrollment?.seatsAvailable <= 5 && course.enrollment?.seatsAvailable > 0) { %>

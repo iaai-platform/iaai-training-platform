@@ -207,7 +207,26 @@ exports.getCourseDetails = async (req, res) => {
         error: { status: 404 },
       });
     }
+    // ========== CORRECTED CODE PLACEMENT ==========
+    // Calculate actual enrollment from User model
+    const actualEnrollment = await User.countDocuments({
+      "myInPersonCourses.courseId": courseId,
+      "myInPersonCourses.enrollmentData.status": {
+        $in: ["paid", "registered", "completed"],
+      },
+    });
 
+    // Update the course object with actual enrollment
+    course.enrollment.currentEnrollment = actualEnrollment;
+    console.log(
+      `📊 Actual enrollment count: ${actualEnrollment} users enrolled`
+    );
+    console.log(
+      `💺 Available seats: ${
+        course.enrollment.seatsAvailable - actualEnrollment
+      } of ${course.enrollment.seatsAvailable}`
+    );
+    // ========== END OF CORRECTED CODE ==========
     // Check if course is expired
     const now = new Date();
     const startDate = course.schedule?.startDate

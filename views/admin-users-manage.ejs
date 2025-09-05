@@ -3,15 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management - IAAI Admin</title>
-    <link rel="stylesheet" href="/css/admin.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title><%= title %> - IAAI Admin</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
     <style>
-        /* ============================================================
-           ✅ 1. Base Styling & Reset
-           ============================================================ */
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #06b6d4;
+            --dark-color: #1f2937;
+            --light-bg: #f9fafb;
+            --border-color: #e5e7eb;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -19,1007 +39,544 @@
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: #333;
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
 
-        /* ============================================================
-           ✅ 2. Enhanced Admin Header
-           ============================================================ */
-        .admin-header {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: white;
-            padding: 35px 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 25px rgba(220,53,69,0.25);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .admin-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="25" r="1" fill="white" opacity="0.05"/><circle cx="25" cy="75" r="1" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
-            pointer-events: none;
-        }
-
-        .admin-header-content {
+        .main-container {
             max-width: 1400px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .admin-header h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .admin-header p {
-            margin-top: 8px;
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-
-        .admin-header .breadcrumb {
-            background: rgba(255,255,255,0.15);
-            padding: 12px 20px;
-            border-radius: 30px;
-            font-size: 0.95rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .admin-header .breadcrumb a {
-            color: white;
-            text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
-        }
-
-        .admin-header .breadcrumb a:hover {
-            opacity: 1;
-            text-decoration: underline;
-        }
-
-        /* ============================================================
-           ✅ 3. Enhanced Container & Layout
-           ============================================================ */
-        .admin-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* ============================================================
-           ✅ 4. Enhanced Revenue Summary
-           ============================================================ */
-        .revenue-summary {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 35px;
+            background: white;
             border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(40,167,69,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
             position: relative;
             overflow: hidden;
         }
 
-        .revenue-summary::before {
+        .header-section::before {
             content: '';
             position: absolute;
             top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            pointer-events: none;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
         }
 
-        .revenue-summary h2 {
-            margin-bottom: 25px;
-            font-size: 1.6rem;
+        .header-content {
             position: relative;
             z-index: 1;
         }
 
-        .revenue-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .revenue-stat {
-            text-align: center;
-            padding: 20px 15px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.3s ease;
-        }
-
-        .revenue-stat:hover {
-            transform: translateY(-5px);
-        }
-
-        .revenue-stat .value {
-            font-size: 2.2rem;
+        .header-title {
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .revenue-stat .label {
-            font-size: 0.95rem;
+        .header-subtitle {
+            font-size: 1.1rem;
             opacity: 0.9;
-            font-weight: 500;
         }
 
-        /* ============================================================
-           ✅ 5. Enhanced Stats Grid
-           ============================================================ */
+        /* Statistics Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .stat-card {
             background: white;
-            padding: 30px 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        .stat-number {
-            font-size: 2.8rem;
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.users { background: #e0f2fe; color: #0ea5e9; }
+        .stat-icon.confirmed { background: #d1fae5; color: #10b981; }
+        .stat-icon.pending { background: #fed7aa; color: #f97316; }
+        .stat-icon.revenue { background: #ddd6fe; color: #8b5cf6; }
+
+        .stat-content h3 {
+            font-size: 1.8rem;
             font-weight: 700;
-            color: #007bff;
-            margin-bottom: 12px;
-            text-shadow: 0 2px 4px rgba(0,123,255,0.1);
+            margin: 0;
         }
 
-        .stat-label {
-            color: #666;
+        .stat-content p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            padding: 30px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark-color);
+            font-size: 0.9rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
+            transition: all 0.3s;
         }
 
-        /* ============================================================
-           ✅ 6. Enhanced Analytics Button
-           ============================================================ */
-        .analytics-btn {
-            background: linear-gradient(135deg, #17a2b8, #138496);
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-filter {
+            padding: 10px 25px;
+            background: var(--primary-color);
             color: white;
-            padding: 15px 30px;
-            border-radius: 12px;
-            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-filter:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-reset {
+            padding: 10px 25px;
+            background: white;
+            color: var(--dark-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-reset:hover {
+            background: var(--light-bg);
+        }
+
+        .btn-export {
+            padding: 10px 25px;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            box-shadow: 0 6px 20px rgba(23,162,184,0.3);
-            border: none;
-            cursor: pointer;
+            gap: 8px;
         }
 
-        .analytics-btn:hover {
-            background: linear-gradient(135deg, #138496, #117a8b);
-            text-decoration: none;
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(23,162,184,0.4);
+        .btn-export:hover {
+            background: #0ea471;
+            transform: translateY(-1px);
         }
 
-        /* ============================================================
-           ✅ 7. Enhanced Filter Bar
-           ============================================================ */
-        .filter-bar {
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 300px;
-            padding: 15px 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: #007bff;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
-        }
-
-        .filter-select {
-            padding: 15px 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            font-size: 15px;
-            background: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 150px;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: #007bff;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
-        }
-
-        /* ============================================================
-           ✅ 8. Enhanced Table Container
-           ============================================================ */
-        .table-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .table-header {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        /* Table Section */
+        .table-section {
             padding: 30px;
-            border-bottom: 2px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        .table-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #2c3e50;
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .user-table {
+            width: 100%;
+            background: white;
+        }
+
+        .user-table thead {
+            background: var(--light-bg);
+        }
+
+        .user-table thead th {
+            padding: 15px;
+            font-weight: 600;
+            color: var(--dark-color);
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .user-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .user-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .user-table tbody td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        /* User Cell */
+        .user-cell {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        /* ============================================================
-           ✅ 9. Enhanced Users Table - Desktop
-           ============================================================ */
-        .table-scroll-wrapper {
-            overflow-x: auto;
-            border-radius: 0 0 20px 20px;
-        }
-
-        .table-scroll-wrapper::-webkit-scrollbar {
-            height: 10px;
-        }
-
-        .table-scroll-wrapper::-webkit-scrollbar-track {
-            background: #f1f3f4;
-            border-radius: 5px;
-        }
-
-        .table-scroll-wrapper::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            border-radius: 5px;
-        }
-
-        .table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #0056b3, #004085);
-        }
-
-        .users-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 14px;
-            min-width: 1300px;
-        }
-
-        .users-table th {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            padding: 20px 16px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            border: none;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            white-space: nowrap;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .users-table td {
-            padding: 18px 16px;
-            border-bottom: 1px solid #f1f3f4;
-            vertical-align: middle;
-            background: white;
-            transition: all 0.3s ease;
-        }
-
-        .users-table tr:hover td {
-            background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
-            transform: scale(1.001);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        .users-table tr:nth-child(even) td {
-            background: #fafbfc;
-        }
-
-        .users-table tr:nth-child(even):hover td {
-            background: linear-gradient(135deg, #f0f4ff, #e0ebff);
-        }
-
-        /* Column-specific widths */
-        .users-table th:nth-child(1), .users-table td:nth-child(1) { min-width: 200px; }
-        .users-table th:nth-child(2), .users-table td:nth-child(2) { min-width: 220px; }
-        .users-table th:nth-child(3), .users-table td:nth-child(3) { min-width: 130px; }
-        .users-table th:nth-child(4), .users-table td:nth-child(4) { min-width: 280px; }
-        .users-table th:nth-child(5), .users-table td:nth-child(5) { min-width: 140px; text-align: center; }
-        .users-table th:nth-child(6), .users-table td:nth-child(6) { min-width: 110px; text-align: center; }
-        .users-table th:nth-child(7), .users-table td:nth-child(7) { min-width: 200px; text-align: center; }
-
-        /* ============================================================
-           ✅ 10. Enhanced User Info Components
-           ============================================================ */
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
         .user-avatar {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 18px;
-            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
-            flex-shrink: 0;
-            border: 3px solid rgba(255,255,255,0.9);
-        }
-
-        .user-info div {
-            min-width: 0;
-        }
-
-        .user-info strong {
-            display: block;
-            font-size: 16px;
-            color: #2c3e50;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 150px;
             font-weight: 600;
+            font-size: 1.1rem;
         }
 
-        .user-info small {
-            color: #6c757d;
-            font-size: 12px;
-            text-transform: capitalize;
-            font-weight: 500;
-            background: #f8f9fa;
-            padding: 2px 8px;
-            border-radius: 8px;
+        .user-info {
+            flex: 1;
         }
 
-        /* ============================================================
-           ✅ 11. Enhanced Payment Info
-           ============================================================ */
-        .payment-info {
-            text-align: center;
-        }
-
-        .payment-amount {
-            font-weight: 700;
-            color: #28a745;
-            font-size: 17px;
-            display: block;
-            margin-bottom: 6px;
-            text-shadow: 0 1px 2px rgba(40,167,69,0.1);
-        }
-
-        .payment-count {
-            font-size: 11px;
-            color: #6c757d;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            padding: 3px 10px;
-            border-radius: 12px;
-            display: inline-block;
-            font-weight: 500;
-        }
-
-        /* ============================================================
-           ✅ 12. Enhanced Course Pills
-           ============================================================ */
-        .course-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            max-width: 260px;
-            margin-bottom: 6px;
-        }
-
-        .course-pill {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 18px;
-            font-size: 11px;
+        .user-name {
             font-weight: 600;
-            white-space: nowrap;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            color: var(--dark-color);
+            margin-bottom: 2px;
         }
 
-        .course-pill::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s ease;
+        .user-email {
+            font-size: 0.85rem;
+            color: #6b7280;
         }
 
-        .course-pill:hover::before {
-            left: 100%;
-        }
-
-        .course-pill:hover {
-            transform: scale(1.05);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-        }
-
-        .course-pill.in-person {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            color: #1565c0;
-            border-color: #90caf9;
-        }
-
-        .course-pill.online-live {
-            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
-            color: #6a1b9a;
-            border-color: #ce93d8;
-        }
-
-        .course-pill.self-paced {
-            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-            color: #2e7d32;
-            border-color: #a5d6a7;
-        }
-
-        /* ============================================================
-           ✅ 13. Enhanced Status Badges
-           ============================================================ */
+        /* Status Badges */
         .status-badge {
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-            border: 2px solid transparent;
-        }
-
-        .status-confirmed {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724;
-            border-color: #b8dabd;
-        }
-
-        .status-pending {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            color: #856404;
-            border-color: #f0d072;
-        }
-
-        /* ============================================================
-           ✅ 14. Enhanced Action Buttons
-           ============================================================ */
-        .action-btns {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 10px 14px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
-            min-width: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            position: relative;
-            overflow: hidden;
+            gap: 5px;
         }
 
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s ease;
+        .status-badge.confirmed {
+            background: #d1fae5;
+            color: #065f46;
         }
 
-        .btn:hover::before {
-            left: 100%;
+        .status-badge.pending {
+            background: #fed7aa;
+            color: #92400e;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        .status-badge.locked {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
-        .btn-sm {
-            padding: 8px 12px;
-            font-size: 11px;
+        .status-badge.active {
+            background: #dbeafe;
+            color: #1e40af;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, #17a2b8, #138496);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #28a745, #218838);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: white;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #ffc107, #e0a800);
-            color: #212529;
-        }
-
-        /* ============================================================
-           ✅ 15. Mobile Card Layout (≤768px)
-           ============================================================ */
-        .mobile-user-cards {
-            display: none;
-            padding: 15px;
-        }
-
-        .user-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
-            transition: transform 0.3s ease;
-        }
-
-        .user-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
-        }
-
-        .user-card-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f3f4;
-        }
-
-        .user-card .user-avatar {
-            width: 55px;
-            height: 55px;
-            font-size: 20px;
-        }
-
-        .user-card-info h4 {
-            margin: 0 0 6px 0;
-            color: #2c3e50;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .user-card-info .role {
-            color: #6c757d;
-            font-size: 13px;
-            text-transform: uppercase;
-            font-weight: 600;
-            background: #f8f9fa;
-            padding: 3px 10px;
-            border-radius: 10px;
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
             display: inline-block;
         }
 
-        .user-card-details {
-            display: grid;
-            gap: 15px;
-            margin-bottom: 25px;
+        .status-indicator.confirmed { background: #10b981; }
+        .status-indicator.pending { background: #f59e0b; }
+        .status-indicator.locked { background: #ef4444; }
+        .status-indicator.active { background: #3b82f6; }
+
+        /* Role Badge */
+        .role-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
-        .detail-row {
+        .role-badge.admin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .role-badge.instructor {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .role-badge.support {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .role-badge.user {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        /* Location Cell */
+        .location-cell {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Course Info */
+        .course-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .course-count {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .course-types {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        /* Spent Amount */
+        .spent-amount {
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 1.1rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            padding: 8px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-action:hover {
+            background: var(--light-bg);
+        }
+
+        .btn-action.details {
+            color: var(--info-color);
+        }
+
+        .btn-action.details:hover {
+            background: #ecfeff;
+        }
+
+        .btn-action.approve {
+            color: var(--success-color);
+        }
+
+        .btn-action.approve:hover {
+            background: #d1fae5;
+        }
+
+        .btn-action.reject {
+            color: var(--warning-color);
+        }
+
+        .btn-action.reject:hover {
+            background: #fef3c7;
+        }
+
+        .btn-action.delete {
+            color: var(--danger-color);
+        }
+
+        .btn-action.delete:hover {
+            background: #fee2e2;
+        }
+
+        /* Pagination */
+        .pagination-section {
+            padding: 20px 30px;
+            background: var(--light-bg);
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            padding: 10px 0;
-            border-bottom: 1px solid #f8f9fa;
-        }
-
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-            flex: 1;
-            margin-right: 15px;
-        }
-
-        .detail-value {
-            flex: 2;
-            text-align: right;
-            font-size: 14px;
-            color: #2c3e50;
-        }
-
-        .mobile-course-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            justify-content: flex-end;
-        }
-
-        .mobile-course-pills .course-pill {
-            font-size: 10px;
-            padding: 4px 10px;
-        }
-
-        .mobile-payment-info {
-            text-align: right;
-        }
-
-        .mobile-payment-info .payment-amount {
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .mobile-payment-info .payment-count {
-            font-size: 11px;
-        }
-
-        .mobile-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-            padding-top: 20px;
-            border-top: 2px solid #f1f3f4;
-        }
-
-        .mobile-actions .btn {
-            flex: 1;
-            min-width: 90px;
-            padding: 12px 10px;
-            font-size: 12px;
-        }
-
-        .mobile-status {
-            display: flex;
-            justify-content: flex-end;
             align-items: center;
         }
 
-        /* ============================================================
-           ✅ 16. Empty State
-           ============================================================ */
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            color: #6c757d;
+        .pagination-info {
+            color: #6b7280;
         }
 
-        .empty-state i {
-            font-size: 5rem;
-            margin-bottom: 25px;
-            opacity: 0.4;
-            color: #007bff;
+        .pagination-controls {
+            display: flex;
+            gap: 5px;
         }
 
-        .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #2c3e50;
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--dark-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
         }
 
-        .empty-state p {
-            font-size: 1.1rem;
-            opacity: 0.8;
+        .page-btn:hover:not(:disabled) {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
 
-        /* ============================================================
-           ✅ 17. Responsive Design
-           ============================================================ */
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-        /* Mobile (≤768px) */
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f4f6;
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .admin-header {
-                padding: 25px 20px;
-            }
-
-            .admin-header-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-
-            .admin-header h1 {
+            .header-title {
                 font-size: 1.8rem;
             }
-
-            .admin-container {
-                padding: 0 15px;
-            }
-
-            .revenue-summary {
-                padding: 25px 20px;
-            }
-
-            .revenue-stats {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
-
+            
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
                 gap: 15px;
-            }
-
-            .filter-bar {
-                flex-direction: column;
                 padding: 20px;
-                gap: 15px;
             }
-
-            .search-box {
-                min-width: 100%;
-                margin-bottom: 5px;
-            }
-
-            .filter-select {
-                min-width: 100%;
-            }
-
-            .table-scroll-wrapper,
-            .users-table {
-                display: none;
-            }
-
-            .mobile-user-cards {
-                display: block;
-            }
-
-            .table-header {
-                padding: 20px;
+            
+            .filter-row {
                 flex-direction: column;
-                gap: 15px;
-                text-align: center;
             }
-
-            .table-title {
-                font-size: 1.2rem;
-                justify-content: center;
+            
+            .filter-group {
+                width: 100%;
             }
-        }
-
-        /* Tablet (769px - 1024px) */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .users-table {
-                font-size: 13px;
-                min-width: 1100px;
+            
+            .table-section {
+                padding: 15px;
             }
-
-            .users-table th,
-            .users-table td {
-                padding: 16px 14px;
-            }
-
-            .user-info strong {
-                max-width: 130px;
-                font-size: 15px;
-            }
-
-            .course-pills {
-                max-width: 220px;
-            }
-
-            .mobile-user-cards {
-                display: none;
-            }
-        }
-
-        /* Large Desktop (1200px+) */
-        @media (min-width: 1200px) {
-            .users-table {
-                font-size: 15px;
-                min-width: 1400px;
-            }
-
-            .users-table th,
-            .users-table td {
-                padding: 20px 18px;
-            }
-
-            .user-avatar {
-                width: 55px;
-                height: 55px;
-                font-size: 20px;
-            }
-
-            .user-info strong {
-                max-width: 170px;
-                font-size: 17px;
-            }
-
-            .course-pills {
-                max-width: 300px;
-            }
-
-            .btn {
-                padding: 12px 18px;
-                font-size: 13px;
-            }
-        }
-
-        /* ============================================================
-           ✅ 18. Print Styles
-           ============================================================ */
-        @media print {
-            .action-btns,
-            .filter-bar,
-            .analytics-btn,
-            .admin-header {
-                display: none !important;
-            }
-
-            .table-container {
-                box-shadow: none;
-                border: 2px solid #ddd;
-            }
-
-            .users-table th {
-                background: #f8f9fa !important;
-                color: #333 !important;
-                -webkit-print-color-adjust: exact;
-            }
-
-            body {
-                background: white !important;
-            }
-        }
-
-        /* ============================================================
-           ✅ 19. Additional Enhancements
-           ============================================================ */
-        .text-muted {
-            color: #6c757d !important;
-        }
-
-        /* Loading Animation */
-        @keyframes shimmer {
-            0% { background-position: -200px 0; }
-            100% { background-position: calc(200px + 100%) 0; }
-        }
-
-        .loading-shimmer {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200px 100%;
-            animation: shimmer 1.5s infinite;
-        }
-
-        /* Smooth transitions for all interactive elements */
-        * {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Focus styles for accessibility */
-        *:focus {
-            outline: 2px solid #007bff;
-            outline-offset: 2px;
-        }
-
-        /* Selection styles */
-        ::selection {
-            background: #007bff;
-            color: white;
         }
     </style>
 </head>
@@ -1027,546 +584,467 @@
 <body>
     <%- include('partials/header') %>
     
-    <!-- Enhanced Admin Header -->
-    <div class="admin-header">
-        <div class="admin-header-content">
-            <div>
-                <h1><i class="fas fa-users"></i> User Management</h1>
-                <p>Manage registered users and their course enrollments</p>
-            </div>
-            <div class="breadcrumb">
-                <a href="/">Home</a> > 
-                <a href="/dashboard">Dashboard</a> > 
-                <span>User Management</span>
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="fas fa-users"></i>
+                    User Management
+                </h1>
+                <p class="header-subtitle">Manage all registered users and their activities</p>
             </div>
         </div>
-    </div>
 
-    <div class="admin-container">
-        <!-- Enhanced Revenue Summary -->
-        <% if (overallStats) { %>
-        <div class="revenue-summary">
-            <h2><i class="fas fa-chart-line"></i> Financial Overview</h2>
-            <div class="revenue-stats">
-                <div class="revenue-stat">
-                    <div class="value">$<%= overallStats.totalRevenue.toFixed(2) %></div>
-                    <div class="label">Total Revenue</div>
-                </div>
-                <div class="revenue-stat">
-                    <div class="value"><%= overallStats.totalTransactions %></div>
-                    <div class="label">Total Transactions</div>
-                </div>
-                <div class="revenue-stat">
-                    <div class="value">$<%= overallStats.averageTransactionValue %></div>
-                    <div class="label">Average Transaction</div>
-                </div>
-                <div class="revenue-stat">
-                    <div class="value"><%= overallStats.totalPaidCourses %></div>
-                    <div class="label">Paid Enrollments</div>
-                </div>
-                <div class="revenue-stat">
-                    <div class="value"><%= overallStats.totalFreeCourses %></div>
-                    <div class="label">Free Enrollments</div>
-                </div>
-            </div>
-        </div>
-        <% } %>
-
-        <!-- Enhanced Analytics Button -->
-        <a href="/admin/payment-analytics" class="analytics-btn">
-            <i class="fas fa-chart-bar"></i> View Detailed Analytics
-        </a>
-
-        <!-- Enhanced Statistics -->
+        <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number"><%= users.length %></div>
-                <div class="stat-label">Total Users</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><%= users.filter(u => u.isConfirmed).length %></div>
-                <div class="stat-label">Confirmed Users</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><%= users.reduce((sum, u) => sum + (u.myCourses ? u.myCourses.length : 0), 0) %></div>
-                <div class="stat-label">Total Enrollments</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><%= users.filter(u => u.totalSpent > 0).length %></div>
-                <div class="stat-label">Paying Users</div>
-            </div>
-        </div>
-
-        <!-- Enhanced Search and Filter -->
-        <div class="filter-bar">
-            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search by name, email, or phone...">
-            <select class="filter-select" id="roleFilter">
-                <option value="">All Roles</option>
-                <option value="user">Users</option>
-                <option value="admin">Admins</option>
-                <option value="instructor">Instructors</option>
-            </select>
-            <select class="filter-select" id="statusFilter">
-                <option value="">All Status</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="pending">Pending</option>
-            </select>
-            <select class="filter-select" id="paymentFilter">
-                <option value="">All Users</option>
-                <option value="paying">Paying Users</option>
-                <option value="free">Free Users Only</option>
-            </select>
-        </div>
-
-        <!-- Enhanced Users Table Container -->
-        <div class="table-container">
-            <div class="table-header">
-                <div class="table-title">
-                    <i class="fas fa-table"></i> Registered Users
+                <div class="stat-icon users">
+                    <i class="fas fa-users"></i>
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="exportUsers()">
-                    <i class="fas fa-download"></i> Export
+                <div class="stat-content">
+                    <h3><%= pagination.totalUsers %></h3>
+                    <p>Total Users</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon confirmed">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= users.filter(u => u.isConfirmed).length %></h3>
+                    <p>Confirmed</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon pending">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= users.filter(u => !u.isConfirmed).length %></h3>
+                    <p>Pending</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon revenue">
+                    <i class="fas fa-euro-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>€<%= users.reduce((sum, u) => sum + parseFloat(u.totalSpent || 0), 0).toFixed(2) %></h3>
+                    <p>Total Revenue</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <form method="GET" action="/admin-users-manage" id="filterForm">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="search">Search</label>
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               placeholder="Name, email, phone..." 
+                               value="<%= filters.search || '' %>">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="">All Status</option>
+                            <option value="confirmed" <%= filters.status === 'confirmed' ? 'selected' : '' %>>Confirmed</option>
+                            <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+                            <option value="locked" <%= filters.status === 'locked' ? 'selected' : '' %>>Locked</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="role">Role</label>
+                        <select id="role" name="role">
+                            <option value="all">All Roles</option>
+                            <option value="user" <%= filters.role === 'user' ? 'selected' : '' %>>User</option>
+                            <option value="instructor" <%= filters.role === 'instructor' ? 'selected' : '' %>>Instructor</option>
+                            <option value="admin" <%= filters.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                            <option value="support" <%= filters.role === 'support' ? 'selected' : '' %>>Support</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="country">Country</label>
+                        <select id="country" name="country">
+                            <option value="all">All Countries</option>
+                            <% countries.forEach(country => { %>
+                                <option value="<%= country %>" <%= filters.country === country ? 'selected' : '' %>>
+                                    <%= country %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="sortBy">Sort By</label>
+                        <select id="sortBy" name="sortBy">
+                            <option value="createdAt" <%= filters.sortBy === 'createdAt' ? 'selected' : '' %>>Registration Date</option>
+                            <option value="firstName" <%= filters.sortBy === 'firstName' ? 'selected' : '' %>>Name</option>
+                            <option value="email" <%= filters.sortBy === 'email' ? 'selected' : '' %>>Email</option>
+                            <option value="updatedAt" <%= filters.sortBy === 'updatedAt' ? 'selected' : '' %>>Last Activity</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-filter"></i> Apply
+                    </button>
+                    
+                    <a href="/admin-users-manage" class="btn-reset">
+                        <i class="fas fa-redo"></i> Reset
+                    </a>
+                    
+                    <button type="button" class="btn-export" onclick="exportUsers()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-section">
+            <div class="table-responsive">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Contact</th>
+                            <th>Location</th>
+                            <th>Role</th>
+                            <th>Courses</th>
+                            <th>Total Spent</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user => { %>
+                        <tr data-user-id="<%= user._id %>">
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">
+                                        <%= user.firstName[0] %><%= user.lastName[0] %>
+                                    </div>
+                                    <div class="user-info">
+                                        <div class="user-name"><%= user.fullName %></div>
+                                        <div class="user-email"><%= user.email %></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <% if (user.phoneNumber) { %>
+                                        <div><i class="fas fa-phone"></i> <%= user.phoneNumber %></div>
+                                    <% } %>
+                                    <div style="font-size: 0.85rem; color: #6b7280;">
+                                        Joined: <%= new Date(user.createdAt).toLocaleDateString() %>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="location-cell">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <%= user.location %>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="role-badge <%= user.role %>">
+                                    <%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="course-info">
+                                    <span class="course-count"><%= user.enrolledCourses %> Courses</span>
+                                    <% if (user.enrolledCourses > 0) { %>
+                                        <span class="course-types">Various Types</span>
+                                    <% } %>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="spent-amount">€<%= user.totalSpent %></span>
+                            </td>
+                            <td>
+                                <% if (user.isConfirmed) { %>
+                                    <% if (user.accountStatus?.isLocked) { %>
+                                        <span class="status-badge locked">
+                                            <span class="status-indicator locked"></span>
+                                            Locked
+                                        </span>
+                                    <% } else { %>
+                                        <span class="status-badge confirmed">
+                                            <span class="status-indicator confirmed"></span>
+                                            Confirmed
+                                        </span>
+                                    <% } %>
+                                <% } else { %>
+                                    <span class="status-badge pending">
+                                        <span class="status-indicator pending"></span>
+                                        Pending
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action details" 
+                                            onclick="viewDetails('<%= user._id %>')"
+                                            title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    
+                                    <% if (!user.isConfirmed) { %>
+                                        <button class="btn-action approve" 
+                                                onclick="approveUser('<%= user._id %>')"
+                                                title="Approve User">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        
+                                        <button class="btn-action reject" 
+                                                onclick="rejectUser('<%= user._id %>')"
+                                                title="Reject User">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    <% } %>
+                                    
+                                    <button class="btn-action delete" 
+                                            onclick="deleteUser('<%= user._id %>')"
+                                            title="Delete User">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-section">
+            <div class="pagination-info">
+                Showing <%= ((pagination.currentPage - 1) * pagination.limit) + 1 %> to 
+                <%= Math.min(pagination.currentPage * pagination.limit, pagination.totalUsers) %> 
+                of <%= pagination.totalUsers %> users
+            </div>
+            
+            <div class="pagination-controls">
+                <button class="page-btn" 
+                        onclick="changePage(1)"
+                        <%= pagination.currentPage === 1 ? 'disabled' : '' %>>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                
+                <button class="page-btn" 
+                        onclick="changePage(<%= pagination.currentPage - 1 %>)"
+                        <%= !pagination.hasPrev ? 'disabled' : '' %>>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                
+                <% for(let i = Math.max(1, pagination.currentPage - 2); i <= Math.min(pagination.totalPages, pagination.currentPage + 2); i++) { %>
+                    <button class="page-btn <%= i === pagination.currentPage ? 'active' : '' %>" 
+                            onclick="changePage(<%= i %>)">
+                        <%= i %>
+                    </button>
+                <% } %>
+                
+                <button class="page-btn" 
+                        onclick="changePage(<%= pagination.currentPage + 1 %>)"
+                        <%= !pagination.hasNext ? 'disabled' : '' %>>
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                
+                <button class="page-btn" 
+                        onclick="changePage(<%= pagination.totalPages %>)"
+                        <%= pagination.currentPage === pagination.totalPages ? 'disabled' : '' %>>
+                    <i class="fas fa-angle-double-right"></i>
                 </button>
             </div>
-
-            <% if (users.length > 0) { %>
-                <!-- Desktop Table View -->
-                <div class="table-scroll-wrapper">
-                    <table class="users-table">
-                        <thead>
-                            <tr>
-                                <th><i class="fas fa-user"></i> User</th>
-                                <th><i class="fas fa-envelope"></i> Contact</th>
-                                <th><i class="fas fa-map-marker-alt"></i> Location</th>
-                                <th><i class="fas fa-graduation-cap"></i> Courses</th>
-                                <th><i class="fas fa-dollar-sign"></i> Total Spent</th>
-                                <th><i class="fas fa-check-circle"></i> Status</th>
-                                <th><i class="fas fa-cogs"></i> Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTableBody">
-                            <% users.forEach(user => { %>
-                                <tr data-user-id="<%= user._id %>" 
-                                    data-role="<%= user.role %>" 
-                                    data-status="<%= user.isConfirmed ? 'confirmed' : 'pending' %>"
-                                    data-payment="<%= user.totalSpent > 0 ? 'paying' : 'free' %>">
-                                    
-                                    <!-- Enhanced User Info -->
-                                    <td>
-                                        <div class="user-info">
-                                            <div class="user-avatar">
-                                                <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
-                                            </div>
-                                            <div>
-                                                <strong><%= user.firstName %> <%= user.lastName %></strong>
-                                                <small class="text-muted"><%= user.role %></small>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Enhanced Contact -->
-                                    <td>
-                                        <div style="line-height: 1.4;">
-                                            <strong><%= user.email %></strong><br>
-                                            <small class="text-muted">
-                                                <i class="fas fa-phone" style="width: 12px;"></i> 
-                                                <%= user.phoneNumber || 'No phone' %>
-                                            </small>
-                                        </div>
-                                    </td>
-
-                                    <!-- Enhanced Location -->
-                                    <td>
-                                        <span style="color: #495057; font-weight: 500;">
-                                            <%= user.country || 'Not specified' %>
-                                        </span>
-                                    </td>
-
-                                    <!-- Enhanced Courses -->
-                                    <td>
-                                        <% if (user.myCourses && user.myCourses.length > 0) { %>
-                                            <div class="course-pills">
-                                                <% user.myCourses.slice(0, 3).forEach(course => { %>
-                                                    <span class="course-pill <%= course.courseType.toLowerCase().replace(' ', '-') %>" 
-                                                          title="<%= course.courseTitle || course.title %> - <%= course.status %>">
-                                                        <%= course.courseCode %>
-                                                    </span>
-                                                <% }) %>
-                                                <% if (user.myCourses.length > 3) { %>
-                                                    <span class="course-pill" style="background: linear-gradient(135deg, #e0e0e0, #d0d0d0); color: #666;">
-                                                        +<%= user.myCourses.length - 3 %>
-                                                    </span>
-                                                <% } %>
-                                            </div>
-                                            <small class="text-muted" style="font-size: 11px;">
-                                                <i class="fas fa-shopping-cart"></i> <%= user.coursesPurchased || 0 %> purchased, 
-                                                <i class="fas fa-heart"></i> <%= user.myWishlist ? user.myWishlist.length : 0 %> wishlist
-                                            </small>
-                                        <% } else { %>
-                                            <span class="text-muted" style="font-style: italic;">
-                                                <i class="fas fa-minus-circle"></i> No courses
-                                            </span>
-                                        <% } %>
-                                    </td>
-
-                                    <!-- Enhanced Payment Info -->
-                                    <td class="payment-info">
-                                        <div class="payment-amount">$<%= user.totalSpent.toFixed(2) %></div>
-                                        <div class="payment-count">
-                                            <i class="fas fa-receipt"></i> 
-                                            <%= user.paymentTransactions ? user.paymentTransactions.length : 0 %> transactions
-                                        </div>
-                                    </td>
-
-                                    <!-- Enhanced Status -->
-                                    <td>
-                                        <span class="status-badge status-<%= user.isConfirmed ? 'confirmed' : 'pending' %>">
-                                            <% if (user.isConfirmed) { %>
-                                                <i class="fas fa-check-circle"></i> Confirmed
-                                            <% } else { %>
-                                                <i class="fas fa-clock"></i> Pending
-                                            <% } %>
-                                        </span>
-                                    </td>
-
-                                    <!-- Enhanced Actions -->
-                                    <td>
-                                        <div class="action-btns">
-                                            <button class="btn btn-info btn-sm" onclick="viewUserDetails('<%= user._id %>')" title="View Details">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <% if (!user.isConfirmed) { %>
-                                                <button class="btn btn-success btn-sm" onclick="approveUser('<%= user._id %>')" title="Approve User">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            <% } %>
-                                            <% if (user.totalSpent > 0) { %>
-                                                <button class="btn btn-warning btn-sm" onclick="viewUserTransactions('<%= user._id %>')" title="View Transactions">
-                                                    <i class="fas fa-receipt"></i>
-                                                </button>
-                                            <% } %>
-                                            <button class="btn btn-danger btn-sm" onclick="deleteUser('<%= user._id %>', '<%= user.firstName %> <%= user.lastName %>')" title="Delete User">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Mobile Card View -->
-                <div class="mobile-user-cards" id="mobileUserCards">
-                    <% users.forEach(user => { %>
-                        <div class="user-card" data-user-id="<%= user._id %>" 
-                             data-role="<%= user.role %>" 
-                             data-status="<%= user.isConfirmed ? 'confirmed' : 'pending' %>"
-                             data-payment="<%= user.totalSpent > 0 ? 'paying' : 'free' %>">
-                            
-                            <div class="user-card-header">
-                                <div class="user-avatar">
-                                    <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
-                                </div>
-                                <div class="user-card-info">
-                                    <h4><%= user.firstName %> <%= user.lastName %></h4>
-                                    <div class="role"><%= user.role %></div>
-                                </div>
-                                <div class="mobile-status">
-                                    <span class="status-badge status-<%= user.isConfirmed ? 'confirmed' : 'pending' %>">
-                                        <% if (user.isConfirmed) { %>
-                                            <i class="fas fa-check-circle"></i> Confirmed
-                                        <% } else { %>
-                                            <i class="fas fa-clock"></i> Pending
-                                        <% } %>
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div class="user-card-details">
-                                <div class="detail-row">
-                                    <div class="detail-label"><i class="fas fa-envelope"></i> Email:</div>
-                                    <div class="detail-value"><%= user.email %></div>
-                                </div>
-                                <div class="detail-row">
-                                    <div class="detail-label"><i class="fas fa-phone"></i> Phone:</div>
-                                    <div class="detail-value"><%= user.phoneNumber || 'No phone' %></div>
-                                </div>
-                                <div class="detail-row">
-                                    <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Location:</div>
-                                    <div class="detail-value"><%= user.country || 'Not specified' %></div>
-                                </div>
-                                <% if (user.myCourses && user.myCourses.length > 0) { %>
-                                <div class="detail-row">
-                                    <div class="detail-label"><i class="fas fa-graduation-cap"></i> Courses:</div>
-                                    <div class="detail-value">
-                                        <div class="mobile-course-pills">
-                                            <% user.myCourses.slice(0, 4).forEach(course => { %>
-                                                <span class="course-pill <%= course.courseType.toLowerCase().replace(' ', '-') %>">
-                                                    <%= course.courseCode %>
-                                                </span>
-                                            <% }) %>
-                                            <% if (user.myCourses.length > 4) { %>
-                                                <span class="course-pill" style="background: #e0e0e0; color: #666;">
-                                                    +<%= user.myCourses.length - 4 %>
-                                                </span>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% } %>
-                                <div class="detail-row">
-                                    <div class="detail-label"><i class="fas fa-dollar-sign"></i> Total Spent:</div>
-                                    <div class="detail-value">
-                                        <div class="mobile-payment-info">
-                                            <div class="payment-amount">$<%= user.totalSpent.toFixed(2) %></div>
-                                            <div class="payment-count">
-                                                <%= user.paymentTransactions ? user.paymentTransactions.length : 0 %> transactions
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mobile-actions">
-                                <button class="btn btn-info btn-sm" onclick="viewUserDetails('<%= user._id %>')">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-                                <% if (!user.isConfirmed) { %>
-                                    <button class="btn btn-success btn-sm" onclick="approveUser('<%= user._id %>')">
-                                        <i class="fas fa-check"></i> Approve
-                                    </button>
-                                <% } %>
-                                <% if (user.totalSpent > 0) { %>
-                                    <button class="btn btn-warning btn-sm" onclick="viewUserTransactions('<%= user._id %>')">
-                                        <i class="fas fa-receipt"></i> Bills
-                                    </button>
-                                <% } %>
-                                <button class="btn btn-danger btn-sm" onclick="deleteUser('<%= user._id %>', '<%= user.firstName %> <%= user.lastName %>')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        </div>
-                    <% }) %>
-                </div>
-            <% } else { %>
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <h3>No users found</h3>
-                    <p>There are no registered users yet.</p>
-                </div>
-            <% } %>
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Enhanced Search and Filter functionality
-        document.getElementById('searchBox').addEventListener('input', filterUsers);
-        document.getElementById('roleFilter').addEventListener('change', filterUsers);
-        document.getElementById('statusFilter').addEventListener('change', filterUsers);
-        document.getElementById('paymentFilter').addEventListener('change', filterUsers);
-
-        function filterUsers() {
-            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-            const roleFilter = document.getElementById('roleFilter').value;
-            const statusFilter = document.getElementById('statusFilter').value;
-            const paymentFilter = document.getElementById('paymentFilter').value;
-            
-            // Filter desktop table rows
-            const tableRows = document.querySelectorAll('#usersTableBody tr');
-            tableRows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const role = row.dataset.role;
-                const status = row.dataset.status;
-                const payment = row.dataset.payment;
-                
-                const matchesSearch = text.includes(searchTerm);
-                const matchesRole = !roleFilter || role === roleFilter;
-                const matchesStatus = !statusFilter || status === statusFilter;
-                const matchesPayment = !paymentFilter || payment === paymentFilter;
-                
-                row.style.display = matchesSearch && matchesRole && matchesStatus && matchesPayment ? '' : 'none';
-            });
-
-            // Filter mobile cards
-            const mobileCards = document.querySelectorAll('.user-card');
-            mobileCards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                const role = card.dataset.role;
-                const status = card.dataset.status;
-                const payment = card.dataset.payment;
-                
-                const matchesSearch = text.includes(searchTerm);
-                const matchesRole = !roleFilter || role === roleFilter;
-                const matchesStatus = !statusFilter || status === statusFilter;
-                const matchesPayment = !paymentFilter || payment === paymentFilter;
-                
-                card.style.display = matchesSearch && matchesRole && matchesStatus && matchesPayment ? '' : 'none';
-            });
+        // View User Details
+        function viewDetails(userId) {
+            window.location.href = `/admin-users/${userId}/details`;
         }
 
-        // Enhanced responsive view handling
-        function handleResponsiveView() {
-            const isMobile = window.innerWidth <= 768;
-            const mobileCards = document.querySelector('.mobile-user-cards');
-            const desktopTable = document.querySelector('.table-scroll-wrapper');
-            
-            if (isMobile) {
-                if (mobileCards) mobileCards.style.display = 'block';
-                if (desktopTable) desktopTable.style.display = 'none';
-            } else {
-                if (mobileCards) mobileCards.style.display = 'none';
-                if (desktopTable) desktopTable.style.display = 'block';
-            }
+        // Change Page
+        function changePage(page) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('page', page);
+            window.location.search = urlParams.toString();
         }
 
-        // Run on load and resize
-        window.addEventListener('load', handleResponsiveView);
-        window.addEventListener('resize', handleResponsiveView);
-
-        // View user details
-        function viewUserDetails(userId) {
-            window.location.href = `/admin-users/${userId}`;
-        }
-
-        // View user transactions
-        function viewUserTransactions(userId) {
-            window.location.href = `/admin-users/${userId}#transactions`;
-        }
-
-        // Approve user
+        // Approve User
         async function approveUser(userId) {
             const result = await Swal.fire({
                 title: 'Approve User',
                 text: 'Are you sure you want to approve this user?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, approve!',
-                customClass: {
-                    popup: 'swal-enhanced'
-                }
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, approve'
             });
 
             if (result.isConfirmed) {
+                showLoading();
                 try {
-                    const response = await fetch('/admin/approve-user', {
+                    const response = await fetch('/admin-users/approve', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ 
-                            userId: userId,
-                            sendEmail: true
-                        })
+                        body: JSON.stringify({ userId })
                     });
 
                     const data = await response.json();
-
+                    
                     if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'User Approved!',
-                            text: data.message,
-                            timer: 2000,
-                            timerProgressBar: true
-                        });
-                        setTimeout(() => location.reload(), 2000);
+                        await Swal.fire('Approved!', data.message, 'success');
+                        location.reload();
                     } else {
-                        Swal.fire('Error', data.message, 'error');
+                        throw new Error(data.message);
                     }
                 } catch (error) {
-                    Swal.fire('Error', 'Failed to approve user', 'error');
+                    Swal.fire('Error', error.message || 'Failed to approve user', 'error');
+                } finally {
+                    hideLoading();
                 }
             }
         }
-        
-        // Delete user
-        async function deleteUser(userId, userName) {
+
+        // Reject User
+        async function rejectUser(userId) {
+            const { value: reason } = await Swal.fire({
+                title: 'Reject User',
+                input: 'textarea',
+                inputLabel: 'Rejection reason (optional)',
+                inputPlaceholder: 'Enter the reason for rejection...',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Reject'
+            });
+
+            if (reason !== undefined) {
+                showLoading();
+                try {
+                    const response = await fetch('/admin-users/reject', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ userId, reason })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        await Swal.fire('Rejected!', data.message, 'success');
+                        location.reload();
+                    } else {
+                        throw new Error(data.message);
+                    }
+                } catch (error) {
+                    Swal.fire('Error', error.message || 'Failed to reject user', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+        }
+
+        // Delete User
+        async function deleteUser(userId) {
             const result = await Swal.fire({
                 title: 'Delete User',
-                html: `Are you sure you want to delete <strong>${userName}</strong>?<br>This action cannot be undone.`,
+                text: 'This will move the user to the recycle bin. Are you sure?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete!',
-                customClass: {
-                    popup: 'swal-enhanced'
-                }
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete'
             });
 
             if (result.isConfirmed) {
+                showLoading();
                 try {
-                    const response = await fetch('/admin/reject-user', {
-                        method: 'POST',
+                    const response = await fetch(`/admin-users/${userId}`, {
+                        method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ 
-                            userId: userId,
-                            reason: 'User deleted by admin'
-                        })
+                        body: JSON.stringify({ reason: 'Manual deletion by admin' })
                     });
 
                     const data = await response.json();
-
+                    
                     if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'User Deleted!',
-                            text: data.message,
-                            timer: 2000,
-                            timerProgressBar: true
-                        });
-                        setTimeout(() => location.reload(), 2000);
+                        await Swal.fire('Deleted!', data.message, 'success');
+                        location.reload();
                     } else {
-                        Swal.fire('Error', data.message, 'error');
+                        throw new Error(data.message);
                     }
                 } catch (error) {
-                    Swal.fire('Error', 'Failed to delete user', 'error');
+                    Swal.fire('Error', error.message || 'Failed to delete user', 'error');
+                } finally {
+                    hideLoading();
                 }
             }
         }
-        
-        // Export users
+
+        // Export Users
         function exportUsers() {
-            window.location.href = '/admin/users/export?format=csv';
+            Swal.fire({
+                title: 'Export Users',
+                text: 'Select export format',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Excel',
+                cancelButtonText: 'CSV',
+                showDenyButton: true,
+                denyButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/admin/users/export?format=excel';
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    window.location.href = '/admin/users/export?format=csv';
+                }
+            });
         }
 
-        // Enhanced loading states
+        // Show/Hide Loading
         function showLoading() {
-            document.body.style.cursor = 'wait';
+            document.getElementById('loadingOverlay').classList.add('active');
         }
 
         function hideLoading() {
-            document.body.style.cursor = 'default';
+            document.getElementById('loadingOverlay').classList.remove('active');
         }
 
-        // Add loading states to async functions
-        const originalApproveUser = approveUser;
-        const originalDeleteUser = deleteUser;
-
-        approveUser = async function(userId) {
-            showLoading();
-            try {
-                await originalApproveUser(userId);
-            } finally {
-                hideLoading();
-            }
-        };
-
-        deleteUser = async function(userId, userName) {
-            showLoading();
-            try {
-                await originalDeleteUser(userId, userName);
-            } finally {
-                hideLoading();
-            }
-        };
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add any additional initialization here
+        });
     </script>
-
     <%- include('partials/footer') %>
 </body>
 </html>
